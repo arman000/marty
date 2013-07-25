@@ -1,0 +1,24 @@
+.bundle/
+log/*.log
+pkg/
+spec/dummy/db/*.sqlite3
+spec/dummy/log/*.log
+spec/dummy/tmp/
+spec/dummy/.sass-cache
+
+# Ignore schema
+/db/schema.rb
+/spec/dummy/db/schema.rb
+/spec/dummy/config/database.yml
+
+# Ignore all logfiles and tempfiles.
+/log/*.log
+/spec/dummy/log/*.log
+/tmp
+.rvmrc
+.ruby-version
+.ruby-gemset
+*~
+*.komodoproject
+/pkg
+/Gemfile.lock
