@@ -38,7 +38,12 @@ class Marty::McFlyGridPanel < Marty::CmGridPanel
     # Set mcfly_scope if the attribute is a mcfly association
     if !c[:scope] && data_adapter.association_attr?(name)
       assoc_name, assoc_method = name.split('__')
-      aklass = data_class.reflect_on_association(assoc_name.to_sym).klass
+
+      begin
+        aklass = data_class.reflect_on_association(assoc_name.to_sym).klass
+      rescue
+        raise "trouble finding #{assoc_name} assoc class on #{data_class}"
+      end
 
       # FIXME: MCFLY_UNIQUENESS is the easiest way I can think of
       # figuring out if a class is Mcfly.

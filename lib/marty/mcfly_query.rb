@@ -158,9 +158,7 @@ module McFly
           # cat_assoc_klass.
           pc = cat_assoc_klass.lookup(ts, rel).try(cat_attr)
 
-          # FIXME: perhaps a bit draconian
-          # raise "#{rel_attr} must have associated #{cat_attr}" unless pc
-          next nil unless pc
+          raise "#{rel_attr} must have associated #{cat_attr}" unless pc
 
           args[lpi] = pc
           self.send(pc_name, ts, *args)

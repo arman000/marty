@@ -2,6 +2,11 @@ module Marty
   module Permissions
     ALL_PERMS = Set.new Rails.configuration.marty.roles
 
+    # The following implements a user-role caching mechanism.  FIXME:
+    # is this even necessary now?  Should be able to get ActiveRecord
+    # to cache user's roles so we don't have to go back to the DB for
+    # it again.
+
     def permission_store
       Thread.current[:marty_permission] ||= {}
     end
@@ -9,8 +14,7 @@ module Marty
     def cm_permissions
       permission_store[:user_map] ||= {}
 
-      # Hijacking Mcfly whodunnit to find current user.  This will
-      # work for tests as well.
+      # Uses Mcfly whodunnit to find current user.
       user = Mcfly.whodunnit
 
       return Set[] unless user
