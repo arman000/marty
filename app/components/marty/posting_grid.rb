@@ -27,13 +27,22 @@ class Marty::PostingGrid < Marty::CmGridPanel
 
     c.on_del = <<-JS
       function() {
-         var records = [];
-         this.getSelectionModel().selected.each(function(r) {
+        var records = [];
+	var me = this;
+        me.getSelectionModel().selected.each(function(r) {
            records.push(r.getId());
-         }, this);
-         // FIXME: very hacky: hard-coded main app id
-         var main_app = Ext.getCmp("cm_auth_app");
-         main_app && main_app.serverSelectPosting(records);
+        }, me);
+
+	// find the root component (main application)
+	var main_app = me;
+	while (1) {
+	  var p = main_app.netzkeGetParentComponent();
+	  if (!p) { break; }
+	  main_app = p;
+	}
+
+	// assumes main_app has serverSelectPosting method
+        main_app.serverSelectPosting(records);
       }
       JS
   end
