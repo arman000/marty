@@ -1,6 +1,6 @@
 require 'mcfly'
 
-class CreateMartyScripts < McFlyMigration
+class CreateMartyScripts < McflyMigration
   include Marty::Migrations
 
   def change

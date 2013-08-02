@@ -1,6 +1,6 @@
 require 'mcfly'
 
-module McFly
+module Mcfly
   module Model
     
     def self.included(base)

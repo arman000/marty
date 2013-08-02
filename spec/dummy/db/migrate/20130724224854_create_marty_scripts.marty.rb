@@ -1,7 +1,7 @@
 # This migration comes from marty (originally 1)
 require 'mcfly'
 
-class CreateMartyScripts < McFlyMigration
+class CreateMartyScripts < McflyMigration
   include Marty::Migrations
 
   def change

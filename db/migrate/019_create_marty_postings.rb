@@ -1,6 +1,6 @@
 require 'marty/migrations'
 
-class CreateMartyPostings < McFlyAppendOnlyMigration
+class CreateMartyPostings < McflyAppendOnlyMigration
   include Marty::Migrations
 
   def change
