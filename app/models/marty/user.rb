@@ -4,7 +4,7 @@ require 'net/ldap'
 class Marty::User < Marty::Base
   attr_protected :login, :firstname, :lastname, :active
 
-  validates_presence_of :login, :firstname, :lastname, :active
+  validates_presence_of :login, :firstname, :lastname
   validates_uniqueness_of :login
 
   validates_format_of :login, :with => /^[a-z0-9_\-@\.]*$/i
@@ -45,8 +45,6 @@ class Marty::User < Marty::Base
     return nil if password.empty?
 
     user = find_by_login(login)
-
-p 'X.'*40, login, user
 
     return nil if !user || !user.active?
 

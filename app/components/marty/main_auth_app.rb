@@ -6,6 +6,7 @@ require 'marty/new_posting_window'
 require 'marty/import_type_view'
 require 'marty/import_synonym_view'
 require 'marty/data_import_view'
+require 'marty/user_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend Marty::Permissions
@@ -44,6 +45,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       menu: [
              :import_type_view,
              :import_synonym_view,
+             :user_view,
             ],
     }
   end
@@ -119,6 +121,12 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.icon 	= :database_go
   end
 
+  action :user_view do |a|
+    a.text 	= I18n.t("user_view")
+    a.handler 	= :netzke_load_component_by_action
+    a.disabled 	= !self.class.has_admin_perm?
+  end
+
   ######################################################################
   # Postings
 
@@ -190,6 +198,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :import_type_view
   component :import_synonym_view
   component :data_import_view
+  component :user_view
 end
 
 MainAuthApp = Marty::MainAuthApp
