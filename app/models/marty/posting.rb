@@ -85,4 +85,9 @@ class Marty::Posting < Marty::Base
     where("created_dt <= ? AND posting_type_id = ? AND is_test = 'f'",
           t, Marty::PostingType.BASE.id).order("created_dt DESC").first
   end
+
+  delorean_fn :is_today, sig: 1 do
+    |posting|
+    posting.created_dt.to_date == Date.today
+  end
 end
