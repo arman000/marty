@@ -11,6 +11,7 @@ Delorean::RUBY_WHITELIST.
   merge!({
            sum: 	[Array],
            zip:         [Array, [Array, Array, Array]],
+           index:       [Array, [Integer, Numeric, String, Array, Fixnum]],
          })
 
 ######################################################################
