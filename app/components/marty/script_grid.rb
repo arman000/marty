@@ -83,7 +83,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
     c.getter 	= lambda { |r|
       dscript = Marty::Dscript.find_by_script_id(r.id)
       # if we have a dscript, then it's checked out.
-      dscript ? dscript.user.name.to_s : "---"
+      dscript ? dscript.user.to_s : "---"
     }
   end
 end

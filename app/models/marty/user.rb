@@ -21,6 +21,10 @@ class Marty::User < Marty::Base
     "#{firstname} #{lastname}"
   end
 
+  def to_s
+    name
+  end
+
   # Returns the user who matches the given autologin +key+ or nil
   def self.try_to_autologin(key)
     tokens = Marty::Token.find_all_by_action_and_value('autologin', key.to_s)
