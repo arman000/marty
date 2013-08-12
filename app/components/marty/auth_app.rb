@@ -24,9 +24,8 @@ class Marty::AuthApp < Netzke::Basepack::SimpleApp
   end
 
   action :sign_out do |c|
-    c.icon = :door_out
-    user = Mcfly.whodunnit
-    c.text = "Sign out #{user.name}" if user
+    c.icon	= :door_out
+    c.text 	= "Sign out #{Mcfly.whodunnit.name}" if Mcfly.whodunnit
   end
 
   js_configure do |c|

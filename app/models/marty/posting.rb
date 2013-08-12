@@ -63,7 +63,7 @@ class Marty::Posting < Marty::Base
   delorean_fn :get_latest, sig: [1, 2] do
     |limit, is_test=nil|
     q = is_test.nil? ? self : self.where("is_test = ?", !!is_test)
-    q.where("created_dt <> 'infinity'").order("created_dt DESC").limit(limit)
+    q.where("created_dt <> 'infinity'").order("created_dt DESC").limit(limit).to_a
   end
 
   delorean_fn :is_base, sig: 1 do

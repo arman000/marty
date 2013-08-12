@@ -292,7 +292,9 @@ class Marty::Xl
       raise "bad worksheet ops" unless ops.is_a?(Array)
       raise "bad options #{opts}" unless opts.is_a?(Hash) || opts.nil?
 
-      name = name.gsub(':', '_')
+      # Remove special characters and truncate sheet name due to Excel
+      # limitations.
+      name = name.gsub(':', '').truncate(31)
 
       opts = self.class.symbolize_keys(opts || {}, ':')
       widths = opts[:widths] || []
