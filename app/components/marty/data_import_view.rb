@@ -15,6 +15,21 @@ class Marty::DataImportView < Marty::CmFormPanel
 	result.updateBodyHtml(html);
       }
       JS
+
+    c.init_component = <<-JS
+      function() {
+        var me = this;
+        me.callParent();
+        var form = me.getForm();
+
+        var comboname = form.findField('import_type');
+        var textname  = form.findField('import_data');
+
+        comboname.on('select', function(combo, record) {
+          textname.setValue("");
+        });
+      }
+      JS
   end
 
   ######################################################################
@@ -76,11 +91,12 @@ class Marty::DataImportView < Marty::CmFormPanel
     c.items = [
                fieldset(I18n.t("data_import_view.select"),
                         {
-                          xtype:	:combo,
-                          name:		"import_type",
-                          store:	Marty::ImportType.all.map(&:name).sort,
-                          max_width:	"350",
-                          hide_label: 	true,
+                          xtype:		:combo,
+                          name:			"import_type",
+                          store:		Marty::ImportType.all.map(&:name).sort,
+                          max_width:		"350",
+                          hide_label:		true,
+                          force_selection:	true,
                         },
                         {
                           name: 	"import_data",

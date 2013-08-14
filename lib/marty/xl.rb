@@ -402,7 +402,7 @@ class Marty::Xl
         r_number, last_row = row_offset, row_offset
 
         data.each do |d|
-          raise "bad data #{d[1]}" unless d[1].is_a?(Array)
+          raise "non array data #{d[1]}" unless d[1].is_a?(Array)
           raise "non hash data options #{d[2]}" unless
             [NilClass, Hash, String, Array].member? d[2].class
           case d[0]
