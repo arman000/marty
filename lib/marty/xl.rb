@@ -281,6 +281,14 @@ class Marty::Xl
     @package = Axlsx::Package.new
     wb = package.workbook
 
+    # We got some sort of error if the worksheets is an array
+    if worksheets.is_a? Hash
+      ws = wb.add_worksheet(name: "EXCEPTION")
+      ws.rows[0] = ["error", worksheets["error"]]
+      ws.rows[1] = ["backtrace", worksheets["backtrace"]]
+      return
+    end
+
     raise "expected worksheets array, got: #{worksheets}" unless
       worksheets.is_a?(Array)
 

@@ -30,10 +30,10 @@ class Marty::ReportForm < Marty::CmFormPanel
 
       err, bt = engine.parse_runtime_exception(exc)
 
-      result = ["Error: #{err}", "Backtrace:"] +
-        bt.map {|m, line, fn| "#{m}:#{line} #{fn}"}
-
-      return result.join('\n')
+      return {
+        "error" => err.to_s,
+        "backtrace" => bt.map {|m, line, fn| "#{m}:#{line} #{fn}"}.join('\n'),
+      }
     end
   end
 

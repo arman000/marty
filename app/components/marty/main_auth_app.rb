@@ -25,28 +25,28 @@ class Marty::MainAuthApp < Marty::AuthApp
     warped = Marty::Util.get_posting_time != Float::INFINITY
 
     {
-      text: I18n.t("postings") +
+      text: 	I18n.t("postings") +
       (warped ? " [#{Marty::Util.get_posting.name}]" : ""),
-      icon: icon_hack(:time),
-      style: (warped ? "background-color: lightGrey;" : ""),
-      menu: [
-             :new_posting,
-             :select_posting,
-             :select_now,
-            ],
+      icon: 	icon_hack(:time),
+      style: 	(warped ? "background-color: lightGrey;" : ""),
+      menu: 	[
+                 :new_posting,
+                 :select_posting,
+                 :select_now,
+                ],
     }
   end
 
   def system_menu
     {
-      text: I18n.t("system"),
-      icon: icon_hack(:wrench),
-      style: "",
-      menu: [
-             :import_type_view,
-             :import_synonym_view,
-             :user_view,
-            ],
+      text: 	I18n.t("system"),
+      icon: 	icon_hack(:wrench),
+      style: 	"",
+      menu: 	[
+                 :import_type_view,
+                 :import_synonym_view,
+                 :user_view,
+                ],
     }
   end
 
