@@ -123,11 +123,11 @@ class Marty::SelectReport < Marty::CmFormPanel
     nodes.map { |node|
       begin
         title, format = engine.evaluate_attrs(node, ["title", "format"])
-        [node, "#{title} (#{format})"]
+        format ? [node, "#{title} (#{format})"] : nil
       rescue
         [node, node]
       end
-    }.sort
+    }.compact.sort
   end
 
   endpoint :get_combobox_options do |params, this|
