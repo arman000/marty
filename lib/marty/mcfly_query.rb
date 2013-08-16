@@ -157,11 +157,12 @@ module Mcfly
           # Assumes there's a mcfly :lookup function on
           # cat_assoc_klass.
           categorizing_obj = cat_assoc_klass.lookup(ts, rel)
-          raise "categorization #{cat_assoc_klass} not found for #{rel}" unless
+          raise "no categorization #{cat_assoc_klass} for #{rel}" unless
             categorizing_obj
 
           pc = categorizing_obj.send(cat_attr)
-          raise "#{categorizing_obj} must have associated #{cat_attr}" unless pc
+          raise ("#{categorizing_obj} must have assoc." +
+                 " #{cat_attr}/#{rel.inspect}") unless pc
 
           args[lpi] = pc
           self.send(pc_name, ts, *args)
