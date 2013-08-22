@@ -7,4 +7,8 @@ class Marty::CmGridAppendOnly < Marty::McflyGridPanel
     c.prohibit_update 	= true
     c.prohibit_delete 	= true
   end
+
+  def default_bbar
+    [:del, :add_in_form]
+  end
 end

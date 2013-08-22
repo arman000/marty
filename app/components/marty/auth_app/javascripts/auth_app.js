@@ -21,7 +21,7 @@
 			    icon: 	Ext.Msg.INFO,
 			    closable: 	false
 			});
-			window.location = window.location;
+			window.location.href = "/";
 		    }
 		});
 	    },
@@ -87,7 +87,7 @@
 		    icon: 	Ext.Msg.INFO,
 		    closable: 	false
 		});
-		window.location = window.location;
+		window.location.href = "/";
 	    }
 	})
     }
