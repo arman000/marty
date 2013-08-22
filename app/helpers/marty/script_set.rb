@@ -20,7 +20,10 @@ class Marty::ScriptSet
       ds = script.group_dscript
       engine, updated_at = @@dengines[ds.id]
 
-      return engine if (updated_at && updated_at == ds.updated_at)
+      if updated_at && updated_at == ds.updated_at
+        sset.add_imports(engine) if sset
+        return engine
+      end
 
       engine = parse(script.name, ds.body, sset)
       @@dengines[ds.id] = [engine, ds.updated_at]
@@ -30,7 +33,10 @@ class Marty::ScriptSet
       # cached.
       engine, created_dt = @@engines[script.id]
 
-      return engine if (created_dt && created_dt == script.created_dt)
+      if created_dt && created_dt == script.created_dt
+        sset.add_imports(engine) if sset
+        return engine
+      end
 
       engine = parse(script.name, script.body, sset)
       @@engines[script.id] = [engine, script.created_dt]
