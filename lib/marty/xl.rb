@@ -292,6 +292,8 @@ class Marty::Xl
     raise "expected worksheets array, got: #{worksheets}" unless
       worksheets.is_a?(Array)
 
+    worksheets << ["No data", []] if worksheets.count == 0
+
     worksheets.each { |opl|
 
       name, ops, opts = opl
