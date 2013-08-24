@@ -170,7 +170,7 @@ module Marty
 
         tag = obj.new_record? ? :create : (obj.changed? ? :update : :same)
 
-        raise "old created_dt >= current version #{obj} #{obj.created_dt} #{dt}" if
+        raise "old created_dt >= current #{obj} #{obj.created_dt} #{dt}" if
           (tag == :update) && (dt != 'infinity') && (obj.created_dt > dt)
 
         obj.created_dt = dt unless tag == :same || dt == 'infinity'
@@ -188,18 +188,18 @@ module Marty
                                cleaner_function=nil,
                                col_sep="\t"
                                )
-      klass.transaction do
-        clean_count = klass.send(cleaner_function.to_sym) if cleaner_function
 
-        recs = self.do_import(klass, data, dt, synonyms, col_sep)
+      recs = self.do_import(klass,
+                            data,
+                            dt,
+                            synonyms,
+                            col_sep,
+                            cleaner_function,
+                            )
 
-        res = Hash.new(0)
-        res[:clean] = clean_count if clean_count && clean_count>0
-
-        recs.each_with_object(res) {|(op, id), h|
-          h[op] += 1
-        }
-      end
+      recs.each_with_object(Hash.new(0)) {|(op, id), h|
+        h[op] += 1
+      }
     end
 
     # Given a Mcfly klass and CSV data, import data into the database
@@ -207,13 +207,22 @@ module Marty
     # Each tuple is associated with one data row and looks like [tag,
     # id].  Tag is one of :same, :update, :create and "id" is the id
     # of the affected row.
-    def self.do_import(klass, data, dt='infinity', synonyms={}, col_sep="\t")
-      csv = CSV.new(data,
-                    headers: true,
-                    col_sep: col_sep,
-                    )
+    def self.do_import(klass,
+                       data,
+                       dt='infinity',
+                       synonyms={},
+                       col_sep="\t",
+                       cleaner_function=nil
+                       )
+
+      csv = CSV.new(data, headers: true, col_sep: col_sep)
 
       klass.transaction do
+        cleaner_ids = cleaner_function ? klass.send(cleaner_function.to_sym) : []
+
+        raise "bad cleaner function result" unless
+          cleaner_ids.all? {|id| id.is_a?(Fixnum) }
+
         row_proc = nil
         res = csv.each_with_index.map { |row, line|
           begin
@@ -232,14 +241,18 @@ module Marty
 
         # raise an error if record referenced more than once.
         res.each_with_index { |(op, id), line|
-          raise Marty::DataImporterError.new("record referenced more than once",
-                                      [ids[id], line]) if
-          op != :blank && ids.member?(id)
+          raise Marty::DataImporterError.
+          new("record referenced more than once", [ids[id], line]) if
+          (op != :blank && ids.member?(id))
 
           ids[id] = line
         }
 
-        res
+        remainder_ids = cleaner_ids - ids.keys
+
+        klass.delete(remainder_ids)
+
+        res + remainder_ids.map {|id| [:clean, id]}
       end
     end
   end
