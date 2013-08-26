@@ -52,7 +52,7 @@ class Marty::User < Marty::Base
 
     return nil if !user || !user.active?
 
-    user.authenticate_with?(login, password) || nil
+    authenticate_with?(login, password) || nil
   end
 
   def self.authenticate_with?(login, password)
@@ -63,6 +63,9 @@ class Marty::User < Marty::Base
     if auth_source == "local"
       ok = password == cf.local_password
     elsif auth_source == "ldap"
+      # IMPORTANT NOTE: if server allows anonymous LDAP access, empty
+      # passwords will succeed!  i.e. if a valid user with empty
+      # password is sent in, ldap.bind will return OK.
       cf = Rails.configuration.marty.ldap
       ldap = Net::LDAP.new(host: cf.host,
                            port: cf.port,

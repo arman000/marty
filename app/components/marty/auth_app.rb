@@ -33,7 +33,7 @@ class Marty::AuthApp < Netzke::Basepack::SimpleApp
   end
 
   endpoint :sign_in do |params,this|
-    user = Marty::User.authenticate_with?(params[:login], params[:password])
+    user = Marty::User.try_to_login(params[:login], params[:password])
 
     if user
       Netzke::Base.controller.set_user(user)
