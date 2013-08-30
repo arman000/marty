@@ -284,8 +284,8 @@ class Marty::Xl
     # We got some sort of error if the worksheets is an array
     if worksheets.is_a? Hash
       ws = wb.add_worksheet(name: "EXCEPTION")
-      ws.rows[0] = ["error", worksheets["error"]]
-      ws.rows[1] = ["backtrace", worksheets["backtrace"]]
+      ws.add_row ["error", worksheets["error"]]
+      ws.add_row ["backtrace", worksheets["backtrace"]]
       return
     end
 
@@ -297,7 +297,6 @@ class Marty::Xl
     worksheets.each { |opl|
 
       name, ops, opts = opl
-
       raise "bad worksheet name: #{name}" unless name.is_a?(String)
       raise "bad worksheet ops" unless ops.is_a?(Array)
       raise "bad options #{opts}" unless opts.is_a?(Hash) || opts.nil?
