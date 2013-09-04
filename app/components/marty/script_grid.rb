@@ -14,6 +14,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
 
     c.columns ||= [:name, :version, :created_dt, :status]
 
+    c.data_store.sorters = {property: :name, direction: 'ASC'}
   end
 
   # override the add_in_form endpoint.  Script creation needs to use
