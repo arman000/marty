@@ -13,6 +13,8 @@ class Marty::ImportSynonymView < Marty::CmGridPanel
     c.prohibit_delete 		= !self.class.has_admin_perm?
     c.prohibit_create 		= !self.class.has_admin_perm?
     c.prohibit_read 		= !self.class.has_any_perm?
+
+    c.data_store.sorters = {property: :import_type__name, direction: 'ASC'}
   end
 
   column :import_type__name do |c|
