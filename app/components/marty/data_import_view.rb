@@ -27,6 +27,7 @@ class Marty::DataImportView < Marty::CmFormPanel
 
         comboname.on('select', function(combo, record) {
           textname.setValue("");
+          me.netzkeGetComponent('result').updateBodyHtml('');
         });
       }
       JS
