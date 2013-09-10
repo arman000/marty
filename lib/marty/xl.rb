@@ -302,8 +302,8 @@ class Marty::Xl
       raise "bad options #{opts}" unless opts.is_a?(Hash) || opts.nil?
 
       # Remove special characters and truncate sheet name due to Excel
-      # limitations.
-      name = name.gsub(':', '').truncate(31)
+      # limitations.  The following chars are not allowed: []*?:\/
+      name = name.gsub(/[\[\]\*\?\/\\]/, '_').gsub(':', '').truncate(31)
 
       opts = self.class.symbolize_keys(opts || {}, ':')
       widths = opts[:widths] || []

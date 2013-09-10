@@ -2,6 +2,10 @@ class Marty::ScriptSet
   # maps script_id to Delorean engine
   @@engines, @@dengines = {}, {}
 
+  def self.reset
+    @@engines, @@dengines = {}, {}
+  end
+
   def self.parse(sname, body, sset=nil)
     sset ||= Marty::ScriptContainer.new
 
