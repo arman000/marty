@@ -9,6 +9,7 @@ class Marty::DataImportView < Marty::CmFormPanel
   end
 
   js_configure do |c|
+
     c.set_result = <<-JS
       function(html) {
 	var result = this.netzkeGetComponent('result');
@@ -24,9 +25,14 @@ class Marty::DataImportView < Marty::CmFormPanel
 
         var comboname = form.findField('import_type');
         var textname  = form.findField('import_data');
+        var importbutton = me.actions["apply"].items[0];
 
         comboname.on('select', function(combo, record) {
           textname.setValue("");
+          me.netzkeGetComponent('result').updateBodyHtml('');
+        });
+
+        importbutton.on('click', function(t, e, ops) {
           me.netzkeGetComponent('result').updateBodyHtml('');
         });
       }
