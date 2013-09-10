@@ -21,6 +21,8 @@ class Marty::UserView < Marty::CmGridPanel
                    :roles
                   ]
 
+    c.data_store.sorters = {property: :login,
+      direction: 'ASC'} if c.columns.include?(:login)
   end
 
   def self.set_roles(roles, user)
