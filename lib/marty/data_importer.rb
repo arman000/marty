@@ -250,8 +250,11 @@ module Marty
 
         remainder_ids = cleaner_ids - ids.keys
 
-        klass.delete(remainder_ids)
+        raise Marty::DataImporterError.
+          new("Missing import data. Please provide a header line and at least one data line.", [1]) if
+          ids.keys.compact.count == 0
 
+        klass.delete(remainder_ids)
         res + remainder_ids.map {|id| [:clean, id]}
       end
     end
