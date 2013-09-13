@@ -5,7 +5,7 @@ class Marty::DataImportView < Marty::CmFormPanel
     a.text  	= I18n.t("data_import_view.import")
     a.tooltip  	= I18n.t("data_import_view.import")
     a.icon  	= :database_go
-    a.disabled 	= false
+    a.disabled 	= Marty::Util.warped? # TODO - Add :price_manager permissions
   end
 
   js_configure do |c|

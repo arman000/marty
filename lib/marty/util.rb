@@ -17,6 +17,10 @@ module Marty
       snap ? snap.created_dt : Float::INFINITY
     end
 
+    def self.warped?
+      self.get_posting_time != Float::INFINITY
+    end
+
     def self.logger
       @@s_logger ||= Rails.logger || Logger.new($stderr)
     end

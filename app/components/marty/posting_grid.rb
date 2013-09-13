@@ -1,4 +1,7 @@
 class Marty::PostingGrid < Marty::CmGridPanel
+  has_marty_permissions	read: :any,
+			delete: :any # delete is hijacked for a select
+
   def configure(c)
     super
 

@@ -2,14 +2,14 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
   def configure(c)
     super
 
-    warped = Marty::Util.get_posting_time != Float::INFINITY
+    warped = Marty::Util.warped?
 
     c.enable_extended_search	= false
-    c.enable_edit_in_form	= !warped
-    c.prohibit_update		= warped
-    c.prohibit_delete		= warped
-    c.prohibit_create		= warped
-    c.prohibit_read		= !self.class.has_any_perm?
+    #c.enable_edit_in_form	= !warped
+    c.prohibit_update		||= warped
+    c.prohibit_delete		||= warped
+    c.prohibit_create		||= warped
+    #c.prohibit_read		= !self.class.has_any_perm?
 
     # default sort all Mcfly grids with id
     c.data_store.sorters ||= {property: :id, direction: 'ASC'}

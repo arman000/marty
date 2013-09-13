@@ -1,4 +1,9 @@
 class Marty::UserView < Marty::CmGridPanel
+  # FIXME: figure out implications of delete, before allowing it
+  has_marty_permissions	create: :admin,
+			read: :any,
+			update: :admin,
+			delete: :none
 
   def configure(c)
     super
@@ -6,11 +11,6 @@ class Marty::UserView < Marty::CmGridPanel
     c.title ||= I18n.t('users', default: "Users")
     c.model 			= "Marty::User"
     c.enable_extended_search 	= false
-    c.prohibit_update 		= !self.class.has_admin_perm?
-    # FIXME: figure out implications of delete, before allowing it
-    c.prohibit_delete 		= true
-    c.prohibit_create 		= !self.class.has_admin_perm?
-    c.prohibit_read 		= !self.class.has_any_perm?
     c.enable_edit_inline	= false
 
     c.columns ||= [:login,
@@ -95,11 +95,11 @@ class Marty::UserView < Marty::CmGridPanel
     a.text 	= I18n.t("user_grid.new")
     a.tooltip  	= I18n.t("user_grid.new")
     a.icon 	= :user_add
-    a.disabled 	= config[:prohibit_create]
+    a.disabled 	= !self.class.can_perform_action?(:create)
   end
 
   action :edit_in_form do |a|
-    a.disabled 	= config[:prohibit_edit]
+    a.disabled 	= !self.class.can_perform_action?(:update)
     a.icon 	= :user_edit
   end
 

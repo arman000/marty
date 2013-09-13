@@ -12,7 +12,7 @@ class Marty::NewPostingForm < Marty::CmFormPanel
     a.text  	= I18n.t("create_posting")
     a.tooltip  	= I18n.t("create_posting")
     a.icon  	= :time_add
-    a.disabled 	= false
+    a.disabled 	= Marty::Util.warped? # TODO - Add :price_manager permissions
   end
 
   ######################################################################
