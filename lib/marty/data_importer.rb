@@ -251,7 +251,8 @@ module Marty
         remainder_ids = cleaner_ids - ids.keys
 
         raise Marty::DataImporterError.
-          new("Missing import data. Please provide a header line and at least one data line.", [1]) if
+          new("Missing import data. " +
+              "Please provide a header line and at least one data line.", [1]) if
           ids.keys.compact.count == 0
 
         klass.delete(remainder_ids)

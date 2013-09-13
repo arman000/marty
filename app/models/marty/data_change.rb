@@ -3,23 +3,6 @@ require 'delorean_lang'
 class Marty::DataChange
   include Delorean::Model
 
-  def self.class_info(klass)
-    @class_info ||= {}
-
-    return @class_info[klass] if @class_info[klass]
-
-    associations = klass.reflect_on_all_associations.map(&:name)
-
-    @class_info[klass] = {
-      cols:
-      klass.columns.map(&:name) - Marty::DataImporter::MCFLY_COLUMNS.to_a,
-      assoc:
-      associations.each_with_object({}) { |a, h|
-        h["#{a}_id"] = Marty::DataImporter::RowProcessor.assoc_info(klass, a)
-      },
-    }
-  end
-
   # Some arbitrary limit so we don't allow enormous queries
   MAX_COUNT = 64000
 
@@ -36,7 +19,7 @@ class Marty::DataChange
     t0 = 'infinity' if t0 == Float::INFINITY
     t1 = 'infinity' if t1 == Float::INFINITY
 
-    info = class_info(klass)
+    info = Marty::DataExporter.class_info(klass)
 
     change_q = '(obsoleted_dt >= ? AND obsoleted_dt < ?)' +
       ' OR (created_dt >= ? AND created_dt < ?)'
@@ -72,7 +55,7 @@ class Marty::DataChange
 
         profile["attrs"] = info[:cols].map { |c|
           {
-            "value" 	=> export_attr(o, c, info),
+            "value" 	=> Marty::DataExporter.export_attr(o, c, info),
             "changed" 	=> prev && (o.send(c.to_sym) != prev.send(c.to_sym)),
           }
         }
@@ -87,18 +70,11 @@ class Marty::DataChange
     Rails.configuration.marty.class_list.sort.uniq || []
   end
 
-  def self.export_attr(obj, c, info)
-    v = obj.send(c.to_sym)
-    assoc_info = info[:assoc][c] unless v.nil?
-    assoc_info ? assoc_info[:assoc_class].find(v).
-      send(assoc_info[:assoc_key].to_sym) : v
-  end
-
   delorean_fn :class_headers, sig: 1 do
     |class_name|
 
     klass = class_name.constantize
-    info = class_info(klass)
+    info = Marty::DataExporter.class_info(klass)
     info[:cols].map { |c|
       # strip _id if it's an assoc
       c = c[0..-4] if info[:assoc][c]
@@ -117,6 +93,13 @@ class Marty::DataChange
     classes = classes.split(/,\s*/) if classes.is_a? String
 
     Set[* classes] & Set[* class_list]
+  end
+
+  delorean_fn :do_export, sig: 2 do
+    |pt, klass|
+    raise "#{klass} not on class_list" unless class_list.member? klass
+
+    Marty::DataExporter.do_export(pt, klass.constantize)
   end
 
 end
