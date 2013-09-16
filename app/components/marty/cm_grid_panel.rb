@@ -19,6 +19,7 @@ class Marty::CmGridPanel < Netzke::Basepack::Grid
     c.prohibit_read		= !read
     c.prohibit_update		= !update
     c.prohibit_delete		= !delete
+
     c.enable_edit_inline	= update
     c.enable_edit_in_form	= update
   end

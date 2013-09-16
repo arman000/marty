@@ -5,11 +5,11 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
     warped = Marty::Util.warped?
 
     c.enable_extended_search	= false
-    #c.enable_edit_in_form	= !warped
+    c.enable_edit_in_form	&&= !warped
     c.prohibit_update		||= warped
     c.prohibit_delete		||= warped
     c.prohibit_create		||= warped
-    #c.prohibit_read		= !self.class.has_any_perm?
+    #c.prohibit_read		||= !self.class.has_any_perm?
 
     # default sort all Mcfly grids with id
     c.data_store.sorters ||= {property: :id, direction: 'ASC'}

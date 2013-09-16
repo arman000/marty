@@ -1,4 +1,8 @@
 class Marty::ImportSynonymView < Marty::CmGridPanel
+  has_marty_permissions	create: :admin,
+			read: :any,
+			update: :admin,
+			delete: :admin
 
   def configure(c)
     super
@@ -8,11 +12,6 @@ class Marty::ImportSynonymView < Marty::CmGridPanel
     c.columns 	= [:import_type__name, :synonym, :internal_name]
 
     c.enable_extended_search 	= false
-    c.enable_edit_in_form 	= self.class.has_admin_perm?
-    c.prohibit_update 		= !self.class.has_admin_perm?
-    c.prohibit_delete 		= !self.class.has_admin_perm?
-    c.prohibit_create 		= !self.class.has_admin_perm?
-    c.prohibit_read 		= !self.class.has_any_perm?
 
     c.data_store.sorters = {property: :import_type__name, direction: 'ASC'}
   end

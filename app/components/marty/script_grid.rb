@@ -23,7 +23,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
     data = ActiveSupport::JSON.decode(params[:data])
 
     unless self.class.has_dev_perm?
-      this.netzke_feedback "no permission"
+      this.netzke_feedback "Permission Denied"
       return
     end
 

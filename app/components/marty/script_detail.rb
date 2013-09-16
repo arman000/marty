@@ -156,7 +156,7 @@ class Marty::ScriptDetail < Marty::CmFormPanel
 
   endpoint :netzke_load do |params, this|
     unless self.class.has_any_perm?
-      this.netzke_feedback "no permission"
+      this.netzke_feedback "Permission Denied"
       return
     end
 
@@ -188,7 +188,7 @@ class Marty::ScriptDetail < Marty::CmFormPanel
 
   endpoint :netzke_submit do |params, this|
     unless self.class.has_any_perm?
-      this.netzke_feedback "no permission"
+      this.netzke_feedback "Permission Denied"
       return
     end
 

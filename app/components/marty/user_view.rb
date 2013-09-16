@@ -55,8 +55,8 @@ class Marty::UserView < Marty::CmGridPanel
     data = ActiveSupport::JSON.decode(params[:data])
     data["id"] = nil
 
-    unless self.class.has_admin_perm?
-      this.netzke_feedback "no permission"
+    unless self.class.can_perform_action?(:create)
+      this.netzke_feedback "Permission Denied"
       return
     end
 
@@ -74,8 +74,8 @@ class Marty::UserView < Marty::CmGridPanel
 
   endpoint :edit_window__edit_form__netzke_submit do |params, this|
     data = ActiveSupport::JSON.decode(params[:data])
-    unless self.class.has_admin_perm?
-      this.netzke_feedback "no permission"
+    unless self.class.can_perform_action?(:update)
+      this.netzke_feedback "Permission Denied"
       return
     end
 

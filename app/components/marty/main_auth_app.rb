@@ -89,41 +89,42 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text 	= I18n.t("import_type")
     a.handler  	= :netzke_load_component_by_action
     a.disabled 	= !self.class.has_admin_perm?
+    a.icon	= :table_go
   end
 
   action :import_synonym_view do |a|
     a.text 	= I18n.t("import_synonym")
     a.handler  	= :netzke_load_component_by_action
     a.disabled 	= !self.class.has_admin_perm?
-  end
-
-  action :mando_loan_program_view do |a|
-    a.text 	= I18n.t("mando_loan_program")
-    a.handler  	= :netzke_load_component_by_action
-    a.disabled 	= !self.class.has_admin_perm?
+    a.icon	= :table_relationship
   end
 
   action :scripting do |a|
     a.text    	= I18n.t("scripting")
     a.handler 	= :netzke_load_component_by_action
     a.icon    	= :script
+    a.disabled 	= !self.class.has_any_perm?
   end
 
   action :reporting do |a|
     a.text 	= I18n.t("reports")
     a.handler 	= :netzke_load_component_by_action
     a.icon 	= :page_lightning
+    a.disabled 	= !self.class.has_any_perm?
   end
 
   action :data_import_view do |a|
     a.text 	= I18n.t("data_import_view.import_data")
     a.handler 	= :netzke_load_component_by_action
     a.icon 	= :database_go
+    a.disabled	= Marty::Util.warped? || (!self.class.has_price_manager_perm? if
+      self.class.respond_to?(:has_price_manager_perm?))
   end
 
   action :user_view do |a|
     a.text 	= I18n.t("user_view")
     a.handler 	= :netzke_load_component_by_action
+    a.icon	= :group
     a.disabled 	= !self.class.has_admin_perm?
   end
 
@@ -134,6 +135,8 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text 	= I18n.t('new_posting')
     a.tooltip 	= I18n.t('new_posting')
     a.icon 	= :time_add
+    a.disabled	= Marty::Util.warped? || (!self.class.has_price_manager_perm? if
+      self.class.respond_to?(:has_price_manager_perm?))
   end
 
   js_configure do |c|
