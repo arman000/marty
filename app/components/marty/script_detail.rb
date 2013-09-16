@@ -137,7 +137,7 @@ class Marty::ScriptDetail < Marty::CmFormPanel
   ######################################################################
 
   def can_save?(ds)
-    self.class.has_admin_perm? || (ds.user == Mcfly.whodunnit)
+    config[:allow_edit] || (ds.user == Mcfly.whodunnit)
   end
 
   def can_checkin?(ds)
@@ -145,11 +145,11 @@ class Marty::ScriptDetail < Marty::CmFormPanel
   end
 
   def can_discard?(ds)
-    self.class.has_admin_perm? || (ds.user == Mcfly.whodunnit)
+    config[:allow_edit] || (ds.user == Mcfly.whodunnit)
   end
 
   def can_checkout?
-    self.class.has_dev_perm?
+    config[:allow_edit]
   end
 
   ######################################################################

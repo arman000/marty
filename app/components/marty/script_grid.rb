@@ -9,7 +9,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
     c.scope 			||= ["obsoleted_dt = 'infinity'"]
     c.prohibit_update 		= true
     c.prohibit_delete 		= true
-    c.prohibit_create 		= !self.class.has_dev_perm?
+    c.prohibit_create 		= !c.allow_edit
     c.prohibit_read 		= !self.class.has_any_perm?
 
     c.columns ||= [:name, :version, :created_dt, :status]
@@ -43,7 +43,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
     a.text 	= I18n.t("script_grid.new")
     a.tooltip  	= I18n.t("script_grid.new")
     a.icon 	= :script_add
-    a.disabled 	= config[:prohibit_create]
+    a.disabled	= config[:prohibit_create]
   end
 
   def default_bbar

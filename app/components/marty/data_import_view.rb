@@ -1,16 +1,10 @@
 class Marty::DataImportView < Marty::CmFormPanel
   include Marty::Extras::Layout
 
-  has_marty_permissions	create: :price_manager,
-			read: :any,
-			update: :price_manager,
-			delete: :none
-
   action :apply do |a|
     a.text  	= I18n.t("data_import_view.import")
     a.tooltip  	= I18n.t("data_import_view.import")
     a.icon  	= :database_go
-    a.disabled 	= Marty::Util.warped? || !self.class.can_perform_action?(:create)
   end
 
   js_configure do |c|

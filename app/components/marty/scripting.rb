@@ -112,6 +112,7 @@ class Marty::Scripting < Netzke::Base
     c.klass 		= Marty::ScriptGrid
     c.title 		= I18n.t("script.selection_list")
     c.flex 		= 1
+    c.allow_edit	= config[:allow_edit]
   end
 
   component :script_log do |c|
@@ -131,6 +132,7 @@ class Marty::Scripting < Netzke::Base
     c.flex 		= 1
     c.split 		= true
     c.region 		= :west
+    c.allow_edit	= config[:allow_edit]
   end
 
   component :script_tester do |c|

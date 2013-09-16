@@ -15,8 +15,8 @@ module Marty
     #
     # :any gives permission to the action if user belongs to at least 1 role
     # :none overrides any other roles
-    #    e.g. delete: [:none, :admin] would allows return false when
-    #    calling can_allow_action
+    #    e.g. delete: [:none, :admin] would return false when calling
+    #    can_allow_action? even if the user belong to the admin role
     def has_marty_permissions(attrs)
       raise "bad attrs" unless attrs.is_a?(Hash)
       raise "unknown action - only create/read/update/delete allowed" unless

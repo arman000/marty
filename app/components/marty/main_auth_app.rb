@@ -11,6 +11,18 @@ require 'marty/user_view'
 class Marty::MainAuthApp < Marty::AuthApp
   extend Marty::Permissions
 
+  def self.has_posting_perm?
+    self.class.has_admin_perm?
+  end
+
+  def self.has_data_import_perm?
+    self.class.has_admin_perm?
+  end
+
+  def self.has_scripting_perm?
+    self.class.has_admin_perm?
+  end
+
   def sep
     { xtype: 'tbseparator' }
   end
@@ -117,8 +129,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text 	= I18n.t("data_import_view.import_data")
     a.handler 	= :netzke_load_component_by_action
     a.icon 	= :database_go
-    a.disabled	= Marty::Util.warped? || (!self.class.has_price_manager_perm? if
-      self.class.respond_to?(:has_price_manager_perm?))
+    a.disabled	= Marty::Util.warped? || !self.class.has_data_import_perm?
   end
 
   action :user_view do |a|
@@ -135,8 +146,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text 	= I18n.t('new_posting')
     a.tooltip 	= I18n.t('new_posting')
     a.icon 	= :time_add
-    a.disabled	= Marty::Util.warped? || (!self.class.has_price_manager_perm? if
-      self.class.respond_to?(:has_price_manager_perm?))
+    a.disabled	= Marty::Util.warped? || !self.class.has_posting_perm?
   end
 
   js_configure do |c|
@@ -194,13 +204,19 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   ######################################################################
 
-  component :scripting
+  component :scripting do |c|
+    c.allow_edit = self.class.has_scripting_perm?
+  end
   component :reporting
   component :posting_window
-  component :new_posting_window
+  component :new_posting_window do |c|
+    c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?
+  end
   component :import_type_view
   component :import_synonym_view
-  component :data_import_view
+  component :data_import_view do |c|
+    c.disabled = Marty::Util.warped? || !self.class.has_data_import_perm?
+  end
   component :user_view
 end
 
