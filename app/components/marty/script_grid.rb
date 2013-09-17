@@ -22,7 +22,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
   endpoint :add_window__add_form__netzke_submit do |params, this|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    unless self.class.has_dev_perm?
+    if config[:prohibit_create]
       this.netzke_feedback "Permission Denied"
       return
     end
