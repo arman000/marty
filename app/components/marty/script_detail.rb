@@ -86,9 +86,9 @@ class Marty::ScriptDetail < Marty::CmFormPanel
     	function() {
            var form_obj = this;
            Ext.Msg.confirm('Confirm',
-     	   'This action will remove the current DEV version.<br>' +
-     	   'All changes since the last checkin <b>will be lost</b>. <br>' +
-     	   'This action cannot be undone. Are your sure?',
+           'This action will remove the current DEV version.<br>' +
+           'All changes since the last checkin <b>will be lost</b>. <br>' +
+           'This action cannot be undone. Are you sure?',
                 function (btn, value, cfg) {
                   (btn == "yes") && form_obj.serverDiscard({script_id: form_obj.getScriptId()});
                 });
