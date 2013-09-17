@@ -2,6 +2,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
 
   def configure(c)
     super
+    c.allow_edit = true if c.allow_edit.nil? && ENV["RAILS_ENV"] == "test"
 
     c.title ||= I18n.t('scripts', default: "Scripts")
     c.model 			= "Marty::Script"

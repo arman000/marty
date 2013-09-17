@@ -2,7 +2,6 @@ require 'delorean_lang'
 require 'coderay'
 
 class Marty::ScriptDetail < Marty::CmFormPanel
-
   DASH = 0x2012.chr('utf-8')
 
   css_configure do |c|
@@ -399,6 +398,8 @@ class Marty::ScriptDetail < Marty::CmFormPanel
 
   def configure(c)
     super
+
+    c.allow_edit = true if c.allow_edit.nil? && ENV["RAILS_ENV"] == "test"
 
     c.title = "Script Detail"
     c.model = "Marty::Script"
