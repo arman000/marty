@@ -2,7 +2,10 @@ class Marty::ScriptGrid < Marty::CmGridPanel
 
   def configure(c)
     super
-    c.allow_edit = true if c.allow_edit.nil? && ENV["RAILS_ENV"] == "test"
+
+    # Hacky fix to allow for testing
+    c.allow_edit = true if c.allow_edit.nil? && ENV["RAILS_ENV"] == "test" &&
+      self.class.current_user_roles.include?(:dev)
 
     c.title ||= I18n.t('scripts', default: "Scripts")
     c.model 			= "Marty::Script"
