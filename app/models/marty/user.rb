@@ -10,12 +10,12 @@ class Marty::User < Marty::Base
   validates_format_of :login, :with => /^[a-z0-9_\-@\.]*$/i
   validates_length_of :login, :firstname, :lastname, maximum: 100
 
-  has_many :user_roles
+  has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
 
   scope :active, :conditions => "#{self.table_name}.active = true"
 
-  # FIXME: should have before_destroy
+  before_destroy :destroy_user
 
   def name
     "#{firstname} #{lastname}"
@@ -91,4 +91,13 @@ class Marty::User < Marty::Base
     Mcfly.whodunnit
   end
 
+private
+  def destroy_user
+    errors.add :base, "Error - you cannot delete yourself" if
+      self.login == Mcfly.whodunnit.login
+    errors.add :base, "Error - you cannot delete the system account" if
+      self.login == Rails.configuration.marty.system_account.to_s
+
+    errors.blank?
+  end
 end

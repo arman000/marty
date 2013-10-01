@@ -1,9 +1,8 @@
 class Marty::UserView < Marty::CmGridPanel
-  # FIXME: figure out implications of delete, before allowing it
   has_marty_permissions	create: :admin,
 			read: :any,
 			update: :admin,
-			delete: :none
+			delete: :admin
 
   def configure(c)
     super
@@ -104,7 +103,7 @@ class Marty::UserView < Marty::CmGridPanel
   end
 
   def default_bbar
-    [:add_in_form, :edit_in_form]
+    [:add_in_form, :edit_in_form, :del]
   end
 
   def default_context_menu
@@ -163,4 +162,3 @@ class Marty::UserView < Marty::CmGridPanel
 end
 
 UserView = Marty::UserView
-
