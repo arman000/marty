@@ -14,7 +14,7 @@ class Marty::PostingWindow < Netzke::Basepack::Window
     c.klass			= Marty::PostingGrid
     c.enable_edit_in_form	= false
     c.enable_extended_search	= false
-    c.rows_per_page		= 10
+    c.rows_per_page		= 12
     c.column_filters_available 	= true
     c.prohibit_update		= true
     c.prohibit_delete		= false # hijacked for selection
