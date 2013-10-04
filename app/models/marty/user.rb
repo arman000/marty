@@ -2,6 +2,8 @@ require 'mcfly'
 require 'net/ldap'
 
 class Marty::User < Marty::Base
+  has_paper_trail
+
   attr_protected :login, :firstname, :lastname, :active
 
   validates_presence_of :login, :firstname, :lastname

@@ -1,4 +1,5 @@
 class Marty::UserRole < Marty::Base
+  has_paper_trail
 
   attr_accessible :user_id, :role_id
   validates_uniqueness_of :user_id, scope: [:role_id]
@@ -6,5 +7,4 @@ class Marty::UserRole < Marty::Base
 
   belongs_to :user
   belongs_to :role
-  # FIXME: should have before_destroy
 end
