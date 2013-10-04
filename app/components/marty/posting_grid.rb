@@ -21,12 +21,48 @@ class Marty::PostingGrid < Marty::CmGridPanel
 
   js_configure do |c|
     c.init_component = <<-JS
-      function() {
-        this.callParent();
-	// Set single selection mode. FIXME: can this be done on config?
-	this.getSelectionModel().setSelectionMode('SINGLE');
-      }
-      JS
+    function() {
+       this.callParent();
+       // Set single selection mode. FIXME: can this be done on config?
+       this.getSelectionModel().setSelectionMode('SINGLE');
+       this.getSelectionModel().on('selectionchange', function(selModel) {
+          this.actions.detail &&
+          this.actions.detail.setDisabled(!selModel.hasSelection());
+       }, this);
+
+       var me = this;
+       me.getView().on('itemkeydown', function(view, record, item, index, e) {
+          if (e.getKey() === e.SPACE) {
+             record_id = me.getSelectionModel().selected.first().getId();
+             me.getView().fireEvent('itemclick', me, record);
+             me.serverDetail({record_id: record_id});
+             var rowIndex = me.find('id', record.getId());
+             me.getView().select(rowIndex);
+          }
+       });
+    }
+    JS
+
+    c.detail = <<-JS
+    function() {
+       record_id = this.getSelectionModel().selected.first().getId();
+       this.serverDetail({record_id: record_id});
+    }
+    JS
+
+    c.show_detail = <<-JS
+    function(details) {
+      Ext.create('Ext.Window', {
+        height: 	150,
+        minWidth:	250,
+        autoWidth:	true,
+        modal:		true,
+        autoScroll:	true,
+        html:		details,
+        title:		"Posting Details"
+     }).show();
+    }
+    JS
 
     c.on_del = <<-JS
       function() {
@@ -51,7 +87,34 @@ class Marty::PostingGrid < Marty::CmGridPanel
   end
 
   def default_bbar
-    [:del]
+    [:del, :detail]
+  end
+
+  action :detail do |a|
+    a.text	= "Detail"
+    a.icon	= :application_view_detail
+    a.handler 	= :detail
+    a.disabled	= true
+  end
+
+  endpoint :server_detail do |params, this|
+    record_id = params[:record_id]
+
+    # Prepare an HTML popup with session details such that the
+    # contents can be easily pasted into a spreadsheet.
+
+    pt = Marty::Posting.find_by_id(record_id)
+
+    dt = pt.created_dt.to_s == 'Infinity' ? '---' :
+      pt.created_dt.strftime('%Y-%m-%d %I:%M %p')
+
+    html =
+      "<b>Name:</b>\t#{pt.name}<br/>" +
+      "<b>Date/Time:</b>\t#{dt}<br/>" +
+      "<b>User:</b>\t#{pt.user.name}<br/>" +
+      "<b>Comment:</b>\t#{pt.comment}"
+
+    this.show_detail html
   end
 
   column :name do |c|

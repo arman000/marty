@@ -6,7 +6,7 @@ class Marty::PostingWindow < Netzke::Basepack::Window
     c.modal 		= true
     c.items 		= [:posting_grid]
     c.lazy_loading 	= true
-    c.width 		= 350
+    c.width 		= 400
     c.height 		= 350
   end
 
