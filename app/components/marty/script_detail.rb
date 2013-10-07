@@ -388,7 +388,7 @@ class Marty::ScriptDetail < Marty::CmFormPanel
   def generate_html(params={})
     r = Marty::Script.find_by_id(params[:script_id])
     body = get_body(r)
-    CodeRay.scan(body, :ruby).div(:line_numbers => :table)
+    CodeRay.scan(body, :ruby).div(line_numbers: :table)
   end
 
   def get_body(r)

@@ -305,7 +305,7 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
     /**
     * @cfg {Number} tabSize The width of a tab character.
     */
-    tabSize:            4,
+    tabSize:            8,
 
     /**
     * @cfg {String} theme The theme to style the editor with. You must make sure the CSS file defining the corresponding 
