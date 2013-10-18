@@ -4,7 +4,6 @@ class Marty::CmGridAppendOnly < Marty::McflyGridPanel
 
     c.enable_extended_search	= false
     c.prohibit_update		= true
-    c.prohibit_delete		= true
   end
 
   def default_bbar
