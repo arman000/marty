@@ -17,11 +17,12 @@ module Mcfly
       # not sharable across different Ruby processes.
       def cached_delorean_fn(name, options = {}, &block)
         @LOOKUP_CACHE ||= {}
+        @INFINITY_SET ||= Set.new ['infinity', 'Infinity', Float::INFINITY]
 
         delorean_fn(name, options) do |ts, *args|
           cache_key = [name, ts] + args.map{ |a|
             a.is_a?(ActiveRecord::Base) ? a.id : a
-          } unless 'infinity' == ts
+          } unless @INFINITY_SET.member?(ts)
 
           next @LOOKUP_CACHE[cache_key] if
             cache_key && @LOOKUP_CACHE.has_key?(cache_key)
