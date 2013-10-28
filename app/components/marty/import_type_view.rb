@@ -9,9 +9,9 @@ class Marty::ImportTypeView < Marty::CmGridPanel
 
     c.title 	= I18n.t('import_type', default: "ImportType")
     c.model 	= "Marty::ImportType"
-    c.columns 	= [:name, :model_name, :synonym_fields, :cleaner_function]
+    c.columns 	= [:name, :model_name, :cleaner_function, :validation_function]
 
-    c.enable_extended_search 	= false
+    c.enable_extended_search = false
 
     c.data_store.sorters = {property: :name, direction: 'ASC'}
   end
@@ -24,11 +24,11 @@ class Marty::ImportTypeView < Marty::CmGridPanel
     c.flex = 1
   end
 
-  column :synonym_fields do |c|
+  column :cleaner_function do |c|
     c.flex = 1
   end
 
-  column :cleaner_function do |c|
+  column :validation_function do |c|
     c.flex = 1
   end
 

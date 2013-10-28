@@ -19,7 +19,7 @@ module Marty
                        ]
 
     class RowProcessor
-      attr_accessor :klass, :headers, :dt, :synonyms, :key_attrs, :hmap
+      attr_accessor :klass, :headers, :dt, :key_attrs, :hmap
 
       EXCEL_START_DATE = Date.parse('1/1/1900')-2
 
@@ -95,11 +95,10 @@ module Marty
         end
       end
 
-      def initialize(klass, headers, dt, synonyms)
+      def initialize(klass, headers, dt)
         @klass 		= klass
         @headers 	= headers
         @dt		= dt
-        @synonyms 	= synonyms
         @key_attrs 	= self.class.get_keys(klass)
 
         # # HACK: not sure why there's a nil at the end of headers sometimes
@@ -135,7 +134,6 @@ module Marty
           next if Marty::DataImporter::MCFLY_COLUMNS.member? a
 
           a = $1 if a =~ /(.*)__/
-          v = (synonyms[a] || {}).fetch(v, v)
 
           if hmap[a].is_a? Hash
             if !v
@@ -184,17 +182,17 @@ module Marty
     def self.do_import_summary(klass,
                                data,
                                dt='infinity',
-                               synonyms={},
                                cleaner_function=nil,
+                               validation_function=nil,
                                col_sep="\t"
                                )
 
       recs = self.do_import(klass,
                             data,
                             dt,
-                            synonyms,
-                            col_sep,
                             cleaner_function,
+                            validation_function,
+                            col_sep,
                             )
 
       recs.each_with_object(Hash.new(0)) {|(op, id), h|
@@ -210,9 +208,9 @@ module Marty
     def self.do_import(klass,
                        data,
                        dt='infinity',
-                       synonyms={},
-                       col_sep="\t",
-                       cleaner_function=nil
+                       cleaner_function=nil,
+                       validation_function=nil,
+                       col_sep="\t"
                        )
 
       csv = CSV.new(data, headers: true, col_sep: col_sep)
@@ -226,7 +224,7 @@ module Marty
         row_proc = nil
         res = csv.each_with_index.map { |row, line|
           begin
-            row_proc ||= RowProcessor.new(klass, row.headers, dt, synonyms)
+            row_proc ||= RowProcessor.new(klass, row.headers, dt)
 
             # skip lines which are all nil
             next :blank if row.to_hash.values.none?
@@ -247,6 +245,13 @@ module Marty
 
           ids[id] = line
         }
+
+        begin
+          # Validate affected rows is necessary
+          klass.send(validation_function.to_sym, ids.keys) if validation_function
+        rescue => exc
+          raise Marty::DataImporterError.new(exc.to_s, [1])
+        end
 
         remainder_ids = cleaner_ids - ids.keys
 

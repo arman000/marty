@@ -58,15 +58,15 @@ class Marty::DataImportView < Marty::CmFormPanel
       import_type_rec
 
     klass 		= import_type_rec.get_model_class
-    synonym_hash 	= import_type_rec.synonym_hash
     cleaner_function 	= import_type_rec.cleaner_function
+    validation_function = import_type_rec.validation_function
 
     begin
       res = Marty::DataImporter.do_import_summary(klass,
                                                   import_data,
                                                   'infinity',
-                                                  synonym_hash,
                                                   cleaner_function,
+                                                  validation_function,
                                                   )
 
       result = res.map { |k, v|
@@ -94,29 +94,30 @@ class Marty::DataImportView < Marty::CmFormPanel
     super
 
     c.title = I18n.t("data_import_view.import_data")
-    c.items = [
-               fieldset(I18n.t("data_import_view.select"),
-                        {
-                          xtype:		:combo,
-                          name:			"import_type",
-                          store:		Marty::ImportType.all.map(&:name).sort,
-                          max_width:		"350",
-                          hide_label:		true,
-                          force_selection:	true,
-                        },
-                        {
-                          name: 	"import_data",
-                          width: 	"100%",
-                          height:	300,
-                          xtype:	:textareafield,
-                          value:	"",
-                          auto_scroll: 	true,
-                          hide_label: 	true,
-                        },
-                        min_width: 700,
-                        ),
-               :result,
-              ]
+    c.items =
+      [
+       fieldset(I18n.t("data_import_view.select"),
+                {
+                  xtype:		:combo,
+                  name:			"import_type",
+                  store:		Marty::ImportType.all.map(&:name).sort,
+                  max_width:		"350",
+                  hide_label:		true,
+                  force_selection:	true,
+                },
+                {
+                  name: 	"import_data",
+                  width: 	"100%",
+                  height:	300,
+                  xtype:	:textareafield,
+                  value:	"",
+                  auto_scroll: 	true,
+                  hide_label: 	true,
+                },
+                min_width: 700,
+                ),
+       :result,
+      ]
   end
 
   component :result do |c|

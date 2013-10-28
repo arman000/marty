@@ -4,7 +4,6 @@ require 'marty/reporting'
 require 'marty/posting_window'
 require 'marty/new_posting_window'
 require 'marty/import_type_view'
-require 'marty/import_synonym_view'
 require 'marty/data_import_view'
 require 'marty/user_view'
 
@@ -56,7 +55,6 @@ class Marty::MainAuthApp < Marty::AuthApp
       style: 	"",
       menu: 	[
                  :import_type_view,
-                 :import_synonym_view,
                  :user_view,
                 ],
     }
@@ -102,13 +100,6 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.handler  	= :netzke_load_component_by_action
     a.disabled 	= !self.class.has_admin_perm?
     a.icon	= :table_go
-  end
-
-  action :import_synonym_view do |a|
-    a.text 	= I18n.t("import_synonym")
-    a.handler  	= :netzke_load_component_by_action
-    a.disabled 	= !self.class.has_admin_perm?
-    a.icon	= :table_relationship
   end
 
   action :scripting do |a|
@@ -213,7 +204,6 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?
   end
   component :import_type_view
-  component :import_synonym_view
   component :data_import_view do |c|
     c.disabled = Marty::Util.warped? || !self.class.has_data_import_perm?
   end
