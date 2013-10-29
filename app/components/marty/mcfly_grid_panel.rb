@@ -16,8 +16,10 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
   end
 
   def get_data(*args)
-    t = Marty::Util.get_posting_time
-    ts = (t == Float::INFINITY) ? 'infinity' : t
+    ts = Marty::Util.get_posting_time
+
+    # normalize infinity
+    ts = 'infinity' if Mcfly::Model::INFINITIES.member? ts
 
     # FIXME: may need to pass the scope in using the params hash in
     # args.  Not sure how the following will interact with sorting.

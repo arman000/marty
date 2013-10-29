@@ -250,7 +250,7 @@ module Marty
           # Validate affected rows is necessary
           klass.send(validation_function.to_sym, ids.keys) if validation_function
         rescue => exc
-          raise Marty::DataImporterError.new(exc.to_s, [1])
+          raise Marty::DataImporterError.new(exc.to_s, [])
         end
 
         remainder_ids = cleaner_ids - ids.keys

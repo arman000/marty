@@ -2,7 +2,7 @@ require 'mcfly'
 
 module Mcfly
   module Model
-    
+
     def self.included(base)
       base.send :extend, ClassMethods
     end
@@ -17,12 +17,11 @@ module Mcfly
       # not sharable across different Ruby processes.
       def cached_delorean_fn(name, options = {}, &block)
         @LOOKUP_CACHE ||= {}
-        @INFINITY_SET ||= Set.new ['infinity', 'Infinity', Float::INFINITY]
 
         delorean_fn(name, options) do |ts, *args|
           cache_key = [name, ts] + args.map{ |a|
             a.is_a?(ActiveRecord::Base) ? a.id : a
-          } unless @INFINITY_SET.member?(ts)
+          } unless Mcfly::Model::INFINITIES.member?(ts)
 
           next @LOOKUP_CACHE[cache_key] if
             cache_key && @LOOKUP_CACHE.has_key?(cache_key)
@@ -53,6 +52,10 @@ module Mcfly
       def cached_mcfly_lookup(name, options = {}, &block)
         cached_delorean_fn(name, options) do |ts, *args|
           raise "time cannot be nil" if ts.nil?
+
+          # normalize infinity
+          ts = 'infinity' if Mcfly::Model::INFINITIES.member? ts
+
           where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).scoping do
             block.call(ts, *args)
           end
@@ -103,7 +106,7 @@ module Mcfly
 
       # Generates Gemini categorization lookups.  For instance,
       # suppose we have the following in class GFee:
-      # 
+      #
       # gen_mcfly_lookup_cat :lookup_q,
       # [:security_instrument,
       #  'Gemini::SecurityInstrumentCategorization',
@@ -120,7 +123,7 @@ module Mcfly
       # cat_assoc_klass = Gemini::SecurityInstrumentCategorization
       # cat_attr = :g_fee_category
       # name = :lookup_q
-      # pc_name = :pc_lookup_q 
+      # pc_name = :pc_lookup_q
       # pc_attrs = {entity: true, security_instrument: true,
       # g_fee_category: true, coupon: true}
 
@@ -142,7 +145,7 @@ module Mcfly
 
         pc_name = "pc_#{name}".to_sym
         gen_mcfly_lookup(pc_name, pc_attrs, options)
-        
+
         lpi = attrs.keys.index rel_attr
 
         raise "should not include #{cat_attr}" if
