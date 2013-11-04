@@ -1,8 +1,8 @@
 class Marty::UserView < Marty::CmGridPanel
-  has_marty_permissions	create: :admin,
+  has_marty_permissions	create: [:admin, :user_manager],
 			read: :any,
-			update: :admin,
-			delete: :admin
+			update: [:admin, :user_manager],
+			delete: [:admin, :user_manager]
 
   def configure(c)
     super
@@ -24,6 +24,16 @@ class Marty::UserView < Marty::CmGridPanel
       direction: 'ASC'} if c.columns.include?(:login)
   end
 
+  js_configure do |c|
+    c.init_component = <<-JS
+    function() {
+       this.callParent();
+       // Set single selection mode. FIXME: can this be done on config?
+       this.getSelectionModel().setSelectionMode('SINGLE');
+    }
+    JS
+  end
+
   def self.set_roles(roles, user)
     roles ||= []
     # set new roles
@@ -41,8 +51,10 @@ class Marty::UserView < Marty::CmGridPanel
     user.active    = data["active"]
     user.uuid      = data["uuid"]
 
-    user.save if user.valid?
-    set_roles(data["roles"], user)
+    if user.valid?
+      user.save
+      set_roles(data["roles"], user)
+    end
 
     user
   end

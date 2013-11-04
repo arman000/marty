@@ -85,7 +85,8 @@ class Marty::MainAuthApp < Marty::AuthApp
     return super unless self.class.has_any_perm?
 
     [ident_menu, sep] +
-      (self.class.has_admin_perm? ? [system_menu, sep] : []) +
+      (self.class.has_admin_perm? ||
+       self.class.has_user_manager_perm? ? [system_menu, sep] : []) +
       data_menus +
       [
        applications_menu, sep,
@@ -127,7 +128,8 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text 	= I18n.t("user_view")
     a.handler 	= :netzke_load_component_by_action
     a.icon	= :group
-    a.disabled 	= !self.class.has_admin_perm?
+    a.disabled 	= !self.class.has_admin_perm? &&
+      !self.class.has_user_manager_perm?
   end
 
   ######################################################################

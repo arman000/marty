@@ -1,7 +1,9 @@
 module Marty
   module Permissions
-    # Make sure there is an admin role, even if hosting app doesn't define it
-    ALL_ROLES = Set.new Rails.configuration.marty.roles.clone << :admin
+    # Make sure there are admin and user_manager roles,
+    # even if hosting app doesn't define them
+    REQ_ROLES = [:admin, :user_manager]
+    ALL_ROLES = (Set.new Rails.configuration.marty.roles.clone).merge(REQ_ROLES)
     ACTIONS = Set.new [:create, :read, :update, :delete] # CRUD
 
     # Call using following format
