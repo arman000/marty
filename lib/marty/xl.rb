@@ -298,7 +298,7 @@ class Marty::Xl
 
       name, ops, opts = opl
       raise "bad worksheet name: #{name}" unless name.is_a?(String)
-      raise "bad worksheet ops" unless ops.is_a?(Array)
+      raise "bad worksheet ops: #{ops.class}" unless ops.is_a?(Array)
       raise "bad options #{opts}" unless opts.is_a?(Hash) || opts.nil?
 
       # Remove special characters and truncate sheet name due to Excel
