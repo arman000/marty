@@ -40,12 +40,4 @@ class Marty::ComponentsController < Marty::ApplicationController
     render layout: true,
     inline: "<%= netzke :#{cname}, class_name: '#{component}', height: 650 %>"
   end
-
-  def home
-    render inline: "<%= netzke :'cm_auth_app' %>", layout: true
-  end
-
-  def mando
-    render inline: "<%= netzke :'mando_main_app' %>", layout: true
-  end
 end
