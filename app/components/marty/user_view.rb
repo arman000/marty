@@ -36,6 +36,12 @@ class Marty::UserView < Marty::CmGridPanel
 
   def self.set_roles(roles, user)
     roles ||= []
+
+    # Destroy old roles (must call destroy for auditing to work properly)
+    user.user_roles.each do |ur|
+      ur.destroy unless roles.include?(I18n.t("roles.#{ur.role.name}"))
+    end
+
     # set new roles
     user.roles = Marty::Role.all.select { |r|
       roles.include? I18n.t("roles.#{r.name}") }
@@ -52,8 +58,8 @@ class Marty::UserView < Marty::CmGridPanel
     user.uuid      = data["uuid"]
 
     if user.valid?
-      user.save
       set_roles(data["roles"], user)
+      user.save
     end
 
     user
@@ -112,6 +118,10 @@ class Marty::UserView < Marty::CmGridPanel
   action :edit_in_form do |a|
     a.disabled 	= !self.class.can_perform_action?(:update)
     a.icon 	= :user_edit
+  end
+
+  action :del do |a|
+    a.icon	= :user_delete
   end
 
   def default_bbar
