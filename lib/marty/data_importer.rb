@@ -67,7 +67,8 @@ module Marty
       def convert(v, type)
         pat = PATS[type]
 
-        raise "bad #{type} #{v.inspect}" unless (!pat || v =~ pat)
+        raise "bad #{type} #{v.inspect}" if
+          v.is_a?(String) && pat && !(v =~ pat)
 
         case type
         when :boolean
@@ -83,13 +84,16 @@ module Marty
         when :float
           v.to_f
         when :decimal
-          BigDecimal(v)
+          v.to_d
         when :date
           # Dates are kept as float in Google spreadsheets.  Need to
-          # convert them to dates.
-          v =~ FLOAT_PAT ? EXCEL_START_DATE + v.to_f : v.to_date
+          # convert them to dates. FIXME: 'infinity' as a date in
+          # Rails 3.2 appears to be broken. Setting a date field to
+          # 'infinity' sets it to nil.
+          v =~ FLOAT_PAT ? EXCEL_START_DATE + v.to_f :
+            Mcfly::Model::INFINITIES.member?(v) ? 'infinity' : v.to_date
         when :datetime
-          v.to_datetime
+          Mcfly::Model::INFINITIES.member?(v) ? 'infinity' : v.to_datetime
         else
           raise "unknown type #{type} for #{v}"
         end
@@ -166,12 +170,18 @@ module Marty
 
         options.each { |k, v| obj.send "#{k}=", v }
 
+        # FIXME: obj.changed? doesn't work properly for timestamp
+        # fields in Rails 3.2. It evaluates to true even when datetime
+        # is not chnaged.  This is due to lack of awareness of timezones.
         tag = obj.new_record? ? :create : (obj.changed? ? :update : :same)
 
         raise "old created_dt >= current #{obj} #{obj.created_dt} #{dt}" if
-          (tag == :update) && (dt != 'infinity') && (obj.created_dt > dt)
+          (tag == :update) &&
+          !Mcfly::Model::INFINITIES.member?(dt) &&
+          (obj.created_dt > dt)
 
-        obj.created_dt = dt unless tag == :same || dt == 'infinity'
+        obj.created_dt = dt unless
+          tag == :same || Mcfly::Model::INFINITIES.member?(dt)
         obj.save!
 
         [tag, obj.id]
@@ -184,7 +194,8 @@ module Marty
                                dt='infinity',
                                cleaner_function=nil,
                                validation_function=nil,
-                               col_sep="\t"
+                               col_sep="\t",
+                               allow_dups=false
                                )
 
       recs = self.do_import(klass,
@@ -193,6 +204,7 @@ module Marty
                             cleaner_function,
                             validation_function,
                             col_sep,
+                            allow_dups,
                             )
 
       recs.each_with_object(Hash.new(0)) {|(op, id), h|
@@ -210,10 +222,12 @@ module Marty
                        dt='infinity',
                        cleaner_function=nil,
                        validation_function=nil,
-                       col_sep="\t"
+                       col_sep="\t",
+                       allow_dups=false
                        )
 
-      csv = CSV.new(data, headers: true, col_sep: col_sep)
+      parsed = data.is_a?(Array) ? data :
+        CSV.new(data, headers: true, col_sep: col_sep)
 
       klass.transaction do
         cleaner_ids = cleaner_function ? klass.send(cleaner_function.to_sym) : []
@@ -222,10 +236,13 @@ module Marty
           cleaner_ids.all? {|id| id.is_a?(Fixnum) }
 
         row_proc = nil
-        res = csv.each_with_index.map { |row, line|
+        res = parsed.each_with_index.map { |row, line|
           begin
-            row_proc ||= RowProcessor.new(klass, row.headers, dt)
-
+            row_proc ||=
+              begin
+                headers = row.respond_to?(:headers) ? row.headers : row.keys
+                RowProcessor.new(klass, headers, dt)
+              end
             # skip lines which are all nil
             next :blank if row.to_hash.values.none?
 
@@ -238,16 +255,17 @@ module Marty
         ids = {}
 
         # raise an error if record referenced more than once.
-        res.each_with_index { |(op, id), line|
+        res.each_with_index do
+          |(op, id), line|
           raise Marty::DataImporterError.
-          new("record referenced more than once", [ids[id], line]) if
-          (op != :blank && ids.member?(id))
+            new("record referenced more than once", [ids[id], line]) if
+            op != :blank && ids.member?(id) && !allow_dups
 
           ids[id] = line
-        }
+        end
 
         begin
-          # Validate affected rows is necessary
+          # Validate affected rows if necessary
           klass.send(validation_function.to_sym, ids.keys) if validation_function
         rescue => exc
           raise Marty::DataImporterError.new(exc.to_s, [])
