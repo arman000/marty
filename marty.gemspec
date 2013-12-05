@@ -42,7 +42,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'mcfly'
 
   s.add_dependency 'coderay'
-  s.add_dependency 'valium'
   s.add_dependency 'net-ldap'
   s.add_dependency 'paper_trail', '~>2.7.2'
 end
