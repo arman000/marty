@@ -127,7 +127,7 @@ class Marty::SelectReport < Marty::CmFormPanel
       rescue
         [node, node]
       end
-    }.compact.sort
+    }.compact.sort{ |a,b| a[1] <=> b[1]}
   end
 
   endpoint :get_combobox_options do |params, this|
