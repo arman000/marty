@@ -53,13 +53,6 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
       else
         c[:scope] = self.class.sorted_scope(assoc_method || 'id')
       end
-
-      # NOTE - Monkey patching of this method eliminates the need to do this
-      # The following is to bypass a Netzke bug in 0.8.4.
-      # They're mistakenly setting :scopes (plural) in
-      # default_fields_for_forms().  This is fixed as of 0.9.x.
-      #c[:editor] ||= {}
-      #c[:editor][:scope] = c[:scope]
     end
   end
 

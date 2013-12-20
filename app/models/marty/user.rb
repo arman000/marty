@@ -9,7 +9,7 @@ class Marty::User < Marty::Base
   validates_presence_of :login, :firstname, :lastname
   validates_uniqueness_of :login
 
-  validates_format_of :login, :with => /^[a-z0-9_\-@\.]*$/i
+  validates_format_of :login, :with => /\A[a-z0-9_\-@\.]*\z/i
   validates_length_of :login, :firstname, :lastname, maximum: 100
 
   has_many :user_roles, dependent: :destroy

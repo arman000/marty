@@ -10,7 +10,7 @@ class Marty::Script < Marty::Base
   validates_presence_of :name, :body, :version, :logmsg, :user
   mcfly_validates_uniqueness_of :name
   validates_format_of :name, {
-    with: /^[A-Z][a-zA-Z0-9]*$/,
+    with: /\A[A-Z][a-zA-Z0-9]*\z/,
     message: I18n.t('script.save_error'),
   }
 
