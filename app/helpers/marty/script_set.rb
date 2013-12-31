@@ -6,10 +6,10 @@ class Marty::ScriptSet
     @@engines, @@dengines = {}, {}
   end
 
-  def self.parse(sname, body, sset=nil)
+  def self.parse(sname, body, version=nil, sset=nil)
     sset ||= Marty::ScriptContainer.new
 
-    engine = Delorean::Engine.new(sname)
+    engine = Delorean::Engine.new(sname, version)
     engine.parse(body, sset)
     engine
   end
@@ -29,7 +29,7 @@ class Marty::ScriptSet
         return engine
       end
 
-      engine = parse(script.name, ds.body, sset)
+      engine = parse(script.name, ds.body, script.version, sset)
       @@dengines[ds.id] = [engine, ds.updated_at]
     else
       # using created_dt instead of version so that we handle cases
@@ -42,7 +42,7 @@ class Marty::ScriptSet
         return engine
       end
 
-      engine = parse(script.name, script.body, sset)
+      engine = parse(script.name, script.body, script.version, sset)
       @@engines[script.id] = [engine, script.created_dt]
     end
     engine
