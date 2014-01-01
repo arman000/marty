@@ -1,3 +1,6 @@
+// This is a hacked up version of 0.8.4 grid.js to work with
+// TreePanel.  FIXME: perhaps we can patch up grid.js dynamically
+// rather than copying all the code?
 {
   trackMouseOver: true,
   loadMask: true,
@@ -16,25 +19,26 @@
       this.normalizeRenderer(c);
 
       // Build the field configuration for this column
-      var fieldConfig = {name: c.dataIndex, defaultValue: c.defaultValue};
+      var fieldConfig = {name: c.dataIndex, defaultValue: c.defaultValue, useNull: true};
 
-      if (c.name !== '_meta') fieldConfig.type = this.fieldTypeForAttrType(c.attrType); // field type (grid editors need this to function well)
+      if (c.name !== 'meta') fieldConfig.type = this.fieldTypeForAttrType(c.attrType); // field type (grid editors need this to function well)
 
       if (c.attrType == 'datetime') {
-        fieldConfig.dateFormat = 'Y-m-d g:i:s'; // in this format we receive dates from the server
+        fieldConfig.dateFormat = 'Y-m-d H:i:s'; // set the format in which we receive datetime from the server (so that the model can parse it)
 
+        // While for 'date' columns the renderer is set up automatically (through using column's xtype), there's no appropriate xtype for our custom datetime column.
+        // Thus, we need to set the renderer manually.
+        // NOTE: for Ext there's no distinction b/w date and datetime; date fields can include time.
         if (!c.renderer) {
-          c.renderer = Ext.util.Format.dateRenderer(c.format || fieldConfig.dateFormat); // format in which the data will be rendered
+          // format in which the data will be rendered; if c.format is nil, Ext.Date.defaultFormat extended with time will be used
+          c.renderer = Ext.util.Format.dateRenderer(c.format || Ext.Date.defaultFormat + " H:i:s");
         }
       };
 
-      if (c.attrType == 'date') {
-        fieldConfig.dateFormat = 'Y-m-d'; // in this format we receive dates from the server
-
-        if (!c.renderer) {
-          c.renderer = Ext.util.Format.dateRenderer(c.format || fieldConfig.dateFormat); // format in which the data will be rendered
-        }
-      };
+      // because checkcolumn doesn't care about editor (not) being set, we need to explicitely set readOnly here
+      if (c.xtype == 'checkcolumn' && !c.editor) {
+        c.readOnly = true;
+      }
 
       fields.push(fieldConfig);
 
@@ -67,7 +71,9 @@
       }
 
       // HACK: somehow this is not set by Ext (while it should be)
-      if (c.xtype == 'datecolumn') c.format = c.format || Ext.util.Format.dateFormat;
+      // if (c.xtype == 'datecolumn') c.format = c.format || Ext.util.Format.dateFormat;
+      // setting dataIndex
+      // c.dataIndex = c.name;
 
     }, this);
     /* ... and done with the columns */
@@ -229,12 +235,12 @@
 
   fieldTypeForAttrType: function(attrType){
     var map = {
-      integer : 'int',
-      decimal : 'float',
-      datetime : 'date',
-      date : 'date',
-      string : 'string',
-      text : 'string',
+      integer   : 'int',
+      decimal   : 'float',
+      datetime  : 'date',
+      date      : 'date',
+      string    : 'string',
+      text      : 'string',
       'boolean' : 'boolean'
     };
     return map[attrType] || 'string';
@@ -283,21 +289,19 @@
 Set a renderer that displayes association values instead of association record ID.
 The association values are passed in the meta-column under associationValues hash.
 */
-
   normalizeAssociationRenderer: function(c) {
     c.scope = this;
     var passedRenderer = c.renderer; // renderer we got from normalizeRenderer
     c.renderer = function(value, a, r, ri, ci){
       var column = this.headerCt.items.getAt(ci),
           editor = column.getEditor && column.getEditor(),
-          // HACK: using private property 'store'
-          recordFromStore = editor && editor.isXType('combobox') && editor.store.findRecord('field1', value),
+          recordFromStore = editor && editor.isXType('combobox') && editor.getStore().findRecord('value', value),
           renderedValue;
 
       if (recordFromStore) {
-        renderedValue = recordFromStore.get('field2');
-      } else if (c.assoc && r.get('_meta')) {
-        renderedValue = r.get('_meta').associationValues[c.name] || value;
+        renderedValue = recordFromStore.get('text');
+      } else if (c.assoc && r.get('meta')) {
+        renderedValue = r.get('meta').associationValues[c.name] || c.emptyText;
       } else {
         renderedValue = value;
       }

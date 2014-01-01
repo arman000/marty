@@ -13,13 +13,13 @@ class Marty::TreePanel < Netzke::Base
   extend ActiveSupport::Memoizable
 
   self.default_instance_config = {
-    :indicate_leafs => true,
-    :auto_scroll => false,
-    :root_visible => false,
-    :load_inline_data => false,
-    :enable_pagination => false,
-    :rows_per_page => 30,
-    :treecolumn => 'tree' # The default name of the column, that will be the treecolumn
+    indicate_leafs:	 true,
+    auto_scroll:	 false,
+    root_visible:	 false,
+    load_inline_data:	 false,
+    enable_pagination:	 false,
+    rows_per_page:	 30,
+    treecolumn:	 	'tree' # default name for tree column
   }
 
   js_configure do |c|
@@ -38,29 +38,42 @@ class Marty::TreePanel < Netzke::Base
 
   def configure(c) #:nodoc:
     super
-    c.title = c.title || self.class.js_config.properties[:title] || data_class.name.pluralize
+    c.title ||= self.class.js_config.properties[:title] ||
+      data_class.name.pluralize
     c.columns = final_columns(with_meta: true)
-    # Set it to the primary key if not given and camelize it
-    # Setting it to anything else than the primary key is especially useful when instances of different class are shown in one tree
-    # because the primary key MUST be unique!
+
+    # Set it to the primary key if not given and camelize it Setting
+    # it to anything else than the primary key is especially useful
+    # when instances of different class are shown in one tree because
+    # the primary key MUST be unique!
     c.pri = (c.pri || data_class.primary_key).to_s.camelize(:lower)
-    # Add extra fields for a tree: A method ':name(r)' is called for every record to retrieve the value
+
+    # Add extra fields for a tree: A method ':name(r)' is called for
+    # every record to retrieve the value
     c.extra_fields ||= []
-    c.extra_fields << {:name => 'leaf', :type => 'boolean'} # This will call leaf?(r) for every record
-    c.extra_fields << {:name => 'expanded', :type => 'boolean'} # This will call expanded?(r) for every record
-    # only if the node id property is different from the data class' primary key, we need to add and extra field
-    c.extra_fields << {:name => c.pri.to_s.camelize(:lower), :type => 'string'} if c.pri != data_class.primary_key
+
+    # This will call leaf?(r) for every record
+    c.extra_fields << {name: 'leaf', type: 'boolean'}
+
+    # This will call expanded?(r) for every record
+    c.extra_fields << {name: 'expanded', type: 'boolean'}
+
+    # only if the node id property is different from the data class'
+    # primary key, we need to add and extra field
+    c.extra_fields << {name: c.pri.to_s.camelize(:lower), type: 'string'} if
+      c.pri != data_class.primary_key
   end
 
-  # Sets the xtype to 'treecolumn' for the column with name equal to the :treecolumn value of the config
+  # Sets the xtype to 'treecolumn' for the column with name equal to
+  # the :treecolumn value of the config
   def set_default_xtype(c)
     c[:xtype] = 'treecolumn' if c[:name].to_s == config[:treecolumn].to_s
   end
 
-  # Set data_index
-  # The name of the field configuration of the Ext JS model will be set to this value
-  # This is neccessary since the data is serialized as a hash (with camelized keys)
-  # so the data_index must also be camelized
+  # Set data_index -- The name of the field configuration of the Ext
+  # JS model will be set to this value This is neccessary since the
+  # data is serialized as a hash (with camelized keys) so the
+  # data_index must also be camelized
   def set_default_data_index(c)
     c[:data_index] = c[:name].camelize(:lower)
   end
@@ -92,6 +105,18 @@ class Marty::TreePanel < Netzke::Base
   # @return [Hash] all the serialized data
   def get_data(*args)
     params = args.first || {} # params are optional!
+
+    sortp = params["sort"]
+
+    # Giant hack to fix property field used in sort.  Not sure why
+    # this is coming in camelized.
+    if sortp.is_a?(Array)
+      sortp.each { |h|
+        h["property"] = h["property"].underscore if
+        h.is_a?(Hash) && h["property"]
+      }
+    end
+
     if !config[:prohibit_read]
       {}.tap do |res|
         # set children to an instance variable in order to access them later
@@ -101,7 +126,10 @@ class Marty::TreePanel < Netzke::Base
         res[:data] = serialize_data(@records)
 
 p 'd.'*30, res[:data]
-        res[:total] = count_records(params) if config[:enable_pagination] && (params[:id].nil? || params[:id] == 'root')
+
+        res[:total] = count_records(params) if
+          config[:enable_pagination] &&
+          (params[:id].nil? || params[:id] == 'root')
       end
     else
       flash :error => "You don't have permissions to read data"
@@ -136,7 +164,8 @@ p 'd.'*30, res[:data]
   # @return [Array] array of records
   def get_children(params)
     scope_data_class(params) do
-      params[:limit] = config[:rows_per_page] if config[:enable_pagination] && (params[:id].nil? || params[:id] == 'root')
+      params[:limit] = config[:rows_per_page] if
+        config[:enable_pagination] && (params[:id].nil? || params[:id] == 'root')
       params[:scope] = config[:scope]
       data_adapter.get_records(params, final_columns)
     end
@@ -147,7 +176,8 @@ p 'd.'*30, res[:data]
   # @param [Hash] params
   def scope_data_class(params, &block)
     if config[:parent_key]
-      # The value of the pri property of the expanded node is passed as params[:id] ('root' for the root collection)
+      # The value of the pri property of the expanded node is passed
+      # as params[:id] ('root' for the root collection)
       if params[:id].nil? || params[:id] == 'root'
         data_class.where(config[:parent_key] => nil).scoping do
           yield
@@ -173,12 +203,16 @@ p 'd.'*30, res[:data]
     end
   end
 
-  # Should return all children of the record that should also be serialized in the current request
+  # Should return all children of the record that should also be
+  # serialized in the current request
   # Note: It's recommended to override this method
   #
   # @param [Object] r The record for which the inline children should be loaded
-  # @return [NilClass, Array] If nil is returned, the tree doesn't know anything about any children, so opening the node will cause another request.
-  # If an empty array is returned, the tree assumes that there are no children available for this node (and thus you can't open it!)
+  # @return [NilClass, Array] If nil is returned, the tree doesn't
+  # know anything about any children, so opening the node will cause
+  # another request.  If an empty array is returned, the tree assumes
+  # that there are no children available for this node (and thus you
+  # can't open it!)
   def get_inline_children(r)
     nil
   end
