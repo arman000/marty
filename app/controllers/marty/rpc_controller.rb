@@ -54,7 +54,7 @@ class Marty::RpcController < ActionController::Base
     begin
       engine.evaluate_attrs(node, attrs, params)
     rescue => exc
-      err, bt = engine.parse_runtime_exception(exc)
+      err, bt = Delorean::Engine.grok_runtime_exception(exc)
       {
         error: err,
         backtrace: bt,

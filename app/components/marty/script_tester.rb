@@ -166,7 +166,7 @@ class Marty::ScriptTester < Marty::CmFormPanel
       this.netzke_feedback "done"
       this.set_result result.join("<br/>")
     rescue => exc
-      err, bt = engine.parse_runtime_exception(exc)
+      err, bt = Delorean::Engine.grok_runtime_exception(exc)
 
       result = ["Error: #{err}", "Backtrace:"] +
         bt.map {|m, line, fn| "#{m}:#{line} #{fn}"}

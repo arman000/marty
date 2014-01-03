@@ -16,8 +16,6 @@ class Delorean::BaseModule::NodeCall
     # QQQ: what happens when arguments to a delayed job aren't
     # serializable?  This should be an error.
 
-    # QQQ: The logging mechanism doesn't work in DelayedJob.
-
     p 'x'*10, engine.module_name, engine.version, nn, params
 
     desc 	= params["p_desc"] || "#{engine.module_name}::#{nn}"
@@ -55,33 +53,30 @@ class Marty::PromiseJob < Struct.new(:promise,
 
   def perform
     log "PERF #{Process.pid} #{desc}"
-    Marty::Util.logger.error("nil promise") unless promise 
 
     promise.set_start
 
-    script = Marty::Script.find_script(sname, version)
+    begin
+      script = Marty::Script.find_script(sname, version)
 
-    raise "Can't find #{sname} version #{version}" unless script
+      raise "Can't find #{sname} version #{version}" unless script
 
-    engine = Marty::ScriptSet.get_engine(script)
+      engine = Marty::ScriptSet.get_engine(script)
 
-    engine.evaluate_attrs(node, attrs, params)
+      engine.evaluate_attrs(node, attrs, params)
 
-    res = attrs.each_with_object({}) { |attr, h|
-      h[attr] = engine.evaluate(node, attr, params)
-    }
+      res = attrs.each_with_object({}) { |attr, h|
+        h[attr] = engine.evaluate(node, attr, params)
+      }
 
-    promise.set_result res
+      promise.set_result res
+      log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
+    rescue => exc
+      log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
+      promise.set_error exc
+      log "ERR+ #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
+    end
 
-    log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
-  end
-
-  def error(job, exc)
-    Marty::Util.logger.error("nil promise") unless promise 
-
-    promise.set_error(exc)
-
-    log "ERRR #{Process.pid} #{job} #{exc}"
   end
 
   def max_attempts

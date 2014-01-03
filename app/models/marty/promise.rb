@@ -8,7 +8,7 @@ class Marty::Promise < Marty::Base
 
   attr_accessible :description, :parent_id, :job_id, :result, :start_dt, :end_dt
 
-  serialize :result, ActiveRecord::Coders::Hstore
+  serialize :result, Hash
 
   validates_presence_of :description
 
@@ -24,6 +24,8 @@ class Marty::Promise < Marty::Base
   end
 
   def set_start
+    log "LOGLOG #{Rails.logger}"
+
     if self.start_dt || self.result != {}
       Marty::Util.logger.error("promise already started: #{self}")
       return
@@ -39,11 +41,11 @@ class Marty::Promise < Marty::Base
   end
 
   def set_result(res)
-    p 's.'*10, self
+    log "SETRES #{Process.pid} #{res} #{self}"
 
     # promise must have been started and not yet ended
     if !self.start_dt || self.end_dt || self.result != {}
-      p 'e.'*10, self
+      log "SETERR #{Process.pid} #{self}"
       Marty::Util.logger.error("unexpected promise state: #{self}")
       return
     end
@@ -114,6 +116,7 @@ class Marty::Promise < Marty::Base
         else
           # work off the job instead of waiting for a real worker to
           # pick it up.
+          log "OFFF #{Process.pid} #{last}"
           work_off_job(job)
         end
 
@@ -144,7 +147,7 @@ class Marty::Promise < Marty::Base
         end
       end
 
-      log "RRRR #{Process.pid} #{last}"
+      log "RRRR #{Process.pid} #{last} #{Time.now.to_f}"
 
       last.result
     ensure

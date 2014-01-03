@@ -4,8 +4,10 @@
 {
   trackMouseOver: true,
   loadMask: true,
+
   componentLoadMask: {msg: "Loading..."},
   deleteMaskMsg: "Deleting...",
+
   initComponent: function(){
     var metaColumn;
     var fields = this.extraFields; // field configs for the underlying data model
@@ -141,12 +143,14 @@
 
     // Create the netzke PagingTreeStore
 
-    this.store = Ext.create('Ext.data.TreeStore', {
+    this.store = Ext.create('Ext.data.TreeStore', Ext.apply({
       model: this.id,
       proxy: proxy,
       autoLoad: !this.loadInlineData,
 //      root: this.inlineData || {data: [{tree:'root', id:0}]}
-    });
+    }, this.dataStore));
+    delete this.dataStore;
+
     this.store.load();
     // HACK: we must let the store now totalCount
 //    this.store.setTotalCount(this.inlineData && this.inlineData[this.store.getProxy().getReader().totalProperty]);
@@ -171,7 +175,8 @@
         xtype: 'pagingtoolbar',
         dock: 'bottom',
         store: this.store,
-        items: this.bbar && ["-"].concat(this.bbar) // append the old bbar. TODO: get rid of it.
+	// append the old bbar. TODO: get rid of it.
+        items: this.bbar && ["-"].concat(this.bbar)
       });
     } else if (this.bbar) {
       this.dockedItems.push({

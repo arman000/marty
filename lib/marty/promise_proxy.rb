@@ -11,7 +11,6 @@ class Marty::PromiseProxy < BasicObject
     @timeout	= timeout
     @mutex  	= ::Mutex.new
     @result 	= NOT_SET
-    @error  	= NOT_SET
   end
 
   ##
@@ -19,19 +18,28 @@ class Marty::PromiseProxy < BasicObject
   #
   # @return [Object]
   def __force__
-    @mutex.synchronize do
-      if @result.equal?(NOT_SET) && @error.equal?(NOT_SET)
-        begin
-          @result = @promise.wait_for_result(@timeout)
-        rescue ::Exception => e
-          @error = e
+    if @result.equal?(NOT_SET)
+      @mutex.synchronize do
+        if @result.equal?(NOT_SET)
+          begin
+            @result = @promise.wait_for_result(@timeout)
+          rescue ::Exception => exc
+            err, bt = Delorean::Engine.grok_runtime_exception(exc)
+            @result = {
+              "error" => err,
+              "backtrace" => bt,
+            }
+          end
         end
       end
-    end if @result.equal?(NOT_SET) && @error.equal?(NOT_SET)
+    end
 
-    # BasicObject won't send raise to Kernel
-    @error.equal?(NOT_SET) ? @result : ::Kernel.raise(@error)
+    # FIXME: the logic for shape of exceptions from Delorean is spread
+    # all over the place.
+    @result.is_a?(::Hash) &&
+      @result["error"] ? ::Kernel.raise(@result["error"]) : @result
   end
+
   alias_method :force, :__force__
 
   ##

@@ -1,5 +1,5 @@
 # Ext.tree.TreePanel-based component
-# 
+#
 # ATTRIBUTION: this code is based on the netzke-extension module found at:
 # 	https://github.com/phgrey/netzke-extension
 # TODO: Add documentation for usage
@@ -21,6 +21,11 @@ class Marty::TreePanel < Netzke::Base
     rows_per_page:	 30,
     treecolumn:	 	'tree' # default name for tree column
   }
+
+  def js_configure(c) #:nodoc:
+    super
+    c.bbar = bbar
+  end
 
   js_configure do |c|
     c.extend = "Ext.tree.TreePanel"
@@ -62,6 +67,17 @@ class Marty::TreePanel < Netzke::Base
     # primary key, we need to add and extra field
     c.extra_fields << {name: c.pri.to_s.camelize(:lower), type: 'string'} if
       c.pri != data_class.primary_key
+  end
+
+  def config
+    @config ||= ActiveSupport::OrderedOptions.new.tap do |c|
+      # extend with data_store convenient config object
+      c.data_store = ActiveSupport::OrderedOptions.new
+    end
+  end
+
+  def bbar
+    config[:bbar]
   end
 
   # Sets the xtype to 'treecolumn' for the column with name equal to

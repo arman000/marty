@@ -28,7 +28,7 @@ class Marty::ReportForm < Marty::CmFormPanel
     rescue => exc
       Marty::Util.logger.error "run_eval failed: #{exc.backtrace}"
 
-      err, bt = engine.parse_runtime_exception(exc)
+      err, bt = Delorean::Engine.grok_runtime_exception(exc)
 
       return {
         "error" => err.to_s,

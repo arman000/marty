@@ -295,10 +295,10 @@ class Marty::Xl
     worksheets << ["No data", []] if worksheets.count == 0
 
     worksheets.each { |opl|
-
       name, ops, opts = opl
+
       raise "bad worksheet name: #{name}" unless name.is_a?(String)
-      raise "bad worksheet ops: #{ops.class}" unless ops.is_a?(Array)
+      raise "bad worksheet ops: #{ops.inspect}" unless ops.is_a?(Array)
       raise "bad options #{opts}" unless opts.is_a?(Hash) || opts.nil?
 
       # Remove special characters and truncate sheet name due to Excel
