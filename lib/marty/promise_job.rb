@@ -4,7 +4,13 @@ class Delorean::BaseModule::NodeCall
   # Monkey-patch '|' method for Delorean NodeCall to create promise
   # jobs and return promise proxy objects.
   def |(args)
-    raise "bad arg to %" unless args.is_a?(Array)
+    if args.is_a?(String)
+      attr = args
+      args = [attr]
+    else
+      raise "bad arg to %" unless args.is_a?(Array)
+      attr = nil
+    end
 
     script, version = engine.module_name, engine.version
 
@@ -15,8 +21,6 @@ class Delorean::BaseModule::NodeCall
 
     # QQQ: what happens when arguments to a delayed job aren't
     # serializable?  This should be an error.
-
-    p 'x'*10, engine.module_name, engine.version, nn, params
 
     desc 	= params["p_desc"] || "#{engine.module_name}::#{nn}"
     timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
@@ -35,7 +39,7 @@ class Delorean::BaseModule::NodeCall
     promise.job_id = job.id
     promise.save!
 
-    Marty::PromiseProxy.new(promise, timeout)
+    Marty::PromiseProxy.new(promise, timeout, attr)
   end
 end
 
@@ -73,7 +77,8 @@ class Marty::PromiseJob < Struct.new(:promise,
       log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
     rescue => exc
       log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
-      promise.set_error exc
+      grok = Delorean::Engine.grok_runtime_exception(exc)
+      promise.set_result(grok)
       log "ERR+ #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
     end
 

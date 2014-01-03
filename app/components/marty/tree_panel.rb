@@ -5,12 +5,8 @@
 # TODO: Add documentation for usage
 
 class Marty::TreePanel < Netzke::Base
-  # Include data accessor module
   include ::Netzke::Basepack::DataAccessor
-  # Include columns module
   include ::Netzke::Basepack::Columns
-
-  extend ActiveSupport::Memoizable
 
   self.default_instance_config = {
     indicate_leafs:	 true,
@@ -140,8 +136,6 @@ class Marty::TreePanel < Netzke::Base
 
         # Serialize children
         res[:data] = serialize_data(@records)
-
-p 'd.'*30, res[:data]
 
         res[:total] = count_records(params) if
           config[:enable_pagination] &&

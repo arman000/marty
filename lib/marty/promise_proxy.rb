@@ -6,9 +6,10 @@ class Marty::PromiseProxy < BasicObject
 
   instance_methods.each {|m| undef_method m unless m =~ /^(__.*|object_id)$/}
 
-  def initialize(promise, timeout)
+  def initialize(promise, timeout, attr=nil)
     @promise  	= promise
     @timeout	= timeout
+    @attr	= attr
     @mutex  	= ::Mutex.new
     @result 	= NOT_SET
   end
@@ -23,12 +24,9 @@ class Marty::PromiseProxy < BasicObject
         if @result.equal?(NOT_SET)
           begin
             @result = @promise.wait_for_result(@timeout)
+            @result = @result[@attr] if @attr && !@result["error"]
           rescue ::Exception => exc
-            err, bt = Delorean::Engine.grok_runtime_exception(exc)
-            @result = {
-              "error" => err,
-              "backtrace" => bt,
-            }
+            @result = Delorean::Engine.grok_runtime_exception(exc)
           end
         end
       end

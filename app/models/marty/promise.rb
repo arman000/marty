@@ -36,10 +36,6 @@ class Marty::Promise < Marty::Base
     self.save!
   end
 
-  def set_error(err)
-    set_result({"error" => err.to_s})
-  end
-
   def set_result(res)
     log "SETRES #{Process.pid} #{res} #{self}"
 

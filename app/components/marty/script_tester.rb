@@ -166,10 +166,10 @@ class Marty::ScriptTester < Marty::CmFormPanel
       this.netzke_feedback "done"
       this.set_result result.join("<br/>")
     rescue => exc
-      err, bt = Delorean::Engine.grok_runtime_exception(exc)
+      res = Delorean::Engine.grok_runtime_exception(exc)
 
-      result = ["Error: #{err}", "Backtrace:"] +
-        bt.map {|m, line, fn| "#{m}:#{line} #{fn}"}
+      result = ["Error: #{res['error']}", "Backtrace:"] +
+        res["backtrace"].map {|m, line, fn| "#{m}:#{line} #{fn}"}
 
       this.netzke_feedback "failed"
       this.set_result '<font color="red">' + result.join("<br/>") + "</font>"
