@@ -14,16 +14,20 @@ class Marty::ReportForm < Marty::CmFormPanel
 
   ######################################################################
 
-  def run_eval(params)
-    data = ActiveSupport::JSON.decode(params[:data] || "{}")
-    data.each_pair do |k,v|
-      data[k] = nil if v.blank? || v == "null"
+  def _get_report_engine(params)
+    d_params = ActiveSupport::JSON.decode(params[:data] || "{}")
+    d_params.each_pair do |k,v|
+      d_params[k] = nil if v.blank? || v == "null"
     end
 
-    engine = Marty::ScriptSet.get_engine(session[:selected_script_id])
+    [Marty::ScriptSet.get_engine(session[:selected_script_id]), d_params]
+  end
+
+  def run_eval(params)
+    engine, d_params = _get_report_engine(params)
 
     begin
-      return engine.evaluate(session[:selected_node], "result", data)
+      return engine.evaluate(session[:selected_node], "result", d_params)
 
     rescue => exc
       Marty::Util.logger.error "run_eval failed: #{exc.backtrace}"
@@ -58,15 +62,46 @@ class Marty::ReportForm < Marty::CmFormPanel
     end
   end
 
+  endpoint :netzke_submit do |params, this|
+    # Only get here when user is asking for a background report
+    p 'X'*30, params
+
+    # Create a promise to execute the node and write the result into
+    # the mailbox.
+
+    # FIXME: handle versions
+
+    # initial a Promise to run this report.  ... tell the user to
+    # check his mailbox
+    engine, d_params = _get_report_engine(params)
+
+    p 'bg.'*10, session[:selected_node], d_params
+
+    d_params["p_hook"] = Marty::DropFolderHook.new(Mcfly.whodunnit.login)
+
+    begin
+      nc = Delorean::BaseModule::NodeCall.
+        new({}, engine, session[:selected_node], d_params)
+      # start the background promise
+      nc | ["result", "title"]
+    end
+
+    this.netzke_feedback "Report result will be placed in your drop folder ..."
+  end
+
   ######################################################################
 
   js_configure do |c|
     c.on_apply = <<-JS
       function() {
-	var values = this.getForm().getValues();
-	var data = escape(Ext.encode(values));
-	// FIXME: hard-coded path
-	window.location = "/marty/components/#{self.name}." + this.repformat + "?data=" + data;
+	// use normal submit on background reports
+	if (this.repformat == "background") return this.callParent();
+
+        var values = this.getForm().getValues();
+        var data = escape(Ext.encode(values));
+        // FIXME: hard-coded path
+        window.location = "/marty/components/#{self.name}." + \
+		this.repformat + "?data=" + data;
       }
       JS
   end
@@ -120,7 +155,7 @@ class Marty::ReportForm < Marty::CmFormPanel
         evaluate_attrs(session[:selected_node], ["form", "title", "format"], {})
 
       raise "bad form items" unless items.is_a?(Array)
-      raise "bad format" unless ["csv", "xlsx"].member?(format)
+      raise "bad format" unless ["csv", "xlsx", "background"].member?(format)
 
     rescue => exc
       c.title = "ERROR"

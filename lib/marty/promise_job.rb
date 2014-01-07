@@ -24,6 +24,7 @@ class Delorean::BaseModule::NodeCall
 
     desc 	= params["p_desc"] || "#{engine.module_name}::#{nn}"
     timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
+    hook	= params["p_hook"]
     parent_id	= _e[:_promise_id]
     promise 	= Marty::Promise.create(description: desc, parent_id: parent_id)
 
@@ -31,7 +32,7 @@ class Delorean::BaseModule::NodeCall
     params[:_parent_id]	 = parent_id if parent_id
 
     job = Delayed::Job.enqueue Marty::PromiseJob.
-      new(promise, desc, script, version, nn, params, args)
+      new(promise, desc, script, version, nn, params, args, hook)
 
     # keep a reference to the job.  This is needed in case we want to
     # work off a promise job that we're waiting for and which hasn't
@@ -50,6 +51,7 @@ class Marty::PromiseJob < Struct.new(:promise,
                                      :node,
                                      :params,
                                      :attrs,
+                                     :hook,
                                      )
   def log(msg)
     open('/tmp/dj.out', 'a') { |f| f.puts msg }
@@ -73,15 +75,18 @@ class Marty::PromiseJob < Struct.new(:promise,
         h[attr] = engine.evaluate(node, attr, params)
       }
 
-      promise.set_result res
       log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
     rescue => exc
+      res = Delorean::Engine.grok_runtime_exception(exc)
       log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
-      grok = Delorean::Engine.grok_runtime_exception(exc)
-      promise.set_result(grok)
-      log "ERR+ #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
     end
+    promise.set_result res
 
+    begin
+      hook.run(res) if hook
+    rescue => exc
+      Marty::Util.logger.error "promise hook failed: #{exc}"
+    end
   end
 
   def max_attempts

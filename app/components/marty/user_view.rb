@@ -20,8 +20,10 @@ class Marty::UserView < Marty::CmGridPanel
                    :roles
                   ]
 
-    c.data_store.sorters = {property: :login,
-      direction: 'ASC'} if c.columns.include?(:login)
+    c.data_store.sorters = {
+      property: :login,
+      direction: 'ASC',
+    } if c.columns.include?(:login)
   end
 
   js_configure do |c|
