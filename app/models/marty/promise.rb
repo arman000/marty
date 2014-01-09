@@ -6,11 +6,18 @@ class Marty::Promise < Marty::Base
   # default timeout (seconds) to wait for jobs to start
   DEFAULT_JOB_TIMEOUT = 10
 
-  attr_accessible :description, :parent_id, :job_id, :result, :start_dt, :end_dt
+  attr_accessible :title,
+  :cformat,
+  :parent_id,
+  :job_id,
+  :status,
+  :result,
+  :start_dt,
+  :end_dt
 
   serialize :result, Hash
 
-  validates_presence_of :description
+  validates_presence_of :title
 
   has_many :children, foreign_key: 'parent_id', class_name: "Marty::Promise"
   belongs_to :parent, class_name: "Marty::Promise"
@@ -48,11 +55,18 @@ class Marty::Promise < Marty::Base
 
     raise "bad result" unless res.is_a?(Hash)
 
+    self.status = res["error"].nil?
     self.result = res
+
+    # update title/format from result hash (somewhat hacky)
+    self.title 		= res["title"].to_s 	if res["title"]
+    self.cformat	= res["format"].to_s 	if res["format"]
 
     # mark promise as ended
     self.end_dt = DateTime.now
     self.save!
+
+    log "NOTIFY #{Process.pid}"
     pg_notify
   end
 

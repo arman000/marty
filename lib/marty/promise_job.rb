@@ -22,17 +22,17 @@ class Delorean::BaseModule::NodeCall
     # QQQ: what happens when arguments to a delayed job aren't
     # serializable?  This should be an error.
 
-    desc 	= params["p_desc"] || "#{engine.module_name}::#{nn}"
+    title 	= params["p_title"]   || "#{engine.module_name}::#{nn}"
     timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
     hook	= params["p_hook"]
     parent_id	= _e[:_promise_id]
-    promise 	= Marty::Promise.create(description: desc, parent_id: parent_id)
+    promise 	= Marty::Promise.create(title: title, parent_id: parent_id)
 
     params[:_promise_id] = promise.id
     params[:_parent_id]	 = parent_id if parent_id
 
     job = Delayed::Job.enqueue Marty::PromiseJob.
-      new(promise, desc, script, version, nn, params, args, hook)
+      new(promise, title, script, version, nn, params, args, hook)
 
     # keep a reference to the job.  This is needed in case we want to
     # work off a promise job that we're waiting for and which hasn't
@@ -45,7 +45,7 @@ class Delorean::BaseModule::NodeCall
 end
 
 class Marty::PromiseJob < Struct.new(:promise,
-                                     :desc,
+                                     :title,
                                      :sname,
                                      :version,
                                      :node,
@@ -58,7 +58,7 @@ class Marty::PromiseJob < Struct.new(:promise,
   end
 
   def perform
-    log "PERF #{Process.pid} #{desc}"
+    log "PERF #{Process.pid} #{title}"
 
     promise.set_start
 
@@ -80,7 +80,7 @@ class Marty::PromiseJob < Struct.new(:promise,
       res = Delorean::Engine.grok_runtime_exception(exc)
       log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
     end
-    promise.set_result res
+    promise.set_result(res)
 
     begin
       hook.run(res) if hook

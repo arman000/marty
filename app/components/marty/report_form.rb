@@ -4,12 +4,29 @@ class Marty::ReportForm < Marty::CmFormPanel
 
   attr_accessor :filename
 
+  # override apply for background generation
   action :apply do |a|
-    a.text  	= I18n.t("reporting.generate")
-    a.tooltip  	= I18n.t("reporting.generate")
+    a.text  	= a.tooltip = I18n.t("reporting.background")
     a.handler  	= :on_apply
-    a.icon  	= :application_put
+    a.icon  	= :report_disk
     a.disabled 	= false
+  end
+
+  action :generate do |a|
+    a.text  	= a.tooltip = I18n.t("reporting.generate")
+    a.handler  	= :on_generate
+    a.icon  	= :report_go
+    a.disabled 	= false
+  end
+
+  ######################################################################
+
+  def configure_bbar(c)
+    c[:bbar] = [
+                '->',
+                :apply,
+                :generate,
+               ]
   end
 
   ######################################################################
@@ -41,7 +58,7 @@ class Marty::ReportForm < Marty::CmFormPanel
 
   def generate_csv(params={})
     res = run_eval(params)
-    Marty::DataExporter.to_csv(res)
+    Marty::ContentHandler.export(res, "csv", "").first
   end
 
   # Used for testing
@@ -51,15 +68,12 @@ class Marty::ReportForm < Marty::CmFormPanel
 
   def generate_xlsx(params={})
     res = run_eval(params)
+    Marty::ContentHandler.export(res, "xlsx", "").first
+  end
 
-    begin
-      xlsx_report = Marty::Xl.spreadsheet(res)
-
-      return xlsx_report.to_stream.read
-    rescue => exc
-      Marty::Util.logger.error "generate_xlsx failed: #{exc.backtrace}"
-      return exc.to_s
-    end
+  def generate_zip(params={})
+    res = run_eval(params)
+    Marty::ContentHandler.export(res, "zip", "result").first
   end
 
   endpoint :netzke_submit do |params, this|
@@ -75,35 +89,31 @@ class Marty::ReportForm < Marty::CmFormPanel
     # check his mailbox
     engine, d_params = _get_report_engine(params)
 
-    p 'bg.'*10, session[:selected_node], d_params
-
-    d_params["p_hook"] = Marty::DropFolderHook.new(Mcfly.whodunnit.login)
+    d_params["p_title"] ||= engine.
+      evaluate(session[:selected_node], "title", {}).to_s
 
     begin
       nc = Delorean::BaseModule::NodeCall.
         new({}, engine, session[:selected_node], d_params)
       # start the background promise
-      nc | ["result", "title"]
+      nc | ["result", "title", "format"]
     end
 
-    this.netzke_feedback "Report result will be placed in your drop folder ..."
+    this.netzke_feedback "Report can be accessed from the Jobs Dashboard ..."
   end
 
   ######################################################################
 
   js_configure do |c|
-    c.on_apply = <<-JS
-      function() {
-	// use normal submit on background reports
-	if (this.repformat == "background") return this.callParent();
-
-        var values = this.getForm().getValues();
-        var data = escape(Ext.encode(values));
-        // FIXME: hard-coded path
-        window.location = "/marty/components/#{self.name}." + \
-		this.repformat + "?data=" + data;
-      }
-      JS
+    c.on_generate = <<-JS
+    function() {
+      var values = this.getForm().getValues();
+      var data = escape(Ext.encode(values));
+      // FIXME: hard-coded path
+      window.location = "/marty/components/#{self.name}." + \
+      	this.repformat + "?data=" + data;
+    }
+    JS
   end
 
   endpoint :netzke_load do |params, this|
@@ -155,7 +165,7 @@ class Marty::ReportForm < Marty::CmFormPanel
         evaluate_attrs(session[:selected_node], ["form", "title", "format"], {})
 
       raise "bad form items" unless items.is_a?(Array)
-      raise "bad format" unless ["csv", "xlsx", "background"].member?(format)
+      raise "bad format" unless ["csv", "xlsx", "zip"].member?(format)
 
     rescue => exc
       c.title = "ERROR"
@@ -176,10 +186,11 @@ class Marty::ReportForm < Marty::CmFormPanel
       items.empty?
 
     self.filename = version.nil? ? title.to_s : "#{title}_#{version}"
-    c.title = "Generate: #{title}"
-    c.title += "-#{version}" if version
-    c.items = items
-    c.repformat = format
+
+    c.items 	= items
+    c.repformat	= format
+    c.title 	= "Generate: #{title}"
+    c.title 	+= "-#{version}" if version
   end
 end
 

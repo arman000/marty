@@ -1,11 +1,4 @@
 class Marty::ComponentsController < Marty::ApplicationController
-  GEN_FORMATS = {
-    "csv" 	=> ['text/csv',			'download'],
-    "xlsx" 	=> ['application/vnd.ms-excel',	'download'],
-    "html" 	=> ['text/html',		'inline'],
-    "txt"	=> ['text/plain',		'inline'],
-  }
-
   # This is useful for individual component testing.  Note that the
   # appropriate route needs to be defined.
   # <base_url>/components/<ComponentCamelCaseName>
@@ -16,7 +9,7 @@ class Marty::ComponentsController < Marty::ApplicationController
 
     format = params[:format]
 
-    if GEN_FORMATS.member? format
+    if format && Marty::ContentHandler::GEN_FORMATS.member?(format)
       klass = component.constantize
 
       raise "bad component" unless klass < Netzke::Base
@@ -25,7 +18,7 @@ class Marty::ComponentsController < Marty::ApplicationController
       fn = "generate_#{format}".to_sym
       return unless inst.respond_to?(fn)
 
-      type, disposition = GEN_FORMATS[format]
+      type, disposition = Marty::ContentHandler::GEN_FORMATS[format]
       filename = inst.respond_to?(:filename) ?
         "#{inst.filename}.#{format}" : "#{component}.#{format}"
 
