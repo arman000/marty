@@ -40,7 +40,7 @@ class Delorean::BaseModule::NodeCall
     promise.job_id = job.id
     promise.save!
 
-    Marty::PromiseProxy.new(promise, timeout, attr)
+    Marty::PromiseProxy.new(promise.id, timeout, attr)
   end
 end
 

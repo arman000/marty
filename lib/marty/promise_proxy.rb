@@ -3,14 +3,22 @@
 
 class Marty::PromiseProxy < BasicObject
   NOT_SET = ::Object.new.freeze
+  METH_SET = ::Set[:marshal_load, :marshal_dump, :force, :__force__]
 
   instance_methods.each {|m| undef_method m unless m =~ /^(__.*|object_id)$/}
 
-  def initialize(promise, timeout, attr=nil)
-    @promise  	= promise
-    @timeout	= timeout
-    @attr	= attr
-    @mutex  	= ::Mutex.new
+  def initialize(promise_id, timeout, attr=nil)
+    marshal_load([promise_id, timeout, attr])
+  end
+
+  def marshal_dump
+    [@promise.id, @timeout, @attr]
+  end
+
+  def marshal_load(args)
+    promise_id, @timeout, @attr = args
+    @promise 	= ::Marty::Promise.find(promise_id)
+    @mutex 	= ::Mutex.new
     @result 	= NOT_SET
   end
 
@@ -26,7 +34,7 @@ class Marty::PromiseProxy < BasicObject
             @result = @promise.wait_for_result(@timeout)
             @result = @result[@attr] if @attr && !@result["error"]
           rescue ::Exception => exc
-            @result = Delorean::Engine.grok_runtime_exception(exc)
+            @result = ::Delorean::Engine.grok_runtime_exception(exc)
           end
         end
       end
@@ -46,9 +54,7 @@ class Marty::PromiseProxy < BasicObject
   # @param  [Symbol]
   # @return [Boolean]
   def respond_to?(method)
-    :force.equal?(method) ||
-      :__force__.equal?(method) ||
-      __force__.respond_to?(method)
+    METH_SET.member?(method) || __force__.respond_to?(method)
   end
 
   private

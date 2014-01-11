@@ -1,4 +1,14 @@
 class Marty::Promise < Marty::Base
+  class MarshalResult
+    def dump(v)
+      Marshal.dump(v)
+    end
+
+    def load(v)
+      # Marshal.load can't handle nil
+      v.nil? ? {} : Marshal.load(v)
+    end
+  end
 
   # default timeout (seconds) to wait for promise values
   DEFAULT_PROMISE_TIMEOUT = 30
@@ -15,7 +25,7 @@ class Marty::Promise < Marty::Base
   :start_dt,
   :end_dt
 
-  serialize :result, Hash
+  serialize :result, MarshalResult.new
 
   validates_presence_of :title
 
