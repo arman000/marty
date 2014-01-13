@@ -19,6 +19,7 @@ class Marty::PromiseView < Marty::TreePanel
     c.model = "Marty::Promise"
     c.columns = [
                  :parent,
+                 :user__login,
                  :start_dt,
                  :end_dt,
                  :status,

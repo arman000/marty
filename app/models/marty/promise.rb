@@ -17,6 +17,7 @@ class Marty::Promise < Marty::Base
   DEFAULT_JOB_TIMEOUT = 10
 
   attr_accessible :title,
+  :user_id,
   :cformat,
   :parent_id,
   :job_id,
@@ -30,7 +31,9 @@ class Marty::Promise < Marty::Base
   validates_presence_of :title
 
   has_many :children, foreign_key: 'parent_id', class_name: "Marty::Promise"
+
   belongs_to :parent, class_name: "Marty::Promise"
+  belongs_to :user, class_name: "Marty::User"
 
   def raw_conn
     self.class.connection.raw_connection

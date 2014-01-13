@@ -26,7 +26,11 @@ class Delorean::BaseModule::NodeCall
     timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
     hook	= params["p_hook"]
     parent_id	= _e[:_promise_id]
-    promise 	= Marty::Promise.create(title: title, parent_id: parent_id)
+    user_id	= Mcfly.whodunnit.id if Mcfly.whodunnit
+    promise 	= Marty::Promise.create(title: title,
+                                        user_id: user_id,
+                                        parent_id: parent_id,
+                                        )
 
     params[:_promise_id] = promise.id
     params[:_parent_id]	 = parent_id if parent_id

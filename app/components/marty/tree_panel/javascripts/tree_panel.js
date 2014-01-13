@@ -305,8 +305,8 @@ The association values are passed in the meta-column under associationValues has
 
       if (recordFromStore) {
         renderedValue = recordFromStore.get('text');
-      } else if (c.assoc && r.get('meta')) {
-        renderedValue = r.get('meta').associationValues[c.name] || c.emptyText;
+      } else if (c.assoc && r.raw.meta) {
+        renderedValue = r.raw.meta.associationValues[c.name] || c.emptyText;
       } else {
         renderedValue = value;
       }
