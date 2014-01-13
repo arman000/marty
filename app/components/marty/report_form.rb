@@ -77,16 +77,8 @@ class Marty::ReportForm < Marty::CmFormPanel
   end
 
   endpoint :netzke_submit do |params, this|
-    # Only get here when user is asking for a background report
-    p 'X'*30, params
+    # We get here when user is asking for a background report
 
-    # Create a promise to execute the node and write the result into
-    # the mailbox.
-
-    # FIXME: handle versions
-
-    # initial a Promise to run this report.  ... tell the user to
-    # check his mailbox
     engine, d_params = _get_report_engine(params)
 
     d_params["p_title"] ||= engine.
@@ -95,7 +87,7 @@ class Marty::ReportForm < Marty::CmFormPanel
     begin
       nc = Delorean::BaseModule::NodeCall.
         new({}, engine, session[:selected_node], d_params)
-      # start the background promise
+      # start the background promise to get report result
       nc | ["result", "title", "format"]
     end
 
@@ -109,8 +101,8 @@ class Marty::ReportForm < Marty::CmFormPanel
     function() {
       var values = this.getForm().getValues();
       var data = escape(Ext.encode(values));
-      // FIXME: hard-coded path
-      window.location = "/marty/components/#{self.name}." + \
+      // FIXME: seems pretty hacky
+      window.location = "#{Marty::Util.marty_path}/components/#{self.name}." + \
       	this.repformat + "?data=" + data;
     }
     JS
@@ -171,7 +163,7 @@ class Marty::ReportForm < Marty::CmFormPanel
       c.title = "ERROR"
       c.items = [
                  {
-                   field_label: 'Exception',
+                   field_label:	'Exception',
                    xtype: 	:displayfield,
                    name: 	'displayfield1',
                    value: 	"<span style=\"color:red;\">#{exc}</span>"

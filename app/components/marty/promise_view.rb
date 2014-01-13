@@ -32,10 +32,13 @@ class Marty::PromiseView < Marty::TreePanel
       property: "id",
       direction: 'DESC',
     }
+
+    # garbage collect old promises (hacky to it here)
+    Marty::Promise.where('start_dt < ?', Date.today-1).delete_all
   end
 
   def bbar
-    ['->', :refresh, :download]
+    [:status, '->', :refresh, :download]
   end
 
   js_configure do |c|
@@ -44,22 +47,42 @@ class Marty::PromiseView < Marty::TreePanel
        this.callParent();
        this.getSelectionModel().on('selectionchange', function(selModel) {
           this.actions.download &&
-       	  this.actions.download.setDisabled(!selModel.hasSelection());
+          this.actions.download.setDisabled(!selModel.hasSelection());
        }, this);
     }
     JS
 
     c.on_download = <<-JS
     function() {
-       var job_id = this.getSelectionModel().selected.first().getId();
-       // FIXME: seems pretty hacky -- find mount point for Marty
-       window.location = "#{Rails.application.routes.named_routes[:marty].path.spec}/job/download?job_id=" + job_id;
+       var jid = this.getSelectionModel().selected.first().getId();
+       // FIXME: seems pretty hacky
+       window.location = "#{Marty::Util.marty_path}/job/download?job_id=" + jid;
     }
     JS
 
     c.on_refresh = <<-JS
     function() {
        this.store.load();
+    }
+    JS
+
+    c.on_status = <<-JS
+    function() {
+       this.serverStatus();
+    }
+    JS
+
+    c.show_detail = <<-JS
+    function(details) {
+       Ext.create('Ext.Window', {
+         height: 	400,
+         minWidth:	600,
+         autoWidth: 	true,
+         modal: 	true,
+         autoScroll: 	true,
+         html: 		details,
+         title: 	"Details"
+      }).show();
     }
     JS
   end
@@ -74,6 +97,18 @@ class Marty::PromiseView < Marty::TreePanel
     a.text 	= a.tooltip = "Refresh"
     a.disabled	= false
     a.icon  	= :arrow_refresh
+  end
+
+  action :status do |a|
+    a.text 	= a.tooltip = "Status"
+    a.disabled	= false
+    a.icon  	= :monitor
+  end
+
+  endpoint :server_status do |params, this|
+    status = `script/delayed_job status`
+    html = status.html_safe.gsub("\n","<br/>")
+    this.show_detail html
   end
 
   def get_children(params)

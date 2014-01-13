@@ -42,7 +42,27 @@ module Marty::ContentHandler
 
   private
 
+  def self.sanitize_filename(filename)
+    filename.strip do |name|
+      name.gsub!(/^.*(\\|\/)/, '')
+
+      # Strip out the non-ascii character
+      name.gsub!(/[^0-9A-Za-z.\-]/, '_')
+    end
+  end
+
+  def self.uniq_filename(filename, fset)
+    (0..1000).each { |i|
+      post = i==0 ? "" : " (#{i})"
+      fn = filename + post
+      return fn unless fset.member? fn
+    }
+    filename
+  end
+
   def self.to_zip_stream(stream, path, data)
+    fset = Set.new
+
     data.each { |r|
       title, format, result = r["title"], r["format"], r["result"]
 
@@ -54,15 +74,12 @@ module Marty::ContentHandler
         next
       end
 
-      # FIXME: handle case where same title is used more than once.
-
-      # FIXME: handle cases where to csv/xlsx fails.
-
       res_data, _type, _disposition, res_name = export(result, format, title)
 
-      # FIXME: should be an error for title to contain '/'
+      filename = uniq_filename(sanitize_filename(res_name), fset)
+      fset.add filename
 
-      stream.put_next_entry((path + [res_name]).join('/'))
+      stream.put_next_entry((path + [filename]).join('/'))
       stream.write res_data
     }
   end
@@ -76,5 +93,4 @@ module Marty::ContentHandler
     end
     res.string
   end
-
 end

@@ -98,12 +98,16 @@ class Marty::Promise < Marty::Base
   end
 
   def latest
-    # latest uncached version
+    # FIXME: Not sure if this is idiomatic.  What's the best way to
+    # force AR to reload the promise object?  reset+reload doesn't
+    # seems to work.
+
+    # get latest uncached version
     Marty::Promise.uncached {Marty::Promise.find(id)}
   end
 
   def work_off_job(job)
-    # Create a temporary worker to work off the job 
+    # Create a temporary worker to work off the job
     Delayed::Job.where(id: job.id).
       update_all(locked_at: Delayed::Job.db_time_now, locked_by: "Temp")
     w = Delayed::Worker.new
@@ -112,9 +116,6 @@ class Marty::Promise < Marty::Base
 
   def wait_for_result(timeout)
     return self.result if self.result != {}
-
-    # FIXME: instead of using latest(), should look at how delayed
-    # jobs are loaded.  i.e. use reset+reload.
 
     begin
       # start listening on promise's notification
@@ -125,7 +126,7 @@ class Marty::Promise < Marty::Base
       # if job hasn't started yet, wait for it to start
       if !last.start_dt
         log "AAAA #{Process.pid} #{last}"
-        
+
         job = Delayed::Job.find_by_id(last.job_id)
         job.reload if job # paranoid
 
@@ -149,7 +150,7 @@ class Marty::Promise < Marty::Base
           return {"error" => "promise #{last.id} timed out (never started)"}
         end
       end
-      
+
       # reload promise in case out copy doesn't have a result yet
       last = latest unless last.end_dt
 
