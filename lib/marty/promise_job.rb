@@ -16,18 +16,19 @@ class Delorean::BaseModule::NodeCall
 
     nn = node.is_a?(Class) ? node.name.demodulize : node.to_s
 
-    title 	= params["p_title"]   || "#{engine.module_name}::#{nn}"
+    title	= params["p_title"]   || "#{engine.module_name}::#{nn}"
     timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
     hook	= params["p_hook"]
     parent_id	= _e[:_promise_id]
-    user_id	= Mcfly.whodunnit.id if Mcfly.whodunnit
+    user_id	= _e[:_user_id] || Mcfly.whodunnit.try(:id)
     promise 	= Marty::Promise.create(title: title,
                                         user_id: user_id,
                                         parent_id: parent_id,
                                         )
 
     params[:_promise_id] = promise.id
-    params[:_parent_id]  = parent_id if parent_id
+    params[:_parent_id]	 = parent_id	if parent_id
+    params[:_user_id]	 = user_id	if user_id
 
     job = Delayed::Job.enqueue Marty::PromiseJob.
       new(promise, title, script, version, nn, params, args, hook)

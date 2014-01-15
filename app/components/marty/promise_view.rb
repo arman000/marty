@@ -35,8 +35,13 @@ class Marty::PromiseView < Marty::TreePanel
       direction: 'DESC',
     }
 
-    # garbage collect old promises (hacky to it here)
-    Marty::Promise.where('start_dt < ?', Date.today-1).delete_all
+    # garbage collect old promises (hacky to do this here)
+    begin
+      Marty::Promise.
+        where('start_dt < ? AND parent_id IS NULL', Date.today-1).destroy_all
+    rescue => exc
+      Marty::Util.logger.error("promise GC error: #{exc}")
+    end
   end
 
   def bbar

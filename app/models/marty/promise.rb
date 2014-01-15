@@ -30,7 +30,10 @@ class Marty::Promise < Marty::Base
 
   validates_presence_of :title
 
-  has_many :children, foreign_key: 'parent_id', class_name: "Marty::Promise"
+  has_many :children,
+  foreign_key: 'parent_id',
+  class_name: "Marty::Promise",
+  dependent: :destroy
 
   belongs_to :parent, class_name: "Marty::Promise"
   belongs_to :user, class_name: "Marty::User"
