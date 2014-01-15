@@ -6,17 +6,17 @@ class Marty::ReportForm < Marty::CmFormPanel
 
   # override apply for background generation
   action :apply do |a|
-    a.text  	= a.tooltip = I18n.t("reporting.background")
-    a.handler  	= :on_apply
-    a.icon  	= :report_disk
-    a.disabled 	= false
+    a.text	= a.tooltip = I18n.t("reporting.background")
+    a.handler	= :on_apply
+    a.icon	= :report_disk
+    a.disabled	= false
   end
 
   action :generate do |a|
-    a.text  	= a.tooltip = I18n.t("reporting.generate")
-    a.handler  	= :on_generate
-    a.icon  	= :report_go
-    a.disabled 	= false
+    a.text	= a.tooltip = I18n.t("reporting.generate")
+    a.handler	= :on_generate
+    a.icon	= :report_go
+    a.disabled	= false
   end
 
   ######################################################################
@@ -84,12 +84,11 @@ class Marty::ReportForm < Marty::CmFormPanel
     d_params["p_title"] ||= engine.
       evaluate(session[:selected_node], "title", {}).to_s
 
-    begin
-      nc = Delorean::BaseModule::NodeCall.
-        new({}, engine, session[:selected_node], d_params)
-      # start the background promise to get report result
-      nc | ["result", "title", "format"]
-    end
+    # start background promise to get report result
+    engine.background_eval(session[:selected_node],
+                           d_params,
+                           ["result", "title", "format"],
+                           )
 
     this.netzke_feedback "Report can be accessed from the Jobs Dashboard ..."
   end
@@ -179,10 +178,10 @@ class Marty::ReportForm < Marty::CmFormPanel
 
     self.filename = version.nil? ? title.to_s : "#{title}_#{version}"
 
-    c.items 	= items
+    c.items	= items
     c.repformat	= format
-    c.title 	= "Generate: #{title}"
-    c.title 	+= "-#{version}" if version
+    c.title	= "Generate: #{title}"
+    c.title	+= "-#{version}" if version
   end
 end
 

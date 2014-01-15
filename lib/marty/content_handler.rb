@@ -18,20 +18,22 @@ module Marty::ContentHandler
 
   def self.export(data, format, name)
     begin
-      if format == "csv"
+      case format
+      when "csv"
         res = Marty::DataExporter.to_csv(data)
-      elsif format == "xlsx"
+      when "xlsx"
         res = Marty::Xl.spreadsheet(data).to_stream.read
-      elsif format == "zip"
+      when "zip"
         res = to_zip(data, name)
-      elsif format.nil? || format == "json"
+      when nil, "json"
         res = data.to_json
+        format = "json"
       else
-        res = {error: "Unknown format: #{format}"}
+        res = {error: "Unknown format: #{format}"}.to_json
         format = "json"
       end
     rescue => exc
-      res = {error: "Conversion for format #{format} failed: #{exc}"}
+      res = {error: "Conversion for format #{format} failed: #{exc}"}.to_json
       format = "json"
     end
 

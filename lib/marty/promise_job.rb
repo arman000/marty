@@ -16,12 +16,6 @@ class Delorean::BaseModule::NodeCall
 
     nn = node.is_a?(Class) ? node.name.demodulize : node.to_s
 
-    # IDEA: sending a promise as an arg to another job shouldn't cause
-    # us to wait for it to be evaluated. i.e. it can be kept lazy!
-
-    # QQQ: what happens when arguments to a delayed job aren't
-    # serializable?  This should be an error.
-
     title 	= params["p_title"]   || "#{engine.module_name}::#{nn}"
     timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
     hook	= params["p_hook"]
@@ -33,7 +27,7 @@ class Delorean::BaseModule::NodeCall
                                         )
 
     params[:_promise_id] = promise.id
-    params[:_parent_id]	 = parent_id if parent_id
+    params[:_parent_id]  = parent_id if parent_id
 
     job = Delayed::Job.enqueue Marty::PromiseJob.
       new(promise, title, script, version, nn, params, args, hook)
@@ -45,6 +39,14 @@ class Delorean::BaseModule::NodeCall
     promise.save!
 
     Marty::PromiseProxy.new(promise.id, timeout, attr)
+  end
+end
+
+class Delorean::Engine
+  def background_eval(node, params, attrs)
+    nc = Delorean::BaseModule::NodeCall.new({}, self, node, params)
+    # start the background promise
+    nc | attrs
   end
 end
 

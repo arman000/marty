@@ -20,6 +20,7 @@ class Marty::PromiseView < Marty::TreePanel
     c.columns = [
                  :parent,
                  :user__login,
+                 :job_id,
                  :start_dt,
                  :end_dt,
                  :status,

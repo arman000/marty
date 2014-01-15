@@ -44,8 +44,6 @@ class Marty::Promise < Marty::Base
   end
 
   def set_start
-    log "LOGLOG #{Rails.logger}"
-
     if self.start_dt || self.result != {}
       Marty::Util.logger.error("promise already started: #{self}")
       return

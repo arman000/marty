@@ -4,13 +4,20 @@ class Marty::JobController < ActionController::Base
 
     promise = Marty::Promise.find_by_id(job_id)
 
-    return "Job not found: #{job_id}" unless promise
-
-    format = promise.cformat
-    data = promise.result["result"]
+    if promise
+      format = promise.cformat
+      # somewhat hacky: if result has "result" key, it's used as the
+      # content.
+      data = promise.result["result"] || promise.result
+      title = promise.title
+    else
+      format = "json"
+      data = {error: "Job not found: #{job_id}"}
+      title = nil
+    end
 
     res, type, disposition, filename =
-      Marty::ContentHandler.export(data, format, promise.title)
+      Marty::ContentHandler.export(data, format, title)
 
     return send_data(res,
                      type: 		type,
