@@ -1,21 +1,29 @@
 class Marty::DataExporter
-  def self.hash_array_merge(*hl)
+  # given an array of hashes, return set of all keys
+  def self.hash_array_keys(hl)
+    hl.each_with_object(Set.new) { |h, keys| keys.merge(h.keys) }
+  end
+
+  def self.hash_array_merge(hl, transpose)
     # given a list of hashes hl, generates a merged hash.  The
     # resulting hash contains a superset of all the hash keys.  The
     # values are corresponding values from each hash in hl.
-    keys = Set.new
-    hl.each { |h| keys.merge(h.keys) }
+    keys = hash_array_keys(hl)
 
-    keys.each_with_object({}) { |k, rh|
-      rh[k] = hl.map { |h| h[k] }
-    }
+    if transpose
+      keys.each_with_object({}) { |k, rh|
+        rh[k] = hl.map { |h| h[k] }
+      }
+    else
+      [keys.to_a] + hl.map {|h| keys.map {|k| h[k]}}
+    end
   end
 
-  def self.to_csv(obj)
+  def self.to_csv(obj, transpose=false)
     obj = [obj] unless obj.respond_to? :map
 
     # if all array items are hashes, we merge them
-    obj = hash_array_merge(*obj) if
+    obj = hash_array_merge(obj, transpose) if
       obj.map {|x| x.is_a? Hash}.all?
 
     csv_string = CSV.generate do |csv|
@@ -58,7 +66,7 @@ class Marty::DataExporter
     # strip _id from assoc fields
     header = [ info[:cols].map { |c| info[:assoc][c] ? c[0..-4] : c } ]
 
-    ts = (ts == Float::INFINITY) ? 'infinity' : ts
+    ts = 'infinity' if Mcfly::Model::INFINITIES.member? ts
 
     header + klass.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).all.
       map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}}

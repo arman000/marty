@@ -24,17 +24,15 @@ module Marty::ContentHandler
       when "xlsx"
         res = Marty::Xl.spreadsheet(data).to_stream.read
       when "zip"
-        res = to_zip(data, name)
+        res = to_zip(data)
       when nil, "json"
-        res = data.to_json
-        format = "json"
+        res, format = data.to_json, "json"
       else
-        res = {error: "Unknown format: #{format}"}.to_json
-        format = "json"
+        res, format = {error: "Unknown format: #{format}"}.to_json, "json"
       end
     rescue => exc
-      res = {error: "Conversion for format #{format} failed: #{exc}"}.to_json
-      format = "json"
+      res, format =
+        {error: "Failed conversion #{format}: #{exc}"}.to_json, "json"
     end
 
     type, disposition = GEN_FORMATS[format]
@@ -86,12 +84,12 @@ module Marty::ContentHandler
     }
   end
 
-  def self.to_zip(data, name)
+  def self.to_zip(data)
     raise "Can't convert non-array data to zip format: #{data.class}" unless
       data.is_a?(Array)
 
     res = Zip::OutputStream.write_buffer do |stream|
-      to_zip_stream(stream, [name], data)
+      to_zip_stream(stream, [], data)
     end
     res.string
   end

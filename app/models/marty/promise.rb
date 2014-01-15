@@ -141,8 +141,15 @@ class Marty::Promise < Marty::Base
         else
           # work off the job instead of waiting for a real worker to
           # pick it up.
-          log "OFFF #{Process.pid} #{last}"
-          work_off_job(job)
+          log "OFF0 #{Process.pid} #{last}"
+          begin
+            work_off_job(job)
+          rescue => exc
+            log "OFFERR #{exc}"
+            res = Delorean::Engine.grok_runtime_exception(exc)
+            last.set_result(res)
+          end
+          log "OFF1 #{Process.pid} #{last}"
         end
 
         last = latest

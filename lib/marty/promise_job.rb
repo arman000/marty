@@ -16,6 +16,13 @@ class Delorean::BaseModule::NodeCall
 
     nn = node.is_a?(Class) ? node.name.demodulize : node.to_s
 
+    begin
+      # make sure params is serialzable before starting a Job
+      Marshal.dump(params)
+    rescue => exc
+      raise "non-serializable parameters"
+    end
+
     title	= params["p_title"]   || "#{engine.module_name}::#{nn}"
     timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
     hook	= params["p_hook"]
