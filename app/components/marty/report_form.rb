@@ -127,6 +127,8 @@ class Marty::ReportForm < Marty::CmFormPanel
       attrs = @engine.enumerate_attrs_by_node(items)
 
       @engine.evaluate_attrs_hash(items, attrs, {})
+    when Numeric, TrueClass, FalseClass
+      items
     else
       raise "bad value in form #{items}"
     end

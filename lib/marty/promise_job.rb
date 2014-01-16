@@ -12,9 +12,11 @@ class Delorean::BaseModule::NodeCall
       attr = nil
     end
 
-    script, version = engine.module_name, engine.version
+    # FIXME: if node is a string like "A::B", then the version
+    # selected will be from the caller[?]
 
-    nn = node.is_a?(Class) ? node.name.demodulize : node.to_s
+    script, version = engine.module_name, engine.version
+    nn = node.is_a?(Class) ? node.name : node.to_s
 
     begin
       # make sure params is serialzable before starting a Job
@@ -23,7 +25,7 @@ class Delorean::BaseModule::NodeCall
       raise "non-serializable parameters"
     end
 
-    title	= params["p_title"]   || "#{engine.module_name}::#{nn}"
+    title	= params["p_title"]   || "#{script}::#{nn.demodulize}"
     timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
     hook	= params["p_hook"]
     parent_id	= _e[:_promise_id]
@@ -37,8 +39,17 @@ class Delorean::BaseModule::NodeCall
     params[:_parent_id]	 = parent_id	if parent_id
     params[:_user_id]	 = user_id	if user_id
 
-    job = Delayed::Job.enqueue Marty::PromiseJob.
-      new(promise, title, script, version, nn, params, args, hook)
+    begin
+      job = Delayed::Job.enqueue Marty::PromiseJob.
+        new(promise, title, script, version, nn, params, args, hook)
+    rescue => exc
+      open('/tmp/dj.out', 'a') { |f| f.puts "CALLERR #{exc}" }
+      res = Delorean::Engine.grok_runtime_exception(exc)
+      promise.set_start
+      promise.set_result(res)
+      open('/tmp/dj.out', 'a') { |f| f.puts "CALLERRSET #{res}" }
+      raise
+    end
 
     # keep a reference to the job.  This is needed in case we want to
     # work off a promise job that we're waiting for and which hasn't
