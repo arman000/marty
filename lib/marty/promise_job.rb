@@ -1,6 +1,15 @@
 require 'delorean_lang'
 
 class Delorean::BaseModule::NodeCall
+  def initialize(_e, engine, node, params)
+    super
+
+    # If call has a promise_id (i.e. is from a promise) then that's
+    # our parent.  Otherwise, we use its parent as our parent.
+    params[:_parent_id]	= _e[:_promise_id] 	|| _e[:_parent_id]
+    params[:_user_id]	= _e[:_user_id] 	|| Mcfly.whodunnit.try(:id)
+  end
+
   # Monkey-patch '|' method for Delorean NodeCall to create promise
   # jobs and return promise proxy objects.
   def |(args)
@@ -28,16 +37,12 @@ class Delorean::BaseModule::NodeCall
     title	= params["p_title"]   || "#{script}::#{nn.demodulize}"
     timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
     hook	= params["p_hook"]
-    parent_id	= _e[:_promise_id]
-    user_id	= _e[:_user_id] || Mcfly.whodunnit.try(:id)
-    promise 	= Marty::Promise.create(title: title,
-                                        user_id: user_id,
-                                        parent_id: parent_id,
-                                        )
-
+    promise 	= Marty::Promise.
+      create(title:	title,
+             user_id:	params[:_user_id],
+             parent_id:	params[:_parent_id],
+             )
     params[:_promise_id] = promise.id
-    params[:_parent_id]	 = parent_id	if parent_id
-    params[:_user_id]	 = user_id	if user_id
 
     begin
       job = Delayed::Job.enqueue Marty::PromiseJob.

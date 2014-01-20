@@ -15,14 +15,14 @@ class Marty::ComponentsController < Marty::ApplicationController
       raise "bad component" unless klass < Netzke::Base
 
       inst = klass.new
-      fn = "generate_#{format}".to_sym
-      return unless inst.respond_to?(fn)
+      return unless inst.respond_to?(:export_content)
 
-      type, disposition = Marty::ContentHandler::GEN_FORMATS[format]
-      filename = inst.respond_to?(:filename) ?
-        "#{inst.filename}.#{format}" : "#{component}.#{format}"
+      title = inst.respond_to?(:filename) ? inst.filename : component
 
-      return send_data(inst.send(fn, params),
+      res, type, disposition, filename =
+        inst.export_content(format, title, params)
+
+      return send_data(res,
                        type: 		type,
                        filename: 	filename,
                        disposition: 	disposition,

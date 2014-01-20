@@ -364,9 +364,9 @@ class Marty::ScriptDetail < Marty::CmFormPanel
   ######################################################################
 
   action :print do |a|
-    a.text  	= I18n.t("script_detail.print")
-    a.tooltip  	= I18n.t("script_detail.print")
-    a.icon  	= :printer
+    a.text	= I18n.t("script_detail.print")
+    a.tooltip	= I18n.t("script_detail.print")
+    a.icon	= :printer
     a.handler	= :on_print
   end
 
@@ -385,10 +385,14 @@ class Marty::ScriptDetail < Marty::CmFormPanel
   ######################################################################
 
   # used for printing
-  def generate_html(params={})
+  def export_content(format, title, params={})
+    raise "unknown format: #{format}" unless format == "html"
+
     r = Marty::Script.find_by_id(params[:script_id])
     body = get_body(r)
-    CodeRay.scan(body, :ruby).div(line_numbers: :table)
+    res = CodeRay.scan(body, :ruby).div(line_numbers: :table)
+
+    [res, "text/html", "inline", "#{title}.html"]
   end
 
   def get_body(r)

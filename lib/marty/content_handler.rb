@@ -43,12 +43,9 @@ module Marty::ContentHandler
   private
 
   def self.sanitize_filename(filename)
-    filename.strip do |name|
-      name.gsub!(/^.*(\\|\/)/, '')
-
-      # Strip out the non-ascii character
-      name.gsub!(/[^0-9A-Za-z.\-]/, '_')
-    end
+    filename.strip.
+      gsub(/[\\\/]/, '_').
+      gsub(/[^[:print:]]/, '_')
   end
 
   def self.uniq_filename(filename, fset)

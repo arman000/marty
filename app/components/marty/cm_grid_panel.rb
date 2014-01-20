@@ -3,7 +3,6 @@ require 'marty/permissions'
 
 class Marty::CmGridPanel < Netzke::Basepack::Grid
   extend Marty::Permissions
-  include Marty::Extras::Csv
 
   has_marty_permissions	read: :any
 

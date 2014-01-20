@@ -44,8 +44,7 @@ class Marty::ReportForm < Marty::CmFormPanel
     engine, d_params = _get_report_engine(params)
 
     begin
-      return engine.evaluate(session[:selected_node], "result", d_params)
-
+      engine.evaluate(session[:selected_node], "result", d_params)
     rescue => exc
       Marty::Util.logger.error "run_eval failed: #{exc.backtrace}"
 
@@ -56,24 +55,18 @@ class Marty::ReportForm < Marty::CmFormPanel
     end
   end
 
-  def generate_csv(params={})
-    res = run_eval(params)
-    Marty::ContentHandler.export(res, "csv", "").first
-  end
+  def export_content(format, title, params={})
+    data = run_eval(params)
 
-  # Used for testing
-  def generate_txt(params={})
-    generate_csv(params)
-  end
+    # hacky: shouldn't have error parsing logic here
+    format = "json" if data.is_a?(Hash) && (data[:error] || data["error"])
 
-  def generate_xlsx(params={})
-    res = run_eval(params)
-    Marty::ContentHandler.export(res, "xlsx", "").first
-  end
+    res, type, disposition, filename =
+      Marty::ContentHandler.export(data, format, title)
 
-  def generate_zip(params={})
-    res = run_eval(params)
-    Marty::ContentHandler.export(res, "zip", "result").first
+    disposition = params["disposition"] if params["disposition"]
+
+    [res, type, disposition, filename]
   end
 
   endpoint :netzke_submit do |params, this|

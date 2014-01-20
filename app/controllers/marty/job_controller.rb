@@ -13,17 +13,16 @@ class Marty::JobController < ActionController::Base
     else
       format = "json"
       data = {error: "Job not found: #{job_id}"}
-      title = nil
+      title = "error"
     end
 
     res, type, disposition, filename =
       Marty::ContentHandler.export(data, format, title)
 
-    return send_data(res,
-                     type: 		type,
-                     filename: 		filename,
-                     disposition: 	disposition,
-                     )
+    send_data(res,
+              type:		type,
+              filename:		filename,
+              disposition:	disposition,
+              )
   end
-
 end
