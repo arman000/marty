@@ -58,11 +58,11 @@ class Marty::Promise < Marty::Base
   end
 
   def set_result(res)
-    log "SETRES #{Process.pid} #{res} #{self}"
+    # log "SETRES #{Process.pid} #{res} #{self}"
 
     # promise must have been started and not yet ended
     if !self.start_dt || self.end_dt || self.result != {}
-      log "SETERR #{Process.pid} #{self}"
+      # log "SETERR #{Process.pid} #{self}"
       Marty::Util.logger.error("unexpected promise state: #{self}")
       return
     end
@@ -80,7 +80,7 @@ class Marty::Promise < Marty::Base
     self.end_dt = DateTime.now
     self.save!
 
-    log "NOTIFY #{Process.pid}"
+    # log "NOTIFY #{Process.pid}"
     pg_notify
   end
 
@@ -88,9 +88,9 @@ class Marty::Promise < Marty::Base
     inspect
   end
 
-  def log(msg)
-    open('/tmp/dj.out', 'a') { |f| f.puts msg }
-  end
+  # def log(msg)
+  #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
+  # end
 
   def wait_for_my_notify(timeout)
     while true do
@@ -129,7 +129,7 @@ class Marty::Promise < Marty::Base
 
       # if job hasn't started yet, wait for it to start
       if !last.start_dt
-        log "AAAA #{Process.pid} #{last}"
+        # log "AAAA #{Process.pid} #{last}"
 
         job = Delayed::Job.find_by_id(last.job_id)
         job.reload if job # paranoid
@@ -141,15 +141,15 @@ class Marty::Promise < Marty::Base
         else
           # work off the job instead of waiting for a real worker to
           # pick it up.
-          log "OFF0 #{Process.pid} #{last}"
+          # log "OFF0 #{Process.pid} #{last}"
           begin
             work_off_job(job)
           rescue => exc
-            log "OFFERR #{exc}"
+            # log "OFFERR #{exc}"
             res = Delorean::Engine.grok_runtime_exception(exc)
             last.set_result(res)
           end
-          log "OFF1 #{Process.pid} #{last}"
+          # log "OFF1 #{Process.pid} #{last}"
         end
 
         last = latest
@@ -157,7 +157,7 @@ class Marty::Promise < Marty::Base
         # we waited for it but it never started.  So, mark it with a
         # timeout error.
         if !last.start_dt
-          log "TO11 #{Process.pid} #{last}"
+          # log "TO11 #{Process.pid} #{last}"
           return {"error" => "promise #{last.id} timed out (never started)"}
         end
       end
@@ -168,10 +168,10 @@ class Marty::Promise < Marty::Base
       # at this point, we know the promise has already started
       if !last.end_dt
         wait_for_my_notify(timeout)
-        log "UUUU #{Process.pid} #{id} #{Time.now.to_f}"
+        # log "UUUU #{Process.pid} #{id} #{Time.now.to_f}"
         last = latest
 
-        log "XXXX #{Process.pid} #{Time.now.to_f} #{last}"
+        # log "XXXX #{Process.pid} #{Time.now.to_f} #{last}"
 
         if !last.end_dt
           log "TO22 #{Process.pid} #{last}"
@@ -179,7 +179,7 @@ class Marty::Promise < Marty::Base
         end
       end
 
-      log "RRRR #{Process.pid} #{last} #{Time.now.to_f}"
+      # log "RRRR #{Process.pid} #{last} #{Time.now.to_f}"
 
       last.result
     ensure

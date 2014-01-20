@@ -6,8 +6,8 @@ class Delorean::BaseModule::NodeCall
 
     # If call has a promise_id (i.e. is from a promise) then that's
     # our parent.  Otherwise, we use its parent as our parent.
-    params[:_parent_id]	= _e[:_promise_id] 	|| _e[:_parent_id]
-    params[:_user_id]	= _e[:_user_id] 	|| Mcfly.whodunnit.try(:id)
+    params[:_parent_id]	= _e[:_promise_id]	|| _e[:_parent_id]
+    params[:_user_id]	= _e[:_user_id]		|| Mcfly.whodunnit.try(:id)
   end
 
   # Monkey-patch '|' method for Delorean NodeCall to create promise
@@ -35,9 +35,9 @@ class Delorean::BaseModule::NodeCall
     end
 
     title	= params["p_title"]   || "#{script}::#{nn.demodulize}"
-    timeout 	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
+    timeout	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
     hook	= params["p_hook"]
-    promise 	= Marty::Promise.
+    promise	= Marty::Promise.
       create(title:	title,
              user_id:	params[:_user_id],
              parent_id:	params[:_parent_id],
@@ -48,11 +48,11 @@ class Delorean::BaseModule::NodeCall
       job = Delayed::Job.enqueue Marty::PromiseJob.
         new(promise, title, script, version, nn, params, args, hook)
     rescue => exc
-      open('/tmp/dj.out', 'a') { |f| f.puts "CALLERR #{exc}" }
+      # log "CALLERR #{exc}"
       res = Delorean::Engine.grok_runtime_exception(exc)
       promise.set_start
       promise.set_result(res)
-      open('/tmp/dj.out', 'a') { |f| f.puts "CALLERRSET #{res}" }
+      # log "CALLERRSET #{res}"
       raise
     end
 
@@ -83,12 +83,12 @@ class Marty::PromiseJob < Struct.new(:promise,
                                      :attrs,
                                      :hook,
                                      )
-  def log(msg)
-    open('/tmp/dj.out', 'a') { |f| f.puts msg }
-  end
+  # def log(msg)
+  #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
+  # end
 
   def perform
-    log "PERF #{Process.pid} #{title}"
+    # log "PERF #{Process.pid} #{title}"
 
     promise.set_start
 
@@ -105,10 +105,10 @@ class Marty::PromiseJob < Struct.new(:promise,
         h[attr] = engine.evaluate(node, attr, params)
       }
 
-      log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
+      # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
     rescue => exc
       res = Delorean::Engine.grok_runtime_exception(exc)
-      log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
+      # log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
     end
     promise.set_result(res)
 
