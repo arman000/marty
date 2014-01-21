@@ -61,10 +61,14 @@ class Marty::ReportForm < Marty::CmFormPanel
     # hacky: shouldn't have error parsing logic here
     format = "json" if data.is_a?(Hash) && (data[:error] || data["error"])
 
-    res, type, disposition, filename =
-      Marty::ContentHandler.export(data, format, title)
+    # hack for testing -- txt -> csv
+    exp_format = format == "txt" ? "csv" : format
 
-    disposition = params["disposition"] if params["disposition"]
+    res, type, disposition, filename =
+      Marty::ContentHandler.export(data, exp_format, title)
+
+    # hack for testing -- set content-type
+    type = "text/plain" if format == "txt" && type =~ /csv/
 
     [res, type, disposition, filename]
   end

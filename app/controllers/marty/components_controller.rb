@@ -7,7 +7,7 @@ class Marty::ComponentsController < Marty::ApplicationController
 
     return redirect_to root_path unless component
 
-    format = params[:format]
+    format, req_disposition = params[:format], params[:disposition]
 
     if format && Marty::ContentHandler::GEN_FORMATS.member?(format)
       klass = component.constantize
@@ -25,7 +25,7 @@ class Marty::ComponentsController < Marty::ApplicationController
       return send_data(res,
                        type: 		type,
                        filename: 	filename,
-                       disposition: 	disposition,
+                       disposition: 	req_disposition || disposition,
                        )
     end
 

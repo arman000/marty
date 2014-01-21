@@ -11,10 +11,10 @@ class Marty::Promise < Marty::Base
   end
 
   # default timeout (seconds) to wait for promise values
-  DEFAULT_PROMISE_TIMEOUT = 30
+  DEFAULT_PROMISE_TIMEOUT = Rails.configuration.marty.promise_timeout || 30
 
   # default timeout (seconds) to wait for jobs to start
-  DEFAULT_JOB_TIMEOUT = 10
+  DEFAULT_JOB_TIMEOUT = Rails.configuration.marty.job_timeout || 10
 
   attr_accessible :title,
   :user_id,
