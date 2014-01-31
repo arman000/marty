@@ -9,7 +9,7 @@ module Marty::Migrations
     name = "fk_#{from}_#{to}_#{column}"
     if name.length > 63
       s = Digest::MD5.hexdigest("#{to}_#{column}").slice(0..9)
-      name = "fk_#{from}_#{s}" 
+      name = "fk_#{from}_#{s}"
     end
     {name: name}
   end
@@ -47,19 +47,22 @@ module Marty::Migrations
                          :obsoleted_dt,
                         ]
 
-  def add_mcfly_index(tb, *attrs)
-    tb = "#{tb_prefix}#{tb}" unless
-      tb.to_s.start_with?(tb_prefix)
-
+  def add_mcfly_attrs_index(tb, *attrs)
     attrs.each { |a|
       options = index_opts(tb, a)
       options[:order] = {a.to_sym => "NULLS LAST"}
       add_index tb.to_sym, a, options
     }
+  end
+
+  def add_mcfly_index(tb, *attrs)
+    tb = "#{tb_prefix}#{tb}" unless
+      tb.to_s.start_with?(tb_prefix)
+
+    add_mcfly_attrs_index(tb, *attrs)
 
     MCFLY_INDEX_COLUMNS.each { |a|
       add_index tb.to_sym, a, index_opts(tb, a)
     }
   end
-
 end
