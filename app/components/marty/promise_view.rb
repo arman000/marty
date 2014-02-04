@@ -83,7 +83,7 @@ class Marty::PromiseView < Marty::TreePanel
     function(details) {
        Ext.create('Ext.Window', {
          height: 	400,
-         minWidth:	600,
+         minWidth:	400,
          autoWidth: 	true,
          modal: 	true,
          autoScroll: 	true,
@@ -132,7 +132,7 @@ class Marty::PromiseView < Marty::TreePanel
   end
 
   column :parent do |c|
-    c.text	= "Job Name"
+    c.text	= 'Job Name'
     c.getter 	= lambda { |r| r.title }
     c.width	= 275
   end
@@ -141,6 +141,18 @@ class Marty::PromiseView < Marty::TreePanel
     c.hidden = true
     # FIXME: TreePanel appears to not work with hidden boolean cols
     c.xtype = 'numbercolumn'
+  end
+
+  column :user__login do |c|
+    c.text 	= I18n.t('jobs.user_login')
+  end
+
+  column :start_dt do |c|
+    c.text 	= I18n.t('jobs.start_dt')
+  end
+
+  column :end_dt do |c|
+    c.text 	= I18n.t('jobs.end_dt')
   end
 
   column :error do |c|
