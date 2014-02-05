@@ -111,11 +111,11 @@ class Marty::DataChange
     Set[* classes] & Set[* class_list]
   end
 
-  delorean_fn :do_export, sig: 2 do
-    |pt, klass|
+  delorean_fn :do_export, sig: [2, 3] do
+    |pt, klass, sort_field=nil|
     raise "#{klass} not on class_list" unless class_list.member? klass
 
-    Marty::DataExporter.do_export(pt, klass.constantize)
+    Marty::DataExporter.do_export(pt, klass.constantize, sort_field)
   end
 
   def self.get_changed_data(t0, t1, klass)

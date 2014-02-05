@@ -60,7 +60,7 @@ class Marty::DataExporter
 
   # Given a Mcfly klass, generate an export array.  Can potentially
   # use up a lot of memory if the result set is large.
-  def self.do_export(ts, klass)
+  def self.do_export(ts, klass, sort_field=nil)
     info = class_info(klass)
 
     # strip _id from assoc fields
@@ -68,7 +68,8 @@ class Marty::DataExporter
 
     ts = 'infinity' if Mcfly::Model::INFINITIES.member? ts
 
-    header + klass.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).all.
+    header + klass.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).
+      order(sort_field || :id).all.
       map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}}
   end
 
