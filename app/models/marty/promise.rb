@@ -174,7 +174,7 @@ class Marty::Promise < Marty::Base
         # log "XXXX #{Process.pid} #{Time.now.to_f} #{last}"
 
         if !last.end_dt
-          log "TO22 #{Process.pid} #{last}"
+          # log "TO22 #{Process.pid} #{last}"
           return {"error" => "promise #{last.id} timed out (didn't end)"}
         end
       end

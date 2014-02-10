@@ -93,6 +93,9 @@ class Marty::PromiseJob < Struct.new(:promise,
     promise.set_start
 
     begin
+      # in case the job writes to the the database
+      Mcfly.whodunnit = promise.user
+
       script = Marty::Script.find_script(sname, version)
 
       raise "Can't find #{sname} version #{version}" unless script

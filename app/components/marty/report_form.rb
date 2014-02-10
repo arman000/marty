@@ -155,7 +155,8 @@ class Marty::ReportForm < Marty::CmFormPanel
         evaluate_attrs(session[:selected_node], ["form", "title", "format"], {})
 
       raise "bad form items" unless items.is_a?(Array)
-      raise "bad format" unless ["csv", "xlsx", "zip"].member?(format)
+      raise "bad format" unless
+        ["csv", "xlsx", "zip", "json"].member?(format)
 
     rescue => exc
       c.title = "ERROR"
