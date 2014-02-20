@@ -145,9 +145,13 @@ module Marty
               next
             end
 
-            srch = {hmap[a][:assoc_key] => v}
-            srch[:obsoleted_dt] = 'infinity' if hmap[a][:mcfly]
-            av = hmap[a][:assoc_class].where(srch).first
+            if v.is_a? ActiveRecord::Base
+              av = v
+            else
+              srch = {hmap[a][:assoc_key] => v}
+              srch[:obsoleted_dt] = 'infinity' if hmap[a][:mcfly]
+              av = hmap[a][:assoc_class].where(srch).first
+            end
 
             raise "#{v.inspect} not found #{hmap[a][:assoc_class]}" unless av
 
