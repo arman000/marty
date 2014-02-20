@@ -1,4 +1,6 @@
-class Marty::ScriptSet
+class Marty::ScriptSet < Delorean::AbstractContainer
+  # ScriptSet acts as a cache for Delorean engine compiles
+
   # maps script_id to Delorean engine
   @@engines, @@dengines = {}, {}
 
@@ -6,31 +8,47 @@ class Marty::ScriptSet
     @@engines, @@dengines = {}, {}
   end
 
-  def self.parse(sname, body, version=nil, sset=nil)
-    sset ||= Marty::ScriptContainer.new
+  attr_reader :tag
 
-    engine = Delorean::Engine.new(sname, version)
-    engine.parse(body, sset)
+  def initialize(tag)
+    if tag.is_a? String
+      tag = Marty::Tag.find_by_name(tag)
+    elsif tag.is_a?(Fixnum)
+      tag = Marty::Tag.find_by_id(tag)
+    end
+
+    raise "bad tag #{tag}" unless tag.is_a? Marty::Tag
+    @tag = tag
+    super()
+  end
+
+  def parse(script)
+    engine = Delorean::Engine.new(script.name)
+    engine.parse(script.body, self)
     engine
   end
 
-  def self.get_engine(script, sset=nil)
-    script = Marty::Script.find(script) if
-      script.is_a?(Fixnum)
+  def get_engine(script)
+    if script.is_a?(Fixnum)
+      script = Marty::Script.find_by_id(script)
+    elsif script.is_a?(String)
+      script = Marty::Script.find_script(script, tag)
+    end
 
     return {error: "No such script"} unless script
 
-    if script.isdev?
-      ds = script.group_dscript
-      engine, updated_at = @@dengines[ds.id]
+    raise "bad script arg: #{script}" unless script.is_a? Marty::Script
 
-      if updated_at && updated_at == ds.updated_at
-        sset.add_imports(engine) if sset
+    if tag.isdev?
+      engine, created_dt = @@dengines[script.id]
+
+      if created_dt && created_dt == script.created_dt
+        add_imports(engine)
         return engine
       end
 
-      engine = parse(script.name, ds.body, script.version, sset)
-      @@dengines[ds.id] = [engine, ds.updated_at]
+      engine = parse(script)
+      @@dengines[script.id] = [engine, script.created_dt]
     else
       # using created_dt instead of version so that we handle cases
       # where cucumber wipes the database but @@engines is still
@@ -38,14 +56,16 @@ class Marty::ScriptSet
       engine, created_dt = @@engines[script.id]
 
       if created_dt && created_dt == script.created_dt
-        sset.add_imports(engine) if sset
+        add_imports(engine)
         return engine
       end
 
-      engine = parse(script.name, script.body, script.version, sset)
+      engine = parse(script)
       @@engines[script.id] = [engine, script.created_dt]
     end
     engine
   end
+
+  ######################################################################
 
 end

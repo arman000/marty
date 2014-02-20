@@ -18,8 +18,8 @@ class Marty::Scripting < Netzke::Base
                              align: :stretch,
                            },
                            items: [
-                                   :script_list,
-                                   :script_log,
+                                   :tag_grid,
+                                   :script_grid,
                                   ],
                          },
                          :script_tester,
@@ -37,30 +37,30 @@ class Marty::Scripting < Netzke::Base
       function() {
       this.callParent();
 
-      var script_list = this.netzkeGetComponent('script_list').getView();
-      script_list.on('itemclick', function(script_list, record) {
+      var script_grid = this.netzkeGetComponent('script_grid').getView();
+      script_grid.on('itemclick', function(script_grid, record) {
 	var id = record.get('id');
         this.selectScript({script_id: id});
-        this.netzkeGetComponent('script_log').getStore().load();
+        this.netzkeGetComponent('tag_grid').getStore().load();
         this.netzkeGetComponent('script_details').netzkeLoad({id: id});
         this.netzkeGetComponent('script_tester').selectScript(id);
       }, this);
 
-      var script_log = this.netzkeGetComponent('script_log').getView();
-      script_log.on('itemclick', function(script_log, record) {
+      var tag_grid = this.netzkeGetComponent('tag_grid').getView();
+      tag_grid.on('itemclick', function(tag_grid, record) {
 	var id = record.get('id');
-        this.selectLog({log_id: id});
+        this.selectTag({tag_id: id});
         this.netzkeGetComponent('script_details').netzkeLoad({id: id});
         this.netzkeGetComponent('script_tester').selectScript(id);
         }, this);
 
       // display tooltip for checkin log message
-      script_log.on('render', function(view) {
+      tag_grid.on('render', function(view) {
           view.tip = Ext.create('Ext.tip.ToolTip', {
               target: view.el,
               delegate: view.itemSelector,
               trackMouse: true,
-              minWidth: 300, 
+              minWidth: 300,
               maxWidth: 500,
               dismissDelay: 0,
               showDelay: 200,
@@ -85,8 +85,8 @@ class Marty::Scripting < Netzke::Base
 	}
         else {
 	  this.selectScript({script_id: script_id});
-          this.netzkeGetComponent('script_list').getStore().load();
-          this.netzkeGetComponent('script_log').getStore().load();
+          this.netzkeGetComponent('script_grid').getStore().load();
+          this.netzkeGetComponent('tag_grid').getStore().load();
           this.netzkeGetComponent('script_details').netzkeLoad({id: script_id});
           this.netzkeGetComponent('script_tester').selectScript(script_id);
 	}
@@ -102,44 +102,44 @@ class Marty::Scripting < Netzke::Base
     component_session[:selected_script_id] = params[:script_id]
   end
 
-  endpoint :select_log do |params, this|
+  endpoint :select_tag do |params, this|
     # store selected script id in the session for this component's instance
-    component_session[:selected_script_id] = params[:log_id]
+    component_session[:selected_script_id] = params[:tag_id]
   end
 
-  component :script_list do |c|
-    c.width 		= 400
-    c.klass 		= Marty::ScriptGrid
-    c.title 		= I18n.t("script.selection_list")
-    c.flex 		= 1
+  component :script_grid do |c|
+    c.width		= 400
+    c.klass		= Marty::ScriptGrid
+    c.title		= I18n.t("script.selection_list")
+    c.flex		= 1
     c.allow_edit	= config[:allow_edit]
   end
 
-  component :script_log do |c|
-    c.klass 		= Marty::ScriptLogGrid
-    c.width 		= 400
-    c.load_inline_data 	= false
-    c.group_id 	 	= component_session[:selected_group_id]
-    c.script_id 	= component_session[:selected_script_id]
-    c.title 		= I18n.t("script.selection_history")
-    c.flex 		= 1
+  component :tag_grid do |c|
+    c.klass		= Marty::TagGrid
+    c.width		= 400
+    c.load_inline_data	= false
+    c.group_id		= component_session[:selected_group_id]
+    c.script_id		= component_session[:selected_script_id]
+    c.title		= I18n.t("script.selection_history")
+    c.flex		= 1
   end
 
   component :script_details do |c|
-    c.klass 		= Marty::ScriptDetail
-    c.script_id 	= component_session[:selected_script_id]
-    c.title 		= I18n.t("script.details")
-    c.flex 		= 1
-    c.split 		= true
-    c.region 		= :west
+    c.klass		= Marty::ScriptDetail
+    c.script_id		= component_session[:selected_script_id]
+    c.title		= I18n.t("script.details")
+    c.flex		= 1
+    c.split		= true
+    c.region		= :west
     c.allow_edit	= config[:allow_edit]
   end
 
   component :script_tester do |c|
-    c.klass 		= Marty::ScriptTester
-    c.script_id 	= component_session[:selected_script_id]
-    c.title 		= I18n.t("script.tester")
-    c.flex 		= 1
+    c.klass		= Marty::ScriptTester
+    c.script_id		= component_session[:selected_script_id]
+    c.title		= I18n.t("script.tester")
+    c.flex		= 1
   end
 
 end

@@ -8,30 +8,30 @@ class Marty::Reporting < Netzke::Base
   end
 
   js_configure do |c|
-    c.header 	= false
-    c.layout 	= :border
-    c.defaults 	= {body_style: 'padding:0px'}
+    c.header	= false
+    c.layout	= :border
+    c.defaults	= {body_style: 'padding:0px'}
 
     c.select_report = <<-JS
-      	function() {
+        function() {
           // this.netzkeGetComponent('report_form').netzkeLoad({});
-	  // FIXME: NetzkeReload() doesn't work when performed on
-	  // ReportForm. So, reload all of Reporting.
-	  this.netzkeReload();
-      	}
+          // FIXME: NetzkeReload() doesn't work when performed on
+          // ReportForm. So, reload all of Reporting.
+          this.netzkeReload();
+        }
       JS
   end
 
   component :report_form do |c|
-    c.klass 	= Marty::ReportForm
-    c.flex 	= 1
-    c.region 	= :center
+    c.klass	= Marty::ReportForm
+    c.flex	= 1
+    c.region	= :center
   end
 
   component :select_report do |c|
-    c.klass 	= Marty::SelectReport
-    c.split 	= true
-    c.region 	= :west
+    c.klass	= Marty::SelectReport
+    c.split	= true
+    c.region	= :west
     c.width	= 300
   end
 end

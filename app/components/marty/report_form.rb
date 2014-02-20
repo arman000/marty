@@ -37,7 +37,10 @@ class Marty::ReportForm < Marty::CmFormPanel
       d_params[k] = nil if v.blank? || v == "null"
     end
 
-    [Marty::ScriptSet.get_engine(session[:selected_script_id]), d_params]
+    sset = Marty::ScriptSet.new session[:selected_tag_id]
+    engine = sset.get_engine(session[:selected_script_id])
+
+    [engine, d_params]
   end
 
   def run_eval(params)
@@ -134,22 +137,18 @@ class Marty::ReportForm < Marty::CmFormPanel
   def configure(c)
     super
 
-    if session[:selected_script_id].nil? || session[:selected_node].nil?
+    unless session[:selected_script_id] &&
+        session[:selected_tag_id]
+        session[:selected_node] &&
       c.title = "No Report selected."
       return
     end
 
     begin
-      @engine = Marty::ScriptSet.get_engine(session[:selected_script_id])
+      sset = Marty::ScriptSet.new session[:selected_tag_id]
+      @engine = sset.get_engine(session[:selected_script_id])
+
       raise @engine.to_s if @engine.is_a?(Hash)
-      selected_ver = Marty::Script.
-        find_by_id(session[:selected_script_id]).version
-      script_name  = Marty::Script.
-        find_by_id(session[:selected_script_id]).name
-      latest_ver   = Marty::Script.
-        where("name = ? and obsoleted_dt = 'infinity'",
-              script_name)[0].version
-      version = selected_ver.match(/^#{latest_ver}$/) ? nil : selected_ver
 
       items, title, format = @engine.
         evaluate_attrs(session[:selected_node], ["form", "title", "format"], {})
@@ -163,9 +162,9 @@ class Marty::ReportForm < Marty::CmFormPanel
       c.items = [
                  {
                    field_label:	'Exception',
-                   xtype: 	:displayfield,
-                   name: 	'displayfield1',
-                   value: 	"<span style=\"color:red;\">#{exc}</span>"
+                   xtype:	:displayfield,
+                   name:	'displayfield1',
+                   value:	"<span style=\"color:red;\">#{exc}</span>"
                  },
                 ]
       return
@@ -176,12 +175,12 @@ class Marty::ReportForm < Marty::CmFormPanel
     items = [{html: "<br><b>No input is needed for this report.</b>"}] if
       items.empty?
 
-    self.filename = version.nil? ? title.to_s : "#{title}_#{version}"
+    tag_name = sset.tag.name
 
+    self.filename = "#{title}_#{tag_name}"
     c.items	= items
     c.repformat	= format
-    c.title	= "Generate: #{title}"
-    c.title	+= "-#{version}" if version
+    c.title	= "Generate: #{title}-#{tag_name}"
   end
 end
 
