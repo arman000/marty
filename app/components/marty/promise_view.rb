@@ -95,25 +95,26 @@ class Marty::PromiseView < Marty::TreePanel
   end
 
   action :download do |a|
-    a.text 	= a.tooltip = "Download"
+    a.text	= a.tooltip = "Download"
     a.disabled	= true
-    a.icon  	= :application_put
+    a.icon	= :application_put
   end
 
   action :refresh do |a|
-    a.text 	= a.tooltip = "Refresh"
+    a.text	= a.tooltip = "Refresh"
     a.disabled	= false
-    a.icon  	= :arrow_refresh
+    a.icon	= :arrow_refresh
   end
 
   action :status do |a|
-    a.text 	= a.tooltip = "Status"
+    a.text	= a.tooltip = "Status"
     a.disabled	= false
-    a.icon  	= :monitor
+    a.icon	= :monitor
   end
 
   endpoint :server_status do |params, this|
-    status = `script/delayed_job status`
+    e, root = ENV['RAILS_ENV'], Rails.root
+    status = `RAILS_ENV=#{e}; #{root}/script/delayed_job status`
     html = status.html_safe.gsub("\n","<br/>")
     this.show_detail html
   end
