@@ -16,10 +16,7 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
   end
 
   def get_data(*args)
-    ts = Marty::Util.get_posting_time
-
-    # normalize infinity
-    ts = 'infinity' if Mcfly::Model::INFINITIES.member? ts
+    ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
 
     # FIXME: may need to pass the scope in using the params hash in
     # args.  Not sure how the following will interact with sorting.
@@ -59,8 +56,7 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
 private
   def self.mcfly_scope(sort_column)
     lambda { |r|
-      t = Marty::Util.get_posting_time
-      ts = (t == Float::INFINITY) ? 'infinity' : t
+      ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
       r.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).
       order(sort_column.to_sym)
     }

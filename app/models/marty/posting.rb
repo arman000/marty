@@ -9,7 +9,7 @@ class Marty::Posting < Marty::Base
   belongs_to :posting_type
 
   def self.make_name(posting_type, dt, is_test)
-    return 'NOW' if Mcfly::Model::INFINITIES.member?(dt)
+    return 'NOW' if Mcfly.is_infinity(dt)
 
     return unless posting_type
 

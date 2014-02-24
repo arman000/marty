@@ -8,7 +8,7 @@ class Marty::Tag < Marty::Base
   belongs_to :user, class_name: "Marty::User"
 
   def self.make_name(dt)
-    return 'DEV' if Mcfly::Model::INFINITIES.member?(dt)
+    return 'DEV' if Mcfly.is_infinity(dt)
 
     # If no dt is provided (which is the usual non-testing case), we
     # use Time.now.strftime to name the posting.  This has the effect
@@ -33,7 +33,7 @@ class Marty::Tag < Marty::Base
   end
 
   def isdev?
-    Mcfly::Model::INFINITIES.member?(created_dt)
+    Mcfly.is_infinity(created_dt)
   end
 
   delorean_fn :lookup, sig: 1 do

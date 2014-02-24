@@ -66,7 +66,7 @@ class Marty::DataExporter
     # strip _id from assoc fields
     header = [ info[:cols].map { |c| info[:assoc][c] ? c[0..-4] : c } ]
 
-    ts = 'infinity' if Mcfly::Model::INFINITIES.member? ts
+    ts = Mcfly.normalize_infinity(ts)
 
     header + klass.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).
       order(sort_field || :id).all.

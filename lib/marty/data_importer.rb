@@ -91,9 +91,9 @@ module Marty
           # Rails 3.2 appears to be broken. Setting a date field to
           # 'infinity' sets it to nil.
           v =~ FLOAT_PAT ? EXCEL_START_DATE + v.to_f :
-            Mcfly::Model::INFINITIES.member?(v) ? 'infinity' : v.to_date
+            Mcfly.is_infinity(v) ? 'infinity' : v.to_date
         when :datetime
-          Mcfly::Model::INFINITIES.member?(v) ? 'infinity' : v.to_datetime
+          Mcfly.is_infinity(v) ? 'infinity' : v.to_datetime
         else
           raise "unknown type #{type} for #{v}"
         end
@@ -180,12 +180,9 @@ module Marty
         tag = obj.new_record? ? :create : (obj.changed? ? :update : :same)
 
         raise "old created_dt >= current #{obj} #{obj.created_dt} #{dt}" if
-          (tag == :update) &&
-          !Mcfly::Model::INFINITIES.member?(dt) &&
-          (obj.created_dt > dt)
+          (tag == :update) && !Mcfly.is_infinity(dt) && (obj.created_dt > dt)
 
-        obj.created_dt = dt unless
-          tag == :same || Mcfly::Model::INFINITIES.member?(dt)
+        obj.created_dt = dt unless tag == :same || Mcfly.is_infinity(dt)
         obj.save!
 
         [tag, obj.id]

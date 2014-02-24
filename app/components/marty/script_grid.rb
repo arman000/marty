@@ -28,9 +28,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
 
     return 'infinity' unless tag
 
-    # normalize infinity
-    Mcfly::Model::INFINITIES.member?(tag.created_dt) ? 'infinity' :
-      tag.created_dt
+    Mcfly.normalize_infinity(tag.created_dt)
   end
 
   def get_data(*args)

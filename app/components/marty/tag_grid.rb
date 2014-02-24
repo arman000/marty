@@ -61,7 +61,7 @@ class Marty::TagGrid < Marty::CmGridPanel
     record_id = params[:record_id]
     pt = Marty::Tag.find_by_id(record_id)
 
-    dt = Mcfly::Model::INFINITIES.member?(pt.created_dt) ? '---' :
+    dt = Mcfly.is_infinity(pt.created_dt) ? '---' :
       pt.created_dt.strftime('%Y-%m-%d %I:%M %p')
 
     html =

@@ -13,9 +13,22 @@ class Marty::Script < Marty::Base
 
   belongs_to :user, class_name: "Marty::User"
 
-  def self.find_script(sname, version)
-    raise "FIXME: IMPLEMENT"
-  end
+  gen_mcfly_lookup :lookup, {
+    name: false,
+  }
 
   gen_mcfly_lookup :get_all, {}, mode: :all
+
+  # find script by name/tag
+  def self.find_script(sname, tag)
+    if tag.is_a? String
+      tag = Marty::Tag.find_by_name(tag)
+    elsif tag.is_a?(Fixnum)
+      tag = Marty::Tag.find_by_id(tag)
+    end
+
+    raise "no such tag" unless tag
+
+    Marty::Script.lookup(tag.created_dt, sname)
+  end
 end

@@ -31,12 +31,18 @@ class Marty::ScriptSet < Delorean::AbstractContainer
   def get_engine(script)
     if script.is_a?(Fixnum)
       script = Marty::Script.find_by_id(script)
+
+      if script
+        # sanity check -- make sure script belongs to the tag
+        sane = Marty::Script.find_script(script.name, tag)
+        raise "script/tag mismatch #{script.id} #{tag.name}" unless
+          sane && sane.id == script.id
+      end
     elsif script.is_a?(String)
       script = Marty::Script.find_script(script, tag)
     end
 
-    return {error: "No such script"} unless script
-
+    raise "No such script" unless script
     raise "bad script arg: #{script}" unless script.is_a? Marty::Script
 
     if tag.isdev?
