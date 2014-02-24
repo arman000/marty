@@ -19,14 +19,15 @@ class Marty::DataExporter
     end
   end
 
-  def self.to_csv(obj, transpose=false)
+  # FIXME: very hacky to default row_sep to CRLF
+  def self.to_csv(obj, transpose=false, row_sep="\r\n")
     obj = [obj] unless obj.respond_to? :map
 
     # if all array items are hashes, we merge them
     obj = hash_array_merge(obj, transpose) if
       obj.map {|x| x.is_a? Hash}.all?
 
-    csv_string = CSV.generate do |csv|
+    csv_string = CSV.generate(row_sep: row_sep) do |csv|
       obj.each { |x|
         x = [x] unless x.respond_to? :map
         csv << x.flatten(1).map(&:to_s)
