@@ -114,7 +114,13 @@ class Marty::PromiseView < Marty::TreePanel
 
   endpoint :server_status do |params, this|
     e, root = ENV['RAILS_ENV'], Rails.root
-    status = `RAILS_ENV=#{e}; #{root}/script/delayed_job status`
+    begin
+      # 2>&1 redirects STDERR to STDOUT since backticks only captures STDOUT
+      status = `RAILS_ENV=#{e} #{root}/script/delayed_job status 2>&1`
+    rescue => exc
+      status = "error getting server status: #{exc}"
+      Marty::Util.logger.error(status)
+    end
     html = status.html_safe.gsub("\n","<br/>")
     this.show_detail html
   end
