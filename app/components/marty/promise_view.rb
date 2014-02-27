@@ -95,33 +95,31 @@ class Marty::PromiseView < Marty::TreePanel
   end
 
   action :download do |a|
-    a.text	= a.tooltip = "Download"
+    a.text	= a.tooltip = 'Download'
     a.disabled	= true
     a.icon	= :application_put
   end
 
   action :refresh do |a|
-    a.text	= a.tooltip = "Refresh"
+    a.text	= a.tooltip = 'Refresh'
     a.disabled	= false
     a.icon	= :arrow_refresh
   end
 
   action :status do |a|
-    a.text	= a.tooltip = "Status"
+    a.text	= 'Status'
+    a.tooltip	= 'Run script/delayed_job status'
     a.disabled	= false
     a.icon	= :monitor
   end
 
   endpoint :server_status do |params, this|
     e, root = ENV['RAILS_ENV'], Rails.root
-    begin
-      # 2>&1 redirects STDERR to STDOUT since backticks only captures STDOUT
-      p = "/usr/local/rvm/gems/ruby-1.9.3-p362/bin"
-      status = `export RAILS_ENV=#{e};export PATH=#{p}:$PATH; #{root}/script/delayed_job status 2>&1`
-    rescue => exc
-      status = "error getting server status: #{exc}"
-      Marty::Util.logger.error(status)
-    end
+    p = "/usr/local/rvm/gems/ruby-1.9.3-p362/bin"
+    # 2>&1 redirects STDERR to STDOUT since backticks only captures STDOUT
+    cmd = "export RAILS_ENV=#{e};export PATH=#{p}:$PATH;" +
+      "#{root}/script/delayed_job status 2>&1"
+    status = `#{cmd}`
     html = status.html_safe.gsub("\n","<br/>")
     this.show_detail html
   end
