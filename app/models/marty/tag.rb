@@ -25,15 +25,28 @@ class Marty::Tag < Marty::Base
   end
 
   def self.do_create(dt, comment)
-    o 			= new
-    o.comment		= comment
-    o.created_dt	= dt
+    o            = new
+    o.comment    = comment
+    o.created_dt = dt
     o.save!
     o
   end
 
   def isdev?
     Mcfly.is_infinity(created_dt)
+  end
+
+  def self.map_to_tag(tag)
+    if tag.is_a? String
+      tag = find_by_name(tag)
+    elsif tag.is_a?(Fixnum)
+      tag = find_by_id(tag)
+    elsif !tag
+      tag = get_latest1
+    end
+
+    raise "bad tag #{tag}" unless tag.is_a? Marty::Tag
+    tag
   end
 
   delorean_fn :lookup, sig: 1 do
@@ -46,8 +59,12 @@ class Marty::Tag < Marty::Base
     lookup(name).try(:created_dt)
   end
 
-  delorean_fn :get_latest, sig: [1, 2] do
+  delorean_fn :get_latest, sig: 1 do
     |limit|
     where("created_dt <> 'infinity'").order("created_dt DESC").limit(limit).to_a
+  end
+
+  delorean_fn :get_latest1, sig: 0 do
+    where("created_dt <> 'infinity'").order("created_dt DESC").first
   end
 end

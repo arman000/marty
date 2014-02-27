@@ -21,10 +21,7 @@ class Delorean::BaseModule::NodeCall
       attr = nil
     end
 
-    # FIXME: if node is a string like "A::B", then the version
-    # selected will be from the caller[?]
-
-    script, version = engine.module_name, engine.version
+    script, tag = engine.module_name, engine.sset.tag
     nn = node.is_a?(Class) ? node.name : node.to_s
 
     begin
@@ -46,7 +43,7 @@ class Delorean::BaseModule::NodeCall
 
     begin
       job = Delayed::Job.enqueue Marty::PromiseJob.
-        new(promise, title, script, version, nn, params, args, hook)
+        new(promise, title, script, tag, nn, params, args, hook)
     rescue => exc
       # log "CALLERR #{exc}"
       res = Delorean::Engine.grok_runtime_exception(exc)
@@ -77,7 +74,7 @@ end
 class Marty::PromiseJob < Struct.new(:promise,
                                      :title,
                                      :sname,
-                                     :version,
+                                     :tag,
                                      :node,
                                      :params,
                                      :attrs,
@@ -96,11 +93,11 @@ class Marty::PromiseJob < Struct.new(:promise,
       # in case the job writes to the the database
       Mcfly.whodunnit = promise.user
 
-      script = Marty::Script.find_script(sname, version)
+      script = Marty::Script.find_script(sname, tag)
 
-      raise "Can't find #{sname} version #{version}" unless script
+      raise "Can't find #{sname} tag #{tag}" unless script
 
-      engine = Marty::ScriptSet.get_engine(script)
+      engine = Marty::ScriptSet.new(tag).get_engine(script)
 
       engine.evaluate_attrs(node, attrs, params)
 

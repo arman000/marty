@@ -10,21 +10,18 @@ class Marty::ScriptSet < Delorean::AbstractContainer
 
   attr_reader :tag
 
-  def initialize(tag)
-    if tag.is_a? String
-      tag = Marty::Tag.find_by_name(tag)
-    elsif tag.is_a?(Fixnum)
-      tag = Marty::Tag.find_by_id(tag)
-    end
-
-    raise "bad tag #{tag}" unless tag.is_a? Marty::Tag
-    @tag = tag
+  def initialize(tag=nil)
+    @tag = Marty::Tag.map_to_tag(tag)
     super()
   end
 
   def parse(script)
-    engine = Delorean::Engine.new(script.name)
-    engine.parse(script.body, self)
+    parse_check script.name, script.body
+  end
+
+  def parse_check(sname, body)
+    engine = Delorean::Engine.new(sname, self)
+    engine.parse(body)
     engine
   end
 
@@ -48,6 +45,9 @@ class Marty::ScriptSet < Delorean::AbstractContainer
     if tag.isdev?
       engine, created_dt = @@dengines[script.id]
 
+      # FIXME: need to invalidate engine and its imports if any of its
+      # imports changed.  Right now, just checking script itself.
+
       if created_dt && created_dt == script.created_dt
         add_imports(engine)
         return engine
@@ -56,10 +56,9 @@ class Marty::ScriptSet < Delorean::AbstractContainer
       engine = parse(script)
       @@dengines[script.id] = [engine, script.created_dt]
     else
-      # using created_dt instead of version so that we handle cases
-      # where cucumber wipes the database but @@engines is still
-      # cached.
-      engine, created_dt = @@engines[script.id]
+      # using created_dt so that we handle cases where cucumber wipes
+      # the database but @@engines is still cached. --- FIXME: Needed?
+      engine, created_dt = @@engines[[tag.id, script.id]]
 
       if created_dt && created_dt == script.created_dt
         add_imports(engine)
@@ -67,11 +66,8 @@ class Marty::ScriptSet < Delorean::AbstractContainer
       end
 
       engine = parse(script)
-      @@engines[script.id] = [engine, script.created_dt]
+      @@engines[[tag.id, script.id]] = [engine, script.created_dt]
     end
     engine
   end
-
-  ######################################################################
-
 end

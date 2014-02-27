@@ -8,9 +8,9 @@ class Marty::Reporting < Netzke::Base
   end
 
   js_configure do |c|
-    c.header	= false
-    c.layout	= :border
-    c.defaults	= {body_style: 'padding:0px'}
+    c.header   = false
+    c.layout   = :border
+    c.defaults = {body_style: 'padding:0px'}
 
     c.select_report = <<-JS
         function() {
@@ -23,16 +23,16 @@ class Marty::Reporting < Netzke::Base
   end
 
   component :report_form do |c|
-    c.klass	= Marty::ReportForm
-    c.flex	= 1
-    c.region	= :center
+    c.klass  = Marty::ReportForm
+    c.flex   = 1
+    c.region = :center
   end
 
   component :select_report do |c|
-    c.klass	= Marty::SelectReport
-    c.split	= true
-    c.region	= :west
-    c.width	= 300
+    c.klass  = Marty::SelectReport
+    c.split  = true
+    c.region = :west
+    c.width  = 300
   end
 end
 

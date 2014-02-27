@@ -3,7 +3,7 @@ class Marty::RpcController < ActionController::Base
 
   def evaluate
     res = do_eval(params["script"],
-                  params["version"],
+                  params["tag"],
                   params["node"],
                   params["attrs"] || "[]",
                   params["params"] || "{}",
@@ -22,7 +22,7 @@ class Marty::RpcController < ActionController::Base
 
   private
 
-  def do_eval(sname, version, node, attrs, params)
+  def do_eval(sname, tag, node, attrs, params)
     return {error: "Bad attrs"} if !attrs.is_a?(String)
 
     begin
@@ -45,11 +45,11 @@ class Marty::RpcController < ActionController::Base
     return {error: "Malformed params"} unless
       params.is_a?(Hash)
 
-    script = Marty::Script.find_script(sname, version)
+    script = Marty::Script.find_script(sname, tag)
 
-    return {error: "Can't find #{sname} version #{version}"} unless script
+    return {error: "Can't find #{sname} tag #{tag}"} unless script
 
-    engine = Marty::ScriptSet.get_engine(script)
+    engine = Marty::ScriptSet.new(tag).get_engine(script)
 
     begin
       engine.evaluate_attrs(node, attrs, params)

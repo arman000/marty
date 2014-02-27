@@ -1,13 +1,17 @@
 class Marty::TagGrid < Marty::CmGridPanel
-  has_marty_permissions read: :any
+  has_marty_permissions	read: :any,
+  			create: :dev
 
   def configure(c)
     super
 
-    c.header	= false
-    c.model	= "Marty::Tag"
-    c.columns	||= [:name, :created_dt, :user__name, :comment]
-    c.data_store.sorters = {property: :created_dt, direction: 'DESC'}
+    c.header    = false
+    c.model     = "Marty::Tag"
+    c.columns ||= [:name, :created_dt, :user__name, :comment]
+    c.data_store.sorters = {
+      property: :created_dt,
+      direction: 'DESC',
+    }
   end
 
   js_configure do |c|
@@ -16,79 +20,68 @@ class Marty::TagGrid < Marty::CmGridPanel
        this.callParent();
        // Set single selection mode. FIXME: can this be done on config?
        this.getSelectionModel().setSelectionMode('SINGLE');
-       this.getSelectionModel().on('selectionchange', function(selModel) {
-          this.actions.detail &&
-          this.actions.detail.setDisabled(!selModel.hasSelection());
-       }, this);
     }
     JS
+  end
 
-    c.detail = <<-JS
-    function() {
-       record_id = this.getSelectionModel().selected.first().getId();
-       this.serverDetail({record_id: record_id});
-    }
-    JS
+  endpoint :add_window__add_form__netzke_submit do |params, this|
+    data = ActiveSupport::JSON.decode(params[:data])
 
-    c.show_detail = <<-JS
-    function(details) {
-      Ext.create('Ext.Window', {
-        height:		150,
-        minWidth:	250,
-        autoWidth:	true,
-        modal:		true,
-        autoScroll:	true,
-        html:		details,
-        title:		"Tag Details"
-     }).show();
-    }
-    JS
+    return this.netzke_feedback("Permission Denied") if
+      config[:prohibit_create]
 
+    # FIXME: disallow tag creation when no script has been modified.
+
+    tag = Marty::Tag.do_create(nil, data["comment"])
+
+    if tag.valid?
+      this.success = true
+      this.on_submit_success
+      return
+    end
+
+    data_adapter.errors_array(tag).each do |error|
+      flash :error => error
+    end
+
+    this.netzke_feedback(@flash)
+  end
+
+  action :add_in_form do |a|
+    a.text     = "New Tag"
+    a.tooltip  = "New Tag"
+    a.icon     = :time_add
+    a.disabled = config[:prohibit_create]
   end
 
   def default_bbar
-    [:detail]
+    [:add_in_form]
   end
 
-  action :detail do |a|
-    a.text	= "Detail"
-    a.icon	= :application_view_detail
-    a.handler	= :detail
-    a.disabled	= true
+  def default_context_menu
+    []
   end
 
-  endpoint :server_detail do |params, this|
-    record_id = params[:record_id]
-    pt = Marty::Tag.find_by_id(record_id)
-
-    dt = Mcfly.is_infinity(pt.created_dt) ? '---' :
-      pt.created_dt.strftime('%Y-%m-%d %I:%M %p')
-
-    html =
-      "<b>Name:</b>\t#{pt.name}<br/>" +
-      "<b>Date/Time:</b>\t#{dt}<br/>" +
-      "<b>User:</b>\t#{pt.user.name}<br/>" +
-      "<b>Comment:</b>\t#{pt.comment}"
-
-    this.show_detail html
+  def default_fields_for_forms
+    [:comment]
   end
 
   column :name do |c|
-    c.flex	= 1
   end
 
   column :created_dt do |c|
-    c.text	= "Date/Time"
-    c.format	= "Y-m-d H:i"
-    c.hidden	= true
+    c.text   = "Date/Time"
+    c.format = "Y-m-d H:i"
+    c.hidden = true
   end
 
   column :user__name do |c|
-    c.width	= 100
+    c.width  = 100
   end
 
   column :comment do |c|
-    c.width	= 100
+    c.width  = 100
+    c.flex   = 1
   end
 
 end

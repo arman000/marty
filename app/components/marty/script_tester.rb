@@ -4,134 +4,140 @@ class Marty::ScriptTester < Marty::CmFormPanel
   def configure(c)
     super
 
-    c.items = [
-               fieldset(I18n.t("script_tester.attributes"),
-                        {
-                          xtype: 	:netzkeremotecombo,
-                          name: 	"nodename",
-                          attr_type: 	:string,
-                          virtual: 	true,
-                          field_label: 	"Node",
-                        },
-                        {
-                          xtype: 	:netzkeremotecombo,
-                          name: 	"attrname",
-                          attr_type: 	:string,
-                          virtual: 	true,
-                          field_label: 	"Attribute",
-                        },
-                        {
-                          name: 	"attrs",
-                          attr_type: 	:text,
-                          value: 	"",
-                          hide_label: 	true,
-                          min_height: 	150,
-                        },
-                        {},
-                        ),
-               fieldset(I18n.t("script_tester.parameters"),
-                        {
-                          xtype: 	:netzkeremotecombo,
-                          name: 	"paramname",
-                          attr_type: 	:string,
-                          virtual: 	true,
-                          hide_label: 	true,
-                        },
-                        {
-                          name: 	"params",
-                          attr_type: 	:text,
-                          value: 	"",
-                          hide_label: 	true,
-                          min_height: 	100,
-                        },
-                        {},
-                        ),
-               :result,
-              ]
+    c.items =
+      [
+       fieldset(I18n.t("script_tester.attributes"),
+                {
+		  xtype:	:netzkeremotecombo,
+		  name:		"nodename",
+		  attr_type:	:string,
+		  virtual:	true,
+		  field_label:	"Node",
+		},
+		{
+		  xtype:	:netzkeremotecombo,
+		  name:		"attrname",
+		  attr_type:	:string,
+		  virtual:	true,
+		  field_label:	"Attribute",
+		},
+		{
+		  name:		"attrs",
+		  attr_type:	:text,
+		  value:	"",
+		  hide_label:	true,
+		  min_height:	150,
+		},
+		{},
+		),
+       fieldset(I18n.t("script_tester.parameters"),
+		{
+		  xtype:	:netzkeremotecombo,
+		  name:		"paramname",
+		  attr_type:	:string,
+		  virtual:	true,
+		  hide_label:	true,
+		},
+		{
+		  name:		"params",
+		  attr_type:	:text,
+		  value:	"",
+		  hide_label:	true,
+		  min_height:	100,
+		},
+                {},
+                ),
+       :result,
+      ]
   end
 
   js_configure do |c|
     c.select_script = <<-JS
-      function(script_id) {
-	var me = this;
+    function(script_id) {
+       var me = this;
 
-        me.loadScript({script_id: script_id});
+       // FIXME: script_id not needed anymore?????
+       me.loadScript({script_id: script_id});
 
-	var form = me.getForm();
-	// reload the attr/param drop downs
-	form.findField('nodename').store.load({params: {}});
-	form.findField('attrname').reset();
-	form.findField('attrname').store.load({params: {}});
-	form.findField('paramname').store.load({params: {}});
-      }
-      JS
+       var form = me.getForm();
+       // reload the attr/param drop downs
+       form.findField('nodename').store.load({params: {}});
+       form.findField('attrname').reset();
+       form.findField('attrname').store.load({params: {}});
+       form.findField('paramname').store.load({params: {}});
+    }
+    JS
 
     c.init_component = <<-JS
-      function() {
-	var me = this;
-        me.callParent();
-	var form = me.getForm();
+    function() {
+       var me = this;
+       me.callParent();
+       var form = me.getForm();
 
-	var nodename 	= form.findField('nodename');
-	var attrname 	= form.findField('attrname');
-	var attrs 	= form.findField('attrs');
-	var paramname 	= form.findField('paramname');
-	var params 	= form.findField('params');
+       var nodename  = form.findField('nodename');
+       var attrname  = form.findField('attrname');
+       var attrs     = form.findField('attrs');
+       var paramname = form.findField('paramname');
+       var params    = form.findField('params');
 
-      	nodename.on('select', function(combo, record) {
+       nodename.on('select', function(combo, record) {
           var data = record[0] && record[0].data;
-	  me.selectNode({node: data.text});
-	  attrname.reset();
-	  attrname.store.load({params: {}});
-	});
+          me.selectNode({node: data.text});
+          attrname.reset();
+          attrname.store.load({params: {}});
+       });
 
-      	attrname.on('select', function(combo, record) {
-	   if (nodename.getValue()) {
- 	     attrs.setValue(attrs.getValue() +
-		nodename.getDisplayValue() + "." + record[0].data.text + '; ');
-           }
-	   combo.select(null);
-	});
+       attrname.on('select', function(combo, record) {
+          if (nodename.getValue()) {
+             attrs.setValue(attrs.getValue() +
+                nodename.getDisplayValue() + "." + record[0].data.text + '; ');
+          }
+          combo.select(null);
+       });
 
-      	paramname.on('select', function(combo, record) {
- 	   params.setValue(params.getValue() + record[0].data.text + " = 0.0\\n");
-	   combo.select(null);
-	});
-      }
-      JS
+       paramname.on('select', function(combo, record) {
+          params.setValue(params.getValue() + record[0].data.text + " = 0\\n");
+          combo.select(null);
+       });
+    }
+    JS
 
     c.set_result = <<-JS
-      function(html) {
-	var result = this.netzkeGetComponent('result');
-	result.updateBodyHtml(html);
-      }
-      JS
+    function(html) {
+       var result = this.netzkeGetComponent('result');
+       result.updateBodyHtml(html);
+    }
+    JS
 
   end
 
+  def new_engine
+    Marty::ScriptSet.new(session[:selected_tag_id]).
+      get_engine(session[:selected_script_id])
+  end
+
   def node_list
-    engine = Marty::ScriptSet.
-      get_engine(component_session[:script_id])
+    engine = new_engine
     engine ? engine.enumerate_nodes.sort : []
   end
 
   def attr_list
-    engine = Marty::ScriptSet.
-      get_engine(component_session[:script_id])
-    node = component_session[:selected_node]
+    engine = new_engine
+    node = session[:selected_node]
     return [] unless node
 
     engine ? engine.enumerate_attrs_by_node(node).sort : []
   end
 
   def param_list
-    engine = Marty::ScriptSet.get_engine(component_session[:script_id])
+    engine = new_engine
     engine.enumerate_params.sort if engine || []
   end
 
   endpoint :load_script do |params, this|
-    component_session[:script_id] = params[:script_id]
-    engine = Marty::ScriptSet.get_engine(params[:script_id])
+    # FIXME: this doesn't actually do anything with the engine!!!
+
+    engine = new_engine
   end
 
   endpoint :netzke_submit do |params, this|
@@ -150,7 +156,7 @@ class Marty::ScriptTester < Marty::CmFormPanel
       return
     end
 
-    engine = Marty::ScriptSet.get_engine(component_session[:script_id])
+    engine = new_engine
 
     begin
       result = attrs.map { |a|
@@ -181,7 +187,7 @@ class Marty::ScriptTester < Marty::CmFormPanel
   end
 
   endpoint :select_node do |params, this|
-    component_session[:selected_node] = params[:node]
+    session[:selected_node] = params[:node]
   end
 
   endpoint :get_combobox_options do |params, this|
@@ -196,19 +202,19 @@ class Marty::ScriptTester < Marty::CmFormPanel
   end
 
   action :apply do |a|
-    a.text 	= I18n.t("script_tester.compute")
-    a.tooltip  	= I18n.t("script_tester.compute")
-    a.icon 	= :script_go
-    a.disabled 	= false
+    a.text     = I18n.t("script_tester.compute")
+    a.tooltip  = I18n.t("script_tester.compute")
+    a.icon     = :script_go
+    a.disabled = false
   end
 
   component :result do |c|
-    c.klass 		= Marty::CmPanel
-    c.title 		= I18n.t("script_tester.results")
-    c.html 		= ""
-    c.flex 		= 1
-    c.min_height 	= 150
-    c.auto_scroll 	= true
+    c.klass       = Marty::CmPanel
+    c.title       = I18n.t("script_tester.results")
+    c.html        = ""
+    c.flex        = 1
+    c.min_height  = 150
+    c.auto_scroll = true
   end
 
 end

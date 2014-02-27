@@ -20,15 +20,22 @@ class Marty::Script < Marty::Base
   gen_mcfly_lookup :get_all, {}, mode: :all
 
   # find script by name/tag
-  def self.find_script(sname, tag)
-    if tag.is_a? String
-      tag = Marty::Tag.find_by_name(tag)
-    elsif tag.is_a?(Fixnum)
-      tag = Marty::Tag.find_by_id(tag)
-    end
-
-    raise "no such tag" unless tag
-
+  def self.find_script(sname, tag=nil)
+    tag = Marty::Tag.map_to_tag(tag)
     Marty::Script.lookup(tag.created_dt, sname)
+  end
+
+  def find_tag
+    # find the first tag created after this script.
+    Marty::Tag.where("created_dt >= ?", created_dt).order(:created_dt).first
+  end
+
+  def self.create_script(name, body)
+    script      = new
+    script.name = name
+    script.body = body
+    script.user = Mcfly.whodunnit # FIXME: needed? why??
+    script.save!
+    script
   end
 end
