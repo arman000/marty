@@ -8,43 +8,43 @@ class Marty::ScriptTester < Marty::CmFormPanel
       [
        fieldset(I18n.t("script_tester.attributes"),
                 {
-		  xtype:	:netzkeremotecombo,
-		  name:		"nodename",
-		  attr_type:	:string,
-		  virtual:	true,
-		  field_label:	"Node",
-		},
-		{
-		  xtype:	:netzkeremotecombo,
-		  name:		"attrname",
-		  attr_type:	:string,
-		  virtual:	true,
-		  field_label:	"Attribute",
-		},
-		{
-		  name:		"attrs",
-		  attr_type:	:text,
-		  value:	"",
-		  hide_label:	true,
-		  min_height:	150,
-		},
-		{},
-		),
+                  xtype:        :netzkeremotecombo,
+                  name:         "nodename",
+                  attr_type:    :string,
+                  virtual:      true,
+                  field_label:  "Node",
+                },
+                {
+                  xtype:        :netzkeremotecombo,
+                  name:         "attrname",
+                  attr_type:    :string,
+                  virtual:      true,
+                  field_label:  "Attribute",
+                },
+                {
+                  name:         "attrs",
+                  attr_type:    :text,
+                  value:        "",
+                  hide_label:   true,
+                  min_height:   150,
+                },
+                {},
+                ),
        fieldset(I18n.t("script_tester.parameters"),
-		{
-		  xtype:	:netzkeremotecombo,
-		  name:		"paramname",
-		  attr_type:	:string,
-		  virtual:	true,
-		  hide_label:	true,
-		},
-		{
-		  name:		"params",
-		  attr_type:	:text,
-		  value:	"",
-		  hide_label:	true,
-		  min_height:	100,
-		},
+                {
+                  xtype:        :netzkeremotecombo,
+                  name:         "paramname",
+                  attr_type:    :string,
+                  virtual:      true,
+                  hide_label:   true,
+                },
+                {
+                  name:         "params",
+                  attr_type:    :text,
+                  value:        "",
+                  hide_label:   true,
+                  min_height:   100,
+                },
                 {},
                 ),
        :result,
@@ -53,11 +53,10 @@ class Marty::ScriptTester < Marty::CmFormPanel
 
   js_configure do |c|
     c.select_script = <<-JS
-    function(script_id) {
+    function(script_name) {
        var me = this;
 
-       // FIXME: script_id not needed anymore?????
-       me.loadScript({script_id: script_id});
+       me.loadScript({script_name: script_name});
 
        var form = me.getForm();
        // reload the attr/param drop downs
@@ -112,8 +111,10 @@ class Marty::ScriptTester < Marty::CmFormPanel
   end
 
   def new_engine
-    Marty::ScriptSet.new(session[:selected_tag_id]).
-      get_engine(session[:selected_script_id])
+    return unless root_sess[:selected_script_name]
+
+    Marty::ScriptSet.new(root_sess[:selected_tag_id]).
+      get_engine(root_sess[:selected_script_name])
   end
 
   def node_list
@@ -123,21 +124,19 @@ class Marty::ScriptTester < Marty::CmFormPanel
 
   def attr_list
     engine = new_engine
-    node = session[:selected_node]
-    return [] unless node
-
-    engine ? engine.enumerate_attrs_by_node(node).sort : []
+    node = root_sess[:selected_node]
+    node && engine ? engine.enumerate_attrs_by_node(node).sort : []
   end
 
   def param_list
     engine = new_engine
-    engine.enumerate_params.sort if engine || []
+    engine ? engine.enumerate_params.sort : []
   end
 
   endpoint :load_script do |params, this|
     # FIXME: this doesn't actually do anything with the engine!!!
 
-    engine = new_engine
+    # engine = new_engine
   end
 
   endpoint :netzke_submit do |params, this|
@@ -187,7 +186,7 @@ class Marty::ScriptTester < Marty::CmFormPanel
   end
 
   endpoint :select_node do |params, this|
-    session[:selected_node] = params[:node]
+    root_sess[:selected_node] = params[:node]
   end
 
   endpoint :get_combobox_options do |params, this|

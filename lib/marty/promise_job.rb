@@ -93,11 +93,7 @@ class Marty::PromiseJob < Struct.new(:promise,
       # in case the job writes to the the database
       Mcfly.whodunnit = promise.user
 
-      script = Marty::Script.find_script(sname, tag)
-
-      raise "Can't find #{sname} tag #{tag}" unless script
-
-      engine = Marty::ScriptSet.new(tag).get_engine(script)
+      engine = Marty::ScriptSet.new(tag).get_engine(sname)
 
       engine.evaluate_attrs(node, attrs, params)
 

@@ -55,8 +55,8 @@ class Marty::ScriptDetail < Marty::CmFormPanel
     ######################################################################
 
     c.refresh_parent = <<-JS
-    function(script_id) {
-       this.netzkeGetParentComponent().scriptRefresh(script_id);
+    function(script_name) {
+       this.netzkeGetParentComponent().scriptRefresh(script_name);
     }
     JS
 
@@ -80,13 +80,23 @@ class Marty::ScriptDetail < Marty::CmFormPanel
     return this.netzke_feedback("Permission Denied") unless
       self.class.has_any_perm?
 
+    script_name = params[:script_name]
+    tag_id = root_sess[:selected_tag_id]
+
     # logic from basepack's form_panel.service -- need to set @record.
-    @record = script = Marty::Script.find_by_id(params[:id])
+    @record = script = Marty::Script.find_script(script_name, tag_id)
 
     title = [script.name, script.find_tag.try(:name)].
       join(" #{Marty::ScriptDetail::DASH} ") if script
 
-    this.set_form_values js_record_data
+    # create an empty record if no script
+    js_data = @record ? js_record_data : {
+      "body" => "",
+      "id"   => -1,
+      "meta" => {},
+    }
+
+    this.set_form_values(js_data)
     this.set_title title
     this.set_readonly_mode !can_save?(script)
 
@@ -157,7 +167,7 @@ class Marty::ScriptDetail < Marty::CmFormPanel
     if script.save
       this.set_form_values(js_record_data)
       this.netzke_set_result(true)
-      this.refresh_parent(script.id)
+      this.refresh_parent(script.name)
       return
     end
 

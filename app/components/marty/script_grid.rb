@@ -25,7 +25,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
   end
 
   def get_tag_dt
-    tag = Marty::Tag.find_by_id(session[:selected_tag_id])
+    tag = Marty::Tag.find_by_id(root_sess[:selected_tag_id])
     tag ? Mcfly.normalize_infinity(tag.created_dt) : 'infinity'
   end
 

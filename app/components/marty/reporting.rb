@@ -13,13 +13,13 @@ class Marty::Reporting < Netzke::Base
     c.defaults = {body_style: 'padding:0px'}
 
     c.select_report = <<-JS
-        function() {
-          // this.netzkeGetComponent('report_form').netzkeLoad({});
-          // FIXME: NetzkeReload() doesn't work when performed on
-          // ReportForm. So, reload all of Reporting.
-          this.netzkeReload();
-        }
-      JS
+    function() {
+       // this.netzkeGetComponent('report_form').netzkeLoad({});
+       // FIXME: NetzkeReload() doesn't work when performed on
+       // ReportForm. So, reload all of Reporting.
+       this.netzkeReload();
+    }
+    JS
   end
 
   component :report_form do |c|

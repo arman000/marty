@@ -48,40 +48,31 @@ class Marty::SelectReport < Marty::CmFormPanel
 
     c.init_component = <<-JS
     function() {
-      var me = this;
-      me.callParent();
+       var me = this;
+       me.callParent();
 
-      var tag_grid    = me.netzkeGetComponent('tag_grid').getView();
-      var script_grid = me.netzkeGetComponent('script_grid').getView();
-      var form        = me.getForm();
-      var nodename    = form.findField('nodename');
+       var tag_grid    = me.netzkeGetComponent('tag_grid').getView();
+       var script_grid = me.netzkeGetComponent('script_grid').getView();
+       var form        = me.getForm();
+       var nodename    = form.findField('nodename');
 
-      tag_grid.on('itemclick', function(tag_grid, record) {
-         var id = record.get('id');
-         me.selectTag({tag_id: id});
-         var script_store = me.netzkeGetComponent('script_grid').getStore();
-         script_store.load();
-         script_store.on('load', function(self, params) {
-            script_grid.getSelectionModel().select(0);
-            var sel = script_grid.getSelectionModel().getSelection()[0];
-            var id = sel && sel.data.id;
-            me.selectScript({script_id: id});
-            nodename.reset();
-            nodename.store.load({params: {}});
-         }, me);
-      }, me);
+       tag_grid.on('itemclick', function(tag_grid, record) {
+          var tag_id = record.get('id');
+          me.selectTag({tag_id: tag_id});
+          script_grid.getStore().load();
+       }, me);
 
-      script_grid.on('itemclick', function(script_grid, record) {
-         var id = record.get('id');
-         me.selectScript({script_id: id});
-         nodename.reset();
-         nodename.store.load({params: {}});
-      }, me);
+       script_grid.on('itemclick', function(script_grid, record) {
+          var script_name = record.get('name');
+          me.selectScript({script_name: script_name});
+          nodename.reset();
+          nodename.store.load({params: {}});
+       }, me);
 
-      nodename.on('select', function(combo, record) {
-         var data = record[0] && record[0].data;
-         me.selectNode({node: data.value});
-      });
+       nodename.on('select', function(combo, record) {
+          var data = record[0] && record[0].data;
+          me.selectNode({node: data.value});
+       });
     }
     JS
 
@@ -96,8 +87,8 @@ class Marty::SelectReport < Marty::CmFormPanel
   REPORT_ATTR_SET = Set["title", "form", "result", "format"]
 
   def node_list
-    sset = Marty::ScriptSet.new session[:selected_tag_id]
-    engine = sset.get_engine(session[:selected_script_id])
+    sset = Marty::ScriptSet.new root_sess[:selected_tag_id]
+    engine = sset.get_engine(root_sess[:selected_script_name])
 
     return [] unless engine
 
@@ -122,23 +113,21 @@ class Marty::SelectReport < Marty::CmFormPanel
 
   ######################################################################
 
-  endpoint :select_node do |params, this|
-    session[:selected_node] = params[:node]
-    this.parent_select_report
+  endpoint :select_tag do |params, this|
+    root_sess[:selected_tag_id]      = params[:tag_id]
+    root_sess[:selected_script_name] = nil
+    root_sess[:selected_node]        = nil
   end
 
   endpoint :select_script do |params, this|
-    session[:selected_script_id] = params[:script_id]
+    root_sess[:selected_script_name] = params[:script_name]
+    root_sess[:selected_node]        = nil
   end
 
-  endpoint :select_tag do |params, this|
-    session[:selected_tag_id] = params[:tag_id]
-
-    # when we select a new tag, invalidate the script selection
-    # FIXME: is this right????
-    session[:selected_script_id] = nil
+  endpoint :select_node do |params, this|
+    root_sess[:selected_node]        = params[:node]
+    this.parent_select_report
   end
-
 end
 
 SelectReport = Marty::SelectReport

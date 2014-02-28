@@ -23,7 +23,7 @@ class Marty::RpcController < ActionController::Base
   private
 
   def do_eval(sname, tag, node, attrs, params)
-    return {error: "Bad attrs"} if !attrs.is_a?(String)
+    return {error: "Bad attrs"} unless attrs.is_a?(String)
 
     begin
       attrs = ActiveSupport::JSON.decode(attrs)
@@ -34,7 +34,7 @@ class Marty::RpcController < ActionController::Base
     return {error: "Malformed attrs"} unless
       attrs.is_a?(Array) && attrs.all? {|x| x.is_a? String}
 
-    return {error: "Bad params"} if !params.is_a?(String)
+    return {error: "Bad params"} unless params.is_a?(String)
 
     begin
       params = ActiveSupport::JSON.decode(params)
@@ -42,14 +42,13 @@ class Marty::RpcController < ActionController::Base
       return {error: "Malformed params"}
     end
 
-    return {error: "Malformed params"} unless
-      params.is_a?(Hash)
+    return {error: "Malformed params"} unless params.is_a?(Hash)
 
-    script = Marty::Script.find_script(sname, tag)
-
-    return {error: "Can't find #{sname} tag #{tag}"} unless script
-
-    engine = Marty::ScriptSet.new(tag).get_engine(script)
+    begin
+      engine = Marty::ScriptSet.new(tag).get_engine(sname)
+    rescue
+      return {error: "Can't get_engine #{sname} tag #{tag}"}
+    end
 
     begin
       engine.evaluate_attrs(node, attrs, params)
@@ -57,5 +56,4 @@ class Marty::RpcController < ActionController::Base
       Delorean::Engine.grok_runtime_exception(exc)
     end
   end
-
 end

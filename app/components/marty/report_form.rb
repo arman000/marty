@@ -6,17 +6,17 @@ class Marty::ReportForm < Marty::CmFormPanel
 
   # override apply for background generation
   action :apply do |a|
-    a.text	= a.tooltip = I18n.t("reporting.background")
-    a.handler	= :on_apply
-    a.icon	= :report_disk
-    a.disabled	= false
+    a.text     = a.tooltip = I18n.t("reporting.background")
+    a.handler  = :on_apply
+    a.icon     = :report_disk
+    a.disabled = false
   end
 
   action :generate do |a|
-    a.text	= a.tooltip = I18n.t("reporting.generate")
-    a.handler	= :on_generate
-    a.icon	= :report_go
-    a.disabled	= false
+    a.text     = a.tooltip = I18n.t("reporting.generate")
+    a.handler  = :on_generate
+    a.icon     = :report_go
+    a.disabled = false
   end
 
   ######################################################################
@@ -37,8 +37,10 @@ class Marty::ReportForm < Marty::CmFormPanel
       d_params[k] = nil if v.blank? || v == "null"
     end
 
-    sset = Marty::ScriptSet.new session[:selected_tag_id]
-    engine = sset.get_engine(session[:selected_script_id])
+    tag_id, script_name =
+      session[:selected_tag_id], session[:selected_script_name]
+
+    engine = Marty::ScriptSet.new(tag_id).get_engine(script_name)
 
     [engine, d_params]
   end
@@ -102,7 +104,7 @@ class Marty::ReportForm < Marty::CmFormPanel
       var data = escape(Ext.encode(values));
       // FIXME: seems pretty hacky
       window.location = "#{Marty::Util.marty_path}/components/#{self.name}." + \
-      	this.repformat + "?data=" + data;
+         this.repformat + "?data=" + data;
     }
     JS
   end
@@ -137,21 +139,22 @@ class Marty::ReportForm < Marty::CmFormPanel
   def configure(c)
     super
 
-    unless session[:selected_script_id] &&
-        session[:selected_tag_id]
-        session[:selected_node] &&
+    unless root_sess[:selected_script_name] && root_sess[:selected_node]
       c.title = "No Report selected."
       return
     end
 
     begin
-      sset = Marty::ScriptSet.new session[:selected_tag_id]
-      @engine = sset.get_engine(session[:selected_script_id])
+      sset = Marty::ScriptSet.new(root_sess[:selected_tag_id])
+      @engine = sset.get_engine(root_sess[:selected_script_name])
 
       raise @engine.to_s if @engine.is_a?(Hash)
 
       items, title, format = @engine.
-        evaluate_attrs(session[:selected_node], ["form", "title", "format"], {})
+        evaluate_attrs(root_sess[:selected_node],
+                       ["form", "title", "format"],
+                       {},
+                       )
 
       raise "bad form items" unless items.is_a?(Array)
       raise "bad format" unless
@@ -159,14 +162,15 @@ class Marty::ReportForm < Marty::CmFormPanel
 
     rescue => exc
       c.title = "ERROR"
-      c.items = [
-                 {
-                   field_label:	'Exception',
-                   xtype:	:displayfield,
-                   name:	'displayfield1',
-                   value:	"<span style=\"color:red;\">#{exc}</span>"
-                 },
-                ]
+      c.items =
+        [
+         {
+           field_label: 'Exception',
+           xtype:       :displayfield,
+           name:        'displayfield1',
+           value:       "<span style=\"color:red;\">#{exc}</span>"
+         },
+        ]
       return
     end
 
@@ -175,12 +179,20 @@ class Marty::ReportForm < Marty::CmFormPanel
     items = [{html: "<br><b>No input is needed for this report.</b>"}] if
       items.empty?
 
+    # Hacky: store these globally in session so we can get them on
+    # report generation request which comes out of band.  Also, if the
+    # user's script/tag selection changes, we don't need to redraw
+    # report_form.
+    session[:selected_tag_id]      = root_sess[:selected_tag_id]
+    session[:selected_script_name] = root_sess[:selected_script_name]
+    session[:selected_node]        = root_sess[:selected_node]
+
     tag_name = sset.tag.name
 
     self.filename = "#{title}_#{tag_name}"
-    c.items	= items
-    c.repformat	= format
-    c.title	= "Generate: #{title}-#{tag_name}"
+    c.items       = items
+    c.repformat   = format
+    c.title       = "Generate: #{title}-#{tag_name}"
   end
 end
 
