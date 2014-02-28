@@ -2,7 +2,7 @@ class Marty::Reporting < Netzke::Base
   def configure(c)
     super
     c.items = [
-               :select_report,
+               :report_select,
                :report_form,
               ]
   end
@@ -28,8 +28,8 @@ class Marty::Reporting < Netzke::Base
     c.region = :center
   end
 
-  component :select_report do |c|
-    c.klass  = Marty::SelectReport
+  component :report_select do |c|
+    c.klass  = Marty::ReportSelect
     c.split  = true
     c.region = :west
     c.width  = 300

@@ -5,7 +5,7 @@ class Marty::Scripting < Netzke::Base
 
     c.items =
       [
-       :script_detail,
+       :script_form,
        {
          xtype: "tabpanel",
          active_tab: 0,
@@ -41,7 +41,7 @@ class Marty::Scripting < Netzke::Base
 
        var tag_grid      = me.netzkeGetComponent('tag_grid').getView();
        var script_grid   = me.netzkeGetComponent('script_grid').getView();
-       var script_detail = me.netzkeGetComponent('script_detail');
+       var script_form = me.netzkeGetComponent('script_form');
        var script_tester = me.netzkeGetComponent('script_tester');
 
        tag_grid.on('itemclick', function(tag_grid, record) {
@@ -50,14 +50,14 @@ class Marty::Scripting < Netzke::Base
           script_grid.getStore().load();
           // unset script_name when new tag is selected
           var script_name = null;
-          script_detail.netzkeLoad({script_name: script_name});
+          script_form.netzkeLoad({script_name: script_name});
           script_tester.selectScript(script_name);
           }, me);
 
        script_grid.on('itemclick', function(script_grid, record) {
           var script_name = record.get('name');
           me.selectScript({script_name: script_name});
-          script_detail.netzkeLoad({script_name: script_name});
+          script_form.netzkeLoad({script_name: script_name});
           script_tester.selectScript(script_name);
           }, me);
     }
@@ -74,7 +74,7 @@ class Marty::Scripting < Netzke::Base
           this.selectScript({script_name: script_name});
           this.netzkeGetComponent('tag_grid').getStore().load();
           this.netzkeGetComponent('script_grid').getStore().load();
-          this.netzkeGetComponent('script_detail').netzkeLoad(
+          this.netzkeGetComponent('script_form').netzkeLoad(
              {script_name: script_name});
           this.netzkeGetComponent('script_tester').selectScript(script_name);
        }
@@ -106,8 +106,8 @@ class Marty::Scripting < Netzke::Base
     c.flex             = 1
   end
 
-  component :script_detail do |c|
-    c.klass            = Marty::ScriptDetail
+  component :script_form do |c|
+    c.klass            = Marty::ScriptForm
     c.title            = I18n.t("script.detail")
     c.flex             = 1
     c.split            = true

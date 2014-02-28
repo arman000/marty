@@ -1,4 +1,4 @@
-class Marty::SelectReport < Marty::CmFormPanel
+class Marty::ReportSelect < Marty::CmFormPanel
   include Marty::Extras::Layout
 
   component :tag_grid do |c|
@@ -28,7 +28,7 @@ class Marty::SelectReport < Marty::CmFormPanel
       [
        :tag_grid,
        :script_grid,
-       fieldset(I18n.t("reporting.select_report"),
+       fieldset(I18n.t("reporting.report_select"),
                 {
                   xtype:        :netzkeremotecombo,
                   name:         "nodename",
@@ -130,4 +130,4 @@ class Marty::SelectReport < Marty::CmFormPanel
   end
 end
 
-SelectReport = Marty::SelectReport
+ReportSelect = Marty::ReportSelect

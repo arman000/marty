@@ -1,7 +1,7 @@
 require 'delorean_lang'
 require 'coderay'
 
-class Marty::ScriptDetail < Marty::CmFormPanel
+class Marty::ScriptForm < Marty::CmFormPanel
   DASH = 0x2012.chr('utf-8')
 
   css_configure do |c|
@@ -13,7 +13,7 @@ class Marty::ScriptDetail < Marty::CmFormPanel
     c.require :"Ext.ux.form.field.CodeMirror"
     c.require :codemirror
     c.require File.dirname(__FILE__) +
-      "/script_detail/javascripts/mode/delorean/delorean.js"
+      "/script_form/javascripts/mode/delorean/delorean.js"
 
     c.set_action_modes = <<-JS
     function(a) {
@@ -87,7 +87,7 @@ class Marty::ScriptDetail < Marty::CmFormPanel
     @record = script = Marty::Script.find_script(script_name, tag_id)
 
     title = [script.name, script.find_tag.try(:name)].
-      join(" #{Marty::ScriptDetail::DASH} ") if script
+      join(" #{Marty::ScriptForm::DASH} ") if script
 
     # create an empty record if no script
     js_data = @record ? js_record_data : {
@@ -116,8 +116,8 @@ class Marty::ScriptDetail < Marty::CmFormPanel
   ######################################################################
 
   action :apply do |a|
-    a.text     = I18n.t("script_detail.save")
-    a.tooltip  = I18n.t("script_detail.save")
+    a.text     = I18n.t("script_form.save")
+    a.tooltip  = I18n.t("script_form.save")
     a.icon     = :database_save
     a.disabled = true
   end
@@ -182,8 +182,8 @@ class Marty::ScriptDetail < Marty::CmFormPanel
   ######################################################################
 
   action :print do |a|
-    a.text    = I18n.t("script_detail.print")
-    a.tooltip = I18n.t("script_detail.print")
+    a.text    = I18n.t("script_form.print")
+    a.tooltip = I18n.t("script_form.print")
     a.icon    = :printer
     a.handler = :on_print
   end
@@ -212,9 +212,7 @@ class Marty::ScriptDetail < Marty::CmFormPanel
   def configure(c)
     super
 
-    # FIXME: do something with allow_edit???
-
-    c.title = "Script Detail"
+    c.title = "Script Form"
     c.model = "Marty::Script"
     c.items =
       [
@@ -234,4 +232,4 @@ class Marty::ScriptDetail < Marty::CmFormPanel
   end
 end
 
-ScriptDetail = Marty::ScriptDetail
+ScriptForm = Marty::ScriptForm
