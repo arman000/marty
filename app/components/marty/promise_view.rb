@@ -45,7 +45,7 @@ class Marty::PromiseView < Marty::TreePanel
   end
 
   def bbar
-    [:status, '->', :refresh, :download]
+    ['->', :refresh, :download]
   end
 
   js_configure do |c|
@@ -72,51 +72,18 @@ class Marty::PromiseView < Marty::TreePanel
        this.store.load();
     }
     JS
-
-    c.on_status = <<-JS
-    function() {
-       this.serverStatus();
-    }
-    JS
-
-    c.show_detail = <<-JS
-    function(details) {
-       Ext.create('Ext.Window', {
-         height: 	400,
-         minWidth:	400,
-         autoWidth: 	true,
-         modal: 	true,
-         autoScroll: 	true,
-         html: 		details,
-         title: 	"Details"
-      }).show();
-    }
-    JS
   end
 
   action :download do |a|
-    a.text	= a.tooltip = "Download"
+    a.text	= a.tooltip = 'Download'
     a.disabled	= true
     a.icon	= :application_put
   end
 
   action :refresh do |a|
-    a.text	= a.tooltip = "Refresh"
+    a.text	= a.tooltip = 'Refresh'
     a.disabled	= false
     a.icon	= :arrow_refresh
-  end
-
-  action :status do |a|
-    a.text	= a.tooltip = "Status"
-    a.disabled	= false
-    a.icon	= :monitor
-  end
-
-  endpoint :server_status do |params, this|
-    e, root = ENV['RAILS_ENV'], Rails.root
-    status = `RAILS_ENV=#{e}; #{root}/script/delayed_job status`
-    html = status.html_safe.gsub("\n","<br/>")
-    this.show_detail html
   end
 
   def get_children(params)
