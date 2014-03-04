@@ -1,12 +1,8 @@
 class Marty::ScriptSet < Delorean::AbstractContainer
-  # ScriptSet acts as a cache for Delorean engine compiles
+  # ScriptSet acts as a process-wide cache for Delorean
+  # engines. FIXME: rewrite as Singleton.
 
-  # maps script_id to Delorean engine
-  @@engines, @@dengines = {}, {}
-
-  def self.reset
-    @@engines, @@dengines = {}, {}
-  end
+  @@engines, @@dengines, @@dengines_dt = {}, {}, nil
 
   attr_reader :tag
 
@@ -29,30 +25,30 @@ class Marty::ScriptSet < Delorean::AbstractContainer
     raise "No such script" unless script
 
     if tag.isdev?
-      engine, created_dt = @@dengines[sname]
+      # FIXME: there are race conditions here if a script changes in
+      # the middle of a DEV import sequence. But, DEV imports are
+      # hacky/rare anyway.  So, don't bother for now.
 
-      # FIXME: need to invalidate engine and its imports if any of its
-      # imports changed.  Right now, just checking script itself.
+      max_dt = Marty::Script.
+        where("created_dt <> 'infinity'").
+        order("created_dt DESC").limit(1).pluck(:created_dt).first
 
-      if created_dt && created_dt == script.created_dt
-        add_imports(engine)
-        return engine
-      end
+      @@dengines_dt ||= max_dt
 
-      engine = parse_check(sname, script.body)
-      @@dengines[sname] = [engine, script.created_dt]
+      # reset dengine cache if a script has changed
+      @@dengines = {} if max_dt > @@dengines_dt
+
+      engine = @@dengines[sname]
+
+      return engine if engine
+
+      @@dengines[sname] = engine = parse_check(sname, script.body)
     else
-      # using created_dt so that we handle cases where cucumber wipes
-      # the database but @@engines is still cached. --- FIXME: Needed?
-      engine, created_dt = @@engines[[tag.id, sname]]
+      engine = @@engines[[tag.id, sname]]
 
-      if created_dt && created_dt == script.created_dt
-        add_imports(engine)
-        return engine
-      end
+      return engine if engine
 
-      engine = parse_check(sname, script.body)
-      @@engines[[tag.id, sname]] = [engine, script.created_dt]
+      @@engines[[tag.id, sname]] = engine = parse_check(sname, script.body)
     end
     engine
   end

@@ -30,7 +30,7 @@ class Marty::TagGrid < Marty::CmGridPanel
     return this.netzke_feedback("Permission Denied") if
       config[:prohibit_create]
 
-    # FIXME: disallow tag creation when no script has been modified.
+    # FIXME: disallow tag creation when no script has been modified?
 
     tag = Marty::Tag.do_create(nil, data["comment"])
 

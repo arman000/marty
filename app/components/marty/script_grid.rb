@@ -1,20 +1,17 @@
 class Marty::ScriptGrid < Marty::CmGridPanel
+  has_marty_permissions \
+  create: [:dev],
+  read: :any,
+  update: [:dev],
+  delete: [] # [:dev]
+
   def configure(c)
     super
-
-    # FIXME: overwriting allow_edit
-
-    c.allow_edit = self.class.current_user_roles.include?(:dev) &&
-      get_tag_dt == 'infinity'
 
     c.title ||= I18n.t('scripts', default: "Scripts")
 
     c.model                  = "Marty::Script"
     c.enable_extended_search = false
-    c.prohibit_update        = true
-    c.prohibit_delete        = true
-    c.prohibit_create        = !c.allow_edit
-    c.prohibit_read          = !self.class.has_any_perm?
 
     c.columns ||= [:name, :created_dt, :tag]
 
@@ -24,15 +21,11 @@ class Marty::ScriptGrid < Marty::CmGridPanel
     }
   end
 
-  def get_tag_dt
-    tag = Marty::Tag.find_by_id(root_sess[:selected_tag_id])
-    tag ? Mcfly.normalize_infinity(tag.created_dt) : 'infinity'
-  end
-
   def get_data(*args)
     # mostly copied from Marty::McflyGridPanel.get_data
 
-    ts = get_tag_dt
+    ts = Marty::Tag.map_to_tag(root_sess[:selected_tag_id]).created_dt
+    ts = Mcfly.normalize_infinity(ts)
     tb = data_class.table_name
 
     data_class.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
@@ -48,6 +41,11 @@ class Marty::ScriptGrid < Marty::CmGridPanel
 
     return this.netzke_feedback("Permission Denied") if
       config[:prohibit_create]
+
+    tag = Marty::Tag.map_to_tag(root_sess[:selected_tag_id])
+
+    return this.netzke_feedback("Can only add in DEV tag") unless
+      tag && tag.isdev?
 
     name = data["name"]
     script = Marty::Script.create_script(name, "# Script #{name}")

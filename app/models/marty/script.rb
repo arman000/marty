@@ -34,8 +34,7 @@ class Marty::Script < Marty::Base
     script      = new
     script.name = name
     script.body = body
-    script.user = Mcfly.whodunnit # FIXME: needed? why??
-    script.save!
+    script.save
     script
   end
 end

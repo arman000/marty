@@ -108,9 +108,7 @@ class Marty::ScriptForm < Marty::CmFormPanel
   end
 
   def can_save?(script)
-    # FIXME: check for save permissions
-
-    script && Mcfly.is_infinity(script.obsoleted_dt)
+    script && self.class.has_dev_perm? && Mcfly.is_infinity(script.obsoleted_dt)
   end
 
   ######################################################################

@@ -56,8 +56,6 @@ class Marty::ScriptTester < Marty::CmFormPanel
     function(script_name) {
        var me = this;
 
-       me.loadScript({script_name: script_name});
-
        var form = me.getForm();
        // reload the attr/param drop downs
        form.findField('nodename').store.load({params: {}});
@@ -131,12 +129,6 @@ class Marty::ScriptTester < Marty::CmFormPanel
   def param_list
     engine = new_engine
     engine ? engine.enumerate_params.sort : []
-  end
-
-  endpoint :load_script do |params, this|
-    # FIXME: this doesn't actually do anything with the engine!!!
-
-    # engine = new_engine
   end
 
   endpoint :netzke_submit do |params, this|

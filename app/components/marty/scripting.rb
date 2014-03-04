@@ -41,10 +41,10 @@ class Marty::Scripting < Netzke::Base
 
        var tag_grid      = me.netzkeGetComponent('tag_grid').getView();
        var script_grid   = me.netzkeGetComponent('script_grid').getView();
-       var script_form = me.netzkeGetComponent('script_form');
+       var script_form   = me.netzkeGetComponent('script_form');
        var script_tester = me.netzkeGetComponent('script_tester');
 
-       tag_grid.on('itemclick', function(tag_grid, record) {
+       tag_grid.on('itemclick', function(self, record) {
           var tag_id = record.get('id');
           me.selectTag({tag_id: tag_id});
           script_grid.getStore().load();
@@ -54,7 +54,7 @@ class Marty::Scripting < Netzke::Base
           script_tester.selectScript(script_name);
           }, me);
 
-       script_grid.on('itemclick', function(script_grid, record) {
+       script_grid.on('itemclick', function(self, record) {
           var script_name = record.get('name');
           me.selectScript({script_name: script_name});
           script_form.netzkeLoad({script_name: script_name});
@@ -66,7 +66,6 @@ class Marty::Scripting < Netzke::Base
     c.script_refresh = <<-JS
     function(script_name) {
        if (!script_name) {
-          // FIXME: will this work now ??? i.e. unsetting script
           this.selectScript({});
           this.netzkeReload();
        }
