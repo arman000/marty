@@ -8,12 +8,11 @@ class Marty::ScriptGrid < Marty::CmGridPanel
   def configure(c)
     super
 
-    c.title ||= I18n.t('scripts', default: "Scripts")
-
     c.model                  = "Marty::Script"
     c.enable_extended_search = false
 
     c.columns ||= [:name, :created_dt, :tag]
+    c.title   ||= I18n.t('scripts', default: "Scripts")
 
     c.data_store.sorters = {
       property: :name,
@@ -22,10 +21,14 @@ class Marty::ScriptGrid < Marty::CmGridPanel
   end
 
   def get_data(*args)
-    # mostly copied from Marty::McflyGridPanel.get_data
+    begin
+      ts = Marty::Tag.map_to_tag(root_sess[:selected_tag_id]).created_dt
+      ts = Mcfly.normalize_infinity(ts)
+    rescue
+      # if there are no non-DEV tags we get an exception above
+      ts = 'infinity'
+    end
 
-    ts = Marty::Tag.map_to_tag(root_sess[:selected_tag_id]).created_dt
-    ts = Mcfly.normalize_infinity(ts)
     tb = data_class.table_name
 
     data_class.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",

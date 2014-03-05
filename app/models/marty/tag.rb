@@ -36,16 +36,26 @@ class Marty::Tag < Marty::Base
     Mcfly.is_infinity(created_dt)
   end
 
-  def self.map_to_tag(tag)
-    if tag.is_a? String
-      tag = find_by_name(tag)
-    elsif tag.is_a?(Fixnum)
-      tag = find_by_id(tag)
-    elsif !tag
+  def self.map_to_tag(tag_id)
+    case tag_id
+    when String
+      tag = find_by_name(tag_id)
+      # if tag name wasn't found, look for a matching matching
+      # posting, then find the tag whose created_dt <= posting dt.
+      if !tag
+        posting = Marty::Posting.lookup(tag_id)
+        tag = find_match(Mcfly.normalize_infinity(posting.created_dt)) if
+          posting
+      end
+    when Fixnum
+      tag = find_by_id(tag_id)
+    when nil
       tag = get_latest1
+    else
+      tag = tag_id
     end
 
-    raise "bad tag #{tag}" unless tag.is_a? Marty::Tag
+    raise "bad tag identifier #{tag_id}" unless tag.is_a? Marty::Tag
     tag
   end
 
@@ -59,12 +69,12 @@ class Marty::Tag < Marty::Base
     lookup(name).try(:created_dt)
   end
 
-  delorean_fn :get_latest, sig: 1 do
-    |limit|
-    where("created_dt <> 'infinity'").order("created_dt DESC").limit(limit).to_a
-  end
-
   delorean_fn :get_latest1, sig: 0 do
     where("created_dt <> 'infinity'").order("created_dt DESC").first
+  end
+
+  delorean_fn :find_match, sig: 1 do
+    |dt|
+    where("created_dt <= ?", dt).order("created_dt DESC").first
   end
 end
