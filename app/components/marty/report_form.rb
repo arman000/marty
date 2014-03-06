@@ -2,8 +2,6 @@ require 'delorean_lang'
 
 class Marty::ReportForm < Marty::CmFormPanel
 
-  attr_accessor :filename
-
   # override apply for background generation
   action :apply do |a|
     a.text     = a.tooltip = I18n.t("reporting.background")
@@ -112,13 +110,13 @@ class Marty::ReportForm < Marty::CmFormPanel
   endpoint :netzke_load do |params, this|
   end
 
-  def eval_form_items(items)
+  def eval_form_items(engine, items)
     case items
     when Array
-      items.map {|x| eval_form_items(x)}
+      items.map {|x| eval_form_items(engine, x)}
     when Hash
       items.each_with_object({}) { |(key, value), result|
-        result[key] = eval_form_items(value)
+        result[key] = eval_form_items(engine, value)
       }
     when String
       items.starts_with?(':') ? items[1..-1].to_sym : items
@@ -126,9 +124,9 @@ class Marty::ReportForm < Marty::CmFormPanel
       raise "bad value in form #{items}" unless
         items < Delorean::BaseModule::BaseClass
 
-      attrs = @engine.enumerate_attrs_by_node(items)
+      attrs = engine.enumerate_attrs_by_node(items)
 
-      @engine.evaluate_attrs_hash(items, attrs, {})
+      engine.evaluate_attrs_hash(items, attrs, {})
     when Numeric, TrueClass, FalseClass
       items
     else
@@ -146,11 +144,11 @@ class Marty::ReportForm < Marty::CmFormPanel
 
     begin
       sset = Marty::ScriptSet.new(root_sess[:selected_tag_id])
-      @engine = sset.get_engine(root_sess[:selected_script_name])
+      engine = sset.get_engine(root_sess[:selected_script_name])
 
-      raise @engine.to_s if @engine.is_a?(Hash)
+      raise engine.to_s if engine.is_a?(Hash)
 
-      items, title, format = @engine.
+      items, title, format = engine.
         evaluate_attrs(root_sess[:selected_node],
                        ["form", "title", "format"],
                        {},
@@ -174,7 +172,7 @@ class Marty::ReportForm < Marty::CmFormPanel
       return
     end
 
-    items = Marty::Xl.symbolize_keys(eval_form_items(items), ':')
+    items = Marty::Xl.symbolize_keys(eval_form_items(engine, items), ':')
 
     items = [{html: "<br><b>No input is needed for this report.</b>"}] if
       items.empty?
@@ -189,7 +187,6 @@ class Marty::ReportForm < Marty::CmFormPanel
 
     tag_name = sset.tag.name
 
-    self.filename = "#{title}_#{tag_name}"
     c.items       = items
     c.repformat   = format
     c.title       = "Generate: #{title}-#{tag_name}"
