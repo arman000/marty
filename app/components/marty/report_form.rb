@@ -20,11 +20,7 @@ class Marty::ReportForm < Marty::CmFormPanel
   ######################################################################
 
   def configure_bbar(c)
-    c[:bbar] = [
-                '->',
-                :apply,
-                :generate,
-               ]
+    c[:bbar] = ['->', :apply, :generate]
   end
 
   ######################################################################
@@ -98,11 +94,11 @@ class Marty::ReportForm < Marty::CmFormPanel
   js_configure do |c|
     c.on_generate = <<-JS
     function() {
-      var values = this.getForm().getValues();
-      var data = escape(Ext.encode(values));
-      // FIXME: seems pretty hacky
-      window.location = "#{Marty::Util.marty_path}/components/#{self.name}." + \
-         this.repformat + "?data=" + data;
+       var values = this.getForm().getValues();
+       var data = escape(Ext.encode(values));
+       // FIXME: seems pretty hacky
+       window.location = "#{Marty::Util.marty_path}/components/#{self.name}." +\
+          this.repformat + "?data=" + data;
     }
     JS
   end
@@ -185,11 +181,9 @@ class Marty::ReportForm < Marty::CmFormPanel
     session[:selected_script_name] = root_sess[:selected_script_name]
     session[:selected_node]        = root_sess[:selected_node]
 
-    tag_name = sset.tag.name
-
-    c.items       = items
-    c.repformat   = format
-    c.title       = "Generate: #{title}-#{tag_name}"
+    c.items     = items
+    c.repformat = format
+    c.title     = "Generate: #{title}-#{sset.tag.name}"
   end
 end
 

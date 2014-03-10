@@ -162,6 +162,10 @@ class Marty::ScriptTester < Marty::CmFormPanel
 
       this.netzke_feedback "done"
       this.set_result result.join("<br/>")
+
+    rescue SystemStackError
+      return this.netzke_feedback "System Stack Error"
+
     rescue => exc
       res = Delorean::Engine.grok_runtime_exception(exc)
 
