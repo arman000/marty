@@ -16,6 +16,8 @@ class Marty::Promise < Marty::Base
   # default timeout (seconds) to wait for jobs to start
   DEFAULT_JOB_TIMEOUT = Rails.configuration.marty.job_timeout || 10
 
+  lazy_load :result
+
   attr_accessible :title,
   :user_id,
   :cformat,
@@ -37,6 +39,14 @@ class Marty::Promise < Marty::Base
 
   belongs_to :parent, class_name: "Marty::Promise"
   belongs_to :user, class_name: "Marty::User"
+
+  def self.cleanup
+    begin
+      where('start_dt < ? AND parent_id IS NULL', Date.today-1).destroy_all
+    rescue => exc
+      Marty::Util.logger.error("promise GC error: #{exc}")
+    end
+  end
 
   def raw_conn
     self.class.connection.raw_connection
