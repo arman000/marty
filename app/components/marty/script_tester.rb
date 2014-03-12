@@ -26,7 +26,7 @@ class Marty::ScriptTester < Marty::CmFormPanel
                   attr_type:    :text,
                   value:        "",
                   hide_label:   true,
-                  min_height:   150,
+                  min_height:   125,
                 },
                 {},
                 ),
@@ -43,7 +43,7 @@ class Marty::ScriptTester < Marty::CmFormPanel
                   attr_type:    :text,
                   value:        "",
                   hide_label:   true,
-                  min_height:   100,
+                  min_height:   125,
                 },
                 {},
                 ),
@@ -208,7 +208,7 @@ class Marty::ScriptTester < Marty::CmFormPanel
     c.title       = I18n.t("script_tester.results")
     c.html        = ""
     c.flex        = 1
-    c.min_height  = 150
+    c.min_height  = 250
     c.auto_scroll = true
   end
 

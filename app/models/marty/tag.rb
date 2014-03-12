@@ -40,7 +40,7 @@ class Marty::Tag < Marty::Base
     case tag_id
     when String
       tag = find_by_name(tag_id)
-      # if tag name wasn't found, look for a matching matching
+      # if tag name wasn't found, look for a matching
       # posting, then find the tag whose created_dt <= posting dt.
       if !tag
         posting = Marty::Posting.lookup(tag_id)

@@ -93,9 +93,9 @@ class Marty::Scripting < Netzke::Base
   component :tag_grid do |c|
     c.klass            = Marty::TagGrid
     c.width            = 400
+    c.height           = 300
     c.load_inline_data = false
     c.title            = I18n.t("script.selection_history")
-    c.flex             = 1
   end
 
   component :script_grid do |c|
