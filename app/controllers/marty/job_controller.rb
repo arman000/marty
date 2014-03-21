@@ -20,9 +20,9 @@ class Marty::JobController < ActionController::Base
       Marty::ContentHandler.export(data, format, title)
 
     send_data(res,
-              type:		type,
-              filename:		filename,
-              disposition:	disposition,
+              type:        type,
+              filename:    filename,
+              disposition: disposition,
               )
   end
 end

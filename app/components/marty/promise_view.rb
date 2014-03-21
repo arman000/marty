@@ -70,15 +70,15 @@ class Marty::PromiseView < Marty::TreePanel
   end
 
   action :download do |a|
-    a.text	= a.tooltip = 'Download'
-    a.disabled	= true
-    a.icon	= :application_put
+    a.text     = a.tooltip = 'Download'
+    a.disabled = true
+    a.icon     = :application_put
   end
 
   action :refresh do |a|
-    a.text	= a.tooltip = 'Refresh'
-    a.disabled	= false
-    a.icon	= :arrow_refresh
+    a.text     = a.tooltip = 'Refresh'
+    a.disabled = false
+    a.icon     = :arrow_refresh
   end
 
   def get_children(params)
@@ -95,36 +95,36 @@ class Marty::PromiseView < Marty::TreePanel
   end
 
   column :parent do |c|
-    c.text	= 'Job Name'
-    c.getter 	= lambda { |r| r.title }
-    c.width	= 275
+    c.text   = 'Job Name'
+    c.getter = lambda { |r| r.title }
+    c.width  = 275
   end
 
   column :status do |c|
     c.hidden = true
     # FIXME: TreePanel appears to not work with hidden boolean cols
-    c.xtype = 'numbercolumn'
+    c.xtype  = 'numbercolumn'
   end
 
   column :user__login do |c|
-    c.text 	= I18n.t('jobs.user_login')
+    c.text   = I18n.t('jobs.user_login')
   end
 
   column :start_dt do |c|
-    c.text 	= I18n.t('jobs.start_dt')
+    c.text   = I18n.t('jobs.start_dt')
   end
 
   column :end_dt do |c|
-    c.text 	= I18n.t('jobs.end_dt')
+    c.text   = I18n.t('jobs.end_dt')
   end
 
   column :error do |c|
     c.getter = lambda {|r| r.result.to_s if r.status == false}
-    c.flex = 1
+    c.flex   = 1
   end
 
   column :cformat do |c|
-    c.text = "Format"
+    c.text   = "Format"
   end
 
 end

@@ -1,14 +1,14 @@
 module Marty::ContentHandler
   GEN_FORMATS = {
-    "csv" 	=> ['text/csv',			'download'],
-    "zip" 	=> ['application/zip',		'download'],
-    "xlsx" 	=> ['application/vnd.ms-excel',	'download'],
-    "html" 	=> ['text/html',		'inline'],
-    "txt"	=> ['text/plain',		'inline'],
-    "json"	=> ['application/json',		'download'],
+    "csv"  => ['text/csv',                 'download'],
+    "zip"  => ['application/zip',          'download'],
+    "xlsx" => ['application/vnd.ms-excel', 'download'],
+    "html" => ['text/html',                'inline'],
+    "txt"  => ['text/plain',               'inline'],
+    "json" => ['application/json',         'download'],
 
     # hacky: default format is JSON
-    nil		=> ['application/json',		'download'],
+    nil    => ['application/json',         'download'],
   }
 
   def self.log_and_raise(err)
@@ -20,7 +20,9 @@ module Marty::ContentHandler
     begin
       case format
       when "csv"
-        res = Marty::DataExporter.to_csv(data)
+        # Somewhat hacky, if data is string => pass through as CSV.
+        # Should generalize to other data types, not just CSV.
+        res = data.is_a?(String) ? data : Marty::DataExporter.to_csv(data)
       when "xlsx"
         res = Marty::Xl.spreadsheet(data).to_stream.read
       when "zip"
