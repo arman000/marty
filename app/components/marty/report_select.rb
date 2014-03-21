@@ -97,6 +97,9 @@ class Marty::ReportSelect < Marty::CmFormPanel
     }
 
     nodes.map { |node|
+      roles = engine.evaluate(node, "roles") rescue nil
+      next if roles && !roles.any?{ |r| Marty::User.has_role(r) }
+
       begin
         title, format = engine.evaluate_attrs(node, ["title", "format"])
         format ? [node, "#{title} (#{format})"] : nil

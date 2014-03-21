@@ -77,14 +77,22 @@ class Marty::ReportForm < Marty::CmFormPanel
 
     engine, d_params = _get_report_engine(params)
 
+    roles = engine.
+      evaluate(session[:selected_node], "roles", {}) rescue nil
+
+    if roles && !roles.any?{ |r| Marty::User.has_role(r) }
+      this.netzke_feedback "Insufficient permissions to run report!"
+      return
+    end
+
     d_params["p_title"] ||= engine.
       evaluate(session[:selected_node], "title", {}).to_s
 
     # start background promise to get report result
     engine.background_eval(session[:selected_node],
-                           d_params,
-                           ["result", "title", "format"],
-                           )
+                         d_params,
+                         ["result", "title", "format"],
+                         )
 
     this.netzke_feedback "Report can be accessed from the Jobs Dashboard ..."
   end
@@ -96,7 +104,8 @@ class Marty::ReportForm < Marty::CmFormPanel
     function() {
        var values = this.getForm().getValues();
        var data = escape(Ext.encode(values));
-       // FIXME: seems pretty hacky
+       // FIXME: this is very hacky since it bypasses Netzke channel.  This is
+       // a security hole wrt to the report role mechanism.
        window.location = "#{Marty::Util.marty_path}/components/#{self.name}." +\
           this.repformat + "?data=" + data;
     }

@@ -94,6 +94,11 @@ class Marty::User < Marty::Base
     Mcfly.whodunnit
   end
 
+ def self.has_role(role)
+    mr =  Mcfly.whodunnit.roles rescue []
+    mr.any? {|attr| attr.name == role}
+ end
+
 private
   def limit_user_manager
     # If current users role is only user_manager, restrict following
@@ -116,15 +121,12 @@ private
     errors.blank?
   end
 
-  def has_role(role)
-    mr =  Mcfly.whodunnit.roles rescue []
-    hr = false
-    mr.each {|r| hr = true if r.name == role }
-    hr
+  delorean_fn :get_roles, sig: 0 do
+     Mcfly.whodunnit.roles
   end
 
   def user_manager_only
-    has_role("user_manager") && !has_role("admin")
+    Marty::User.has_role("user_manager") && !Marty::User.has_role("admin")
   end
 
   def destroy_user
