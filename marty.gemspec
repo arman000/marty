@@ -44,5 +44,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'coderay'
   s.add_dependency 'net-ldap'
   s.add_dependency 'paper_trail', '~>2.7.2'
-  s.add_dependency 'rubyzip', '>= 1.0.0'
+  s.add_dependency 'rubyzip', '1.1.0'
 end
