@@ -7,7 +7,8 @@ class Marty::ComponentsController < Marty::ApplicationController
 
     return redirect_to root_path unless component
 
-    format, req_disposition = params[:format], params[:disposition]
+    format, req_disposition, title =
+      params[:format], params[:disposition], params[:reptitle]
 
     if format && Marty::ContentHandler::GEN_FORMATS.member?(format)
       klass = component.constantize
@@ -17,15 +18,15 @@ class Marty::ComponentsController < Marty::ApplicationController
       inst = klass.new
       return unless inst.respond_to?(:export_content)
 
-      title = inst.respond_to?(:filename) ? inst.filename : component
+      title ||= component
 
       res, type, disposition, filename =
         inst.export_content(format, title, params)
 
       return send_data(res,
-                       type: 		type,
-                       filename: 	filename,
-                       disposition: 	req_disposition || disposition,
+                       type:        type,
+                       filename:    filename,
+                       disposition: req_disposition || disposition,
                        )
     end
 

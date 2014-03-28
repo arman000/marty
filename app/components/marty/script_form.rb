@@ -215,16 +215,16 @@ class Marty::ScriptForm < Marty::CmFormPanel
     c.items =
       [
        {
-	 mode:			"text/x-delorean",
-	 line_numbers:		true,
-	 indent_unit:		4,
-	 tab_mode:		"shift",
-	 match_brackets:	true,
-	 hide_label:		true,
-	 xtype:			:codemirror,
-	 name:			:body,
-	 empty_text:		"No script selected.",
-	 getter:		lambda { |r| r.body },
+         mode:           "text/x-delorean",
+         line_numbers:   true,
+         indent_unit:    4,
+         tab_mode:       "shift",
+         match_brackets: true,
+         hide_label:     true,
+         xtype:          :codemirror,
+         name:           :body,
+         empty_text:     "No script selected.",
+         getter:         lambda { |r| r.body },
        },
       ]
   end

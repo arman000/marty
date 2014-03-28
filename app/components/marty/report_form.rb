@@ -107,7 +107,7 @@ class Marty::ReportForm < Marty::CmFormPanel
        // FIXME: this is very hacky since it bypasses Netzke channel.  This is
        // a security hole wrt to the report role mechanism.
        window.location = "#{Marty::Util.marty_path}/components/#{self.name}." +\
-          this.repformat + "?data=" + data;
+          this.repformat + "?data=" + data + "&reptitle=" + this.reptitle;
     }
     JS
   end
@@ -162,7 +162,6 @@ class Marty::ReportForm < Marty::CmFormPanel
       raise "bad form items" unless items.is_a?(Array)
       raise "bad format" unless
         ["csv", "xlsx", "zip", "json"].member?(format)
-
     rescue => exc
       c.title = "ERROR"
       c.items =
@@ -193,6 +192,7 @@ class Marty::ReportForm < Marty::CmFormPanel
     c.items     = items
     c.repformat = format
     c.title     = "Generate: #{title}-#{sset.tag.name}"
+    c.reptitle  = title
   end
 end
 
