@@ -4,12 +4,12 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
 
     warped = Marty::Util.warped?
 
-    c.enable_extended_search	= false
-    c.enable_edit_in_form	&&= !warped
-    c.prohibit_update		||= warped
-    c.prohibit_delete		||= warped
-    c.prohibit_create		||= warped
-    #c.prohibit_read		||= !self.class.has_any_perm?
+    c.enable_extended_search = false
+    c.enable_edit_in_form    &&= !warped
+    c.prohibit_update        ||= warped
+    c.prohibit_delete        ||= warped
+    c.prohibit_create        ||= warped
+    #c.prohibit_read         ||= !self.class.has_any_perm?
 
     # default sort all Mcfly grids with id
     c.data_store.sorters ||= {property: :id, direction: 'ASC'}
@@ -52,6 +52,20 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
       end
     end
   end
+
+  # The basepack grid doesn't catch general exceptions.  We can get
+  # this if there's some sort of failure with saving to the DB.
+  # e.g. range violation.
+  def process_data_with_error_handling(data, operation)
+    begin
+      process_data_without_error_handling(data, operation)
+    rescue => exc
+      success = false
+      flash :error => "Error: #{exc}"
+    end
+  end
+
+  alias_method_chain :process_data, :error_handling
 
 private
   def self.mcfly_scope(sort_column)

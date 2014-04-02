@@ -67,3 +67,89 @@ end
 
 ######################################################################
 
+# The following is a hack to get around postgres_ext's broken handling
+# of PostgreSQL ranges.  Essentially, postgres_ext doesn't allow
+# numranges to exlude the range start e.g. anything like: "(1.1,2.2]".
+# This hack turns off the casting of PostgreSQL ranges to ruby
+# ranges. i.e. we keep them as strings.  Note that this hack would be
+# quite different for Rails 4.0.
+
+raise "The PG range hack needs to be fixed" if Rails.version[0] != "3"
+
+require 'postgres_ext'
+
+RANGE_TYPES =
+  Set[:numrange,:int4range,:int8range,:daterange,:tsrange,:tstzrange]
+
+module ActiveRecord
+  module ConnectionAdapters
+    class PostgreSQLColumn
+      RANGE_TYPES =
+        Set[:numrange,:int4range,:int8range,:daterange,:tsrange,:tstzrange]
+
+      def type_cast_with_rr(value)
+        return value if RANGE_TYPES.member?(type)
+
+        type_cast_without_rr(value)
+      end
+
+      alias_method_chain :type_cast, :rr
+
+
+      def type_cast_code_with_rr(var_name)
+        return var_name if RANGE_TYPES.member?(type)
+
+        type_cast_code_without_rr(var_name)
+      end
+      alias_method_chain :type_cast_code, :rr
+
+    end
+  end
+end
+
+######################################################################
+
+def pg_range_to_human(r)
+  m = /\A(?<open>\[|\()(?<start>.*?),(?<end>.*?)(?<close>\]|\))\z/.match(r)
+
+  raise "bad pg range #{r}" unless m
+
+  if m[:start] == ""
+    res = ""
+  else
+    op = m[:open] == "(" ? ">" : ">="
+    res = "#{op}#{m[:start]}"
+  end
+
+  if m[:end] != ""
+    op = m[:close] == ")" ? "<" : "<="
+    res += "#{op}#{m[:end]}"
+  end
+
+  res
+end
+
+def human_to_pg_range(r)
+  m = /\A
+    ((?<op0>\>|\>=)(?<start>[^\<\>\=]*?))?
+    ((?<op1>\<|\<=)(?<end>[^\<\>\=]*?))?
+    \z/x.match(r)
+
+  raise "bad range #{r}" unless m
+
+  if m[:op0]
+    open = m[:op0] == ">" ? "(" : "["
+    start = "#{open}#{m[:start]}"
+  else
+    start = "["
+  end
+
+  if m[:op1]
+    close = m[:op1] == "<" ? ")" : "]"
+    ends = "#{m[:end]}#{close}"
+  else
+    ends = "]"
+  end
+
+  "#{start},#{ends}"
+end

@@ -28,4 +28,53 @@ module Marty::Util
   def self.marty_path
     Rails.application.routes.named_routes[:marty].path.spec
   end
+
+  def self.pg_range_to_human(r)
+    return r if r == "empty" || r.nil?
+
+    m = /\A(?<open>\[|\()(?<start>.*?),(?<end>.*?)(?<close>\]|\))\z/.match(r)
+
+    raise "bad PG range #{r}" unless m
+
+    if m[:start] == ""
+      res = ""
+    else
+      op = m[:open] == "(" ? ">" : ">="
+      res = "#{op}#{m[:start]}"
+    end
+
+    if m[:end] != ""
+      op = m[:close] == ")" ? "<" : "<="
+      res += "#{op}#{m[:end]}"
+    end
+
+    res
+  end
+
+  def self.human_to_pg_range(r)
+    return r if r == "empty"
+
+    m = /\A
+    ((?<op0>\>|\>=)(?<start>[^\<\>\=]*?))?
+    ((?<op1>\<|\<=)(?<end>[^\<\>\=]*?))?
+    \z/x.match(r)
+
+    raise "bad range #{r}" unless m
+
+    if m[:op0]
+      open = m[:op0] == ">" ? "(" : "["
+      start = "#{open}#{m[:start]}"
+    else
+      start = "["
+    end
+
+    if m[:op1]
+      close = m[:op1] == "<" ? ")" : "]"
+      ends = "#{m[:end]}#{close}"
+    else
+      ends = "]"
+    end
+
+    "#{start},#{ends}"
+  end
 end

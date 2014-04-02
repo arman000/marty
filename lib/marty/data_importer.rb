@@ -59,9 +59,9 @@ module Marty
       FLOAT_PAT = /^-?\d+(\.\d+)?$/
 
       PATS = {
-        integer: 	/^-?\d+(\.0+)?$/,
-        float: 		FLOAT_PAT,
-        decimal: 	FLOAT_PAT,
+        integer: /^-?\d+(\.0+)?$/,
+        float:   FLOAT_PAT,
+        decimal: FLOAT_PAT,
       }
 
       def convert(v, type)
@@ -94,16 +94,18 @@ module Marty
             Mcfly.is_infinity(v) ? 'infinity' : v.to_date
         when :datetime
           Mcfly.is_infinity(v) ? 'infinity' : v.to_datetime
+        when :numrange, :int4range, :int8range
+          v.to_s
         else
           raise "unknown type #{type} for #{v}"
         end
       end
 
       def initialize(klass, headers, dt)
-        @klass 		= klass
-        @headers 	= headers
-        @dt		= dt
-        @key_attrs 	= self.class.get_keys(klass)
+        @klass     = klass
+        @headers   = headers
+        @dt        = dt
+        @key_attrs = self.class.get_keys(klass)
 
         # # HACK: not sure why there's a nil at the end of headers sometimes
         # headers.pop if headers[-1].nil?
