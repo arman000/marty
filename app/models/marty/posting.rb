@@ -60,6 +60,11 @@ class Marty::Posting < Marty::Base
     lookup(name).try(:created_dt)
   end
 
+  delorean_fn :first_match, sig: 1 do
+    |dt|
+    where("created_dt <= ?", dt).order("created_dt DESC").first
+  end
+
   delorean_fn :get_latest, sig: [1, 2] do
     |limit, is_test=nil|
     q = is_test.nil? ? self : self.where(is_test: !!is_test)
