@@ -29,10 +29,14 @@ module Marty::Util
     Rails.application.routes.named_routes[:marty].path.spec
   end
 
+  def self.pg_range_match(r)
+    /\A(?<open>\[|\()(?<start>.*?),(?<end>.*?)(?<close>\]|\))\z/.match(r)
+  end
+
   def self.pg_range_to_human(r)
     return r if r == "empty" || r.nil?
 
-    m = /\A(?<open>\[|\()(?<start>.*?),(?<end>.*?)(?<close>\]|\))\z/.match(r)
+    m = pg_range_match(r)
 
     raise "bad PG range #{r}" unless m
 
