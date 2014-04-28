@@ -6,6 +6,10 @@ class Marty::ScriptSet < Delorean::AbstractContainer
 
   attr_reader :tag
 
+  def self.clear_cache
+    @@engines, @@dengines, @@dengines_dt = {}, {}, nil
+  end
+
   def initialize(tag=nil)
     @tag = Marty::Tag.map_to_tag(tag)
     super()
