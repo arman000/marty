@@ -24,17 +24,12 @@ class Marty::ScriptSet < Delorean::AbstractContainer
   def get_engine(sname)
     raise "bad sname #{sname}" unless sname.is_a?(String)
 
-    script = Marty::Script.find_script(sname, tag)
-
-    raise "No such script" unless script
-
     if tag.isdev?
       # FIXME: there are race conditions here if a script changes in
       # the middle of a DEV import sequence. But, DEV imports are
       # hacky/rare anyway.  So, don't bother for now.
 
       max_dt = Marty::Script.
-        where("created_dt <> 'infinity'").
         order("created_dt DESC").limit(1).pluck(:created_dt).first
 
       @@dengines_dt ||= max_dt
@@ -46,14 +41,17 @@ class Marty::ScriptSet < Delorean::AbstractContainer
 
       return engine if engine
 
-      @@dengines[sname] = engine = parse_check(sname, script.body)
+      script = Marty::Script.find_script(sname, tag) || raise("No such script")
+
+      @@dengines[sname] = parse_check(sname, script.body)
     else
       engine = @@engines[[tag.id, sname]]
 
       return engine if engine
 
-      @@engines[[tag.id, sname]] = engine = parse_check(sname, script.body)
+      script = Marty::Script.find_script(sname, tag) || raise("No such script")
+
+      @@engines[[tag.id, sname]] = parse_check(sname, script.body)
     end
-    engine
   end
 end
