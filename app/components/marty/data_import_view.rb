@@ -2,17 +2,17 @@ class Marty::DataImportView < Marty::CmFormPanel
   include Marty::Extras::Layout
 
   action :apply do |a|
-    a.text  	= I18n.t("data_import_view.import")
-    a.tooltip  	= I18n.t("data_import_view.import")
-    a.icon  	= :database_go
+    a.text    = I18n.t("data_import_view.import")
+    a.tooltip = I18n.t("data_import_view.import")
+    a.icon    = :database_go
   end
 
   js_configure do |c|
 
     c.set_result = <<-JS
       function(html) {
-	var result = this.netzkeGetComponent('result');
-	result.updateBodyHtml(html);
+        var result = this.netzkeGetComponent('result');
+        result.updateBodyHtml(html);
       }
       JS
 
@@ -57,8 +57,8 @@ class Marty::DataImportView < Marty::CmFormPanel
     return this.netzke_feedback("Import type #{import_type} not found") unless
       import_type_rec
 
-    klass 		= import_type_rec.get_model_class
-    cleaner_function 	= import_type_rec.cleaner_function
+    klass               = import_type_rec.get_model_class
+    cleaner_function    = import_type_rec.cleaner_function
     validation_function = import_type_rec.validation_function
 
     begin
@@ -71,11 +71,11 @@ class Marty::DataImportView < Marty::CmFormPanel
 
       result = res.map { |k, v|
         case k
-        when :clean 	then "#{v} record(s) cleaned."
-        when :same 	then "#{v} record(s) unchanged."
-        when :create 	then "#{v} record(s) created."
-        when :update 	then "#{v} record(s) updated."
-        when :blank 	then "#{v} empty lines."
+        when :clean  then "#{v} record(s) cleaned."
+        when :same   then "#{v} record(s) unchanged."
+        when :create then "#{v} record(s) created."
+        when :update then "#{v} record(s) updated."
+        when :blank  then "#{v} empty lines."
         end
       }
 
@@ -98,21 +98,26 @@ class Marty::DataImportView < Marty::CmFormPanel
       [
        fieldset(I18n.t("data_import_view.select"),
                 {
-                  xtype:		:combo,
-                  name:			"import_type",
-                  store:		Marty::ImportType.all.map(&:name).sort,
-                  max_width:		"350",
-                  hide_label:		true,
-                  force_selection:	true,
+                  xtype:           :combo,
+                  name:            "import_type",
+                  store:           Marty::ImportType.all.map(&:name).sort,
+                  max_width:       "350",
+                  hide_label:      true,
+                  force_selection: true,
                 },
                 {
-                  name: 	"import_data",
-                  width: 	"100%",
-                  height:	300,
-                  xtype:	:textareafield,
-                  value:	"",
-                  auto_scroll: 	true,
-                  hide_label: 	true,
+                  name:         "import_data",
+                  width:        "100%",
+                  height:       300,
+                  xtype:        :textareafield,
+                  value:        "",
+                  auto_scroll:  true,
+                  hide_label:   true,
+                  spellcheck:   false,
+                  field_style: {
+                    font_family: 'courier new',
+                    font_size:   '12px'
+                  },
                 },
                 min_width: 700,
                 ),
@@ -121,12 +126,12 @@ class Marty::DataImportView < Marty::CmFormPanel
   end
 
   component :result do |c|
-    c.klass 		= Marty::CmPanel
-    c.title 		= I18n.t("data_import_view.results")
-    c.html 		= ""
-    c.flex 		= 1
-    c.min_height 	= 150
-    c.auto_scroll 	= true
+    c.klass       = Marty::CmPanel
+    c.title       = I18n.t("data_import_view.results")
+    c.html        = ""
+    c.flex        = 1
+    c.min_height  = 150
+    c.auto_scroll = true
   end
 end
 

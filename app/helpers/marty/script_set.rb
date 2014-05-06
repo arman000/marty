@@ -2,13 +2,13 @@ class Marty::ScriptSet < Delorean::AbstractContainer
   # ScriptSet acts as a process-wide cache for Delorean
   # engines. FIXME: rewrite as Singleton.
 
-  @@engines, @@dengines, @@dengines_dt = {}, {}, nil
-
   attr_reader :tag
 
   def self.clear_cache
     @@engines, @@dengines, @@dengines_dt = {}, {}, nil
   end
+
+  clear_cache
 
   def initialize(tag=nil)
     @tag = Marty::Tag.map_to_tag(tag)

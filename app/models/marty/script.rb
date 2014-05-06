@@ -37,4 +37,19 @@ class Marty::Script < Marty::Base
     script.save
     script
   end
+
+  delorean_fn :eval_to_hash, sig: 5 do
+    |dt, script, node, attrs, params|
+    tag = Marty::Tag.find_match(dt)
+
+    raise "no tag found for #{dt}" unless tag
+
+    engine = Marty::ScriptSet.new(tag).get_engine(script)
+    res = engine.eval_to_hash(node, attrs, params)
+
+    # FIXME: should sanitize res to make sure that no nodes are being
+    # passed back.  It's likely that nodes which are not from the
+    # current tag can caused problems.
+    res
+  end
 end

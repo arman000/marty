@@ -131,7 +131,7 @@ class Marty::ReportForm < Marty::CmFormPanel
 
       attrs = engine.enumerate_attrs_by_node(items)
 
-      engine.evaluate_attrs_hash(items, attrs, {})
+      engine.eval_to_hash(items, attrs, {})
     when Numeric, TrueClass, FalseClass
       items
     else
