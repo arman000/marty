@@ -19,10 +19,8 @@ class Marty::DataExporter
     end
   end
 
-  def self.to_csv(obj, config)
+  def self.to_csv(obj, config={})
     obj = [obj] unless obj.respond_to? :map
-
-    config ||= {}
 
     # if all array items are hashes, we merge them
     obj = hash_array_merge(obj, config["transpose"]) if
