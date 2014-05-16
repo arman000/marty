@@ -29,10 +29,17 @@ end
 
 ######################################################################
 
-# define addition on hashes -- useful in Delorean code.
 class Hash
+  # define addition on hashes -- useful in Delorean code.
   def +(x)
     self.merge(x)
+  end
+
+  # define hash slice (similar to node slice in Delorean)
+  def %(x)
+    x.each_with_object({}) { |k, h|
+      h[k] = self[k]
+    }
   end
 end
 

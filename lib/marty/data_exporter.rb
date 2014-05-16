@@ -19,18 +19,24 @@ class Marty::DataExporter
     end
   end
 
-  def self.to_csv(obj, config={})
+  def self.to_csv(obj, config)
     obj = [obj] unless obj.respond_to? :map
 
-    # FIXME: very hacky to default row_sep to CRLF
-    row_sep = config[:row_sep] || "\r\n"
-    col_sep = config[:col_sep] || ','
+    config ||= {}
 
     # if all array items are hashes, we merge them
-    obj = hash_array_merge(obj, config[:transpose]) if
+    obj = hash_array_merge(obj, config["transpose"]) if
       obj.map {|x| x.is_a? Hash}.all?
 
-    csv_string = CSV.generate(row_sep: row_sep, col_sep: col_sep) do |csv|
+    # symbolize config keys as expected by CSV.generate
+    conf = config.each_with_object({}) { |(k,v), h|
+      h[k.to_sym] = v unless k.to_s == "transpose"
+    }
+
+    # FIXME: very hacky to default row_sep to CRLF
+    conf[:row_sep] ||= "\r\n"
+
+    csv_string = CSV.generate(conf) do |csv|
       obj.each { |x|
         x = [x] unless x.respond_to? :map
         csv << x.flatten(1).map(&:to_s)
@@ -46,10 +52,8 @@ class Marty::DataExporter
     associations = klass.reflect_on_all_associations.map(&:name)
 
     @class_info[klass] = {
-      cols:
-      klass.columns.map(&:name) - Marty::DataImporter::MCFLY_COLUMNS.to_a,
-      assoc:
-      associations.each_with_object({}) { |a, h|
+      cols: klass.columns.map(&:name) - Marty::DataImporter::MCFLY_COLUMNS.to_a,
+      assoc: associations.each_with_object({}) { |a, h|
         h["#{a}_id"] = Marty::DataImporter::RowProcessor.assoc_info(klass, a)
       },
     }
