@@ -7,6 +7,7 @@ require 'marty/import_type_view'
 require 'marty/data_import_view'
 require 'marty/user_view'
 require 'marty/promise_view'
+require 'marty/api_auth_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend Marty::Permissions
@@ -57,6 +58,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       menu: 	[
                  :import_type_view,
                  :user_view,
+                 :api_auth_view,
                 ],
     }
   end
@@ -141,6 +143,13 @@ class Marty::MainAuthApp < Marty::AuthApp
       !self.class.has_user_manager_perm?
   end
 
+  action :api_auth_view do |a|
+    a.text 	= I18n.t("api_auth_view", default: "API Authorization")
+    a.handler 	= :netzke_load_component_by_action
+    a.icon	= :script_key
+    a.disabled 	= !self.class.has_admin_perm?
+  end
+
   ######################################################################
   # Postings
 
@@ -220,6 +229,9 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.disabled = Marty::Util.warped? || !self.class.has_data_import_perm?
   end
   component :user_view
+  component :api_auth_view do |c|
+    c.disabled = Marty::Util.warped?
+  end
 end
 
 MainAuthApp = Marty::MainAuthApp

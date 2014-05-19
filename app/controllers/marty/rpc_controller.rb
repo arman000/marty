@@ -7,6 +7,7 @@ class Marty::RpcController < ActionController::Base
                   params["node"],
                   params["attrs"] || "[]",
                   params["params"] || "{}",
+                  params["api_key"] || nil,
                   )
 
     respond_to do |format|
@@ -22,7 +23,7 @@ class Marty::RpcController < ActionController::Base
 
   private
 
-  def do_eval(sname, tag, node, attrs, params)
+  def do_eval(sname, tag, node, attrs, params, api_key)
     return {error: "Bad attrs"} unless attrs.is_a?(String)
 
     begin
@@ -43,6 +44,9 @@ class Marty::RpcController < ActionController::Base
     end
 
     return {error: "Malformed params"} unless params.is_a?(Hash)
+
+    return {error: "Permission denied" } unless
+      Marty::ApiAuth.authorized?(sname, api_key)
 
     begin
       engine = Marty::ScriptSet.new(tag).get_engine(sname)
