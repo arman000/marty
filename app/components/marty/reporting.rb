@@ -32,7 +32,7 @@ class Marty::Reporting < Netzke::Base
     c.klass  = Marty::ReportSelect
     c.split  = true
     c.region = :west
-    c.width  = 300
+    c.width  = 325
   end
 end
 

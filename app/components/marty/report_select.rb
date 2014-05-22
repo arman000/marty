@@ -11,7 +11,7 @@ class Marty::ReportSelect < Marty::CmFormPanel
   end
 
   component :script_grid do |c|
-    c.height           = 300
+    c.height           = 350
     c.klass            = Marty::ScriptGrid
     c.title            = I18n.t("script.selection_list")
     c.bbar             = []
