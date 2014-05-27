@@ -42,7 +42,8 @@ class Marty::Promise < Marty::Base
 
   def self.cleanup
     begin
-      where('start_dt < ? AND parent_id IS NULL', Date.today-1).destroy_all
+      where('start_dt < ? AND parent_id IS NULL',
+            DateTime.now - 2.hours).destroy_all
     rescue => exc
       Marty::Util.logger.error("promise GC error: #{exc}")
     end
