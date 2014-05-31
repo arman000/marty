@@ -8,6 +8,10 @@ module Mcfly
     end
 
     module ClassMethods
+      def clear_cache
+        @LOOKUP_CACHE.clear if @LOOKUP_CACHE
+      end
+
       # Implements a VERY HACKY class-based caching mechanism for
       # database lookup results.  Issues include: cached values are
       # ActiveRecord objects.  Not sure if these should be shared
