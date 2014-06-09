@@ -1,4 +1,6 @@
 class Marty::PromiseView < Marty::TreePanel
+  extend Marty::Permissions
+
   css_configure do |c|
     c.require :promise_view
   end
@@ -36,11 +38,11 @@ class Marty::PromiseView < Marty::TreePanel
     }
 
     # garbage collect old promises (hacky to do this here)
-    Marty::Promise.cleanup
+    Marty::Promise.cleanup(false)
   end
 
   def bbar
-    ['->', :refresh, :download]
+    [:clear, '->', :refresh, :download]
   end
 
   js_configure do |c|
@@ -67,6 +69,24 @@ class Marty::PromiseView < Marty::TreePanel
        this.store.load();
     }
     JS
+
+    c.on_clear = <<-JS
+    function(params) {
+       var me = this;
+       Ext.Msg.prompt('Clear All Jobs',
+       'Enter CLEAR and press OK to clear all previous jobs',
+       function (btn, value) {
+          (btn == "ok" && value == "CLEAR") && me.serverClear({});
+       });
+    }
+    JS
+  end
+
+  action :clear do |a|
+    a.text     = a.tooltip = 'Clear'
+    a.disabled = false
+    a.icon     = :application_delete
+    a.hidden   = !self.class.has_admin_perm?
   end
 
   action :download do |a|
@@ -79,6 +99,11 @@ class Marty::PromiseView < Marty::TreePanel
     a.text     = a.tooltip = 'Refresh'
     a.disabled = false
     a.icon     = :arrow_refresh
+  end
+
+  endpoint :server_clear do |params, this|
+    Marty::Promise.cleanup(true)
+    this.on_refresh
   end
 
   def get_children(params)
