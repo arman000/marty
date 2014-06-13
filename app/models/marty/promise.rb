@@ -40,10 +40,10 @@ class Marty::Promise < Marty::Base
   belongs_to :parent, class_name: "Marty::Promise"
   belongs_to :user, class_name: "Marty::User"
 
-  def self.cleanup
+  def self.cleanup(all=false)
     begin
       where('start_dt < ? AND parent_id IS NULL',
-            DateTime.now - 2.hours).destroy_all
+            DateTime.now - (all ? 0.hours : 2.hours)).destroy_all
     rescue => exc
       Marty::Util.logger.error("promise GC error: #{exc}")
     end
