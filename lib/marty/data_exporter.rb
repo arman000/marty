@@ -1,3 +1,6 @@
+require 'base64'
+require 'zlib'
+
 class Marty::DataExporter
   # given an array of hashes, return set of all keys
   def self.hash_array_keys(hl)
@@ -19,6 +22,14 @@ class Marty::DataExporter
     end
   end
 
+  def self.encode_json(s)
+    Base64.strict_encode64 Zlib.deflate(s)
+  end
+
+  def self.decode_json(s)
+    Zlib.inflate Base64.strict_decode64(s)
+  end
+
   def self.to_csv(obj, config=nil)
     obj = [obj] unless obj.respond_to? :map
 
@@ -37,10 +48,12 @@ class Marty::DataExporter
     conf[:row_sep] ||= "\r\n"
 
     csv_string = CSV.generate(conf) do |csv|
-      obj.each { |x|
+      obj.each do |x|
         x = [x] unless x.respond_to? :map
-        csv << x.flatten(1).map(&:to_s)
-      }
+        csv << x.map { |v|
+          v.is_a?(Array) || v.is_a?(Hash) ? encode_json(v.to_json) : v.to_s
+        }
+      end
     end
   end
 
@@ -80,5 +93,4 @@ class Marty::DataExporter
       order(sort_field || :id).all.
       map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}}
   end
-
 end

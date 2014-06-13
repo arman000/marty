@@ -42,6 +42,10 @@ class Marty::Script < Marty::Base
     |dt, script, node, attrs, params|
     tag = Marty::Tag.find_match(dt)
 
+    # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
+    # params. So, need to clone it.
+    params = params.clone
+
     raise "no tag found for #{dt}" unless tag
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)

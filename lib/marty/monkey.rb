@@ -142,7 +142,7 @@ def human_to_pg_range(r)
     ((?<op1>\<|\<=)(?<end>[^\<\>\=]*?))?
     \z/x.match(r)
 
-  raise "bad range #{r}" unless m
+  raise "bad range '#{r}'" unless m
 
   if m[:op0]
     open = m[:op0] == ">" ? "(" : "["
