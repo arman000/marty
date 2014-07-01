@@ -65,9 +65,12 @@ class Marty::DataExporter
     associations = klass.reflect_on_all_associations.map(&:name)
 
     @class_info[klass] = {
-      cols: klass.columns.map(&:name) - Marty::DataImporter::MCFLY_COLUMNS.to_a,
-      assoc: associations.each_with_object({}) { |a, h|
-        h["#{a}_id"] = Marty::DataImporter::RowProcessor.assoc_info(klass, a)
+      cols:
+      klass.columns.map(&:name) - Marty::DataRowProcessor::MCFLY_COLUMNS.to_a,
+
+      assoc:
+      associations.each_with_object({}) { |a, h|
+        h["#{a}_id"] = Marty::DataRowProcessor.assoc_info(klass, a)
       },
     }
   end
@@ -75,8 +78,25 @@ class Marty::DataExporter
   def self.export_attr(obj, c, info)
     v = obj.send(c.to_sym)
     assoc_info = info[:assoc][c] unless v.nil?
-    assoc_info ? assoc_info[:assoc_class].find(v).
-      send(assoc_info[:assoc_key].to_sym) : v
+    return [v] unless assoc_info
+
+    assoc_obj = assoc_info[:assoc_class].find(v)
+
+    assoc_info[:assoc_keys].map {|k| assoc_obj.send(k.to_sym)}
+  end
+
+  def self.export_header_attr(c, info)
+    assoc_info = info[:assoc][c]
+    return c unless assoc_info
+
+    # remove _id
+    c = c[0..-4]
+
+    assoc_keys = assoc_info[:assoc_keys]
+
+    # FIXME: this doesn't work if k is also an association.  Needs to
+    # be recursive.
+    assoc_keys.length > 1 ? assoc_keys.map {|k| "#{c}__#{k}"} : c
   end
 
   # Given a Mcfly klass, generate an export array.  Can potentially
@@ -85,12 +105,12 @@ class Marty::DataExporter
     info = class_info(klass)
 
     # strip _id from assoc fields
-    header = [ info[:cols].map { |c| info[:assoc][c] ? c[0..-4] : c } ]
+    header = [ info[:cols].map {|c| export_header_attr(c, info)}.flatten(1) ]
 
     ts = Mcfly.normalize_infinity(ts)
 
     header + klass.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).
       order(sort_field || :id).all.
-      map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}}
+      map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}.flatten(1)}
   end
 end
