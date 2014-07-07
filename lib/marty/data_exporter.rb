@@ -37,7 +37,7 @@ class Marty::DataExporter
 
     # if all array items are hashes, we merge them
     obj = hash_array_merge(obj, config["transpose"]) if
-      obj.map {|x| x.is_a? Hash}.all?
+      obj.is_a?(Array) && obj.map {|x| x.is_a? Hash}.all?
 
     # symbolize config keys as expected by CSV.generate
     conf = config.each_with_object({}) { |(k,v), h|
@@ -47,12 +47,27 @@ class Marty::DataExporter
     # FIXME: very hacky to default row_sep to CRLF
     conf[:row_sep] ||= "\r\n"
 
-    csv_string = CSV.generate(conf) do |csv|
-      obj.each do |x|
-        x = [x] unless x.respond_to? :map
-        csv << x.map { |v|
-          v.is_a?(Array) || v.is_a?(Hash) ? encode_json(v.to_json) : v.to_s
-        }
+    # FIXME: the following is ridiculously complex. We have different
+    # data paths for hashes and arrays.  Also, arrays can turn into
+    # hashes is all their items are hashes!  We map to complex objects
+    # to JSON when inside hashes, but not arrays. Really need to
+    # rethink this.  Probably should have separate functions for
+    # to_csv for hash and arrays.
+
+    if obj.is_a? Hash
+      csv_string = CSV.generate(conf) do |csv|
+        obj.each do |x|
+          csv << x.flatten(1).map(&:to_s)
+        end
+      end
+    else
+      csv_string = CSV.generate(conf) do |csv|
+        obj.each do |x|
+          x = [x] unless x.respond_to? :map
+          csv << x.map { |v|
+            v.is_a?(Array) || v.is_a?(Hash) ? encode_json(v.to_json) : v.to_s
+          }
+        end
       end
     end
   end

@@ -41,7 +41,10 @@ class Marty::DataChange
 
         profile["attrs"] = info[:cols].map { |c|
           {
-            "value" 	=> Marty::DataExporter.export_attr(o, c, info),
+            # FIXME: using .first on export_attr -- this will not work
+            # if the attr is an association which will requires
+            # multiple keys to identify (e.g. Rule: name & version)
+            "value" 	=> Marty::DataExporter.export_attr(o, c, info).first,
             "changed" 	=> prev && (o.send(c.to_sym) != prev.send(c.to_sym)),
           }
         }
