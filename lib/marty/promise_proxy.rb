@@ -53,8 +53,8 @@ class Marty::PromiseProxy < BasicObject
   #
   # @param  [Symbol]
   # @return [Boolean]
-  def respond_to?(method)
-    METH_SET.member?(method) || __force__.respond_to?(method)
+  def respond_to?(method, include_all=false)
+    METH_SET.member?(method) || __force__.respond_to?(method, include_all)
   end
 
   private
