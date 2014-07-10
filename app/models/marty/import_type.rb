@@ -28,4 +28,12 @@ class Marty::ImportType < Marty::Base
     model_name.constantize
   end
 
+  delorean_fn :lookup, sig: 1 do
+    |name|
+    self.find_by_name(name)
+  end
+
+  delorean_fn :get_all, sig: 0 do
+    self.all
+  end
 end
