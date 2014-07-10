@@ -14,3 +14,6 @@ PyXLL - Gemini interface
 
 * Should be able to see the addAdd-Ins tab in Excel and it should
   include the PyXLL menu.
+
+* sample.xlsx in this directory is an example of PyXLL calling into
+  PennyMac's Gemini application server.

@@ -122,9 +122,15 @@ class Marty::DataExporter
     # strip _id from assoc fields
     header = [ info[:cols].map {|c| export_header_attr(c, info)}.flatten(1) ]
 
-    ts = Mcfly.normalize_infinity(ts)
+    query = klass
 
-    header + klass.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).
+    # is it Mcfly?
+    if (klass.const_get(:MCFLY_UNIQUENESS) rescue nil)
+      ts = Mcfly.normalize_infinity(ts)
+      query = query.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts)
+    end
+
+    header + query.
       order(sort_field || :id).all.
       map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}.flatten(1)}
   end

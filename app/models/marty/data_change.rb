@@ -116,7 +116,10 @@ class Marty::DataChange
 
   delorean_fn :do_export, sig: [2, 3] do
     |pt, klass, sort_field=nil|
-    raise "#{klass} not on class_list" unless class_list.member? klass
+
+    # allow classes on class_list or any Enum to be exported
+    raise "'#{klass}' not on class_list" unless
+      class_list.member?(klass) || klass.constantize.is_a?(Marty::Enum)
 
     Marty::DataExporter.do_export(pt, klass.constantize, sort_field)
   end

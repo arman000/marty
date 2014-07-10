@@ -59,7 +59,7 @@ class Marty::Tag < Marty::Base
     tag
   end
 
-  delorean_fn :lookup, sig: 1 do
+  cached_delorean_fn :lookup, sig: 1 do
     |name|
     self.find_by_name(name)
   end
