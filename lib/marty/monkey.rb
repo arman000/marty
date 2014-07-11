@@ -12,6 +12,21 @@ Delorean::RUBY_WHITELIST.
          })
 
 ######################################################################
+
+# Be able to access Enums from Delorean
+class Delorean::BaseModule::BaseClass
+  class << self
+    alias_method :old_get_attr, :_get_attr
+
+    def _get_attr(obj, attr, _e)
+      return obj.send(attr) if
+        obj.instance_of?(Class) && obj.is_a?(Marty::Enum)
+      old_get_attr(obj, attr, _e)
+    end
+  end
+end
+
+######################################################################
 # FIXME: not sure why the following is needed.  Otherwise, the monkey
 # patch doesn't work.
 ActiveSupport::JSON.encode([Date.today])

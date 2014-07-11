@@ -64,6 +64,12 @@ class Marty::Tag < Marty::Base
     self.find_by_name(name)
   end
 
+  # Performance hack to cache Rule AR object
+  cached_delorean_fn :lookup_id, sig: 1 do
+    |id|
+    find_by_id(id)
+  end
+
   delorean_fn :lookup_dt, sig: 1 do
     |name|
     lookup(name).try(:created_dt)
@@ -75,6 +81,8 @@ class Marty::Tag < Marty::Base
 
   delorean_fn :find_match, sig: 1 do
     |dt|
-    where("created_dt <= ?", dt).order("created_dt DESC").first
+    id = where("created_dt <= ?", dt).order("created_dt DESC").pluck(:id).first
+    # performance hack
+    id && lookup_id(id)
   end
 end
