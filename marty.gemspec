@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*"] + Dir["lib/tasks/*.rake"] +
     ["MIT-LICENSE", "Rakefile", "README.rdoc"]
 
-  s.add_dependency "rails", "~> 3.2.13"
+  s.add_dependency "rails", "~> 4.0.0"
 
   s.add_development_dependency "pg"
 
@@ -28,8 +28,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "selenium-webdriver"
   s.add_development_dependency 'timecop'
 
-  s.add_dependency 'netzke-core', '0.8.4'
-  s.add_dependency 'netzke-basepack', '0.8.4'
+  s.add_dependency 'netzke-core'
+  s.add_dependency 'netzke-basepack'
 
   # needed for Netzke
   s.add_dependency 'will_paginate', '~>3.0.3'
@@ -43,5 +43,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'coderay'
   s.add_dependency 'net-ldap'
-  s.add_dependency 'paper_trail', '~>2.7.2'
+  s.add_dependency 'paper_trail', '~>3.0.0'
 end
