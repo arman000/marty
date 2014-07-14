@@ -9,7 +9,7 @@ class Marty::Posting < Marty::Base
   belongs_to :posting_type
 
   def self.make_name(posting_type, dt, is_test)
-    return 'NOW' if dt == Float::INFINITY || dt == 'infinity'
+    return 'NOW' if Mcfly.is_infinity(dt)
 
     return unless posting_type
 
@@ -36,11 +36,11 @@ class Marty::Posting < Marty::Base
 
     raise "unknown posting type #{name}" unless posting_type
 
-    o 			= new
-    o.posting_type 	= posting_type
-    o.is_test 		= !!is_test
-    o.comment		= comment
-    o.created_dt 	= dt
+    o              = new
+    o.posting_type = posting_type
+    o.is_test      = !!is_test
+    o.comment      = comment
+    o.created_dt   = dt
     o.save!
     o
   end
@@ -60,10 +60,16 @@ class Marty::Posting < Marty::Base
     lookup(name).try(:created_dt)
   end
 
+  delorean_fn :first_match, sig: 1 do
+    |dt|
+    where("created_dt <= ?", dt).order("created_dt DESC").first
+  end
+
   delorean_fn :get_latest, sig: [1, 2] do
     |limit, is_test=nil|
-    q = is_test.nil? ? self : self.where("is_test = ?", !!is_test)
-    q.where("created_dt <> 'infinity'").order("created_dt DESC").limit(limit).to_a
+    q = is_test.nil? ? self : self.where(is_test: !!is_test)
+    q.where("created_dt <> 'infinity'").
+      order("created_dt DESC").limit(limit).to_a
   end
 
   delorean_fn :is_base, sig: 1 do
@@ -79,11 +85,10 @@ class Marty::Posting < Marty::Base
     |posting|
     next posting if is_base(posting)
 
-    t = posting.created_dt
-    t = 'infinity' if t == Float::INFINITY
-
-    where("created_dt <= ? AND posting_type_id = ? AND is_test = 'f'",
-          t, Marty::PostingType.BASE.id).order("created_dt DESC").first
+    where("created_dt <= ?", Mcfly.normalize_infinity(posting.created_dt)).
+      where(posting_type_id: Marty::PostingType.BASE.id,
+            is_test: false,
+            ).order("created_dt DESC").first
   end
 
   delorean_fn :is_today, sig: 1 do

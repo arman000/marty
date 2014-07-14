@@ -6,6 +6,8 @@ require 'marty/new_posting_window'
 require 'marty/import_type_view'
 require 'marty/data_import_view'
 require 'marty/user_view'
+require 'marty/promise_view'
+require 'marty/api_auth_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend Marty::Permissions
@@ -56,6 +58,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       menu: 	[
                  :import_type_view,
                  :user_view,
+                 :api_auth_view,
                 ],
     }
   end
@@ -68,6 +71,7 @@ class Marty::MainAuthApp < Marty::AuthApp
                  :reporting,
                  :scripting,
                  :data_import_view,
+                 :promise_view,
                 ],
     }
   end
@@ -117,6 +121,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled 	= !self.class.has_any_perm?
   end
 
+  action :promise_view do |a|
+    a.text 	= I18n.t("jobs.promise_view")
+    a.handler 	= :netzke_load_component_by_action
+    a.icon 	= :report_magnify
+    a.disabled 	= !self.class.has_any_perm?
+  end
+
   action :data_import_view do |a|
     a.text 	= I18n.t("data_import_view.import_data")
     a.handler 	= :netzke_load_component_by_action
@@ -130,6 +141,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.icon	= :group
     a.disabled 	= !self.class.has_admin_perm? &&
       !self.class.has_user_manager_perm?
+  end
+
+  action :api_auth_view do |a|
+    a.text 	= I18n.t("api_auth_view", default: "API Authorization")
+    a.handler 	= :netzke_load_component_by_action
+    a.icon	= :script_key
+    a.disabled 	= !self.class.has_admin_perm?
   end
 
   ######################################################################
@@ -201,6 +219,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.allow_edit = self.class.has_scripting_perm?
   end
   component :reporting
+  component :promise_view
   component :posting_window
   component :new_posting_window do |c|
     c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?
@@ -210,6 +229,9 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.disabled = Marty::Util.warped? || !self.class.has_data_import_perm?
   end
   component :user_view
+  component :api_auth_view do |c|
+    c.disabled = Marty::Util.warped?
+  end
 end
 
 MainAuthApp = Marty::MainAuthApp

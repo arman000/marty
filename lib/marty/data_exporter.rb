@@ -1,28 +1,74 @@
+require 'base64'
+require 'zlib'
+
 class Marty::DataExporter
-  def self.hash_array_merge(*hl)
+  # given an array of hashes, return set of all keys
+  def self.hash_array_keys(hl)
+    hl.each_with_object(Set.new) { |h, keys| keys.merge(h.keys) }
+  end
+
+  def self.hash_array_merge(hl, transpose)
     # given a list of hashes hl, generates a merged hash.  The
     # resulting hash contains a superset of all the hash keys.  The
     # values are corresponding values from each hash in hl.
-    keys = Set.new
-    hl.each { |h| keys.merge(h.keys) }
+    keys = hash_array_keys(hl)
 
-    keys.each_with_object({}) { |k, rh|
-      rh[k] = hl.map { |h| h[k] }
-    }
+    if transpose
+      keys.each_with_object({}) { |k, rh|
+        rh[k] = hl.map { |h| h[k] }
+      }
+    else
+      [keys.to_a] + hl.map {|h| keys.map {|k| h[k]}}
+    end
   end
 
-  def self.to_csv(obj)
+  def self.encode_json(s)
+    Base64.strict_encode64 Zlib.deflate(s)
+  end
+
+  def self.decode_json(s)
+    Zlib.inflate Base64.strict_decode64(s)
+  end
+
+  def self.to_csv(obj, config=nil)
     obj = [obj] unless obj.respond_to? :map
 
-    # if all array items are hashes, we merge them
-    obj = hash_array_merge(*obj) if
-      obj.map {|x| x.is_a? Hash}.all?
+    config ||= {}
 
-    csv_string = CSV.generate do |csv|
-      obj.each { |x|
-        x = [x] unless x.respond_to? :map
-        csv << x.flatten(1).map(&:to_s)
-      }
+    # if all array items are hashes, we merge them
+    obj = hash_array_merge(obj, config["transpose"]) if
+      obj.is_a?(Array) && obj.map {|x| x.is_a? Hash}.all?
+
+    # symbolize config keys as expected by CSV.generate
+    conf = config.each_with_object({}) { |(k,v), h|
+      h[k.to_sym] = v unless k.to_s == "transpose"
+    }
+
+    # FIXME: very hacky to default row_sep to CRLF
+    conf[:row_sep] ||= "\r\n"
+
+    # FIXME: the following is ridiculously complex. We have different
+    # data paths for hashes and arrays.  Also, arrays can turn into
+    # hashes is all their items are hashes!  We map to complex objects
+    # to JSON when inside hashes, but not arrays. Really need to
+    # rethink this.  Probably should have separate functions for
+    # to_csv for hash and arrays.
+
+    if obj.is_a? Hash
+      csv_string = CSV.generate(conf) do |csv|
+        obj.each do |x|
+          csv << x.flatten(1).map(&:to_s)
+        end
+      end
+    else
+      csv_string = CSV.generate(conf) do |csv|
+        obj.each do |x|
+          x = [x] unless x.respond_to? :map
+          csv << x.map { |v|
+            v.is_a?(Array) || v.is_a?(Hash) ? encode_json(v.to_json) : v.to_s
+          }
+        end
+      end
     end
   end
 
@@ -35,10 +81,11 @@ class Marty::DataExporter
 
     @class_info[klass] = {
       cols:
-      klass.columns.map(&:name) - Marty::DataImporter::MCFLY_COLUMNS.to_a,
+      klass.columns.map(&:name) - Marty::DataRowProcessor::MCFLY_COLUMNS.to_a,
+
       assoc:
       associations.each_with_object({}) { |a, h|
-        h["#{a}_id"] = Marty::DataImporter::RowProcessor.assoc_info(klass, a)
+        h["#{a}_id"] = Marty::DataRowProcessor.assoc_info(klass, a)
       },
     }
   end
@@ -46,22 +93,45 @@ class Marty::DataExporter
   def self.export_attr(obj, c, info)
     v = obj.send(c.to_sym)
     assoc_info = info[:assoc][c] unless v.nil?
-    assoc_info ? assoc_info[:assoc_class].find(v).
-      send(assoc_info[:assoc_key].to_sym) : v
+    return [v] unless assoc_info
+
+    assoc_obj = assoc_info[:assoc_class].find(v)
+
+    assoc_info[:assoc_keys].map {|k| assoc_obj.send(k.to_sym)}
+  end
+
+  def self.export_header_attr(c, info)
+    assoc_info = info[:assoc][c]
+    return c unless assoc_info
+
+    # remove _id
+    c = c[0..-4]
+
+    assoc_keys = assoc_info[:assoc_keys]
+
+    # FIXME: this doesn't work if k is also an association.  Needs to
+    # be recursive.
+    assoc_keys.length > 1 ? assoc_keys.map {|k| "#{c}__#{k}"} : c
   end
 
   # Given a Mcfly klass, generate an export array.  Can potentially
   # use up a lot of memory if the result set is large.
-  def self.do_export(ts, klass)
+  def self.do_export(ts, klass, sort_field=nil)
     info = class_info(klass)
 
     # strip _id from assoc fields
-    header = [ info[:cols].map { |c| info[:assoc][c] ? c[0..-4] : c } ]
+    header = [ info[:cols].map {|c| export_header_attr(c, info)}.flatten(1) ]
 
-    ts = (ts == Float::INFINITY) ? 'infinity' : ts
+    query = klass
 
-    header + klass.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).all.
-      map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}}
+    # is it Mcfly?
+    if (klass.const_get(:MCFLY_UNIQUENESS) rescue nil)
+      ts = Mcfly.normalize_infinity(ts)
+      query = query.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts)
+    end
+
+    header + query.
+      order(sort_field || :id).all.
+      map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}.flatten(1)}
   end
-
 end

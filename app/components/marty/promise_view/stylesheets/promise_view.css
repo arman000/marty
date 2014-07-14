@@ -1,0 +1,15 @@
+.green-row td {
+    background-color: #91FF91 !important;
+}
+
+.red-row td {
+    background-color: #FF4545 !important;
+}
+
+.orange-row td {
+    background-color: #FF9D5C !important;
+}
+
+.gray-row td {
+    background-color: #D3D3D3 !important;
+}

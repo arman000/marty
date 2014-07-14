@@ -3,29 +3,30 @@ class Marty::Scripting < Netzke::Base
   def configure(c)
     super
 
-    c.items = [
-               :script_details,
-               {
-                 xtype: "tabpanel",
-                 active_tab: 0,
-                 region: :center,
-                 split: true,
-                 items: [
-                         {
-                           title: I18n.t("script.selection"),
-                           layout: {
-                             type: :vbox,
-                             align: :stretch,
-                           },
-                           items: [
-                                   :script_list,
-                                   :script_log,
-                                  ],
-                         },
-                         :script_tester,
-                        ],
-               },
-              ]
+    c.items =
+      [
+       :script_form,
+       {
+         xtype: "tabpanel",
+         active_tab: 0,
+         region: :center,
+         split: true,
+         items: [
+                 {
+                   title: I18n.t("script.selection"),
+                   layout: {
+                     type: :vbox,
+                     align: :stretch,
+                   },
+                   items: [
+                           :tag_grid,
+                           :script_grid,
+                          ],
+                 },
+                 :script_tester,
+                ],
+       },
+      ]
   end
 
   js_configure do |c|
@@ -34,112 +35,88 @@ class Marty::Scripting < Netzke::Base
     c.layout = :border
 
     c.init_component = <<-JS
-      function() {
-      this.callParent();
+    function() {
+       var me = this;
+       me.callParent();
 
-      var script_list = this.netzkeGetComponent('script_list').getView();
-      script_list.on('itemclick', function(script_list, record) {
-	var id = record.get('id');
-        this.selectScript({script_id: id});
-        this.netzkeGetComponent('script_log').getStore().load();
-        this.netzkeGetComponent('script_details').netzkeLoad({id: id});
-        this.netzkeGetComponent('script_tester').selectScript(id);
-      }, this);
+       var tag_grid      = me.netzkeGetComponent('tag_grid').getView();
+       var script_grid   = me.netzkeGetComponent('script_grid').getView();
+       var script_form   = me.netzkeGetComponent('script_form');
+       var script_tester = me.netzkeGetComponent('script_tester');
 
-      var script_log = this.netzkeGetComponent('script_log').getView();
-      script_log.on('itemclick', function(script_log, record) {
-	var id = record.get('id');
-        this.selectLog({log_id: id});
-        this.netzkeGetComponent('script_details').netzkeLoad({id: id});
-        this.netzkeGetComponent('script_tester').selectScript(id);
-        }, this);
+       tag_grid.on('itemclick', function(self, record) {
+          var tag_id = record.get('id');
+          me.selectTag({tag_id: tag_id});
+          script_grid.getStore().load();
+          // unset script_name when new tag is selected
+          var script_name = null;
+          script_form.netzkeLoad({script_name: script_name});
+          script_tester.selectScript(script_name);
+          }, me);
 
-      // display tooltip for checkin log message
-      script_log.on('render', function(view) {
-          view.tip = Ext.create('Ext.tip.ToolTip', {
-              target: view.el,
-              delegate: view.itemSelector,
-              trackMouse: true,
-              minWidth: 300, 
-              maxWidth: 500,
-              dismissDelay: 0,
-              showDelay: 200,
-              renderTo: Ext.getBody(),
-              listeners: {
-                  beforeshow: function updateTipBody(tip) {
-                      tip.update(
-                          view.getRecord(tip.triggerElement).get('log_message')
-                      );
-                  }
-              }
-          });
-      });
-      }
-      JS
+       script_grid.on('itemclick', function(self, record) {
+          var script_name = record.get('name');
+          me.selectScript({script_name: script_name});
+          script_form.netzkeLoad({script_name: script_name});
+          script_tester.selectScript(script_name);
+          }, me);
+    }
+    JS
 
     c.script_refresh = <<-JS
-      function(script_id) {
-	if (script_id == -1) {
-	  this.selectScript({});
-	  this.netzkeReload()
-	}
-        else {
-	  this.selectScript({script_id: script_id});
-          this.netzkeGetComponent('script_list').getStore().load();
-          this.netzkeGetComponent('script_log').getStore().load();
-          this.netzkeGetComponent('script_details').netzkeLoad({id: script_id});
-          this.netzkeGetComponent('script_tester').selectScript(script_id);
-	}
-      }
-      JS
+    function(script_name) {
+       if (!script_name) {
+          this.selectScript({});
+          this.netzkeReload();
+       }
+       else {
+          this.selectScript({script_name: script_name});
+          this.netzkeGetComponent('tag_grid').getStore().load();
+          this.netzkeGetComponent('script_grid').getStore().load();
+          this.netzkeGetComponent('script_form').netzkeLoad(
+             {script_name: script_name});
+          this.netzkeGetComponent('script_tester').selectScript(script_name);
+       }
+    }
+    JS
+  end
+
+  endpoint :select_tag do |params, this|
+    root_sess[:selected_tag_id]    = params[:tag_id]
+    root_sess[:selected_script_name] = nil
   end
 
   endpoint :select_script do |params, this|
-    # store selected script id in the session for this component's instance
-    script = Marty::Script.find_by_id(params[:script_id])
-
-    component_session[:selected_group_id] = script && script.group_id
-    component_session[:selected_script_id] = params[:script_id]
+    root_sess[:selected_script_name] = params[:script_name]
   end
 
-  endpoint :select_log do |params, this|
-    # store selected script id in the session for this component's instance
-    component_session[:selected_script_id] = params[:log_id]
+  component :tag_grid do |c|
+    c.klass            = Marty::TagGrid
+    c.width            = 400
+    c.height           = 300
+    c.load_inline_data = false
+    c.title            = I18n.t("script.selection_history")
   end
 
-  component :script_list do |c|
-    c.width 		= 400
-    c.klass 		= Marty::ScriptGrid
-    c.title 		= I18n.t("script.selection_list")
-    c.flex 		= 1
-    c.allow_edit	= config[:allow_edit]
+  component :script_grid do |c|
+    c.width            = 400
+    c.klass            = Marty::ScriptGrid
+    c.title            = I18n.t("script.selection_list")
+    c.flex             = 1
   end
 
-  component :script_log do |c|
-    c.klass 		= Marty::ScriptLogGrid
-    c.width 		= 400
-    c.load_inline_data 	= false
-    c.group_id 	 	= component_session[:selected_group_id]
-    c.script_id 	= component_session[:selected_script_id]
-    c.title 		= I18n.t("script.selection_history")
-    c.flex 		= 1
-  end
-
-  component :script_details do |c|
-    c.klass 		= Marty::ScriptDetail
-    c.script_id 	= component_session[:selected_script_id]
-    c.title 		= I18n.t("script.details")
-    c.flex 		= 1
-    c.split 		= true
-    c.region 		= :west
-    c.allow_edit	= config[:allow_edit]
+  component :script_form do |c|
+    c.klass            = Marty::ScriptForm
+    c.title            = I18n.t("script.detail")
+    c.flex             = 1
+    c.split            = true
+    c.region           = :west
   end
 
   component :script_tester do |c|
-    c.klass 		= Marty::ScriptTester
-    c.script_id 	= component_session[:selected_script_id]
-    c.title 		= I18n.t("script.tester")
-    c.flex 		= 1
+    c.klass            = Marty::ScriptTester
+    c.title            = I18n.t("script.tester")
+    c.flex             = 1
   end
 
 end

@@ -1,51 +1,57 @@
-class Marty::ScriptSet
-  # maps script_id to Delorean engine
-  @@engines, @@dengines = {}, {}
+class Marty::ScriptSet < Delorean::AbstractContainer
+  # ScriptSet acts as a process-wide cache for Delorean
+  # engines. FIXME: rewrite as Singleton.
 
-  def self.reset
-    @@engines, @@dengines = {}, {}
+  attr_reader :tag
+
+  def self.clear_cache
+    @@engines, @@dengines, @@dengines_dt = {}, {}, nil
   end
 
-  def self.parse(sname, body, sset=nil)
-    sset ||= Marty::ScriptContainer.new
+  clear_cache
 
-    engine = Delorean::Engine.new(sname)
-    engine.parse(body, sset)
+  def initialize(tag=nil)
+    @tag = Marty::Tag.map_to_tag(tag)
+    super()
+  end
+
+  def parse_check(sname, body)
+    engine = Delorean::Engine.new(sname, self)
+    engine.parse(body)
     engine
   end
 
-  def self.get_engine(script, sset=nil)
-    script = Marty::Script.find(script) if
-      script.is_a?(Fixnum)
+  def get_engine(sname)
+    raise "bad sname #{sname}" unless sname.is_a?(String)
 
-    return {error: "No such script"} unless script
+    if tag.isdev?
+      # FIXME: there are race conditions here if a script changes in
+      # the middle of a DEV import sequence. But, DEV imports are
+      # hacky/rare anyway.  So, don't bother for now.
 
-    if script.isdev?
-      ds = script.group_dscript
-      engine, updated_at = @@dengines[ds.id]
+      max_dt = Marty::Script.
+        order("created_dt DESC").limit(1).pluck(:created_dt).first
 
-      if updated_at && updated_at == ds.updated_at
-        sset.add_imports(engine) if sset
-        return engine
-      end
+      @@dengines_dt ||= max_dt
 
-      engine = parse(script.name, ds.body, sset)
-      @@dengines[ds.id] = [engine, ds.updated_at]
+      # reset dengine cache if a script has changed
+      @@dengines = {} if max_dt > @@dengines_dt
+
+      engine = @@dengines[sname]
+
+      return engine if engine
+
+      script = Marty::Script.find_script(sname, tag) || raise("No such script")
+
+      @@dengines[sname] = parse_check(sname, script.body)
     else
-      # using created_dt instead of version so that we handle cases
-      # where cucumber wipes the database but @@engines is still
-      # cached.
-      engine, created_dt = @@engines[script.id]
+      engine = @@engines[[tag.id, sname]]
 
-      if created_dt && created_dt == script.created_dt
-        sset.add_imports(engine) if sset
-        return engine
-      end
+      return engine if engine
 
-      engine = parse(script.name, script.body, sset)
-      @@engines[script.id] = [engine, script.created_dt]
+      script = Marty::Script.find_script(sname, tag) || raise("No such script")
+
+      @@engines[[tag.id, sname]] = parse_check(sname, script.body)
     end
-    engine
   end
-
 end

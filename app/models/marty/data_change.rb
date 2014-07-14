@@ -11,24 +11,11 @@ class Marty::DataChange
 
     klass = class_name.constantize
 
-    # The following test fails when t0/t1 are infinity.  ActiveSupport
-    # doesn't know about infinity.
-
-    # return unless t0 < t1
-
     t0 = 'infinity' if t0 == Float::INFINITY
     t1 = 'infinity' if t1 == Float::INFINITY
 
     info = Marty::DataExporter.class_info(klass)
-
-    change_q = '(obsoleted_dt >= ? AND obsoleted_dt < ?)' +
-      ' OR (created_dt >= ? AND created_dt < ?)'
-
-    raise "Change count exceeds limit #{MAX_COUNT}" if
-      klass.where(change_q, t0, t1, t0, t1).count > MAX_COUNT
-
-    changes = klass.where(change_q, t0, t1, t0, t1).
-      order("group_id, created_dt").group_by(&:group_id)
+    changes = get_changed_data(t0, t1, klass)
 
     changes.inject({}) { |h, (group_id, ol)|
       h[group_id] = ol.each_with_index.map { |o, i|
@@ -41,7 +28,6 @@ class Marty::DataChange
         # status=="mod" then "changes" will provide the list of
         # columns which changed.  If the object was deleted during
         # t0-t1 then we set the deleted flag in the profile.
-
         profile["deleted"] = (group_id == o.id &&
                               o.obsoleted_dt != Float::INFINITY &&
                               (t1 == 'infinity' || o.obsoleted_dt < t1)
@@ -55,7 +41,10 @@ class Marty::DataChange
 
         profile["attrs"] = info[:cols].map { |c|
           {
-            "value" 	=> Marty::DataExporter.export_attr(o, c, info),
+            # FIXME: using .first on export_attr -- this will not work
+            # if the attr is an association which will requires
+            # multiple keys to identify (e.g. Rule: name & version)
+            "value" 	=> Marty::DataExporter.export_attr(o, c, info).first,
             "changed" 	=> prev && (o.send(c.to_sym) != prev.send(c.to_sym)),
           }
         }
@@ -64,6 +53,36 @@ class Marty::DataChange
       }
       h
     }
+  end
+
+  delorean_fn :change_summary, sig: 3 do
+    |t0, t1, class_name|
+
+    klass = class_name.constantize
+
+    t0 = 'infinity' if t0 == Float::INFINITY
+    t1 = 'infinity' if t1 == Float::INFINITY
+
+    info = Marty::DataExporter.class_info(klass)
+    changes = get_changed_data(t0, t1, klass)
+
+    created = updated = deleted = 0
+
+    changes.each { |group_id, ol|
+      ol.each_with_index.map { |o, i|
+        deleted +=1 if (group_id == o.id &&
+                        o.obsoleted_dt != Float::INFINITY &&
+                        (t1 == 'infinity' || o.obsoleted_dt < t1)
+                        )
+        if i == 0
+          created +=1 unless o.created_dt < t0
+        else
+          updated += 1
+        end
+      }
+    }
+
+    {'created' => created, 'updated' => updated, 'deleted' => deleted}
   end
 
   delorean_fn :class_list, sig: 0 do
@@ -95,11 +114,28 @@ class Marty::DataChange
     Set[* classes] & Set[* class_list]
   end
 
-  delorean_fn :do_export, sig: 2 do
-    |pt, klass|
-    raise "#{klass} not on class_list" unless class_list.member? klass
+  delorean_fn :do_export, sig: [2, 3] do
+    |pt, klass, sort_field=nil|
 
-    Marty::DataExporter.do_export(pt, klass.constantize)
+    # allow classes on class_list or any Enum to be exported
+    raise "'#{klass}' not on class_list" unless
+      class_list.member?(klass) || klass.constantize.is_a?(Marty::Enum)
+
+    Marty::DataExporter.do_export(pt, klass.constantize, sort_field)
   end
 
+  def self.get_changed_data(t0, t1, klass)
+    # The following test fails when t0/t1 are infinity.  ActiveSupport
+    # doesn't know about infinity.
+    # return unless t0 < t1
+
+    change_q = '(obsoleted_dt >= ? AND obsoleted_dt < ?)' +
+      ' OR (created_dt >= ? AND created_dt < ?)'
+
+    raise "Change count exceeds limit #{MAX_COUNT}" if
+      klass.where(change_q, t0, t1, t0, t1).count > MAX_COUNT
+
+    klass.where(change_q, t0, t1, t0, t1).
+      order("group_id, created_dt").group_by(&:group_id)
+  end
 end

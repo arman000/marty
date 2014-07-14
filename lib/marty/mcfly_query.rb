@@ -8,6 +8,10 @@ module Mcfly
     end
 
     module ClassMethods
+      def clear_cache
+        @LOOKUP_CACHE.clear if @LOOKUP_CACHE
+      end
+
       # Implements a VERY HACKY class-based caching mechanism for
       # database lookup results.  Issues include: cached values are
       # ActiveRecord objects.  Not sure if these should be shared
@@ -21,7 +25,7 @@ module Mcfly
         delorean_fn(name, options) do |ts, *args|
           cache_key = [name, ts] + args.map{ |a|
             a.is_a?(ActiveRecord::Base) ? a.id : a
-          } unless Mcfly::Model::INFINITIES.member?(ts)
+          } unless Mcfly.is_infinity(ts)
 
           next @LOOKUP_CACHE[cache_key] if
             cache_key && @LOOKUP_CACHE.has_key?(cache_key)
@@ -53,8 +57,7 @@ module Mcfly
         cached_delorean_fn(name, options) do |ts, *args|
           raise "time cannot be nil" if ts.nil?
 
-          # normalize infinity
-          ts = 'infinity' if Mcfly::Model::INFINITIES.member? ts
+          ts = Mcfly.normalize_infinity(ts)
 
           where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).scoping do
             block.call(ts, *args)

@@ -1,24 +1,40 @@
 class Marty::ScriptGrid < Marty::CmGridPanel
+  has_marty_permissions \
+  create: [:dev],
+  read: :any,
+  update: [:dev],
+  delete: [] # [:dev]
 
   def configure(c)
     super
 
-    # Hacky fix to allow for testing
-    c.allow_edit = true if c.allow_edit.nil? && ENV["RAILS_ENV"] == "test" &&
-      self.class.current_user_roles.include?(:dev)
+    c.model                  = "Marty::Script"
+    c.enable_extended_search = false
 
-    c.title ||= I18n.t('scripts', default: "Scripts")
-    c.model 			= "Marty::Script"
-    c.enable_extended_search 	= false
-    c.scope 			||= ["obsoleted_dt = 'infinity'"]
-    c.prohibit_update 		= true
-    c.prohibit_delete 		= true
-    c.prohibit_create 		= !c.allow_edit
-    c.prohibit_read 		= !self.class.has_any_perm?
+    c.columns ||= [:name, :created_dt, :tag]
+    c.title   ||= I18n.t('scripts', default: "Scripts")
 
-    c.columns ||= [:name, :version, :created_dt, :status]
+    c.data_store.sorters = {
+      property: :name,
+      direction: 'ASC',
+    }
+  end
 
-    c.data_store.sorters = {property: :name, direction: 'ASC'}
+  def get_data(*args)
+    begin
+      ts = Marty::Tag.map_to_tag(root_sess[:selected_tag_id]).created_dt
+      ts = Mcfly.normalize_infinity(ts)
+    rescue
+      # if there are no non-DEV tags we get an exception above
+      ts = 'infinity'
+    end
+
+    tb = data_class.table_name
+
+    data_class.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
+                     ts, ts).scoping do
+      super
+    end
   end
 
   # override the add_in_form endpoint.  Script creation needs to use
@@ -26,28 +42,33 @@ class Marty::ScriptGrid < Marty::CmGridPanel
   endpoint :add_window__add_form__netzke_submit do |params, this|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    if config[:prohibit_create]
-      this.netzke_feedback "Permission Denied"
-      return
-    end
+    return this.netzke_feedback("Permission Denied") if
+      config[:prohibit_create]
 
-    script = Marty::Script.create_script(data["name"])
+    tag = Marty::Tag.map_to_tag(root_sess[:selected_tag_id])
+
+    return this.netzke_feedback("Can only add in DEV tag") unless
+      tag && tag.isdev?
+
+    name = data["name"]
+    script = Marty::Script.create_script(name, "# Script #{name}")
+
     if script.valid?
       this.success = true
-      this.on_submit_success
-    else
-      data_adapter.errors_array(script).each do |error|
-        flash :error => error
-      end
-      this.netzke_feedback(@flash)
+      return this.on_submit_success
     end
+
+    data_adapter.errors_array(script).each do |error|
+      flash :error => error
+    end
+    this.netzke_feedback(@flash)
   end
 
   action :add_in_form do |a|
-    a.text 	= I18n.t("script_grid.new")
-    a.tooltip  	= I18n.t("script_grid.new")
-    a.icon 	= :script_add
-    a.disabled	= config[:prohibit_create]
+    a.text     = I18n.t("script_grid.new")
+    a.tooltip  = I18n.t("script_grid.new")
+    a.icon     = :script_add
+    a.disabled = config[:prohibit_create]
   end
 
   def default_bbar
@@ -63,33 +84,20 @@ class Marty::ScriptGrid < Marty::CmGridPanel
   end
 
   column :name do |c|
-    c.flex 	= 1
-    c.text 	= I18n.t("script_grid.name")
-  end
-
-  column :version do |c|
-    c.width 	= 60
-    c.text 	= I18n.t("script_grid.version")
+    c.flex      = 1
+    c.text      = I18n.t("script_grid.name")
   end
 
   column :created_dt do |c|
-    c.text 	= I18n.t("script_grid.created_dt")
-    c.format 	= "Y-m-d H:i"
+    c.text      = I18n.t("script_grid.created_dt")
+    c.format    = "Y-m-d H:i"
     c.read_only = true
   end
 
-  # There's always a log entry with version DEV.  this entry is
-  # active if there's an associated dscript entry which referes to
-  # it.  Otherwise, the log entry refers to a checked-in version.
-
-  column :status do |c|
-    c.text 	= I18n.t("script_grid.status")
-    c.flex 	= 2
-    c.getter 	= lambda { |r|
-      dscript = Marty::Dscript.find_by_script_id(r.id)
-      # if we have a dscript, then it's checked out.
-      dscript ? dscript.user.to_s : "---"
-    }
+  column :tag do |c|
+    c.text      = I18n.t("script_grid.tag")
+    c.flex      = 1
+    c.getter    = lambda { |r| r.find_tag.try(:name) }
   end
 end
 

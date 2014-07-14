@@ -12,7 +12,7 @@ default.
 * @class Ext.ux.layout.component.field.CodeMirror
 * @extends Ext.layout.component.field.Field
 * @author Adrian Teodorescu (ateodorescu@gmail.com)
-* 
+*
 * Layout class for {@link Ext.ux.form.field.CodeMirror} fields. Handles sizing the codemirror field.
 */
 Ext.define('Ext.ux.layout.component.field.CodeMirror', {
@@ -39,7 +39,7 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
             innerHeight = height - me.measureLabelErrorHeight(ownerContext) -
                           ownerContext.bodyCellContext.getPaddingInfo().height;
 
-        
+
         if (Ext.isNumber(innerHeight)) {
             ownerContext.textAreaContext.setHeight(innerHeight);
             ownerContext.editorContext.setHeight(innerHeight);
@@ -50,7 +50,7 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
 
     publishInnerWidth: function (ownerContext, width) {
         var me = this;
-        
+
         if (Ext.isNumber(width)) {
             ownerContext.textAreaContext.setWidth(width);
             ownerContext.editorContext.setWidth(width);
@@ -66,25 +66,25 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
 * @author Adrian Teodorescu (ateodorescu@gmail.com; http://www.mzsolutions.eu)
 * @docauthor Adrian Teodorescu (ateodorescu@gmail.com; http://www.mzsolutions.eu)
 * @license [MIT][1]
-* 
+*
 * @version 1.5
-* 
-* 
+*
+*
 * Provides a [CodeMirror][2] component wrapper for Sencha. The supported and tested CodeMirror versions are 2.2, 2.3 and 2.4.
-* The component works with Extjs 4.1.x. 
-* 
+* The component works with Extjs 4.1.x.
+*
 * [1]: http://www.mzsolutions.eu/extjs/license.txt
 * [2]: http://codemirror.net/
-* 
-* 
+*
+*
 * The editor's toolbar buttons have tooltips defined in the {@link #buttonTips} property, but they are not
 * enabled by default unless the global {@link Ext.tip.QuickTipManager} singleton is {@link Ext.tip.QuickTipManager#init initialized}.
 *
 * If you include the modes script files by yourself then ignore the {@link #modes} property.
 * If you also include the extensions script files by yourself then ignore the {@link #extensions} property.
-* 
-* 
-* 
+*
+*
+*
 #Example usage:#
 
 {@img Ext.ux.form.field.CodeMirror.png Ext.ux.form.field.CodeMirror component}
@@ -93,7 +93,7 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
         title:          'Function info',
         bodyPadding:    10,
         width:          500,
-        renderTo: Ext.getBody(),        
+        renderTo: Ext.getBody(),
         items: [{
             xtype:      'textfield',
             name:       'name',
@@ -106,7 +106,7 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
             fieldLabel: 'Code',
             anchor:     '100%'
         }],
-        
+
         buttons: [{
             text: 'Save',
             handler: function(){
@@ -115,9 +115,9 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
                 }
             }
         }]
-    }); 
+    });
 
-    
+
 #Plugin example for the CodeMirror component:#
 
     Ext.define('Ext.ux.form.plugin.CodeMirror', {
@@ -133,7 +133,7 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
         constructor: function(config) {
             Ext.apply(this, config);
         },
-            
+
         init: function(codemirror){
             var me = this;
             me.codemirror = codemirror;
@@ -145,7 +145,7 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
                 items = [],
                 baseCSSPrefix = Ext.baseCSSPrefix,
                 tipsEnabled = Ext.tip.QuickTipManager && Ext.tip.QuickTipManager.isEnabled();
-            
+
             function btn(id, toggle, handler){
                 return {
                     itemId : id,
@@ -166,7 +166,7 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
                 me.codemirror.getToolbar().add(items);
             }
         },
-        
+
         relayBtnCmd: function(btn){
             alert('test');
         },
@@ -178,7 +178,7 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
                 cls: Ext.baseCSSPrefix + 'html-editor-tip'
             }
         }
-        
+
     });
 
 
@@ -213,22 +213,31 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
     componentLayout: 'codemirror',
 
     editorWrapCls: Ext.baseCSSPrefix + 'html-editor-wrap',
-    
+
     maskOnDisable: true,
 
     afterBodyEl: '</div>',
 
+    /*
+    // map tabs to 4 spaces -- arman (doesn't work - may need new version)
+    extraKeys: {
+            "Tab": function() {
+              editor.replaceSelection("   " , "end");
+            }
+    },
+    */
+
     /**
-    * @cfg {String} mode The default mode to use when the editor is initialized. When not given, this will default to the first mode that was loaded. 
-    * It may be a string, which either simply names the mode or is a MIME type associated with the mode. Alternatively, 
-    * it may be an object containing configuration options for the mode, with a name property that names the mode 
-    * (for example {name: "javascript", json: true}). The demo pages for each mode contain information about what 
+    * @cfg {String} mode The default mode to use when the editor is initialized. When not given, this will default to the first mode that was loaded.
+    * It may be a string, which either simply names the mode or is a MIME type associated with the mode. Alternatively,
+    * it may be an object containing configuration options for the mode, with a name property that names the mode
+    * (for example {name: "javascript", json: true}). The demo pages for each mode contain information about what
     * configuration parameters the mode supports.
     */
     mode:               'text/plain',
 
     /**
-    * @cfg {Boolean} showAutoIndent Enable auto indent button for indenting the selected range 
+    * @cfg {Boolean} showAutoIndent Enable auto indent button for indenting the selected range
     */
     showAutoIndent:     true,
 
@@ -238,13 +247,13 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
     showLineNumbers:    true,
 
     /**
-    * @cfg {Boolean} enableMatchBrackets Force matching-bracket-highlighting to happen 
+    * @cfg {Boolean} enableMatchBrackets Force matching-bracket-highlighting to happen
     */
     enableMatchBrackets:    true,
 
     /**
-    * @cfg {Boolean} enableElectricChars Configures whether the editor should re-indent the current line when a character is typed 
-    * that might change its proper indentation (only works if the mode supports indentation). 
+    * @cfg {Boolean} enableElectricChars Configures whether the editor should re-indent the current line when a character is typed
+    * that might change its proper indentation (only works if the mode supports indentation).
     */
     enableElectricChars:    false,
 
@@ -269,13 +278,13 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
     enableLineNumbers:      true,
 
     /**
-    * @cfg {Boolean} enableGutter Can be used to force a 'gutter' (empty space on the left of the editor) to be shown even 
+    * @cfg {Boolean} enableGutter Can be used to force a 'gutter' (empty space on the left of the editor) to be shown even
     * when no line numbers are active. This is useful for setting markers.
     */
     enableGutter:           true,
 
     /**
-    * @cfg {Boolean} enableFixedGutter When enabled (off by default), this will make the gutter stay visible when the 
+    * @cfg {Boolean} enableFixedGutter When enabled (off by default), this will make the gutter stay visible when the
     * document is scrolled horizontally.
     */
     enableFixedGutter:      false,
@@ -291,8 +300,8 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
     readOnly : false,
 
     /**
-    * @cfg {Number} pollInterval Indicates how quickly (miliseconds) CodeMirror should poll its input textarea for changes. 
-    * Most input is captured by events, but some things, like IME input on some browsers, doesn't generate events 
+    * @cfg {Number} pollInterval Indicates how quickly (miliseconds) CodeMirror should poll its input textarea for changes.
+    * Most input is captured by events, but some things, like IME input on some browsers, doesn't generate events
     * that allow CodeMirror to properly detect it. Thus, it polls.
     */
     pollInterval:         100,
@@ -305,32 +314,32 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
     /**
     * @cfg {Number} tabSize The width of a tab character.
     */
-    tabSize:            8,
+    tabSize:            4,
 
     /**
-    * @cfg {String} theme The theme to style the editor with. You must make sure the CSS file defining the corresponding 
-    * .cm-s-[name] styles is loaded (see the theme directory in the distribution). The default is "default", for which 
-    * colors are included in codemirror.css. It is possible to use multiple theming classes at once—for example 
+    * @cfg {String} theme The theme to style the editor with. You must make sure the CSS file defining the corresponding
+    * .cm-s-[name] styles is loaded (see the theme directory in the distribution). The default is "default", for which
+    * colors are included in codemirror.css. It is possible to use multiple theming classes at once—for example
     * "foo bar" will assign both the cm-s-foo and the cm-s-bar classes to the editor.
     */
     theme:              'default',
-    
+
     /**
     * @property {String} pathModes Path to the modes folder to dinamically load the required scripts. You could also
-    * include all your required modes in a big script file and this path will be ignored. 
+    * include all your required modes in a big script file and this path will be ignored.
     * Do not fill in the trailing slash.
     */
     pathModes:          'mode',
-    
+
     /**
     * @property {String} pathExtensions Path to the extensions folder to dinamically load the required scripts. You could also
-    * include all your required extensions in a big script file and this path will be ignored. 
-    * Do not fill in the trailing slash. 
+    * include all your required extensions in a big script file and this path will be ignored.
+    * Do not fill in the trailing slash.
     */
     pathExtensions:     'lib/util',
 
     /**
-    * @property {Array} extensions Define here extensions script dependencies; This is used by toolbar buttons to automatically 
+    * @property {Array} extensions Define here extensions script dependencies; This is used by toolbar buttons to automatically
     * load the scripts before using an extension.
     */
     extensions:{
@@ -338,13 +347,13 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             dependencies: ['formatting.js']
         }
     },
-    
+
     scriptsLoaded: [],
     lastMode: '',
-    
+
     initComponent : function(){
         var me = this;
-        
+
         me.addEvents(
             /**
              * @event initialize
@@ -361,22 +370,22 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             'activate',
             /**
              * @event deactivate
-             * Fires when the editor looses the focus. 
+             * Fires when the editor looses the focus.
              * @param {Ext.ux.form.field.CodeMirror} this
              */
             'deactivate',
              /**
              * @event change
-             * Fires when the content of the editor is changed. 
+             * Fires when the content of the editor is changed.
              * @param {Ext.ux.form.field.CodeMirror} this
              * @param {String} newValue New value
              * @param {String} oldValue Old value
-             * @param {Array} options 
+             * @param {Array} options
              */
             'change',
              /**
              * @event modechanged
-             * Fires when the editor mode changes. 
+             * Fires when the editor mode changes.
              * @param {Ext.ux.form.field.CodeMirror} this
              * @param {String} newMode New mode
              * @param {String} oldMode Old mode
@@ -390,7 +399,7 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             'cursoractivity',
             /**
              * @event gutterclick
-             * Fires whenever the editor gutter (the line-number area) is clicked. 
+             * Fires whenever the editor gutter (the line-number area) is clicked.
              * @param {Ext.ux.form.field.CodeMirror} this
              * @param {Number} lineNumber Zero-based number of the line that was clicked
              * @param {Object} event The raw mousedown event
@@ -418,11 +427,11 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
              * @event keyevent
              * Fires on eery keydown, keyup, and keypress event that CodeMirror captures.
              * @param {Ext.ux.form.field.CodeMirror} this
-             * @param {Object} event This key event is pretty much the raw key event, except that a stop() method is always 
-             * added to it. You could feed it to, for example, jQuery.Event to further normalize it. This function can inspect 
-             * the key event, and handle it if it wants to. It may return true to tell CodeMirror to ignore the event. 
-             * Be wary that, on some browsers, stopping a keydown does not stop the keypress from firing, whereas on others 
-             * it does. If you respond to an event, you should probably inspect its type property and only do something when 
+             * @param {Object} event This key event is pretty much the raw key event, except that a stop() method is always
+             * added to it. You could feed it to, for example, jQuery.Event to further normalize it. This function can inspect
+             * the key event, and handle it if it wants to. It may return true to tell CodeMirror to ignore the event.
+             * Be wary that, on some browsers, stopping a keydown does not stop the keypress from firing, whereas on others
+             * it does. If you respond to an event, you should probably inspect its type property and only do something when
              * it is keydown (or keypress for actions that need character data).
              */
             'keyevent'
@@ -433,8 +442,8 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
 
         me.initLabelable();
         me.initField();
-        
-        /* 
+
+        /*
         Fix resize issues as suggested by user koblass on the Extjs forums
         http://www.sencha.com/forum/showthread.php?167047-Ext.ux.form.field.CodeMirror-for-Ext-4.x&p=860535&viewfull=1#post860535
         */
@@ -443,11 +452,11 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
                 me.editor.refresh();
             }
         }, me);
-        
+
     },
 
     getMaskTarget: function(){
-        return this.bodyEl;    
+        return this.bodyEl;
     },
 
     /**
@@ -488,10 +497,10 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
 
         me.disableItems(true);
         me.initEditor();
-        
+
         me.rendered = true;
     },
-    
+
     initRenderTpl: function() {
         var me = this;
         if (!me.hasOwnProperty('renderTpl')) {
@@ -511,7 +520,7 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
     initEditor : function(){
         var me = this,
         mode = "text/x-delorean";
-        
+
         // if no mode is loaded we could get an error like "Object #<Object> has no method 'startState'"
         // search mime to find script dependencies
         var item = me.getMime(me.mode);
@@ -521,7 +530,7 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
                 mode = "text/x-delorean";
             }
         }
-        
+
         me.editor = CodeMirror(me.editorEl, {
             matchBrackets:      me.enableMatchBrackets,
             electricChars:      me.enableElectricChars,
@@ -591,14 +600,14 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
 	var el = document.getElementById(me.bodyEl.id);
 	el.setAttribute("valign", "top");
     },
-    
+
     /**
     * @private
     */
     relayBtnCmd: function(btn){
         this.relayCmd(btn.getItemId());
     },
-    
+
     /**
     * @private
     */
@@ -610,12 +619,12 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
                 // auto formatting
                 case 'justifycenter':
                     if(!CodeMirror.extensions.autoIndentRange){
-                        me.loadDependencies(me.extensions.format, me.pathExtensions, me.doIndentSelection, me);                        
+                        me.loadDependencies(me.extensions.format, me.pathExtensions, me.doIndentSelection, me);
                     }else{
                         me.doIndentSelection();
                     }
                 break;
-                
+
                 // line numbers
                 case 'insertorderedlist':
                     me.doChangeLineNumbers();
@@ -623,39 +632,39 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             }
         }, 10, this);
     },
-    
+
     /**
     * @private
     * Reload all CodeMirror extensions for the current instance;
-    * 
+    *
     */
     reloadExtentions: function(){
         var me = this;
-        
+
         for (var ext in CodeMirror.extensions)
           if (CodeMirror.extensions.propertyIsEnumerable(ext) &&
               !me.editor.propertyIsEnumerable(ext))
             me.editor[ext] = CodeMirror.extensions[ext];
     },
-    
+
     doChangeLineNumbers: function(){
         var me = this;
-        
+
         me.enableLineNumbers = !me.enableLineNumbers;
         me.editor.setOption('lineNumbers', me.enableLineNumbers);
     },
-    
+
     /**
     * @private
     */
     doIndentSelection: function(){
         var me = this;
-        
+
         me.reloadExtentions();
-        
+
         try{
             var range = { from: me.editor.getCursor(true), to: me.editor.getCursor(false) };
-            me.editor.autoIndentRange(range.from, range.to);        
+            me.editor.autoIndentRange(range.from, range.to);
         }catch(err){}
     },
 
@@ -665,13 +674,13 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             dependencies:   []
 	},
     ],
-    
+
     /**
     * @private
     */
     getMime: function(mime){
         var me = this, item, found = false;
-        
+
         for(var i=0;i<me.modes.length;i++){
             item = me.modes[i];
             if(Ext.isArray(item.mime)){
@@ -691,16 +700,16 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
         else
             return null;
     },
-    
+
     /**
     * @private
     */
     loadDependencies: function(item, path, handler, scope){
         var me = this;
-        
+
         me.scripts = [];
         me.scriptIndex = -1;
-        
+
         // load the dependencies
         for(var i=0; i < item.dependencies.length; i++){
             if(!Ext.Array.contains(me.scriptsLoaded, path + '/' + item.dependencies[i])){
@@ -724,7 +733,7 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
                         }
                     }
                 };
-            
+
                 me.scripts[me.scriptIndex] = {
                     url: options.url,
                     success: true,
@@ -739,7 +748,7 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             me.loadScript(me.scripts[i].options);
         }
     },
-    
+
     /**
     * @private
     */
@@ -759,13 +768,13 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
                 script.onError(script.options, response.status);
             },
             scope: me
-        });        
+        });
     },
-    
+
     /**
     * @private
     * Return mode depending on the mime; If the mime is not loaded then return null
-    * 
+    *
     * @param mime
     */
     getMimeMode: function(mime){
@@ -781,23 +790,23 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
         }
         return mode;
     },
-    
+
     /**
     * Change the CodeMirror mode to the specified mime.
-    * 
+    *
     * @param {String} mime The MIME value according to the CodeMirror documentation
     */
     setMode: function(mime){
-        var me = this, 
+        var me = this,
             found = false;
         // search mime to find script dependencies
         var item = me.getMime(mime);
-        
+
         if(!item) {
             // mime not found
             return;
         }
-        
+
         var mode = me.getMimeMode(mime);
 
         if(!mode){
@@ -814,7 +823,7 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             else
                 me.editor.setOption('mode', mode);
         }
-        
+
         if(me.modesSelect){
             me.modesSelect.dom.value = mime;
         }
@@ -823,21 +832,21 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             me.lastMode = mime;
         }catch(err){}
     },
-    
+
     /**
     * Set the editor as read only
-    * 
+    *
     * @param {Boolean} readOnly
     */
     setReadOnly: function(readOnly) {
         var me = this;
-        
+
         if(me.editor){
             me.editor.setOption('readOnly', readOnly);
             me.disableItems(readOnly);
         }
     },
-    
+
     onDisable: function() {
         this.bodyEl.mask();
         this.callParent(arguments);
@@ -847,12 +856,12 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
         this.bodyEl.unmask();
         this.callParent(arguments);
     },
-    
+
     disableItems: function(disabled) {
     },
 
     /**
-    * Sets a data value into the field and runs the change detection. 
+    * Sets a data value into the field and runs the change detection.
     * @param {Mixed} value The value to set
     * @return {Ext.ux.form.field.CodeMirror} this
     */
@@ -865,7 +874,7 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             me.editor.setValue(value);
         return me;
     },
-    
+
     /**
     * Return submit value to the owner form.
     * @return {Mixed} The field value
@@ -874,20 +883,20 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
         var me = this;
         return me.getValue();
     },
-    
+
     /**
     * Return the value of the CodeMirror editor
     * @return {Mixed} The field value
     */
     getValue: function(){
         var me = this;
-        
+
         if(me.editor)
             return me.editor.getValue();
         else
             return null;
     },
-    
+
     /**
     * @private
     */
@@ -905,5 +914,5 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
         }
         me.callParent();
     },
-    
+
 });

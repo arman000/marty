@@ -4,22 +4,19 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
 
     warped = Marty::Util.warped?
 
-    c.enable_extended_search	= false
-    c.enable_edit_in_form	&&= !warped
-    c.prohibit_update		||= warped
-    c.prohibit_delete		||= warped
-    c.prohibit_create		||= warped
-    #c.prohibit_read		||= !self.class.has_any_perm?
+    c.enable_extended_search = false
+    c.enable_edit_in_form    &&= !warped
+    c.prohibit_update        ||= warped
+    c.prohibit_delete        ||= warped
+    c.prohibit_create        ||= warped
+    #c.prohibit_read         ||= !self.class.has_any_perm?
 
     # default sort all Mcfly grids with id
     c.data_store.sorters ||= {property: :id, direction: 'ASC'}
   end
 
   def get_data(*args)
-    ts = Marty::Util.get_posting_time
-
-    # normalize infinity
-    ts = 'infinity' if Mcfly::Model::INFINITIES.member? ts
+    ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
 
     # FIXME: may need to pass the scope in using the params hash in
     # args.  Not sure how the following will interact with sorting.
@@ -56,11 +53,24 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
     end
   end
 
+  # The basepack grid doesn't catch general exceptions.  We can get
+  # this if there's some sort of failure with saving to the DB.
+  # e.g. range violation.
+  def process_data_with_error_handling(data, operation)
+    begin
+      process_data_without_error_handling(data, operation)
+    rescue => exc
+      success = false
+      flash :error => "Error: #{exc}"
+    end
+  end
+
+  alias_method_chain :process_data, :error_handling
+
 private
   def self.mcfly_scope(sort_column)
     lambda { |r|
-      t = Marty::Util.get_posting_time
-      ts = (t == Float::INFINITY) ? 'infinity' : t
+      ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
       r.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).
       order(sort_column.to_sym)
     }

@@ -17,7 +17,7 @@ class Marty::User < Marty::Base
 
   scope :active, :conditions => "#{self.table_name}.active = true"
 
-  validate :limit_user_manager
+  validate :verify_changes
   before_destroy :destroy_user
 
   def name
@@ -94,8 +94,13 @@ class Marty::User < Marty::Base
     Mcfly.whodunnit
   end
 
+ def self.has_role(role)
+    mr =  Mcfly.whodunnit.roles rescue []
+    mr.any? {|attr| attr.name == role}
+ end
+
 private
-  def limit_user_manager
+  def verify_changes
     # If current users role is only user_manager, restrict following
     # 1 - Do not allow user to edit own record
     # 2 - Do not allow user to edit the Gemini system record
@@ -113,18 +118,20 @@ private
         "User Managers cannot edit the Gemini system account"
       end
     end
+
+    errors.add :base, "The Gemini system account cannot be deactivated" if
+      self.login == Rails.configuration.marty.system_account.to_s &&
+      !self.active
+
     errors.blank?
   end
 
-  def has_role(role)
-    mr =  Mcfly.whodunnit.roles rescue []
-    hr = false
-    mr.each {|r| hr = true if r.name == role }
-    hr
+  delorean_fn :get_roles, sig: 0 do
+     Mcfly.whodunnit.roles
   end
 
   def user_manager_only
-    has_role("user_manager") && !has_role("admin")
+    Marty::User.has_role("user_manager") && !Marty::User.has_role("admin")
   end
 
   def destroy_user
@@ -132,6 +139,9 @@ private
       self.login == Mcfly.whodunnit.login
     errors.add :base, "You cannot delete the system account" if
       self.login == Rails.configuration.marty.system_account.to_s
+    # Default to disallowing any deletions for now
+    errors.add :base,
+    "Users cannot be deleted - set 'Active' to false to disable the account"
 
     errors.blank?
   end
