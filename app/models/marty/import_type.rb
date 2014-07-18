@@ -31,14 +31,9 @@ class Marty::ImportType < Marty::Base
     model_name.constantize
   end
 
-  delorean_fn :check_import_role, sig: 1 do
-    |name|
-    if Mcfly.whodunnit.roles.
-        where(id: Marty::ImportType.find_by_name(name).role_id) == []
-      false
-    else
-      true
-    end
+  def allow_import?()
+    Mcfly.whodunnit.roles.pluck(:id).
+      include?(role_id) if Mcfly.whodunnit
   end
 
   delorean_fn :lookup, sig: 1 do
