@@ -57,6 +57,10 @@ class Marty::DataImportView < Marty::CmFormPanel
     return this.netzke_feedback("Import type #{import_type} not found") unless
       import_type_rec
 
+    return this.netzke_feedback("Insufficient permissions to run " +
+                                "the data import") unless
+      import_type_rec.allow_import?
+
     klass               = import_type_rec.get_model_class
     cleaner_function    = import_type_rec.cleaner_function
     validation_function = import_type_rec.validation_function
