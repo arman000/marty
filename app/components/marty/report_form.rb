@@ -104,10 +104,25 @@ class Marty::ReportForm < Marty::CmFormPanel
     function() {
        var values = this.getForm().getValues();
        var data = escape(Ext.encode(values));
-       // FIXME: this is very hacky since it bypasses Netzke channel.  This is
-       // a security hole wrt to the report role mechanism.
-       window.location = "#{Marty::Util.marty_path}/components/#{self.name}." +\
-          this.repformat + "?data=" + data + "&reptitle=" + this.reptitle;
+       if (data.length > 4096) {
+          msg = "There is too much data to run as a foreground report." +\
+                "<br/>Please run as a background report."
+          Ext.create('Ext.Window', {
+            height:        100,
+            minWidth:      350,
+            autoWidth:     true,
+            modal:         true,
+            autoScroll:    true,
+            html:          msg,
+            title:         "Warning"
+          }).show();
+       } else {
+         // FIXME: this is very hacky since it bypasses Netzke channel.
+         // This is a security hole wrt to the report role mechanism.
+         window.location = "#{Marty::Util.marty_path}/components" +\
+            "/#{self.name}." + this.repformat +\
+            "?data=" + data + "&reptitle=" + this.reptitle;
+       }
     }
     JS
   end
