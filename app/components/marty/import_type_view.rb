@@ -7,9 +7,10 @@ class Marty::ImportTypeView < Marty::CmGridPanel
   def configure(c)
     super
 
-    c.title 	= I18n.t('import_type', default: "ImportType")
-    c.model 	= "Marty::ImportType"
-    c.columns 	= [:name, :model_name, :cleaner_function, :validation_function]
+    c.title   = I18n.t('import_type', default: "ImportType")
+    c.model   = "Marty::ImportType"
+    c.columns = [:name, :role__name, :model_name,
+                 :cleaner_function, :validation_function]
 
     c.enable_extended_search = false
 
@@ -18,6 +19,10 @@ class Marty::ImportTypeView < Marty::CmGridPanel
 
   column :name do |c|
     c.flex = 1
+  end
+
+  column :role__name do |c|
+    c.width = 150
   end
 
   column :model_name do |c|
