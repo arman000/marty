@@ -19,9 +19,7 @@ class Delorean::BaseModule::BaseClass
     alias_method :old_get_attr, :_get_attr
 
     def _get_attr(obj, attr, _e)
-      return obj.send(attr) if
-        obj.instance_of?(Class) && obj.is_a?(Marty::Enum)
-      old_get_attr(obj, attr, _e)
+      Marty::Enum === obj ? obj[attr] : old_get_attr(obj, attr, _e)
     end
   end
 end

@@ -74,7 +74,7 @@ class Marty::Posting < Marty::Base
 
   delorean_fn :is_base, sig: 1 do
     |posting|
-    posting.posting_type == Marty::PostingType.BASE
+    posting.posting_type == Marty::PostingType["BASE"]
   end
 
   # Get the base for the posting argument.  If the posting has
@@ -86,7 +86,7 @@ class Marty::Posting < Marty::Base
     next posting if is_base(posting)
 
     where("created_dt <= ?", Mcfly.normalize_infinity(posting.created_dt)).
-      where(posting_type_id: Marty::PostingType.BASE.id,
+      where(posting_type_id: Marty::PostingType["BASE"].id,
             is_test: false,
             ).order("created_dt DESC").first
   end
