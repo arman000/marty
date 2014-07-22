@@ -72,23 +72,6 @@ end
 
 ######################################################################
 
-class ActiveRecord::Relation
-  # multi-column pluck based on AR pluck code
-  def pluckn(*columns)
-    return pluck(columns[0]) if columns.length == 1
-
-    relation = clone
-    relation.select_values = columns
-    klass.connection.select_all(relation.arel).map! do |attributes|
-      attributes.map { |k,v|
-        klass.type_cast_attribute(k, klass.initialize_attributes(attributes))
-      }
-    end
-  end
-end
-
-######################################################################
-
 # The following is a hack to get around postgres_ext's broken handling
 # of PostgreSQL ranges.  Essentially, postgres_ext doesn't allow
 # numranges to exlude the range start e.g. anything like: "(1.1,2.2]".
@@ -96,36 +79,25 @@ end
 # ranges. i.e. we keep them as strings.  Note that this hack would be
 # quite different for Rails 4.0.
 
-raise "The PG range hack needs to be fixed" if Rails.version[0] != "3"
-
-require 'postgres_ext'
-
-RANGE_TYPES =
-  Set[:numrange,:int4range,:int8range,:daterange,:tsrange,:tstzrange]
-
-module ActiveRecord
-  module ConnectionAdapters
-    class PostgreSQLColumn
-      RANGE_TYPES =
-        Set[:numrange,:int4range,:int8range,:daterange,:tsrange,:tstzrange]
-
-      def type_cast_with_rr(value)
-        return value if RANGE_TYPES.member?(type)
-
-        type_cast_without_rr(value)
-      end
-
-      alias_method_chain :type_cast, :rr
+require 'active_record/connection_adapters/postgresql_adapter'
 
 
-      def type_cast_code_with_rr(var_name)
-        return var_name if RANGE_TYPES.member?(type)
+[:numrange,:int4range,:int8range,:daterange,:tsrange,:tstzrange].each {|t|
+  ActiveRecord::ConnectionAdapters::PostgreSQLAdapter::OID.
+  alias_type t.to_s, 'text'
+}
 
-        type_cast_code_without_rr(var_name)
-      end
-      alias_method_chain :type_cast_code, :rr
+# The following is a hack to work around a bug in Rails4 array
+# handling which doesn't currently support multidimensional arrays.
+module ActiveRecord::ConnectionAdapters::PostgreSQLColumn::Cast
+  def string_to_array(string, oid)
+    type_cast_array parse_pg_array(string), oid
+  end
 
-    end
+  private
+  def type_cast_array(value, oid)
+    Array === value ?
+    value.map {|val| type_cast_array val, oid} : oid.type_cast(value)
   end
 end
 
@@ -174,4 +146,17 @@ def human_to_pg_range(r)
   end
 
   "#{start},#{ends}"
+end
+
+######################################################################
+
+# Rails 4 doesn't handle 'infinity' datetime correctly properly due to
+# in_time_zone conversion. Ergo this hack.
+
+class String
+  alias_method :old_in_time_zone, :in_time_zone
+
+  def in_time_zone(zone = ::Time.zone)
+    self == 'infinity' ? self : old_in_time_zone(zone)
+  end
 end

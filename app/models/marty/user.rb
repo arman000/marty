@@ -4,7 +4,7 @@ require 'net/ldap'
 class Marty::User < Marty::Base
   has_paper_trail
 
-  attr_protected :login, :firstname, :lastname, :active
+  # attr_protected :login, :firstname, :lastname, :active
 
   validates_presence_of :login, :firstname, :lastname
   validates_uniqueness_of :login
@@ -15,7 +15,7 @@ class Marty::User < Marty::Base
   has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
 
-  scope :active, :conditions => "#{self.table_name}.active = true"
+  scope :active, -> { where("#{self.table_name}.active = ?", true) }
 
   validate :verify_changes
   before_destroy :destroy_user

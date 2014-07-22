@@ -3,7 +3,7 @@ require 'mcfly'
 class Marty::Script < Marty::Base
   has_mcfly
 
-  attr_accessible :name, :body
+  # attr_accessible :name, :body
   validates_presence_of :name, :body
   mcfly_validates_uniqueness_of :name
   validates_format_of :name, {

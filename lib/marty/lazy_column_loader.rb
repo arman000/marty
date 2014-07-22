@@ -1,3 +1,7 @@
+# ATTRIBUTION NOTE: This module has been mostly copied from the
+# lazy_columns gem. The original code can be found at:
+# https://github.com/jorgemanrubia/lazy_columns
+
 module Marty
   module LazyColumnLoader
     extend ActiveSupport::Concern
@@ -12,11 +16,12 @@ module Marty
 
     private
       def exclude_columns_from_default_scope(columns)
-        default_scope select((
-                              column_names - columns).map {
-                               |column_name|
-                               "#{table_name}.#{column_name}"
-                             })
+        default_scope {
+          select((column_names - columns).map {
+                   |column_name|
+                   "#{table_name}.#{column_name}"
+                 })
+        }
       end
 
       def define_lazy_accessors_for(columns)
@@ -28,8 +33,10 @@ module Marty
           unless has_attribute?(column)
             changes_before_reload = self.changes.clone
             self.reload
-            changes_before_reload.each{|attribute_name, values|
-              self.send("#{attribute_name}=", values[1])}
+            changes_before_reload.each{
+              |attribute_name, values|
+              self.send("#{attribute_name}=", values[1])
+            }
           end
           read_attribute column
         end

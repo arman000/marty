@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*"] + Dir["lib/tasks/*.rake"] +
     ["MIT-LICENSE", "Rakefile", "README.rdoc"]
 
-  s.add_dependency "rails", "~> 4.0.0"
+  s.add_dependency "rails", "~> 4.0.8"
 
   s.add_development_dependency "pg"
 

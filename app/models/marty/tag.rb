@@ -1,7 +1,7 @@
 class Marty::Tag < Marty::Base
   has_mcfly append_only: true
 
-  attr_accessible :created_dt, :name, :comment
+  # attr_accessible :created_dt, :name, :comment
   mcfly_validates_uniqueness_of :name
   validates_presence_of :name, :comment
 

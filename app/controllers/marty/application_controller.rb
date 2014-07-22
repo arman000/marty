@@ -1,5 +1,6 @@
 class Marty::ApplicationController < ActionController::Base
-  protect_from_forgery
+  # HACKKKKKKKKKKKKKKKKKKKKKKKKKKKK!!!
+  # protect_from_forgery
 
   # Marty's ApplicationController is based on Redmine's
   # implementation.

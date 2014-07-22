@@ -15,10 +15,10 @@ class Marty::ImportType < Marty::Base
     end
   end
 
-  attr_accessible :name,
-  :model_name,
-  :cleaner_function,
-  :validation_function
+  # attr_accessible :name,
+  # :model_name,
+  # :cleaner_function,
+  # :validation_function
 
   validates_presence_of :name, :model_name
   validates_uniqueness_of :name

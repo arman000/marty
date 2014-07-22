@@ -1,7 +1,7 @@
 class Marty::Posting < Marty::Base
   has_mcfly append_only: true
 
-  attr_accessible :created_dt, :name, :posting_type_id, :is_test, :comment
+  # attr_accessible :created_dt, :name, :posting_type_id, :is_test, :comment
   mcfly_validates_uniqueness_of :name
   validates_presence_of :name, :posting_type_id, :comment
 

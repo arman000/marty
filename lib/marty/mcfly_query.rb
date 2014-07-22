@@ -101,6 +101,7 @@ module Mcfly
 
           q = self.where(qstr, *attr_list_ids)
           q = q.order(order) unless order.empty?
+          mode = :to_a if mode == :all
           mode ? q.send(mode) : q
         end
       end

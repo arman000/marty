@@ -53,19 +53,20 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
     end
   end
 
-  # The basepack grid doesn't catch general exceptions.  We can get
-  # this if there's some sort of failure with saving to the DB.
-  # e.g. range violation.
-  def process_data_with_error_handling(data, operation)
-    begin
-      process_data_without_error_handling(data, operation)
-    rescue => exc
-      success = false
-      flash :error => "Error: #{exc}"
-    end
-  end
+# HACKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+  # # The basepack grid doesn't catch general exceptions.  We can get
+  # # this if there's some sort of failure with saving to the DB.
+  # # e.g. range violation.
+  # def process_data_with_error_handling(data, operation)
+  #   begin
+  #     process_data_without_error_handling(data, operation)
+  #   rescue => exc
+  #     success = false
+  #     flash :error => "Error: #{exc}"
+  #   end
+  # end
 
-  alias_method_chain :process_data, :error_handling
+  # alias_method_chain :process_data, :error_handling
 
 private
   def self.mcfly_scope(sort_column)

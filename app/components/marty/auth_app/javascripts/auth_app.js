@@ -3,7 +3,7 @@
 	var me = this;
 	this.signinWin = this.signinWin || Ext.create('widget.window', {
 	    width: 	300,
-	    height: 	150,
+	    height: 	200,
 	    modal: 	true,
 	    layout: 	'fit',
 

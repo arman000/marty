@@ -1,4 +1,4 @@
-class Marty::AuthApp < Netzke::Basepack::SimpleApp
+class Marty::AuthApp < Marty::SimpleApp
   # Set the Logout button if current_user is set
   def menu
     [].tap do |menu|

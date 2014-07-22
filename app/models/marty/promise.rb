@@ -5,6 +5,10 @@ class Marty::Promise < Marty::Base
     end
 
     def load(v)
+      # FIXME: Rails4 bytea interface seems to remove the trailing
+      # \x00 char.
+      v += "\x00" if v
+
       # Marshal.load can't handle nil
       v.nil? ? {} : Marshal.load(v)
     end
@@ -17,16 +21,6 @@ class Marty::Promise < Marty::Base
   DEFAULT_JOB_TIMEOUT = Rails.configuration.marty.job_timeout || 10
 
   lazy_load :result
-
-  attr_accessible :title,
-  :user_id,
-  :cformat,
-  :parent_id,
-  :job_id,
-  :status,
-  :result,
-  :start_dt,
-  :end_dt
 
   serialize :result, MarshalResult.new
 

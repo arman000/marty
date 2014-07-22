@@ -131,7 +131,7 @@ class Marty::DataExporter
     end
 
     header + query.
-      order(sort_field || :id).all.
+      order(sort_field || :id).
       map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}.flatten(1)}
   end
 end
