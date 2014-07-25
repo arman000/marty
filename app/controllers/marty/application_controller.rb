@@ -97,7 +97,8 @@ class Marty::ApplicationController < ActionController::Base
   def logout_user
     if Marty::User.current
       cookies.delete :autologin
-      Marty::Token.delete_all(["user_id = ?", Marty::User.current.id])
+      Marty::Token.delete_all(["user_id = ?", Marty::User.current.id]) unless
+        Marty::Util.db_in_recovery?
       self.set_user(nil)
     end
   end
@@ -113,17 +114,18 @@ class Marty::ApplicationController < ActionController::Base
   def password_authentication
     user = Marty::User.try_to_login(params[:username], params[:password])
 
-    if user.nil?
-      invalid_credentials
-    else
-      # Valid user
+    user.nil? ? failed_authentication(params[:username] || 'nil username') :
       successful_authentication(user)
-    end
+  end
+
+  def failed_authentication(login)
+      logger.info("Failed authentication for '#{login}' " +
+                  "from #{request.remote_ip} at #{Time.now.utc}")
   end
 
   def successful_authentication(user)
-    logger.info("Successful authentication for " +
-                "'#{user.login}' from #{request.remote_ip} at #{Time.now.utc}")
+    logger.info("Successful authentication for '#{user.login}' " +
+                "from #{request.remote_ip} at #{Time.now.utc}")
     self.set_user(user)
   end
 
