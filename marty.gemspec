@@ -10,11 +10,12 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/arman000/marty"
   s.summary     = "A framework for working with versioned data"
   s.description = s.summary
+  s.licenses    = ['MIT']
 
   s.files = Dir["{app,config,db,lib}/**/*"] + Dir["lib/tasks/*.rake"] +
     ["MIT-LICENSE", "Rakefile", "README.rdoc"]
 
-  s.add_dependency "rails", "~> 3.2.13"
+  s.add_dependency "rails", "~> 3.2"
 
   s.add_development_dependency "pg"
 
@@ -30,9 +31,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'netzke-core', '0.8.4'
   s.add_dependency 'netzke-basepack', '0.8.4'
-
-  # needed for Netzke
-  s.add_dependency 'will_paginate', '~>3.0.3'
 
   s.add_dependency 'foreigner', '~>1.4.2'
 
