@@ -10,4 +10,8 @@ module Marty::Enum
 
     raise "no such #{self.name}: '#{index}'"
   end
+
+  def clear_cache
+    @LOOKUP_CACHE.clear if @LOOKUP_CACHE
+  end
 end
