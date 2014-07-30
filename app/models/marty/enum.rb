@@ -11,7 +11,7 @@ module Marty::Enum
     raise "no such #{self.name}: '#{index}'"
   end
 
-  def clear_cache
+  def clear_lookup_cache!
     @LOOKUP_CACHE.clear if @LOOKUP_CACHE
   end
 end
