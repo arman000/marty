@@ -17,9 +17,13 @@ class Marty::PromiseProxy < BasicObject
 
   def marshal_load(args)
     promise_id, @timeout, @attr = args
-    @promise 	= ::Marty::Promise.find(promise_id)
-    @mutex 	= ::Mutex.new
-    @result 	= NOT_SET
+    @promise = ::Marty::Promise.find(promise_id)
+    @mutex   = ::Mutex.new
+    @result  = NOT_SET
+  end
+
+  def __promise_id__
+    @promise.id
   end
 
   ##
