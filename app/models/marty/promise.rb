@@ -18,16 +18,6 @@ class Marty::Promise < Marty::Base
 
   lazy_load :result
 
-  attr_accessible :title,
-  :user_id,
-  :cformat,
-  :parent_id,
-  :job_id,
-  :status,
-  :result,
-  :start_dt,
-  :end_dt
-
   serialize :result, MarshalResult.new
 
   validates_presence_of :title

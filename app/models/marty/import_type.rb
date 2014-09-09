@@ -15,12 +15,6 @@ class Marty::ImportType < Marty::Base
     end
   end
 
-  attr_accessible :name,
-  :model_name,
-  :cleaner_function,
-  :validation_function,
-  :role_id
-
   belongs_to :role
 
   validates_presence_of :name, :model_name, :role_id
