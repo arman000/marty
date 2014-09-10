@@ -7,7 +7,7 @@ class Marty::Posting < Marty::Base
   belongs_to :user, class_name: "Marty::User"
   belongs_to :posting_type
 
-  def self.make_name(posting_type, dt, is_test)
+  def self.make_name(posting_type, dt)
     return 'NOW' if Mcfly.is_infinity(dt)
 
     return unless posting_type
@@ -17,27 +17,25 @@ class Marty::Posting < Marty::Base
     # of using the host's timezone. i.e. since we're in PST8PDT, names
     # will be based off of the Pacific TZ.
     dt ||= Time.now
-    "#{'TEST-' if is_test}#{posting_type.name}-#{dt.strftime('%Y%m%d-%H%M')}"
+    "#{posting_type.name}-#{dt.strftime('%Y%m%d-%H%M')}"
   end
 
   before_validation :set_posting_name
   def set_posting_name
     posting_type = Marty::PostingType.find_by_id(self.posting_type_id)
-    self.is_test ||= false
 
     self.name =
-      self.class.make_name(posting_type, self.created_dt, self.is_test)
+      self.class.make_name(posting_type, self.created_dt)
     true
   end
 
-  def self.do_create(type_name, is_test, dt, comment)
+  def self.do_create(type_name, dt, comment)
     posting_type = Marty::PostingType.find_by_name(type_name)
 
     raise "unknown posting type #{name}" unless posting_type
 
     o              = new
     o.posting_type = posting_type
-    o.is_test      = !!is_test
     o.comment      = comment
     o.created_dt   = dt
     o.save!
@@ -66,8 +64,9 @@ class Marty::Posting < Marty::Base
 
   delorean_fn :get_latest, sig: [1, 2] do
     |limit, is_test=nil|
-    q = is_test.nil? ? self : self.where(is_test: !!is_test)
-    q.where("created_dt <> 'infinity'").
+    # is_test arg is ignored (keeping it for backward compatibility)
+
+    where("created_dt <> 'infinity'").
       order("created_dt DESC").limit(limit).to_a
   end
 
@@ -86,7 +85,6 @@ class Marty::Posting < Marty::Base
 
     where("created_dt <= ?", Mcfly.normalize_infinity(posting.created_dt)).
       where(posting_type_id: Marty::PostingType["BASE"].id,
-            is_test: false,
             ).order("created_dt DESC").first
   end
 
