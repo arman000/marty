@@ -1,4 +1,9 @@
 class Marty::NewPostingForm < Marty::CmFormPanel
+  extend Marty::Permissions
+
+  # override this to set permissions for posting types
+  has_marty_permissions read: :any
+
   js_configure do |c|
     c.close_me = <<-JS
     function() {
@@ -27,7 +32,12 @@ class Marty::NewPostingForm < Marty::CmFormPanel
 
     c.model = "Marty::Posting"
     c.items = [
-               :posting_type__name,
+               {
+                 name: :posting_type__name,
+                 scope: lambda { |r|
+                   r.where(name: Marty::NewPostingForm.can_perform_actions)
+                 },
+               },
                :comment,
               ]
   end

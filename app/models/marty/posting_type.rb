@@ -8,4 +8,10 @@ class Marty::PostingType < Marty::Base
     |name|
     self.find_by_name(name)
   end
+
+  def self.seed
+    ['BASE', 'CLOSE', 'INTRA', 'RULE'].each { |type|
+      create name: type
+    }
+  end
 end

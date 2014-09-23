@@ -44,8 +44,8 @@ class Marty::DataChange
             # FIXME: using .first on export_attr -- this will not work
             # if the attr is an association which will requires
             # multiple keys to identify (e.g. Rule: name & version)
-            "value" 	=> Marty::DataExporter.export_attr(o, c, info).first,
-            "changed" 	=> prev && (o.send(c.to_sym) != prev.send(c.to_sym)),
+            "value"     => Marty::DataExporter.export_attr(o, c, info).first,
+            "changed"   => prev && (o.send(c.to_sym) != prev.send(c.to_sym)),
           }
         }
 
@@ -111,7 +111,7 @@ class Marty::DataChange
     |classes|
     classes = classes.split(/,\s*/) if classes.is_a? String
 
-    Set[* classes] & Set[* class_list]
+    classes.to_set & class_list.to_set
   end
 
   delorean_fn :do_export, sig: [2, 3] do

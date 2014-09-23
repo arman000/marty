@@ -23,9 +23,7 @@ class Marty::Posting < Marty::Base
   before_validation :set_posting_name
   def set_posting_name
     posting_type = Marty::PostingType.find_by_id(self.posting_type_id)
-
-    self.name =
-      self.class.make_name(posting_type, self.created_dt)
+    self.name = self.class.make_name(posting_type, self.created_dt)
     true
   end
 
@@ -64,28 +62,21 @@ class Marty::Posting < Marty::Base
 
   delorean_fn :get_latest, sig: [1, 2] do
     |limit, is_test=nil|
-    # is_test arg is ignored (keeping it for backward compatibility)
+    # IMPORTANT: is_test arg is ignored (KEEP for backward compat.)
 
     where("created_dt <> 'infinity'").
       order("created_dt DESC").limit(limit).to_a
   end
 
-  delorean_fn :is_base, sig: 1 do
-    |posting|
-    posting.posting_type == Marty::PostingType["BASE"]
-  end
+  delorean_fn :get_last, sig: [0, 1] do
+    |posting_type=nil|
 
-  # Get the base for the posting argument.  If the posting has
-  # posting_type base, then the argument itself is the result.
-  # Otherwise, we search for the last non-TEST BASE posting which is
-  # older.
-  delorean_fn :get_base, sig: 1 do
-    |posting|
-    next posting if is_base(posting)
+    raise "bad posting type" if
+      posting_type && !posting_type.is_a?(Marty::PostingType)
 
-    where("created_dt <= ?", Mcfly.normalize_infinity(posting.created_dt)).
-      where(posting_type_id: Marty::PostingType["BASE"].id,
-            ).order("created_dt DESC").first
+    q = where("created_dt <> 'infinity'")
+    q = q.where(posting_type_id: posting_type.id) if posting_type
+    q.order("created_dt DESC").first
   end
 
   delorean_fn :is_today, sig: 1 do

@@ -12,8 +12,9 @@ require 'marty/api_auth_view'
 class Marty::MainAuthApp < Marty::AuthApp
   extend Marty::Permissions
 
+  # set of posting types user is allowed to post with
   def self.has_posting_perm?
-    self.class.has_admin_perm?
+    Marty::NewPostingForm.has_any_perm?
   end
 
   def self.has_data_import_perm?
@@ -36,43 +37,43 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   def posting_menu
     warped = Marty::Util.get_posting_time != Float::INFINITY
+    wtext  = warped ? " [#{Marty::Util.get_posting.name}" : ''
 
     {
-      text: 	I18n.t("postings") +
-      (warped ? " [#{Marty::Util.get_posting.name}]" : ""),
-      icon: 	icon_hack(:time),
-      style: 	(warped ? "background-color: lightGrey;" : ""),
-      menu: 	[
-                 :new_posting,
-                 :select_posting,
-                 :select_now,
-                ],
+      text:  I18n.t("postings") + wtext,
+      icon:  icon_hack(:time),
+      style: (warped ? "background-color: lightGrey;" : ""),
+      menu:  [
+              :new_posting,
+              :select_posting,
+              :select_now,
+             ],
     }
   end
 
   def system_menu
     {
-      text: 	I18n.t("system"),
-      icon: 	icon_hack(:wrench),
-      style: 	"",
-      menu: 	[
-                 :import_type_view,
-                 :user_view,
-                 :api_auth_view,
-                ],
+      text:  I18n.t("system"),
+      icon:  icon_hack(:wrench),
+      style: "",
+      menu:  [
+              :import_type_view,
+              :user_view,
+              :api_auth_view,
+             ],
     }
   end
 
   def applications_menu
     {
-      text:	I18n.t("applications"),
-      icon:	icon_hack(:application_cascade),
-      menu:	[
-                 :reporting,
-                 :scripting,
-                 :data_import_view,
-                 :promise_view,
-                ],
+      text: I18n.t("applications"),
+      icon: icon_hack(:application_cascade),
+      menu: [
+             :reporting,
+             :scripting,
+             :data_import_view,
+             :promise_view,
+            ],
     }
   end
 
@@ -101,101 +102,101 @@ class Marty::MainAuthApp < Marty::AuthApp
   ######################################################################
 
   action :import_type_view do |a|
-    a.text 	= I18n.t("import_type")
-    a.handler  	= :netzke_load_component_by_action
-    a.disabled 	= !self.class.has_admin_perm?
-    a.icon	= :table_go
+    a.text      = I18n.t("import_type")
+    a.handler   = :netzke_load_component_by_action
+    a.disabled  = !self.class.has_admin_perm?
+    a.icon      = :table_go
   end
 
   action :scripting do |a|
-    a.text    	= I18n.t("scripting")
-    a.handler 	= :netzke_load_component_by_action
-    a.icon    	= :script
-    a.disabled 	= !self.class.has_any_perm?
+    a.text      = I18n.t("scripting")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :script
+    a.disabled  = !self.class.has_any_perm?
   end
 
   action :reporting do |a|
-    a.text 	= I18n.t("reports")
-    a.handler 	= :netzke_load_component_by_action
-    a.icon 	= :page_lightning
-    a.disabled 	= !self.class.has_any_perm?
+    a.text      = I18n.t("reports")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :page_lightning
+    a.disabled  = !self.class.has_any_perm?
   end
 
   action :promise_view do |a|
-    a.text 	= I18n.t("jobs.promise_view")
-    a.handler 	= :netzke_load_component_by_action
-    a.icon 	= :report_magnify
-    a.disabled 	= !self.class.has_any_perm?
+    a.text      = I18n.t("jobs.promise_view")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :report_magnify
+    a.disabled  = !self.class.has_any_perm?
   end
 
   action :data_import_view do |a|
-    a.text 	= I18n.t("data_import_view.import_data")
-    a.handler 	= :netzke_load_component_by_action
-    a.icon 	= :database_go
-    a.disabled	= Marty::Util.warped? || !self.class.has_data_import_perm?
+    a.text      = I18n.t("data_import_view.import_data")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :database_go
+    a.disabled  = Marty::Util.warped? || !self.class.has_data_import_perm?
   end
 
   action :user_view do |a|
-    a.text 	= I18n.t("user_view")
-    a.handler 	= :netzke_load_component_by_action
-    a.icon	= :group
-    a.disabled 	= !self.class.has_admin_perm? &&
+    a.text      = I18n.t("user_view")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :group
+    a.disabled  = !self.class.has_admin_perm? &&
       !self.class.has_user_manager_perm?
   end
 
   action :api_auth_view do |a|
-    a.text 	= I18n.t("api_auth_view", default: "API Authorization")
-    a.handler 	= :netzke_load_component_by_action
-    a.icon	= :script_key
-    a.disabled 	= !self.class.has_admin_perm?
+    a.text      = I18n.t("api_auth_view", default: "API Authorization")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :script_key
+    a.disabled  = !self.class.has_admin_perm?
   end
 
   ######################################################################
   # Postings
 
   action :new_posting do |a|
-    a.text 	= I18n.t('new_posting')
-    a.tooltip 	= I18n.t('new_posting')
-    a.icon 	= :time_add
-    a.disabled	= Marty::Util.warped? || !self.class.has_posting_perm?
+    a.text      = I18n.t('new_posting')
+    a.tooltip   = I18n.t('new_posting')
+    a.icon      = :time_add
+    a.disabled  = Marty::Util.warped? || !self.class.has_posting_perm?
   end
 
   js_configure do |c|
     c.on_new_posting = <<-JS
-    	function(params) {
-          this.netzkeLoadComponent({
-		name: "new_posting_window",
-		callback: function(w) { w.show(); },
-          });
-    	}
-    	JS
+    function(params) {
+      this.netzkeLoadComponent({
+            name: "new_posting_window",
+            callback: function(w) { w.show(); },
+      });
+    }
+    JS
 
     c.on_select_posting = <<-JS
-    	function(params) {
-          this.netzkeLoadComponent({
-		name: "posting_window",
-		callback: function(w) { w.show(); },
-          });
-    	}
-    	JS
+    function(params) {
+      this.netzkeLoadComponent({
+            name: "posting_window",
+            callback: function(w) { w.show(); },
+      });
+    }
+    JS
 
     c.on_reload = <<-JS
-    	function(params) {
-	  window.location.reload();
-    	}
-    	JS
+    function(params) {
+      window.location.reload();
+    }
+    JS
 
     c.on_select_now = <<-JS
-    	function(params) {
-          this.serverSelectPosting({});
-    	}
-    	JS
+    function(params) {
+      this.serverSelectPosting({});
+    }
+    JS
   end
 
   action :select_posting do |a|
-    a.text 	= I18n.t('select_posting')
-    a.tooltip 	= I18n.t('select_posting')
-    a.icon 	= :timeline_marker
+    a.text      = I18n.t('select_posting')
+    a.tooltip   = I18n.t('select_posting')
+    a.icon      = :timeline_marker
   end
 
   endpoint :server_select_posting do |params, this|
@@ -208,9 +209,9 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   action :select_now do |a|
-    a.text 	= I18n.t('go_to_now')
-    a.icon 	= :arrow_in
-    a.disabled 	= Marty::Util.get_posting_time == Float::INFINITY
+    a.text      = I18n.t('go_to_now')
+    a.icon      = :arrow_in
+    a.disabled  = Marty::Util.get_posting_time == Float::INFINITY
   end
 
   ######################################################################
