@@ -32,7 +32,9 @@ module Marty
       roles = roles << :any if self.has_any_perm?
 
       aroles = self.marty_permissions[action.to_sym] || []
-      Set[ *aroles].intersect? roles.to_set
+      # TODO: Use code below when switching to Ruby 2.1
+      # Set[ *aroles].intersect? roles.to_set
+      (Set[ *aroles] & roles.to_set).length > 0
     end
 
     def can_perform_actions
@@ -42,7 +44,9 @@ module Marty
       roles = roles << :any if self.has_any_perm?
 
       self.marty_permissions.map { |action, aroles|
-        action if Set[ *aroles].intersect? roles.to_set
+        # TODO: Use code below when switching to Ruby 2.1
+        #action if Set[ *aroles].intersect? roles.to_set
+        action if (Set[ *aroles] & roles.to_set).length > 0
       }.compact
     end
 
