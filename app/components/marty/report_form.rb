@@ -90,9 +90,9 @@ class Marty::ReportForm < Marty::CmFormPanel
 
     # start background promise to get report result
     engine.background_eval(session[:selected_node],
-                         d_params,
-                         ["result", "title", "format"],
-                         )
+                           d_params,
+                           ["result", "title", "format"],
+                           )
 
     this.netzke_feedback "Report can be accessed from the Jobs Dashboard ..."
   end
@@ -100,14 +100,32 @@ class Marty::ReportForm < Marty::CmFormPanel
   ######################################################################
 
   js_configure do |c|
+    # FIXME: can replace HTTP GET with a POST this would solve the
+    # data.length issue:
+    # http://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
     c.on_generate = <<-JS
     function() {
        var values = this.getForm().getValues();
        var data = escape(Ext.encode(values));
-       // FIXME: this is very hacky since it bypasses Netzke channel.  This is
-       // a security hole wrt to the report role mechanism.
-       window.location = "#{Marty::Util.marty_path}/components/#{self.name}." +\
-          this.repformat + "?data=" + data + "&reptitle=" + this.reptitle;
+       if (data.length > 4096) {
+          msg = "There is too much data to run as a foreground report." +\
+                "<br/>Please run as a background report."
+          Ext.create('Ext.Window', {
+            height:        100,
+            minWidth:      350,
+            autoWidth:     true,
+            modal:         true,
+            autoScroll:    true,
+            html:          msg,
+            title:         "Warning"
+          }).show();
+       } else {
+         // FIXME: this is very hacky since it bypasses Netzke channel.
+         // This is a security hole wrt to the report role mechanism.
+         window.location = "#{Marty::Util.marty_path}/components" +\
+            "/#{self.name}." + this.repformat +\
+            "?data=" + data + "&reptitle=" + this.reptitle;
+       }
     }
     JS
   end

@@ -1,14 +1,13 @@
 class Marty::Posting < Marty::Base
   has_mcfly append_only: true
 
-  # attr_accessible :created_dt, :name, :posting_type_id, :is_test, :comment
   mcfly_validates_uniqueness_of :name
   validates_presence_of :name, :posting_type_id, :comment
 
   belongs_to :user, class_name: "Marty::User"
   belongs_to :posting_type
 
-  def self.make_name(posting_type, dt, is_test)
+  def self.make_name(posting_type, dt)
     return 'NOW' if Mcfly.is_infinity(dt)
 
     return unless posting_type
@@ -18,27 +17,23 @@ class Marty::Posting < Marty::Base
     # of using the host's timezone. i.e. since we're in PST8PDT, names
     # will be based off of the Pacific TZ.
     dt ||= Time.now
-    "#{'TEST-' if is_test}#{posting_type.name}-#{dt.strftime('%Y%m%d-%H%M')}"
+    "#{posting_type.name}-#{dt.strftime('%Y%m%d-%H%M')}"
   end
 
   before_validation :set_posting_name
   def set_posting_name
     posting_type = Marty::PostingType.find_by_id(self.posting_type_id)
-    self.is_test ||= false
-
-    self.name =
-      self.class.make_name(posting_type, self.created_dt, self.is_test)
+    self.name = self.class.make_name(posting_type, self.created_dt)
     true
   end
 
-  def self.do_create(type_name, is_test, dt, comment)
+  def self.do_create(type_name, dt, comment)
     posting_type = Marty::PostingType.find_by_name(type_name)
 
     raise "unknown posting type #{name}" unless posting_type
 
     o              = new
     o.posting_type = posting_type
-    o.is_test      = !!is_test
     o.comment      = comment
     o.created_dt   = dt
     o.save!
@@ -67,28 +62,21 @@ class Marty::Posting < Marty::Base
 
   delorean_fn :get_latest, sig: [1, 2] do
     |limit, is_test=nil|
-    q = is_test.nil? ? self : self.where(is_test: !!is_test)
-    q.where("created_dt <> 'infinity'").
+    # IMPORTANT: is_test arg is ignored (KEEP for backward compat.)
+
+    where("created_dt <> 'infinity'").
       order("created_dt DESC").limit(limit).to_a
   end
 
-  delorean_fn :is_base, sig: 1 do
-    |posting|
-    posting.posting_type == Marty::PostingType.BASE
-  end
+  delorean_fn :get_last, sig: [0, 1] do
+    |posting_type=nil|
 
-  # Get the base for the posting argument.  If the posting has
-  # posting_type base, then the argument itself is the result.
-  # Otherwise, we search for the last non-TEST BASE posting which is
-  # older.
-  delorean_fn :get_base, sig: 1 do
-    |posting|
-    next posting if is_base(posting)
+    raise "bad posting type" if
+      posting_type && !posting_type.is_a?(Marty::PostingType)
 
-    where("created_dt <= ?", Mcfly.normalize_infinity(posting.created_dt)).
-      where(posting_type_id: Marty::PostingType.BASE.id,
-            is_test: false,
-            ).order("created_dt DESC").first
+    q = where("created_dt <> 'infinity'")
+    q = q.where(posting_type_id: posting_type.id) if posting_type
+    q.order("created_dt DESC").first
   end
 
   delorean_fn :is_today, sig: 1 do

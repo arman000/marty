@@ -26,7 +26,6 @@ class Marty::ApiAuth < Marty::Base
       self.api_key.nil? || self.api_key.length == 0
   end
 
-  # attr_accessible :app_name, :api_key, :script_name
   validates_presence_of :app_name, :api_key, :script_name
 
   validates_with ApiAuthValidator

@@ -24,8 +24,8 @@ class Marty::AuthApp < Marty::SimpleApp
   end
 
   action :sign_out do |c|
-    c.icon	= :door_out
-    c.text 	= "Sign out #{Mcfly.whodunnit.name}" if Mcfly.whodunnit
+    c.icon = :door_out
+    c.text = "Sign out #{Mcfly.whodunnit.name}" if Mcfly.whodunnit
   end
 
   js_configure do |c|

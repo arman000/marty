@@ -15,12 +15,9 @@ class Marty::ImportType < Marty::Base
     end
   end
 
-  # attr_accessible :name,
-  # :model_name,
-  # :cleaner_function,
-  # :validation_function
+  belongs_to :role
 
-  validates_presence_of :name, :model_name
+  validates_presence_of :name, :model_name, :role_id
   validates_uniqueness_of :name
   validates_with ImportTypeValidator
 
@@ -28,4 +25,17 @@ class Marty::ImportType < Marty::Base
     model_name.constantize
   end
 
+  def allow_import?()
+    Mcfly.whodunnit.roles.pluck(:id).
+      include?(role_id) if Mcfly.whodunnit
+  end
+
+  delorean_fn :lookup, sig: 1 do
+    |name|
+    self.find_by_name(name)
+  end
+
+  delorean_fn :get_all, sig: 0 do
+    self.all
+  end
 end

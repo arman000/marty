@@ -6,8 +6,8 @@ class Delorean::BaseModule::NodeCall
 
     # If call has a promise_id (i.e. is from a promise) then that's
     # our parent.  Otherwise, we use its parent as our parent.
-    params[:_parent_id]	= _e[:_promise_id]	|| _e[:_parent_id]
-    params[:_user_id]	= _e[:_user_id]		|| Mcfly.whodunnit.try(:id)
+    params[:_parent_id] = _e[:_promise_id] || _e[:_parent_id]
+    params[:_user_id]   = _e[:_user_id]    || Mcfly.whodunnit.try(:id)
   end
 
   # Monkey-patch '|' method for Delorean NodeCall to create promise
@@ -31,13 +31,13 @@ class Delorean::BaseModule::NodeCall
       raise "non-serializable parameters"
     end
 
-    title	= params["p_title"]   || "#{script}::#{nn.demodulize}"
-    timeout	= params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
-    hook	= params["p_hook"]
-    promise	= Marty::Promise.
-      create(title:	title,
-             user_id:	params[:_user_id],
-             parent_id:	params[:_parent_id],
+    title   = params["p_title"]   || "#{script}::#{nn.demodulize}"
+    timeout = params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
+    hook    = params["p_hook"]
+    promise = Marty::Promise.
+      create(title:     title,
+             user_id:   params[:_user_id],
+             parent_id: params[:_parent_id],
              )
     params[:_promise_id] = promise.id
 

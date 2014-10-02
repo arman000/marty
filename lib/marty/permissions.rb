@@ -3,56 +3,51 @@ module Marty
     # Make sure there are admin and user_manager roles,
     # even if hosting app doesn't define them
     REQ_ROLES = [:admin, :user_manager]
-    ALL_ROLES = (Set.new Rails.configuration.marty.roles.clone).merge(REQ_ROLES)
-    ACTIONS = Set.new [:create, :read, :update, :delete] # CRUD
+    ALL_ROLES = Rails.configuration.marty.roles.to_set.merge(REQ_ROLES)
 
     # Call using following format
-    #   has_marty_permissions	create: [:dev, :admin],
-    #				read: :any,
-    #				update: :admin,
-    #				delete: :none
-    #
-    # Allowed actions are only :create, :read, :update, :delete
-    # Roles can be passed in as a symbol or array of symbols
+    #   has_marty_permissions   create: [:dev, :admin],
+    #                           read: :any,
+    #                           update: :admin,
+    #                           delete: []
     #
     # :any gives permission to the action if user belongs to at least 1 role
-    # :none overrides any other roles
-    #    e.g. delete: [:none, :admin] would return false when calling
-    #    can_allow_action? even if the user belong to the admin role
     def has_marty_permissions(attrs)
       raise "bad attrs" unless attrs.is_a?(Hash)
-      raise "unknown action - only create/read/update/delete allowed" unless
-        attrs.keys.to_set.subset? ACTIONS
       raise "unknown role" unless
-        attrs.values.flatten.to_set.subset? (ALL_ROLES << :any << :none)
+        attrs.values.flatten.to_set.subset? (ALL_ROLES << :any)
 
-      #klass = self.to_s
-      #return "#{klass} with #{attrs.inspect}"
       self.define_singleton_method(:marty_permissions) { attrs }
     end
 
     def current_user_roles
       roles = Mcfly.whodunnit.roles rescue []
-      Set.new(roles.map {|r| r.name.to_sym})
+      roles.map {|r| r.name.to_sym}.to_set
     end
 
     def can_perform_action?(action)
+      return false unless self.respond_to?(:marty_permissions)
+
       roles = self.current_user_roles
-      roles << :any if self.has_any_perm?
+      roles = roles << :any if self.has_any_perm?
 
-      allow = false
+      aroles = self.marty_permissions[action.to_sym] || []
+      # TODO: Use code below when switching to Ruby 2.1
+      # Set[ *aroles].intersect? roles.to_set
+      (Set[ *aroles] & roles.to_set).length > 0
+    end
 
-      if self.respond_to?(:marty_permissions)
-        perms = self.marty_permissions
-        result = []
-        result = (result << perms.fetch(action.to_sym)).flatten if
-          perms.include?(action.to_sym)
+    def can_perform_actions
+      return [] unless self.respond_to?(:marty_permissions)
 
-        result.each {|r| allow ||= roles.include? r} unless
-          result.include?(:none)
-        #puts "#{self.to_s} #{action} - #{allow}"
-      end
-      allow
+      roles = self.current_user_roles
+      roles = roles << :any if self.has_any_perm?
+
+      self.marty_permissions.map { |action, aroles|
+        # TODO: Use code below when switching to Ruby 2.1
+        #action if Set[ *aroles].intersect? roles.to_set
+        action if (Set[ *aroles] & roles.to_set).length > 0
+      }.compact
     end
 
     # generate has_xxx_perm? methods for all permissions.

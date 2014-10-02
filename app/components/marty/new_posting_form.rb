@@ -1,23 +1,26 @@
 class Marty::NewPostingForm < Marty::CmFormPanel
+  extend Marty::Permissions
+
+  # override this to set permissions for posting types
+  has_marty_permissions read: :any
 
   js_configure do |c|
     c.close_me = <<-JS
-    	function() {
-	  // assume we're embedded in a window
-	  this.netzkeGetParentComponent().close();
-    	}
+    function() {
+      // assume we're embedded in a window
+      this.netzkeGetParentComponent().close();
+    }
     JS
   end
 
   action :apply do |a|
-    a.text  	= I18n.t("create_posting")
-    a.tooltip  	= I18n.t("create_posting")
-    a.icon  	= :time_add
-    #a.disabled 	= Marty::Util.warped? || !self.class.can_perform_action?(:create)
+    a.text    = I18n.t("create_posting")
+    a.tooltip = I18n.t("create_posting")
+    a.icon    = :time_add
   end
 
   ######################################################################
-    
+
   endpoint :netzke_submit do |params, this|
     res = super(params, this)
     this.close_me
@@ -29,12 +32,15 @@ class Marty::NewPostingForm < Marty::CmFormPanel
 
     c.model = "Marty::Posting"
     c.items = [
-               :posting_type__name,
-               :is_test,
+               {
+                 name: :posting_type__name,
+                 scope: lambda { |r|
+                   r.where(name: Marty::NewPostingForm.can_perform_actions)
+                 },
+               },
                :comment,
               ]
   end
-
 end
 
 NewPostingForm = Marty::NewPostingForm

@@ -22,7 +22,7 @@ private
 
   # Removes obsolete tokens
   def delete_previous_tokens
-    if user
+    if user && !Marty::Util.db_in_recovery?
       Token.delete_all(['user_id = ?', user.id])
     end
   end

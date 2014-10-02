@@ -1,4 +1,17 @@
-from pyxll import xl_func, xl_version, xlAsyncReturn
+ from pyxll import (
+    xl_func,
+    xl_version,
+    xl_menu,
+    xl_macro,
+    xlAsyncReturn,
+    xlcAlert,
+    xlcCalculateNow,
+    xlcCalculateDocument,
+    )
+import pyxll
+import hashlib
+
+import win32com.client
 
 import json
 import requests
@@ -15,6 +28,37 @@ RESULTS = {}
 
 # FIXME: hard-coded pool size
 pool = ThreadPool(processes=20)
+
+def xl_app():
+    """returns a Dispatch object for the current Excel instance"""
+    # get the Excel application object from PyXLL and wrap it
+    xl_window = pyxll.get_active_object()
+    xl_app = win32com.client.Dispatch(xl_window).Application
+
+    # it's helpful to make sure the gen_py wrapper has been created
+    # as otherwise things like constants and event handlers won't work.
+    win32com.client.gencache.EnsureDispatch(xl_app)
+
+    return xl_app
+
+# named Excel cell which we will treat as a call version id for
+# clearing the Gemini call cache.
+GEMINI_CALL_ID = "gemini_call_id"
+
+@xl_macro()
+def gemini_increment_id():
+    gemini_reset()
+    xl = xl_app()
+    range = xl.Range(GEMINI_CALL_ID)
+    range.Value = range.Value + 1
+
+@xl_menu("Gemini Reset", menu="Gemini")
+def gemini_reset_menu():
+    xlcAlert("Remove %d cached items" % len(RESULTS))
+    gemini_reset()
+    xl = xl_app()
+    range = xl.Range(GEMINI_CALL_ID)
+    range.Value = 0
 
 @xl_func(": void")
 def gemini_reset():
@@ -70,7 +114,8 @@ def gemini_call(handle, url_base, script, node, attr, keys, values):
             if not isinstance(res, list) or len(res) != 1:
                 raise Exception("unexpected result from Gemini")
 
-            hkey = str(hash(tuple(values[0])))
+            hash_str = str(tuple([script, node, attr] + values[0]))
+            hkey = hashlib.md5(hash_str).hexdigest()[:30]
 
             RESULTS[hkey] = res[0]
 
