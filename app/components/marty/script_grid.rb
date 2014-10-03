@@ -18,9 +18,8 @@ class Marty::ScriptGrid < Marty::CmGridPanel
       property: :name,
       direction: 'ASC',
     }
-  end
 
-  def get_data(*args)
+    # Set Mcfly scoping
     begin
       ts = Marty::Tag.map_to_tag(root_sess[:selected_tag_id]).created_dt
       ts = Mcfly.normalize_infinity(ts)
@@ -30,11 +29,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
     end
 
     tb = data_class.table_name
-
-    data_class.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
-                     ts, ts).scoping do
-      super
-    end
+    c.scope = ["#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", ts, ts]
   end
 
   # override the add_in_form endpoint.  Script creation needs to use

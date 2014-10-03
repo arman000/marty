@@ -13,18 +13,13 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
 
     # default sort all Mcfly grids with id
     c.data_store.sorters ||= {property: :id, direction: 'ASC'}
-  end
 
-  def get_data(*args)
-    ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
-
-    # FIXME: may need to pass the scope in using the params hash in
-    # args.  Not sure how the following will interact with sorting.
-    tb = data_class.table_name
-    data_class.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
-                     ts, ts).scoping do
-      super
-    end
+    # Set Mcfly scoping
+    c.scope = lambda { |r|
+      ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
+      tb = data_class.table_name
+      r.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", ts, ts)
+    }
   end
 
   ######################################################################
