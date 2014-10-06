@@ -1,7 +1,7 @@
 module Marty
   module Extras
     module Layout
-      
+
       def hbox(*args)
         params = args.pop
         params.merge(layout: { type: :hbox, align: :stretch },

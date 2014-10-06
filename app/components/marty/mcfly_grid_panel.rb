@@ -13,13 +13,16 @@ class Marty::McflyGridPanel < Marty::CmGridPanel
 
     # default sort all Mcfly grids with id
     c.data_store.sorters ||= {property: :id, direction: 'ASC'}
+  end
 
-    # Set Mcfly scoping
-    c.scope = lambda { |r|
-      ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
-      tb = data_class.table_name
-      r.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", ts, ts)
-    }
+  def get_records(params)
+   ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
+   tb = data_class.table_name
+
+    data_class.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
+                     ts, ts).scoping do
+      super
+    end
   end
 
   ######################################################################

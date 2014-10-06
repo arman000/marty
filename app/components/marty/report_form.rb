@@ -122,8 +122,7 @@ class Marty::ReportForm < Marty::CmFormPanel
        } else {
          // FIXME: this is very hacky since it bypasses Netzke channel.
          // This is a security hole wrt to the report role mechanism.
-         window.location = "#{Marty::Util.marty_path}/components" +\
-            "/#{self.name}." + this.repformat +\
+         window.location = "/marty/components/#{self.name}." + this.repformat +\
             "?data=" + data + "&reptitle=" + this.reptitle;
        }
     }
