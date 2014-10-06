@@ -8,8 +8,8 @@
 # community.
 #
 # Options:
-# * +live_search_scope+ - The scope name for filtering the results by 
-#   the live search (default: :live_search) 
+# * +live_search_scope+ - The scope name for filtering the results by
+#   the live search (default: :live_search)
 #
 
 class Marty::LiveSearchGridPanel < Marty::McflyGridPanel
@@ -17,8 +17,8 @@ class Marty::LiveSearchGridPanel < Marty::McflyGridPanel
     c.listen_fn = <<-JS
     function(obj, search_text) {
         var lg = this.ownerCt.ownerCt;
-    	lg.getStore().getProxy().extraParams.live_search = search_text;
-    	lg.getStore().load();
+        lg.getStore().getProxy().extraParams.live_search = search_text;
+        lg.getStore().load();
     }
     JS
 
@@ -37,13 +37,10 @@ class Marty::LiveSearchGridPanel < Marty::McflyGridPanel
               }]
   end
 
-  def get_data(*args)
-    params = args.first
+  def get_records(params)
     search_scope = config[:live_search_scope] || :live_search
     data_class.send(search_scope, params && params[:live_search] || '').scoping do
       super
     end
   end
-
 end
-
