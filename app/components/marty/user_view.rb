@@ -1,24 +1,27 @@
 class Marty::UserView < Marty::CmGridPanel
-  has_marty_permissions	create: [:admin, :user_manager],
-			read: :any,
-			update: [:admin, :user_manager],
-			delete: [:admin, :user_manager]
+  has_marty_permissions \
+  create: [:admin, :user_manager],
+  read: :any,
+  update: [:admin, :user_manager],
+  delete: [:admin, :user_manager]
 
   def configure(c)
     super
 
     c.title ||= I18n.t('users', default: "Users")
-    c.model 			= "Marty::User"
-    c.enable_extended_search 	= false
-    c.enable_edit_inline	= false
+    c.model                  = "Marty::User"
+    c.enable_extended_search = false
+    c.enable_edit_inline     = false
 
-    c.columns ||= [:login,
-                   :firstname,
-                   :lastname,
-                   :active,
-                   :uuid,
-                   :roles
-                  ]
+    c.columns ||=
+      [
+       :login,
+       :firstname,
+       :lastname,
+       :active,
+       :uuid,
+       :roles
+      ]
 
     c.data_store.sorters = {
       property: :login,
@@ -45,23 +48,24 @@ class Marty::UserView < Marty::CmGridPanel
     end
 
     # set new roles
-    user.roles = Marty::Role.all.select { |r|
-      roles.include? I18n.t("roles.#{r.name}") }
+    user.roles = Marty::Role.select {
+      |r| roles.include? I18n.t("roles.#{r.name}")
+    }
   end
 
   def self.create_edit_user(data)
     # Creates the initial place-holder user object and check it
     # out.
     user = data["id"].nil? ? Marty::User.new : Marty::User.find(data["id"])
-    user.login 	   = data["login"]
+    user.login     = data["login"]
     user.firstname = data["firstname"]
     user.lastname  = data["lastname"]
     user.active    = data["active"]
     user.uuid      = data["uuid"]
 
     if user.valid?
-      set_roles(data["roles"], user)
       user.save
+      set_roles(data["roles"], user)
     end
 
     user
@@ -72,6 +76,7 @@ class Marty::UserView < Marty::CmGridPanel
 
   endpoint :add_window__add_form__netzke_submit do |params, this|
     data = ActiveSupport::JSON.decode(params[:data])
+
     data["id"] = nil
 
     unless self.class.can_perform_action?(:create)
@@ -111,19 +116,19 @@ class Marty::UserView < Marty::CmGridPanel
   end
 
   action :add_in_form do |a|
-    a.text 	= I18n.t("user_grid.new")
-    a.tooltip  	= I18n.t("user_grid.new")
-    a.icon 	= :user_add
-    a.disabled 	= !self.class.can_perform_action?(:create)
+    a.text     = I18n.t("user_grid.new")
+    a.tooltip  = I18n.t("user_grid.new")
+    a.icon     = :user_add
+    a.disabled = !self.class.can_perform_action?(:create)
   end
 
   action :edit_in_form do |a|
-    a.disabled 	= !self.class.can_perform_action?(:update)
-    a.icon 	= :user_edit
+    a.disabled = !self.class.can_perform_action?(:update)
+    a.icon     = :user_edit
   end
 
   action :del do |a|
-    a.icon	= :user_delete
+    a.icon     = :user_delete
   end
 
   def default_bbar
@@ -135,39 +140,39 @@ class Marty::UserView < Marty::CmGridPanel
   end
 
   column :login do |c|
-    c.width 	= 100
-    c.text 	= I18n.t("user_grid.login")
+    c.width = 100
+    c.text  = I18n.t("user_grid.login")
   end
 
   column :firstname do |c|
-    c.width 	= 100
-    c.text 	= I18n.t("user_grid.firstname")
+    c.width = 100
+    c.text  = I18n.t("user_grid.firstname")
   end
 
   column :lastname do |c|
-    c.width 	= 100
-    c.text 	= I18n.t("user_grid.lastname")
+    c.width = 100
+    c.text  = I18n.t("user_grid.lastname")
   end
 
   column :active do |c|
-    c.width 	= 60
-    c.text 	= I18n.t("user_grid.active")
+    c.width = 60
+    c.text  = I18n.t("user_grid.active")
   end
 
   column :uuid do |c|
-    c.width 	= 60
-    c.text 	= I18n.t("user_grid.uuid")
+    c.width = 60
+    c.text  = I18n.t("user_grid.uuid")
   end
 
   column :roles do |c|
-    c.width 	= 100
-    c.flex 	= 1
+    c.width  = 100
+    c.flex   = 1
     c.editor = {
       trigger_action: :all,
       name: "roles",
       attr_type: :string,
       xtype: :combo,
-      store: Marty::Role.all.map { |r| I18n.t("roles.#{r.name}") }.sort,
+      store: Marty::Role.pluck(:name).map {|n| I18n.t("roles.#{n}")}.sort,
       empty_text: "Roles",
       multi_select: true,
     }
@@ -178,8 +183,8 @@ class Marty::UserView < Marty::CmGridPanel
   end
 
   column :created_dt do |c|
-    c.text 	= I18n.t("user_grid.created_dt")
-    c.format 	= "Y-m-d H:i"
+    c.text      = I18n.t("user_grid.created_dt")
+    c.format    = "Y-m-d H:i"
     c.read_only = true
   end
 

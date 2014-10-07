@@ -4,8 +4,6 @@ require 'net/ldap'
 class Marty::User < Marty::Base
   has_paper_trail
 
-  # attr_protected :login, :firstname, :lastname, :active
-
   validates_presence_of :login, :firstname, :lastname
   validates_uniqueness_of :login
 
@@ -95,7 +93,7 @@ class Marty::User < Marty::Base
   end
 
  def self.has_role(role)
-    mr =  Mcfly.whodunnit.roles rescue []
+    mr = Mcfly.whodunnit.roles rescue []
     mr.any? {|attr| attr.name == role}
  end
 
@@ -137,9 +135,11 @@ private
   def destroy_user
     errors.add :base, "You cannot delete your own account" if
       self.login == Mcfly.whodunnit.login
+
     errors.add :base, "You cannot delete the system account" if
       self.login == Rails.configuration.marty.system_account.to_s
     # Default to disallowing any deletions for now
+
     errors.add :base,
     "Users cannot be deleted - set 'Active' to false to disable the account"
 
