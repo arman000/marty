@@ -8,14 +8,13 @@
   overflow: hidden;
 }
 
-.CodeMirror-scroll {
+/* Removing this block prevents double scroll-bar issue with Chrome */
+/*.CodeMirror-scroll {
   overflow: auto;
   height: 500px;
-  /* This is needed to prevent an IE[67] bug where the scrolled content
-     is visible outside of the scrolling box. */
   position: relative;
   outline: none;
-}
+}*/
 
 /* Vertical scrollbar */
 .CodeMirror-scrollbar {
