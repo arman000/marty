@@ -12,6 +12,7 @@ class Marty::UserView < Marty::CmGridPanel
     c.model                  = "Marty::User"
     c.enable_extended_search = false
     c.enable_edit_inline     = false
+    c.multi_select           = false
 
     c.columns ||=
       [
@@ -27,16 +28,6 @@ class Marty::UserView < Marty::CmGridPanel
       property: :login,
       direction: 'ASC',
     } if c.columns.include?(:login)
-  end
-
-  js_configure do |c|
-    c.init_component = <<-JS
-    function() {
-       this.callParent();
-       // Set single selection mode. FIXME: can this be done on config?
-       this.getSelectionModel().setSelectionMode('SINGLE');
-    }
-    JS
   end
 
   def self.set_roles(roles, user)

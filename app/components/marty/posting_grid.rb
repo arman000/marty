@@ -1,30 +1,29 @@
 class Marty::PostingGrid < Marty::CmGridPanel
-  has_marty_permissions	read: :any,
-			delete: :any # delete is hijacked for a select
+  has_marty_permissions read: :any,
+                        delete: :any # delete is hijacked for a select
 
   def configure(c)
     super
 
-    c.header 	= false
-    c.model 	= "Marty::Posting"
-    c.columns 	= [:name, :created_dt, :user__name, :comment]
+    c.header             = false
+    c.model              = "Marty::Posting"
+    c.columns            = [:name, :created_dt, :user__name, :comment]
+    c.multi_select       = false
     c.data_store.sorters = {property: :created_dt, direction: 'DESC'}
   end
 
   # hijacking delete button
   action :del do |a|
-    a.text 	= "Select"
-    a.tooltip  	= "Select"
-    a.icon 	= :time_go
-    a.disabled 	= true
+    a.text      = "Select"
+    a.tooltip   = "Select"
+    a.icon      = :time_go
+    a.disabled  = true
   end
 
   js_configure do |c|
     c.init_component = <<-JS
     function() {
        this.callParent();
-       // Set single selection mode. FIXME: can this be done on config?
-       this.getSelectionModel().setSelectionMode('SINGLE');
        this.getSelectionModel().on('selectionchange', function(selModel) {
           this.actions.detail &&
           this.actions.detail.setDisabled(!selModel.hasSelection());
@@ -53,13 +52,13 @@ class Marty::PostingGrid < Marty::CmGridPanel
     c.show_detail = <<-JS
     function(details) {
       Ext.create('Ext.Window', {
-        height: 	150,
-        minWidth:	250,
-        autoWidth:	true,
-        modal:		true,
-        autoScroll:	true,
-        html:		details,
-        title:		"Posting Details"
+        height:         150,
+        minWidth:       250,
+        autoWidth:      true,
+        modal:          true,
+        autoScroll:     true,
+        html:           details,
+        title:          "Posting Details"
      }).show();
     }
     JS
@@ -67,20 +66,20 @@ class Marty::PostingGrid < Marty::CmGridPanel
     c.on_del = <<-JS
       function() {
         var records = [];
-	var me = this;
+        var me = this;
         me.getSelectionModel().selected.each(function(r) {
            records.push(r.getId());
         }, me);
 
-	// find the root component (main application)
-	var main_app = me;
-	while (1) {
-	  var p = main_app.netzkeGetParentComponent();
-	  if (!p) { break; }
-	  main_app = p;
-	}
+        // find the root component (main application)
+        var main_app = me;
+        while (1) {
+          var p = main_app.netzkeGetParentComponent();
+          if (!p) { break; }
+          main_app = p;
+        }
 
-	// assumes main_app has serverSelectPosting method
+        // assumes main_app has serverSelectPosting method
         main_app.serverSelectPosting(records);
       }
       JS
@@ -91,10 +90,10 @@ class Marty::PostingGrid < Marty::CmGridPanel
   end
 
   action :detail do |a|
-    a.text	= "Detail"
-    a.icon	= :application_view_detail
-    a.handler 	= :detail
-    a.disabled	= true
+    a.text      = "Detail"
+    a.icon      = :application_view_detail
+    a.handler   = :detail
+    a.disabled  = true
   end
 
   endpoint :server_detail do |params, this|
@@ -118,21 +117,21 @@ class Marty::PostingGrid < Marty::CmGridPanel
   end
 
   column :name do |c|
-    c.flex 	= 1
+    c.flex      = 1
   end
 
   column :created_dt do |c|
-    c.text 	= "Date/Time"
-    c.format 	= "Y-m-d H:i"
-    c.hidden 	= true
+    c.text      = "Date/Time"
+    c.format    = "Y-m-d H:i"
+    c.hidden    = true
   end
 
   column :user__name do |c|
-    c.width 	= 100
+    c.width     = 100
   end
 
   column :comment do |c|
-    c.width 	= 100
+    c.width     = 100
   end
 
 end

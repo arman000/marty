@@ -82,7 +82,7 @@ class Marty::Scripting < Netzke::Base
   end
 
   endpoint :select_tag do |params, this|
-    root_sess[:selected_tag_id]    = params[:tag_id]
+    root_sess[:selected_tag_id]      = params[:tag_id]
     root_sess[:selected_script_name] = nil
   end
 

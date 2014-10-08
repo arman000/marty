@@ -10,6 +10,7 @@ class Marty::ScriptGrid < Marty::CmGridPanel
 
     c.model                  = "Marty::Script"
     c.enable_extended_search = false
+    c.multi_select           = false
 
     c.columns ||= [:name, :created_dt, :tag]
     c.title   ||= I18n.t('scripts', default: "Scripts")
@@ -30,7 +31,10 @@ class Marty::ScriptGrid < Marty::CmGridPanel
     end
 
     tb = data_class.table_name
-    data_class.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", ts, ts)
+    data_class.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
+                     ts, ts).scoping do
+      super
+    end
   end
 
   # override the add_in_form endpoint.  Script creation needs to use

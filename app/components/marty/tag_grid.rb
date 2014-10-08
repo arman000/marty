@@ -1,27 +1,21 @@
 class Marty::TagGrid < Marty::CmGridPanel
-  has_marty_permissions	read: :any,
-  			create: :dev
+  has_marty_permissions \
+  read:   :any,
+  create: :dev
 
   def configure(c)
     super
 
-    c.header    = false
-    c.model     = "Marty::Tag"
+    c.header       = false
+    c.model        = "Marty::Tag"
+    c.multi_select = false
+
     c.columns ||= [:name, :created_dt, :user__name, :comment]
+
     c.data_store.sorters = {
       property: :created_dt,
       direction: 'DESC',
     }
-  end
-
-  js_configure do |c|
-    c.init_component = <<-JS
-    function() {
-       this.callParent();
-       // Set single selection mode. FIXME: can this be done on config?
-       this.getSelectionModel().setSelectionMode('SINGLE');
-    }
-    JS
   end
 
   endpoint :add_window__add_form__netzke_submit do |params, this|
