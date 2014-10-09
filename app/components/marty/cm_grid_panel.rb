@@ -6,6 +6,16 @@ class Marty::CmGridPanel < Netzke::Basepack::Grid
 
   has_marty_permissions read: :any
 
+  js_configure do |c|
+    # For some reason the grid update function was removed in Netzke
+    # 0.10.  So, add it here.
+    c.cm_update = <<-JS
+    function() {
+      this.store.load();
+    }
+    JS
+  end
+
   def configure(c)
     super
 
