@@ -78,8 +78,8 @@ class Marty::Promise < Marty::Base
     self.result = res
 
     # update title/format from result hash (somewhat hacky)
-    self.title 		= res["title"].to_s 	if res["title"]
-    self.cformat	= res["format"].to_s 	if res["format"]
+    self.title   = res["title"].to_s  if res["title"]
+    self.cformat = res["format"].to_s if res["format"]
 
     # mark promise as ended
     self.end_dt = DateTime.now

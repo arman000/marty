@@ -1,7 +1,7 @@
 # Ext.tree.TreePanel-based component
 #
 # ATTRIBUTION: this code is based on the netzke-extension module found at:
-# 	https://github.com/phgrey/netzke-extension
+#       https://github.com/phgrey/netzke-extension
 # TODO: Add documentation for usage
 
 class Marty::TreePanel < Netzke::Base
@@ -9,13 +9,13 @@ class Marty::TreePanel < Netzke::Base
   include ::Netzke::Basepack::Columns
 
   self.default_instance_config = {
-    indicate_leafs:	 true,
-    auto_scroll:	 false,
-    root_visible:	 false,
-    load_inline_data:	 false,
-    enable_pagination:	 false,
-    rows_per_page:	 30,
-    treecolumn:	 	'tree' # default name for tree column
+    indicate_leafs:      true,
+    auto_scroll:         false,
+    root_visible:        false,
+    load_inline_data:    false,
+    enable_pagination:   false,
+    rows_per_page:       30,
+    treecolumn:         'tree' # default name for tree column
   }
 
   def js_configure(c) #:nodoc:
@@ -139,7 +139,7 @@ class Marty::TreePanel < Netzke::Base
 
         res[:total] = count_records(params) if
           config[:enable_pagination] &&
-          (params[:id].nil? || params[:id] == 'root')
+          (params[:node].nil? || params[:node] == 'root')
       end
     else
       flash :error => "You don't have permissions to read data"
@@ -175,7 +175,7 @@ class Marty::TreePanel < Netzke::Base
   def get_children(params)
     scope_data_class(params) do
       params[:limit] = config[:rows_per_page] if
-        config[:enable_pagination] && (params[:id].nil? || params[:id] == 'root')
+        config[:enable_pagination] && (params[:node].nil? || params[:node] == 'root')
       params[:scope] = config[:scope]
       data_adapter.get_records(params, final_columns)
     end
@@ -187,13 +187,13 @@ class Marty::TreePanel < Netzke::Base
   def scope_data_class(params, &block)
     if config[:parent_key]
       # The value of the pri property of the expanded node is passed
-      # as params[:id] ('root' for the root collection)
-      if params[:id].nil? || params[:id] == 'root'
+      # as params[:node] ('root' for the root collection)
+      if params[:node].nil? || params[:node] == 'root'
         data_class.where(config[:parent_key] => nil).scoping do
           yield
         end
       else
-        data_class.where(config[:parent_key] => params[:id]).scoping do
+        data_class.where(config[:parent_key] => params[:node]).scoping do
           yield
         end
       end

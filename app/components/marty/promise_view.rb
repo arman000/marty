@@ -109,7 +109,7 @@ class Marty::PromiseView < Marty::TreePanel
   def get_children(params)
     params[:scope] = config[:scope]
 
-    parent_id = params[:id]
+    parent_id = params[:node]
     parent_id = nil if parent_id == 'root'
 
     scope_data_class(params) do
