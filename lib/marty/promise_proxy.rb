@@ -3,7 +3,17 @@
 
 class Marty::PromiseProxy < BasicObject
   NOT_SET = ::Object.new.freeze
-  METH_SET = ::Set[:marshal_load, :marshal_dump, :force, :__force__]
+  METH_SET = ::Set[
+                   :marshal_load,
+                   :marshal_dump,
+                   :force,
+                   :__force__,
+                   # Added for Rails 4 -- were causing forced eval.
+                   # This list is very hacky and will depend on how
+                   # ActiveRecord treats assignment to proxy objs.
+                   :is_a?,
+                   :nested_under_indifferent_access,
+                  ]
 
   instance_methods.each {|m| undef_method m unless m =~ /^(__.*|object_id)$/}
 
@@ -24,6 +34,19 @@ class Marty::PromiseProxy < BasicObject
 
   def __promise_id__
     @promise.id
+  end
+
+  def is_a?(c)
+    # Marty::PromiseProxy == c
+    # {}.is_a? c
+
+    # FIXME: not sure why this has to return false.  Otherwise, some
+    # spec tests fail.
+    false
+  end
+
+  def nested_under_indifferent_access
+    false
   end
 
   ##
@@ -64,6 +87,8 @@ class Marty::PromiseProxy < BasicObject
   private
 
   def method_missing(method, *args, &block)
+    # ::File.open('/tmp/dj.out', 'a') { |f| f.puts "FORCE MISS #{method}" }
+
     __force__.__send__(method, *args, &block)
   end
 end

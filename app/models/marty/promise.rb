@@ -5,12 +5,14 @@ class Marty::Promise < Marty::Base
     end
 
     def load(v)
+      # Marshal.load can't handle nil
+      return {} unless v
+
       # FIXME: Rails4 bytea interface seems to remove the trailing
       # \x00 char.
-      v += "\x00" if v
+      v += "\x00"
 
-      # Marshal.load can't handle nil
-      v.nil? ? {} : Marshal.load(v)
+      Marshal.load(v)
     end
   end
 
@@ -63,7 +65,7 @@ class Marty::Promise < Marty::Base
   end
 
   def set_result(res)
-    # log "SETRES #{Process.pid} #{res} #{self}"
+    # log "SETRES #{Process.pid} #{self}"
 
     # promise must have been started and not yet ended
     if !self.start_dt || self.end_dt || self.result != {}
@@ -115,6 +117,10 @@ class Marty::Promise < Marty::Base
     Marty::Promise.uncached {Marty::Promise.find(id)}
   end
 
+  def self.job_by_id(job_id)
+    Delayed::Job.uncached {Delayed::Job.find_by_id(job_id)}
+  end
+
   def work_off_job(job)
     # Create a temporary worker to work off the job
     Delayed::Job.where(id: job.id).
@@ -134,12 +140,11 @@ class Marty::Promise < Marty::Base
 
       # if job hasn't started yet, wait for it to start
       if !last.start_dt
-        # log "AAAA #{Process.pid} #{last}"
+        job = Marty::Promise.job_by_id(last.job_id)
 
-        job = Delayed::Job.find_by_id(last.job_id)
-        job.reload if job # paranoid
+        # log "AAAA #{Process.pid} #{last} #{job}"
 
-        if !job && job.locked_at
+        if !job || job.locked_at
           # job has been locked, so it looks like it started already
           # and we need to wait for it.
           wait_for_my_notify(Marty::Promise::DEFAULT_JOB_TIMEOUT)
