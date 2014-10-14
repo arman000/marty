@@ -10,7 +10,7 @@ require 'marty/promise_view'
 require 'marty/api_auth_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
-  extend Marty::Permissions
+  extend ::Marty::Permissions
 
   # set of posting types user is allowed to post with
   def self.has_posting_perm?

@@ -1,5 +1,5 @@
 class Marty::NewPostingForm < Marty::CmFormPanel
-  extend Marty::Permissions
+  extend ::Marty::Permissions
 
   # override this to set permissions for posting types
   has_marty_permissions read: :any

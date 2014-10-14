@@ -1,5 +1,5 @@
 class Marty::PromiseView < Marty::TreePanel
-  extend Marty::Permissions
+  extend ::Marty::Permissions
 
   css_configure do |c|
     c.require :promise_view
