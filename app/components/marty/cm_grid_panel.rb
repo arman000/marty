@@ -7,9 +7,18 @@ class Marty::CmGridPanel < ::Netzke::Basepack::Grid
 
   has_marty_permissions read: :any
 
+  def preconfigure_record_window(c)
+    super
+    # Fix Add in form/Edit in form modal popup width
+    # Netzke 0.10.1 defaults width to 80% of screen which is too wide
+    # for a form where the fields are stacked top to bottom
+    # Netzke 0.8.4 defaulted width to 400px - let's make it a bit wider
+    c.width = 475
+  end
+
   js_configure do |c|
     # For some reason the grid update function was removed in Netzke
-    # 0.10.  So, add it here.
+    # 0.10.1.  So, add it here.
     c.cm_update = <<-JS
     function() {
       this.store.load();
