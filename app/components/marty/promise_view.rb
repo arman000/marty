@@ -73,10 +73,15 @@ class Marty::PromiseView < Marty::TreePanel
     c.on_clear = <<-JS
     function(params) {
        var me = this;
-       Ext.Msg.prompt('Clear All Jobs',
-       'Enter CLEAR and press OK to clear all previous jobs',
-       function (btn, value) {
+       Ext.Msg.show({
+         title: 'Clear All Jobs',
+         msg: 'Enter CLEAR and press OK to clear all previous jobs',
+         width: 375,
+         buttons: Ext.Msg.OKCANCEL,
+         prompt: true,
+         fn: function (btn, value) {
           (btn == "ok" && value == "CLEAR") && me.serverClear({});
+         }
        });
     }
     JS
