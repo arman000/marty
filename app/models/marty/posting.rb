@@ -55,9 +55,14 @@ class Marty::Posting < Marty::Base
     lookup(name).try(:created_dt)
   end
 
-  delorean_fn :first_match, sig: 1 do
-    |dt|
-    where("created_dt <= ?", dt).order("created_dt DESC").first
+  delorean_fn :first_match, sig: [1, 2] do
+    |dt, posting_type=nil|
+    raise "bad posting type" if
+      posting_type && !posting_type.is_a?(Marty::PostingType)
+
+    q = where("created_dt <= ?", dt)
+    q = q.where(posting_type_id: posting_type.id) if posting_type
+    q.order("created_dt DESC").first
   end
 
   delorean_fn :get_latest, sig: [1, 2] do
