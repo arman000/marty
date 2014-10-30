@@ -17,17 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", "~> 4.0.8"
 
-  s.add_development_dependency "pg"
-
-  # s.add_development_dependency "cucumber-rails"
-  s.add_development_dependency "pickle"
-  s.add_development_dependency "rspec-rails", '>= 2.0.1'
-  s.add_development_dependency "sqlite3"
-  s.add_development_dependency "factory_girl_rails"
-  s.add_development_dependency "database_cleaner"
-  s.add_development_dependency "capybara", '~> 1.0'
-  s.add_development_dependency "selenium-webdriver"
-  s.add_development_dependency 'timecop'
+  s.add_dependency "pg"
 
   s.add_dependency 'netzke-core'
   s.add_dependency 'netzke-basepack'
