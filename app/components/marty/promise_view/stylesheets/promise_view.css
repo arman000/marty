@@ -1,3 +1,7 @@
+.x-grid-row-selected .x-grid-cell-inner {
+    background-color: #E9E8F6 !important;
+}
+
 .green-row td {
     background-color: #91FF91 !important;
 }
