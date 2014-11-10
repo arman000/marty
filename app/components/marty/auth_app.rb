@@ -30,6 +30,7 @@ class Marty::AuthApp < Marty::SimpleApp
 
   js_configure do |c|
     c.mixin
+    c.auth_spec_mode = Gemini::Application.config.marty.auth_spec_mode
   end
 
   endpoint :sign_in do |params,this|
