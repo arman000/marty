@@ -127,7 +127,7 @@ class Marty::PromiseView < Marty::TreePanel
   column :parent do |c|
     c.text   = 'Job Name'
     c.getter = lambda { |r| r.title }
-    c.width  = 275
+    c.width  = 300
   end
 
   column :status do |c|
@@ -138,6 +138,11 @@ class Marty::PromiseView < Marty::TreePanel
 
   column :user__login do |c|
     c.text   = I18n.t('jobs.user_login')
+    c.width  = 100
+  end
+
+  column :job_id do |c|
+    c.width = 90
   end
 
   column :start_dt do |c|
@@ -155,6 +160,7 @@ class Marty::PromiseView < Marty::TreePanel
 
   column :cformat do |c|
     c.text   = "Format"
+    c.width  = 90
   end
 
 end
