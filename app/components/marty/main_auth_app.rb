@@ -71,7 +71,6 @@ class Marty::MainAuthApp < Marty::AuthApp
       menu: [
              :reporting,
              :scripting,
-             :data_import_view,
              :promise_view,
             ],
     }
@@ -127,13 +126,6 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.handler   = :netzke_load_component_by_action
     a.icon      = :report_magnify
     a.disabled  = !self.class.has_any_perm?
-  end
-
-  action :data_import_view do |a|
-    a.text      = I18n.t("data_import_view.import_data")
-    a.handler   = :netzke_load_component_by_action
-    a.icon      = :database_go
-    a.disabled  = Marty::Util.warped? || !self.class.has_data_import_perm?
   end
 
   action :user_view do |a|
@@ -224,10 +216,6 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :posting_window
   component :new_posting_window do |c|
     c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?
-  end
-  component :import_type_view
-  component :data_import_view do |c|
-    c.disabled = Marty::Util.warped? || !self.class.has_data_import_perm?
   end
   component :user_view
   component :api_auth_view do |c|
