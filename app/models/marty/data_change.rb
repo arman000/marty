@@ -11,8 +11,8 @@ class Marty::DataChange
 
     klass = class_name.constantize
 
-    t0 = 'infinity' if t0 == Float::INFINITY
-    t1 = 'infinity' if t1 == Float::INFINITY
+    t0 = Mcfly.normalize_infinity t0
+    t1 = Mcfly.normalize_infinity t1
 
     info = Marty::DataExporter.class_info(klass)
     changes = get_changed_data(t0, t1, klass)
@@ -60,8 +60,8 @@ class Marty::DataChange
 
     klass = class_name.constantize
 
-    t0 = 'infinity' if t0 == Float::INFINITY
-    t1 = 'infinity' if t1 == Float::INFINITY
+    t0 = Mcfly.normalize_infinity t0
+    t1 = Mcfly.normalize_infinity t1
 
     info = Marty::DataExporter.class_info(klass)
     changes = get_changed_data(t0, t1, klass)
@@ -122,6 +122,45 @@ class Marty::DataChange
       class_list.member?(klass) || klass.constantize.is_a?(Marty::Enum)
 
     Marty::DataExporter.do_export(pt, klass.constantize, sort_field)
+  end
+
+  delorean_fn :export_changes, sig: 3 do
+    |t0, t1, class_name|
+
+    klass = class_name.constantize
+
+    t0 = Mcfly.normalize_infinity t0
+    t1 = Mcfly.normalize_infinity t1
+
+    info = Marty::DataExporter.class_info(klass)
+
+    change_q = '(obsoleted_dt >= ? AND obsoleted_dt < ?)' +
+      ' OR (created_dt >= ? AND created_dt < ?)'
+
+    # find all changes from t0 to t1 -- orders by id to get the lower
+    # ones since those are the original version in Mcfly.  Using
+    # unscoped to get around lazy loaded column scopes.
+    changes = klass.unscoped.select("DISTINCT ON (group_id) *").
+      where(change_q, t0, t1, t0, t1).
+      order("group_id, id").
+      to_a
+
+    # update/adds, deletes
+    chg, del = [], []
+
+    changes.each do |o|
+      if Mcfly.is_infinity(o.obsoleted_dt)
+        chg << o
+      else
+        # if a version of row existed before t0 => add it to del list
+        del << o if klass.
+          where("group_id = ? AND created_dt < ?", o.group_id, t0).exists?
+      end
+    end
+
+    [chg, del].map {|l|
+      l.empty? ? nil : Marty::DataExporter.do_export_query_result(klass, l)
+    }
   end
 
   def self.get_changed_data(t0, t1, klass)

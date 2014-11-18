@@ -117,11 +117,6 @@ class Marty::DataExporter
   # Given a Mcfly klass, generate an export array.  Can potentially
   # use up a lot of memory if the result set is large.
   def self.do_export(ts, klass, sort_field=nil)
-    info = class_info(klass)
-
-    # strip _id from assoc fields
-    header = [ info[:cols].map {|c| export_header_attr(c, info)}.flatten(1) ]
-
     query = klass
 
     # is it Mcfly?
@@ -130,8 +125,16 @@ class Marty::DataExporter
       query = query.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts)
     end
 
-    header + query.
-      order(sort_field || :id).
+    do_export_query_result(klass, query.order(sort_field || :id))
+  end
+
+  def self.do_export_query_result(klass, qres)
+    info = class_info(klass)
+
+    # strip _id from assoc fields
+    header = [ info[:cols].map {|c| export_header_attr(c, info)}.flatten(1) ]
+
+    header + qres.
       map {|obj| info[:cols].map {|c| export_attr(obj, c, info)}.flatten(1)}
   end
 end
