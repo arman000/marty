@@ -4,7 +4,6 @@ require 'marty/reporting'
 require 'marty/posting_window'
 require 'marty/new_posting_window'
 require 'marty/import_type_view'
-require 'marty/data_import_view'
 require 'marty/user_view'
 require 'marty/promise_view'
 require 'marty/api_auth_view'
@@ -217,6 +216,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :new_posting_window do |c|
     c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?
   end
+  component :import_type_view
   component :user_view
   component :api_auth_view do |c|
     c.disabled = Marty::Util.warped?
