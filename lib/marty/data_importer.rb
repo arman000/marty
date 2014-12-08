@@ -12,11 +12,11 @@ module Marty
     # perform cleaning and do_import and summarize its results
     def self.do_import_summary(klass,
                                data,
-                               dt='infinity',
-                               cleaner_function=nil,
-                               validation_function=nil,
-                               col_sep="\t",
-                               allow_dups=false
+                               dt                  = 'infinity',
+                               cleaner_function    = nil,
+                               validation_function = nil,
+                               col_sep             = "\t",
+                               allow_dups          = false
                                )
 
       recs = self.do_import(klass,
@@ -40,11 +40,12 @@ module Marty
     # of the affected row.
     def self.do_import(klass,
                        data,
-                       dt='infinity',
-                       cleaner_function=nil,
-                       validation_function=nil,
-                       col_sep="\t",
-                       allow_dups=false
+                       dt                  = 'infinity',
+                       cleaner_function    = nil,
+                       validation_function = nil,
+                       col_sep             = "\t",
+                       allow_dups          = false,
+                       key_attrs           = nil
                        )
 
       parsed = data.is_a?(Array) ? data :
@@ -68,6 +69,7 @@ module Marty
             new(klass,
                 row.respond_to?(:headers) ? row.headers : row.keys,
                 dt,
+                key_attrs,
                 )
             # skip lines which are all nil
             next :blank if row.to_hash.values.none?

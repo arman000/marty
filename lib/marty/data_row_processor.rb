@@ -55,9 +55,9 @@ class Marty::DataRowProcessor
 
     case type
     when :boolean
-      case v.downcase
-      when "true" then true
-      when "false" then false
+      case v.to_s.downcase
+      when "true", "1", "y" then true
+      when "false", "0", "n" then false
       else raise "unknown boolean #{v}"
       end
     when :string, :text
@@ -86,11 +86,11 @@ class Marty::DataRowProcessor
     end
   end
 
-  def initialize(klass, headers, dt)
+  def initialize(klass, headers, dt, _key_attrs)
     @klass     = klass
     @headers   = headers
     @dt        = dt
-    @key_attrs = self.class.get_keys(klass)
+    @key_attrs = _key_attrs || self.class.get_keys(klass)
 
     # # HACK: not sure why there's a nil at the end of headers sometimes
     # headers.pop if headers[-1].nil?
@@ -143,14 +143,22 @@ class Marty::DataRowProcessor
     assoc_groups = assoc_options.keys.group_by {|x| x.split('__').first}
 
     assoc_groups.each do |aclass, attrs|
-      # if group has only one attr and the attr is nil or AR obj, then
-      # we don't need to search.
+      srch_class = hmap[attrs.first][:assoc_class]
+
       if attrs.length == 1
         a = attrs.first
         v = assoc_options[a]
 
+        # If group has only one attr and the attr is nil or AR obj, then
+        # we don't need to search.
         if v.nil? || v.is_a?(ActiveRecord::Base)
           options["#{aclass}_id"] = v && v.id
+          next
+        end
+
+        # If it's an Enum, use the faster cached looked mechanism
+        if Marty::Enum === srch_class
+          options["#{aclass}_id"] = srch_class[ v ].id
           next
         end
       end
@@ -165,8 +173,6 @@ class Marty::DataRowProcessor
         h[:obsoleted_dt] = 'infinity' if hmap[a][:mcfly]
       end
 
-      srch_class = hmap[attrs.first][:assoc_class]
-
       av = srch_class.where(srch).first
 
       raise "#{aclass} not found #{srch}" unless av
@@ -176,9 +182,9 @@ class Marty::DataRowProcessor
 
     find_options = options.select { |k,v| key_attrs.member? k.to_sym }
 
-    raise "invalid entry" if find_options.empty?
+    raise "invalid entry: no keys" if find_options.empty?
 
-    find_options['obsoleted_dt'] = 'infinity'
+    find_options['obsoleted_dt'] = 'infinity' if dt
 
     obj = klass.where(find_options).first || klass.new
 
@@ -198,7 +204,7 @@ class Marty::DataRowProcessor
     raise "old created_dt >= current #{obj} #{obj.created_dt} #{dt}" if
       (tag == :update) && !Mcfly.is_infinity(dt) && (obj.created_dt > dt)
 
-    obj.created_dt = dt unless tag == :same || Mcfly.is_infinity(dt)
+    obj.created_dt = dt unless tag == :same || Mcfly.is_infinity(dt) || !dt
     obj.save!
 
     [tag, obj.id]
