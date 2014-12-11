@@ -93,4 +93,18 @@ module Marty::Util
     end
     status
   end
+
+  def self.deep_round(obj, digits)
+    case obj
+    when Array
+      obj.map {|o| deep_round(o, digits)}
+    when Hash
+      obj.inject({}) { |result, (key, value)|
+        result[key] = deep_round(value, digits)
+        result
+      }
+    else
+      obj.is_a?(Float)? obj.round(digits) : obj
+    end
+  end
 end
