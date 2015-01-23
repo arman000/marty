@@ -44,18 +44,30 @@ class Marty::Scripting < Netzke::Base
        var script_form   = me.netzkeGetComponent('script_form');
        var script_tester = me.netzkeGetComponent('script_tester');
 
-       tag_grid.on('itemclick', function(self, record) {
-          var tag_id = record.get('id');
+       tag_grid.getSelectionModel().on('selectionchange',
+          function(self, records) {
+
+          if(records[0] == null)
+             return;
+
+          var tag_id = records[0].get('id');
           me.selectTag({tag_id: tag_id});
           script_grid.getStore().load();
-          // unset script_name when new tag is selected
           var script_name = null;
           script_form.netzkeLoad({script_name: script_name});
           script_tester.selectScript(script_name);
           }, me);
 
-       script_grid.on('itemclick', function(self, record) {
-          var script_name = record.get('name');
+       script_grid.getSelectionModel().on('selectionchange',
+          function(self, records) {
+
+          if(script_grid.getStore().isLoading() == true)
+             return;
+
+          if(records[0] == null)
+             return;
+
+          var script_name = records[0].get('name');
           me.selectScript({script_name: script_name});
           script_form.netzkeLoad({script_name: script_name});
           script_tester.selectScript(script_name);

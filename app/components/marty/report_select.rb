@@ -55,23 +55,30 @@ class Marty::ReportSelect < Marty::CmFormPanel
        var script_grid = me.netzkeGetComponent('script_grid').getView();
        var nodename    = me.getForm().findField('nodename');
 
-       tag_grid.on('itemclick', function(self, record) {
-          var tag_id = record.get('id');
-          me.selectTag({tag_id: tag_id});
-          script_grid.getStore().load();
-       }, me);
-
-       script_grid.on('itemclick', function(self, record) {
-          var script_name = record.get('name');
-          me.selectScript({script_name: script_name});
-          nodename.reset();
-          nodename.store.load({params: {}});
-       }, me);
-
        nodename.on('select', function(self, record) {
           var data = record[0] && record[0].data;
           me.selectNode({node: data.value});
        });
+
+       tag_grid.getSelectionModel().on('selectionchange',
+        function(self, records) {
+          var tag_id = records[0].get('id');
+          me.selectTag({tag_id: tag_id});
+          script_grid.getStore().load();
+       }, me);
+
+       script_grid.getSelectionModel().on('selectionchange',
+        function(self, records) {
+          if(script_grid.getStore().isLoading() == true) return;
+
+          if(records[0] == null)
+             return;
+
+          var script_name = records[0].get('name');
+          me.selectScript({script_name: script_name});
+          nodename.reset();
+          nodename.store.load({params: {}});
+          }, me);
     }
     JS
 

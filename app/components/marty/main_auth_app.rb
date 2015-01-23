@@ -40,6 +40,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
     {
       text:  I18n.t("postings") + wtext,
+      name:  "posting",
       icon:  icon_hack(:time),
       style: (warped ? "background-color: lightGrey;" : ""),
       menu:  [
