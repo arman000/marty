@@ -78,16 +78,27 @@ end
 # of PostgreSQL ranges.  Essentially, postgres_ext doesn't allow
 # numranges to exlude the range start e.g. anything like: "(1.1,2.2]".
 # This hack turns off the casting of PostgreSQL ranges to ruby
-# ranges. i.e. we keep them as strings.  Note that this hack would be
-# quite different for Rails 4.0.
+# ranges. i.e. we keep them as strings.
 
 require 'active_record/connection_adapters/postgresql_adapter'
 
+module ActiveRecord
+  module ConnectionAdapters
+    module PostgreSQL
+      module OID
+        class Range
+          def cast_value(value)
+            super
+          end
 
-[:numrange,:int4range,:int8range,:daterange,:tsrange,:tstzrange].each {|t|
-  ActiveRecord::ConnectionAdapters::PostgreSQLAdapter::OID.
-  alias_type t.to_s, 'text'
-}
+          def type_cast_for_database(value)
+            super
+          end
+        end
+      end
+    end
+  end
+end
 
 # The following is a hack to work around a bug in Rails4 array
 # handling which doesn't currently support multidimensional arrays.

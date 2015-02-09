@@ -172,7 +172,7 @@ class Marty::DataChange
       ' OR (created_dt >= ? AND created_dt < ?)'
 
     raise "Change count exceeds limit #{MAX_COUNT}" if
-      klass.where(change_q, t0, t1, t0, t1).count > MAX_COUNT
+      klass.unscoped.where(change_q, t0, t1, t0, t1).count > MAX_COUNT
 
     klass.where(change_q, t0, t1, t0, t1).
       order("group_id, created_dt").group_by(&:group_id)

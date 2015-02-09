@@ -17,12 +17,12 @@ class Marty::ImportType < Marty::Base
 
   belongs_to :role
 
-  validates_presence_of :name, :model_name, :role_id
+  validates_presence_of :name, :db_model_name, :role_id
   validates_uniqueness_of :name
   validates_with ImportTypeValidator
 
   def get_model_class
-    model_name.constantize
+    db_model_name.constantize
   end
 
   def allow_import?()

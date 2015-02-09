@@ -15,14 +15,12 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*"] + Dir["lib/tasks/*.rake"] +
     ["MIT-LICENSE", "Rakefile", "README.rdoc"]
 
-  s.add_dependency "rails", "~> 4.0.8"
+  # s.add_dependency "rails", "~> 4.2.0"
 
   s.add_dependency "pg"
 
   s.add_dependency 'netzke-core'
   s.add_dependency 'netzke-basepack'
-
-  s.add_dependency 'foreigner', '~>1.4.2'
 
   s.add_dependency 'axlsx'
 
