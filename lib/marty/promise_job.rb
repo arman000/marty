@@ -65,6 +65,8 @@ end
 
 class Delorean::Engine
   def background_eval(node, params, attrs)
+    raise "background_eval bad params" unless params.is_a?(Hash)
+
     nc = Delorean::BaseModule::NodeCall.new({}, self, node, params)
     # start the background promise
     nc | attrs
