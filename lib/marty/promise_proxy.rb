@@ -32,8 +32,8 @@ class Marty::PromiseProxy < BasicObject
     @result  = NOT_SET
   end
 
-  def __promise_id__
-    @promise.id
+  def __promise__
+    @promise
   end
 
   def is_a?(c)

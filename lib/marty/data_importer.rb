@@ -3,7 +3,10 @@ module Marty
     attr_reader :lines
 
     def initialize(message, lines)
-      super(message)
+      msg = lines && lines.respond_to?(:join) ?
+      "#{message} - lines: #{lines.join(',')}" : message
+
+      super(msg)
       @lines = lines
     end
   end
