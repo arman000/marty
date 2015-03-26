@@ -116,8 +116,6 @@ en:
     cleaner_function: Model Cleaner Method
     validation_function: Validation Function
     role__name: Role Name
-    company__name: Client Name
-    email: Email
     created_dt: Last Modified
     posting__name: Posting
     posting: Posting
