@@ -42,8 +42,8 @@ class Marty::TagGrid < Marty::CmGridPanel
   end
 
   action :add_in_form do |a|
-    a.text     = "New Tag"
-    a.tooltip  = "New Tag"
+    a.text     = I18n.t("tag_grid.new")
+    a.tooltip  = I18n.t("tag_grid.new")
     a.icon     = :time_add
     a.disabled = config[:prohibit_create]
   end

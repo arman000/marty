@@ -158,13 +158,14 @@ class Marty::UserView < Marty::CmGridPanel
   column :roles do |c|
     c.width  = 100
     c.flex   = 1
+    c.text   = I18n.t("user_grid.roles")
     c.editor = {
       trigger_action: :all,
       name: "roles",
       attr_type: :string,
       xtype: :combo,
       store: Marty::Role.pluck(:name).map {|n| I18n.t("roles.#{n}")}.sort,
-      empty_text: "Roles",
+      empty_text: I18n.t("user_grid.select_roles"),
       multi_select: true,
     }
 
