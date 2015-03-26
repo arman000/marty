@@ -108,7 +108,7 @@ module Mcfly
 
       ######################################################################
 
-      # Generates Gemini categorization lookups.  For instance,
+      # Generates categorization lookups.  For instance,
       # suppose we have the following in class GFee:
       #
       # gen_mcfly_lookup_cat :lookup_q,

@@ -1,0 +1,132 @@
+en:
+  config: Configuration
+  scripting: Scripting
+  postings: Postings
+  new_posting: New Posting
+  select_posting: Select Posting
+  go_to_now: Go to NOW
+  fields: Fields
+  updated_at: Updated At
+  user_view: User Management
+  reports: Reports
+  import_synonym: Import Synonyms
+  import_type: Import Types
+  system: System
+  applications: Applications
+  create_posting: Create
+  api_auth: API Authorization
+
+  roles:
+    viewer: Viewer
+    admin: Admin
+    dev: Developer
+    user_manager: User Manager
+
+  script:
+    selection: Selection
+    tester: Testing
+    selection_list: Scripts
+    selection_history: Script History
+    detail: Script Detail
+    save_error: "must be capitalized and contain only letters and digits (no spaces)"
+
+  tag_grid:
+    new: New Tag
+
+  script_grid:
+    title: Scripts
+    new: New Script
+    name: Name
+    tag: Associated Tag
+    created_dt: Create Date/Time
+
+  user_grid:
+    title: Users
+    new:   New User
+    name:  Name
+    login: Login
+    firstname: First Name
+    lastname:  Last Name
+    active:    Active
+    uuid:      UUID
+    roles:     Roles
+    select_roles: Select one or more roles
+    created_dt: Last Checked In
+
+  script_form:
+    save: Save
+    checkin: Check In
+    checkout: Check Out
+    discard: Discard
+    discarded: Discarded
+    checked_out: Checked out
+    print: Print
+
+  script_tester:
+    attributes: Compute Attributes
+    parameters: Parameters
+    results: Results/Errors
+    compute: Compute
+
+  script_log:
+    title: Script Versions
+    version: Version
+    last_update: Last Update
+    user_name: Edited By
+    log_message: Log Message
+
+  run_script:
+    download_csv: CSV Download
+    download_xlsx: Excel Download
+    attr_selection: Attribute Selection
+    select_attr: Select Attribute
+    select_node: Select Node
+
+  reporting:
+    parameters: Report Parameters
+    report_select: Select Report
+    select: Select Report
+    select_version: Select Version
+    select_script: Select Script
+    generate: Generate Report
+    background: Background Report
+
+  jobs:
+    promise_view: Jobs Dashboard
+    start_dt: Start Date
+    end_dt: End Date
+    user_login: User Login
+
+  data_import_view:
+    import: Import
+    import_data: Import Data
+    import_type: Import Type
+    results: Results/Errors
+    select: Provide Import Type and Import Data
+
+  attributes:
+    version: Version
+    key: Key
+    value: Value
+    name: Name
+    description: Description
+    comment: Comment
+    model_name: Model Name
+    synonym_fields: Synonym Fields
+    cleaner_function: Model Cleaner Method
+    validation_function: Validation Function
+    role__name: Role Name
+    created_dt: Last Modified
+    posting__name: Posting
+    posting: Posting
+    user__name: User
+    internal_name: Internal Name
+    import_type__name: Import Type
+    synonym: Synonym
+    posting_type: Posting Type
+    posting_type__name: Posting Type
+    tag: Script Tag
+    tag__name: Script Tag
+    api_key: API Key
+    app_name: Application Name
+    script_name: Script Name

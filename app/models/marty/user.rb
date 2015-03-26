@@ -1,5 +1,6 @@
 require 'mcfly'
 require 'net/ldap'
+require 'paper_trail'
 
 class Marty::User < Marty::Base
   has_paper_trail
@@ -101,23 +102,23 @@ private
   def verify_changes
     # If current users role is only user_manager, restrict following
     # 1 - Do not allow user to edit own record
-    # 2 - Do not allow user to edit the Gemini system record
+    # 2 - Do not allow user to edit the application system record
     if user_manager_only
-      gemini_user = Marty::User.find_by_login(
+      system_user = Marty::User.find_by_login(
         Rails.configuration.marty.system_account.to_s)
-      gemini_id = gemini_user.id if gemini_user
+      system_id = system_user.id if system_user
 
       if self.id == Mcfly.whodunnit.id
         roles.each {|r| roles.delete r unless r.name == "user_manager"}
         errors.add :base, "User Managers cannot edit "\
           "or add additional roles to their own accounts"
-      elsif self.id == gemini_id
+      elsif self.id == system_id
         errors.add :base,
-        "User Managers cannot edit the Gemini system account"
+        "User Managers cannot edit the application system account"
       end
     end
 
-    errors.add :base, "The Gemini system account cannot be deactivated" if
+    errors.add :base, "The application system account cannot be deactivated" if
       self.login == Rails.configuration.marty.system_account.to_s &&
       !self.active
 
