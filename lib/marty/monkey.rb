@@ -100,17 +100,31 @@ module ActiveRecord
   end
 end
 
-# The following is a hack to work around a bug in Rails4 array
-# handling which doesn't currently support multidimensional arrays.
-module ActiveRecord::ConnectionAdapters::PostgreSQLColumn::Cast
-  def string_to_array(string, oid)
-    type_cast_array parse_pg_array(string), oid
-  end
 
-  private
-  def type_cast_array(value, oid)
-    Array === value ?
-    value.map {|val| type_cast_array val, oid} : oid.type_cast(value)
+module ActiveRecord
+  module ConnectionAdapters
+    module PostgreSQL
+      module OID # :nodoc:
+        class Array
+
+          # In the 4.2.1 version of this code, under Mutable, the code
+          # checks for raw_old_value != type_cast_for_database(new_value)
+          #
+          # Since this is comparing db (string) version, we end up
+          # comparing "{1}"!="{1.0}" for float arrays. The following
+          # is a hack to check the new_value which is the ruby array.
+          # This could be problematic in other ways.  But, works for
+          # our purposes.  FIXME: In Rails 5.0 all this code has been
+          # changed and this should no longer be an issue.
+
+
+          def changed_in_place?(raw_old_value, new_value)
+            new_value != type_cast_from_database(raw_old_value)
+          end
+
+        end
+      end
+    end
   end
 end
 
@@ -163,7 +177,7 @@ end
 
 ######################################################################
 
-# Rails 4 doesn't handle 'infinity' datetime correctly properly due to
+# Rails 4 doesn't handle 'infinity' datetime properly due to
 # in_time_zone conversion. Ergo this hack.
 
 class String
