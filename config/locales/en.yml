@@ -111,7 +111,7 @@ en:
     name: Name
     description: Description
     comment: Comment
-    model_name: Model Name
+    db_model_name: Model Name
     synonym_fields: Synonym Fields
     cleaner_function: Model Cleaner Method
     validation_function: Validation Function

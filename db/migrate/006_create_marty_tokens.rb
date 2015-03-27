@@ -1,4 +1,6 @@
 class CreateMartyTokens < ActiveRecord::Migration
+  include Marty::Migrations
+
   def change
     create_table :marty_tokens do |t|
       t.references :user, null: false
@@ -6,7 +8,7 @@ class CreateMartyTokens < ActiveRecord::Migration
       t.datetime :created_on, null: false
     end
 
-    add_foreign_key(:marty_tokens, :marty_users, column: :user_id)
+    add_fk :marty_tokens, :marty_users, column: :user_id
     add_index(:marty_tokens, [:user_id])
   end
 end

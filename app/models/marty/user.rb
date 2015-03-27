@@ -1,10 +1,7 @@
 require 'mcfly'
 require 'net/ldap'
-require 'paper_trail'
 
 class Marty::User < Marty::Base
-  has_paper_trail
-
   validates_presence_of :login, :firstname, :lastname
   validates_uniqueness_of :login
 

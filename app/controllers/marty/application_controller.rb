@@ -103,14 +103,6 @@ class Marty::ApplicationController < ActionController::Base
     end
   end
 
-  def user_for_paper_trail
-    if Marty::User.current
-      Marty::User.current.login
-    else
-      'unknown'
-    end
-  end
-
   def password_authentication
     user = Marty::User.try_to_login(params[:username], params[:password])
 
