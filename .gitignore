@@ -22,3 +22,4 @@ spec/dummy/.sass-cache
 *.komodoproject
 /pkg
 /Gemfile.lock
+*.swp
