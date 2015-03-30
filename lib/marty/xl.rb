@@ -339,7 +339,7 @@ class Marty::Xl
     y1, y2 = [y1, y2].map { |y|
       next y unless y.is_a?(Hash)
       raise "bad offset #{y}" unless y["off"].is_a?(Fixnum)
-      ws.rows.last.index + y["off"]
+      ws.rows.last.row_index + y["off"]
     }
 
     [x1, y1, x2, y2].each { |x|
@@ -491,8 +491,8 @@ class Marty::Xl
         ws.add_image(image_src: "#{Rails.public_path}/images/#{img}",
                      noSelect: true,
                      noMove: true) do |image|
-          image.width 	= w
-          image.height 	= h
+          image.width  = w
+          image.height = h
           image.start_at x1, y1
           image.end_at x2, y2 if x2.is_a?(Fixnum) && y2.is_a?(Fixnum)
         end
