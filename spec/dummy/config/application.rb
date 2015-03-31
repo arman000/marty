@@ -1,17 +1,19 @@
 require File.expand_path('../boot', __FILE__)
 
 # Pick the frameworks you want:
+require "active_model/railtie"
+require "active_job/railtie"
 require "active_record/railtie"
 require "action_controller/railtie"
 require "action_mailer/railtie"
-require "active_resource/railtie"
+require "action_view/railtie"
 require "sprockets/railtie"
-# require "rails/test_unit/railtie"
 
 Bundler.require(*Rails.groups)
 require "marty"
 
 module Dummy
+  APP_ROOT = File.expand_path("..", __FILE__).freeze
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -53,13 +55,19 @@ module Dummy
     # This will create an empty whitelist of attributes available for mass-assignment for all models
     # in your app. As such, your models will need to explicitly whitelist or blacklist accessible
     # parameters by using an attr_accessible or attr_protected declaration.
-    config.active_record.whitelist_attributes = true
+    #config.active_record.whitelist_attributes = true
 
     # Enable the asset pipeline
     config.assets.enabled = true
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
+
+    # FIXME: consider whether or not this can be done with sqlite
+    config.paths["config/database"] = "#{APP_ROOT}/database.yml"
+
+    # FIXME: not sure this is the proper way to add a new config
+    config.marty = ActiveSupport::OrderedOptions.new
   end
 end
 

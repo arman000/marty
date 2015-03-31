@@ -4,3 +4,8 @@ source "http://rubygems.org"
 # Bundler will treat runtime dependencies like base dependencies, and
 # development dependencies will be added by default to the :development group.
 gemspec
+
+group :development, :test do
+  gem 'rails', '~> 4.2.1'
+  gem 'rspec-rails', '~> 2.99.0'
+end
