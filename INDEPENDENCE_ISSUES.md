@@ -9,3 +9,4 @@ Things that may affect how independent Marty can be as a gem:
 * verify if migrations in the dummy test job are done correctly and that migrations
   in the top level directory match. Are the test job ones supposed to come from
   those top-level ones?
+* User model tests shouldn't rely on `User.last` as an alternate user type.
