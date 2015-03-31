@@ -12,6 +12,9 @@ module Marty
         columns = columns.collect(&:to_s)
         exclude_columns_from_default_scope columns
         define_lazy_accessors_for columns
+
+        # allow introspection of lazy-loaded column list
+        const_set(:LAZY_LOADED, columns)
       end
 
     private
