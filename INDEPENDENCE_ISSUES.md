@@ -10,3 +10,8 @@ Things that may affect how independent Marty can be as a gem:
   in the top level directory match. Are the test job ones supposed to come from
   those top-level ones?
 * User model tests shouldn't rely on `User.last` as an alternate user type.
+
+## Things pulled from Gemini:
+
+* `load_script_bodies` and `load_a_script` went into `spec/script_helper.rb` from `app/controllers/gemini/application_controller.rb` - for api and promise model specs
+* `app/models/gemini/helper.rb` (came from same place in Gemini) - for promise model specs
