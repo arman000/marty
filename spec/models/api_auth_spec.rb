@@ -4,7 +4,7 @@ require 'script_helper'
 module Marty
   describe ApiAuth do
     before(:each) do
-      Mcfly.whodunnit = Marty::User.create!(login: 'gemini', firstname: 'test', lastname: 'test', active: true)
+      Mcfly.whodunnit = create_gemini_user
 
       load_script_bodies({
                            "Script1" => "A:\n    a = 1\n",

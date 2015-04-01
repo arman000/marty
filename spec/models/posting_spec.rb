@@ -3,7 +3,7 @@ require 'spec_helper'
 module Marty
   describe Posting do
     before(:each) do
-      Mcfly.whodunnit = Marty::User.create!(login: 'gemini', firstname: 'test', lastname: 'test', active: true)
+      Mcfly.whodunnit = create_gemini_user
 
       # FIXME: these two pre-seedings of the database should probably be handled differently
       PostingType.clear_lookup_cache!
