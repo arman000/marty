@@ -13,5 +13,5 @@ Things that may affect how independent Marty can be as a gem:
 
 ## Things pulled from Gemini:
 
-* `load_script_bodies` and `load_a_script` went into `spec/script_helper.rb` from `app/controllers/gemini/application_controller.rb` - for api and promise model specs
+* `load_script_bodies` and `load_a_script` went into `spec/support/script_helpers.rb` from `app/controllers/gemini/application_controller.rb` - for api and promise model specs
 * `app/models/gemini/helper.rb` (came from same place in Gemini) - for promise model specs

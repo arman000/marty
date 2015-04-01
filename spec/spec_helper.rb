@@ -18,4 +18,5 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
 
   config.include UserHelpers
+  config.include ScriptHelpers
 end

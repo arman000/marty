@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'script_helper'
 
 module Marty
   describe ApiAuth do
