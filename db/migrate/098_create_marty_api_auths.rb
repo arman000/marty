@@ -1,6 +1,6 @@
 require 'mcfly'
 
-class CreateMartyAppAuths < McflyMigration
+class CreateMartyApiAuths < McflyMigration
   include Marty::Migrations
 
   def change
