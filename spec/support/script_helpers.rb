@@ -29,7 +29,9 @@ module ScriptHelpers
 
     # If no tag_time is provided, the tag created_dt will be the same
     # as the scripts.
-    Marty::Tag.do_create(tag_time, "tagged from load scripts") if
+    tag = Marty::Tag.do_create(tag_time, "tagged from load scripts") if
       !tag or tag.created_dt <= latest.created_dt
+
+    tag
   end
 end

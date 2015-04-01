@@ -68,6 +68,8 @@ module Dummy
 
     # FIXME: not sure this is the proper way to add a new config
     config.marty = ActiveSupport::OrderedOptions.new
+
+    config.secret_key_base = "SECRET_KEY_BASE"
   end
 end
 
