@@ -5,7 +5,8 @@ module Marty
     before(:each) do
       Mcfly.whodunnit = create_gemini_user
 
-      # FIXME: these two pre-seedings of the database should probably be handled differently
+      # FIXME: these pre-seedings of the PostingType and Posting
+      # database should probably be handled differently
       PostingType.clear_lookup_cache!
       PostingType.seed
       create_now_posting
