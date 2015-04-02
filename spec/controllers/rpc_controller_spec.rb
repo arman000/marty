@@ -83,17 +83,6 @@ describe Marty::RpcController do
     end
   end
 
-  # FIXME: Should use a different method to pre-seed the database
-  def create_now_posting
-    unless Marty::Posting.find_by_name('NOW')
-      sn                 = Marty::Posting.new
-      sn.posting_type_id = Marty::PostingType["BASE"].id
-      sn.comment         = '---'
-      sn.created_dt      = 'infinity'
-      sn.save!
-    end
-  end
-
   let(:t1) { @t1 }
   let(:t2) { @t2 }
   let(:p0) { @p0 }

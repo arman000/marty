@@ -12,16 +12,6 @@ module Marty
       create_now_posting
     end
 
-    def create_now_posting
-      unless Posting.find_by_name('NOW')
-        sn                 = Posting.new
-        sn.posting_type_id = PostingType["BASE"].id
-        sn.comment         = '---'
-        sn.created_dt      = 'infinity'
-        sn.save!
-      end
-    end
-
     describe "validations" do
       it "should require unique Names" do
         dt = "20130215 0800"
