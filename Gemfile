@@ -12,4 +12,5 @@ gem 'daemons'
 group :development, :test do
   gem 'rails', '~> 4.2.1'
   gem 'rspec-rails', '~> 2.99.0'
+  gem 'timecop'
 end
