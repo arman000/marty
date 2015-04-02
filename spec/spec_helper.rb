@@ -20,4 +20,6 @@ RSpec.configure do |config|
   config.include DbSeedHelpers
   config.include UserHelpers
   config.include ScriptHelpers
+  config.include DelayedJobHelpers
+  config.include CleanDbHelpers
 end

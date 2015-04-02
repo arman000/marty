@@ -6,6 +6,8 @@ source "http://rubygems.org"
 gemspec
 
 gem 'responders'
+gem 'delayed_job_active_record'
+gem 'daemons'
 
 group :development, :test do
   gem 'rails', '~> 4.2.1'

@@ -4,6 +4,6 @@ module UserHelpers
   end
 
   def create_user name
-    Marty::User.create!(login: name, firstname: name, lastname: 'test', active: true)
+    Marty::User.find_or_create_by!(login: name, firstname: name, lastname: 'test', active: true)
   end
 end
