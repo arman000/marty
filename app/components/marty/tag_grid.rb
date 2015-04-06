@@ -1,4 +1,4 @@
-class Marty::TagGrid < Marty::CmGridPanel
+class Marty::TagGrid < Marty::Grid
   has_marty_permissions \
   read:   :any,
   create: :dev

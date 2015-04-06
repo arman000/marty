@@ -1,4 +1,4 @@
-class Marty::PostingGrid < Marty::CmGridPanel
+class Marty::PostingGrid < Marty::Grid
   has_marty_permissions read: :any,
                         delete: :any # delete is hijacked for a select
 

@@ -1,4 +1,4 @@
-class Marty::ScriptGrid < Marty::CmGridPanel
+class Marty::ScriptGrid < Marty::Grid
   has_marty_permissions \
   create: [:dev],
   read: :any,

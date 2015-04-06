@@ -1,6 +1,6 @@
 require 'delorean_lang'
 
-class Marty::ReportForm < Marty::CmFormPanel
+class Marty::ReportForm < Marty::Form
 
   # override apply for background generation
   action :apply do |a|

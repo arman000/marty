@@ -1,15 +1,15 @@
 class Marty::ApiAuthView < Marty::McflyGridPanel
-  has_marty_permissions	create: :admin,
-			read: :any,
-			update: :admin,
-			delete: :admin
+  has_marty_permissions create: :admin,
+                        read: :any,
+                        update: :admin,
+                        delete: :admin
 
   def configure(c)
     super
 
-    c.title 	= I18n.t('api_auth', default: "API Authorization")
-    c.model 	= "Marty::ApiAuth"
-    c.columns 	= [:app_name, :api_key, :script_name]
+    c.title   = I18n.t('api_auth', default: "API Authorization")
+    c.model   = "Marty::ApiAuth"
+    c.columns = [:app_name, :api_key, :script_name]
 
     c.enable_extended_search = false
 
@@ -27,7 +27,6 @@ class Marty::ApiAuthView < Marty::McflyGridPanel
   column :script_name do |c|
     c.flex = 1
   end
-
 end
 
 ApiAuthView = Marty::ApiAuthView

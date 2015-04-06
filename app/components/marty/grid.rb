@@ -2,7 +2,7 @@ require 'netzke-basepack'
 require 'netzke/basepack/grid'
 require 'marty/permissions'
 
-class Marty::CmGridPanel < ::Netzke::Basepack::Grid
+class Marty::Grid < ::Netzke::Basepack::Grid
   extend ::Marty::Permissions
 
   has_marty_permissions read: :any

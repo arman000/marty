@@ -1,4 +1,4 @@
-class Marty::ReportSelect < Marty::CmFormPanel
+class Marty::ReportSelect < Marty::Form
   include Marty::Extras::Layout
 
   component :tag_grid do |c|

@@ -1,3 +1,7 @@
+# Basic Marty single-page application with authentication.
+#
+# == Extending Marty::AuthApp
+# DOCFIX
 class Marty::AuthApp < Marty::SimpleApp
   # Set the Logout button if current_user is set
   def menu

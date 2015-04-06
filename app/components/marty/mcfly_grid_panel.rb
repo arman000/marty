@@ -1,4 +1,4 @@
-class Marty::McflyGridPanel < Marty::CmGridPanel
+class Marty::McflyGridPanel < Marty::Grid
   def configure(c)
     super
 

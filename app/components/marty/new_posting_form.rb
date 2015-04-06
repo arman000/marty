@@ -1,4 +1,4 @@
-class Marty::NewPostingForm < Marty::CmFormPanel
+class Marty::NewPostingForm < Marty::Form
   extend ::Marty::Permissions
 
   # override this to set permissions for posting types

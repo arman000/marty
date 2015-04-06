@@ -1,4 +1,4 @@
-class Marty::UserView < Marty::CmGridPanel
+class Marty::UserView < Marty::Grid
   has_marty_permissions \
   create: [:admin, :user_manager],
   read: :any,

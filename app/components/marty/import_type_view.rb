@@ -1,4 +1,4 @@
-class Marty::ImportTypeView < Marty::CmGridPanel
+class Marty::ImportTypeView < Marty::Grid
   has_marty_permissions \
   create: :admin,
   read: :any,

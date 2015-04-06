@@ -1,4 +1,4 @@
-class Marty::ScriptTester < Marty::CmFormPanel
+class Marty::ScriptTester < Marty::Form
   include Marty::Extras::Layout
 
   def configure(c)
@@ -204,7 +204,7 @@ class Marty::ScriptTester < Marty::CmFormPanel
   end
 
   component :result do |c|
-    c.klass       = Marty::CmPanel
+    c.klass       = Marty::Panel
     c.title       = I18n.t("script_tester.results")
     c.html        = ""
     c.flex        = 1

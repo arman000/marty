@@ -1,7 +1,7 @@
 require 'delorean_lang'
 require 'coderay'
 
-class Marty::ScriptForm < Marty::CmFormPanel
+class Marty::ScriptForm < Marty::Form
   DASH = 0x2012.chr('utf-8')
 
   css_configure do |c|

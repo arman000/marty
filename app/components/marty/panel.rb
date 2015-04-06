@@ -1,4 +1,5 @@
-class Marty::CmPanel < Netzke::Core::Panel
+# Marty's version of the Netzke Panel component.
+class Marty::Panel < Netzke::Core::Panel
   js_configure do |c|
     c.update_body_html = <<-JS
         function(html){
@@ -8,5 +9,4 @@ class Marty::CmPanel < Netzke::Core::Panel
   end
 end
 
-CmPanel = Marty::CmPanel
-
+Panel = Marty::Panel
