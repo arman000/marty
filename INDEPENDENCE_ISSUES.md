@@ -19,3 +19,10 @@ Things that may affect how independent Marty can be as a gem:
   model/job controller specs - All that's needed from here is the sleep method
   so the scripts could probably be changed to reference this from a spec helper
   of some sort
+* Some of the category models and migrations. This may be OK since they are
+  only used in testing.
+* Some/most/all of the models/gemini/extras. Perhaps these are more appropriate
+  as Marty items anyway.
+* The DataReport and Fields (only parts) delorean scripts were needed for the data_import spec.
+* Along with those Delorean scripts more gemini models were needed (and put into spec/dummy/app/models)
+  Amongst them: LoanProgram, *Type, etc

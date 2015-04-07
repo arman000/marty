@@ -1,0 +1,105 @@
+import Fields
+
+######################################################################
+
+TableReport:
+    pt_name     =? nil
+    posting     = Marty::Posting.lookup(pt_name)
+    pt          = posting.created_dt
+    module_name =? nil
+    class_name  =? nil
+    title       =? (class_name || "Table Report") + (
+        if pt_name then "_" + pt_name else "")
+    sort_field  =? nil
+
+    result_raw  = Marty::DataChange.do_export(
+        pt,
+        if module_name then module_name + '::' + class_name else class_name,
+        sort_field,
+        )
+    row_count   = result_raw.length
+    result      = Gemini::Helper.to_csv(result_raw)
+    form        = [
+        Fields::PostingField,
+        Fields::ClassField,
+        ]
+    format      = "csv"
+
+#####################################################################
+
+EnumReport:
+    title   = "Gemini Enumerations"
+    format  = "csv"
+    form    = []
+    classes = [
+        "AmortizationType",
+        "ArmIndexType",
+        "AutomatedUnderwritingSystemType",
+        "ExtraFeatureType",
+        "LoanPurposeType",
+        "LockType",
+        "MortgageType",
+        "PrepaymentPenaltyOptionType",
+        "ProjectLegalStructureType",
+        "PropertyUsageType",
+        "RefinanceCashOutDeterminationType",
+        "RuleType",
+        "StreamlineType",
+        ]
+
+    res = [
+        [c] +
+        Marty::DataChange.do_export('infinity', "Gemini::%s" % c)[1,100] +
+        [""]
+        for c in classes
+        ].flatten(1)
+
+    result  = res
+
+#####################################################################
+
+DataImportParam: Fields::CsvField
+    field_label = "Import Text"
+    name        = "data_import_field"
+    height      =  600
+
+ImportTypeField:
+    field_label = "Import Type"
+    name        = "import_type"
+    xtype       = ":combo"
+    store       = [imp.name for imp in Marty::ImportType.get_all].sort
+    value       = store[0]
+
+CommaSepField:
+    xtype       = ":checkboxfield"
+    name        = "comma_sep"
+    field_label = "Comma Separated"
+    checked     = false
+
+DataImportReport:
+    roles       = ["price_manager", "rule_manager"]
+    import_type =? nil
+    comma_sep   =? nil
+
+    title = if import_type
+        then "Data Import - " + import_type
+        else "Data Import Job"
+
+    data_import_field =?
+
+    import_type_rec = Marty::ImportType.lookup(import_type) ||
+        ERR("NULL ImportType", import_type)
+
+    result = Gemini::Helper.import_data(
+        import_type_rec,
+        data_import_field,
+        if comma_sep then "," else nil
+        )
+
+    form = [
+        ImportTypeField,
+        DataImportParam,
+        CommaSepField,
+        ]
+
+    format = "csv"
