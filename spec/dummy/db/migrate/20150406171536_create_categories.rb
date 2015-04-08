@@ -52,8 +52,8 @@ class CreateCategories < ActiveRecord::Migration
     drop_table 'gemini_bud_categories'
     drop_table 'gemini_fannie_bups'
     drop_table 'gemini_loan_programs'
-    drop_table 'gemini_amortization_type'
-    drop_table 'gemini_mortgage_type'
-    drop_table 'gemini_dummy'
+    drop_table 'gemini_amortization_types'
+    drop_table 'gemini_mortgage_types'
+    drop_table 'gemini_streamline_types'
   end
 end
