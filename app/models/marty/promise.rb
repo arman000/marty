@@ -196,6 +196,20 @@ class Marty::Promise < Marty::Base
       # Stop listening to the promise notifications
       raw_conn.exec("UNLISTEN promise_#{id}")
     end
-
   end
+
+  # Support UI live search -- FIXME: hacky to have UI scoping here
+  scope :live_search, lambda { |search_text|
+    return if !search_text || search_text.length < 1
+
+    # Searches user login/firstname/lastname
+    query = [
+             "marty_users.login ILIKE ?",
+             "marty_users.firstname ILIKE ?",
+             "marty_users.lastname ILIKE ?",
+            ].join(' OR ')
+
+    st = "%#{search_text}%"
+    joins(:user).where(query, st, st, st)
+  }
 end

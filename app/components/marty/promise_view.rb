@@ -14,6 +14,29 @@ class Marty::PromiseView < Marty::TreePanel
        return "orange-row";
     }
     JS
+
+    c.listen_fn = <<-JS
+    function(obj, search_text) {
+        var lg = this.ownerCt.ownerCt;
+        lg.getStore().getProxy().extraParams.live_search = search_text;
+        lg.getStore().load();
+    }
+    JS
+
+    # Live search box -- direct copy from Marty::LiveSearchGridPanel
+    c.tbar = ['->', {
+                name:  'live_search_text',
+                xtype: 'textfield',
+                enable_key_events: true,
+                ref: '../live_search_field',
+                empty_text: 'Search',
+                listeners: {
+                  change: {
+                    fn: c.listen_fn,
+                    buffer: 100,
+                  }
+                }
+              }]
   end
 
   def configure(c)
@@ -117,9 +140,13 @@ class Marty::PromiseView < Marty::TreePanel
     parent_id = params[:node]
     parent_id = nil if parent_id == 'root'
 
+    search_scope = config[:live_search_scope] || :live_search
+
     scope_data_class(params) do
-      data_class.where(parent_id: parent_id).scoping do
-        data_adapter.get_records(params, final_columns)
+      data_class.send(search_scope, params && params[:live_search] || '').scoping do
+        data_class.where(parent_id: parent_id).scoping do
+          data_adapter.get_records(params, final_columns)
+        end
       end
     end
   end
@@ -162,7 +189,6 @@ class Marty::PromiseView < Marty::TreePanel
     c.text   = "Format"
     c.width  = 90
   end
-
 end
 
 PromiseView = Marty::PromiseView
