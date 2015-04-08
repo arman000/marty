@@ -3,8 +3,6 @@ Things that may affect how independent Marty can be as a gem:
 * It requires a database.yml file for testing purposes.
   For now that file refers to a postgresql instance but maybe it should be
   a sqlite db instead
-* There was a `rake db:create` required in the dummy app directory
-* It depends on the Mcfly gem?
 * PostingType and Posting tables both need to be pre-seeded to operate correctly.
 * verify if migrations in the dummy test job are done correctly and that migrations
   in the top level directory match. Are the test job ones supposed to come from
@@ -13,8 +11,8 @@ Things that may affect how independent Marty can be as a gem:
 
 ## Things pulled from Gemini:
 
-* `load_script_bodies` and `load_a_script` went into `spec/support/script_helpers.rb`
-  from `app/controllers/gemini/application_controller.rb` - for api and promise model specs
+* `load_script_bodies`, `load_scripts`, and `load_a_script` went into `spec/support/script_helpers.rb`
+  from `app/controllers/gemini/application_controller.rb` - for api, promise model, and lib specs
 * `app/models/gemini/helper.rb` (came from same place in Gemini) - for promise
   model/job controller specs - All that's needed from here is the sleep method
   so the scripts could probably be changed to reference this from a spec helper
@@ -23,6 +21,6 @@ Things that may affect how independent Marty can be as a gem:
   only used in testing.
 * Some/most/all of the models/gemini/extras. Perhaps these are more appropriate
   as Marty items anyway.
-* The DataReport and Fields (only parts) delorean scripts were needed for the data_import spec.
+* The `DataReport` and `Fields` (only parts) delorean scripts were needed for the data_import spec.
 * Along with those Delorean scripts more gemini models were needed (and put into spec/dummy/app/models)
-  Amongst them: LoanProgram, *Type, etc
+  Amongst them: `LoanProgram`, `*Type`, etc. They also got migrations.
