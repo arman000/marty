@@ -1,5 +1,7 @@
 # Marty seeds needed for testing purposes
-Marty::PostingType.seed
+['BASE', 'CLOSE', 'INTRA', 'RULE'].each { |type|
+  Marty::PostingType.create name: type
+}
 
 # Gemini seeds needed for testing purposes
 Gemini::AmortizationType.create(name: "Fixed")
