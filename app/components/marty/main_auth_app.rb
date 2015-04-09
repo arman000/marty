@@ -17,11 +17,11 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def self.has_data_import_perm?
-    self.class.has_admin_perm?
+    self.has_admin_perm?
   end
 
   def self.has_scripting_perm?
-    self.class.has_admin_perm?
+    self.has_admin_perm?
   end
 
   def sep

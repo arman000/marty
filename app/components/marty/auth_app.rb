@@ -34,7 +34,10 @@ class Marty::AuthApp < Marty::SimpleApp
 
   js_configure do |c|
     c.mixin
-    c.auth_spec_mode = Gemini::Application.config.marty.auth_spec_mode
+    # FIXME: hacky -- if auth_spec_mode config is set, the JS code
+    # doesn't reload the screen on login.  Is is currently needed with
+    # netzke-testing.
+    c.auth_spec_mode = Rails.configuration.marty.auth_spec_mode
   end
 
   endpoint :sign_in do |params,this|

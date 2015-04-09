@@ -74,11 +74,11 @@ end
 
 ######################################################################
 
-# The following is a hack to get around postgres_ext's broken handling
-# of PostgreSQL ranges.  Essentially, postgres_ext doesn't allow
-# numranges to exlude the range start e.g. anything like: "(1.1,2.2]".
-# This hack turns off the casting of PostgreSQL ranges to ruby
-# ranges. i.e. we keep them as strings.
+# The following is a hack to get around ActiveRecord's broken handling
+# of PostgreSQL ranges.  Essentially, AR doesn't allow numranges to
+# exclude the range start e.g. anything like: "(1.1,2.2]".  This hack
+# turns off the casting of PostgreSQL ranges to ruby ranges. i.e. we
+# keep them as strings.
 
 require 'active_record/connection_adapters/postgresql_adapter'
 
