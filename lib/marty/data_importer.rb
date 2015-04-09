@@ -1,3 +1,5 @@
+require 'csv'
+
 module Marty
   class DataImporterError < StandardError
     attr_reader :lines

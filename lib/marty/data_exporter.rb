@@ -1,5 +1,6 @@
 require 'base64'
 require 'zlib'
+require 'csv'
 
 class Marty::DataExporter
   # given an array of hashes, return set of all keys

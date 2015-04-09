@@ -1,3 +1,5 @@
+require 'csv'
+
 module Marty::ContentHandler
   GEN_FORMATS = {
     "csv"  => ['text/csv',                 'download'],
