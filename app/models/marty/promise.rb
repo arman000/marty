@@ -6,13 +6,7 @@ class Marty::Promise < Marty::Base
 
     def load(v)
       # Marshal.load can't handle nil
-      return {} unless v
-
-      # FIXME: Rails4 bytea interface seems to remove the trailing
-      # \x00 char.
-      v += "\x00"
-
-      Marshal.load(v)
+      v ? Marshal.load(v) : {}
     end
   end
 
