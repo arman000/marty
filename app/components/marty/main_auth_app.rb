@@ -16,10 +16,6 @@ class Marty::MainAuthApp < Marty::AuthApp
     Marty::NewPostingForm.has_any_perm?
   end
 
-  def self.has_data_import_perm?
-    self.has_admin_perm?
-  end
-
   def self.has_scripting_perm?
     self.has_admin_perm?
   end
