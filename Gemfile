@@ -7,7 +7,7 @@ gemspec
 
 gem 'responders'
 gem 'delayed_job_active_record'
-gem 'daemons'
+gem 'daemons', '~> 1.1.9'
 
 group :development, :test do
   gem 'rails', '~> 4.2.1'
