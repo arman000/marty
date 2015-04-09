@@ -5,6 +5,17 @@ class Marty::UserView < Marty::Grid
   update: [:admin, :user_manager],
   delete: [:admin, :user_manager]
 
+  # list of columns to be displayed in the grid view
+  def self.user_columns
+    [
+     :login,
+     :firstname,
+     :lastname,
+     :active,
+     :roles,
+    ]
+  end
+
   def configure(c)
     super
 
@@ -14,15 +25,7 @@ class Marty::UserView < Marty::Grid
     c.enable_edit_inline     = false
     c.multi_select           = false
 
-    c.columns ||=
-      [
-       :login,
-       :firstname,
-       :lastname,
-       :active,
-       :uuid,
-       :roles
-      ]
+    c.columns ||= self.class.user_columns
 
     c.data_store.sorters = {
       property: :login,
@@ -45,14 +48,12 @@ class Marty::UserView < Marty::Grid
   end
 
   def self.create_edit_user(data)
-    # Creates the initial place-holder user object and check it
-    # out.
+    # Creates initial place-holder user object and validate
     user = data["id"].nil? ? Marty::User.new : Marty::User.find(data["id"])
-    user.login     = data["login"]
-    user.firstname = data["firstname"]
-    user.lastname  = data["lastname"]
-    user.active    = data["active"]
-    user.uuid      = data["uuid"]
+
+    self.user_columns.each {
+      |c| user.send("#{c}=", data[c.to_s]) unless c == :roles
+    }
 
     if user.valid?
       user.save
@@ -148,11 +149,6 @@ class Marty::UserView < Marty::Grid
   column :active do |c|
     c.width = 60
     c.text  = I18n.t("user_grid.active")
-  end
-
-  column :uuid do |c|
-    c.width = 60
-    c.text  = I18n.t("user_grid.uuid")
   end
 
   column :roles do |c|

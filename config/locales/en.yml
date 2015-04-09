@@ -48,7 +48,6 @@ en:
     firstname: First Name
     lastname:  Last Name
     active:    Active
-    uuid:      UUID
     roles:     Roles
     select_roles: Select one or more roles
     created_dt: Last Checked In

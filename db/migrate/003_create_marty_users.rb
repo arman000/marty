@@ -7,9 +7,6 @@ class CreateMartyUsers < ActiveRecord::Migration
       t.string :firstname, null: false
       t.string :lastname, null: false
       t.boolean :active, null: false
-
-      # FIXME: It's a hack to have this in here
-      t.integer :uuid
     end
   end
 end
