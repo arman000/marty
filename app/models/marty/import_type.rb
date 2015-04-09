@@ -25,9 +25,8 @@ class Marty::ImportType < Marty::Base
     db_model_name.constantize
   end
 
-  def allow_import?()
-    Mcfly.whodunnit.roles.pluck(:id).
-      include?(role_id) if Mcfly.whodunnit
+  def allow_import?
+    Mcfly.whodunnit && Mcfly.whodunnit.roles.pluck(:id).include?(role_id)
   end
 
   delorean_fn :lookup, sig: 1 do
