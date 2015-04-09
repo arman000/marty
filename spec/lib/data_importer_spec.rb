@@ -79,21 +79,6 @@ Conv Fixed 30	2.375	a123	7.24000	12	2012
 EOF
 
   describe DataImporter do
-    before(:each) do
-      Mcfly.whodunnit = create_gemini_user
-    end
-    
-    before(:all) do
-      # FIXME: these seeds should be done in a central location
-      Gemini::AmortizationType.create(name: "Fixed")
-      Gemini::AmortizationType.create(name: "Adjustable")
-      Gemini::MortgageType.create(name: "Conventional")
-      Gemini::MortgageType.create(name: "FHA")
-      Gemini::MortgageType.create(name: "VA")
-      Gemini::MortgageType.create(name: "USDA/Rural Housing")
-      Gemini::StreamlineType.seed
-    end
-
     it "should be able to import fannie buyups" do
       res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
       res.should == {create: 2}
@@ -353,12 +338,6 @@ EOF
     end
 
     it "should be able to export" do
-      # FIXME: these pre-seedings of the PostingType and Posting
-      # database should probably be handled differently
-      PostingType.clear_lookup_cache!
-      PostingType.seed
-      create_now_posting
-
       load_scripts(nil, Date.today)
       Marty::ScriptSet.clear_cache
       Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)

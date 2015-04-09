@@ -2,16 +2,6 @@ require 'spec_helper'
 
 module Marty
   describe Posting do
-    before(:each) do
-      Mcfly.whodunnit = create_gemini_user
-
-      # FIXME: these pre-seedings of the PostingType and Posting
-      # database should probably be handled differently
-      PostingType.clear_lookup_cache!
-      PostingType.seed
-      create_now_posting
-    end
-
     describe "validations" do
       it "should require unique Names" do
         dt = "20130215 0800"

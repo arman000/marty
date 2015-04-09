@@ -40,18 +40,9 @@ A: M3::A
 eof
 
 describe Marty::RpcController do
-  before(:each) do
-    Mcfly.whodunnit = create_gemini_user
-  end
-
   before(:each) { @routes = Marty::Engine.routes }
 
   before(:each) {
-    # FIXME: this pre-seeding of the database should probably be handled differently
-    Marty::PostingType.clear_lookup_cache!
-    Marty::PostingType.seed
-
-    create_now_posting
     create_dev_tag
 
     @p0 = Marty::Posting.do_create("BASE", Date.today, 'a comment')
@@ -72,16 +63,6 @@ describe Marty::RpcController do
 
     @p2 = Marty::Posting.do_create("BASE", Date.today + 4.minute, 'a comment')
   }
-
-  # FIXME: Should use a different method to pre-seed the database
-  def create_dev_tag
-    unless Marty::Tag.find_by_name('DEV')
-      tag            = Marty::Tag.new
-      tag.comment    = '---'
-      tag.created_dt = 'infinity'
-      tag.save!
-    end
-  end
 
   let(:t1) { @t1 }
   let(:t2) { @t2 }

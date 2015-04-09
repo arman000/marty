@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe Marty::RpcController do
-  before(:each) do
-    Mcfly.whodunnit = create_gemini_user
-  end
-
   before(:each) { @routes = Marty::Engine.routes }
 
   before(:each) {

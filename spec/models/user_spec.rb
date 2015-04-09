@@ -3,14 +3,13 @@ require 'spec_helper'
 module Marty
   describe User do
     before(:each) do
-      user = create_gemini_user
-      Mcfly.whodunnit = user
+      user = UserHelpers.create_gemini_user
       Rails.configuration.marty.system_account = user.login
 
       # FIXME: need this other user where Marty::User.last used
       # (users can't edit their own account and user's cant edit
       # gemini account)
-      other_user = create_user('other_user')
+      other_user = UserHelpers.create_user('other_user')
     end
 
     describe "validations" do

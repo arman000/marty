@@ -3,8 +3,6 @@ require 'spec_helper'
 module Marty
   describe ApiAuth do
     before(:each) do
-      Mcfly.whodunnit = create_gemini_user
-
       load_script_bodies({
                            "Script1" => "A:\n    a = 1\n",
                            "NewScript1" => "B:\n    b = 0\n",

@@ -8,12 +8,14 @@ describe Marty::JobController, slow: true do
   before(:each) { @routes = Marty::Engine.routes }
 
   before(:all) do
-    Mcfly.whodunnit = create_gemini_user
-
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
     # transactional fixtures interfere with queueing jobs
     self.use_transactional_fixtures = false
+
+    # Needed here because shutting transactional fixtures off
+    # means we lose the globally set uesr
+    Mcfly.whodunnit = UserHelpers.create_gemini_user
 
     load_script_bodies(promise_bodies, Date.today)
 

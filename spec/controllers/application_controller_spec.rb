@@ -3,7 +3,6 @@ require 'spec_helper'
 module Marty
   describe ApplicationController do
     before(:each) do
-      create_gemini_user
       subject.logout_user
       expect(Marty::User.current).to be_nil
     end
