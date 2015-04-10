@@ -1,4 +1,4 @@
-= Marty
+# Marty
 
 Marty is a framework for viewing and reporting on versioned data.
 Marty provides its own scripting environment.  Scripts can also be
@@ -9,23 +9,29 @@ Marty also provides user authentication and session support.
 Currently, only LDAP-based authentication is supported.  There's also
 support for role-based authorization.
 
-= Testing
+# Testing
 
 Marty currently only runs with postgresql. To be able to run the tests
 you will first need to create a `database.yml` file in `spec/dummy/config`.
 You can use the example file by doing:
 
-  $ cp spec/dummy/config/database.yml.example spec/dummy/config/database.yml
+```bash
+$ cp spec/dummy/config/database.yml.example spec/dummy/config/database.yml
+```
 
 To create the test database in prepartion to run your tests:
 
-  $ RAILS_ENV=test rake db:create db:migrate
+```bash
+$ RAILS_ENV=test rake db:create db:migrate
+```
 
 Then to run the tests:
 
-  $ rspec
+```bash
+$ rspec
+```
 
-= History & Status
+# History & Status
 
 Marty was originally part of a much larger project internal to
 PennyMac.  We have split Marty from its original home with the goal of
