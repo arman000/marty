@@ -5,7 +5,13 @@ require "marty/version"
 Gem::Specification.new do |s|
   s.name        = "marty"
   s.version     = Marty::VERSION
-  s.authors     = ["Arman Bostani", "Eric Litwin", "Iliana Toneva"]
+  s.authors     = [
+                   "Arman Bostani",
+                   "Eric Litwin",
+                   "Iliana Toneva",
+                   "Brian VanLoo",
+                   "Chad Edie",
+                  ]
   s.email       = ["arman.bostani@pnmac.com"]
   s.homepage    = "https://github.com/arman000/marty"
   s.summary     = "A framework for working with versioned data"
