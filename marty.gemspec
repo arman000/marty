@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.licenses    = ['MIT']
 
   s.files = Dir["{app,config,db,lib}/**/*"] + Dir["lib/tasks/*.rake"] +
-    ["MIT-LICENSE", "Rakefile", "README.rdoc"]
+    ["MIT-LICENSE", "Rakefile", "README.md"]
 
   s.add_dependency "pg"
 
