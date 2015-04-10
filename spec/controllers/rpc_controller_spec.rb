@@ -43,8 +43,6 @@ describe Marty::RpcController do
   before(:each) { @routes = Marty::Engine.routes }
 
   before(:each) {
-    create_dev_tag
-
     @p0 = Marty::Posting.do_create("BASE", Date.today, 'a comment')
 
     @t1 = load_script_bodies({

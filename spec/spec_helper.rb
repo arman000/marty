@@ -10,7 +10,6 @@ ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__
 Dir[Rails.root.join("../support/**/*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
-  config.include DbSeedHelpers
   config.include ScriptHelpers
   config.include DelayedJobHelpers
   config.include CleanDbHelpers
@@ -24,7 +23,7 @@ RSpec.configure do |config|
   config.before(:suite) do
     load File.expand_path("../dummy/db/seeds.rb", __FILE__)
     Mcfly.whodunnit = UserHelpers.create_gemini_user
-    DbSeedHelpers.create_now_posting
+    Marty::Engine.load_seed
     raise "Bad Posting count #{Marty::Posting.count}" unless Marty::Posting.count == 1
   end
 
