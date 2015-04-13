@@ -73,6 +73,19 @@ class Marty::Script < Marty::Base
     tag
   end
 
+  def self.load_scripts(path=nil, dt=nil)
+    path ||= "#{Rails.root}/db/gemini"
+
+    # read delorean files from the directory
+    bodies = Dir.glob("#{path}/*\.dl").each_with_object({}) {
+      |fpath, h|
+      fname = File.basename(fpath)[0..-4].camelize
+      h[fname] = File.read(fpath)
+    }
+
+    load_script_bodies(bodies, dt)
+  end
+
   delorean_fn :eval_to_hash, sig: 5 do
     |dt, script, node, attrs, params|
     tag = Marty::Tag.find_match(dt)

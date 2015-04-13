@@ -68,4 +68,23 @@ describe Marty::Script do
         to change(Marty::Tag, :count).by(1)
     end
   end
+
+  describe '.load_scripts' do
+    before(:each) do
+      allow(Marty::Script).to receive(:load_script_bodies)
+    end
+
+    let(:scripts_path) { File.expand_path('../../fixtures/scripts/load_tests', __FILE__) }
+    let(:now) { Time.zone.now - 1.minute }
+    let(:ls1) { File.read("#{scripts_path}/script1.dl") }
+    let(:ls2) { File.read("#{scripts_path}/script2.dl") }
+
+    # FIXME: path defaults to "#{Rails.root}/db/gemini". Should probably
+    # be something more Marty-appropriate
+
+    it "reads in the files and loads the script bodies" do
+      Marty::Script.load_scripts(scripts_path, now)
+      expect(Marty::Script).to have_received(:load_script_bodies).with({'Script1' => ls1, 'Script2' => ls2}, now)
+    end
+  end
 end
