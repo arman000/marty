@@ -17,6 +17,14 @@ Mcfly.whodunnit = Marty::User.find_by_login(system_login)
   Marty::Role.create(name: role.to_s)
 end
 
+# Give system account all roles
+Marty::Role.all.map { |role|
+  ur = Marty::UserRole.new
+  ur.user = Mcfly.whodunnit
+  ur.role = role
+  ur.save
+}
+
 # FIXME: this is a hack.  It's needed due to the fact that 'NOW'
 # posting requires a PostingType.
 Marty::PostingType.create name: 'BASE'
