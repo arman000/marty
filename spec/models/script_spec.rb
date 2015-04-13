@@ -52,20 +52,29 @@ describe Marty::Script do
       expect(Marty::Script).to have_received(:load_a_script).twice
     end
 
-    it 'creates a new tag if none exist yet' do
+    it 'creates a new tag if none exist yet with provided datetime' do
       expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1, 'Test2' => s2}, now) }.
         to change(Marty::Tag, :count).by(1)
+      expect(@tag.created_dt).to eq(now + 1.second)
     end
 
     it 'creates a new tag when there is an older one present' do
-      # FIXME: Tagging code attempts to get the date from previous script
-      # so this method always requires at least one script to be present.
-      # This is a problem both when no date parameter is provided to 
-      # load_script_bodies and when there is a previous tag present.
-      Marty::Script.create!(name: 'TestScript', body: s1)
       Marty::Tag.do_create(now - 1.minute, 'initial test tag')
       expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1, 'Test2' => s2}, now) }.
         to change(Marty::Tag, :count).by(1)
+      expect(@tag.created_dt).to eq(now + 1.second)
+    end
+
+    it 'creates a new tag when no previous tag is present and no datetime provided' do
+      expect { tag = Marty::Script.load_script_bodies({'Test1' => s1, 'Test2' => s2}) }.
+        to change(Marty::Tag, :count).by(1)
+    end
+
+    it "doesn't create a new tag if one is present and the script wasn't modified" do
+      Marty::Script.create!(name: 'Test1', body: s1, created_dt: now)
+      Marty::Tag.do_create(now + 1.second, 'tag created by test')
+      expect { Marty::Script.load_script_bodies({'Test1' => s1}) }.
+        not_to change(Marty::Tag, :count)
     end
   end
 
