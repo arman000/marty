@@ -338,7 +338,7 @@ EOF
     end
 
     it "should be able to export" do
-      load_scripts(nil, Date.today)
+      Marty::Script.load_scripts(nil, Date.today)
       Marty::ScriptSet.clear_cache
       Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
       Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)

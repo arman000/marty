@@ -14,7 +14,7 @@ describe Marty::Promise, slow: true do
     # means we lose the globally set user
     Mcfly.whodunnit = UserHelpers.system_user
 
-    load_script_bodies(promise_bodies, Date.today)
+    Marty::Script.load_script_bodies(promise_bodies, Date.today)
 
     start_delayed_job
   end

@@ -10,7 +10,6 @@ ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__
 Dir[Rails.root.join("../support/**/*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
-  config.include ScriptHelpers
   config.include DelayedJobHelpers
   config.include CleanDbHelpers
 

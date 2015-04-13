@@ -5,16 +5,16 @@ describe Marty::RpcController do
 
   before(:each) {
     @tags = []
-    @tags << load_script_bodies({
+    @tags << Marty::Script.load_script_bodies({
                          "A" => "A:\n    a = 1\n",
                          "B" => "B:\n    b = 0\n",
                        }, Date.today)
 
-    @tags << load_script_bodies({
+    @tags << Marty::Script.load_script_bodies({
                          "B" => "import A\nB:\n    b = A::A().a\n",
                        }, Date.today + 1.minute)
 
-    @tags << load_script_bodies({
+    @tags << Marty::Script.load_script_bodies({
                          "A" => "A:\n    a = 2\n",
                        }, Date.today + 2.minute)
 
