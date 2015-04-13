@@ -5,9 +5,9 @@ class CreateMartyApiAuths < McflyMigration
 
   def change
     create_table :marty_api_auths do |t|
-      t.string :app_name, null: false
-      t.string :api_key, null: false
-      t.string :script_name, null: false
+      t.string :app_name,    null: false, limit: 255
+      t.string :api_key,     null: false, limit: 255
+      t.string :script_name, null: false, limit: 255
     end
 
     add_mcfly_unique_index(Marty::ApiAuth)

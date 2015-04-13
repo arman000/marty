@@ -14,15 +14,15 @@ class CreateMartyPromises < ActiveRecord::Migration
     end
 
     create_table :marty_promises do |t|
-      t.string :title, null: false
+      t.string     :title,   null: false, limit: 255
       t.references :user
-      t.string :cformat
+      t.string     :cformat, limit: 255
       t.references :parent
       t.references :job
-      t.boolean :status
-      t.binary :result
-      t.datetime :start_dt
-      t.datetime :end_dt
+      t.boolean    :status
+      t.binary     :result
+      t.datetime   :start_dt
+      t.datetime   :end_dt
     end
 
     class << @connection

@@ -1,6 +1,6 @@
 class AddValidationFunctionToImportTypes < ActiveRecord::Migration
   def change
-    add_column :marty_import_types, :validation_function, :string
+    add_column :marty_import_types, :validation_function, :string, limit: 255
     drop_table :marty_import_synonyms
   end
 end

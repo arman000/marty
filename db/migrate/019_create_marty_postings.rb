@@ -5,9 +5,9 @@ class CreateMartyPostings < McflyAppendOnlyMigration
 
   def change
     create_table :marty_postings do |t|
-      t.string :name, null: false
+      t.string     :name,         null: false, limit: 255
       t.references :posting_type, null: false
-      t.string :comment, null: false
+      t.string     :comment,      null: false, limit: 255
     end
 
     add_mcfly_index :marty_postings,
