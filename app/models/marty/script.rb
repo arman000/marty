@@ -86,6 +86,14 @@ class Marty::Script < Marty::Base
     load_script_bodies(bodies, dt)
   end
 
+  def self.delete_scripts
+    ActiveRecord::Base.connection.
+      execute("ALTER TABLE marty_scripts DISABLE TRIGGER ALL;")
+    Marty::Script.delete_all
+    ActiveRecord::Base.connection.
+      execute("ALTER TABLE marty_scripts ENABLE TRIGGER ALL;")
+  end
+
   delorean_fn :eval_to_hash, sig: 5 do
     |dt, script, node, attrs, params|
     tag = Marty::Tag.find_match(dt)
