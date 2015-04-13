@@ -5,12 +5,11 @@ module Marty
     before(:each) do
       user = UserHelpers.create_gemini_user
       Rails.configuration.marty.system_account = user.login
-
-      # FIXME: need this other user where Marty::User.last used
-      # (users can't edit their own account and user's cant edit
-      # gemini account)
-      other_user = UserHelpers.create_user('other_user')
     end
+
+    let (:tuser) {
+      UserHelpers.create_user('other_user')
+    }
 
     describe "validations" do
       it "should require login, firstname and lastname" do
@@ -45,7 +44,7 @@ module Marty
       end
 
       it "should not allow user managers to edit the Gemini account" do
-        Mcfly.whodunnit = Marty::User.last
+        Mcfly.whodunnit = tuser
         user = Marty::User.find_by_login("gemini")
         Marty::User.any_instance.stub(:user_manager_only).and_return(true)
         user.firstname = 'Testing'
@@ -55,12 +54,11 @@ module Marty
       end
 
       it "should not allow user managers to edit their own account" do
-        Mcfly.whodunnit = Marty::User.last
-        user = Mcfly.whodunnit
+        Mcfly.whodunnit = tuser
         Marty::User.any_instance.stub(:user_manager_only).and_return(true)
-        user.firstname = 'Testing'
-        expect(user).to_not be_valid
-        expect(user.errors[:base].to_s).
+        tuser.firstname = 'Testing'
+        expect(tuser).to_not be_valid
+        expect(tuser.errors[:base].to_s).
           to include('cannot edit or add additional roles')
       end
     end
