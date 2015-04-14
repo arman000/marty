@@ -68,10 +68,14 @@ module Dummy
 
     # FIXME: not sure this is the proper way to add a new config
     config.marty = ActiveSupport::OrderedOptions.new
-    config.marty.local_password = 'gemini'
+    config.marty.system_account = 'marty'
+    config.marty.local_password = 'marty'
     config.marty.class_list = []
-
+    config.marty.roles = [
+                          :admin,
+                          :dev,
+                          :viewer,
+                         ]
     config.secret_key_base = "SECRET_KEY_BASE"
   end
 end
-

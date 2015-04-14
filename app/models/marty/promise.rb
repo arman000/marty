@@ -194,16 +194,19 @@ class Marty::Promise < Marty::Base
 
   # Support UI live search -- FIXME: hacky to have UI scoping here
   scope :live_search, lambda { |search_text|
-    return if !search_text || search_text.length < 1
+    return if !search_text || search_text.strip.length < 1
 
     # Searches user login/firstname/lastname
     query = [
              "marty_users.login ILIKE ?",
              "marty_users.firstname ILIKE ?",
              "marty_users.lastname ILIKE ?",
+             "marty_roles.name ILIKE ?",
             ].join(' OR ')
 
     st = "%#{search_text}%"
-    joins(:user).where(query, st, st, st)
+    # Convert "Role Name" or "Role name" to "role_name" (underscore is key)
+    st2 = "%#{search_text.titleize.gsub(/\s/, '').underscore}%"
+    joins({:user => :roles}).where(query, st, st, st, st2).distinct
   }
 end

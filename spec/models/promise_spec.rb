@@ -11,8 +11,8 @@ describe Marty::Promise, slow: true do
     self.use_transactional_fixtures = false
 
     # Needed here because shutting transactional fixtures off
-    # means we lose the globally set uesr
-    Mcfly.whodunnit = UserHelpers.create_gemini_user
+    # means we lose the globally set user
+    Mcfly.whodunnit = UserHelpers.system_user
 
     load_script_bodies(promise_bodies, Date.today)
 
@@ -24,7 +24,7 @@ describe Marty::Promise, slow: true do
     expect(Marty::Promise.unscoped.count).to eq(0)
     engine = Marty::ScriptSet.new.get_engine(NAME_A)
     engine.background_eval("Y", {"p_title" => NAME_A}, ["d"])
-    sleep 10
+    sleep 5
     Marty::Promise.cleanup
     expect(Marty::Promise.unscoped.count).to eq(10)
   end
@@ -55,5 +55,11 @@ describe Marty::Promise, slow: true do
     Timecop.freeze(@time + 4.hours)
     Marty::Promise.cleanup(true)
     expect(Marty::Promise.unscoped.count).to eq(0)
+  end
+
+  it "should provide a live search scope for filtering by user or role" do
+    expect(Marty::Promise.live_search('XXX').size).to eq(0)
+    expect(Marty::Promise.live_search('marty').size).to eq(10)
+    expect(Marty::Promise.live_search('Admin').size).to eq(10)
   end
 end

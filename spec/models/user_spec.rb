@@ -3,8 +3,8 @@ require 'spec_helper'
 module Marty
   describe User do
     before(:each) do
-      user = UserHelpers.create_gemini_user
-      Rails.configuration.marty.system_account = user.login
+      Rails.configuration.marty.system_account =
+        UserHelpers.system_user.login
     end
 
     let (:tuser) {
@@ -22,15 +22,15 @@ module Marty
 
       it "should require unique login" do
         expect(Mcfly.whodunnit).to_not be_nil
-        user = Marty::User.find_by_login("gemini").dup
+        user = UserHelpers.system_user.dup
         expect(user).to_not be_valid
         expect(user.errors[:login].to_s).to include('already been taken')
-        user.login = 'gemini2'
+        user.login = 'marty2'
         expect(user).to be_valid
       end
 
       it "should not allow Gemini account to be de-activated" do
-        user = Marty::User.find_by_login("gemini")
+        user = UserHelpers.system_user
         user.active = false
         expect(user).to_not be_valid
         expect(user.errors[:base].to_s).
@@ -38,14 +38,14 @@ module Marty
       end
 
       it "should not allow accounts to be deleted" do
-        user = Marty::User.find_by_login("gemini")
+        user = UserHelpers.system_user
         user.destroy
         expect(user.destroyed?).to be false
       end
 
       it "should not allow user managers to edit the Gemini account" do
         Mcfly.whodunnit = tuser
-        user = Marty::User.find_by_login("gemini")
+        user = UserHelpers.system_user
         Marty::User.any_instance.stub(:user_manager_only).and_return(true)
         user.firstname = 'Testing'
         expect(user).to_not be_valid

@@ -33,7 +33,7 @@ class Marty::PromiseView < Marty::TreePanel
                 listeners: {
                   change: {
                     fn: c.listen_fn,
-                    buffer: 100,
+                    buffer: 500,
                   }
                 }
               }]

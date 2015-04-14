@@ -15,7 +15,7 @@ describe Marty::JobController, slow: true do
 
     # Needed here because shutting transactional fixtures off
     # means we lose the globally set uesr
-    Mcfly.whodunnit = UserHelpers.create_gemini_user
+    Mcfly.whodunnit = UserHelpers.system_user
 
     load_script_bodies(promise_bodies, Date.today)
 
@@ -49,7 +49,7 @@ describe Marty::JobController, slow: true do
       res.to_s
     }.to raise_error(RuntimeError)
 
-    sleep 10
+    sleep 5
 
     expect(Marty::Promise.unscoped.where(start_dt: nil).count).to eq 0
   end
@@ -58,10 +58,9 @@ describe Marty::JobController, slow: true do
     engine = Marty::ScriptSet.new.get_engine(NAME_A)
 
     # NOTE: can't make this too small since the default
-    # Delayed::Worker::sleep_delay is 5 seconds -- also check the
-    # delayed_job initializer config which may have reduced this for
-    # test env.
-    slp = 10
+    # Delayed::Worker::sleep_delay is 5 seconds
+    # However - delayed_job initializer config sets this to 1 for test
+    slp = 5
 
     exp_res = {"d"=>[
                      {"z"=>slp,"a"=>{"b"=>{"e"=>1-slp}}},
@@ -100,7 +99,7 @@ describe Marty::JobController, slow: true do
   it "should be to handle non-serializable errors" do
     engine = Marty::ScriptSet.new.get_engine(NAME_C)
     engine.background_eval("Z", {"p_title" => NAME_C}, ["result"])
-    sleep 10
+    sleep 5
 
     promise = Marty::Promise.find_by_title(NAME_C)
 
@@ -115,7 +114,7 @@ describe Marty::JobController, slow: true do
   it "promise proxies should be stored lazily (not expanded)" do
     engine = Marty::ScriptSet.new.get_engine(NAME_E)
     engine.background_eval("Z", {"p_title" => NAME_E}, ["result"])
-    sleep 10
+    sleep 5
 
     promise = Marty::Promise.find_by_title(NAME_E)
 
@@ -131,7 +130,7 @@ describe Marty::JobController, slow: true do
   it "should not leave zombie promises when we have exceptions" do
     engine = Marty::ScriptSet.new.get_engine(NAME_D)
     engine.background_eval("Z", {"p_title" => NAME_D}, ["result"])
-    sleep 10
+    sleep 5
 
     pl = Marty::Promise.unscoped.where(title: NAME_D)
 
@@ -147,7 +146,7 @@ describe Marty::JobController, slow: true do
     title = "BG RPC"
     engine = Marty::ScriptSet.new.get_engine(NAME_A)
     engine.background_eval("Y", {"p_title" => title}, ["d"])
-    sleep 10
+    sleep 5
 
     promise = Marty::Promise.find_by_title(title)
 
@@ -173,7 +172,7 @@ describe Marty::JobController, slow: true do
                            {},
                            ["result", "format", "title"],
                            )
-    sleep 10
+    sleep 5
 
     promise = Marty::Promise.find_by_title(NAME_B)
 

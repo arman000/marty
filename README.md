@@ -35,7 +35,7 @@ $ rspec
 
 Marty was originally part of a much larger project internal to
 PennyMac.  We have split Marty from its original home with the goal of
-making it generally available as a platform for woring with versioned
+making it generally available as a platform for working with versioned
 data and scripts. However, all of the rspec and cucumber tests are
 still in the parent and have yet to be ported. Also, documentation is
 sorely lacking. Hopefully, this will be rectified sometime in 2015.

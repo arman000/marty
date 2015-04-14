@@ -22,13 +22,14 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     load File.expand_path("../dummy/db/seeds.rb", __FILE__)
-    Mcfly.whodunnit = UserHelpers.create_gemini_user
+    #Mcfly.whodunnit = UserHelpers.create_test_user
     Marty::Engine.load_seed
-    raise "Bad Posting count #{Marty::Posting.count}" unless Marty::Posting.count == 1
+    raise "Bad Posting count #{Marty::Posting.count}" unless
+      Marty::Posting.count == 1
   end
 
   config.before(:each) do
-    Mcfly.whodunnit = UserHelpers.create_gemini_user
+    Mcfly.whodunnit = UserHelpers.system_user
   end
 
   config.infer_spec_type_from_file_location!
