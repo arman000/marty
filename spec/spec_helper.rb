@@ -2,6 +2,7 @@ ENV["RAILS_ENV"] ||= "test"
 
 require 'dummy/config/application'
 require 'rspec/rails'
+require 'database_cleaner'
 
 Dummy::Application.initialize!
 
@@ -20,11 +21,10 @@ RSpec.configure do |config|
   config.order = 'random'
 
   config.before(:suite) do
-    load File.expand_path("../dummy/db/seeds.rb", __FILE__)
-    #Mcfly.whodunnit = UserHelpers.create_test_user
+    DatabaseCleaner.clean_with(:truncation)
+
     Marty::Engine.load_seed
-    raise "Bad Posting count #{Marty::Posting.count}" unless
-      Marty::Posting.count == 1
+    load File.expand_path("../dummy/db/seeds.rb", __FILE__)
   end
 
   config.before(:each) do
