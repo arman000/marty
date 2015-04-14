@@ -4,8 +4,6 @@
 
 ## Things pulled from Gemini:
 
-* `load_script_bodies`, `load_scripts`, and `load_a_script` went into `spec/support/script_helpers.rb`
-  from `app/controllers/gemini/application_controller.rb` - for api, promise model, and lib specs
 * Some of the category models and migrations. This may be OK since they are
   only used in testing.
 * Some/most/all of the models/gemini/extras. Perhaps these are more appropriate
