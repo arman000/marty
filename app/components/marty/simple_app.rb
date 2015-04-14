@@ -88,10 +88,10 @@ class Marty::SimpleApp < Netzke::Base
   # Html required for Ext.History to work
   def js_component_html
     super << %Q{
-orm id="history-form" class="x-hidden">
+<form id="history-form" class="x-hidden">
   <input type="hidden" id="x-history-field" />
   <iframe id="x-history-frame"></iframe>
-form>
+</form>
     }
   end
 end
