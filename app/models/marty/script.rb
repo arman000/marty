@@ -74,10 +74,10 @@ class Marty::Script < Marty::Base
   end
 
   def self.load_scripts(path=nil, dt=nil)
-    path ||= "#{Rails.root}/db/gemini"
+    path ||= "#{Rails.root}/app/delorean_scripts"
 
     # read delorean files from the directory
-    bodies = Dir.glob("#{path}/*\.dl").each_with_object({}) {
+    bodies = Dir.glob("#{path}/*.dl").each_with_object({}) {
       |fpath, h|
       fname = File.basename(fpath)[0..-4].camelize
       h[fname] = File.read(fpath)

@@ -99,13 +99,17 @@ describe Marty::Script do
     let(:ls1) { File.read("#{scripts_path}/script1.dl") }
     let(:ls2) { File.read("#{scripts_path}/script2.dl") }
 
-    # FIXME: path defaults to "#{Rails.root}/db/gemini". Should probably
-    # be something more Marty-appropriate
-
     it 'reads in the files and loads the script bodies' do
       Marty::Script.load_scripts(scripts_path, now)
       expect(Marty::Script).to have_received(:load_script_bodies).
         with({'Script1' => ls1, 'Script2' => ls2}, now)
+    end
+
+    it 'gets the files from the default path' do
+      allow(Dir).to receive(:glob).and_return([])
+      Marty::Script.load_scripts
+      expect(Dir).to have_received(:glob).
+        with("#{Rails.root}/app/delorean_scripts/*.dl")
     end
   end
 
