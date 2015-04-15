@@ -24,7 +24,7 @@ RSpec.configure do |config|
     DatabaseCleaner.clean_with(:truncation)
 
     Marty::Engine.load_seed
-    load File.expand_path("../dummy/db/seeds.rb", __FILE__)
+    Rails.application.load_seed
   end
 
   config.before(:each) do
