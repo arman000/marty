@@ -45,7 +45,7 @@ describe Marty::RpcController do
   before(:each) {
     @p0 = Marty::Posting.do_create("BASE", Date.today, 'a comment')
 
-    @t1 = load_script_bodies({
+    @t1 = Marty::Script.load_script_bodies({
                          "M1" => sample_script,
                          "M2" => sample_script.gsub(/a/, "aa").gsub(/b/, "bb"),
                          "M3" => sample_script3,
@@ -54,7 +54,7 @@ describe Marty::RpcController do
 
     @p1 = Marty::Posting.do_create("BASE", Date.today + 2.minute, 'a comment')
 
-    @t2 = load_script_bodies({
+    @t2 = Marty::Script.load_script_bodies({
                          "M1" =>
                          sample_script.gsub(/A/, "AA")+'    e =? "hello"',
                        }, Date.today + 3.minute)

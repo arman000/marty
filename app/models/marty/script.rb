@@ -37,6 +37,63 @@ class Marty::Script < Marty::Base
     script
   end
 
+  def self.load_a_script(sname, body, dt=nil)
+    s = Marty::Script.lookup('infinity', sname)
+
+    if !s
+      s = Marty::Script.new
+      s.body = body
+      s.name = sname
+      s.created_dt = dt if dt
+      s.save!
+    elsif s.body != body
+      s.body = body
+      s.created_dt = dt if dt
+      s.save!
+    end
+  end
+
+  def self.load_script_bodies(bodies, dt=nil)
+    bodies.each {
+      |sname, body|
+      load_a_script(sname, body, dt)
+    }
+
+    # Create a new tag if scripts were modified after the last tag
+    tag = Marty::Tag.get_latest1
+    latest = Marty::Script.order("created_dt DESC").first
+
+    tag_time = (dt || [latest.try(:created_dt), Time.now].compact.max) + 1.second
+
+    # If no tag_time is provided, the tag created_dt will be the same
+    # as the scripts.
+    tag = Marty::Tag.do_create(tag_time, "tagged from load scripts") if
+      !(tag && latest) || tag.created_dt <= latest.created_dt
+
+    tag
+  end
+
+  def self.load_scripts(path=nil, dt=nil)
+    path ||= "#{Rails.root}/app/delorean_scripts"
+
+    # read delorean files from the directory
+    bodies = Dir.glob("#{path}/*.dl").each_with_object({}) {
+      |fpath, h|
+      fname = File.basename(fpath)[0..-4].camelize
+      h[fname] = File.read(fpath)
+    }
+
+    load_script_bodies(bodies, dt)
+  end
+
+  def self.delete_scripts
+    ActiveRecord::Base.connection.
+      execute("ALTER TABLE marty_scripts DISABLE TRIGGER ALL;")
+    Marty::Script.delete_all
+    ActiveRecord::Base.connection.
+      execute("ALTER TABLE marty_scripts ENABLE TRIGGER ALL;")
+  end
+
   delorean_fn :eval_to_hash, sig: 5 do
     |dt, script, node, attrs, params|
     tag = Marty::Tag.find_match(dt)

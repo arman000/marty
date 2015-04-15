@@ -9,6 +9,46 @@ Marty also provides user authentication and session support.
 Currently, only LDAP-based authentication is supported.  There's also
 support for role-based authorization.
 
+# Rake tasks
+
+The Marty framework provides several rake tasks to manage its database tables
+and delorean scripts.
+
+To create the correct migrations for a Marty-based applications:
+
+```
+$ rake marty:install:migrations
+```
+
+The Marty database needs to be seeded with specific configuration
+information. Before running your Marty application for the first time you will
+need to run:
+
+```
+$ rake marty:seed
+```
+
+If you are using Delorean scripts in your application you can load them
+with a rake task. By default these scripts will be picked up from
+`app/delorean_scripts`. To load scripts:
+
+```
+$ rake marty:load_scripts
+```
+
+You can override the default directory by setting the `LOAD_DIR` environment
+variable:
+
+```
+$ LOAD_DIR=<delorean script directory> marty:load_scripts
+```
+
+To delete scripts:
+
+```
+$ rake marty:delete_scripts
+```
+
 # Testing
 
 Marty currently only runs with postgresql. To be able to run the tests
