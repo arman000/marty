@@ -21,22 +21,26 @@ describe Marty::Script do
         to eq(now.to_s)
     end
 
-    it "doesn't create a new script entry if it already exists and is the same as the existing" do
+    it "doesn't create a new script entry if it already exists and is the " +
+      "same as the existing" do
       Marty::Script.load_a_script('TestExistsAndSame', s1)
       expect { Marty::Script.load_a_script('TestExistsAndSame', s1) }.
         not_to change(Marty::Script, :count)
     end
 
-    it 'updates the existing script entry if it already exists but is different' do
+    it 'updates the existing script entry if it already exists but is ' +
+      'different' do
       Marty::Script.load_a_script('TestExistsAndDifferent1', s1)
       expect { Marty::Script.load_a_script('TestExistsAndDifferent1', s2) }.
         to change(Marty::Script, :count).by(1)
 
       Marty::Script.load_a_script('TestExistsAndDifferent2', s1, now - 1.minute)
-      expect { Marty::Script.load_a_script('TestExistsAndDifferent2', s2, now) }.
-        to change { Marty::Script.where(name: 'TestExistsAndDifferent2',  obsoleted_dt: 'infinity').count }.by(0)
-      expect(Marty::Script.lookup('infinity', 'TestExistsAndDifferent2').created_dt.to_s).
-        to eq(now.to_s)
+      expect { Marty::Script.load_a_script('TestExistsAndDifferent2',
+                                           s2, now) }.
+        to change { Marty::Script.where(name: 'TestExistsAndDifferent2',
+                                        obsoleted_dt: 'infinity').count }.by(0)
+      expect(Marty::Script.lookup('infinity', 'TestExistsAndDifferent2').
+             created_dt.to_s).to eq(now.to_s)
     end
   end
 
@@ -53,24 +57,29 @@ describe Marty::Script do
     end
 
     it 'creates a new tag if none exist yet with provided datetime' do
-      expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1, 'Test2' => s2}, now) }.
+      expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1,
+                                                        'Test2' => s2}, now) }.
         to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
 
     it 'creates a new tag when there is an older one present' do
       Marty::Tag.do_create(now - 1.minute, 'initial test tag')
-      expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1, 'Test2' => s2}, now) }.
+      expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1,
+                                                        'Test2' => s2}, now) }.
         to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
 
-    it 'creates a new tag when no previous tag is present and no datetime provided' do
-      expect { tag = Marty::Script.load_script_bodies({'Test1' => s1, 'Test2' => s2}) }.
+    it 'creates a new tag when no previous tag is present and no datetime ' +
+      'provided' do
+      expect { tag = Marty::Script.load_script_bodies({'Test1' => s1,
+                                                       'Test2' => s2}) }.
         to change(Marty::Tag, :count).by(1)
     end
 
-    it "doesn't create a new tag if one is present and the script wasn't modified" do
+    it "doesn't create a new tag if one is present and the script wasn't" +
+      "modified" do
       Marty::Script.create!(name: 'Test1', body: s1, created_dt: now)
       Marty::Tag.do_create(now + 1.second, 'tag created by test')
       expect { Marty::Script.load_script_bodies({'Test1' => s1}) }.
@@ -83,7 +92,9 @@ describe Marty::Script do
       allow(Marty::Script).to receive(:load_script_bodies)
     end
 
-    let(:scripts_path) { File.expand_path('../../fixtures/scripts/load_tests', __FILE__) }
+    let(:scripts_path) do
+      File.expand_path('../../fixtures/scripts/load_tests', __FILE__)
+    end
     let(:now) { Time.zone.now - 1.minute }
     let(:ls1) { File.read("#{scripts_path}/script1.dl") }
     let(:ls2) { File.read("#{scripts_path}/script2.dl") }
@@ -93,7 +104,8 @@ describe Marty::Script do
 
     it 'reads in the files and loads the script bodies' do
       Marty::Script.load_scripts(scripts_path, now)
-      expect(Marty::Script).to have_received(:load_script_bodies).with({'Script1' => ls1, 'Script2' => ls2}, now)
+      expect(Marty::Script).to have_received(:load_script_bodies).
+        with({'Script1' => ls1, 'Script2' => ls2}, now)
     end
   end
 
