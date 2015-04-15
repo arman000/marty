@@ -56,6 +56,7 @@ class Marty::MainAuthApp < Marty::AuthApp
               :import_type_view,
               :user_view,
               :api_auth_view,
+              :reload_scripts,
              ],
     }
   end
@@ -139,6 +140,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled  = !self.class.has_admin_perm?
   end
 
+  action :reload_scripts do |a|
+    a.text     = 'Reload Scripts'
+    a.tooltip  = 'Reload and tag Delorean scripts'
+    a.icon     = :arrow_refresh
+    a.disabled = !self.class.has_admin_perm?
+  end
+
   ######################################################################
   # Postings
 
@@ -179,6 +187,22 @@ class Marty::MainAuthApp < Marty::AuthApp
       this.serverSelectPosting({});
     }
     JS
+
+    c.on_reload_scripts = <<-JS
+    function(params) {
+       var me = this;
+       Ext.Msg.show({
+         title: 'Reload Scripts',
+         msg: 'Enter RELOAD and press OK to force a reload of all scripts',
+         width: 375,
+         buttons: Ext.Msg.OKCANCEL,
+         prompt: true,
+         fn: function (btn, value) {
+           btn == "ok" && value == "RELOAD" && me.serverReloadScripts({});
+         }
+       });
+    }
+    JS
   end
 
   action :select_posting do |a|
@@ -217,6 +241,11 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :user_view
   component :api_auth_view do |c|
     c.disabled = Marty::Util.warped?
+  end
+
+  endpoint :server_reload_scripts do |params, this|
+    Marty::Script.load_scripts
+    this.netzke_feedback 'Scripts have been reloaded'
   end
 end
 
