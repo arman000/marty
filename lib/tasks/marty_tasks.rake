@@ -20,7 +20,6 @@ namespace :marty do
       Marty::User.find_by_login(Rails.configuration.marty.system_account)
     raise 'must have system user account seeded' unless Mcfly.whodunnit
     load_dir = ENV['LOAD_DIR']
-    raise 'must provide LOAD_DIR= option' unless load_dir
     Marty::Script.load_scripts(load_dir)
   end
 end
