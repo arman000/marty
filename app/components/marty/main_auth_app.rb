@@ -74,8 +74,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def ident_menu
-    '<span style="color:#B32D15; font-size:150%; font-weight:bold;">' +
-      'Marty</span>'
+    :title_box
   end
 
   def data_menus
