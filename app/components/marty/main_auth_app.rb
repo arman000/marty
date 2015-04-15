@@ -95,7 +95,33 @@ class Marty::MainAuthApp < Marty::AuthApp
       ] + super
   end
 
+  def app_title
+    "Marty"
+  end
+
+  def app_char
+    0x03FB.chr('utf-8')
+  end
+
+  def warp_char
+    0x231B.chr('utf-8')
+  end
+
   ######################################################################
+
+  action :title_box do |a|
+    warped = Marty::Util.get_posting_time != Float::INFINITY
+    e = ENV['RAILS_ENV']
+    title = app_title
+    title += " - #{e.capitalize}" unless e == 'production'
+    title += ' [TIME WARPED]' if warped
+    a.text =
+      "<span style='color:#3333FF;
+             background-color:#{warped ? '#FBDF4F' : ''};
+             font-size:120%;
+             font-weight:bold;'>#{warped ? warp_char : app_char}  #{title}</span>"
+    #a.handler  = :netzke_load_component_by_action
+  end
 
   action :import_type_view do |a|
     a.text      = I18n.t("import_type")
