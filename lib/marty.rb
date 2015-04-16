@@ -1,5 +1,6 @@
 # Do not change order of require, since there are some dependencies
 # Do not require 'marty/permissions' - it relies on Rails being loaded first
+require 'marty/railtie'
 require 'marty/engine'
 require 'marty/monkey'
 require 'marty/mcfly_query'

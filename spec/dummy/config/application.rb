@@ -63,11 +63,8 @@ module Dummy
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
 
-    # FIXME: consider whether or not this can be done with sqlite
     config.paths["config/database"] = "#{APP_ROOT}/database.yml"
 
-    # FIXME: not sure this is the proper way to add a new config
-    config.marty = ActiveSupport::OrderedOptions.new
     config.marty.system_account = 'marty'
     config.marty.local_password = 'marty'
     config.marty.class_list = []
