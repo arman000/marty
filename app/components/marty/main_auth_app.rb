@@ -76,12 +76,15 @@ class Marty::MainAuthApp < Marty::AuthApp
     Marty::Util.warped?
   end
 
+  def app_moniker
+    warped ? 0x231B.chr('utf-8') : 0x03FB.chr('utf-8')
+  end
+
   def app_title
     e = ENV['RAILS_ENV']
 
-    title = warped ? 0x231B.chr('utf-8') : 0x03FB.chr('utf-8')
-    title += " #{Rails.application.class.parent_name} - #{e.capitalize}" unless
-      e == 'production'
+    title = "#{app_moniker} #{Rails.application.class.parent_name}"
+    title += " - #{e.capitalize}" unless e == 'production'
     title += ' [TIME WARPED]' if warped
     title
   end
