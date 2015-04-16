@@ -74,7 +74,7 @@ class Marty::Script < Marty::Base
     tag
   end
 
-  def self.load_scripts(path, dt=nil)
+  def self.load_scripts(path=nil, dt=nil)
     files = get_script_filenames(path)
 
     bodies = read_script_files(files)
