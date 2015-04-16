@@ -31,7 +31,6 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def posting_menu
-    warped = Marty::Util.get_posting_time != Float::INFINITY
     wtext  = warped ? " [#{Marty::Util.get_posting.name}" : ''
 
     {
@@ -73,16 +72,25 @@ class Marty::MainAuthApp < Marty::AuthApp
     }
   end
 
-  def ident_menu
-    warped = Marty::Util.get_posting_time != Float::INFINITY
+  def warped
+    Marty::Util.warped?
+  end
+
+  def app_title
     e = ENV['RAILS_ENV']
-    title = app_title
-    title += " - #{e.capitalize}" unless e == 'production'
+
+    title = warped ? 0x231B.chr('utf-8') : 0x03FB.chr('utf-8')
+    title += " #{Rails.application.class.parent_name} - #{e.capitalize}" unless
+      e == 'production'
     title += ' [TIME WARPED]' if warped
+    title
+  end
+
+  def ident_menu
     "<span style='color:#3333FF;
-          background-color:#{warped ? '#FBDF4F' : ''};
-          font-size:120%;
-          font-weight:bold;'>#{warped ? warp_char : app_char} #{title}</span>"
+        background-color:#{warped ? '#FBDF4F' : ''};
+        font-size:120%;
+        font-weight:bold;'>#{app_title}</span>"
   end
 
   def data_menus
@@ -100,19 +108,6 @@ class Marty::MainAuthApp < Marty::AuthApp
        applications_menu, sep,
        posting_menu, sep,
       ] + super
-  end
-
-  # FIXME: is there a way to get the current application title?
-  def app_title
-    "Marty"
-  end
-
-  def app_char
-    0x03FB.chr('utf-8')
-  end
-
-  def warp_char
-    0x231B.chr('utf-8')
   end
 
   ######################################################################
