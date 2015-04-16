@@ -79,8 +79,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     title = app_title
     title += " - #{e.capitalize}" unless e == 'production'
     title += ' [TIME WARPED]' if warped
-    a.text =
-      "<span style='color:#3333FF;
+    "<span style='color:#3333FF;
           background-color:#{warped ? '#FBDF4F' : ''};
           font-size:120%;
           font-weight:bold;'>#{warped ? warp_char : app_char} #{title}</span>"
