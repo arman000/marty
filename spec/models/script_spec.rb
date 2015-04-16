@@ -51,8 +51,21 @@ describe Marty::Script do
 
     let(:now) { Time.zone.now - 1.minute }
 
-    it 'loads each script' do
+    it 'loads each script given a hash' do
       Marty::Script.load_script_bodies({'Test1' => s1, 'Test2' => s2}, now)
+      expect(Marty::Script).to have_received(:load_a_script).
+        with('Test1', s1, now)
+      expect(Marty::Script).to have_received(:load_a_script).
+        with('Test2', s2, now)
+      expect(Marty::Script).to have_received(:load_a_script).twice
+    end
+
+    it 'loads each script given an array of tuples' do
+      Marty::Script.load_script_bodies([['Test1', s1], ['Test2', s2]], now)
+      expect(Marty::Script).to have_received(:load_a_script).
+        with('Test1', s1, now)
+      expect(Marty::Script).to have_received(:load_a_script).
+        with('Test2', s2, now)
       expect(Marty::Script).to have_received(:load_a_script).twice
     end
 
@@ -102,14 +115,50 @@ describe Marty::Script do
     it 'reads in the files and loads the script bodies' do
       Marty::Script.load_scripts(scripts_path, now)
       expect(Marty::Script).to have_received(:load_script_bodies).
-        with({'Script1' => ls1, 'Script2' => ls2}, now)
+        with(match_array([['Script1', ls1], ['Script2', ls2]]), now)
     end
 
-    it 'gets the files from the default path' do
-      allow(Dir).to receive(:glob).and_return([])
-      Marty::Script.load_scripts
-      expect(Dir).to have_received(:glob).
-        with("#{Rails.root}/app/delorean_scripts/*.dl")
+  end
+
+  describe '.get_script_filenames' do
+    context 'with single directory passed in' do
+      before(:each) do
+        allow(Dir).to receive(:glob).and_return(script_files)
+      end
+
+      let(:script_files) { ['/test/script1.dl', '/test/script2.dl'] }
+
+      it 'gets the files from the specified directory' do
+        Marty::Script.get_script_filenames('/test')
+        expect(Dir).to have_received(:glob).with('/test/*.dl')
+      end
+
+      it 'returns the files in the given directory' do
+        expect(Marty::Script.get_script_filenames('/test')).
+          to match_array(script_files)
+      end
+    end
+
+    context 'with duplicate script file names' do
+      it 'returns only the unique file names' do
+        allow(Dir).to receive(:glob).with('/test1/*.dl').
+          and_return(['/test1/sc1.dl', '/test1/sc2.dl'])
+        allow(Dir).to receive(:glob).with('/test2/*.dl').
+          and_return(['/test2/sc2.dl', '/test2/sc3.dl'])
+        expect(Marty::Script.get_script_filenames(['/test1', '/test2'])).
+          to match_array(['/test1/sc1.dl', '/test1/sc2.dl', '/test2/sc3.dl'])
+      end
+    end
+
+    context 'using default directories' do
+      it 'gets the files from the default paths' do
+        allow(Dir).to receive(:glob).and_return([])
+        Marty::Script.get_script_filenames
+        expect(Dir).to have_received(:glob).with("#{Rails.root}/delorean/*.dl")
+        expect(Dir).to have_received(:glob).
+          with(File.expand_path('../../../delorean/*.dl', __FILE__))
+        expect(Dir).to have_received(:glob).twice
+      end
     end
   end
 

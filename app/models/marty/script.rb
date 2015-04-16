@@ -63,7 +63,8 @@ class Marty::Script < Marty::Base
     tag = Marty::Tag.get_latest1
     latest = Marty::Script.order("created_dt DESC").first
 
-    tag_time = (dt || [latest.try(:created_dt), Time.now].compact.max) + 1.second
+    tag_time = (dt || [latest.try(:created_dt), Time.now].compact.max) +
+      1.second
 
     # If no tag_time is provided, the tag created_dt will be the same
     # as the scripts.
@@ -73,17 +74,42 @@ class Marty::Script < Marty::Base
     tag
   end
 
-  def self.load_scripts(path=nil, dt=nil)
-    path ||= "#{Rails.root}/app/delorean_scripts"
+  def self.load_scripts(path, dt=nil)
+    files = get_script_filenames(path)
 
-    # read delorean files from the directory
-    bodies = Dir.glob("#{path}/*.dl").each_with_object({}) {
-      |fpath, h|
-      fname = File.basename(fpath)[0..-4].camelize
-      h[fname] = File.read(fpath)
-    }
+    bodies = read_script_files(files)
 
     load_script_bodies(bodies, dt)
+  end
+
+  def self.read_script_files(files)
+    files.collect { |fpath|
+      fname = File.basename(fpath)[0..-4].camelize
+      [fname, File.read(fpath)]
+    }
+  end
+
+  def self.get_script_filenames(paths = nil)
+    if paths
+      paths = Array(paths)
+    else
+      paths = ["#{Rails.root}/delorean",
+                File.expand_path('../../../../delorean', __FILE__)]
+    end
+
+    basenames = []
+    filenames = []
+    paths.each do |path|
+      Dir.glob("#{path}/*.dl").each do |filename|
+        basename = File.basename(filename)
+        unless basenames.include?(basename)
+          basenames << basename
+          filenames << filename
+        end
+      end
+    end
+
+    filenames
   end
 
   def self.delete_scripts
