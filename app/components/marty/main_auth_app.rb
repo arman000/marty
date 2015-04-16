@@ -74,7 +74,16 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def ident_menu
-    :title_box
+    warped = Marty::Util.get_posting_time != Float::INFINITY
+    e = ENV['RAILS_ENV']
+    title = app_title
+    title += " - #{e.capitalize}" unless e == 'production'
+    title += ' [TIME WARPED]' if warped
+    a.text =
+      "<span style='color:#3333FF;
+          background-color:#{warped ? '#FBDF4F' : ''};
+          font-size:120%;
+          font-weight:bold;'>#{warped ? warp_char : app_char} #{title}</span>"
   end
 
   def data_menus
@@ -94,6 +103,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       ] + super
   end
 
+  # FIXME: is there a way to get the current application title?
   def app_title
     "Marty"
   end
@@ -107,20 +117,6 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   ######################################################################
-
-  action :title_box do |a|
-    warped = Marty::Util.get_posting_time != Float::INFINITY
-    e = ENV['RAILS_ENV']
-    title = app_title
-    title += " - #{e.capitalize}" unless e == 'production'
-    title += ' [TIME WARPED]' if warped
-    a.text =
-      "<span style='color:#3333FF;
-             background-color:#{warped ? '#FBDF4F' : ''};
-             font-size:120%;
-             font-weight:bold;'>#{warped ? warp_char : app_char}  #{title}</span>"
-    #a.handler  = :netzke_load_component_by_action
-  end
 
   action :import_type_view do |a|
     a.text      = I18n.t("import_type")
