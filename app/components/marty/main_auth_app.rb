@@ -25,16 +25,14 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def icon_hack(name)
-    # There's a Netzke bug whereby, using icon names in hashes
-    # doesn't generate the proper URL.
+    # There's a Netzke bug whereby, using an icon name in a hash
+    # doesn't generate a proper URL.
     "#{Netzke::Core.ext_uri}/../images/icons/#{name}.png"
   end
 
   def posting_menu
-    wtext  = warped ? " [#{Marty::Util.get_posting.name}" : ''
-
     {
-      text:  I18n.t("postings") + wtext,
+      text:  warped ? "#{Marty::Util.get_posting.name}" : I18n.t("postings"),
       name:  "posting",
       icon:  icon_hack(:time),
       style: (warped ? "background-color: lightGrey;" : ""),
