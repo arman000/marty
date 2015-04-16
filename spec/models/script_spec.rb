@@ -160,6 +160,19 @@ describe Marty::Script do
         expect(Dir).to have_received(:glob).twice
       end
     end
+
+    context 'with Rails.configuration.marty.delorean_scripts_path' do
+      before(:each) do
+        Rails.configuration.marty.delorean_scripts_path = ['/conf_test']
+      end
+      after(:each) { Rails.configuration.marty.delorean_scripts_path = nil }
+
+      it 'gets the files from the specified path' do
+        allow(Dir).to receive(:glob).and_return([])
+        Marty::Script.get_script_filenames
+        expect(Dir).to have_received(:glob).with('/conf_test/*.dl')
+      end
+    end
   end
 
   describe '.delete_scripts' do

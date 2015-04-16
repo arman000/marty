@@ -92,6 +92,8 @@ class Marty::Script < Marty::Base
   def self.get_script_filenames(paths = nil)
     if paths
       paths = Array(paths)
+    elsif Rails.configuration.marty.delorean_scripts_path
+      paths = Rails.configuration.marty.delorean_scripts_path
     else
       paths = ["#{Rails.root}/delorean",
                 File.expand_path('../../../../delorean', __FILE__)]
