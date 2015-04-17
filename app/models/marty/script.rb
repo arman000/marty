@@ -90,6 +90,20 @@ class Marty::Script < Marty::Base
   end
 
   def self.get_script_filenames(paths = nil)
+    paths = get_script_paths(paths)
+
+    filenames = {}
+    paths.each do |path|
+      Dir.glob("#{path}/*.dl").each do |filename|
+        basename = File.basename(filename)
+        filenames[basename] = filename unless filenames.has_key?(basename)
+      end
+    end
+
+    filenames.values
+  end
+
+  def self.get_script_paths(paths)
     if paths
       paths = Array(paths)
     elsif Rails.configuration.marty.delorean_scripts_path
@@ -98,21 +112,8 @@ class Marty::Script < Marty::Base
       paths = ["#{Rails.root}/delorean",
                 File.expand_path('../../../../delorean', __FILE__)]
     end
-
-    basenames = []
-    filenames = []
-    paths.each do |path|
-      Dir.glob("#{path}/*.dl").each do |filename|
-        basename = File.basename(filename)
-        unless basenames.include?(basename)
-          basenames << basename
-          filenames << filename
-        end
-      end
-    end
-
-    filenames
   end
+
 
   def self.delete_scripts
     ActiveRecord::Base.connection.
