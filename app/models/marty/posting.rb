@@ -73,6 +73,16 @@ class Marty::Posting < Marty::Base
       order("created_dt DESC").limit(limit).to_a
   end
 
+  delorean_fn :get_latest_by_type, sig: [2, 2] do
+    |limit, posting_types=[]|
+    raise "missing posting types list" unless posting_types
+    raise "bad posting types list" unless posting_types.is_a?(Array)
+
+    joins(:posting_type).where("created_dt <> 'infinity'").
+      where(marty_posting_types: { name: posting_types } ).
+      order("created_dt DESC").limit(limit || 1).to_a
+  end
+
   delorean_fn :get_last, sig: [0, 1] do
     |posting_type=nil|
 
