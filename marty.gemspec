@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.add_dependency "pg"
 
   s.add_dependency 'netzke-core', '0.11.0'
-  s.add_dependency 'netzke-basepack', '0.11.0'
+  s.add_dependency 'netzke-basepack', '0.11.1'
 
   s.add_dependency 'axlsx', '2.1.0pre'
 
