@@ -36,4 +36,9 @@ class Gemini::Helper
                                           col_sep,
                                           false)
   end
+
+  delorean_fn :infinity_dt, sig: 1 do
+    |pt|
+    Mcfly.is_infinity pt
+  end
 end

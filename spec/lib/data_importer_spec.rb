@@ -355,6 +355,69 @@ EOF
       res[0].should == fannie_bup1_export[0]
       res[1..-1].sort.should == fannie_bup1_export[1..-1].sort
     end
+  end
 
+  describe "Blame Report without yml translations" do
+    before(:each) do
+      I18n.backend.store_translations(:en, {
+        attributes: {
+          note_rate: nil
+        }
+      })
+      Marty::Script.load_scripts(nil, Date.today)
+      Marty::ScriptSet.clear_cache
+      p = Marty::Posting.do_create("BASE", DateTime.yesterday, 'yesterday')
+      Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
+      Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
+      p2 = Marty::Posting.do_create("BASE", DateTime.now, 'now is the time')
+      engine = Marty::ScriptSet.new.get_engine("BlameReport")
+      @res = engine.evaluate("DataBlameReport",
+                             "result",
+                             {
+                               "pt_name1"    => p.name,
+                               "pt_name2"    => p2.name
+                             },
+                            )
+    end
+
+    context 'when exporting' do
+      it "exports the column_name" do
+
+        expect(@res[0][1][0][1].length).to eq(12)
+        expect(@res[0][1][0][1][7]).to eq("note_rate")
+      end
+    end
+  end
+
+  describe "Blame Report with yml translations" do
+    before(:each) do
+      I18n.backend.store_translations(:en, {
+        attributes: {
+          note_rate: "Note Rate"
+        }
+      })
+      Marty::Script.load_scripts(nil, Date.today)
+      Marty::ScriptSet.clear_cache
+      p = Marty::Posting.do_create("BASE", DateTime.yesterday, 'yesterday')
+      Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
+      Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
+      p2 = Marty::Posting.do_create("BASE", DateTime.now, 'now is the time')
+      engine = Marty::ScriptSet.new.get_engine("BlameReport")
+      @res = engine.evaluate("DataBlameReport",
+                             "result",
+                             {
+                               "pt_name1"    => p.name,
+                               "pt_name2"    => p2.name
+                             },
+                            )
+    end
+
+    context 'when exporting' do
+      it "exports the locale value for the column header" do
+
+        expect(@res[0][1][0][1].length).to eq(12)
+        expect(@res[0][1][0][1][7]).to eq("Note Rate")
+      end
+    end
   end
 end

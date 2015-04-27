@@ -7,6 +7,16 @@ PostingField:
 
 ######################################################################
 
+PostingField1: PostingField
+    field_label = "Posting 1"
+    name        = "pt_name1"
+
+PostingField2: PostingField
+    field_label = "Posting 2"
+    name        = "pt_name2"
+
+######################################################################
+
 ClassListField:
     field_label = "Tables"
     xtype       = ":multiselectcombo"

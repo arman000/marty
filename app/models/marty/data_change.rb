@@ -97,7 +97,7 @@ class Marty::DataChange
     info[:cols].map { |c|
       # strip _id if it's an assoc
       c = c[0..-4] if info[:assoc][c]
-      I18n.t(c, scope: 'attributes')
+      I18n.t(c, scope: 'attributes', default: c)
     }
   end
 

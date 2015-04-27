@@ -1,0 +1,134 @@
+Style:
+    digit_0       = {"format_code" : "0"}
+    digit_1       = {"format_code" : "0.0"}
+    digit_2       = {"format_code" : "0.00"}
+    digit_3       = {"format_code" : "0.000"}
+    digit_4       = {"format_code" : "0.0000"}
+    date          = {"format_code" : "mm/dd/yy"}
+    timestamp     = {"format_code" : "m/d/yy h:mm AM/PM"}
+    datetime      = {"format_code" : "yyyy-mm-dd h:mm:ss"}
+    dollars       = {"format_code" : "$#,###"}
+    dollars_cent  = {"format_code" : "$#,###.##"}
+
+    bg_gray       = {"bg_color": "C5D9F1"}
+    bg_lightgreen = {"bg_color": "99CC00"}
+    bg_tan        = {"bg_color": "FFCC66"}
+    bg_redish     = {"bg_color": "EF5959"}
+    bg_lightgray  = {"bg_color": "F1F5F5"}
+
+    quoted        = {"quote_prefix": true}
+
+    gray_digit_3  = bg_gray + digit_3
+
+    bg_penny      = {
+        "bg_color":     "0D056F",
+        "fg_color":     "FFFFFF",
+        }
+
+    bg_highlight  = {
+        "bg_color":     "FFFF00",
+        "fg_color":     "0D056F",
+        }
+
+    bold        = {"b": true}
+
+    penny_bold  = bold + bg_penny
+
+    align_center = {
+        "alignment": {
+            "horizontal": ":center",
+            }
+        }
+
+    align_left  = {
+        "alignment": {
+            "horizontal": ":left",
+            }
+        }
+
+    align_right = {
+        "alignment": {
+            "horizontal": ":right",
+            }
+        }
+
+    calibri     = {"font_name": "Calibri"}
+    sz_14       = {"sz": 14}
+    sz_12       = {"sz": 12}
+    sz_10       = {"sz": 10}
+
+    h_hdr       = bold + bg_highlight + align_center + calibri + sz_14
+    m_hdr       = penny_bold + align_center + calibri + sz_14
+    s_hdr       = penny_bold + align_left + calibri + sz_12
+    s_hdr_dt    = s_hdr + datetime
+    s_hdr_date  = s_hdr + date
+    g_bold      = bg_gray + bold
+
+    border_thin         = {
+        "style" : ":thin",
+        "color" : "000000",
+        }
+
+#####################################################################
+
+    m_hdr_style0 = {"style": m_hdr}
+    m_hdr_style1 = {"style": [m_hdr]}
+
+    s_hdr_style2 = {"style": [s_hdr]*2}
+    s_hdr_style3 = {"style": [s_hdr]*3}
+
+HeatMapFmt:
+    color_scale = [
+        {"type":":min",         "val":0,        "color":"FF63BE7B"},
+        {"type":":percent",     "val":"50",     "color":"FFFFEB84"},
+        {"type":":max",         "val":0,        "color":"FFF8696B"}
+        ]
+
+    cfmt = {
+        "type":         ":colorScale",
+        "priority":     1,
+        "color_scale":  color_scale,
+        }
+
+ThresholdFmt:
+    winner =? 0
+    thresh_cell =? '$B$1'
+
+    cfmt = {
+        "type":         ":expression",
+        "priority":     1,
+        "dxfId" : {
+            "fg_color": "FFF8696B",
+            "type":     ":dxf",
+            "b":        true,
+            },
+        "formula":      'ABS(INDIRECT("RC", FALSE))>'+thresh_cell,
+        }
+
+    cfmtnot0 = {
+         "type"     : ":cellIs",
+         "operator" : ":notEqual",
+         "formula"  : "0",
+         "dxfId"    : {
+            "fg_color": "FFF8696B",
+            "type":     ":dxf",
+            "b":        true,
+            },
+         "priority" : 1,
+         }
+
+    cfmtequal = {
+         "type"     : ":cellIs",
+         "operator" : ":equal",
+         "formula"  : winner.to_s,
+         "dxfId"    :
+            {
+            "fg_color": "FFF8696B",
+            "type":     ":dxf",
+            "b":        true,
+            },
+         "priority" : 1,
+         }
+
+Row:
+    blank = ["row", []]

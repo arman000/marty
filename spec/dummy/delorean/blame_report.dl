@@ -1,0 +1,171 @@
+import Fields
+import Styles
+
+PostingField2: Fields::PostingField2
+    store = ["NOW"] + [lp.name for lp in Marty::Posting.get_latest(10, nil)]
+
+StyleRow:
+    profile     =?
+    obj         = profile["obj"]
+    status      = profile["status"]
+    attrs       = profile["attrs"]
+    user_name   = Marty::DataChange.user_name(obj.user_id)
+    delete      = profile["deleted"]
+    create      = status == "new"
+
+    o_user_name = if delete then Marty::DataChange.user_name(obj.o_user_id)
+                  else ""
+    o_dt        = if delete then obj.obsoleted_dt.to_s else ""
+    del_style   = if delete then Styles::Style.bg_redish else {}
+    mod_style   = Styles::Style.bg_tan
+    new_style   = if create then Styles::Style.bg_lightgreen else {}
+
+    b_style     = Styles::Style.calibri + new_style
+    b_c_style   = b_style + mod_style
+    m_style     = b_style + Styles::Style.bg_lightgray + del_style
+    m_d_style   = m_style + Styles::Style.datetime
+
+    row = [
+        obj.group_id,
+        obj.created_dt.to_s,
+        user_name,
+        o_dt,
+        o_user_name,
+        ] + [ a.value for a in attrs]
+
+    row_styles = [
+        m_style,
+        m_d_style,
+        m_style,
+        m_d_style,
+        m_style,
+        ] + [
+        (if a.changed then b_c_style else b_style)
+        for a in attrs
+        ]
+
+    s_row = ["row", row, {"style": row_styles}]
+
+StyleGroup:
+    group =?
+    rows = [
+        StyleRow(profile = profile).s_row
+        for profile in group
+        ]
+
+ModelRows:
+    klass       =?
+    t1          =?
+    t2          =?
+
+    groups = Marty::DataChange.changes(t1, t2, klass)
+
+    headers = ["Group ID", "Created", "By", "Deleted", "By"] +
+        Marty::DataChange.class_headers(klass)
+
+    width = headers.length
+    border = [
+        "border",
+        [0, {"off": 1}, width, {"off": 1}],
+        Styles::Style.border_thin,
+        ]
+
+    row_groups = [
+        StyleGroup(group = x[1]).rows + [border]
+        for x in groups
+        ]
+
+    s_style     = {"style": [Styles::Style.s_hdr] * width}
+    s_headers   = ["row", headers, s_style]
+    rows        = [s_headers] + row_groups.flatten(1)
+    count       = row_groups.length
+    ws          = if count > 0 then [klass, rows] else nil
+
+DataBlameReport:
+    title = "Data Blame Report"
+
+    pt_name1    =?
+    posting1    =? Marty::Posting.lookup(pt_name1)
+    t1          = posting1.created_dt
+
+    pt_name2    =?
+    posting2    =? Marty::Posting.lookup(pt_name2)
+    t2          = posting2.created_dt
+
+    class_list  =? false
+
+    form = [
+        Fields::PostingField1,
+        PostingField2,
+        Fields::ClassListField,
+        ]
+
+    ts = if Gemini::Helper.infinity_dt(t1)
+         then [t2, t1]
+         else if Gemini::Helper.infinity_dt(t2)
+              then [t1, t2]
+              else [t1, t2].sort
+
+    sanitized = if class_list
+        then Marty::DataChange.sanitize_classes(class_list)
+        else Marty::DataChange.class_list
+
+    result = [
+        ModelRows(t1 = ts[0], t2 = ts[1], klass = klass).ws
+        for klass in sanitized
+        ].compact
+
+    format = "xlsx"
+
+ModelSummaryRow:
+    klass       =?
+    t1          =?
+    t2          =?
+
+    r = Marty::DataChange.change_summary(t1, t2, klass)
+    cr = r['created']
+    up = r['updated']
+    dl = r['deleted']
+
+    ws = if cr > 0 || up > 0 || dl > 0 then ["row", [klass, cr, up, dl]] else nil
+
+DataBlameReportSummary:
+    title = "Summary Data Blame Report"
+
+    pt_name1    =?
+    posting1    =? Marty::Posting.lookup(pt_name1)
+    t1          = posting1.created_dt
+
+    pt_name2    =?
+    posting2    =? Marty::Posting.lookup(pt_name2)
+    t2          = posting2.created_dt
+
+    form = [
+        Fields::PostingField1,
+        PostingField2,
+        ]
+
+    postings = [
+        ["Posting 1", pt_name1,],
+        ["Posting 2", pt_name2,],
+        ]
+
+    hrow = [
+        "row", ["Data Table", "Created", "Updated", "Deleted",],
+        Styles::Style.m_hdr_style0,
+        ]
+
+    ts = if Gemini::Helper.infinity_dt(t1)
+         then [t2, t1]
+         else if Gemini::Helper.infinity_dt(t2)
+              then [t1, t2]
+              else [t1, t2].sort
+
+    rows = [
+        ModelSummaryRow(t1 = ts[0], t2 = ts[1], klass = klass).ws
+        for klass in Marty::DataChange.class_list
+        ].compact
+
+    header = [["row", r, {"style" : [Styles::Style.s_hdr]}] for r in postings]
+    result = [[title,[hrow] + rows, {"widths" : [30]}], ["Parameters", header]]
+    format = "xlsx"
