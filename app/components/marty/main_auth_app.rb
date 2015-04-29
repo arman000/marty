@@ -34,6 +34,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     {
       text:  warped ? "#{Marty::Util.get_posting.name}" : I18n.t("postings"),
       name:  "posting",
+      tooltip: "Postings",
       icon:  icon_hack(:time),
       style: (warped ? "background-color: lightGrey;" : ""),
       menu:  [

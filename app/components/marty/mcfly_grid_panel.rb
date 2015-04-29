@@ -41,30 +41,11 @@ class Marty::McflyGridPanel < Marty::Grid
         raise "trouble finding #{assoc_name} assoc class on #{data_class}"
       end
 
-      # FIXME: MCFLY_UNIQUENESS is the easiest way I can think of
-      # figuring out if a class is Mcfly.
-      if (aklass.const_get(:MCFLY_UNIQUENESS) rescue nil)
-        c[:scope] = self.class.mcfly_scope(assoc_method || 'id')
-      else
-        c[:scope] = self.class.sorted_scope(assoc_method || 'id')
-      end
+      c[:scope] = Mcfly.has_mcfly?(aklass) ?
+      self.class.mcfly_scope(assoc_method || 'id') :
+        self.class.sorted_scope(assoc_method || 'id')
     end
   end
-
-# HACKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
-  # # The basepack grid doesn't catch general exceptions.  We can get
-  # # this if there's some sort of failure with saving to the DB.
-  # # e.g. range violation.
-  # def process_data_with_error_handling(data, operation)
-  #   begin
-  #     process_data_without_error_handling(data, operation)
-  #   rescue => exc
-  #     success = false
-  #     flash :error => "Error: #{exc}"
-  #   end
-  # end
-
-  # alias_method_chain :process_data, :error_handling
 
 private
   def self.mcfly_scope(sort_column)

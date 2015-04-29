@@ -1,4 +1,5 @@
 require 'csv'
+require 'marty/data_conversion'
 
 module Marty
   class DataImporterError < StandardError
@@ -49,8 +50,7 @@ module Marty
                        cleaner_function    = nil,
                        validation_function = nil,
                        col_sep             = "\t",
-                       allow_dups          = false,
-                       key_attrs           = nil
+                       allow_dups          = false
                        )
 
       parsed = data.is_a?(Array) ? data :
@@ -63,24 +63,18 @@ module Marty
         raise "bad cleaner function result" unless
           cleaner_ids.all? {|id| id.is_a?(Fixnum) }
 
-        row_proc = nil
         eline = 0
 
         begin
-          res = parsed.each_with_index.map { |row, line|
+          res = parsed.each_with_index.map do
+            |row, line|
             eline = line
 
-            row_proc ||= Marty::DataRowProcessor.
-            new(klass,
-                row.respond_to?(:headers) ? row.headers : row.keys,
-                dt,
-                key_attrs,
-                )
             # skip lines which are all nil
             next :blank if row.to_hash.values.none?
 
-            row_proc.create_or_update(row)
-          }
+            Marty::DataConversion.create_or_update(klass, row, dt)
+          end
         rescue => exc
           # to find problems with the importer, comment out the rescue block
           raise Marty::DataImporterError.new(exc.to_s, [eline])

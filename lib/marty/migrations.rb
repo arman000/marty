@@ -63,10 +63,12 @@ module Marty::Migrations
     raise "bad class arg #{klass}" unless
       klass.is_a?(Class) && klass < ActiveRecord::Base
 
+    attrs = get_attrs(klass)
+
     remove_index(klass.table_name.to_sym,
                  name: unique_index_name(klass)
                  ) if index_exists?(klass.table_name.to_sym,
-                                    get_attrs(klass),
+                                    attrs,
                                     name: unique_index_name(klass),
                                     unique: true)
   end
@@ -96,18 +98,11 @@ private
     }
   end
 
-  def get_attrs(klass)
-    attrs = klass.const_get(:MCFLY_UNIQUENESS)
-    raise "class has no :MCFLY_UNIQUENESS" unless attrs
-
-    attrs = attrs[0..-2] + attrs.last.fetch(:scope, []) if
-      attrs.last.is_a?(Hash)
-    raise "key list for #{klass} is empty" if attrs.empty?
-
-    attrs
-  end
-
   def unique_index_name(klass)
     "unique_#{klass.table_name}"
+  end
+
+  def get_attrs(klass)
+    (Mcfly.mcfly_uniqueness(klass) + ['obsoleted_dt']).uniq
   end
 end

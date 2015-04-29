@@ -1,6 +1,7 @@
 require 'base64'
 require 'zlib'
 require 'csv'
+require 'marty/data_conversion'
 
 class Marty::DataExporter
   # given an array of hashes, return set of all keys
@@ -78,15 +79,15 @@ class Marty::DataExporter
 
     return @class_info[klass] if @class_info[klass]
 
-    associations = klass.reflect_on_all_associations.map(&:name)
+    associations = Marty::DataConversion.associations(klass)
 
     @class_info[klass] = {
       cols:
-      klass.columns.map(&:name) - Marty::DataRowProcessor::MCFLY_COLUMNS.to_a,
+      klass.columns.map(&:name) - Mcfly::COLUMNS.to_a,
 
       assoc:
-      associations.each_with_object({}) { |a, h|
-        h["#{a}_id"] = Marty::DataRowProcessor.assoc_info(klass, a)
+      associations.each_with_object({}) { |(attr, assoc), h|
+        h["#{attr}_id"] = assoc
       },
     }
   end
@@ -120,8 +121,7 @@ class Marty::DataExporter
   def self.do_export(ts, klass, sort_field=nil)
     query = klass
 
-    # is it Mcfly?
-    if (klass.const_get(:MCFLY_UNIQUENESS) rescue nil)
+    if Mcfly.has_mcfly?(klass)
       ts = Mcfly.normalize_infinity(ts)
       query = query.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts)
     end
