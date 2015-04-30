@@ -205,6 +205,11 @@ class Marty::DataConversion
   ######################################################################
 
   def self.create_or_update(klass, row, dt)
+    # Given a row data (usually from import) try to find the
+    # associated DB row from the klass keys.  If found the row is
+    # updated using the dt datetime.  Otherwise, a new row is created
+    # with the provided row data.
+
     c_row = convert_row(klass, row.to_hash, dt)
     obj = find_row(klass, c_row, dt)
 
