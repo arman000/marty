@@ -29,22 +29,6 @@ class Delorean::BaseModule::BaseClass
 end
 
 ######################################################################
-# FIXME: not sure why the following is needed.  Otherwise, the monkey
-# patch doesn't work.
-ActiveSupport::JSON.encode([Date.today])
-
-class Date
-  # Very Hacky: The date JSON encoding format doesn't include TZ info.
-  # Therefore, the ExtJS client interprets it as GMT.  This causes
-  # dates to be displayed as previous day on Pacific TZ clients.  So,
-  # we just tack on 12:00 time to force the client to use the correct
-  # date (at least in the US).
-  def as_json(options = nil)
-    strftime("%Y-%m-%dT12:00:00-00:00")
-  end
-end
-
-######################################################################
 
 class Hash
   # define addition on hashes -- useful in Delorean code.
