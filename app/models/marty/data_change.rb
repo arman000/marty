@@ -37,17 +37,17 @@ class Marty::DataChange
           profile["status"], prev = "mod", prev = ol[i-1]
         end
 
-        exp_attrs = Marty::DataExporter.export_attrs(klass, o)
+        exp_attrs = Marty::DataExporter.export_attrs(klass, o).flatten(1)
 
         # assumes cols order is same as that returned by export_attrs
         profile["attrs"] = cols.each_with_index.map do
           |c, i|
 
           {
-            # FIXME: using .first on export_attr -- this will not work
-            # if the attr is an association which will requires
-            # multiple keys to identify (e.g. Rule: name & version)
-            "value"     => exp_attrs[i].first,
+            # FIXME: this will not work if the attr is an association
+            # which will requires multiple keys to identify
+            # (e.g. Rule: name & version)
+            "value"     => exp_attrs[i],
             "changed"   => prev && (o.send(c.to_sym) != prev.send(c.to_sym)),
           }
         end

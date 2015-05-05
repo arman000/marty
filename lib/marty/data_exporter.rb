@@ -70,26 +70,41 @@ class Marty::DataExporter
     end
   end
 
-  def self.export_attrs(klass, obj)
+  def self.export_attrs(klass, obj, attrs=nil)
     col_types = Marty::DataConversion.col_types(klass)
 
-    col_types.map do
-      |c, type|
+    (attrs || col_types.keys).map do
+      |c|
+
       v = obj.send(c.to_sym)
+
+      c = c.to_s
+      type = col_types[c]
 
       # return [value] if not assoc or nil
       next [v] if v.nil? || !type.is_a?(Hash)
 
       assoc_obj = type[:assoc_class].find(v)
-      type[:assoc_keys].map {|k| assoc_obj.send(k.to_sym)}
+
+      assoc_keys = type[:assoc_keys]
+      assoc_class = type[:assoc_class]
+
+      # FIXME: this recursion will fail if a reference which then
+      # makes sub-references is nil.  To handle this, we'd need to
+      # create the export structure first.
+      export_attrs(assoc_class, assoc_obj, assoc_keys).flatten(1)
     end
   end
 
-  def self.export_header_attrs(klass)
+  def self.export_headers(klass, attrs=nil)
     col_types = Marty::DataConversion.col_types(klass)
 
-    col_types.map do
-      |c, type|
+    (attrs || col_types.keys).map do
+      |c|
+
+      c = c.to_s
+      type = col_types[c]
+
       next c unless type.is_a?(Hash)
 
       # remove _id
@@ -97,9 +112,12 @@ class Marty::DataExporter
 
       assoc_keys = type[:assoc_keys]
 
-      # FIXME: this doesn't work if k is also an association.  Needs to
-      # be recursive.
-      assoc_keys.length > 1 ? assoc_keys.map {|k| "#{c}__#{k}"} : c
+      # if association has a single key, just use col name
+      next c if assoc_keys.length == 1
+
+      assoc_class = type[:assoc_class]
+
+      export_headers(assoc_class, assoc_keys).map {|k| "#{c}__#{k}"}
     end
   end
 
@@ -118,7 +136,7 @@ class Marty::DataExporter
 
   def self.do_export_query_result(klass, qres)
     # strip _id from assoc fields
-    header = [ export_header_attrs(klass).flatten(1) ]
+    header = [ export_headers(klass).flatten ]
 
     header + qres.map {|obj| export_attrs(klass, obj).flatten(1)}
   end

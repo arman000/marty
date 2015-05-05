@@ -75,7 +75,6 @@ class Marty::DataConversion
       h[assoc.name.to_s] = {
         assoc_keys:  assoc_keys,
         assoc_class: assoc.klass,
-        mcfly_keys:  mcfly_keys,
         foreign_key: assoc.foreign_key,
       }
     end
