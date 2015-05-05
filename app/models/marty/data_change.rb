@@ -14,14 +14,12 @@ class Marty::DataChange
     t0 = Mcfly.normalize_infinity t0
     t1 = Mcfly.normalize_infinity t1
 
-    info = Marty::DataExporter.class_info(klass)
+    cols = Marty::DataConversion.columns(klass)
     changes = get_changed_data(t0, t1, klass)
 
-    changes.inject({}) { |h, (group_id, ol)|
-      h[group_id] = ol.each_with_index.map { |o, i|
-        profile = {
-          "obj" => o,
-        }
+    changes.each_with_object({}) do |(group_id, ol), h|
+      h[group_id] = ol.each_with_index.map do |o, i|
+        profile = {"obj" => o}
 
         # Create a profile hash for each object in the group.
         # "status" tells us if the object is old/new/mod.  If
@@ -39,20 +37,24 @@ class Marty::DataChange
           profile["status"], prev = "mod", prev = ol[i-1]
         end
 
-        profile["attrs"] = info[:cols].map { |c|
+        exp_attrs = Marty::DataExporter.export_attrs(klass, o)
+
+        # assumes cols order is same as that returned by export_attrs
+        profile["attrs"] = cols.each_with_index.map do
+          |c, i|
+
           {
             # FIXME: using .first on export_attr -- this will not work
             # if the attr is an association which will requires
             # multiple keys to identify (e.g. Rule: name & version)
-            "value"     => Marty::DataExporter.export_attr(o, c, info).first,
+            "value"     => exp_attrs[i].first,
             "changed"   => prev && (o.send(c.to_sym) != prev.send(c.to_sym)),
           }
-        }
+        end
 
         profile
-      }
-      h
-    }
+      end
+    end
   end
 
   delorean_fn :change_summary, sig: 3 do
@@ -63,7 +65,6 @@ class Marty::DataChange
     t0 = Mcfly.normalize_infinity t0
     t1 = Mcfly.normalize_infinity t1
 
-    info = Marty::DataExporter.class_info(klass)
     changes = get_changed_data(t0, t1, klass)
 
     created = updated = deleted = 0
@@ -93,10 +94,10 @@ class Marty::DataChange
     |class_name|
 
     klass = class_name.constantize
-    info = Marty::DataExporter.class_info(klass)
-    info[:cols].map { |c|
+    assoc = Marty::DataConversion.associations klass
+    Marty::DataConversion.columns(klass).map { |c|
       # strip _id if it's an assoc
-      c = c[0..-4] if info[:assoc][c]
+      c = c[0..-4] if assoc[c]
       I18n.t(c, scope: 'attributes', default: c)
     }
   end
@@ -131,8 +132,6 @@ class Marty::DataChange
 
     t0 = Mcfly.normalize_infinity t0
     t1 = Mcfly.normalize_infinity t1
-
-    info = Marty::DataExporter.class_info(klass)
 
     change_q = '(obsoleted_dt >= ? AND obsoleted_dt < ?)' +
       ' OR (created_dt >= ? AND created_dt < ?)'

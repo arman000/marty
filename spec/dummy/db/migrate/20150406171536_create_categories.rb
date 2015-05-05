@@ -1,5 +1,8 @@
 class CreateCategories < ActiveRecord::Migration
   def up
+    ActiveRecord::Migration.new.create_table 'entities' do |t|
+      t.string :name
+    end
     McflyAppendOnlyMigration.new.create_table 'gemini_bud_categories' do |t|
       t.string :name
     end

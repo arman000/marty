@@ -76,9 +76,14 @@ class Marty::DataConversion
         assoc_keys:  assoc_keys,
         assoc_class: assoc.klass,
         mcfly_keys:  mcfly_keys,
+        foreign_key: assoc.foreign_key,
       }
-      h[assoc.foreign_key] = assoc.name
     end
+  end
+
+  def self.assoc_cols(klass)
+    # array of klass association columns (e.g. ["xxx_id", ...])
+    associations(klass).values.map { |a| a[:foreign_key] }
   end
 
   ######################################################################
@@ -86,23 +91,34 @@ class Marty::DataConversion
   @@col_types = {}
 
   def self.col_types(klass)
-    # build a profile for ActiveRecord klass columns which
-    # enables find/import of its database records
+    # build profile for ActiveRecord non-assoc columns -- used to
+    # find/import of klass database records.
 
-    assoc = associations(klass)
     @@col_types[klass] ||= klass.columns.each_with_object({}) do
       |col, h|
 
+      assoc ||= associations(klass)
+      acols ||= assoc_cols(klass)
+
       cn = col.name
 
-      # ignore mcfly cols -- FIXME: should we do this???
-      next if assoc.has_key?(cn) || Mcfly::COLUMNS.member?(cn)
+      # ignore mcfly cols
+      next if Mcfly::COLUMNS.member?(cn)
 
-      # for JSON fields in Rails 3.x type is nil, so use sql_type
-      type = col.type || col.sql_type
-      type = "#{type}_array" if col.array
-      h[cn] = type.to_sym
+      if acols.member?(cn)
+        h[cn] = assoc.values.detect { |a| a[:foreign_key] == cn }
+      else
+        # for JSON fields in Rails 3.x type is nil, so use sql_type
+        type = col.type || col.sql_type
+        type = "#{type}_array" if col.array
+        h[cn] = type.to_sym
+      end
     end
+  end
+
+  def self.columns(klass)
+    # list of non-mcfly columns
+    col_types(klass).keys
   end
 
   ######################################################################
