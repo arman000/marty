@@ -303,7 +303,8 @@ class Marty::Xl
 
       # Remove special characters and truncate sheet name due to Excel
       # limitations.  The following chars are not allowed: []*?:\/
-      name = name.gsub(/[\[\]\*\?\/\\]/, '_').gsub(':', '').truncate(31)
+      # axlsx >= 2.1.0 doesn't put underscores in sheet names anymore
+      name = name.gsub(/[\[\]\*\?\/\\:]/, '').truncate(31)
 
       opts = self.class.symbolize_keys(opts || {}, ':')
       widths = opts[:widths] || []
