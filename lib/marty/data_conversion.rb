@@ -46,7 +46,7 @@ class Marty::DataConversion
       Mcfly.is_infinity(v) ? 'infinity' : v.to_datetime
     when :numrange, :int4range, :int8range
       v.to_s
-    when :float_array, :json
+    when :float_array, :json, :jsonb
       JSON.parse Marty::DataExporter.decode_json(v)
     else
       raise "unknown type #{type} for #{v}"

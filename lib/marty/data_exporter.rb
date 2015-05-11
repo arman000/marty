@@ -13,6 +13,14 @@ class Marty::DataExporter
     # given a list of hashes hl, generates a merged hash.  The
     # resulting hash contains a superset of all the hash keys.  The
     # values are corresponding values from each hash in hl.
+    # e.g. the following
+    #
+    # [{"a"=>1, "b"=>2}, {"a"=>11, "c"=>33}, {"a"=>1111, "b"=>222, "c"=>333}]
+    #
+    # maps to ...
+    #
+    # [["a", "b", "c"], [1, 2, nil], [11, nil, 33], [1111, 222, 333]]
+
     keys = hash_array_keys(hl)
 
     return keys.each_with_object({}) { |k, rh|
@@ -84,10 +92,9 @@ class Marty::DataExporter
       # return [value] if not assoc or nil
       next [v] if v.nil? || !type.is_a?(Hash)
 
-      assoc_obj = type[:assoc_class].find(v)
-
-      assoc_keys = type[:assoc_keys]
+      assoc_keys  = type[:assoc_keys]
       assoc_class = type[:assoc_class]
+      assoc_obj   = assoc_class.find(v)
 
       # FIXME: this recursion will fail if a reference which then
       # makes sub-references is nil.  To handle this, we'd need to
