@@ -11,6 +11,24 @@ class Marty::DataConversion
     decimal: FLOAT_PAT,
   }
 
+  # database types that can be converted to on import
+  DATABASE_TYPES = Set[
+    :boolean,
+    :string,
+    :text,
+    :integer,
+    :float,
+    :decimal,
+    :date,
+    :datetime,
+    :numrange,
+    :int4range,
+    :int8range,
+    :float_array,
+    :json,
+    :jsonb,
+  ]
+
   def self.convert(v, type)
     # Converts external data v (e.g. from a CSV, cut/paste) to
     # ActiveRecord database data type.
