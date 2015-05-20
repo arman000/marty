@@ -39,6 +39,46 @@ class Marty::Promise < Marty::Base
     end
   end
 
+  class VirtualRoot
+    def self.primary_key
+      'id'
+    end
+
+    def id
+      'root'
+    end
+
+    def user_id
+      0
+    end
+    alias_method :job_id, :user_id
+
+    def result
+      nil
+    end
+    [:start_dt, :end_dt].each { |m| alias_method m, :result }
+
+    def status
+      true
+    end
+  end
+
+  def self.root
+    VirtualRoot.new
+  end
+
+  def self.children_for_id(id, search_order)
+    if id == 'root'
+      where(parent_id: nil).live_search(search_order).order(id: :desc).includes(:children, :user)
+    else
+      find(id).children.live_search(search_order).order(id: :desc).includes(:children, :user)
+    end
+  end
+
+  def leaf
+    children.empty?
+  end
+
   def raw_conn
     self.class.connection.raw_connection
   end

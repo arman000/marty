@@ -2,6 +2,9 @@ class Marty::ComponentsController < Marty::ApplicationController
   # This is useful for individual component testing.  Note that the
   # appropriate route needs to be defined.
   # <base_url>/components/<ComponentCamelCaseName>
+
+  helper Rails.application.routes.url_helpers
+
   def index
     component = params[:component]
 

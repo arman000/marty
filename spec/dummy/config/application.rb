@@ -65,6 +65,8 @@ module Dummy
 
     config.paths["config/database"] = "#{APP_ROOT}/database.yml"
 
+    config.marty.auth_source = 'local'
+
     config.marty.system_account = 'marty'
     config.marty.local_password = 'marty'
     config.marty.class_list = []
@@ -76,3 +78,4 @@ module Dummy
     config.secret_key_base = "SECRET_KEY_BASE"
   end
 end
+require "marty/permissions"

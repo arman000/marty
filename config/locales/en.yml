@@ -92,9 +92,12 @@ en:
 
   jobs:
     promise_view: Jobs Dashboard
+    promise_view_two: New Jobs Dashboard!
+    title: Job Name
     start_dt: Start Date
     end_dt: End Date
     user_login: User Login
+    cformat: Format
 
   data_import_view:
     import: Import

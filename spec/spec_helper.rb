@@ -10,6 +10,18 @@ ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__
 
 Dir[Rails.root.join("../support/**/*.rb")].each { |f| require f }
 
+class ActiveRecord::Base
+  mattr_accessor :shared_connection
+
+  @@shared_connection = nil
+
+  def self.connection
+    @@shared_connection || retrieve_connection
+  end
+end
+
+ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection
+
 RSpec.configure do |config|
   config.include DelayedJobHelpers
   config.include CleanDbHelpers
@@ -33,4 +45,6 @@ RSpec.configure do |config|
 
   config.infer_spec_type_from_file_location!
   config.use_transactional_fixtures = true
+
+  Netzke::Testing.rspec_init(config)
 end
