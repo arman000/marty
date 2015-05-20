@@ -165,6 +165,8 @@ class Marty::DataConversion
     ctypes = col_types(klass)
     assoc  = associations(klass)
 
+    raise "bad row (extra columns?) -- #{row}" if row.has_key?(nil)
+
     key_groups = row.keys.group_by {|x| x.split('__').first}
 
     key_groups.each_with_object({}) do
