@@ -1,5 +1,5 @@
 class ComponentsController < Marty::ApplicationController
   def home
-    render nothing: true
+    render inline: "<%= netzke :'Marty::AuthApp' %>", layout: true
   end
 end
