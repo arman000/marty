@@ -56,7 +56,10 @@ class Marty::ReportSelect < Marty::Form
        var nodename    = me.getForm().findField('nodename');
 
        nodename.on('select', function(self, record) {
-          var data = record[0] && record[0].data;
+          if(record instanceof Array) {
+            record = record[0]
+          }
+          var data = record && record.data;
           me.selectNode({node: data.value});
        });
 
