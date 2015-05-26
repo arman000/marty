@@ -73,6 +73,14 @@ class Marty::DataConversion
 
   ######################################################################
 
+  def self.assoc_keys(klass)
+    # FIXME: very hacky -- picks 1st non-id attr as the association
+    # key for regular (non-mcfly) AR models.
+    Mcfly.has_mcfly?(klass) ?
+      Mcfly.mcfly_uniqueness(klass) :
+      [klass.attribute_names.reject{|x| x=="id"}.first.to_sym]
+  end
+
   @@associations = {}
 
   def self.associations(klass)
@@ -83,15 +91,8 @@ class Marty::DataConversion
       each_with_object({}) do
       |assoc, h|
 
-      mcfly_keys = Mcfly.mcfly_uniqueness(assoc.klass) rescue nil
-
-      # FIXME: very hacky -- picks 1st non-id attr as the association
-      # key for regular (non-mcfly) AR models.
-      assoc_keys = mcfly_keys ||
-        [assoc.klass.attribute_names.reject{|x| x=="id"}.first]
-
       h[assoc.name.to_s] = {
-        assoc_keys:  assoc_keys,
+        assoc_keys:  assoc_keys(assoc.klass),
         assoc_class: assoc.klass,
         foreign_key: assoc.foreign_key,
       }
@@ -141,8 +142,7 @@ class Marty::DataConversion
   ######################################################################
 
   def self.find_row(klass, options, dt)
-    # FIXME: handle non-mcfly classes
-    key_attrs = Mcfly.mcfly_uniqueness(klass) rescue nil
+    key_attrs = assoc_keys(klass)
 
     raise "no key_attrs for #{klass}" unless key_attrs
 
@@ -150,10 +150,11 @@ class Marty::DataConversion
 
     raise "no keys for #{klass} -- #{options}" if find_options.empty?
 
-    find_options['obsoleted_dt'] = 'infinity' if dt
+    q = klass.where(find_options)
+    q = q.where('obsoleted_dt >= ?', dt) if dt && Mcfly.has_mcfly?(klass)
 
     # FIXME: error out on multiple matches?
-    klass.where(find_options).first
+    q.first
   end
 
   ######################################################################

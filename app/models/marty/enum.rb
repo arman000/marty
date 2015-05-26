@@ -11,6 +11,11 @@ module Marty::Enum
     raise "no such #{self.name}: '#{index}'"
   end
 
+  def to_s
+    # FIXME: hacky since not all enums have name
+    self.name
+  end
+
   def clear_lookup_cache!
     @LOOKUP_CACHE.clear if @LOOKUP_CACHE
   end
