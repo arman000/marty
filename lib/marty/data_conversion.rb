@@ -185,8 +185,19 @@ class Marty::DataConversion
 
         v = row[ga]
 
-        # not an association, so we need to convert
-        h[ga] = v && convert(v, type)
+        if v.nil?
+          h[ga] = nil
+        elsif Hash === type
+          # got an id for an association -- FIXME: perhaps this should
+          # not be allowed at all?
+          raise "#{type[:assoc_class].name} with id #{v} not found" unless
+            type[:assoc_class].find_by_id(v)
+
+          h[ga] = v
+        else
+          # not an association, so we need to convert
+          h[ga] = convert(v, type)
+        end
         next
       end
 
