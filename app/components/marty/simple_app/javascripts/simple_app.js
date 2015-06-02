@@ -30,26 +30,17 @@
     }
   },
 
-  processHistory: function(token){
-    if (token){
-      this.mainPanel.removeAll();
-      this.netzkeLoadComponent(token, {container: this.mainPanel});
-    } else {
-      this.mainPanel.removeAll();
-    }
-  },
-
   // instantiateComponent: function(config){
   //   this.mainPanel.instantiateChild(config);
   // },
 
   appLoadComponent: function(name){
-    Ext.util.History.add(name);
+    this.netzkeLoadComponent(name, {container: this.mainPanel});
   },
 
   netzkeLoadComponentByAction: function(action){
     var componentName = action.component || action.name;
-    if (componentName) this.appLoadComponent(componentName);
+    if (componentName) this.netzkeLoadComponent(componentName, {container: this.mainPanel});
   },
 
   onToggleConfigMode: function(params){
