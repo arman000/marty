@@ -74,6 +74,7 @@ module Dummy
                           :admin,
                           :dev,
                           :viewer,
+                          :user_manager,
                          ]
     config.secret_key_base = "SECRET_KEY_BASE"
   end

@@ -16,7 +16,8 @@ default.
 * Layout class for {@link Ext.ux.form.field.CodeMirror} fields. Handles sizing the codemirror field.
 */
 Ext.define('Ext.ux.layout.component.field.CodeMirror', {
-    extend: 'Ext.layout.component.field.Field',
+    extend: 'Ext.layout.component.Auto',
+    // extend: 'Ext.layout.component.field.FieldContainer',
     alias: ['layout.codemirror'],
 
     type: 'codemirror',
@@ -38,8 +39,6 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
         var me = this,
             innerHeight = height - me.measureLabelErrorHeight(ownerContext) -
                           ownerContext.bodyCellContext.getPaddingInfo().height;
-
-
         if (Ext.isNumber(innerHeight)) {
             ownerContext.textAreaContext.setHeight(innerHeight);
             ownerContext.editorContext.setHeight(innerHeight);
@@ -60,129 +59,6 @@ Ext.define('Ext.ux.layout.component.field.CodeMirror', {
     }
 });
 
-/**
-* @class Ext.ux.form.field.CodeMirror
-* @extends Ext.form.field.Base
-* @author Adrian Teodorescu (ateodorescu@gmail.com; http://www.mzsolutions.eu)
-* @docauthor Adrian Teodorescu (ateodorescu@gmail.com; http://www.mzsolutions.eu)
-* @license [MIT][1]
-*
-* @version 1.5
-*
-*
-* Provides a [CodeMirror][2] component wrapper for Sencha. The supported and tested CodeMirror versions are 2.2, 2.3 and 2.4.
-* The component works with Extjs 4.1.x.
-*
-* [1]: http://www.mzsolutions.eu/extjs/license.txt
-* [2]: http://codemirror.net/
-*
-*
-* The editor's toolbar buttons have tooltips defined in the {@link #buttonTips} property, but they are not
-* enabled by default unless the global {@link Ext.tip.QuickTipManager} singleton is {@link Ext.tip.QuickTipManager#init initialized}.
-*
-* If you include the modes script files by yourself then ignore the {@link #modes} property.
-* If you also include the extensions script files by yourself then ignore the {@link #extensions} property.
-*
-*
-*
-#Example usage:#
-
-{@img Ext.ux.form.field.CodeMirror.png Ext.ux.form.field.CodeMirror component}
-
-    var form = Ext.create('Ext.form.Panel', {
-        title:          'Function info',
-        bodyPadding:    10,
-        width:          500,
-        renderTo: Ext.getBody(),
-        items: [{
-            xtype:      'textfield',
-            name:       'name',
-            anchor:     '100%',
-            fieldLabel: 'Name',
-            allowBlank: false  // requires a non-empty value
-        }, {
-            xtype:      'codemirror',
-            name:       'function',
-            fieldLabel: 'Code',
-            anchor:     '100%'
-        }],
-
-        buttons: [{
-            text: 'Save',
-            handler: function(){
-                if(form.getForm().isValid()){
-                    alert(form.getForm().getValues().function);
-                }
-            }
-        }]
-    });
-
-
-#Plugin example for the CodeMirror component:#
-
-    Ext.define('Ext.ux.form.plugin.CodeMirror', {
-        mixins: {
-            observable: 'Ext.util.Observable'
-        },
-        alternateClassName: 'Ext.form.plugin.CodeMirror',
-        requires: [
-            'Ext.tip.QuickTipManager',
-            'Ext.ux.form.field.CodeMirror'
-        ],
-
-        constructor: function(config) {
-            Ext.apply(this, config);
-        },
-
-        init: function(codemirror){
-            var me = this;
-            me.codemirror = codemirror;
-            me.mon(codemirror, 'initialize', me.onInitialize, me);
-        },
-
-        onInitialize: function(){
-            var me = this, undef,
-                items = [],
-                baseCSSPrefix = Ext.baseCSSPrefix,
-                tipsEnabled = Ext.tip.QuickTipManager && Ext.tip.QuickTipManager.isEnabled();
-
-            function btn(id, toggle, handler){
-                return {
-                    itemId : id,
-                    cls : baseCSSPrefix + 'btn-icon',
-                    iconCls: baseCSSPrefix + 'edit-'+id,
-                    enableToggle:toggle !== false,
-                    scope: me,
-                    handler:handler||me.relayBtnCmd,
-                    clickEvent:'mousedown',
-                    tooltip: tipsEnabled ? me.buttonTips[id] || undef : undef,
-                    overflowText: me.buttonTips[id].title || undef,
-                    tabIndex:-1
-                };
-            }
-
-            items.push(btn('test', false));
-            if(items.length > 0){
-                me.codemirror.getToolbar().add(items);
-            }
-        },
-
-        relayBtnCmd: function(btn){
-            alert('test');
-        },
-
-        buttonTips : {
-            test : {
-                title: 'Test',
-                text: 'Test button.',
-                cls: Ext.baseCSSPrefix + 'html-editor-tip'
-            }
-        }
-
-    });
-
-
-*/
 Ext.define('Ext.ux.form.field.CodeMirror', {
     extend: 'Ext.Component',
     mixins: {
@@ -210,7 +86,8 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
         }
     ],
 
-    componentLayout: 'codemirror',
+    // FIXME: the layout mechanism is currently busted
+    // componentLayout: 'codemirror',
 
     editorWrapCls: Ext.baseCSSPrefix + 'html-editor-wrap',
 
@@ -354,90 +231,6 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
     initComponent : function(){
         var me = this;
 
-        me.addEvents(
-            /**
-             * @event initialize
-             * Fires when the editor is fully initialized (including the iframe)
-             * @param {Ext.ux.form.field.CodeMirror} this
-             */
-            'initialize',
-            /**
-             * @event activate
-             * Fires when the editor is first receives the focus. Any insertion must wait
-             * until after this event.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             */
-            'activate',
-            /**
-             * @event deactivate
-             * Fires when the editor looses the focus.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             */
-            'deactivate',
-             /**
-             * @event change
-             * Fires when the content of the editor is changed.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             * @param {String} newValue New value
-             * @param {String} oldValue Old value
-             * @param {Array} options
-             */
-            'change',
-             /**
-             * @event modechanged
-             * Fires when the editor mode changes.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             * @param {String} newMode New mode
-             * @param {String} oldMode Old mode
-             */
-            'modechanged',
-            /**
-             * @event cursoractivity
-             * Fires when the cursor or selection moves, or any change is made to the editor content.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             */
-            'cursoractivity',
-            /**
-             * @event gutterclick
-             * Fires whenever the editor gutter (the line-number area) is clicked.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             * @param {Number} lineNumber Zero-based number of the line that was clicked
-             * @param {Object} event The raw mousedown event
-             */
-            'gutterclick',
-            /**
-             * @event scroll
-             * Fires whenever the editor is scrolled.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             */
-            'scroll',
-            /**
-             * @event highlightcomplete
-             * Fires whenever the editor's content has been fully highlighted.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             */
-            'highlightcomplete',
-            /**
-             * @event update
-             * Fires whenever CodeMirror updates its DOM display.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             */
-            'update',
-            /**
-             * @event keyevent
-             * Fires on eery keydown, keyup, and keypress event that CodeMirror captures.
-             * @param {Ext.ux.form.field.CodeMirror} this
-             * @param {Object} event This key event is pretty much the raw key event, except that a stop() method is always
-             * added to it. You could feed it to, for example, jQuery.Event to further normalize it. This function can inspect
-             * the key event, and handle it if it wants to. It may return true to tell CodeMirror to ignore the event.
-             * Be wary that, on some browsers, stopping a keydown does not stop the keypress from firing, whereas on others
-             * it does. If you respond to an event, you should probably inspect its type property and only do something when
-             * it is keydown (or keypress for actions that need character data).
-             */
-            'keyevent'
-        );
-
-
         me.callParent(arguments);
 
         me.initLabelable();
@@ -452,7 +245,6 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
                 me.editor.refresh();
             }
         }, me);
-
     },
 
     getMaskTarget: function(){
@@ -473,17 +265,13 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             editorCls       : cssPrefix + 'codemirror',
             editorName      : Ext.id(),
             //size            : 'height:100px;width:100%'
-	    // PennyMac: setting height to 100%.
+            // PennyMac: setting height to 100%.
             size            : 'height:100%;width:100%',
         };
     },
 
     getSubTplMarkup: function() {
         return this.getTpl('fieldSubTpl').apply(this.getSubTplData());
-    },
-
-    finishRenderChildren: function () {
-        this.callParent();
     },
 
     /**
@@ -493,20 +281,13 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
         var me = this;
 
         me.callParent(arguments);
-        me.inputEl = me.editorEl;
+        me.editorEl = me.getEl('editorEl');
+        me.bodyEl = me.getEl('bodyEl');
 
         me.disableItems(true);
         me.initEditor();
 
         me.rendered = true;
-    },
-
-    initRenderTpl: function() {
-        var me = this;
-        if (!me.hasOwnProperty('renderTpl')) {
-            me.renderTpl = me.getTpl('labelableRenderTpl');
-        }
-        return me.callParent();
     },
 
     initRenderData: function() {
@@ -595,10 +376,10 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             css.style.height = '100%';
         }
 
-	// PennyMac: align the body to the top. Otherwise it ends up
-	// in the center of the enclosing table.
-	var el = document.getElementById(me.bodyEl.id);
-	el.setAttribute("valign", "top");
+        // PennyMac: align the body to the top. Otherwise it ends up
+        // in the center of the enclosing table.
+        var el = document.getElementById(me.bodyEl.id);
+        el.setAttribute("valign", "top");
     },
 
     /**
@@ -669,10 +450,10 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
     },
 
     modes: [
-	{
+        {
             mime:           ["text/x-delorean"],
             dependencies:   []
-	},
+        },
     ],
 
     /**
