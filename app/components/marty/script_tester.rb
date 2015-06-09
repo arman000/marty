@@ -78,7 +78,10 @@ class Marty::ScriptTester < Marty::Form
        var params    = form.findField('params');
 
        nodename.on('select', function(combo, record) {
-          var data = record[0] && record[0].data;
+          if(record instanceof Array) {
+             record = record[0]
+          }
+          var data = record && record.data;
           me.selectNode({node: data.text});
           attrname.reset();
           attrname.store.load({params: {}});
@@ -86,14 +89,20 @@ class Marty::ScriptTester < Marty::Form
 
        attrname.on('select', function(combo, record) {
           if (nodename.getValue()) {
+             if(record instanceof Array) {
+                record = record[0]
+             }
              attrs.setValue(attrs.getValue() +
-                nodename.getDisplayValue() + "." + record[0].data.text + '; ');
+                nodename.getDisplayValue() + "." + record.data.text + '; ');
           }
           combo.select(null);
        });
 
        paramname.on('select', function(combo, record) {
-          params.setValue(params.getValue() + record[0].data.text + " = 0\\n");
+          if(record instanceof Array) {
+             record = record[0]
+          }
+          params.setValue(params.getValue() + record.data.text + " = 0\\n");
           combo.select(null);
        });
     }
