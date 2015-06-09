@@ -30,11 +30,11 @@ class Marty::McflyGridPanel < Marty::Grid
   def augment_column_config(c)
     super
 
-    name = c[:name]
+    #name = c[:name]
 
     # Set mcfly_scope if the attribute is a mcfly association
-    if !c[:scope] && data_adapter.association_attr?(name)
-      assoc_name, assoc_method = name.split('__')
+    if !c[:scope] && data_adapter.association_attr?(c)
+      assoc_name, assoc_method = c[:name].split('__')
       begin
         aklass = data_class.reflect_on_association(assoc_name.to_sym).klass
       rescue
