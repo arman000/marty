@@ -6,7 +6,6 @@
     this.menuBar   = this.down('container[itemId="menu_bar"]');
     var statusBar = this.statusBar = this.down('container[itemId="status_bar"]');
 
-    Ext.util.History.on('change', this.processHistory, this);
 
     // Setting the "busy" indicator for Ajax requests
     Ext.Ajax.on('beforerequest',    function(){ statusBar.showBusy(); });
@@ -15,32 +14,42 @@
 
     // Initialize history
     Ext.util.History.init();
+    Ext.util.History.on('change', this.processHistory, this);
+  },
+
+  processHistory: function(token){
+    if (token){
+      this.mainPanel.removeAll();
+      this.netzkeLoadComponent(token, {container: this.mainPanel});
+    } else {
+      this.mainPanel.removeAll();
+    }
   },
 
   afterRender: function(){
     this.callParent();
-
-    // If we are given a token, load the corresponding component, otherwise load the last loaded component
     var currentToken = Ext.util.History.getToken();
-    if (currentToken != "") {
+    if (typeof currentToken == "string" && currentToken.length > 0) {
       this.processHistory(currentToken);
-    } else {
-      var lastLoaded = this.initialConfig.componentToLoad; // passed from the server
-      if (lastLoaded) Ext.util.History.add(lastLoaded);
     }
   },
 
-  // instantiateComponent: function(config){
-  //   this.mainPanel.instantiateChild(config);
-  // },
-
   appLoadComponent: function(name){
     this.netzkeLoadComponent(name, {container: this.mainPanel});
+    Ext.util.History.suspendEvent("change");
+    Ext.util.History.add(name);
+    // Can't re-enable history events right away because we don't
+    // want a second load of the same component (causes ExtJS to
+    // error). The back button won't function properly for the second
+    // this is disabled.
+    setTimeout(function() {
+      Ext.util.History.resumeEvent("change");
+    }, 1000);
   },
 
   netzkeLoadComponentByAction: function(action){
     var componentName = action.component || action.name;
-    if (componentName) this.netzkeLoadComponent(componentName, {container: this.mainPanel});
+    if (componentName) this.appLoadComponent(componentName);
   },
 
   onToggleConfigMode: function(params){
