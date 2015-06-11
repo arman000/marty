@@ -1,4 +1,4 @@
-class Marty::PromiseViewTwo < Netzke::Basepack::Tree
+class Marty::PromiseViewTwo < Netzke::Basepack::Grid
   extend ::Marty::Permissions
 
   css_configure do |config|

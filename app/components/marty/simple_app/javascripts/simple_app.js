@@ -36,15 +36,15 @@
 
   appLoadComponent: function(name){
     this.netzkeLoadComponent(name, {container: this.mainPanel});
-    Ext.util.History.suspendEvent("change");
+//    Ext.util.History.suspendEvent("change");
     Ext.util.History.add(name);
     // Can't re-enable history events right away because we don't
     // want a second load of the same component (causes ExtJS to
     // error). The back button won't function properly for the second
     // this is disabled.
-    setTimeout(function() {
-      Ext.util.History.resumeEvent("change");
-    }, 1000);
+//    setTimeout(function() {
+//      Ext.util.History.resumeEvent("change");
+//    }, 1000);
   },
 
   netzkeLoadComponentByAction: function(action){

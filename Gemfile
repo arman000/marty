@@ -17,8 +17,7 @@ group :development, :test do
   gem 'selenium-webdriver'
   gem 'timecop'
   gem 'database_cleaner'
-  gem 'netzke', github: 'netzke/netzke'
-  gem 'netzke-core', github: 'netzke/netzke-core'
-  gem 'netzke-basepack', github: 'netzke/netzke-basepack'
-  gem 'netzke-testing', github: 'ratdaddy/netzke-testing'
+  gem 'netzke-core' #, '~> 0.11.0'
+  gem 'netzke-basepack' #, '~> 0.11.0'
+  gem 'netzke-testing'
 end
