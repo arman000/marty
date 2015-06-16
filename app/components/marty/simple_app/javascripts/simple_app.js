@@ -36,6 +36,10 @@
     }
   },
 
+  appLoadComponent: function(name) {
+    this.router.add(name);
+  },
+
   netzkeLoadComponentByAction: function(action){
     this.router.add(action.name);
   },
