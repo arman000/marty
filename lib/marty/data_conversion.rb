@@ -74,11 +74,12 @@ class Marty::DataConversion
   ######################################################################
 
   def self.assoc_keys(klass)
+    return Mcfly.mcfly_uniqueness(klass) if Mcfly.has_mcfly?(klass)
     # FIXME: very hacky -- picks 1st non-id attr as the association
-    # key for regular (non-mcfly) AR models.
-    Mcfly.has_mcfly?(klass) ?
-      Mcfly.mcfly_uniqueness(klass) :
-      [klass.attribute_names.reject{|x| x=="id"}.first.to_sym]
+    # key for regular (non-mcfly) AR models which don't have
+    # MARTY_IMPORT_UNIQUENESS.
+    klass.const_get(:MARTY_IMPORT_UNIQUENESS) rescue [
+    klass.attribute_names.reject{|x| x=="id"}.first.to_sym]
   end
 
   @@associations = {}
