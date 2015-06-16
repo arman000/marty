@@ -7,6 +7,7 @@ class Marty::ScriptTester < Marty::Form
     c.items =
       [
        fieldset(I18n.t("script_tester.attributes"),
+=begin
                 {
                   xtype:        :netzkeremotecombo,
                   name:         "nodename",
@@ -21,6 +22,7 @@ class Marty::ScriptTester < Marty::Form
                   virtual:      true,
                   field_label:  "Attribute",
                 },
+=end
                 {
                   name:         "attrs",
                   attr_type:    :text,
@@ -31,6 +33,7 @@ class Marty::ScriptTester < Marty::Form
                 {},
                 ),
        fieldset(I18n.t("script_tester.parameters"),
+=begin
                 {
                   xtype:        :netzkeremotecombo,
                   name:         "paramname",
@@ -38,6 +41,7 @@ class Marty::ScriptTester < Marty::Form
                   virtual:      true,
                   hide_label:   true,
                 },
+=end
                 {
                   name:         "params",
                   attr_type:    :text,
@@ -52,12 +56,15 @@ class Marty::ScriptTester < Marty::Form
   end
 
   js_configure do |c|
+=begin
     c.select_script = <<-JS
     function(script_name) {
+       console.log("selecting the script for the tester");
        var me = this;
 
        var form = me.getForm();
        // reload the attr/param drop downs
+       form.findField('nodename').reset()
        form.findField('nodename').store.load({params: {}});
        form.findField('attrname').reset();
        form.findField('attrname').store.load({params: {}});
@@ -78,6 +85,7 @@ class Marty::ScriptTester < Marty::Form
        var params    = form.findField('params');
 
        nodename.on('select', function(combo, record) {
+          console.log('node on select');
           if(record instanceof Array) {
              record = record[0]
           }
@@ -107,6 +115,7 @@ class Marty::ScriptTester < Marty::Form
        });
     }
     JS
+=end
 
     c.set_result = <<-JS
     function(html) {
@@ -124,6 +133,7 @@ class Marty::ScriptTester < Marty::Form
       get_engine(root_sess[:selected_script_name])
   end
 
+=begin
   def node_list
     engine = new_engine
     engine ? engine.enumerate_nodes.sort : []
@@ -139,6 +149,7 @@ class Marty::ScriptTester < Marty::Form
     engine = new_engine
     engine ? engine.enumerate_params.sort : []
   end
+=end
 
   endpoint :netzke_submit do |params, this|
     data = ActiveSupport::JSON.decode(params[:data])
@@ -186,6 +197,7 @@ class Marty::ScriptTester < Marty::Form
     end
   end
 
+=begin
   def combofy(l)
     l.each_with_index.map {|x, i| [i+1, x]}
   end
@@ -204,6 +216,7 @@ class Marty::ScriptTester < Marty::Form
                   combofy(param_list)
                 end
   end
+=end
 
   action :apply do |a|
     a.text     = I18n.t("script_tester.compute")
