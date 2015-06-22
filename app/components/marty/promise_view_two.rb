@@ -1,4 +1,4 @@
-class Marty::PromiseViewTwo < Netzke::Basepack::Grid
+class Marty::PromiseViewTwo < Netzke::Basepack::Tree
   extend ::Marty::Permissions
 
   css_configure do |config|
@@ -54,6 +54,7 @@ class Marty::PromiseViewTwo < Netzke::Basepack::Grid
       :error,
     ]
     config.root_visible = false
+    config.enable_pagination = false
     config.bbar = bbar
 
     # garbage collect old promises (hacky to do this here)
