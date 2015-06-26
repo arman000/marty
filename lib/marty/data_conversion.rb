@@ -277,7 +277,7 @@ class Marty::DataConversion
     tag = obj.new_record? ? :create : (obj.changed? ? :update : :same)
 
     raise "old created_dt >= current #{obj} #{obj.created_dt} #{dt}" if
-      (tag == :update) && !Mcfly.is_infinity(dt) && (obj.created_dt > dt)
+      (tag == :update) && dt && !Mcfly.is_infinity(dt) && (obj.created_dt > dt)
 
     obj.created_dt = dt unless tag == :same || Mcfly.is_infinity(dt) || !dt
     obj.save!
