@@ -13,11 +13,11 @@ group :development, :test do
   gem 'rails', '~> 4.2.1'
   gem 'pry-rails'
   gem 'rspec-rails', '~> 2.99.0'
-  gem 'capybara', '~> 1.1.4'
+  gem 'capybara'
   gem 'selenium-webdriver'
   gem 'timecop'
   gem 'database_cleaner'
-  gem 'netzke-core' #, '~> 0.11.0'
-  gem 'netzke-basepack' #, '~> 0.11.0'
-  gem 'netzke-testing'
+  gem 'netzke-core'
+  gem 'netzke-basepack'
+  gem 'netzke-testing' #, path: File.expand_path('../../netzke-testing', __FILE__)
 end
