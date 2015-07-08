@@ -15,7 +15,6 @@ describe 'Jobs Dashboard - Netzke::Testing', type: :feature, js: true do
       cformat: 'csv',
       start_dt: Time.now
 
-    Rails.configuration.marty.auth_spec_mode = true
     run_mocha_spec 'login', component: 'Marty::AuthApp'
 
     run_mocha_spec 'job_dashboard_live_search',

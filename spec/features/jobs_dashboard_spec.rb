@@ -20,6 +20,7 @@ describe 'Jobs Dashboard', type: :feature, js: true do
     fill_in 'Login', with: 'marty'
     fill_in 'Password', with: 'marty'
     find(:xpath, '//a[contains(., "OK")]').click
+    expect(page).to have_content('marty marty')
 
     visit marty_components_path('Marty::PromiseViewTwo')
     page_title = I18n.t("jobs.promise_view")
