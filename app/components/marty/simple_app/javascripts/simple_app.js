@@ -37,13 +37,7 @@
   },
 
   appLoadComponent: function(name) {
-    me = this
-    this.router.suspendEvent("change");
     this.router.add(name);
-    this.netzkeLoadComponent(name, {container: this.mainPanel});
-    setTimeout(function() {
-      me.resumeEvent("change");
-    }, 1000);
   },
 
   netzkeLoadComponentByAction: function(action){
