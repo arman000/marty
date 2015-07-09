@@ -6,7 +6,6 @@ require 'marty/new_posting_window'
 require 'marty/import_type_view'
 require 'marty/user_view'
 require 'marty/promise_view'
-require 'marty/promise_view_two'
 require 'marty/api_auth_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
@@ -68,7 +67,6 @@ class Marty::MainAuthApp < Marty::AuthApp
              :reporting,
              :scripting,
              :promise_view,
-             :promise_view_two,
             ],
     }
   end
@@ -139,13 +137,6 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   action :promise_view do |a|
     a.text      = I18n.t("jobs.promise_view")
-    a.handler   = :netzke_load_component_by_action
-    a.icon      = :report_magnify
-    a.disabled  = !self.class.has_any_perm?
-  end
-
-  action :promise_view_two do |a|
-    a.text      = I18n.t("jobs.promise_view_two")
     a.handler   = :netzke_load_component_by_action
     a.icon      = :report_magnify
     a.disabled  = !self.class.has_any_perm?
@@ -259,7 +250,6 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
   component :reporting
   component :promise_view
-  component :promise_view_two
   component :posting_window
   component :new_posting_window do |c|
     c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?

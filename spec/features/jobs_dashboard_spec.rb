@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'Jobs Dashboard', type: :feature, js: true do
+describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
   it 'filters out usernames other than the one specified in the search box' do
     other_user = Marty::User.create(login: 'other',
                                     firstname: 'other',
@@ -22,7 +22,7 @@ describe 'Jobs Dashboard', type: :feature, js: true do
     find(:xpath, '//a[contains(., "OK")]').click
     expect(page).to have_content('marty marty')
 
-    visit marty_components_path('Marty::PromiseViewTwo')
+    visit marty_components_path('Marty::PromiseView')
     page_title = I18n.t("jobs.promise_view")
     expect(page).to have_content(page_title)
     expect(tree_row_count(page_title)).to eq(2)

@@ -1,12 +1,12 @@
-class Marty::PromiseView < Marty::TreePanel
+class Marty::PromiseView < Netzke::Basepack::Tree
   extend ::Marty::Permissions
 
-  css_configure do |c|
-    c.require :promise_view
+  css_configure do |config|
+    config.require :promise_view
   end
 
-  js_configure do |c|
-    c.default_get_row_class = <<-JS
+  js_configure do |config|
+    config.default_get_row_class = <<-JS
     function(record, index, rowParams, ds) {
        var status = record.get('status');
        if (status === false) return "red-row";
@@ -15,7 +15,7 @@ class Marty::PromiseView < Marty::TreePanel
     }
     JS
 
-    c.listen_fn = <<-JS
+    config.listen_fn = <<-JS
     function(obj, search_text) {
         var lg = this.ownerCt.ownerCt;
         lg.getStore().getProxy().extraParams.live_search = search_text;
@@ -24,7 +24,7 @@ class Marty::PromiseView < Marty::TreePanel
     JS
 
     # Live search box -- direct copy from Marty::LiveSearchGridPanel
-    c.tbar = ['->', {
+    config.tbar = ['->', {
                 name:  'live_search_text',
                 xtype: 'textfield',
                 enable_key_events: true,
@@ -32,33 +32,30 @@ class Marty::PromiseView < Marty::TreePanel
                 empty_text: 'Search',
                 listeners: {
                   change: {
-                    fn: c.listen_fn,
+                    fn: config.listen_fn,
                     buffer: 500,
                   }
                 }
               }]
   end
 
-  def configure(c)
-    c.title = I18n.t("jobs.promise_view")
-    c.model = "Marty::Promise"
-    c.columns = [
-                 :parent,
-                 :user__login,
-                 :job_id,
-                 :start_dt,
-                 :end_dt,
-                 :status,
-                 :cformat,
-                 :error,
-                ]
-    c.treecolumn = :parent
+  def configure(config)
     super
-
-    c.data_store.sorters = {
-      property: "id",
-      direction: 'DESC',
-    }
+    config.title = I18n.t("jobs.promise_view")
+    config.model = "Marty::Promise"
+    config.columns = [
+      {name: :title, xtype: :treecolumn},
+      :user__login,
+      :job_id,
+      :start_dt,
+      :end_dt,
+      :status,
+      :cformat,
+      :error,
+    ]
+    config.root_visible = false
+    config.enable_pagination = false
+    config.bbar = bbar
 
     # garbage collect old promises (hacky to do this here)
     Marty::Promise.cleanup(false)
@@ -68,18 +65,19 @@ class Marty::PromiseView < Marty::TreePanel
     [:clear, '->', :refresh, :download]
   end
 
-  js_configure do |c|
-    c.init_component = <<-JS
+  js_configure do |config|
+    config.init_component = <<-JS
     function() {
        this.callParent();
        this.getSelectionModel().on('selectionchange', function(selModel) {
           this.actions.download &&
           this.actions.download.setDisabled(!selModel.hasSelection());
        }, this);
+       this.getView().getRowClass = this.defaultGetRowClass;
     }
     JS
 
-    c.on_download = <<-JS
+    config.on_download = <<-JS
     function() {
        var jid = this.getSelectionModel().selected.first().getId();
        // FIXME: seems pretty hacky
@@ -87,13 +85,13 @@ class Marty::PromiseView < Marty::TreePanel
     }
     JS
 
-    c.on_refresh = <<-JS
+    config.on_refresh = <<-JS
     function() {
        this.store.load();
     }
     JS
 
-    c.on_clear = <<-JS
+    config.on_clear = <<-JS
     function(params) {
        var me = this;
        Ext.Msg.show({
@@ -134,60 +132,45 @@ class Marty::PromiseView < Marty::TreePanel
     this.on_refresh
   end
 
-  def get_children(params)
-    params[:scope] = config[:scope]
-
-    parent_id = params[:node]
-    parent_id = nil if parent_id == 'root'
-
+  def get_records params
     search_scope = config[:live_search_scope] || :live_search
-
-    scope_data_class(params) do
-      data_class.send(search_scope, params && params[:live_search] || '').scoping do
-        data_class.where(parent_id: parent_id).scoping do
-          data_adapter.get_records(params, final_columns)
-        end
-      end
-    end
+    Marty::Promise.children_for_id(params[:id], params[search_scope])
   end
 
-  column :parent do |c|
-    c.text   = 'Job Name'
-    c.getter = lambda { |r| r.title }
-    c.width  = 300
+  column :title do |config|
+    config.text = I18n.t('jobs.title')
+    config.width = 300
   end
 
-  column :status do |c|
-    c.hidden = true
-    # FIXME: TreePanel appears to not work with hidden boolean cols
-    c.xtype  = 'numbercolumn'
+  column :user__login do |config|
+    config.text = I18n.t('jobs.user_login')
+    config.width = 100
   end
 
-  column :user__login do |c|
-    c.text   = I18n.t('jobs.user_login')
-    c.width  = 100
+  column :job_id do |config|
+    config.width = 90
+  end
+  
+  column :start_dt do |config|
+    config.text = I18n.t('jobs.start_dt')
   end
 
-  column :job_id do |c|
-    c.width = 90
+  column :end_dt do |config|
+    config.text = I18n.t('jobs.end_dt')
   end
 
-  column :start_dt do |c|
-    c.text   = I18n.t('jobs.start_dt')
+  column :status do |config|
+    config.hidden = true
   end
 
-  column :end_dt do |c|
-    c.text   = I18n.t('jobs.end_dt')
+  column :cformat do |config|
+    config.text = I18n.t('jobs.cformat')
+    config.width = 90
   end
 
-  column :error do |c|
-    c.getter = lambda {|r| r.result.to_s if r.status == false}
-    c.flex   = 1
-  end
-
-  column :cformat do |c|
-    c.text   = "Format"
-    c.width  = 90
+  column :error do |config|
+    config.getter = ->(record) { record.result.to_s if record.status == false }
+    config.flex = 1
   end
 end
 

@@ -1,4 +1,4 @@
-describe 'Marty::PromiseViewTwo', ->
+describe 'Marty::PromiseView', ->
   it 'sees two jobs then filters down to one when searched', (done) ->
     wait ->
       expect(grid().getStore().getCount()).to.eql 2

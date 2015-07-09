@@ -92,7 +92,6 @@ en:
 
   jobs:
     promise_view: Jobs Dashboard
-    promise_view_two: New Jobs Dashboard!
     title: Job Name
     start_dt: Start Date
     end_dt: End Date

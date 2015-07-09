@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'Jobs Dashboard - Netzke::Testing', type: :feature, js: true do
+describe 'Jobs Dashboard - Netzke::Testing', type: :feature, js: true, capybara: true do
   it 'filters out usernames other than the one specified in the search box' do
     other_user = Marty::User.create(login: 'other',
                                     firstname: 'other',
@@ -18,6 +18,6 @@ describe 'Jobs Dashboard - Netzke::Testing', type: :feature, js: true do
     run_mocha_spec 'login', component: 'Marty::AuthApp'
 
     run_mocha_spec 'job_dashboard_live_search',
-      component: 'Marty::PromiseViewTwo'
+      component: 'Marty::PromiseView'
   end
 end

@@ -1,19 +1,26 @@
-.x-grid-row-selected .x-grid-cell-inner {
-    background-color: #E9E8F6 !important;
+.green-row {
+    background-color: #91FF91;
 }
 
-.green-row td {
-    background-color: #91FF91 !important;
+.red-row {
+    background-color: #FF4545;
 }
 
-.red-row td {
-    background-color: #FF4545 !important;
+.orange-row {
+    background-color: #FF9D5C;
 }
 
-.orange-row td {
-    background-color: #FF9D5C !important;
+.x-grid-item-selected .green-row {
+    background-color: #549454; /* V: 58 */
+    font-weight: bold;
 }
 
-.gray-row td {
-    background-color: #D3D3D3 !important;
+.x-grid-item-selected .red-row {
+    background-color: #bd3333; /* V: 74 */
+    font-weight: bold;
+}
+
+.x-grid-item-selected .orange-row {
+    background-color: #b87243; /* V: 74 */
+    font-weight: bold;
 }
