@@ -15,5 +15,15 @@ module Gemini
 
     belongs_to :entity
     mcfly_belongs_to :bud_category
+
+    def self.import_preprocess(data)
+      data.map {
+        |rec|
+        rec["note_rate"].gsub! /\$/, ''
+        rec["buy_up"].gsub! /\%/, ''
+        rec["buy_down"].gsub! /\%/, ''
+        rec
+      }
+    end
   end
 end

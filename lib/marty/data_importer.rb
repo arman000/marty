@@ -22,7 +22,8 @@ module Marty
                                cleaner_function    = nil,
                                validation_function = nil,
                                col_sep             = "\t",
-                               allow_dups          = false
+                               allow_dups          = false,
+                               preprocess_function = nil
                                )
 
       recs = self.do_import(klass,
@@ -32,6 +33,7 @@ module Marty
                             validation_function,
                             col_sep,
                             allow_dups,
+                            preprocess_function,
                             )
 
       recs.each_with_object(Hash.new(0)) {|(op, id), h|
@@ -50,11 +52,16 @@ module Marty
                        cleaner_function    = nil,
                        validation_function = nil,
                        col_sep             = "\t",
-                       allow_dups          = false
+                       allow_dups          = false,
+                       preprocess_function = nil
                        )
 
       parsed = data.is_a?(Array) ? data :
         CSV.new(data, headers: true, col_sep: col_sep)
+
+      # run preprocessor
+      parsed = klass.send(preprocess_function.to_sym, parsed) if
+        preprocess_function
 
       klass.transaction do
         cleaner_ids = cleaner_function ? klass.send(cleaner_function.to_sym) :

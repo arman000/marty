@@ -8,7 +8,11 @@ class Marty::ImportType < Marty::Base
         return
       end
 
-      [entry.cleaner_function, entry.validation_function].each { |func|
+      [
+        entry.cleaner_function,
+        entry.validation_function,
+        entry.preprocess_function,
+      ].each { |func|
         entry.errors[:base] = "unknown class method #{func}" if
         func && !klass.respond_to?(func.to_sym)
       }

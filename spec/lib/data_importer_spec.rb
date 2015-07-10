@@ -78,6 +78,16 @@ Conv Fixed 30	2.250	4.42000	7.24000	12	2012
 Conv Fixed 30	2.375	a123	7.24000	12	2012
 EOF
 
+fannie_bup7 =<<EOF
+bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
+Conv Fixed 30	$2.250	4.42%	7.24%	12	2012
+Conv Fixed 30	$2.375	4.42%	7.24%	12	2012
+Conv Fixed 30	$2.500	4.41300	7.22800	12	2012
+Conv Fixed 30	$2.625	4.37500	7.16200	12	2012
+Conv Fixed 30	$2.750	4.32900	7.09300	12	2012
+Conv Fixed 20	$2.875	4.24800	6.95900	12	2012
+EOF
+
   describe DataImporter do
     it "should be able to import fannie buyups" do
       res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
@@ -227,6 +237,21 @@ EOF
                           'import_validation',
                           )
       res.should == {update: 1, clean: 11}
+    end
+
+    it "should be able to import with preprocess" do
+      res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
+      res = Marty::DataImporter.
+        do_import_summary(Gemini::FannieBup,
+                          fannie_bup7,
+                          'infinity',
+                          'import_cleaner',
+                          nil,
+                          "\t",
+                          false,
+                          'import_preprocess',
+                         )
+      res.should == {create: 6}
     end
 
     it "should be able to import with validation - allow prior month" do

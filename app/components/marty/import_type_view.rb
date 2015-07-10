@@ -17,6 +17,7 @@ class Marty::ImportTypeView < Marty::Grid
        :db_model_name,
        :cleaner_function,
        :validation_function,
+       :preprocess_function,
       ]
 
     c.enable_extended_search = false
@@ -44,6 +45,9 @@ class Marty::ImportTypeView < Marty::Grid
     c.flex = 1
   end
 
+  column :preprocess_function do |c|
+    c.flex = 1
+  end
 end
 
 ImportTypeView = Marty::ImportTypeView
