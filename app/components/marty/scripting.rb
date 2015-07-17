@@ -46,7 +46,6 @@ class Marty::Scripting < Netzke::Base
 
        tag_grid.getSelectionModel().on('selectionchange',
           function(self, records) {
-          console.log("tag grid selectionchange:", records);
 
           if(records[0] == null)
              return;
@@ -61,7 +60,6 @@ class Marty::Scripting < Netzke::Base
 
        script_grid.getSelectionModel().on('selectionchange',
           function(self, records) {
-          console.log("script grid selectionchange:", records);
 
           if(script_grid.getStore().isLoading() == true)
              return;
