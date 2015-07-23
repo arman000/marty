@@ -150,7 +150,7 @@ class Marty::PromiseView < Netzke::Basepack::Tree
   column :job_id do |config|
     config.width = 90
   end
-  
+
   column :start_dt do |config|
     config.text = I18n.t('jobs.start_dt')
   end

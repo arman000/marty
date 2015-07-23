@@ -42,7 +42,6 @@ class Marty::Scripting < Netzke::Base
        var tag_grid      = me.netzkeGetComponent('tag_grid').getView();
        var script_grid   = me.netzkeGetComponent('script_grid').getView();
        var script_form   = me.netzkeGetComponent('script_form');
-       //var script_tester = me.netzkeGetComponent('script_tester');
 
        tag_grid.getSelectionModel().on('selectionchange',
           function(self, records) {
@@ -55,7 +54,6 @@ class Marty::Scripting < Netzke::Base
           script_grid.getStore().load();
           var script_name = null;
           script_form.netzkeLoad({script_name: script_name});
-          //script_tester.selectScript(script_name);
           }, me);
 
        script_grid.getSelectionModel().on('selectionchange',
@@ -70,7 +68,6 @@ class Marty::Scripting < Netzke::Base
           var script_name = records[0].get('name');
           me.selectScript({script_name: script_name});
           script_form.netzkeLoad({script_name: script_name});
-          //script_tester.selectScript(script_name);
           }, me);
     }
     JS
@@ -87,7 +84,6 @@ class Marty::Scripting < Netzke::Base
           this.netzkeGetComponent('script_grid').getStore().load();
           this.netzkeGetComponent('script_form').netzkeLoad(
              {script_name: script_name});
-          //this.netzkeGetComponent('script_tester').selectScript(script_name);
        }
     }
     JS

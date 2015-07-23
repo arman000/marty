@@ -7,22 +7,6 @@ class Marty::ScriptTester < Marty::Form
     c.items =
       [
        fieldset(I18n.t("script_tester.attributes"),
-=begin
-                {
-                  xtype:        :netzkeremotecombo,
-                  name:         "nodename",
-                  attr_type:    :string,
-                  virtual:      true,
-                  field_label:  "Node",
-                },
-                {
-                  xtype:        :netzkeremotecombo,
-                  name:         "attrname",
-                  attr_type:    :string,
-                  virtual:      true,
-                  field_label:  "Attribute",
-                },
-=end
                 {
                   name:         "attrs",
                   attr_type:    :text,
@@ -33,15 +17,6 @@ class Marty::ScriptTester < Marty::Form
                 {},
                 ),
        fieldset(I18n.t("script_tester.parameters"),
-=begin
-                {
-                  xtype:        :netzkeremotecombo,
-                  name:         "paramname",
-                  attr_type:    :string,
-                  virtual:      true,
-                  hide_label:   true,
-                },
-=end
                 {
                   name:         "params",
                   attr_type:    :text,
@@ -56,67 +31,6 @@ class Marty::ScriptTester < Marty::Form
   end
 
   js_configure do |c|
-=begin
-    c.select_script = <<-JS
-    function(script_name) {
-       console.log("selecting the script for the tester");
-       var me = this;
-
-       var form = me.getForm();
-       // reload the attr/param drop downs
-       form.findField('nodename').reset()
-       form.findField('nodename').store.load({params: {}});
-       form.findField('attrname').reset();
-       form.findField('attrname').store.load({params: {}});
-       form.findField('paramname').store.load({params: {}});
-    }
-    JS
-
-    c.init_component = <<-JS
-    function() {
-       var me = this;
-       me.callParent();
-       var form = me.getForm();
-
-       var nodename  = form.findField('nodename');
-       var attrname  = form.findField('attrname');
-       var attrs     = form.findField('attrs');
-       var paramname = form.findField('paramname');
-       var params    = form.findField('params');
-
-       nodename.on('select', function(combo, record) {
-          console.log('node on select');
-          if(record instanceof Array) {
-             record = record[0]
-          }
-          var data = record && record.data;
-          me.selectNode({node: data.text});
-          attrname.reset();
-          attrname.store.load({params: {}});
-       });
-
-       attrname.on('select', function(combo, record) {
-          if (nodename.getValue()) {
-             if(record instanceof Array) {
-                record = record[0]
-             }
-             attrs.setValue(attrs.getValue() +
-                nodename.getDisplayValue() + "." + record.data.text + '; ');
-          }
-          combo.select(null);
-       });
-
-       paramname.on('select', function(combo, record) {
-          if(record instanceof Array) {
-             record = record[0]
-          }
-          params.setValue(params.getValue() + record.data.text + " = 0\\n");
-          combo.select(null);
-       });
-    }
-    JS
-=end
-
     c.set_result = <<-JS
     function(html) {
        var result = this.netzkeGetComponent('result');
@@ -132,24 +46,6 @@ class Marty::ScriptTester < Marty::Form
     Marty::ScriptSet.new(root_sess[:selected_tag_id]).
       get_engine(root_sess[:selected_script_name])
   end
-
-=begin
-  def node_list
-    engine = new_engine
-    engine ? engine.enumerate_nodes.sort : []
-  end
-
-  def attr_list
-    engine = new_engine
-    node = root_sess[:selected_node]
-    node && engine ? engine.enumerate_attrs_by_node(node).sort : []
-  end
-
-  def param_list
-    engine = new_engine
-    engine ? engine.enumerate_params.sort : []
-  end
-=end
 
   endpoint :netzke_submit do |params, this|
     data = ActiveSupport::JSON.decode(params[:data])
@@ -196,27 +92,6 @@ class Marty::ScriptTester < Marty::Form
       this.set_result '<font color="red">' + result.join("<br/>") + "</font>"
     end
   end
-
-=begin
-  def combofy(l)
-    l.each_with_index.map {|x, i| [i+1, x]}
-  end
-
-  endpoint :select_node do |params, this|
-    root_sess[:selected_node] = params[:node]
-  end
-
-  endpoint :get_combobox_options do |params, this|
-    this.data = case params["attr"]
-                when "nodename" then
-                  combofy(node_list)
-                when "attrname" then
-                  combofy(attr_list)
-                when "paramname"
-                  combofy(param_list)
-                end
-  end
-=end
 
   action :apply do |a|
     a.text     = I18n.t("script_tester.compute")

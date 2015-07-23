@@ -3,7 +3,8 @@ class Marty::ComponentsController < Marty::ApplicationController
   # appropriate route needs to be defined.
   # <base_url>/components/<ComponentCamelCaseName>
 
-  helper Rails.application.routes.url_helpers
+  # FIXME: what is this??????
+  # helper Rails.application.routes.url_helpers
 
   def index
     component = params[:component]

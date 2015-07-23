@@ -17,7 +17,6 @@ default.
 */
 Ext.define('Ext.ux.layout.component.field.CodeMirror', {
     extend: 'Ext.layout.component.Auto',
-    // extend: 'Ext.layout.component.field.FieldContainer',
     alias: ['layout.codemirror'],
 
     type: 'codemirror',

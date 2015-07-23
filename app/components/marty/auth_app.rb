@@ -32,10 +32,6 @@ class Marty::AuthApp < Marty::SimpleApp
     c.text = "Sign out #{Mcfly.whodunnit.name}" if Mcfly.whodunnit
   end
 
-  js_configure do |c|
-    c.mixin
-  end
-
   endpoint :sign_in do |params,this|
     user = Marty::User.try_to_login(params[:login], params[:password])
 
