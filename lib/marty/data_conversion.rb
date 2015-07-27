@@ -171,6 +171,14 @@ class Marty::DataConversion
 
     key_groups = row.keys.group_by {|x| x.split('__').first}
 
+    # FIXME: map all empty string values to nil --- this means that
+    # user can't import empty strings -- Perhaps, mapping "" -> nil
+    # should be optional?
+    row = row.each_with_object({}) {
+      |(k,v), h|
+      h[k] = v == '' ? nil : v
+    }
+
     key_groups.each_with_object({}) do
       |(ga, g), h|
 
