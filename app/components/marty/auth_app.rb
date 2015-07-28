@@ -3,6 +3,10 @@
 # == Extending Marty::AuthApp
 # DOCFIX
 class Marty::AuthApp < Marty::SimpleApp
+  js_configure do |c|
+    c.mixin
+  end
+
   # Set the Logout button if current_user is set
   def menu
     [].tap do |menu|
