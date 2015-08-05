@@ -54,7 +54,7 @@ class Marty::Tag < Marty::Base
       tag = tag_id
     end
 
-    raise "bad tag identifier #{tag_id}" unless tag.is_a? Marty::Tag
+    raise "bad tag identifier #{tag_id || 'nil'}" unless tag.is_a? Marty::Tag
     tag
   end
 
