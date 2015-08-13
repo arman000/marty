@@ -50,8 +50,9 @@ class Marty::RpcController < ActionController::Base
 
     begin
       engine = Marty::ScriptSet.new(tag).get_engine(sname)
-    rescue
-      return {error: "Can't get_engine #{sname || 'nil'} tag #{tag || 'nil'}"}
+    rescue => e
+      return {error: "Can't get engine: #{sname || 'nil'} with tag: " +
+              "#{tag || 'nil'}; message: #{e.message}"}
     end
 
     begin
