@@ -22,4 +22,16 @@ namespace :marty do
     load_dir = ENV['LOAD_DIR']
     Marty::Script.load_scripts(load_dir)
   end
+
+  desc 'Print out all models and their fields'
+  task print_schema: :environment do
+    Rails.application.eager_load!
+    ActiveRecord::Base.descendants.each do |model|
+      puts model.name
+      model.attribute_names.each do |attribute|
+        puts "  #{attribute}"
+      end
+      puts
+    end
+  end
 end
