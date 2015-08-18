@@ -26,7 +26,7 @@ namespace :marty do
   desc 'Print out all models and their fields'
   task print_schema: :environment do
     Rails.application.eager_load!
-    ActiveRecord::Base.descendants.each do |model|
+    ActiveRecord::Base.descendants.sort_by(&:name).each do |model|
       puts model.name
       model.attribute_names.each do |attribute|
         puts "  #{attribute}"
