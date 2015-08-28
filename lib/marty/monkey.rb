@@ -114,53 +114,6 @@ end
 
 ######################################################################
 
-def pg_range_to_human(r)
-  m = /\A(?<open>\[|\()(?<start>.*?),(?<end>.*?)(?<close>\]|\))\z/.match(r)
-
-  raise "bad pg range #{r}" unless m
-
-  if m[:start] == ""
-    res = ""
-  else
-    op = m[:open] == "(" ? ">" : ">="
-    res = "#{op}#{m[:start]}"
-  end
-
-  if m[:end] != ""
-    op = m[:close] == ")" ? "<" : "<="
-    res += "#{op}#{m[:end]}"
-  end
-
-  res
-end
-
-def human_to_pg_range(r)
-  m = /\A
-    ((?<op0>\>|\>=)(?<start>[^\<\>\=]*?))?
-    ((?<op1>\<|\<=)(?<end>[^\<\>\=]*?))?
-    \z/x.match(r)
-
-  raise "bad range '#{r}'" unless m
-
-  if m[:op0]
-    open = m[:op0] == ">" ? "(" : "["
-    start = "#{open}#{m[:start]}"
-  else
-    start = "["
-  end
-
-  if m[:op1]
-    close = m[:op1] == "<" ? ")" : "]"
-    ends = "#{m[:end]}#{close}"
-  else
-    ends = "]"
-  end
-
-  "#{start},#{ends}"
-end
-
-######################################################################
-
 # Rails 4 doesn't handle 'infinity' datetime properly due to
 # in_time_zone conversion. Ergo this hack.
 
