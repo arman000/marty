@@ -124,3 +124,16 @@ class String
     self == 'infinity' ? self : old_in_time_zone(zone)
   end
 end
+
+######################################################################
+
+# Axlsx::sanitize modifies strings in worksheet definition -- this
+# doesn't work with Delorean's frozen strings.
+require 'axlsx'
+module Axlsx
+  def self.sanitize(str)
+    str.delete(CONTROL_CHARS)
+  end
+end
+
+######################################################################
