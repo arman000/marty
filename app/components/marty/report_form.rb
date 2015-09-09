@@ -10,9 +10,9 @@ class Marty::ReportForm < Marty::Form
     a.disabled = false
   end
 
-  action :generate do |a|
+  action :background do |a|
     a.text     = a.tooltip = I18n.t("reporting.generate")
-    a.handler  = :on_generate
+    a.handler  = :on_background
     a.icon     = :report_go
     a.disabled = false
   end
@@ -20,7 +20,7 @@ class Marty::ReportForm < Marty::Form
   ######################################################################
 
   def configure_bbar(c)
-    c[:bbar] = ['->', :apply, :generate]
+    c[:bbar] = ['->', :apply, :background]
   end
 
   ######################################################################
@@ -103,7 +103,7 @@ class Marty::ReportForm < Marty::Form
     # FIXME: can replace HTTP GET with a POST this would solve the
     # data.length issue:
     # http://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
-    c.on_generate = <<-JS
+    c.on_background = <<-JS
     function() {
        var values = this.getForm().getValues();
        var data = escape(Ext.encode(values));
@@ -193,6 +193,10 @@ class Marty::ReportForm < Marty::Form
       return
     end
 
+    # if there's a background_only flag, we disable the foreground submit
+    background_only =
+      engine.evaluate(root_sess[:selected_node], "background_only") rescue nil
+
     items = Marty::Xl.symbolize_keys(eval_form_items(engine, items), ':')
 
     items = [{html: "<br><b>No input is needed for this report.</b>"}] if
@@ -210,6 +214,8 @@ class Marty::ReportForm < Marty::Form
     c.repformat = format
     c.title     = "Generate: #{title}-#{sset.tag.name}"
     c.reptitle  = title
+
+    actions[:background].disabled = !!background_only
   end
 end
 
