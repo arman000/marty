@@ -169,14 +169,14 @@ class Marty::DataConversion
 
     raise "bad row (extra columns?) -- #{row}" if row.has_key?(nil)
 
-    key_groups = row.keys.group_by {|x| x.split('__').first}
+    key_groups = row.keys.group_by {|x| x.to_s.split('__').first}
 
     # FIXME: map all empty string values to nil --- this means that
     # user can't import empty strings -- Perhaps, mapping "" -> nil
     # should be optional?
     row = row.each_with_object({}) {
       |(k,v), h|
-      h[k] = v == '' ? nil : v
+      h[k.to_s] = v == '' ? nil : v
     }
 
     key_groups.each_with_object({}) do
