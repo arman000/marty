@@ -15,14 +15,15 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
       cformat: 'csv',
       start_dt: Time.now
 
-    visit marty_components_path('Marty::AuthApp')
+    visit "/"
     find(ext_button_id('Sign in')).click
     fill_in 'Login', with: 'marty'
     fill_in 'Password', with: 'marty'
     find(:xpath, '//a[contains(., "OK")]').click
     expect(page).to have_content('marty marty')
 
-    visit marty_components_path('Marty::PromiseView')
+    find(ext_button_id('Applications')).click
+    find(ext_menuitem_id('Jobs Dashboard')).click
     page_title = I18n.t("jobs.promise_view")
     expect(page).to have_content(page_title)
     expect(tree_row_count(page_title)).to eq(2)
@@ -34,6 +35,11 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
 
   def ext_button_id title
     id = page.evaluate_script("Ext.ComponentQuery.query(\"button{isVisible(true)}[text='#{title}']\")[0].id")
+    "##{id}"
+  end
+
+  def ext_menuitem_id title
+    id = page.evaluate_script("Ext.ComponentQuery.query(\"menuitem[text='#{title}']\")[0].id")
     "##{id}"
   end
 
