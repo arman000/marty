@@ -137,3 +137,27 @@ module Axlsx
 end
 
 ######################################################################
+
+require 'netzke/basepack/data_adapters/active_record_adapter'
+module Netzke::Basepack::DataAdapters
+  class ActiveRecordAdapter < AbstractAdapter
+    # FIXME: another giant hack to handle lazy_load columns.
+    # Modified original count_records to call count('*') instead of
+    # count when lazy-loaded.  Otherwise, we run into issues with
+    # counting records in the default_scope placed by the lazy_load
+    # module.
+    def count_records(params, columns=[])
+
+      relation = @relation || get_relation(params)
+      columns.each do |c|
+        assoc, method = c[:name].split('__')
+        relation = relation.includes(assoc.to_sym).references(assoc.to_sym) if method
+      end
+
+      @model_class.const_defined?(:LAZY_LOADED) ? relation.count('*') :
+        relation.count
+    end
+
+  end
+end
+
