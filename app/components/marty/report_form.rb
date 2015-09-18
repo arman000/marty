@@ -10,9 +10,9 @@ class Marty::ReportForm < Marty::Form
     a.disabled = false
   end
 
-  action :background do |a|
+  action :foreground do |a|
     a.text     = a.tooltip = I18n.t("reporting.generate")
-    a.handler  = :on_background
+    a.handler  = :on_foreground
     a.icon     = :report_go
     a.disabled = false
   end
@@ -20,7 +20,7 @@ class Marty::ReportForm < Marty::Form
   ######################################################################
 
   def configure_bbar(c)
-    c[:bbar] = ['->', :apply, :background]
+    c[:bbar] = ['->', :apply, :foreground]
   end
 
   ######################################################################
@@ -100,10 +100,13 @@ class Marty::ReportForm < Marty::Form
   ######################################################################
 
   js_configure do |c|
-    # FIXME: can replace HTTP GET with a POST this would solve the
-    # data.length issue:
+    # FIXME: Can we use POST instead of get:
     # http://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
-    c.on_background = <<-JS
+    # arman -- I tried this solution. However, with a POST the
+    # component no longer has the session cookie.  Therefore, we don't
+    # have access to the selected script.  We likely needs to rethink
+    # this whole mechanism.
+    c.on_foreground = <<-JS
     function() {
        var values = this.getForm().getValues();
        var data = escape(Ext.encode(values));
@@ -215,7 +218,7 @@ class Marty::ReportForm < Marty::Form
     c.title     = "Generate: #{title}-#{sset.tag.name}"
     c.reptitle  = title
 
-    actions[:background].disabled = !!background_only
+    actions[:foreground].disabled = !!background_only
   end
 end
 
