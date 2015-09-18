@@ -51,6 +51,9 @@ $ rake marty:delete_scripts
 
 # Testing
 
+Make sure that extjs is installed (or symbolically linked) in the 
+dummy app at spec/dummy/public.
+
 Marty currently only runs with postgresql. To be able to run the tests
 you will first need to create a `database.yml` file in `spec/dummy/config`.
 You can use the example file by doing:

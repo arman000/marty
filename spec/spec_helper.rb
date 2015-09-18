@@ -13,10 +13,18 @@ Dir[Rails.root.join("../support/**/*.rb")].each { |f| require f }
 class ActiveRecord::Base
   mattr_accessor :shared_connection
 
-  @@shared_connection = nil
+  def self.clear_connection
+    @@shared_connection = nil
+  end
+
+  clear_connection
 
   def self.connection
     @@shared_connection || retrieve_connection
+  end
+
+  def self.reset_shared_connection
+    @@shared_connection = retrieve_connection
   end
 end
 
