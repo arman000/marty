@@ -151,10 +151,13 @@ class Marty::DataConversion
 
     raise "no keys for #{klass} -- #{options}" if find_options.empty?
 
-    q = klass.where(find_options)
+    # unscope klass since we're sometimes sent lazy column classes
+    q = klass.unscoped.where(find_options)
     q = q.where('obsoleted_dt >= ?', dt) if dt && Mcfly.has_mcfly?(klass)
 
-    # FIXME: error out on multiple matches?
+    # q.count is almost always 0 or 1 => hopefully it's not too slow on PG.
+    raise "too many results for: #{klass} -- #{options}" if q.count > 1
+
     q.first
   end
 
