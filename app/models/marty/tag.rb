@@ -63,7 +63,7 @@ class Marty::Tag < Marty::Base
     self.find_by_name(name)
   end
 
-  # Performance hack to cache Rule AR object
+  # Performance hack to cache AR object
   cached_delorean_fn :lookup_id, sig: 1 do
     |id|
     find_by_id(id)
@@ -80,8 +80,17 @@ class Marty::Tag < Marty::Base
 
   delorean_fn :find_match, sig: 1 do
     |dt|
-    id = where("created_dt <= ?", dt).order("created_dt DESC").pluck(:id).first
-    # performance hack
+    id = select(:id).where("created_dt <= ?", dt).order("created_dt DESC").first.id
+
+    # performance hack to use cached version
     id && lookup_id(id)
+  end
+
+  # Performance hack for script sets -- FIXME: making find_mtach
+  # cached breaks Gemini tests.  Need to look into it.
+  cached_delorean_fn :cached_find_match, sig: 1 do
+    |dt|
+
+    find_match dt
   end
 end
