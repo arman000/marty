@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/arman000/marty.svg)](https://travis-ci.org/arman000/marty)
 # Marty
 
 Marty is a framework for viewing and reporting on versioned data.
