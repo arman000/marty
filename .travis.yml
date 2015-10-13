@@ -8,6 +8,12 @@ before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - bundle exec rake db:migrate
 
+  - sh -e /etc/init.d/xvfb start
+
+  - wget http://cdn.sencha.com/ext/gpl/ext-5.1.0-gpl.zip
+  - unzip -q ext-5.1.0-gpl.zip
+  - mv ext-5.1.0 spec/dummy/public/extjs
+
 script:
   - export DISPLAY=:99.0
   - bundle exec rake
