@@ -176,4 +176,41 @@ class Marty::DataChange
     klass.where(change_q, t0, t1, t0, t1).
       order("group_id, created_dt").group_by(&:group_id)
   end
+
+  ######################################################################
+
+  # Given a Mcfly class_name, find all of the obsoleted Mcfly objects
+  # which are referenced by live (non-obsoleted) class instances.
+  delorean_fn :dead_refs, sig: 2 do
+    |ts, class_name|
+
+    klass = class_name.constantize
+
+    return unless Mcfly.has_mcfly?(klass)
+
+    ts = Mcfly.normalize_infinity(ts)
+    col_types = Marty::DataConversion.col_types(klass)
+
+    mcfly_cols = col_types.map { |attr, h|
+      Hash === h && Mcfly.has_mcfly?(h[:assoc_class]) && h || nil
+    }.compact
+
+    mcfly_cols.each_with_object({}) {
+      |h, res|
+
+      fk = h[:foreign_key]
+      attr = fk.to_s.sub(/_id$/, '').to_sym
+      ref_table = h[:assoc_class].table_name
+
+      arr = klass.joins(attr).
+            where("#{klass.table_name}.obsoleted_dt >= ?", ts).
+            where("#{klass.table_name}.created_dt < ?", ts).
+            where("#{ref_table}.obsoleted_dt < ? OR #{ref_table}.created_dt >= ?", ts, ts).
+            all
+
+      arr = arr.map {|obj| Marty::DataExporter.export_attrs(klass, obj, [fk])}
+
+      res[fk] = arr unless arr.empty?
+    }
+  end
 end
