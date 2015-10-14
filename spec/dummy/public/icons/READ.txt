@@ -1,0 +1,3 @@
+This directory currently contains a bunch of empty png files which are
+needed to keep the feature test happy (only used with Travis CI).
+FIXME: Should decide how to include the actual famfamfam icons.

@@ -13,6 +13,7 @@ before_script:
   - wget http://cdn.sencha.com/ext/gpl/ext-5.1.0-gpl.zip
   - unzip -q ext-5.1.0-gpl.zip
   - mv ext-5.1.0 spec/dummy/public/extjs
+  - ls -s spec/dummy/public/extjs/icons spec/dummy/public/icons
 
 script:
   - export DISPLAY=:99.0
