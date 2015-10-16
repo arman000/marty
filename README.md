@@ -52,7 +52,7 @@ $ rake marty:delete_scripts
 
 # Testing
 
-Make sure that extjs is installed (or symbolically linked) in the 
+Make sure that extjs is installed (or symbolically linked) in the
 dummy app at spec/dummy/public.
 
 Marty currently only runs with postgresql. To be able to run the tests

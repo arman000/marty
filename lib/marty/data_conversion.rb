@@ -153,7 +153,8 @@ class Marty::DataConversion
 
     # unscope klass since we're sometimes sent lazy column classes
     q = klass.unscoped.where(find_options)
-    q = q.where('obsoleted_dt >= ?', dt) if dt && Mcfly.has_mcfly?(klass)
+    q = q.where("obsoleted_dt >= ? AND created_dt < ?", dt, dt) if
+       dt && Mcfly.has_mcfly?(klass)
 
     # q.count is almost always 0 or 1 => hopefully it's not too slow on PG.
     raise "too many results for: #{klass} -- #{options}" if q.count > 1
