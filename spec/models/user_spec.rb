@@ -46,7 +46,8 @@ module Marty
       it "should not allow user managers to edit the Gemini account" do
         Mcfly.whodunnit = tuser
         user = UserHelpers.system_user
-        Marty::User.any_instance.stub(:user_manager_only).and_return(true)
+        allow_any_instance_of(Marty::User).to receive(:user_manager_only).
+          and_return(true)
         user.firstname = 'Testing'
         expect(user).to_not be_valid
         expect(user.errors[:base].to_s).
@@ -55,7 +56,8 @@ module Marty
 
       it "should not allow user managers to edit their own account" do
         Mcfly.whodunnit = tuser
-        Marty::User.any_instance.stub(:user_manager_only).and_return(true)
+        allow_any_instance_of(Marty::User).to receive(:user_manager_only).
+          and_return(true)
         tuser.firstname = 'Testing'
         expect(tuser).to_not be_valid
         expect(tuser.errors[:base].to_s).

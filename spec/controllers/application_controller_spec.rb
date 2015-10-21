@@ -9,7 +9,8 @@ module Marty
 
     describe 'authentication' do
       it "should allow a registered user to log in" do
-        Rails.configuration.marty.stub(:auth_source).and_return('local')
+        allow(Rails.configuration.marty).to receive(:auth_source).
+          and_return('local')
 
         user = Marty::User.try_to_login('marty', 'marty')
         subject.set_user(user)
@@ -21,8 +22,9 @@ module Marty
 
       it "should allow a registered user to log in when the database " +
         "is in recovery mode" do
-        Marty::Util.stub(:db_in_recovery?).and_return(true)
-        Rails.configuration.marty.stub(:auth_source).and_return('local')
+        allow(Marty::Util).to receive(:db_in_recovery?).and_return(true)
+        allow(Rails.configuration.marty).to receive(:auth_source).
+          and_return('local')
 
         user = Marty::User.try_to_login('marty', 'marty')
         subject.set_user(user)
@@ -40,7 +42,7 @@ module Marty
 
       it "should prevent a non-registered user from logging in when the " +
         "database is in recovery mode" do
-        Marty::Util.stub(:db_in_recovery?).and_return(true)
+        allow(Marty::Util).to receive(:db_in_recovery?).and_return(true)
         user = Marty::User.try_to_login('unknown_marty', 'invalid_password')
         expect(user).to be_nil
         expect(Marty::User.current).to be_nil
