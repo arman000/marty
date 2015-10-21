@@ -24,41 +24,60 @@ class Marty::RpcController < ActionController::Base
   private
 
   def do_eval(sname, tag, node, attrs, params, api_key)
-    return {error: "Bad attrs"} unless attrs.is_a?(String)
+    unless attrs.is_a?(String)
+      logger.info "Marty::RpcController#do_eval, Bad attrs (must be a string): <#{attrs.inspect}>"
+      return {error: "Bad attrs"}
+    end
 
     begin
       attrs = ActiveSupport::JSON.decode(attrs)
-    rescue MultiJson::DecodeError
+    rescue JSON::ParserError => e
+      logger.info "Marty::RpcController#do_eval, Malformed attrs (json parse error): #{attrs.inspect}, #{e.message}"
       return {error: "Malformed attrs"}
     end
 
-    return {error: "Malformed attrs"} unless
-      attrs.is_a?(Array) && attrs.all? {|x| x.is_a? String}
+    unless attrs.is_a?(Array) && attrs.all? {|x| x.is_a? String}
+      logger.info "Marty::RpcController#do_eval, Malformed attrs (must be array of strings): <#{attrs.inspect}>"
+      return {error: "Malformed attrs"}
+    end
 
-    return {error: "Bad params"} unless params.is_a?(String)
+    unless params.is_a?(String)
+      logger.info "Marty::RpcController#do_eval, Bad params (must be a string): <#{params.inspect}>"
+      return {error: "Bad params"}
+    end
 
     begin
       params = ActiveSupport::JSON.decode(params)
-    rescue MultiJson::DecodeError
+    rescue JSON::ParserError => e
+      logger.info "Marty::RpcController#do_eval, Malformed params (json parse error): <#{params.inspect}>, #{e.message}"
       return {error: "Malformed params"}
     end
 
-    return {error: "Malformed params"} unless params.is_a?(Hash)
+    unless params.is_a?(Hash)
+      logger.info "Marty::RpcController#do_eval, Malformed params (must be a hash): <#{params.inspect}>"
+      return {error: "Malformed params"}
+    end
 
-    return {error: "Permission denied" } unless
-      Marty::ApiAuth.authorized?(sname, api_key)
+    unless Marty::ApiAuth.authorized?(sname, api_key)
+      logger.info "Marty::RpcController#do_eval, permission denied"
+      return {error: "Permission denied" }
+    end
 
     begin
       engine = Marty::ScriptSet.new(tag).get_engine(sname)
     rescue => e
-      return {error: "Can't get engine: #{sname || 'nil'} with tag: " +
-              "#{tag || 'nil'}; message: #{e.message}"}
+      err_msg = "Can't get engine: #{sname || 'nil'} with tag: " +
+              "#{tag || 'nil'}; message: #{e.message}"
+      logger.info "Marty::RpcController#do_eval, #{err_msg}"
+      return {error: err_msg}
     end
 
     begin
       engine.evaluate_attrs(node, attrs, params)
     rescue => exc
-      Delorean::Engine.grok_runtime_exception(exc)
+      err_msg = Delorean::Engine.grok_runtime_exception(exc)
+      logger.info "Marty::RpcController#do_eval, Evaluation error: #{err_msg}"
+      err_msg
     end
   end
 end
