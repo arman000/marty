@@ -40,7 +40,14 @@ A: M3::A
 eof
 
 describe Marty::RpcController do
-  before(:each) { @routes = Marty::Engine.routes }
+  before(:each) {
+    @routes = Marty::Engine.routes
+
+    # HACKY: 'params' param is special to the Rails controller test helper (at
+    # least as of 4.2). Setting this avoids test framework code that relies on
+    # params being a hash.
+    @request.env['PATH_INFO'] = "/marty/rpc/evaluate.json"
+  }
 
   before(:each) {
     @p0 = Marty::Posting.do_create("BASE", Date.today, 'a comment')
@@ -275,5 +282,52 @@ describe Marty::RpcController do
       api_key: api.api_key + 'x',
     }
     expect(response.body).to match(/"error":"Permission denied"/)
+  end
+
+  context "error handling" do
+    it 'returns bad attrs if attrs is not a string' do
+      get :evaluate, format: :json, attrs: 0
+      expect(response.body).to match(/"error":"Bad attrs"/)
+    end
+
+    it 'returns malformed attrs for improperly formatted json' do
+      get :evaluate, format: :json, attrs: "{"
+      expect(response.body).to match(/"error":"Malformed attrs"/)
+    end
+
+    it 'returns malformed attrs if attrs is not an array of strings' do
+      get :evaluate, format: :json, attrs: "{}"
+      expect(response.body).to match(/"error":"Malformed attrs"/)
+
+      get :evaluate, format: :json, attrs: "[0]"
+      expect(response.body).to match(/"error":"Malformed attrs"/)
+    end
+
+    it 'returns bad params if params is not a string' do
+      get(:evaluate, format: :json, params: 0)
+      expect(response.body).to match(/"error":"Bad params"/)
+    end
+
+    it 'returns malformed params for improperly formatted json' do
+      get :evaluate, format: :json, params: "{"
+      expect(response.body).to match(/"error":"Malformed params"/)
+    end
+
+    it 'returns malformed params if params is not a hash' do
+      get :evaluate, format: :json, params: "[0]"
+      expect(response.body).to match(/"error":"Malformed params"/)
+    end
+
+    it 'returns engine/tag lookup error if script not found' do
+      get :evaluate, format: :json, script: 'M1', tag: 'invalid'
+      expect(response.body).to match(/"error":"Can't get engine:/)
+      get :evaluate, format: :json, script: 'Invalid', tag: t1.name
+      expect(response.body).to match(/"error":"Can't get engine:/)
+    end
+
+    it 'returns the script runtime error (no node specified)' do
+      get :evaluate, format: :json, script: 'M1', tag: t1.name
+      expect(response.body).to match(/"error":"bad node/)
+    end
   end
 end
