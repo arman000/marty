@@ -34,7 +34,10 @@ RSpec.configure do |config|
   config.include DelayedJobHelpers
   config.include CleanDbHelpers
 
-  config.treat_symbols_as_metadata_keys_with_true_values = true
+  # TODO: Continue to remove should syntax from specs - remove this line to see
+  # errors
+  config.expect_with(:rspec) { |c| c.syntax = [:should, :expect] }
+
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
 

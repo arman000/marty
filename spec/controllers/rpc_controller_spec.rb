@@ -139,7 +139,7 @@ describe Marty::RpcController do
       params: {"a" => 4.5}.to_json,
       tag: p2.name,
     }
-    response.body.should == [4.5, 13.5, 18.0].to_json
+    expect(response.body).to eq([4.5, 13.5, 18.0].to_json)
 
     get 'evaluate', {
       format: :json,

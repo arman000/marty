@@ -12,7 +12,7 @@ gem 'daemons', '~> 1.1.9'
 group :development, :test do
   gem 'rails', '~> 4.2.1'
   gem 'pry-rails'
-  gem 'rspec-rails', '~> 2.99.0'
+  gem 'rspec-rails', '~>3.0'
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'timecop'
