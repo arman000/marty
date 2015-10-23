@@ -89,6 +89,19 @@ Conv Fixed 20	$2.875	4.24800	6.95900	12	2012
 EOF
 
   describe DataImporter do
+    it "should be able to import into classes with id as uniqueness" do
+      pending("Fix data importer to handle at least group_id as mcfly_uniqueness")
+
+      res = Marty::DataImporter.
+            do_import_summary(Gemini::Simple,
+                              [{"some_name" => "hello"}])
+      res.should == {create: 1}
+      res = Marty::DataImporter.
+            do_import_summary(Gemini::Simple,
+                              [{"group_id" => Gemini::Simple.first.group_id, "some_name" => "hello"}])
+      res.should == {same: 1}
+    end
+
     it "should be able to import fannie buyups" do
       res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
       res.should == {create: 2}
