@@ -199,14 +199,22 @@ class Marty::DataChange
       |h, res|
 
       fk = h[:foreign_key]
-      attr = fk.to_s.sub(/_id$/, '').to_sym
-      ref_table = h[:assoc_class].table_name
+      rtable = h[:assoc_class].table_name
+      ktable = klass.table_name
 
-      arr = klass.joins(attr).
-            where("#{klass.table_name}.obsoleted_dt >= ?", ts).
-            where("#{klass.table_name}.created_dt < ?", ts).
-            where("#{ref_table}.obsoleted_dt < ? OR #{ref_table}.created_dt >= ?", ts, ts).
-            all
+      # find references to the latest version in rtable (i.e. id =
+      # group_id). The latest referenced version should not be
+      # obsoleted before the row which refers to it.  FIXME: this is
+      # not exhaustive.  There are other possibities for dead
+      # references. e.g. referenced id != group_id.
+      arr =
+        klass.
+        joins("INNER JOIN #{rtable} ON #{ktable}.#{fk} = #{rtable}.group_id").
+        where("#{ktable}.obsoleted_dt >= ?", ts).
+        where("#{ktable}.created_dt < ?", ts).
+        where("#{rtable}.obsoleted_dt < #{ktable}.obsoleted_dt").
+        where("#{rtable}.group_id = #{rtable}.id").
+        all
 
       arr = arr.map {|obj| Marty::DataExporter.export_attrs(klass, obj, [fk])}
 
