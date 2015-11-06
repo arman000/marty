@@ -8,27 +8,25 @@ Gem::Specification.new do |s|
   s.authors     = [
                    "Arman Bostani",
                    "Eric Litwin",
-                   "Iliana Toneva",
                    "Brian VanLoo",
+                   "Iliana Toneva",
                    "Chad Edie",
                   ]
   s.email       = ["arman.bostani@pnmac.com"]
   s.homepage    = "https://github.com/arman000/marty"
   s.summary     = "A framework for working with versioned data"
   s.description = s.summary
+  s.files       = `git ls-files`.split($\)
   s.licenses    = ['MIT']
 
-  s.files = Dir["{app,config,db,lib}/**/*"] + Dir["lib/tasks/*.rake"] +
-    ["MIT-LICENSE", "Rakefile", "README.md"]
-
-  s.add_dependency "pg"
+  s.add_dependency "pg", "~> 0.17"
 
   s.add_dependency 'netzke-core', '~> 0.12.2'
   s.add_dependency 'netzke-basepack', '~> 0.12.6'
 
   s.add_dependency 'axlsx', '2.1.0pre'
 
-  s.add_dependency 'delorean_lang'
+  s.add_dependency 'delorean_lang', '~> 0.1'
   s.add_dependency 'mcfly', '0.0.17'
 
   s.add_dependency 'coderay'
