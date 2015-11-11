@@ -275,7 +275,7 @@ EOF
         do_import_summary(Gemini::FannieBup, fannie_bup1, 'infinity')
       res.should == {create: 6}
 
-      now = DateTime.now
+      now = Time.zone.now.to_datetime
       cm, cy = now.month, now.year
       pm1, py1 = (now - 1.month).month, (now - 1.month).year
       pm2, py2 = (now - 2.months).month, (now - 2.months).year
@@ -380,7 +380,7 @@ EOF
       Marty::ScriptSet.clear_cache
       Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
       Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
-      p = Marty::Posting.do_create("BASE", DateTime.tomorrow, '?')
+      p = Marty::Posting.do_create("BASE", Time.zone.tomorrow.to_datetime, '?')
 
       engine = Marty::ScriptSet.new.get_engine("DataReport")
       res = engine.evaluate("TableReport",
@@ -404,10 +404,12 @@ EOF
       })
       Marty::Script.load_scripts(nil, Date.today)
       Marty::ScriptSet.clear_cache
-      p = Marty::Posting.do_create("BASE", DateTime.yesterday, 'yesterday')
+      p = Marty::Posting.do_create("BASE", Time.zone.yesterday.to_datetime,
+                                   'yesterday')
       Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
       Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
-      p2 = Marty::Posting.do_create("BASE", DateTime.now, 'now is the time')
+      p2 = Marty::Posting.do_create("BASE", Time.zone.now.to_datetime,
+                                    'now is the time')
       engine = Marty::ScriptSet.new.get_engine("BlameReport")
       @res = engine.evaluate("DataBlameReport",
                              "result",
@@ -436,10 +438,12 @@ EOF
       })
       Marty::Script.load_scripts(nil, Date.today)
       Marty::ScriptSet.clear_cache
-      p = Marty::Posting.do_create("BASE", DateTime.yesterday, 'yesterday')
+      p = Marty::Posting.do_create("BASE", Time.zone.yesterday.to_datetime,
+                                   'yesterday')
       Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
       Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
-      p2 = Marty::Posting.do_create("BASE", DateTime.now, 'now is the time')
+      p2 = Marty::Posting.do_create("BASE", Time.zone.now.to_datetime,
+                                    'now is the time')
       engine = Marty::ScriptSet.new.get_engine("BlameReport")
       @res = engine.evaluate("DataBlameReport",
                              "result",

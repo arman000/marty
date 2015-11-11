@@ -20,7 +20,7 @@ describe Marty::Promise, slow: true do
   end
 
   before(:each) do
-    @time = DateTime.now
+    @time = Time.zone.now.to_datetime
     expect(Marty::Promise.unscoped.count).to eq(0)
     engine = Marty::ScriptSet.new.get_engine(NAME_A)
     engine.background_eval("Y", {"p_title" => NAME_A}, ["d"])

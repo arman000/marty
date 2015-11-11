@@ -10,10 +10,10 @@ class Marty::Tag < Marty::Base
     return 'DEV' if Mcfly.is_infinity(dt)
 
     # If no dt is provided (which is the usual non-testing case), we
-    # use Time.now.strftime to name the posting.  This has the effect
+    # use Time.zone.now.strftime to name the posting.  This has the effect
     # of using the host's timezone. i.e. since we're in PST8PDT, names
     # will be based off of the Pacific TZ.
-    dt ||= Time.now
+    dt ||= Time.zone.now.to_time
     dt.strftime('%Y%m%d-%H%M')
   end
 

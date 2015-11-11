@@ -61,7 +61,7 @@ class Marty::DataConversion
       v =~ FLOAT_PAT ? EXCEL_START_DATE + v.to_f :
         Mcfly.is_infinity(v) ? 'infinity' : v.to_date
     when :datetime
-      Mcfly.is_infinity(v) ? 'infinity' : v.to_datetime
+      Mcfly.is_infinity(v) ? 'infinity' : Time.zone.parse(v).to_datetime
     when :numrange, :int4range, :int8range
       v.to_s
     when :float_array, :json, :jsonb

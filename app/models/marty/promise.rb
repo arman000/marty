@@ -33,7 +33,7 @@ class Marty::Promise < Marty::Base
   def self.cleanup(all=false)
     begin
       where('start_dt < ? AND parent_id IS NULL',
-            DateTime.now - (all ? 0.hours : 4.hours)).destroy_all
+            Time.zone.now.to_datetime - (all ? 0.hours : 4.hours)).destroy_all
     rescue => exc
       Marty::Util.logger.error("promise GC error: #{exc}")
     end
@@ -94,7 +94,7 @@ class Marty::Promise < Marty::Base
     end
 
     # mark promise as started
-    self.start_dt = DateTime.now
+    self.start_dt = Time.zone.now.to_datetime
     self.save!
   end
 
@@ -118,7 +118,7 @@ class Marty::Promise < Marty::Base
     self.cformat = res["format"].to_s if res["format"]
 
     # mark promise as ended
-    self.end_dt = DateTime.now
+    self.end_dt = Time.zone.now.to_datetime
     self.save!
 
     # log "NOTIFY #{Process.pid}"
@@ -212,10 +212,10 @@ class Marty::Promise < Marty::Base
       # at this point, we know the promise has already started
       if !last.end_dt
         wait_for_my_notify(timeout)
-        # log "UUUU #{Process.pid} #{id} #{Time.now.to_f}"
+        # log "UUUU #{Process.pid} #{id} #{Time.zone.now.to_f}"
         last = latest
 
-        # log "XXXX #{Process.pid} #{Time.now.to_f} #{last}"
+        # log "XXXX #{Process.pid} #{Time.zone.now.to_f} #{last}"
 
         if !last.end_dt
           # log "TO22 #{Process.pid} #{last}"
@@ -223,7 +223,7 @@ class Marty::Promise < Marty::Base
         end
       end
 
-      # log "RRRR #{Process.pid} #{last} #{Time.now.to_f}"
+      # log "RRRR #{Process.pid} #{last} #{Time.zone.now.to_f}"
 
       last.result
     ensure

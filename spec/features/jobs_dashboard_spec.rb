@@ -9,13 +9,14 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
     Marty::Promise.create title: "Test Job 1",
       user: Marty::User.find_by(login: 'marty'),
       cformat: 'csv',
-      start_dt: Time.now
+      start_dt: Time.zone.now.to_time
     Marty::Promise.create title: "Test Job 2",
       user: other_user,
       cformat: 'csv',
-      start_dt: Time.now
+      start_dt: Time.zone.now.to_time
 
     visit "/"
+    sleep 1
     find(ext_button_id('Sign in')).click
     fill_in 'Login', with: 'marty'
     fill_in 'Password', with: 'marty'

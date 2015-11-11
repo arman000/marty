@@ -103,10 +103,10 @@ class Marty::PromiseJob < Struct.new(:promise,
         h[attr] = engine.evaluate(node, attr, params)
       }
 
-      # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
+      # log "DONE #{Process.pid} #{promise.id} #{Time.zone.now.to_f} #{res}"
     rescue => exc
       res = Delorean::Engine.grok_runtime_exception(exc)
-      # log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
+      # log "ERR- #{Process.pid} #{promise.id} #{Time.zone.now.to_f} #{exc}"
     end
     promise.set_result(res)
 

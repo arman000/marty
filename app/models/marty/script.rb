@@ -63,7 +63,7 @@ class Marty::Script < Marty::Base
     tag = Marty::Tag.get_latest1
     latest = Marty::Script.order("created_dt DESC").first
 
-    tag_time = (dt || [latest.try(:created_dt), Time.now].compact.max) +
+    tag_time = (dt || [latest.try(:created_dt), Time.zone.now.to_time].compact.max) +
       1.second
 
     # If no tag_time is provided, the tag created_dt will be the same

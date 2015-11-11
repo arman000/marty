@@ -12,7 +12,7 @@ class Marty::Token < Marty::Base
 
   # # Return true if token has expired
   # def expired?
-  #   return Time.now > self.created_on + @@validity_time
+  #   return Time.zone.now.to_time > self.created_on + @@validity_time
   # end
 
 private

@@ -66,7 +66,7 @@ module Marty
         s.name = 'TestScript'
         s.body = '-- Test3'
         # Creates a script in the future - no tag exists
-        s.created_dt = Time.now + 1.minute
+        s.created_dt = Time.zone.now.to_time + 1.minute
         s.save!
 
         api = ApiAuth.new
