@@ -9,10 +9,16 @@ B: A
     c = a + b
     d =?
     e = c / a
+    f = e * d
 
 C:
     p0 =?
     a = 456.0 + p0
+
+D:
+    in =? "no input"
+    out = in
+
 DELOREAN
 
 sample_script3 = <<eof
@@ -67,6 +73,9 @@ describe Marty::RpcController do
                        }, Date.today + 3.minute)
 
     @p2 = Marty::Posting.do_create("BASE", Date.today + 4.minute, 'a comment')
+    @data = [["some data",7,[1,2,3],{foo: "bar", baz: "quz"},5,"string"],
+             ["some more data",[1,2,3],5,{foo: "bar", baz: "quz"},5,"string"]]
+    @data_json = [@data].to_json
   }
 
   let(:t1) { @t1 }
@@ -75,6 +84,43 @@ describe Marty::RpcController do
   let(:p1) { @p1 }
   let(:p2) { @p2 }
 
+  it "should be able to post" do
+    post 'evaluate', {
+           format: :json,
+           script: "M1",
+           node: "B",
+           attrs: ["e","f"].to_json,
+           tag: t1.name,
+           params: { a: 333, d: 5}.to_json
+         }
+    expect(response.body).to eq([4,20].to_json)
+  end
+  it "should be able to post with complex data" do
+    post 'evaluate', {
+           format: :json,
+           script: "M1",
+           node: "D",
+           attrs: ["out"].to_json,
+           tag: t1.name,
+           params: {in: @data}.to_json
+         }
+    expect(response.body).to eq(@data_json)
+  end
+  # content-type: application/json structures the request a little differently
+  # so we also test that
+  it "should be able to post (JSON) with complex data" do
+    @request.env['CONTENT_TYPE'] = 'application/json'
+    @request.env['ACCEPT'] = 'application/json'
+    post 'evaluate', {
+           format: :json,
+           script: "M1",
+           node: "D",
+           attrs: ["out"].to_json,
+           tag: t1.name,
+           params: {in: @data}.to_json
+         }
+    expect(response.body).to eq(@data_json)
+  end
   it "should be able to run scripts" do
     get 'evaluate', {
       format: :json,
