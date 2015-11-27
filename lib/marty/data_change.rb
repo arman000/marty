@@ -179,6 +179,105 @@ class Marty::DataChange
 
   ######################################################################
 
+  # Given a class and an array of records (hashes), figure out the
+  # differences in the current records for the class and the records.
+  # Produces a result hash with the following format:
+  #
+  # {"only_source" => [...],
+  #  "only_input"  => [...],
+  #  "different"   => [...],
+  #  "same"        => [...]}
+  #
+  # The "only_input" are hashes found in input which were not found in
+  # source.  "same" are input hashes which were found in source and
+  # have identical information for fields provided.  "only_source" is
+  # an array of source objects for which no equivalent was found in
+  # the input data.  "different" denotes the set of objects which were
+  # found in both input and source but differed on some attribute
+  # values.  "different" is an array of hashes.  Array element look
+  # like:
+  #
+  # {"source" => {k1=>v1, k2=>v2, ...},
+  #  "input"  => {k1=>v1, k2=>v2, ...}}
+
+  delorean_fn :diff, sig: [2, 3] do
+    |klass, input_data, ts='infinity'|
+
+    ts = Mcfly.normalize_infinity(ts)
+    keys = Marty::DataConversion.assoc_keys(klass).map(&:to_s).to_set
+
+    only_source, only_input, different, same = [], [], [], []
+    found_sources = Set[]
+
+    input_data.each do
+      |input|
+
+      input_keys = input.keys
+
+      raise "non-String keys in input data" unless
+        input_keys.all? { |x| String === x }
+
+      begin
+        # convert record -- if there's an exception, it's likely that
+        # an association lookup failed => don't have some association
+        # in source.  FIXME: it could be that we get an conversion
+        # error through not finding a non-key association.  Ideally,
+        # if we can find the key in source, we should report this as
+        # "different".
+        conv =
+          Marty::DataConversion.convert_row(klass, input, ts)
+      rescue => exc
+        only_input << input
+        next
+      end
+
+      key_hash = conv.reject { |k, v| !keys.member?(k) }
+
+      source = Marty::DataConversion.find_row(klass, key_hash, ts)
+
+      if !source
+        # lookup of keys failed => don't have this in source
+        only_input << input
+        next
+      end
+
+      found_sources << source
+
+      non_key_hash = conv.reject { |k, v| keys.member?(k) }
+
+      # is source same as converted input?
+      if non_key_hash.all? { |k, v| v == source.send(k) }
+        same << input
+        next
+      end
+
+      source_export = Marty::DataExporter.export_obj(source) % input_keys
+
+      different << [
+        {"_origin_" => "source"} + source_export,
+        {"_origin_" => "input"} + input,
+      ]
+    end
+
+    # now find any live source object which have not been visited
+    query = klass
+
+    query = query.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts) if
+      Mcfly.has_mcfly?(klass)
+
+    query = query.where.not(id: found_sources.map(&:id))
+
+    {
+      "different"   => different,
+      "same"        => same,
+      "only_input"  => only_input,
+      "only_source" => Marty::DataExporter.
+                      do_export_query_result(klass, query),
+    }
+  end
+
+  ######################################################################
+
   # Given a Mcfly class_name, find all of the obsoleted Mcfly objects
   # which are referenced by live (non-obsoleted) class instances.
   delorean_fn :dead_refs, sig: 2 do

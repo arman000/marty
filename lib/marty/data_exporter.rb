@@ -147,4 +147,13 @@ class Marty::DataExporter
 
     header + qres.map {|obj| export_attrs(klass, obj).flatten(1)}
   end
+
+  # Export a single object to hash -- FIXME: inefficient
+  # implementation
+  def self.export_obj(obj)
+    klass = obj.class
+    headers = export_headers(klass)
+    rec = export_attrs(klass, obj).flatten
+    Hash[ headers.zip(rec) ]
+  end
 end

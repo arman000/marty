@@ -58,10 +58,18 @@ class Marty::DataConversion
       # convert them to dates. FIXME: 'infinity' as a date in
       # Rails 3.2 appears to be broken. Setting a date field to
       # 'infinity' sets it to nil.
-      v =~ FLOAT_PAT ? EXCEL_START_DATE + v.to_f :
-        Mcfly.is_infinity(v) ? 'infinity' : v.to_date
+      begin
+        v =~ FLOAT_PAT ? EXCEL_START_DATE + v.to_f :
+          Mcfly.is_infinity(v) ? 'infinity' : v.to_date
+      rescue => exc
+        raise "date conversion failed for #{v}"
+      end
     when :datetime
-      Mcfly.is_infinity(v) ? 'infinity' : v.to_datetime
+      begin
+        Mcfly.is_infinity(v) ? 'infinity' : v.to_datetime
+      rescue => exc
+        raise "datetime conversion failed for #{v}"
+      end
     when :numrange, :int4range, :int8range
       v.to_s
     when :float_array, :json, :jsonb

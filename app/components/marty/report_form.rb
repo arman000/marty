@@ -102,10 +102,15 @@ class Marty::ReportForm < Marty::Form
   js_configure do |c|
     # FIXME: Can we use POST instead of get:
     # http://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
-    # arman -- I tried this solution. However, with a POST the
-    # component no longer has the session cookie.  Therefore, we don't
-    # have access to the selected script.  We likely needs to rethink
-    # this whole mechanism.
+    # arman -- I tried this solution. However, with a POST, the
+    # component doesn't get the session cookie.  Therefore, we don't
+    # have access to the selected script.  QQQ: why not just send the
+    # session cookie in the header??  also see -- using XMLHttpRequest
+    # http://stackoverflow.com/questions/9516865/how-to-set-a-header-field-on-post-a-form
+    # http://stackoverflow.com/questions/9713058/sending-post-data-with-a-xmlhttprequest
+    # Or, perhaps use ExtJS Ajax:
+    # http://stackoverflow.com/questions/2917581/how-to-post-json-data-with-extjs
+
     c.on_foreground = <<-JS
     function() {
        var values = this.getForm().getValues();
