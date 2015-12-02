@@ -142,6 +142,7 @@ class Marty::ReportForm < Marty::Form
 
        document.body.appendChild(form);
        form.submit();
+       document.body.removeChild(form);
     }
     JS
   end
