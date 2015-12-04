@@ -43,7 +43,7 @@ class Marty::DataConversion
       case v.to_s.downcase
       when "true",  "1", "y" then true
       when "false", "0", "n" then false
-      else raise "unknown boolean #{v}"
+      else raise "unknown boolean: #{v.inspect}"
       end
     when :string, :text
       v
@@ -55,27 +55,25 @@ class Marty::DataConversion
       v.to_d
     when :date
       # Dates are kept as float in Google spreadsheets.  Need to
-      # convert them to dates. FIXME: 'infinity' as a date in
-      # Rails 3.2 appears to be broken. Setting a date field to
-      # 'infinity' sets it to nil.
+      # convert them to dates.
       begin
         v =~ FLOAT_PAT ? EXCEL_START_DATE + v.to_f :
           Mcfly.is_infinity(v) ? 'infinity' : v.to_date
       rescue => exc
-        raise "date conversion failed for #{v}"
+        raise "date conversion failed for #{v.inspect}}"
       end
     when :datetime
       begin
         Mcfly.is_infinity(v) ? 'infinity' : v.to_datetime
       rescue => exc
-        raise "datetime conversion failed for #{v}"
+        raise "datetime conversion failed for #{v.inspect}}"
       end
     when :numrange, :int4range, :int8range
       v.to_s
     when :float_array, :json, :jsonb
       JSON.parse Marty::DataExporter.decode_json(v)
     else
-      raise "unknown type #{type} for #{v}"
+      raise "unknown type #{type} for #{v.inspect}}"
     end
   end
 

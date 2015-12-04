@@ -25,7 +25,15 @@ class Marty::ReportForm < Marty::Form
 
   ######################################################################
 
-  def _get_report_engine(params)
+  # FIXME: Most of the following functionality should be moved out to
+  # a library.  It doesn't belong here in a component.  These are
+  # currently also getting called form the report controller.
+
+  # FIXME: The usage of session/root_sess should be entirely removed.
+  # Instead we should send in :selected_node, :selected_tag_id,
+  # :selected_script_name as params.
+
+  def self.get_report_engine(params, session)
     d_params = ActiveSupport::JSON.decode(params[:data] || "{}")
     d_params.each_pair do |k,v|
       d_params[k] = nil if v.blank? || v == "null"
@@ -39,11 +47,15 @@ class Marty::ReportForm < Marty::Form
     [engine, d_params]
   end
 
-  def run_eval(params)
-    engine, d_params = _get_report_engine(params)
+  def self.run_eval(params, session)
+    node = session[:selected_node]
+
+    raise "no selected report node" unless String === node
+
+    engine, d_params = get_report_engine(params, session)
 
     begin
-      engine.evaluate(session[:selected_node], "result", d_params)
+      engine.evaluate(node, "result", d_params)
     rescue => exc
       Marty::Util.logger.error "run_eval failed: #{exc.backtrace}"
 
@@ -55,7 +67,7 @@ class Marty::ReportForm < Marty::Form
   end
 
   def export_content(format, title, params={})
-    data = run_eval(params)
+    data = self.class.run_eval(params, session)
 
     # hacky: shouldn't have error parsing logic here
     format = "json" if data.is_a?(Hash) && (data[:error] || data["error"])
@@ -75,7 +87,7 @@ class Marty::ReportForm < Marty::Form
   endpoint :netzke_submit do |params, this|
     # We get here when user is asking for a background report
 
-    engine, d_params = _get_report_engine(params)
+    engine, d_params = self.class.get_report_engine(params, session)
 
     roles = engine.
       evaluate(session[:selected_node], "roles", {}) rescue nil
@@ -100,39 +112,37 @@ class Marty::ReportForm < Marty::Form
   ######################################################################
 
   js_configure do |c|
-    # FIXME: Can we use POST instead of get:
-    # http://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
-    # arman -- I tried this solution. However, with a POST, the
-    # component doesn't get the session cookie.  Therefore, we don't
-    # have access to the selected script.  QQQ: why not just send the
-    # session cookie in the header??  also see -- using XMLHttpRequest
-    # http://stackoverflow.com/questions/9516865/how-to-set-a-header-field-on-post-a-form
-    # http://stackoverflow.com/questions/9713058/sending-post-data-with-a-xmlhttprequest
-    # Or, perhaps use ExtJS Ajax:
-    # http://stackoverflow.com/questions/2917581/how-to-post-json-data-with-extjs
+    # Find the mount path for the Marty engine. FIXME: this is likely
+    # very brittle.
+    @@mount_path = Rails.application.routes.routes.detect {
+      |r| r.app.app == Marty::Engine
+    }.format({})
 
     c.on_foreground = <<-JS
     function() {
        var values = this.getForm().getValues();
-       var data = escape(Ext.encode(values));
-       if (data.length > 4096) {
-          msg = "There is too much data to run as a foreground report." +\
-                "<br/>Please run as a background report."
-          Ext.create('Ext.Window', {
-            height:        100,
-            minWidth:      350,
-            autoWidth:     true,
-            modal:         true,
-            autoScroll:    true,
-            html:          msg,
-            title:         "Warning"
-          }).show();
-       } else {
-         // FIXME: this is very hacky since it bypasses Netzke channel.
-         // This is a security hole wrt to the report role mechanism.
-         window.location = "/marty/components/#{self.name}." + this.repformat +\
-            "?data=" + data + "&reptitle=" + this.reptitle;
+       var data = Ext.encode(values);
+
+       var form = document.createElement("form");
+       form.setAttribute("method", "post");
+       form.setAttribute("action", "#{@@mount_path}/report."+this.repformat);
+
+       var params = {data: data, reptitle: this.reptitle};
+
+       for(var key in params) {
+          if (params.hasOwnProperty(key)) {
+             var hiddenField = document.createElement("input");
+             hiddenField.setAttribute("type", "hidden");
+             hiddenField.setAttribute("name", key);
+             hiddenField.setAttribute("value", params[key]);
+
+            form.appendChild(hiddenField);
+          }
        }
+
+       document.body.appendChild(form);
+       form.submit();
+       document.body.removeChild(form);
     }
     JS
   end
