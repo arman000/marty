@@ -16,6 +16,7 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
       start_dt: Time.now
 
     visit "/"
+    all 'span', text: 'Sign in'
     find(ext_button_id('Sign in')).click
     fill_in 'Login', with: 'marty'
     fill_in 'Password', with: 'marty'
