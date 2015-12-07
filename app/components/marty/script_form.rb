@@ -62,6 +62,7 @@ class Marty::ScriptForm < Marty::Form
 
     ######################################################################
 
+    # FIXME: no longer works -- see related FIXME below.
     c.on_print = <<-JS
     function() {
        window.open(
@@ -197,7 +198,10 @@ class Marty::ScriptForm < Marty::Form
 
   ######################################################################
 
-  # used for printing
+  # Used for printing: REALLY FIXME -- this no longer works since the
+  # removal of the component export_content hack. -- To fix, we should
+  # create a ScriptPrint report.  Then, we should have the button run
+  # this report in the foreground.
   def export_content(format, title, params={})
     raise "unknown format: #{format}" unless format == "html"
 

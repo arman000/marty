@@ -5,7 +5,7 @@ class Marty::ReportController < ActionController::Base
 
     raise "bad format" unless Marty::ContentHandler::GEN_FORMATS.member?(format)
 
-    data = Marty::ReportForm.run_eval(params, session)
+    data = Marty::ReportForm.run_eval(params)
 
     # hacky: shouldn't have error parsing logic here
     format = "json" if data.is_a?(Hash) && (data[:error] || data["error"])

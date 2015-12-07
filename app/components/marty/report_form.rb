@@ -25,34 +25,35 @@ class Marty::ReportForm < Marty::Form
 
   ######################################################################
 
-  # FIXME: Most of the following functionality should be moved out to
-  # a library.  It doesn't belong here in a component.  These are
-  # currently also getting called form the report controller.
-
-  # FIXME: The usage of session/root_sess should be entirely removed.
-  # Instead we should send in :selected_node, :selected_tag_id,
-  # :selected_script_name as params.
-
-  def self.get_report_engine(params, session)
+  def self.get_report_engine(params)
     d_params = ActiveSupport::JSON.decode(params[:data] || "{}")
     d_params.each_pair do |k,v|
       d_params[k] = nil if v.blank? || v == "null"
     end
 
-    tag_id, script_name =
-      session[:selected_tag_id], session[:selected_script_name]
+    tag_id      = d_params.delete("selected_tag_id")
+    script_name = d_params.delete("selected_script_name")
+    node        = d_params.delete("selected_node")
 
     engine = Marty::ScriptSet.new(tag_id).get_engine(script_name)
 
-    [engine, d_params]
+    roles = engine.evaluate(node, "roles", {}) rescue nil
+
+    if roles && !roles.any?{ |r| Marty::User.has_role(r) }
+      # insufficient permissions
+      return []
+    end
+
+    d_params["p_title"] ||= engine.evaluate(node, "title", {}).to_s
+
+    [engine, d_params, node]
   end
 
-  def self.run_eval(params, session)
-    node = session[:selected_node]
+  def self.run_eval(params)
+    engine, d_params, node = get_report_engine(params)
 
+    raise "no engine" unless engine # insufficient permissions
     raise "no selected report node" unless String === node
-
-    engine, d_params = get_report_engine(params, session)
 
     begin
       engine.evaluate(node, "result", d_params)
@@ -66,42 +67,16 @@ class Marty::ReportForm < Marty::Form
     end
   end
 
-  def export_content(format, title, params={})
-    data = self.class.run_eval(params, session)
-
-    # hacky: shouldn't have error parsing logic here
-    format = "json" if data.is_a?(Hash) && (data[:error] || data["error"])
-
-    # hack for testing -- txt -> csv
-    exp_format = format == "txt" ? "csv" : format
-
-    res, type, disposition, filename =
-      Marty::ContentHandler.export(data, exp_format, title)
-
-    # hack for testing -- set content-type
-    type = "text/plain" if format == "txt" && type =~ /csv/
-
-    [res, type, disposition, filename]
-  end
-
   endpoint :netzke_submit do |params, this|
     # We get here when user is asking for a background report
 
-    engine, d_params = self.class.get_report_engine(params, session)
+    engine, d_params, node = self.class.get_report_engine(params)
 
-    roles = engine.
-      evaluate(session[:selected_node], "roles", {}) rescue nil
-
-    if roles && !roles.any?{ |r| Marty::User.has_role(r) }
-      this.netzke_feedback "Insufficient permissions to run report!"
-      return
-    end
-
-    d_params["p_title"] ||= engine.
-      evaluate(session[:selected_node], "title", {}).to_s
+    return this.netzke_feedback "Insufficient permissions to run report!" unless
+      engine
 
     # start background promise to get report result
-    engine.background_eval(session[:selected_node],
+    engine.background_eval(node,
                            d_params,
                            ["result", "title", "format"],
                            )
@@ -220,13 +195,15 @@ class Marty::ReportForm < Marty::Form
     items = [{html: "<br><b>No input is needed for this report.</b>"}] if
       items.empty?
 
-    # Hacky: store these globally in session so we can get them on
-    # report generation request which comes out of band.  Also, if the
-    # user's script/tag selection changes, we don't need to redraw
-    # report_form.
-    session[:selected_tag_id]      = root_sess[:selected_tag_id]
-    session[:selected_script_name] = root_sess[:selected_script_name]
-    session[:selected_node]        = root_sess[:selected_node]
+    # add hidden fields for selected tag/script/node
+    items += [:selected_tag_id, :selected_script_name, :selected_node].map { |f|
+      {
+        name:   f,
+        xtype:  :textfield,
+        hidden: true,
+        value:  root_sess[f],
+      }
+    }
 
     c.items     = items
     c.repformat = format
