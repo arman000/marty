@@ -36,7 +36,12 @@ class Marty::Tag < Marty::Base
   end
 
   def self.map_to_tag(tag_id)
+    # FIXME: this is really hacky. This function should not take so
+    # many different types of arguments.
+
     case tag_id
+    when Fixnum, /\A[0-9]+\z/
+      tag = find_by_id(tag_id)
     when String
       tag = find_by_name(tag_id)
       # if tag name wasn't found, look for a matching
@@ -46,15 +51,13 @@ class Marty::Tag < Marty::Base
         tag = find_match(Mcfly.normalize_infinity(posting.created_dt)) if
           posting
       end
-    when Fixnum
-      tag = find_by_id(tag_id)
     when nil
       tag = get_latest1
     else
       tag = tag_id
     end
 
-    raise "bad tag identifier #{tag_id || 'nil'}" unless tag.is_a? Marty::Tag
+    raise "bad tag identifier #{tag_id.inspect}" unless tag.is_a? Marty::Tag
     tag
   end
 

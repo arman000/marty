@@ -98,13 +98,21 @@ class Marty::ReportForm < Marty::Form
        var values = this.getForm().getValues();
        var data = Ext.encode(values);
 
+       var params = {data: data, reptitle: this.reptitle};
+
+       // very hacky -- when selected_testing is set, we assume we're
+       // testing and try to inline the result.
+       if (values["selected_testing"]) {
+          this.repformat = "txt";
+          params["disposition"] = "inline";
+       }
+
        var form = document.createElement("form");
+
        form.setAttribute("method", "post");
        form.setAttribute("action", "#{@@mount_path}/report."+this.repformat);
 
-       var params = {data: data, reptitle: this.reptitle};
-
-       for(var key in params) {
+       for (var key in params) {
           if (params.hasOwnProperty(key)) {
              var hiddenField = document.createElement("input");
              hiddenField.setAttribute("type", "hidden");
@@ -196,7 +204,12 @@ class Marty::ReportForm < Marty::Form
       items.empty?
 
     # add hidden fields for selected tag/script/node
-    items += [:selected_tag_id, :selected_script_name, :selected_node].map { |f|
+    items += [:selected_tag_id,
+              :selected_script_name,
+              :selected_node,
+              # just for testing
+              :selected_testing,
+             ].map { |f|
       {
         name:   f,
         xtype:  :textfield,
