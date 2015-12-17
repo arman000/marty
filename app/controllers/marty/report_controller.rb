@@ -1,4 +1,4 @@
-class Marty::ReportController < ActionController::Base
+class Marty::ReportController < Marty::ApplicationController
   def index
     format, req_disposition, title =
       params[:format], params[:disposition], params[:reptitle]

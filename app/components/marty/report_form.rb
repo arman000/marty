@@ -52,7 +52,7 @@ class Marty::ReportForm < Marty::Form
   def self.run_eval(params)
     engine, d_params, node = get_report_engine(params)
 
-    raise "no engine" unless engine # insufficient permissions
+    raise "Insufficient permissions" unless engine
     raise "no selected report node" unless String === node
 
     begin
@@ -111,6 +111,13 @@ class Marty::ReportForm < Marty::Form
 
        form.setAttribute("method", "post");
        form.setAttribute("action", "#{@@mount_path}/report."+this.repformat);
+
+       // set authenticity token
+       var hiddenField = document.createElement("input");
+       hiddenField.setAttribute("type", "hidden");
+       hiddenField.setAttribute("name", "authenticity_token");
+       hiddenField.setAttribute("value", this.authenticityToken);
+       form.appendChild(hiddenField);
 
        for (var key in params) {
           if (params.hasOwnProperty(key)) {
@@ -218,10 +225,11 @@ class Marty::ReportForm < Marty::Form
       }
     }
 
-    c.items     = items
-    c.repformat = format
-    c.title     = "Generate: #{title}-#{sset.tag.name}"
-    c.reptitle  = title
+    c.items              = items
+    c.repformat          = format
+    c.title              = "Generate: #{title}-#{sset.tag.name}"
+    c.reptitle           = title
+    c.authenticity_token = controller.send(:form_authenticity_token)
 
     actions[:foreground].disabled = !!background_only
   end
