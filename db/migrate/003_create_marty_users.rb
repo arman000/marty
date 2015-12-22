@@ -1,7 +1,7 @@
 class CreateMartyUsers < ActiveRecord::Migration
   def change
     create_table :marty_users do |t|
-      t.timestamps
+      t.timestamps null: false
 
       t.string  :login,     null: false, limit: 255
       t.string  :firstname, null: false, limit: 255
