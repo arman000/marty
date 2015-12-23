@@ -3,7 +3,7 @@ class CreateMartyImportSynonyms < ActiveRecord::Migration
 
   def change
     create_table :marty_import_synonyms do |t|
-      t.timestamps
+      t.timestamps null: false
 
       t.references :import_type,   null: false
       t.string     :synonym,       null: false, limit: 255
