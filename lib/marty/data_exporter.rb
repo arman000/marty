@@ -78,15 +78,16 @@ class Marty::DataExporter
     end
   end
 
-  def self.export_attrs(klass, obj, attrs=nil)
+  def self.export_attrs(klass, obj, attrs=nil, exclude_attrs=[])
     col_types = Marty::DataConversion.col_types(klass)
 
-    (attrs || col_types.keys).map do
+    attr_list = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
+
+    attr_list.map do
       |c|
 
       v = obj.send(c.to_sym)
 
-      c = c.to_s
       type = col_types[c]
 
       # return [value] if not assoc or nil
@@ -103,13 +104,14 @@ class Marty::DataExporter
     end
   end
 
-  def self.export_headers(klass, attrs=nil)
+  def self.export_headers(klass, attrs=nil, exclude_attrs=[])
     col_types = Marty::DataConversion.col_types(klass)
 
-    (attrs || col_types.keys).map do
+    attr_list = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
+
+    attr_list.map do
       |c|
 
-      c = c.to_s
       type = col_types[c]
 
       next c unless type.is_a?(Hash)
@@ -130,7 +132,7 @@ class Marty::DataExporter
 
   # Given a Mcfly klass, generate an export array.  Can potentially
   # use up a lot of memory if the result set is large.
-  def self.do_export(ts, klass, sort_field=nil)
+  def self.do_export(ts, klass, sort_field=nil, exclude_attrs=[])
     query = klass
 
     if Mcfly.has_mcfly?(klass)
@@ -138,14 +140,16 @@ class Marty::DataExporter
       query = query.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts)
     end
 
-    do_export_query_result(klass, query.order(sort_field || :id))
+    do_export_query_result(klass, query.order(sort_field || :id), exclude_attrs)
   end
 
-  def self.do_export_query_result(klass, qres)
+  def self.do_export_query_result(klass, qres, exclude_attrs=[])
     # strip _id from assoc fields
-    header = [ export_headers(klass).flatten ]
+    header = [ export_headers(klass, nil, exclude_attrs).flatten ]
 
-    header + qres.map {|obj| export_attrs(klass, obj).flatten(1)}
+    header + qres.map {|obj|
+      export_attrs(klass, obj, nil, exclude_attrs).flatten(1)
+    }
   end
 
   # Export a single object to hash -- FIXME: inefficient

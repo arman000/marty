@@ -115,14 +115,15 @@ class Marty::DataChange
     classes.to_set & class_list.to_set
   end
 
-  delorean_fn :do_export, sig: [2, 3] do
-    |pt, klass, sort_field=nil|
+  delorean_fn :do_export, sig: [2, 4] do
+    |pt, klass, sort_field=nil, exclude_attrs=[]|
 
     # allow classes on class_list or any Enum to be exported
     raise "'#{klass}' not on class_list" unless
       class_list.member?(klass) || klass.constantize.is_a?(Marty::Enum)
 
-    Marty::DataExporter.do_export(pt, klass.constantize, sort_field)
+    Marty::DataExporter.
+      do_export(pt, klass.constantize, sort_field, exclude_attrs)
   end
 
   delorean_fn :export_changes, sig: 3 do
