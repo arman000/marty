@@ -7,6 +7,7 @@ require 'marty/import_type_view'
 require 'marty/user_view'
 require 'marty/promise_view'
 require 'marty/api_auth_view'
+require 'marty/config_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
@@ -53,6 +54,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       menu:  [
               :import_type_view,
               :user_view,
+              :config_view,
               :api_auth_view,
               :reload_scripts,
              ],
@@ -146,6 +148,14 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text      = I18n.t("user_view")
     a.handler   = :netzke_load_component_by_action
     a.icon      = :group
+    a.disabled  = !self.class.has_admin_perm? &&
+      !self.class.has_user_manager_perm?
+  end
+
+  action :config_view do |a|
+    a.text      = I18n.t("config_view")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :cog
     a.disabled  = !self.class.has_admin_perm? &&
       !self.class.has_user_manager_perm?
   end
@@ -256,6 +266,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
   component :import_type_view
   component :user_view
+  component :config_view
   component :api_auth_view do |c|
     c.disabled = Marty::Util.warped?
   end
