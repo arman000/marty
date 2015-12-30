@@ -18,13 +18,15 @@ class Marty::ConfigView < Marty::Grid
     c.data_store.sorters     = {property: :key, direction: 'ASC'}
   end
 
+  # need a getter / setter to call the []= and [] methods now
+  # since value is no longer stored as is
   def my_jsonb_getter
-    lambda { |r| Marty::Config[r.key].to_s }
+    lambda { |r| Marty::Config[r.key].to_json }
   end
 
   def my_jsonb_setter
     lambda { |r, v|
-      Marty::Config[r.key] = v }
+      Marty::Config[r.key] = ActiveSupport::JSON.decode(v) }
   end
 
   def default_fields_for_forms
