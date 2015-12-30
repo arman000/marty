@@ -26,7 +26,9 @@ class Marty::ConfigView < Marty::Grid
 
   def my_jsonb_setter
     lambda { |r, v|
-      Marty::Config[r.key] = ActiveSupport::JSON.decode(v) }
+      decoded = ActiveSupport::JSON.decode(v) rescue nil
+      r.set_value(decoded)
+    }
   end
 
   def default_fields_for_forms
@@ -39,6 +41,7 @@ class Marty::ConfigView < Marty::Grid
         xtype:       :textareafield,
         auto_scroll: true,
         spellcheck:  false,
+        allow_blank: false,
         field_style: {
           font_family: 'courier new',
           font_size:   '12px'

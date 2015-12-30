@@ -1,7 +1,7 @@
 class Marty::Config < Marty::Base
   class ConfigValidator < ActiveModel::Validator
     def validate(entry)
-      v = entry.value.to_json
+      v = entry.get_value
       entry.errors[:base] = "bad JSON value" if !v
       v
     end
@@ -21,13 +21,17 @@ class Marty::Config < Marty::Base
         self.value[0]
   end
 
+  def set_value(v)
+    self.value = [v]
+  end
+
   def self.[]=(key, value)
     entry = find_by_key(key)
     if !entry
       entry = self.new
       entry.key = key
     end
-    entry.value = [value]
+    entry.set_value(value)
     entry.save!
 
     value
@@ -39,7 +43,7 @@ class Marty::Config < Marty::Base
   end
 
   def self.del(key)
-    entry = find_by_key(key)
+    entrypass = find_by_key(key)
     if entry
       result = entry.get_value
       entry.destroy
