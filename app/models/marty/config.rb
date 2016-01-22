@@ -11,13 +11,21 @@ class Marty::Config < Marty::Base
   validates_uniqueness_of :key
   validates_with ConfigValidator
 
+<<<<<<< 8ca2019c045758a2f85d8148b1d3aac1f2847fde
+=======
+
+>>>>>>> adds rspec for view writer
   delorean_fn :lookup, sig: 1 do
     |key|
     self[key]
   end
 
   def get_value
+<<<<<<< 8ca2019c045758a2f85d8148b1d3aac1f2847fde
     self.value[0]
+=======
+        self.value[0]
+>>>>>>> adds rspec for view writer
   end
 
   def set_value(v)

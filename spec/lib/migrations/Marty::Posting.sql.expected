@@ -1,0 +1,21 @@
+create or replace function f_fixfalse(s text) returns text as $$
+begin
+    return case when s = 'false' then null else s end;
+end
+$$ language plpgsql;
+
+drop view if exists vw_marty_postings;
+create or replace view vw_marty_postings as
+select
+    concat(u.firstname, ' ', u.lastname) AS user_name, 
+    concat(ou.firstname, ' ', ou.lastname) AS obsoleted_user, 
+    main.id, 
+    main.group_id, 
+    main.created_dt, 
+    main.obsoleted_dt, 
+    main.name, 
+    marty_posting_types1.name as posting_type_name
+from marty_postings main
+    join marty_users u on main.user_id = u.id
+    left join marty_users ou on main.o_user_id = ou.id
+    left join marty_posting_types marty_posting_types1 on main.posting_type_id = marty_posting_types1.id

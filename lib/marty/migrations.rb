@@ -73,6 +73,60 @@ module Marty::Migrations
                                     unique: true)
   end
 
+  def self.write_view(target_dir, klass, jsons, excludes)
+    colnames = klass.columns_hash.keys
+    user_id_cols = ["user_id", "o_user_id"]
+    excludes += user_id_cols
+    joins = ["join marty_users u on main.user_id = u.id",
+             "left join marty_users ou on main.o_user_id = ou.id"]
+    columns = ["concat(u.firstname, ' ', u.lastname) AS user_name",
+               "concat(ou.firstname, ' ', ou.lastname) AS obsoleted_user"]
+    jointabs = {}
+    colnames.each do |c|
+      if jsons[c]
+        jsons[c].each do |subc|
+          if subc.class == Array
+            subcol, type = subc
+            columns.push "f_fixfalse(main.#{c} ->> '#{subcol}')::#{type} " +
+                         "as \"#{c}_#{subcol}\""
+          else
+            columns.push "main.#{c} ->> '#{subc}' as \"#{c}_#{subc}\""
+          end
+        end
+      elsif !excludes.include?(c)
+        assoc = klass.reflections.find { |(n, h)| h.foreign_key == c }
+        if assoc && assoc[1].klass.columns_hash["name"]
+          table_name = assoc[1].table_name
+          jointabs[table_name] ||= 0
+          jointabs[table_name] += 1
+          tn_alias = "#{table_name}#{jointabs[table_name]}"
+          joins.push "left join #{table_name} #{tn_alias} on main.#{c} " +
+                     "= #{tn_alias}.id"
+          target_name = c.gsub(/_id$/,'_name')
+          columns.push "#{tn_alias}.name as #{target_name}"
+        else
+          columns.push "main.#{c}"
+        end
+      end
+    end
+    File.open(File.join(target_dir,"#{klass}.sql"), "w") do |f|
+      f.puts <<EOSQL
+create or replace function f_fixfalse(s text) returns text as $$
+begin
+    return case when s = 'false' then null else s end;
+end
+$$ language plpgsql;
+
+drop view if exists vw_#{klass.table_name};
+create or replace view vw_#{klass.table_name} as
+select
+    #{columns.join(", \n    ")}
+from #{klass.table_name} main
+    #{joins.join("\n    ")}
+EOSQL
+    end
+  end
+
 private
   def fk_opts(from, to, column)
     name = "fk_#{from}_#{to}_#{column}"
