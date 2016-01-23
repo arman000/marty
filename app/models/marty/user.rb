@@ -8,6 +8,8 @@ class Marty::User < Marty::Base
   validates_format_of :login, :with => /\A[a-z0-9_\-@\.]*\z/i
   validates_length_of :login, :firstname, :lastname, maximum: 100
 
+  MARTY_IMPORT_UNIQUENESS = [:login]
+
   has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
 
