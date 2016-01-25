@@ -41,6 +41,20 @@ module Marty
         hbox({flex: 1, border: false}.merge(params))
       end
 
+      def textarea_field(name, options={})
+        {
+          name:        name,
+          width:       "100%",
+          height:      150,
+          xtype:       :textareafield,
+          auto_scroll: true,
+          spellcheck:  false,
+          field_style: {
+            font_family: 'courier new',
+            font_size:   '12px'
+          },
+        } + options
+      end
     end
   end
 end

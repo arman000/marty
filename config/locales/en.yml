@@ -8,6 +8,7 @@ en:
   fields: Fields
   updated_at: Updated At
   user_view: User Management
+  config_view: Configuration
   reports: Reports
   import_synonym: Import Synonyms
   import_type: Import Types
