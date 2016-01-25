@@ -15,7 +15,8 @@ Gem::Specification.new do |s|
   s.email       = ["arman.bostani@pnmac.com"]
   s.homepage    = "https://github.com/arman000/marty"
   s.summary     = "A framework for working with versioned data"
-  s.description = s.summary
+  s.description =
+    "Marty is a framework for viewing and reporting on versioned data."
   s.files       = `git ls-files`.split($\)
   s.licenses    = ['MIT']
 
@@ -29,7 +30,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'delorean_lang', '~> 0.1'
   s.add_dependency 'mcfly', '0.0.18'
 
-  s.add_dependency 'coderay'
-  s.add_dependency 'net-ldap'
-  s.add_dependency 'rubyzip'
+  s.add_dependency 'coderay', '~> 1.1.0'
+  s.add_dependency 'net-ldap', '~> 0.12.0'
+  s.add_dependency 'rubyzip', '~> 1.1.0'
 end

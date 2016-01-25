@@ -64,7 +64,7 @@ class Marty::DataExporter
 
     return CSV.generate(conf) do |csv|
       obj.each do |x|
-        csv << x.flatten(1).map(&:to_s)
+        csv << x.flatten(1).map { |v| v.nil? ? nil : v.to_s }
       end
     end if obj.is_a?(Hash)
 
@@ -72,7 +72,14 @@ class Marty::DataExporter
       obj.each do |x|
         x = [x] unless x.respond_to? :map
         csv << x.map { |v|
-          v.is_a?(Array) || v.is_a?(Hash) ? encode_json(v.to_json) : v.to_s
+          case v
+          when Array, Hash
+            encode_json(v.to_json)
+          when nil
+            nil
+          else
+            v.to_s
+          end
         }
       end
     end
