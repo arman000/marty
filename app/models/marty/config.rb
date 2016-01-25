@@ -11,14 +11,13 @@ class Marty::Config < Marty::Base
   validates_uniqueness_of :key
   validates_with ConfigValidator
 
-
   delorean_fn :lookup, sig: 1 do
     |key|
     self[key]
   end
 
   def get_value
-        self.value[0]
+    self.value[0]
   end
 
   def set_value(v)
@@ -43,7 +42,7 @@ class Marty::Config < Marty::Base
   end
 
   def self.del(key)
-    entrypass = find_by_key(key)
+    entry = find_by_key(key)
     if entry
       result = entry.get_value
       entry.destroy

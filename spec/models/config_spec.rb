@@ -33,6 +33,19 @@ module Marty
         expect(Marty::Config.lookup("TEST 2")).to eq(nil)
         expect(Marty::Config["TEST 2"]).to eq(nil)
       end
+
+      it "should handle del" do
+        (0..10).each { |i|
+          v = {"i" => i}
+          Marty::Config["k#{i}"] = v
+          expect(Marty::Config["k#{i}"]).to eq(v)
+        }
+
+        (0..10).each { |i|
+          Marty::Config.del("k#{i}")
+          expect(Marty::Config["k#{i}"]).to eq(nil)
+        }
+      end
     end
   end
 end
