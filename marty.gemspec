@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'delorean_lang', '~> 0.1'
   s.add_dependency 'mcfly', '0.0.18'
 
-  s.add_dependency 'coderay', '~> 1.1.0'
+  s.add_dependency 'coderay'
   s.add_dependency 'net-ldap', '~> 0.12.0'
-  s.add_dependency 'rubyzip', '~> 1.1.0'
+  s.add_dependency 'rubyzip'
 end
