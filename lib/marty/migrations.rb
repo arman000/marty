@@ -123,6 +123,8 @@ select
     #{columns.join(", \n    ")}
 from #{klass.table_name} main
     #{joins.join("\n    ")}
+
+grant select on vw_#{klass.table_name} to public;
 EOSQL
     end
   end
