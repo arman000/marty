@@ -5,9 +5,10 @@ module Marty
     it "writes db views correctly" do
       tdir = File.dirname(__FILE__) + "/migrations/"
       Marty::Migrations.write_view(tdir, Marty::Posting, {}, ["comment"])
-      genfile = File.join(tdir,"Marty::Posting.sql")
+      filename = "vw_marty_postings.sql"
+      genfile = File.join(tdir,filename)
       generated = File.read(genfile)
-      expected = File.read(File.join(tdir,"Marty::Posting.sql.expected"))
+      expected = File.read(File.join(tdir,"#{filename}.expected"))
       expect(generated).to eq(expected)
       File.delete(genfile)
     end

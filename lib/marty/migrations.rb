@@ -109,7 +109,9 @@ module Marty::Migrations
         end
       end
     end
-    File.open(File.join(target_dir,"#{klass}.sql"), "w") do |f|
+    table_name = klass.table_name
+    file_name = "vw_#{table_name}.sql"
+    File.open(File.join(target_dir,file_name), "w") do |f|
       f.puts <<EOSQL
 create or replace function f_fixfalse(s text) returns text as $$
 begin
@@ -122,7 +124,7 @@ create or replace view vw_#{klass.table_name} as
 select
     #{columns.join(", \n    ")}
 from #{klass.table_name} main
-    #{joins.join("\n    ")}
+    #{joins.join("\n    ")};
 
 grant select on vw_#{klass.table_name} to public;
 EOSQL
