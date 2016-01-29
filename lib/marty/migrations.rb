@@ -122,7 +122,7 @@ $$ language plpgsql;
 drop view if exists vw_#{klass.table_name};
 create or replace view vw_#{klass.table_name} as
 select
-    #{columns.join(", \n    ")}
+    #{columns.join(",\n    ")}
 from #{klass.table_name} main
     #{joins.join("\n    ")};
 
