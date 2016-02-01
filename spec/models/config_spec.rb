@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Marty
-  describe Config do
+  describe Marty::Config do
     describe "validations" do
       it "should return valid config value based on key" do
         Marty::Config["TEST 1"] = 2

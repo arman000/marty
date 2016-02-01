@@ -6,12 +6,14 @@ Gem::Specification.new do |s|
   s.name        = "marty"
   s.version     = Marty::VERSION
   s.authors     = [
-                   "Arman Bostani",
-                   "Eric Litwin",
-                   "Brian VanLoo",
-                   "Iliana Toneva",
-                   "Chad Edie",
-                  ]
+    "Arman Bostani",
+    "Brian VanLoo",
+    "Chad Edie",
+    "Eric Litwin",
+    "Iliana Toneva",
+    "Jock Cooper",
+    "Masaki Matsuo",
+  ]
   s.email       = ["arman.bostani@pnmac.com"]
   s.homepage    = "https://github.com/arman000/marty"
   s.summary     = "A framework for working with versioned data"
