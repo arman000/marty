@@ -4,7 +4,9 @@ module Marty
   describe "Migrations" do
     it "writes db views correctly" do
       tdir = File.dirname(__FILE__) + "/migrations/"
-      Marty::Migrations.write_view(tdir, Marty::Posting, {}, ["comment"])
+      Marty::Migrations.write_view(tdir,
+                                   'vw_marty_postings',
+                                   Marty::Posting, {}, ["comment"])
       filename = "vw_marty_postings.sql"
       genfile = File.join(tdir,filename)
       generated = File.read(genfile)
