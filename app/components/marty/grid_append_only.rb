@@ -2,11 +2,9 @@ class Marty::GridAppendOnly < Marty::McflyGridPanel
   def configure(c)
     super
 
-    c.enable_extended_search = false
-    c.prohibit_update        = true
+    c.paging                 = :pagination
+    c.editing                = :in_form
+    c.permissions[:update]   = false
   end
 
-  def default_bbar
-    [:del, :add_in_form]
-  end
 end

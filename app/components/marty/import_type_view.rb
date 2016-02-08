@@ -10,7 +10,7 @@ class Marty::ImportTypeView < Marty::Grid
 
     c.title   = I18n.t('import_type', default: "ImportType")
     c.model   = "Marty::ImportType"
-    c.columns =
+    c.attributes =
       [
        :name,
        :role__name,
@@ -19,33 +19,30 @@ class Marty::ImportTypeView < Marty::Grid
        :validation_function,
        :preprocess_function,
       ]
-
-    c.enable_extended_search = false
-
-    c.data_store.sorters = {property: :name, direction: 'ASC'}
+    c.store_config.merge!({sorters: [{property: :name, direction: 'ASC'}]})
   end
 
-  column :name do |c|
+  attribute :name do |c|
     c.flex = 1
   end
 
-  column :role__name do |c|
+  attribute :role__name do |c|
     c.width = 150
   end
 
-  column :db_model_name do |c|
+  attribute :db_model_name do |c|
     c.flex = 1
   end
 
-  column :cleaner_function do |c|
+  attribute :cleaner_function do |c|
     c.flex = 1
   end
 
-  column :validation_function do |c|
+  attribute :validation_function do |c|
     c.flex = 1
   end
 
-  column :preprocess_function do |c|
+  attribute :preprocess_function do |c|
     c.flex = 1
   end
 end

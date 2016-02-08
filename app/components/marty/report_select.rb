@@ -6,7 +6,7 @@ class Marty::ReportSelect < Marty::Form
     c.height           = 200
     c.load_inline_data = false
     c.title            = I18n.t("script.selection_history")
-    c.columns          = [:name, :created_dt, :comment]
+    c.attributes          = [:name, :created_dt, :comment]
     c.bbar             = []
   end
 
@@ -15,8 +15,10 @@ class Marty::ReportSelect < Marty::Form
     c.klass            = Marty::ScriptGrid
     c.title            = I18n.t("script.selection_list")
     c.bbar             = []
-    c.columns          = [:name, :tag]
-    c.scope            = ["name like '%Report'"]
+    c.attributes          = [:name, :tag]
+    c.scope            = lambda { |r|
+      r.where("name like '%Report'")
+    }
   end
 
   ######################################################################
@@ -43,10 +45,10 @@ class Marty::ReportSelect < Marty::Form
     c.bbar = []
   end
 
-  js_configure do |c|
+  client_class do |c|
     c.header = false
 
-    c.init_component = <<-JS
+    c.init_component = l(<<-JS)
     function() {
        var me = this;
        me.callParent();
@@ -60,13 +62,13 @@ class Marty::ReportSelect < Marty::Form
             record = record[0]
           }
           var data = record && record.data;
-          me.selectNode({node: data.value});
+          me.server.selectNode({node: data.value});
        });
 
        tag_grid.getSelectionModel().on('selectionchange',
         function(self, records) {
           var tag_id = records[0].get('id');
-          me.selectTag({tag_id: tag_id});
+          me.server.selectTag({tag_id: tag_id});
           script_grid.getStore().load();
        }, me);
 
@@ -78,14 +80,14 @@ class Marty::ReportSelect < Marty::Form
              return;
 
           var script_name = records[0].get('name');
-          me.selectScript({script_name: script_name});
+          me.server.selectScript({script_name: script_name});
           nodename.reset();
           nodename.store.load({params: {}});
           }, me);
     }
     JS
 
-    c.parent_select_report = <<-JS
+    c.parent_select_report = l(<<-JS)
     function() {
        this.netzkeGetParentComponent().selectReport();
     }
@@ -119,26 +121,26 @@ class Marty::ReportSelect < Marty::Form
     }.compact.sort{ |a,b| a[1] <=> b[1]}
   end
 
-  endpoint :get_combobox_options do |params, this|
-    this.data = node_list if params["attr"] == "nodename"
+  endpoint :get_combobox_options do |params|
+    client.data = node_list if params["attr"] == "nodename"
   end
 
   ######################################################################
 
-  endpoint :select_tag do |params, this|
+  endpoint :select_tag do |params|
     root_sess[:selected_tag_id]      = params[:tag_id]
     root_sess[:selected_script_name] = nil
     root_sess[:selected_node]        = nil
   end
 
-  endpoint :select_script do |params, this|
+  endpoint :select_script do |params|
     root_sess[:selected_script_name] = params[:script_name]
     root_sess[:selected_node]        = nil
   end
 
-  endpoint :select_node do |params, this|
+  endpoint :select_node do |params|
     root_sess[:selected_node]        = params[:node]
-    this.parent_select_report
+    client.parent_select_report
   end
 end
 

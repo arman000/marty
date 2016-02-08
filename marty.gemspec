@@ -28,8 +28,8 @@ Gem::Specification.new do |s|
 
   s.add_dependency "pg", "~> 0.17"
 
-  s.add_dependency 'netzke-core', '~> 0.12.2'
-  s.add_dependency 'netzke-basepack', '~> 0.12.6'
+  s.add_dependency 'netzke-core', '~> 1.0.0.0'
+  s.add_dependency 'netzke-basepack', '~> 1.0.0.0'
 
   s.add_dependency 'axlsx', '2.1.0pre'
 

@@ -3,22 +3,23 @@ class Marty::ReportForm < Marty::Form
   # override apply for background generation
   action :apply do |a|
     a.text     = a.tooltip = I18n.t("reporting.background")
-    a.handler  = :on_apply
+    a.handler  = :netzke_on_apply
     a.icon     = :report_disk
     a.disabled = false
   end
 
   action :foreground do |a|
     a.text     = a.tooltip = I18n.t("reporting.generate")
-    a.handler  = :on_foreground
     a.icon     = :report_go
     a.disabled = false
   end
 
   ######################################################################
 
-  def configure_bbar(c)
-    c[:bbar] = ['->', :apply, :foreground]
+  def default_bbar
+    [
+      '->', :apply, :foreground
+    ]
   end
 
   ######################################################################
@@ -65,12 +66,12 @@ class Marty::ReportForm < Marty::Form
     end
   end
 
-  endpoint :netzke_submit do |params, this|
+  endpoint :submit do |params|
     # We get here when user is asking for a background report
 
     engine, d_params, node = self.class.get_report_engine(params)
 
-    return this.netzke_feedback "Insufficient permissions to run report!" unless
+    return client.netzke_notify "Insufficient permissions to run report!" unless
       engine
 
     # start background promise to get report result
@@ -79,19 +80,19 @@ class Marty::ReportForm < Marty::Form
                            ["result", "title", "format"],
                            )
 
-    this.netzke_feedback "Report can be accessed from the Jobs Dashboard ..."
+    client.netzke_notify "Report can be accessed from the Jobs Dashboard ..."
   end
 
   ######################################################################
 
-  js_configure do |c|
+  client_class do |c|
     # Find the mount path for the Marty engine. FIXME: this is likely
     # very brittle.
     @@mount_path = Rails.application.routes.routes.detect {
       |r| r.app.app == Marty::Engine
     }.format({})
 
-    c.on_foreground = <<-JS
+    c.netzke_on_foreground = l(<<-JS)
     function() {
        var values = this.getForm().getValues();
        var data = Ext.encode(values);
@@ -135,7 +136,7 @@ class Marty::ReportForm < Marty::Form
     JS
   end
 
-  endpoint :netzke_load do |params, this|
+  endpoint :netzke_load do |params|
   end
 
   def eval_form_items(engine, items)

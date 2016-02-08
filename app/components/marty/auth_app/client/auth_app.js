@@ -1,5 +1,5 @@
 {
-    onSignIn: function() {
+    netzkeOnSignIn: function() {
         var me = this;
         this.signinWin = this.signinWin || Ext.create('Ext.Window', {
             width:      300,
@@ -12,7 +12,7 @@
                 var values      = form.getForm().getValues();
 
                 // calling the endpoint
-                me.signIn(values, function(res) {
+                me.server.signIn(values, function(res) {
                     if (res) {
                         if (!me.authSpecMode) { this.signinWin.close(); }
                         Ext.Msg.show({
@@ -75,8 +75,8 @@
         this.signinWin.down('textfield').focus(false, 100);
     },
 
-    onSignOut: function() {
-        this.signOut(null, function(success) {
+    netzkeOnSignOut: function() {
+        this.server.signOut(null, function(success) {
             if (success) {
                 Ext.Msg.show({
                     title:      "Signed out",

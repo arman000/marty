@@ -13,8 +13,8 @@
 #
 
 class Marty::LiveSearchGridPanel < Marty::McflyGridPanel
-  js_configure do |c|
-    c.listen_fn = <<-JS
+  client_class do |c|
+    c.listen_fn = l(<<-JS)
     function(obj, search_text) {
         var lg = this.ownerCt.ownerCt;
         lg.getStore().getProxy().extraParams.live_search = search_text;
@@ -39,7 +39,7 @@ class Marty::LiveSearchGridPanel < Marty::McflyGridPanel
 
   def get_records(params)
     search_scope = config[:live_search_scope] || :live_search
-    data_class.send(search_scope, params && params[:live_search] || '').scoping do
+    model.send(search_scope, params && params[:live_search] || '').scoping do
       super
     end
   end
