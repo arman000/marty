@@ -1,7 +1,3 @@
-require 'netzke-basepack'
-require 'netzke/basepack/grid'
-require 'marty/permissions'
-
 class Marty::Grid < ::Netzke::Basepack::Grid
   extend ::Marty::Permissions
 
