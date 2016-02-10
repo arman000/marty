@@ -5,6 +5,11 @@ class Marty::Xl
   include Delorean::Model
 
   def self.spreadsheet(worksheets)
+    # hack: axlsx tries to modify its input when sent an empty
+    # array!  This fails when we sent it a frozen one => make sure
+    # we sent it an unfozen array.
+    worksheets = [] if worksheets == []
+
     xl = Marty::Xl.new(worksheets)
     xl.package
   end

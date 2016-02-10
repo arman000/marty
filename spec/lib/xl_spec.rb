@@ -195,4 +195,8 @@ describe Marty::Xl do
       ["", "", "", "", "", "text", 72, 4, 75, 6, 78]
   end
 
+  it "should not raise an exception when given an empty, frozen arg" do
+    data = [].freeze
+    expect { Marty::Xl.spreadsheet(data).to_stream.read }.to_not raise_error
+  end
 end
