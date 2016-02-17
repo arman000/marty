@@ -6,7 +6,8 @@ module Marty
       tdir = File.dirname(__FILE__) + "/migrations/"
       Marty::Migrations.write_view(tdir,
                                    'vw_marty_postings',
-                                   Marty::Posting, {}, ["comment"])
+                                   Marty::Posting, {}, ["comment"],
+                                   [["marty_posting_types", "id"]])
       filename = "vw_marty_postings.sql"
       genfile = File.join(tdir,filename)
       generated = File.read(genfile)

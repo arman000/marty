@@ -14,7 +14,8 @@ select
     main.created_dt,
     main.obsoleted_dt,
     main.name,
-    marty_posting_types1.name as posting_type_name
+    marty_posting_types1.name as posting_type_name,
+    marty_posting_types1.id as marty_posting_types_id
 from marty_postings main
     join marty_users u on main.user_id = u.id
     left join marty_users ou on main.o_user_id = ou.id

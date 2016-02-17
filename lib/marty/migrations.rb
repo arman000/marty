@@ -73,7 +73,7 @@ module Marty::Migrations
                                     unique: true)
   end
 
-  def self.write_view(target_dir, target_view, klass, jsons, excludes)
+  def self.write_view(target_dir, target_view, klass, jsons, excludes, extras)
     colnames = klass.columns_hash.keys
     user_id_cols = ["user_id", "o_user_id"]
     excludes += user_id_cols
@@ -104,6 +104,10 @@ module Marty::Migrations
                      "= #{tn_alias}.id"
           target_name = c.gsub(/_id$/,'_name')
           columns.push "#{tn_alias}.name as #{target_name}"
+          extras.select { |(table, column)| table_name == table }.each do
+            |(table, column)|
+            columns.push "#{tn_alias}.#{column} as #{table_name}_#{column}"
+          end
         else
           columns.push "main.#{c}"
         end
