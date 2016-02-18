@@ -73,7 +73,7 @@ module Marty::Migrations
                                     unique: true)
   end
 
-  def self.write_view(target_dir, klass, jsons, excludes)
+  def self.write_view(target_dir, target_view, klass, jsons, excludes, extras)
     colnames = klass.columns_hash.keys
     user_id_cols = ["user_id", "o_user_id"]
     excludes += user_id_cols
@@ -104,14 +104,16 @@ module Marty::Migrations
                      "= #{tn_alias}.id"
           target_name = c.gsub(/_id$/,'_name')
           columns.push "#{tn_alias}.name as #{target_name}"
+          extras.select { |(table, column)| table_name == table }.each do
+            |(table, column)|
+            columns.push "#{tn_alias}.#{column} as #{table_name}_#{column}"
+          end
         else
           columns.push "main.#{c}"
         end
       end
     end
-    table_name = klass.table_name
-    file_name = "vw_#{table_name}.sql"
-    File.open(File.join(target_dir,file_name), "w") do |f|
+    File.open(File.join(target_dir, "#{target_view}.sql"), "w") do |f|
       f.puts <<EOSQL
 create or replace function f_fixfalse(s text) returns text as $$
 begin
@@ -119,14 +121,14 @@ begin
 end
 $$ language plpgsql;
 
-drop view if exists vw_#{klass.table_name};
-create or replace view vw_#{klass.table_name} as
+drop view if exists #{target_view};
+create or replace view #{target_view} as
 select
     #{columns.join(",\n    ")}
 from #{klass.table_name} main
     #{joins.join("\n    ")};
 
-grant select on vw_#{klass.table_name} to public;
+grant select on #{target_view} to public;
 EOSQL
     end
   end
