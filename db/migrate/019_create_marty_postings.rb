@@ -1,5 +1,3 @@
-require 'marty/migrations'
-
 class CreateMartyPostings < McflyAppendOnlyMigration
   include Marty::Migrations
 

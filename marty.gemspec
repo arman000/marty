@@ -1,6 +1,10 @@
 $:.push File.expand_path("../lib", __FILE__)
 
 require "marty/version"
+require "digest/md5"
+require "base64"
+require "zlib"
+require "csv"
 
 Gem::Specification.new do |s|
   s.name        = "marty"

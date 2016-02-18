@@ -1,5 +1,3 @@
-require 'mcfly'
-
 class Marty::ApiAuth < Marty::Base
   has_mcfly
 

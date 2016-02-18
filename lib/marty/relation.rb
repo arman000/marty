@@ -1,5 +1,3 @@
-require 'mcfly'
-
 class Marty::Relation
   # Given a Mcfly class (klass) and a list of classes which can
   # reference klass, returns instaces of klass which have no references.

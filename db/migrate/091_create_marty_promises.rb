@@ -1,5 +1,3 @@
-require 'marty/migrations'
-
 class CreateMartyPromises < ActiveRecord::Migration
   include Marty::Migrations
 

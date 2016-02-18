@@ -25,3 +25,4 @@ spec/dummy/.sass-cache
 *.swp
 
 /spec/dummy/public/extjs
+.rspec-results

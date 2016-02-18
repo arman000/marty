@@ -1,5 +1,3 @@
-require 'delorean_lang'
-
 class Marty::ReportForm < Marty::Form
 
   # override apply for background generation

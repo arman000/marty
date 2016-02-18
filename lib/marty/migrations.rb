@@ -1,5 +1,3 @@
-require 'digest/md5'
-
 module Marty::Migrations
   def tb_prefix
     "marty_"

@@ -43,6 +43,8 @@ RSpec.configure do |config|
 
   config.order = 'random'
 
+  config.example_status_persistence_file_path = '.rspec-results'
+
   config.before(:suite) do
     DatabaseCleaner.clean_with(:truncation)
 

@@ -1,5 +1,3 @@
-require 'mcfly'
-
 class CreateMartyApiAuths < McflyMigration
   include Marty::Migrations
 

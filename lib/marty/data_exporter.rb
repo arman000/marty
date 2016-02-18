@@ -1,8 +1,3 @@
-require 'base64'
-require 'zlib'
-require 'csv'
-require 'marty/data_conversion'
-
 class Marty::DataExporter
   # given an array of hashes, return set of all keys
   def self.hash_array_keys(hl)

@@ -1,4 +1,3 @@
-require 'marty/permissions'
 require 'marty/scripting'
 require 'marty/reporting'
 require 'marty/posting_window'
