@@ -1,5 +1,3 @@
-require 'mcfly'
-
 class Marty::DataConversion
   EXCEL_START_DATE = Date.parse('1/1/1900')-2
 

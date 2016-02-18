@@ -1,19 +1,15 @@
 # Do not change order of require, since there are some dependencies
-# Do not require 'marty/permissions' - it relies on Rails being loaded first
-require 'marty/railtie'
+#
+# Do not include anything here that will be properly autoloaded by Rails - This
+# would be any file that define a properly namespaced module/class as Marty::<filename>
+# and that don't run code outside of that module/class
+#
+# Also note that anything required here will need to require in any classes that
+# they might be overriding methods in
+
 require 'marty/engine'
-require 'marty/monkey'
+require 'marty/railtie'
 require 'marty/mcfly_query'
-require 'marty/util'
-require 'marty/migrations'
-require 'marty/data_exporter'
-require 'marty/xl.rb'
-require 'marty/data_conversion'
-require 'marty/data_importer'
-require 'marty/data_change'
-require 'marty/relation'
+require 'marty/monkey'
 require 'marty/promise_job'
-require 'marty/promise_proxy'
-require 'marty/content_handler'
 require 'marty/lazy_column_loader'
-require 'marty/version'

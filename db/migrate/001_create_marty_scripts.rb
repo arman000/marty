@@ -1,5 +1,3 @@
-require 'mcfly'
-
 class CreateMartyScripts < McflyMigration
   include Marty::Migrations
 

@@ -1,6 +1,3 @@
-require 'mcfly'
-require 'net/ldap'
-
 class Marty::User < Marty::Base
   validates_presence_of :login, :firstname, :lastname
   validates_uniqueness_of :login

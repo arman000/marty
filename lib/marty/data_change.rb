@@ -1,5 +1,3 @@
-require 'delorean_lang'
-
 class Marty::DataChange
   include Delorean::Model
 

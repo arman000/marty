@@ -1,6 +1,3 @@
-require 'axlsx'
-require 'delorean_lang'
-
 class Marty::Xl
   include Delorean::Model
 

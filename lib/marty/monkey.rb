@@ -4,15 +4,6 @@
 
 require 'delorean_lang'
 
-# Very hacky to overwrite delorean's whitelist.  But, there's no
-# better way now.
-
-Delorean::RUBY_WHITELIST.
-  merge!({
-         })
-
-######################################################################
-
 # Be able to access Enums from Delorean
 class Delorean::BaseModule::BaseClass
   class << self
