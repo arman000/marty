@@ -102,9 +102,9 @@ module Marty::Migrations
                      "= #{tn_alias}.id"
           target_name = c.gsub(/_id$/,'_name')
           columns.push "#{tn_alias}.name as #{target_name}"
-          extras.select { |(table, column)| table_name == table }.each do
-            |(table, column)|
-            columns.push "#{tn_alias}.#{column} as #{table_name}_#{column}"
+          extras.each do |(table, column, new_colname)|
+            columns.push "#{tn_alias}.#{column} as #{new_colname}" if
+              table == table_name
           end
         else
           columns.push "main.#{c}"
