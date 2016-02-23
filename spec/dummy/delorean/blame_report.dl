@@ -58,7 +58,7 @@ ModelRows:
     t1          =?
     t2          =?
 
-    groups = Marty::DataChange.changes(t1, t2, klass)
+    groups = Marty::DataChange.changes(t1, t2, klass, [])
 
     headers = ["Group ID", "Created", "By", "Deleted", "By"] +
         Marty::DataChange.class_headers(klass)
