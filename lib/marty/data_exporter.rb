@@ -89,11 +89,13 @@ class Marty::DataExporter
       |c|
 
       v = obj.send(c.to_sym)
-
       type = col_types[c]
 
       # return [value] if not assoc or nil
-      next [v] if v.nil? || !type.is_a?(Hash)
+      next [v] if !type.is_a?(Hash)
+
+      # no child row, return nils for each field
+      next [nil]*type[:assoc_keys].count if v.nil?
 
       assoc_keys  = type[:assoc_keys]
       assoc_class = type[:assoc_class]

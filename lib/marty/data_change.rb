@@ -4,16 +4,20 @@ class Marty::DataChange
   # Some arbitrary limit so we don't allow enormous queries
   MAX_COUNT = 64000
 
-  delorean_fn :changes, sig: 3 do
-    |t0, t1, class_name|
+  # will break if DataExporter::export_attrs recurses more than 1 level
+  # and a level 2+ child table has a compound mcfly_uniqueness key
+  delorean_fn :changes, sig: [3, 4] do
+    |t0, t1, class_name, ids = nil|
 
     klass = class_name.constantize
 
     t0 = Mcfly.normalize_infinity t0
     t1 = Mcfly.normalize_infinity t1
 
-    cols = Marty::DataConversion.columns(klass)
-    changes = get_changed_data(t0, t1, klass)
+    cols_model = Marty::DataConversion.columns(klass)
+    cols_header = Marty::DataExporter.export_headers(class_name.constantize,
+                                                     nil, [])
+    changes = get_changed_data(t0, t1, klass, ids)
 
     changes.each_with_object({}) do |(group_id, ol), h|
       h[group_id] = ol.each_with_index.map do |o, i|
@@ -38,18 +42,19 @@ class Marty::DataChange
         exp_attrs = Marty::DataExporter.export_attrs(klass, o).flatten(1)
 
         # assumes cols order is same as that returned by export_attrs
-        profile["attrs"] = cols.each_with_index.map do
-          |c, i|
 
-          {
-            # FIXME: this will not work if the attr is an association
-            # which will requires multiple keys to identify
-            # (e.g. Rule: name & version)
-            "value"     => exp_attrs[i],
-            "changed"   => prev && (o.send(c.to_sym) != prev.send(c.to_sym)),
-          }
+        profile["attrs"] = cols_model.each_with_index.with_object([]) do
+          |(col, i), a|
+          header_current = cols_header[i]
+          valcount = Array === header_current ? header_current.count : 1
+          changed = o.send(col.to_sym) != prev.send(col.to_sym) if prev
+          valcount.times do
+            a.push({
+              "value"     => exp_attrs.shift,
+              "changed"   => changed
+            })
+          end
         end
-
         profile
       end
     end
@@ -90,14 +95,8 @@ class Marty::DataChange
 
   delorean_fn :class_headers, sig: 1 do
     |class_name|
-
-    klass = class_name.constantize
-    assoc = Marty::DataConversion.associations klass
-    Marty::DataConversion.columns(klass).map { |c|
-      # strip _id if it's an assoc
-      c = c[0..-4] if assoc[c]
-      I18n.t(c, scope: 'attributes', default: c)
-    }
+    Marty::DataExporter.export_headers(class_name.constantize, nil, []).flatten.
+      map { |f| I18n.t(f, scope: 'attributes', default: f) }
   end
 
   delorean_fn :user_name, sig: 1 do
@@ -161,19 +160,25 @@ class Marty::DataChange
     }
   end
 
-  def self.get_changed_data(t0, t1, klass)
+  def self.get_changed_data(t0, t1, klass, ids)
     # The following test fails when t0/t1 are infinity.  ActiveSupport
     # doesn't know about infinity.
     # return unless t0 < t1
 
     change_q = '(obsoleted_dt >= ? AND obsoleted_dt < ?)' +
-      ' OR (created_dt >= ? AND created_dt < ?)'
+               ' OR (created_dt >= ? AND created_dt < ?)'
 
-    raise "Change count exceeds limit #{MAX_COUNT}" if
-      klass.unscoped.where(change_q, t0, t1, t0, t1).count > MAX_COUNT
+    countq = klass.unscoped.where(change_q, t0, t1, t0, t1)
+    dataq = klass.where(change_q, t0, t1, t0, t1)
 
-    klass.where(change_q, t0, t1, t0, t1).
-      order("group_id, created_dt").group_by(&:group_id)
+    if ids
+      countq = countq.where(group_id: ids)
+      dataq = dataq.where(group_id: ids)
+    end
+
+    raise "Change count exceeds limit #{MAX_COUNT}" if countq.count > MAX_COUNT
+
+    dataq.order("group_id, created_dt").group_by(&:group_id)
   end
 
   ######################################################################
