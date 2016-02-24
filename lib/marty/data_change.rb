@@ -7,7 +7,7 @@ class Marty::DataChange
   # will break if DataExporter::export_attrs recurses more than 1 level
   # and a level 2+ child table has a compound mcfly_uniqueness key
   delorean_fn :changes, sig: [3, 4] do
-    |t0, t1, class_name, ids = []|
+    |t0, t1, class_name, ids = nil|
 
     klass = class_name.constantize
 
@@ -46,8 +46,8 @@ class Marty::DataChange
         profile["attrs"] = cols_model.each_with_index.with_object([]) do
           |(col, i), a|
           header_current = cols_header[i]
-          valcount = (header_current.is_a? Array) ? header_current.count : 1
-          changed = prev && (o.send(col.to_sym) != prev.send(col.to_sym))
+          valcount = Array === header_current ? header_current.count : 1
+          changed = o.send(col.to_sym) != prev.send(col.to_sym) if prev
           valcount.times do
             a.push({
               "value"     => exp_attrs.shift,
@@ -68,7 +68,7 @@ class Marty::DataChange
     t0 = Mcfly.normalize_infinity t0
     t1 = Mcfly.normalize_infinity t1
 
-    changes = get_changed_data(t0, t1, klass, [])
+    changes = get_changed_data(t0, t1, klass)
 
     created = updated = deleted = 0
 
@@ -170,7 +170,8 @@ class Marty::DataChange
 
     countq = klass.unscoped.where(change_q, t0, t1, t0, t1)
     dataq = klass.where(change_q, t0, t1, t0, t1)
-    if ids && ids.length > 0
+
+    if ids
       countq = countq.where(group_id: ids)
       dataq = dataq.where(group_id: ids)
     end

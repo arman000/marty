@@ -420,7 +420,6 @@ EOF
 
     context 'when exporting' do
       it "exports the column_name" do
-
         expect(@res[0][1][0][1].length).to eq(12)
         expect(@res[0][1][0][1][7]).to eq("note_rate")
       end

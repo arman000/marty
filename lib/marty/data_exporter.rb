@@ -95,7 +95,7 @@ class Marty::DataExporter
       next [v] if !type.is_a?(Hash)
 
       # no child row, return nils for each field
-      next type[:assoc_keys].map { |_| nil  } if v.nil?
+      next [nil]*type[:assoc_keys].count if v.nil?
 
       assoc_keys  = type[:assoc_keys]
       assoc_class = type[:assoc_class]
