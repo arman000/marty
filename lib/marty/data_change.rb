@@ -160,7 +160,7 @@ class Marty::DataChange
     }
   end
 
-  def self.get_changed_data(t0, t1, klass, ids)
+  def self.get_changed_data(t0, t1, klass, ids=nil)
     # The following test fails when t0/t1 are infinity.  ActiveSupport
     # doesn't know about infinity.
     # return unless t0 < t1
