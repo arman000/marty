@@ -14,6 +14,7 @@ class Marty::AuthApp < Marty::SimpleApp
       if !user.nil?
         menu << "->" << {
           text: user.name,
+          tooltip: 'Current user',
           menu: user_menu,
           name: "sign_out",
         }
