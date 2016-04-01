@@ -75,7 +75,13 @@ module Dummy
                           :dev,
                           :viewer,
                           :user_manager,
+                          :price_manager,
                          ]
+    config.marty.posting_types = [
+                                  :BASE,
+                                  :CLOSE,
+                                  :INTRA,
+                                 ]
     config.secret_key_base = "SECRET_KEY_BASE"
   end
 end

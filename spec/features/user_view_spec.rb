@@ -1,5 +1,4 @@
 require 'spec_helper'
-include IntegrationHelpers
 
 feature 'on User View', js: true do
 

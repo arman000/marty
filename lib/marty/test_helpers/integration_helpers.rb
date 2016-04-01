@@ -1,6 +1,6 @@
-module IntegrationHelpers
+module Marty::TestHelpers::IntegrationHelpers
 
-  # provides Rspec-y way to group/document longer feature tests
+  # without rspec-by gem, essentially works as documentation & wait
   def by message, level=0
     wait_for_ready(10)
     pending(message) unless block_given?
@@ -15,18 +15,19 @@ module IntegrationHelpers
   alias and_by by
 
   def by_start message
-    RSpec.configuration.reporter.by_started(message)
+    if RSpec.configuration.reporter.respond_to? :by_started
+      RSpec.configuration.reporter.by_started(message)
+    end
   end
-
+  
   def by_end
-    RSpec.configuration.reporter.by_ended()
+    if RSpec.configuration.reporter.respond_to? :by_ended
+      RSpec.configuration.reporter.by_ended()
+    end
   end
-
+  
   # test setup helpers
   def populate_test_users
-    Rails.configuration.marty.auth_source = 'local'
-    Rails.configuration.marty.local_password = 'marty'
-
     (1..2).each { |i|
       Rails.configuration.marty.roles.each { |role_name|
         username = "#{role_name}#{i}"
@@ -55,13 +56,13 @@ module IntegrationHelpers
     user.active = true
     user.save
   end
-
+  
   # navigation helpers
   def ensure_on(path)
     visit(path) unless current_path == path
   end
 
-  def log_in(username, password="marty")
+  def log_in(username, password)
     wait_for_ready(10)
 
     if first("a[data-qtip='Current user']")
@@ -74,25 +75,19 @@ module IntegrationHelpers
     fill_in("password", :with => password)
     press("OK")
     wait_for_ajax
-    find('a', text: username, match: :first, wait: 5)
   end
 
-  def log_in_as(username, password="marty")
+  def log_in_as(username)
+    Rails.configuration.marty.auth_source = 'local'
+    
     ensure_on("/")
-    log_in(username, password)
+    log_in(username, Rails.configuration.marty.local_password)
     ensure_on("/")
   end
 
   def log_out
     press("Current user")
     press("Sign out")
-  end
-
-  def log_out_as(name)
-    press(name)
-    press("Sign out")
-    #find('span', text: "Sign in", match: :first, wait: 5)
-    #ensure_on("/")
   end
 
   def press component, c_type='button'
@@ -135,10 +130,8 @@ module IntegrationHelpers
 
   def wait_for_ajax
     begin
-      all(:status, 'Busy...', minimum: 1)
-    rescue Capybara::ExpectationNotMet => e
-      Rails.logger.warn(e)
-    rescue Selenium::WebDriver::Error::StaleElementReferenceError => e
+      first(:status, 'Busy...')
+    rescue 
     end
     wait_for_ready(10)
     wait_until { !ajax_loading? }
@@ -186,9 +179,12 @@ module IntegrationHelpers
     "##{id}"
   end
 
-  def set_field_value value, field_type
+  def set_field_value value, field_type='textfield', name=''
+    args1 = name.empty? ? "" : "[fieldLabel='#{name}']"
+    args2 = name.empty? ? "" : "[name='#{name}']"
     page.execute_script <<-JS
-      var field = Ext.ComponentQuery.query("#{field_type}")[0];
+      var field = Ext.ComponentQuery.query("#{field_type}#{args1}")[0];
+      field = field || Ext.ComponentQuery.query("#{field_type}#{args2}")[0];
       field.setValue("#{value}")
     JS
   end
@@ -621,32 +617,6 @@ module IntegrationHelpers
     Capybara.add_selector(:gridcolumn) do
       xpath { |name| ".//span[contains(@class, 'x-column-header')]" +
               "//span[text()='#{name}']" }
-    end
-  end
-end
-
-# monkey patching rspec for use with instafail & by method
-module RSpec::Core
-  class Reporter
-    if defined?(NOTIFICATIONS)
-      NOTIFICATIONS.push("by_started", "by_finished")
-    end
-
-    def by_started(message)
-      notify :by_started, message
-    end
-
-    def by_ended(message = '')
-      notify :by_ended, message
-    end
-  end
-
-  unless defined?(Reporter::NOTIFICATIONS)
-    class Formatters::DocumentationFormatter
-      def by_started(message)
-      end
-      def by_ended(message = '')
-      end
     end
   end
 end

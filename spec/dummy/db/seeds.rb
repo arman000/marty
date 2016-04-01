@@ -1,3 +1,5 @@
+Marty::Engine.load_seed
+
 # Gemini seeds needed for testing purposes
 Gemini::AmortizationType.create(name: "Fixed")
 Gemini::AmortizationType.create(name: "Adjustable")

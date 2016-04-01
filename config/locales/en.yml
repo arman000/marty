@@ -23,6 +23,9 @@ en:
     dev: Developer
     user_manager: User Manager
 
+  posting_types:
+    BASE: BASE
+
   script:
     selection: Selection
     tester: Testing

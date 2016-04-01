@@ -25,14 +25,14 @@ Marty::Role.all.map { |role|
   ur.save
 }
 
-# FIXME: this is a hack.  It's needed due to the fact that 'NOW'
-# posting requires a PostingType.
-Marty::PostingType.create name: 'BASE'
+# Create PostingTypes from configuration
+(Rails.configuration.marty.posting_types || []).each do |p_type|
+  Marty::PostingType.create(name: p_type.to_s)
+end
 
 # Create NOW posting
 unless Marty::Posting.find_by_name('NOW')
   sn                 = Marty::Posting.new
-  # FIXME: this is Gemini-specific
   sn.posting_type_id = Marty::PostingType['BASE'].id
   sn.comment         = '---'
   sn.created_dt      = 'infinity'
