@@ -66,8 +66,8 @@ module Marty::TestHelpers::IntegrationHelpers
     wait_for_ready(10)
 
     if first("a[data-qtip='Current user']")
-      return if first("a[contains(text(), '#{username}')]")
       log_out
+      wait_for_ajax
     end
 
     find(:xpath, "//span", text: 'Sign in', match: :first, wait: 5).click
@@ -90,14 +90,14 @@ module Marty::TestHelpers::IntegrationHelpers
     press("Sign out")
   end
 
-  def press component, c_type='button'
+  def press button_name, index_of = 0
     begin
-      cmp = first("a[data-qtip='#{component}']")
-      cmp ||= first(:xpath, ".//a", text: "#{component}")
-      cmp ||= find(:btn, component, match: :first)
+      cmp = first("a[data-qtip='#{button_name}']")
+      cmp ||= first(:xpath, ".//a", text: "#{button_name}")
+      cmp ||= find(:btn, button_name, match: :first)
       cmp.click
     rescue
-      find_by_id(ext_cmp_id(component, c_type)).click
+      find_by_id(ext_button_id(button_name, index_of)).click
     end
   end
 
@@ -113,8 +113,8 @@ module Marty::TestHelpers::IntegrationHelpers
     find(:xpath, '//img[contains(@class, "x-tool-close")]').click
   end
 
-  def wait_until
-    Timeout.timeout(Capybara.default_max_wait_time) do
+  def wait_until(seconds_to_wait = Capybara.default_max_wait_time)
+    Timeout.timeout(seconds_to_wait) do
       sleep(0.1) until value = yield
       value
     end
@@ -158,7 +158,7 @@ module Marty::TestHelpers::IntegrationHelpers
     while !res && iterations > 0
       begin
         res = yield
-      rescue
+      rescue StandardError, RSpec::Expectations::ExpectationNotMetError
         sleep sleeptime
         iterations -= 1
       end
@@ -173,10 +173,9 @@ module Marty::TestHelpers::IntegrationHelpers
   end
 
   # component helpers
-  def ext_cmp_id title, c_type='button'
-    id = page.execute_script("Ext.ComponentQuery.query(
-      \"#{c_type}{isVisible(true)}[text='#{title}']\")[0].id")
-    "##{id}"
+  def ext_button_id title, index_of=0
+    page.evaluate_script("Ext.ComponentQuery.query(
+      \"button{isVisible(true)}[text='#{title}']\")[#{index_of}].id")
   end
 
   def set_field_value value, field_type='textfield', name=''
@@ -358,14 +357,17 @@ module Marty::TestHelpers::IntegrationHelpers
 
   def select_row(row, component, click_after=true)
     elid = wait_for_element do
-      page.execute_script <<-JS
-      var grid = #{component};
-      grid.getSelectionModel().select(#{row.to_i-1});
-      var node = grid.getView().getNode(#{row.to_i-1});
-      return node.id;
-    JS
+      resid = page.execute_script <<-JS
+        var grid = #{component};
+        grid.getSelectionModel().select(#{row.to_i-1});
+        var node = grid.getView().getNode(#{row.to_i-1});
+        return node.id;
+      JS
+
+      find_by_id(resid).click if click_after
+      resid
     end
-    find("##{elid}").click if click_after
+
     wait_for_ajax
     return elid
   end
@@ -401,15 +403,17 @@ module Marty::TestHelpers::IntegrationHelpers
     # FOR NETZKE 1.0, use this line... for columns
     # r.get('association_values')['#{col}'] :
     js_get_fields = fields.each_key.map do |k|
-      "var column = Ext.ComponentQuery.query('gridcolumn[name=\"#{k}\"]', grid)[0];\n"+
-        "var value = column.assoc ? r.get('meta').associationValues['#{k}'] : " +
-        "r.get('#{k}');\n" +
-        "if(value instanceof Date){\n"+
-        "   obj['#{k}'] = value.toISOString().substring(0, \n"+
-        "value.toISOString().indexOf('T'));\n"+
-        "} else {\n"+
-        "   obj['#{k}'] = value;\n"+
-        "}\n"
+      <<-JS 
+        var col = Ext.ComponentQuery.query('gridcolumn[name=\"#{k}\"]', grid)[0];
+        var value = col.assoc ? r.get('meta').associationValues['#{k}'] :
+                                r.get('#{k}');
+        if (value instanceof Date) {
+          obj['#{k}'] = value.toISOString().substring(0, 
+            value.toISOString().indexOf('T'));
+        } else {
+          obj['#{k}'] = value;
+        }
+      JS
     end.join
 
     obj = page.execute_script <<-JS

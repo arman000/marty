@@ -96,7 +96,7 @@ feature 'on Data Import', js: true do
 
     and_by '2 Fannie bups got added' do
       wait_for_ajax
-      expect(Gemini::FannieBup.count).to eq 3
+      wait_for_element { expect(Gemini::FannieBup.count).to eq 3 }
     end
   end
 

@@ -16,6 +16,14 @@ module CleanDbHelpers
     self.use_transactional_fixtures = true
   end
 
+  def simple_restore_clean_db(clean_file)
+    self.use_transactional_fixtures = false
+    `pg_restore -j 2 -O -x -c -d #{current_db} #{clean_file}`
+    ActiveRecord::Base.clear_all_connections!
+    ActiveRecord::Base.reset_shared_connection
+    self.use_transactional_fixtures = true
+  end
+
   def simple_restore_tie_out_db(tdir)
     svc = ActiveRecord::Migrator.current_version
     from = "#{tdir}/dump.psql"
