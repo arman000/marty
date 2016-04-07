@@ -10,7 +10,7 @@ class Marty::User < Marty::Base
   has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
 
-  scope :active, -> { where("#{self.table_name}.active = ?", true) }
+  scope :active, -> { where(active: true) }
 
   validate :verify_changes
   before_destroy :destroy_user
