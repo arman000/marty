@@ -97,20 +97,20 @@ module Marty::TestHelpers::IntegrationHelpers
       cmp ||= find(:btn, button_name, match: :first)
       cmp.click
     rescue
-      find_by_id(ext_button_id(button_name, index_of)).click
+      find_by_id(ext_button_id(button_name, index_of), visible: :all).click
     end
   end
 
   def popup message = ''
     by_start('popup: ' + message)
     wait_for_ready
-    yield
+    yield if block_given?
     close_window
     by_end
   end
 
   def close_window
-    find(:xpath, '//img[contains(@class, "x-tool-close")]').click
+    find(:xpath, '//img[contains(@class, "x-tool-close")]', wait: 5).click
   end
 
   def wait_until(seconds_to_wait = Capybara.default_max_wait_time)
@@ -152,7 +152,7 @@ module Marty::TestHelpers::IntegrationHelpers
     el.native.send_keys([:control, '-'])
   end
 
-  def wait_for_element(seconds_to_wait = 2.0, sleeptime = 0.1)
+  def wait_for_element(seconds_to_wait = 1.0, sleeptime = 0.1)
     res = nil
     iterations = (seconds_to_wait / sleeptime).to_i
     while !res && iterations > 0
@@ -424,7 +424,7 @@ module Marty::TestHelpers::IntegrationHelpers
       return obj;
     JS
 
-    expect(obj).to eq fields.stringify_keys
+    wait_for_element { expect(obj).to eq fields.stringify_keys }
   end
 
   def sorted_by? col, grid, direction = 'asc'

@@ -3,7 +3,6 @@ require 'spec_helper'
 feature 'on AuthApp', js: true do
 
   before(:all) do
-    Dummy::Application.load_seed
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
 
