@@ -31,6 +31,8 @@ class Marty::UserView < Marty::Grid
       property: :login,
       direction: 'ASC',
     } if c.columns.include?(:login)
+
+    c.scope = ->(arel) { arel.includes(:roles) }
   end
 
   def self.set_roles(roles, user)
