@@ -129,10 +129,6 @@ module Marty::TestHelpers::IntegrationHelpers
   end
 
   def wait_for_ajax
-    begin
-      first(:status, 'Busy...')
-    rescue 
-    end
     wait_for_ready(10)
     wait_until { !ajax_loading? }
     wait_for_ready
@@ -158,7 +154,7 @@ module Marty::TestHelpers::IntegrationHelpers
     while !res && iterations > 0
       begin
         res = yield
-      rescue StandardError, RSpec::Expectations::ExpectationNotMetError
+      rescue StandardError
         sleep sleeptime
         iterations -= 1
       end
@@ -174,18 +170,23 @@ module Marty::TestHelpers::IntegrationHelpers
 
   # component helpers
   def ext_button_id title, index_of=0
-    page.evaluate_script("Ext.ComponentQuery.query(
-      \"button{isVisible(true)}[text='#{title}']\")[#{index_of}].id")
+    res = nil
+    page.document.synchronize {
+      res = page.evaluate_script("Ext.ComponentQuery.query(
+        \"button{isVisible(true)}[text='#{title}']\")[#{index_of}].id")
+    }
+    res
   end
 
   def set_field_value value, field_type='textfield', name=''
     args1 = name.empty? ? "" : "[fieldLabel='#{name}']"
     args2 = name.empty? ? "" : "[name='#{name}']"
-    page.execute_script <<-JS
+    page.document.synchronize { page.execute_script <<-JS
       var field = Ext.ComponentQuery.query("#{field_type}#{args1}")[0];
       field = field || Ext.ComponentQuery.query("#{field_type}#{args2}")[0];
       field.setValue("#{value}")
     JS
+    }
   end
 
   def get_total_pages
@@ -205,18 +206,22 @@ module Marty::TestHelpers::IntegrationHelpers
     simple_escape!(text)
 
     find(:xpath, ".//textarea[@name='#{textarea}']")
-    page.execute_script <<-JS
+    page.document.synchronize { page.execute_script <<-JS
       var area = Ext.ComponentQuery.query('textarea[name="#{textarea}"]')[0];
       area.setValue("#{text}");
     JS
+    }
   end
 
   def btn_disabled? text, grid
-    res = page.execute_script(<<-JS)
+    res = nil
+    page.document.synchronize { res = page.execute_script(<<-JS)
       var grid = #{grid};
       var btn = Ext.ComponentQuery.query('[text="#{text}"]', grid)[0];
       return !btn || btn.disabled;
     JS
+    }
+    res
   end
 
   # Netzke component lookups, arguments for helper methods below
@@ -251,61 +256,80 @@ module Marty::TestHelpers::IntegrationHelpers
   # Netzke helper methods
   # Grid helpers
   def id_of component
-    page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = page.execute_script <<-JS
       var c = #{component};
       return c.view.id
     JS
+    }
+    res
   end
 
   def row_count grid
-    result =  page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res =  page.execute_script <<-JS
       var grid = #{grid};
       return grid.getStore().getCount();
     JS
-    result.to_i
+    }
+    res.to_i
   end
 
   def row_total grid
-    result =  page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res =  page.execute_script <<-JS
       var grid = #{grid};
       return grid.getStore().getTotalCount();
     JS
-    result.to_i
+    }
+    res.to_i
   end
 
   def row_modified_count grid
-    result =  page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res =  page.execute_script <<-JS
       var grid = #{grid};
       return grid.getStore().getUpdatedRecords().length;
     JS
-    result.to_i
+    }
+    res.to_i
   end
 
   def data_desc row, grid
-    desc = page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = page.execute_script <<-JS
       var grid = #{grid};
       var r = grid.getStore().getAt(#{row.to_i-1});
       return r.data.desc
     JS
-
-    desc.gsub(/<.*?>/, '')
+    }
+    res.gsub(/<.*?>/, '')
   end
 
   def click_col col, grid
-    el_id = page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = page.execute_script <<-JS
       var grid = #{grid};
       return Ext.ComponentQuery.query('gridcolumn[text="#{col}"]', grid)[0].id;
     JS
-
-    find_by_id(el_id).click
+    }
+    find_by_id(res).click
   end
 
   def col_values(col, grid, cnt, init=0)
     #does not validate the # of rows
     # FOR NETZKE 1.0, use this line... for columns
     # r.get('association_values')['#{col}'] :
-    items = wait_for_element do
-      result = page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = wait_for_element do
+        result = page.execute_script <<-JS
         var grid = #{grid},
           column = Ext.ComponentQuery.query('gridcolumn[name=\"#{col}\"]', grid)[0],
           obj = [];
@@ -322,15 +346,18 @@ module Marty::TestHelpers::IntegrationHelpers
         };
         return obj;
       JS
-      result if result.count == cnt
-    end
-    items
+        result if result.count == cnt
+      end
+    }
+    res
   end
 
   def validate_col_values(col, val, grid, cnt, init=0)
     # FOR NETZKE 1.0, use this line... for columns
     # r.get('association_values')['#{col}'] :
-    obj = page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = page.execute_script <<-JS
       var grid = #{grid},
         column = Ext.ComponentQuery.query('gridcolumn[name=\"#{col}\"]', grid)[0];
       for (var i = #{init}; i < #{init.to_i + cnt.to_i}; i++) {
@@ -341,40 +368,48 @@ module Marty::TestHelpers::IntegrationHelpers
       };
       return true;
     JS
+    }
+    res
   end
 
   def cell_value(row, col, component)
     # FOR NETZKE 1.0, use this line... for columns
     # r.get('association_values')['#{col}'] :
-    page.execute_script <<-JS
+    page.document.synchronize {
+      page.execute_script <<-JS
       var grid = #{component},
         column = Ext.ComponentQuery.query('gridcolumn[name=\"#{col}\"]', grid)[0],
         r      = grid.getStore().getAt(#{row.to_i-1});
       return column.assoc ? r.get('meta').associationValues['#{col}'] :
                             r.get('#{col}');
     JS
+    }  
   end
 
   def select_row(row, component, click_after=true)
-    elid = wait_for_element do
-      resid = page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = wait_for_element do
+        resid = page.execute_script <<-JS
         var grid = #{component};
         grid.getSelectionModel().select(#{row.to_i-1});
         var node = grid.getView().getNode(#{row.to_i-1});
         return node.id;
       JS
-
-      find_by_id(resid).click if click_after
-      resid
-    end
-
+        
+        find_by_id(resid).click if click_after
+        resid
+      end
+    }
     wait_for_ajax
-    return elid
+    return res
   end
 
   def select_rows(row0, row1, component)
-    elids = wait_for_element do
-      page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = wait_for_element do
+        page.execute_script <<-JS
       var grid = #{component};
       var result = [];
       for (var i = #{row0.to_i - 1}; i < #{row1.to_i}; i++) {
@@ -383,8 +418,9 @@ module Marty::TestHelpers::IntegrationHelpers
       };
       return result;
     JS
-    end
-    elids
+      end
+    }
+    res
   end
 
   def set_row_vals row, grid, fields
@@ -392,11 +428,13 @@ module Marty::TestHelpers::IntegrationHelpers
       "r.set('#{k}', '#{v}');"
     end.join
 
-    page.execute_script <<-JS
+    page.document.synchronize {
+      page.execute_script <<-JS
       var grid = #{grid};
       var r = grid.getStore().getAt(#{row.to_i-1});
       #{js_set_fields}
     JS
+    }
   end
 
   def validate_row_values row, grid, fields
@@ -416,21 +454,24 @@ module Marty::TestHelpers::IntegrationHelpers
       JS
     end.join
 
-    obj = page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = page.execute_script <<-JS
       var grid = #{grid};
       var r = grid.getStore().getAt(#{row.to_i-1});
       var obj = {};
       #{js_get_fields}
       return obj;
     JS
-
-    wait_for_element { expect(obj).to eq fields.stringify_keys }
+    }
+    wait_for_element { expect(res).to eq fields.stringify_keys }
   end
 
   def sorted_by? col, grid, direction = 'asc'
     # FOR NETZKE 1.0, use this line... for columns
     # r.get('association_values')['#{col}'] :
-    page.execute_script <<-JS
+    page.document.synchronize {
+      page.execute_script <<-JS
       var grid = #{grid},
         column = Ext.ComponentQuery.query('gridcolumn[name=\"#{col}\"]', grid)[0],
         colValues = [];
@@ -443,13 +484,15 @@ module Marty::TestHelpers::IntegrationHelpers
 
       return colValues.toString() === Ext.Array.sort(colValues).toString();
     JS
+    }
   end
 
   # Grid Combobox Helpers
   def select_grid_combobox(selection, row, field, grid)
     result = false
     while !result
-      result = page.execute_script <<-JS
+      page.document.synchronize {
+        result = page.execute_script <<-JS
          var grid = #{grid},
            combo  = Ext.ComponentQuery.query('netzkeremotecombo[name="#{field}"]')[0],
            editor = grid.getPlugin('celleditor'), now;
@@ -467,14 +510,18 @@ module Marty::TestHelpers::IntegrationHelpers
          editor.completeEdit();
          return true
        JS
+      }
+      result
     end
   end
 
   def grid_combobox_values(row, field, grid)
     start_edit_grid_combobox(row, field, grid)
     # hacky: delay for combobox to render, assumes that the combobox is not empty
-    result = wait_for_element do
-      page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = wait_for_element do
+        page.execute_script <<-JS
         var grid = #{grid},
           combo  = Ext.ComponentQuery.query('netzkeremotecombo[name="#{field}"]')[0],
           r      = [],
@@ -490,14 +537,17 @@ module Marty::TestHelpers::IntegrationHelpers
         editor.completeEdit();
         return r;
       JS
-    end
-    result
+      end
+    }
+    res
   end
 
   def get_grid_combobox_val(index, row, field, grid)
     start_edit_grid_combobox(row, field, grid)
 
-    result = wait_for_element do
+    res = nil
+    page.document.synchronize {
+      res = wait_for_element do
       page.execute_script <<-JS
         var grid = #{grid},
           combo  = Ext.ComponentQuery.query('netzkeremotecombo[name="#{field}"]')[0],
@@ -506,12 +556,14 @@ module Marty::TestHelpers::IntegrationHelpers
         editor.completeEdit();
         return val;
       JS
-    end
-    result
+      end
+    }
+    res
   end
 
   def start_edit_grid_combobox(row, field, grid)
-    page.execute_script <<-JS
+    page.document.synchronize {
+      page.execute_script <<-JS
       var grid = #{grid},
         combo  = Ext.ComponentQuery.query('netzkeremotecombo[name="#{field}"]')[0],
         editor = grid.getPlugin('celleditor');
@@ -521,6 +573,7 @@ module Marty::TestHelpers::IntegrationHelpers
       while(new Date().getTime() < now + 500) { }
       combo.onTriggerClick();
     JS
+    }
   end
 
   # Field edit/Key in Helpers
@@ -541,7 +594,9 @@ module Marty::TestHelpers::IntegrationHelpers
   end
 
   def id_of_edit_field(row, field, grid)
-    page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = page.execute_script <<-JS
       var grid = #{grid},
           editor = grid.getPlugin('celleditor');
 
@@ -549,19 +604,24 @@ module Marty::TestHelpers::IntegrationHelpers
         column:grid.headerCt.items.findIndex('name', '#{field}') });
       return editor.activeEditor.field.inputId;
     JS
+    }
+    res
   end
 
   def end_edit(row, field, grid)
-    page.execute_script <<-JS
+    page.document.synchronize {
+      page.execute_script <<-JS
       var grid = #{grid},
           editor = grid.getPlugin('celleditor');
       editor.completeEdit();
     JS
+    }
   end
 
   # Combobox Helpers
   def select_combobox(values, combo_label)
-    page.execute_script <<-JS
+    page.document.synchronize {
+      page.execute_script <<-JS
       var values = #{values.split(/,\s*/)};
       var combo = Ext.ComponentQuery.query("combobox[fieldLabel='#{combo_label}']")[0];
       combo = combo || Ext.ComponentQuery.query("combobox[name='#{combo_label}']")[0];
@@ -572,10 +632,13 @@ module Marty::TestHelpers::IntegrationHelpers
       combo.select(arr);
       if (combo.isExpanded) { combo.onTriggerClick(); }
     JS
+    }
   end
 
   def combobox_values(combo_label)
-    page.execute_script <<-JS
+    res = nil
+    page.document.synchronize {
+      res = page.execute_script <<-JS
       var combo = Ext.ComponentQuery.query("combobox[fieldLabel='#{combo_label}']")[0];
       combo = combo || Ext.ComponentQuery.query("combobox[name='#{combo_label}']")[0];
       values = [];
@@ -583,14 +646,18 @@ module Marty::TestHelpers::IntegrationHelpers
         function(r) { values.push(r.data.text || r.data.field1); });
       return values;
     JS
+    }
+    res
   end
 
   def click_combobox combo_label
-    page.execute_script <<-JS
+    page.document.synchronize {
+      page.execute_script <<-JS
       var combo = Ext.ComponentQuery.query("combobox[fieldLabel='#{combo_label}']")[0];
       combo = combo || Ext.ComponentQuery.query("combobox[name='#{combo_label}']")[0];
       combo.onTriggerClick();
     JS
+    }
     wait_until { !ajax_loading? }
   end
 
