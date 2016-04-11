@@ -113,13 +113,6 @@ module Marty::TestHelpers::IntegrationHelpers
     find(:xpath, '//img[contains(@class, "x-tool-close")]', wait: 5).click
   end
 
-  def wait_until(seconds_to_wait = Capybara.default_max_wait_time)
-    Timeout.timeout(seconds_to_wait) do
-      sleep(0.1) until value = yield
-      value
-    end
-  end
-
   def wait_for_ready wait_time = nil
     if wait_time
       find(:status, 'Ready', wait: wait_time)
@@ -130,7 +123,7 @@ module Marty::TestHelpers::IntegrationHelpers
 
   def wait_for_ajax
     wait_for_ready(10)
-    wait_until { !ajax_loading? }
+    wait_for_element { !ajax_loading? }
     wait_for_ready
   end
 
@@ -658,7 +651,7 @@ module Marty::TestHelpers::IntegrationHelpers
       combo.onTriggerClick();
     JS
     }
-    wait_until { !ajax_loading? }
+    wait_for_element { !ajax_loading? }
   end
 
   # Capybara finders
