@@ -90,13 +90,14 @@ feature 'on Data Import', js: true do
     and_by 'do Background Report with delayed jobs' do
       Delayed::Worker.delay_jobs = false
       press('Background Report')
+      wait_for_element { find(:status, 'Busy...') }
       wait_for_ajax
       Delayed::Worker.delay_jobs = true
     end
 
     and_by '2 Fannie bups got added' do
       wait_for_ajax
-      wait_for_element { expect(Gemini::FannieBup.count).to eq 3 }
+      expect(Gemini::FannieBup.count).to eq 3
     end
   end
 
