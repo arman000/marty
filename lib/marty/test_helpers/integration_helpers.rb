@@ -19,13 +19,13 @@ module Marty::TestHelpers::IntegrationHelpers
       RSpec.configuration.reporter.by_started(message)
     end
   end
-  
+
   def by_end
     if RSpec.configuration.reporter.respond_to? :by_ended
       RSpec.configuration.reporter.by_ended()
     end
   end
-  
+
   # test setup helpers
   def populate_test_users
     (1..2).each { |i|
@@ -56,7 +56,7 @@ module Marty::TestHelpers::IntegrationHelpers
     user.active = true
     user.save
   end
-  
+
   # navigation helpers
   def ensure_on(path)
     visit(path) unless current_path == path
@@ -79,7 +79,7 @@ module Marty::TestHelpers::IntegrationHelpers
 
   def log_in_as(username)
     Rails.configuration.marty.auth_source = 'local'
-    
+
     ensure_on("/")
     log_in(username, Rails.configuration.marty.local_password)
     ensure_on("/")

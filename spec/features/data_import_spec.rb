@@ -13,7 +13,7 @@ feature 'on Data Import', js: true do
     populate_import_type
     populate_bud_category_fannie_bup
     populate_test_users
-    
+
     custom_selectors
   end
 
@@ -52,7 +52,7 @@ feature 'on Data Import', js: true do
   let(:tg) { gridpanel('tag_grid') }
   let(:sg) { gridpanel('script_grid') }
   let(:rf) { gridpanel('report_form') }
-  
+
   it 'data import report adds 2 new fannie bups' do
     log_in_as('marty')
     go_to_reporting

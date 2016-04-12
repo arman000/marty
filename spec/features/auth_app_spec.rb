@@ -7,7 +7,7 @@ feature 'on AuthApp', js: true do
     save_clean_db(@clean_file)
 
     populate_test_users
-    
+
     custom_selectors
 
     monkey_patch_new_posting_form
@@ -33,7 +33,7 @@ feature 'on AuthApp', js: true do
       press('Postings')
       press('New Posting')
     end
-    
+
     and_by 'make posting TEST-A' do
       click_combobox('Posting Type')
       select_combobox('BASE', 'Posting Type')
@@ -46,7 +46,7 @@ feature 'on AuthApp', js: true do
       press('Postings')
       press('Select Posting')
     end
-    
+
     and_by 'select new posting' do
       within(:gridpanel, 'posting_window', match: :first) do
         expect(row_count(pg)).to eq 2
@@ -68,7 +68,7 @@ feature 'on AuthApp', js: true do
       press('Postings')
       press('New Posting')
     end
-    
+
     and_by 'no posting available for adding' do
       click_combobox('Posting Type')
       expect(combobox_values('Posting Type')).not_to include 'BASE'

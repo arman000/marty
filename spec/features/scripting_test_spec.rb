@@ -3,10 +3,8 @@ require 'spec_helper'
 feature 'on Data Import', js: true do
 
   before(:all) do
-    Dummy::Application.load_seed
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
-  
     populate_test_users
     populate_sample_scripts1
     populate_sample_scripts2
@@ -47,7 +45,7 @@ C:
     p0 =?
     a = 456.0 + p0
 DELOREAN
-    
+
     with_user("dev1") { |u|
       Marty::Script.
         load_script_bodies({
@@ -84,7 +82,7 @@ DELOREAN
                            }, Date.today + 2.minute)
     }
   end
-  
+
   let(:tg) { gridpanel('tag_grid') }
   let(:sg) { gridpanel('script_grid') }
 

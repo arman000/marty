@@ -11,7 +11,6 @@ feature 'on Reporting', js: true do
 
     populate_test_users
     populate_sample_reports
-    
     custom_selectors
   end
 
@@ -76,7 +75,7 @@ DD: BB
 
     result = 444
 DELOREAN
-    
+
     with_user("dev1") { |u|
       Marty::Posting.do_create('BASE', SOME_DT, 'a comment')
 
@@ -184,7 +183,7 @@ DELOREAN
       select_row(1, sg)
       select_node('AA (csv)')
     end
-    
+
     and_by 'fill form' do
       wait_for_ajax
       set_field_value('XYZ', '', 'pt_name')
@@ -192,7 +191,7 @@ DELOREAN
       set_field_value('true', 'textfield', 'selected_testing')
       press("Generate Report")
     end
-    
+
     wait_for_element do
       expect(page).to have_content('XYZ1,XYZ2,XYZ3,XYZ4 1,2,3,4 2,4,6,8 ' +
                                    '3,6,9,12 4,8,12,16')

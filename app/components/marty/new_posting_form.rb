@@ -2,7 +2,7 @@ class Marty::NewPostingForm < Marty::Form
   extend ::Marty::Permissions
 
   # override this to set permissions for posting types
-  has_marty_permissions read:  :any
+  has_marty_permissions read: :any
 
   js_configure do |c|
     c.close_me = <<-JS

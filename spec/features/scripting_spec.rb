@@ -17,7 +17,7 @@ feature 'on Data Import', js: true do
   end
 
   after(:each) do
-    simple_restore_clean_db(@clean_file)
+    restore_clean_db(@clean_file, false)
   end
 
   after(:all) do
