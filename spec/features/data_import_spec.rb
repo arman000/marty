@@ -108,7 +108,8 @@ feature 'on Data Import', js: true do
     end
 
     and_by '2 Fannie bups got added' do
-      wait_for_ajax
+      # no reliable way to check if delayed job completed in time
+      wait_for_element(4.0) { Gemini::FannieBup.count > 1 }
       expect(Gemini::FannieBup.count).to eq 3
     end
   end

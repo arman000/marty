@@ -141,15 +141,16 @@ module Marty::TestHelpers::IntegrationHelpers
     el.native.send_keys([:control, '-'])
   end
 
-  def wait_for_element(seconds_to_wait = 1.0, sleeptime = 0.1)
+  def wait_for_element(seconds_to_wait = 2.0, sleeptime = 0.1)
     res = nil
-    iterations = (seconds_to_wait / sleeptime).to_i
-    while !res && iterations > 0
+    start_time = current_time = Time.now
+    while !res && current_time - start_time < seconds_to_wait
       begin
         res = yield
-      rescue StandardError
+      rescue
+      ensure
         sleep sleeptime
-        iterations -= 1
+        current_time = Time.now
       end
     end
     res
