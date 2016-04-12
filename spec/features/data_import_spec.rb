@@ -95,6 +95,18 @@ feature 'on Data Import', js: true do
       Delayed::Worker.delay_jobs = true
     end
 
+    and_by 'go to jobs dashboard' do
+      press('Applications')
+      press('Jobs Dashboard')
+    end
+
+    and_by 'background job has shown up' do
+      wait_for_ajax
+      within(:gridpanel, 'promise_view', match: :first) do
+        expect(row_count(treepanel('promise_view'))).to eq 1
+      end
+    end
+
     and_by '2 Fannie bups got added' do
       wait_for_ajax
       expect(Gemini::FannieBup.count).to eq 3
