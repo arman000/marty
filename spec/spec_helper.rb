@@ -33,6 +33,7 @@ ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection
 RSpec.configure do |config|
   config.include DelayedJobHelpers
   config.include CleanDbHelpers
+  config.include Marty::TestHelpers::IntegrationHelpers
 
   # TODO: Continue to remove should syntax from specs - remove this line to see
   # errors
@@ -47,8 +48,6 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     DatabaseCleaner.clean_with(:truncation)
-
-    Marty::Engine.load_seed
     Rails.application.load_seed
   end
 
