@@ -275,7 +275,7 @@ feature 'on Data Import', js: true do
         press('OK')
       end
     end
-    
+
     and_by 'new tag contains new script' do
       wait_for_ajax
       select_row(2, tg)

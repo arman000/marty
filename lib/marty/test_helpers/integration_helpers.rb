@@ -377,7 +377,7 @@ module Marty::TestHelpers::IntegrationHelpers
       return column.assoc ? r.get('meta').associationValues['#{col}'] :
                             r.get('#{col}');
     JS
-    }  
+    }
   end
 
   def select_row(row, component, click_after=true)
@@ -390,7 +390,7 @@ module Marty::TestHelpers::IntegrationHelpers
         var node = grid.getView().getNode(#{row.to_i-1});
         return node.id;
       JS
-        
+
         find_by_id(resid).click if click_after
         resid
       end
@@ -435,12 +435,12 @@ module Marty::TestHelpers::IntegrationHelpers
     # FOR NETZKE 1.0, use this line... for columns
     # r.get('association_values')['#{col}'] :
     js_get_fields = fields.each_key.map do |k|
-      <<-JS 
+      <<-JS
         var col = Ext.ComponentQuery.query('gridcolumn[name=\"#{k}\"]', grid)[0];
         var value = col.assoc ? r.get('meta').associationValues['#{k}'] :
                                 r.get('#{k}');
         if (value instanceof Date) {
-          obj['#{k}'] = value.toISOString().substring(0, 
+          obj['#{k}'] = value.toISOString().substring(0,
             value.toISOString().indexOf('T'));
         } else {
           obj['#{k}'] = value;
