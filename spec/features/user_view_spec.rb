@@ -109,50 +109,54 @@ feature 'on User View', js: true do
       populate_test_users
     end
 
-    it 'base user types' do
+    it 'user manager has access' do
       log_in_as('user_manager1')
       go_to_user_view
-      by 'user manager has access' do
+      by 'check buttons' do
         find(:btn, 'New User', match: :first)
         zoom_out uv
         expect(btn_disabled?('New User', uv)).to be_falsy
         expect(btn_disabled?('Edit in form', uv)).to be_falsy
         expect(btn_disabled?('Delete', uv)).to be_falsy
-        log_out
       end
+    end
 
+    it 'admin has access' do
       log_in_as('admin1')
       go_to_user_view
-      and_by 'admin has access' do
+      and_by 'check buttons' do
         find(:btn, 'New User', match: :first)
         expect(btn_disabled?('New User', uv)).to be_falsy
         expect(btn_disabled?('Edit in form', uv)).to be_falsy
         expect(btn_disabled?('Delete', uv)).to be_falsy
-        log_out
       end
+    end
 
+    it 'viewer denied access' do
       log_in_as('viewer1')
       go_to_user_view_backdoor
-      and_by 'viewer denied access' do
+      and_by 'check buttons' do
         find(:btn, 'New User', match: :first)
         #selection needed to make delete button disappear
+        wait_for_ajax
         select_row(1, uv)
         expect(btn_disabled?('New User', uv)).to be_truthy
         expect(btn_disabled?('Edit in form', uv)).to be_truthy
         expect(btn_disabled?('Delete', uv)).to be_truthy
-        log_out
       end
+    end
 
+    it 'developer denied access' do
       log_in_as('dev1')
       go_to_user_view_backdoor
-      and_by 'developer denied access' do
+      and_by 'check buttons' do
         find(:btn, 'New User', match: :first)
         #selection needed to make delete button disappear
+        wait_for_ajax
         select_row(1, uv)
         expect(btn_disabled?('New User', uv)).to be_truthy
         expect(btn_disabled?('Edit in form', uv)).to be_truthy
         expect(btn_disabled?('Delete', uv)).to be_truthy
-        log_out
       end
     end
   end

@@ -5,7 +5,6 @@ feature 'on Reporting', js: true do
     SOME_DATE = "20130520"
     SOME_TIME = "1200"
     SOME_DT   = "#{SOME_DATE} #{SOME_TIME} PST8PDT"
-    Dummy::Application.load_seed
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
 

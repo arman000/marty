@@ -35,6 +35,8 @@ RSpec.configure do |config|
   config.include CleanDbHelpers
   config.include Marty::TestHelpers::IntegrationHelpers
 
+  Capybara.default_max_wait_time = 3
+
   # TODO: Continue to remove should syntax from specs - remove this line to see
   # errors
   config.expect_with(:rspec) { |c| c.syntax = [:should, :expect] }

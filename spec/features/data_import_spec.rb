@@ -3,7 +3,6 @@ require 'spec_helper'
 feature 'on Data Import', js: true do
 
   before(:all) do
-    Dummy::Application.load_seed
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
     dt = Time.zone.now
@@ -82,7 +81,8 @@ feature 'on Data Import', js: true do
 
       within(:gridpanel, 'report_form', match: :first) do
         select_combobox('FB', 'Import Type')
-        paste("bud_category_id\tnote_rate\tsettlement_mm\tsettlement_yy\tbuy_up\tbuy_down\n1\t9.500\t9\t2014\t0\t0\n1\t9.750\t9\t2014\t0\t0\n",
+        bud_id = Gemini::BudCategory.first.id
+        paste("bud_category_id\tnote_rate\tsettlement_mm\tsettlement_yy\tbuy_up\tbuy_down\n#{bud_id}\t9.500\t9\t2014\t0\t0\n#{bud_id}\t9.750\t9\t2014\t0\t0\n",
               'data_import_field')
       end
     end
@@ -102,14 +102,13 @@ feature 'on Data Import', js: true do
 
     and_by 'background job has shown up' do
       wait_for_ajax
-      within(:gridpanel, 'promise_view', match: :first) do
-        expect(row_count(treepanel('promise_view'))).to eq 1
-      end
+      expect(row_count(treepanel('promise_view'))).to eq 1
+      find(:xpath, "//tr[contains(@class, 'green-row')]", match: :first)
     end
 
     and_by '2 Fannie bups got added' do
       # no reliable way to check if delayed job completed in time
-      wait_for_element(10.0) { Gemini::FannieBup.count > 1 }
+      wait_for_element(20.0) { Gemini::FannieBup.count == 3 }
       expect(Gemini::FannieBup.count).to eq 3
     end
   end
