@@ -29,6 +29,15 @@ class ActiveRecord::Base
   end
 end
 
+Capybara.register_driver :selenium do |app|
+  client = Selenium::WebDriver::Remote::Http::Default.new
+  profile = Selenium::WebDriver::Firefox::Profile.new
+  profile.load_no_focus_lib = true
+  Capybara::Selenium::Driver.new(app, :profile => profile,
+                                 :http_client => client)
+end
+
+
 ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection
 
 RSpec.configure do |config|

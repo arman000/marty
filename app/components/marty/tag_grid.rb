@@ -32,11 +32,7 @@ class Marty::TagGrid < Marty::Grid
       return
     end
 
-    model_adapter.errors_array(tag).each do |error|
-      flash :error => error
-    end
-
-    client.netzke_notify(@flash)
+    client.netzke_notify(model_adapter.errors_array(tag).join("\n"))
   end
 
   action :add_in_form do |a|

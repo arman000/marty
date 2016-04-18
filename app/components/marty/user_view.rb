@@ -79,10 +79,7 @@ class Marty::UserView < Marty::Grid
       client.success = true
       client.netzke_on_submit_success
     else
-      model_adapter.errors_array(user).each do |error|
-        flash :error => error
-      end
-      client.netzke_notify(@flash)
+      client.netzke_notify(model_adapter.errors_array(user).join("\n"))
     end
   end
 
@@ -98,10 +95,7 @@ class Marty::UserView < Marty::Grid
       client.success = true
       client.netzke_on_submit_success
     else
-      model_adapter.errors_array(user).each do |error|
-        flash :error => error
-      end
-      client.netzke_notify(@flash)
+      client.netzke_notify(model_adapter.errors_array(user).join("\n"))
     end
   end
 
@@ -128,62 +122,45 @@ class Marty::UserView < Marty::Grid
 
   attribute :login do |c|
     c.width = 100
-    c.text  = I18n.t("user_grid.login").upcase
+    c.label  = I18n.t("user_grid.login")
   end
 
   attribute :firstname do |c|
     c.width = 100
-    c.text  = I18n.t("user_grid.firstname")
+    c.label  = I18n.t("user_grid.firstname")
   end
 
   attribute :lastname do |c|
     c.width = 100
-    c.text  = I18n.t("user_grid.lastname")
+    c.label  = I18n.t("user_grid.lastname")
   end
 
   attribute :active do |c|
     c.width = 60
-    c.text  = I18n.t("user_grid.active")
+    c.label  = I18n.t("user_grid.active")
   end
 
   attribute :roles do |c|
     c.width  = 100
     c.flex   = 1
-    c.text   = I18n.t("user_grid.roles")
+    c.label   = I18n.t("user_grid.roles")
     c.type   = :string,
 
     c.getter = lambda do |r|
       r.roles.map { |ur| I18n.t("roles.#{ur.name}") }.sort
     end
+    c.editor_config = { multi_select: true,
+                        empty_text: I18n.t("user_grid.select_roles"),
+                        store: Marty::Role.pluck(:name).map {
+                          |n| I18n.t("roles.#{n}")}.sort,
+                        type: :string,
+                        xtype: :combo}
   end
 
   attribute :created_dt do |c|
-    c.text      = I18n.t("user_grid.created_dt")
+    c.label      = I18n.t("user_grid.created_dt")
     c.format    = "Y-m-d H:i"
     c.read_only = true
-  end
-
-  def default_form_items
-    [
-      :login,
-      :firstname,
-      :lastname,
-      :active,
-      { name: :uuid,
-        text: I18n.t("uuid")
-      },
-      {
-        name: "roles",
-        xtype: :combo,
-        type: :string,
-        store: Marty::Role.pluck(:name).map {|n| I18n.t("roles.#{n}")}.sort,
-        empty_text: I18n.t("user_grid.select_roles"),
-        multi_select: true,
-        getter: lambda do |r|
-          r.roles.map { |ur| I18n.t("roles.#{ur.name}") }.sort
-        end
-      }
-    ]
   end
 end
 

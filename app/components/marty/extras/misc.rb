@@ -19,13 +19,13 @@ module Marty::Extras::Misc
     {
       format: "0." + "0"*decimal_places,
       xtype: 'numbercolumn',
-      editor_config: { hide_trigger: true },
+      editor_config: { hide_trigger: true,
+                       decimal_precision: decimal_places },
       field_config: { decimal_precision: decimal_places,
                       xtype: :numberfield,
                       hide_trigger: true,
                       key_nav_enabled: false,
-                      mouse_wheel_enabled: false,
-                    }
+                      mouse_wheel_enabled: false }
     }
   end
 end

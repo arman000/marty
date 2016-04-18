@@ -167,11 +167,7 @@ class Marty::ScriptForm < Marty::Form
       return
     end
 
-    model_adapter.errors_array(script).each do |error|
-      flash error: error
-    end
-
-    client.netzke_notify @flash
+    client.netzke_notify(model_adapter.errors_array(script).join("\n"))
     client.netzke_apply_form_errors(build_form_errors(record))
   end
 
