@@ -100,7 +100,7 @@ DELOREAN
 
     and_by 'compute attrs with bad params' do
       wait_for_ajax
-      find(:xpath, "//div[text()='Compute Attributes']", wait: 5)
+      find(:xpath, "//div[text()='Compute Attributes']", wait: 10)
       fill_in('attrs', with: "A.a; A.b; B.a; C.a")
       fill_in('params', with: "a = 1.1\nc = 2.2")
       press('Compute')
@@ -143,6 +143,7 @@ DELOREAN
     and_by 'select M1 (for dev) sample script' do
       press('Selection')
       wait_for_ajax
+      find(:gridpanel, 'script_grid', match: :first, wait: 10)
       select_row(1, tg)
       select_row(1, sg)
       press('Testing')
@@ -205,7 +206,7 @@ DELOREAN
 
     and_by 'use bad attributes' do
       wait_for_ajax
-      find(:xpath, "//div[text()='Compute Attributes']", wait: 5)
+      find(:xpath, "//div[text()='Compute Attributes']", wait: 10)
       fill_in('attrs', with: "A; y; >")
       press('Compute')
     end
@@ -266,7 +267,7 @@ DELOREAN
 
     and_by 'use good attr' do
       wait_for_ajax
-      find(:xpath, "//div[text()='Compute Attributes']", wait: 5)
+      find(:xpath, "//div[text()='Compute Attributes']", wait: 10)
       fill_in('attrs', with: "C.p; B.p")
       press('Compute')
     end
