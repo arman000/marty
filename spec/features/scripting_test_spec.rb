@@ -83,6 +83,14 @@ DELOREAN
     }
   end
 
+  def tab_press tab_text
+    #we need a separate method for tab clicks
+    wait_for_element do
+        find_by_id(ext_button_id(tab_text), visible: :all).click
+        true
+    end
+  end
+
   let(:tg) { gridpanel('tag_grid') }
   let(:sg) { gridpanel('script_grid') }
 
@@ -95,7 +103,7 @@ DELOREAN
       zoom_out(tg)
       select_row(2, tg)
       select_row(1, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'compute attrs with bad params' do
@@ -141,12 +149,12 @@ DELOREAN
     end
 
     and_by 'select M1 (for dev) sample script' do
-      press('Selection')
+      tab_press('Selection')
       wait_for_ajax
       find(:gridpanel, 'script_grid', match: :first, wait: 10)
       select_row(1, tg)
       select_row(1, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'compute attrs with empty params' do
@@ -174,10 +182,10 @@ DELOREAN
     end
 
     and_by 'select M2 sample grid' do
-      press('Selection')
+      tab_press('Selection')
       wait_for_ajax
       select_row(2, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'compute attrs with good params' do
@@ -201,7 +209,7 @@ DELOREAN
     by 'select M1 sample script' do
       wait_for_ajax
       select_row(1, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'use bad attributes' do
@@ -262,7 +270,7 @@ DELOREAN
       wait_for_ajax
       zoom_out(sg)
       select_row(3, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'use good attr' do

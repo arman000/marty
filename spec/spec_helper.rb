@@ -66,7 +66,6 @@ RSpec.configure do |config|
       screenshot_name = "screenshot-#{filename}-#{line_number}.png"
       screenshot_path = "#{Rails.root.join("tmp")}/#{screenshot_name}"
       page.save_screenshot(screenshot_path)
-      puts meta[:full_description] + "\n Screenshot: #{screenshot_path}"
      end
   end
 
