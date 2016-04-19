@@ -100,6 +100,7 @@ DELOREAN
 
     and_by 'compute attrs with bad params' do
       wait_for_ajax
+      find(:xpath, "//div[text()='Compute Attributes']", wait: 5)
       fill_in('attrs', with: "A.a; A.b; B.a; C.a")
       fill_in('params', with: "a = 1.1\nc = 2.2")
       press('Compute')
@@ -204,6 +205,7 @@ DELOREAN
 
     and_by 'use bad attributes' do
       wait_for_ajax
+      find(:xpath, "//div[text()='Compute Attributes']", wait: 5)
       fill_in('attrs', with: "A; y; >")
       press('Compute')
     end
@@ -264,6 +266,7 @@ DELOREAN
 
     and_by 'use good attr' do
       wait_for_ajax
+      find(:xpath, "//div[text()='Compute Attributes']", wait: 5)
       fill_in('attrs', with: "C.p; B.p")
       press('Compute')
     end
