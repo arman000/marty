@@ -92,6 +92,7 @@ DELOREAN
 
     by 'select M1 sample script' do
       wait_for_ajax
+      zoom_out(tg)
       select_row(2, tg)
       select_row(1, sg)
       press('Testing')
@@ -256,6 +257,7 @@ DELOREAN
 
     by 'select M3 sample script' do
       wait_for_ajax
+      zoom_out(sg)
       select_row(3, sg)
       press('Testing')
     end

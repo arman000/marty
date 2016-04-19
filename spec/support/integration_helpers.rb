@@ -1,4 +1,4 @@
-module Marty::TestHelpers::IntegrationHelpers
+module Marty::IntegrationHelpers
 
   MAX_WAIT_TIME = 5.0
 
