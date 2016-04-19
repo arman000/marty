@@ -57,6 +57,19 @@ RSpec.configure do |config|
     Mcfly.whodunnit = UserHelpers.system_user
   end
 
+  config.after(:each, :js => true) do |example|
+    # save a screenshot on js failures for CI server testing
+    if example.exception
+      meta = example.metadata
+      filename = File.basename(meta[:file_path])
+      line_number = meta[:line_number]
+      screenshot_name = "screenshot-#{filename}-#{line_number}.png"
+      screenshot_path = "#{Rails.root.join("tmp")}/#{screenshot_name}"
+      page.save_screenshot(screenshot_path)
+      puts meta[:full_description] + "\n Screenshot: #{screenshot_path}"
+     end
+  end
+
   config.infer_spec_type_from_file_location!
   config.use_transactional_fixtures = true
 
