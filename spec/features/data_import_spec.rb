@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'on Data Import', js: true do
+feature 'under Applications menu, Reports using  Data Import', js: true do
 
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"

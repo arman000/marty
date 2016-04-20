@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'on User View', js: true do
+feature 'under Sytem menu, User Management worflows', js: true do
 
   before(:all) do
     custom_selectors
@@ -36,7 +36,7 @@ feature 'on User View', js: true do
 
   let(:uv) { gridpanel('user_view') }
 
-  it 'create, edit, delete user' do
+  it 'marty user can add/edit but not delete users' do
     log_in_as('marty')
     go_to_user_view
 
@@ -103,7 +103,7 @@ feature 'on User View', js: true do
     end
   end
 
-  describe 'check user permissions' do
+  describe 'check user permissions & what buttons appear' do
 
     before(:all) do
       populate_test_users

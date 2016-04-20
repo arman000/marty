@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'on AuthApp', js: true do
+feature 'Posting workflows', js: true do
 
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
@@ -60,7 +60,7 @@ feature 'on AuthApp', js: true do
     end
   end
 
-  it 'cannot create posting' do
+  it 'cannot create posting as dev' do
     log_in_as('dev1')
 
     by 'bring up new posting form' do

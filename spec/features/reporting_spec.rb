@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'on Reporting', js: true do
+feature 'under Applications menu, Reports workflows', js: true do
   before(:all) do
     SOME_DATE = "20130520"
     SOME_TIME = "1200"

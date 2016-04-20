@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'on Data Import', js: true do
+feature 'under Applications menu, Scripting (debug) workflows', js: true do
 
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
@@ -94,7 +94,7 @@ DELOREAN
   let(:tg) { gridpanel('tag_grid') }
   let(:sg) { gridpanel('script_grid') }
 
-  it 'switches between 2 diff tags and 2 diff scripts' do
+  it 'switches between tags & scripts, computes values and checks for errors' do
     log_in_as('dev1')
     go_to_scripting
 
@@ -204,7 +204,7 @@ DELOREAN
     end
   end
 
-  it 'deals with malformed params/attrs input' do
+  it 'malformed params/attrs input shows proper errors' do
     log_in_as('dev1')
     go_to_scripting
 
@@ -266,7 +266,7 @@ DELOREAN
     end
   end
 
-  it 'computes simple values' do
+  it 'computes simple results' do
     log_in_as('dev1')
     go_to_scripting
 
