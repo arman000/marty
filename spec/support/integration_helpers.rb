@@ -73,6 +73,7 @@ module Marty::IntegrationHelpers
     end
 
     find(:xpath, "//span", text: 'Sign in', match: :first, wait: 5).click
+    find(:xpath, "//span", text: 'Password', match: :first, wait: 5)
     fill_in("login", :with => username)
     fill_in("password", :with => password)
     press("OK")
@@ -140,12 +141,14 @@ module Marty::IntegrationHelpers
   end
 
   def zoom_out component
-    el_id = id_of(component)
-    el = wait_for_element { find_by_id(el_id) }
-    el.native.send_keys([:control, '0'])
-    el.native.send_keys([:control, '-'])
-    el.native.send_keys([:control, '-'])
-    el.native.send_keys([:control, '-'])
+    wait_for_element do
+      el_id = id_of(component)
+      el = find_by_id(el_id)
+      el.native.send_keys([:control, '0'])
+      el.native.send_keys([:control, '-'])
+      el.native.send_keys([:control, '-'])
+      el.native.send_keys([:control, '-'])
+    end
   end
 
   def wait_for_element(seconds_to_wait = 2.0, sleeptime = 0.1)
@@ -392,7 +395,7 @@ module Marty::IntegrationHelpers
   end
 
   def select_row(row, grid, click_after=true)
-    resid = run_js(<<-JS, 6.0)
+    resid = run_js(<<-JS, 10.0)
       #{ext_var(grid, 'grid')}
       grid.getSelectionModel().select(#{row.to_i-1});
       return grid.getView().getNode(#{row.to_i-1}).id;

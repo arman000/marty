@@ -9,6 +9,7 @@ feature 'under Sytem menu, User Management worflows', js: true do
   def go_to_user_view
     press('System')
     press('User Management')
+    expect(page).to have_content 'marty'
   end
 
   def go_to_user_view_backdoor
