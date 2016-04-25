@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'on Data Import', js: true do
+feature 'under Applications menu, Scripting (debug) workflows', js: true do
 
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
@@ -83,23 +83,35 @@ DELOREAN
     }
   end
 
+  def tab_press tab_text
+    #we need a separate method for tab clicks
+    wait_for_element do
+        find_by_id(ext_button_id(tab_text), visible: :all).click
+        true
+    end
+  end
+
   let(:tg) { gridpanel('tag_grid') }
   let(:sg) { gridpanel('script_grid') }
 
-  it 'switches between 2 diff tags and 2 diff scripts' do
+  it 'switches between tags & scripts, computes values and checks for errors' do
     log_in_as('dev1')
     go_to_scripting
 
     by 'select M1 sample script' do
       wait_for_ajax
+      zoom_out(tg)
       select_row(2, tg)
       select_row(1, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'compute attrs with bad params' do
       wait_for_ajax
-      fill_in('attrs', with: "A.a; A.b; B.a; C.a")
+      wait_for_element do
+        fill_in('attrs', with: "A.a; A.b; B.a; C.a")
+        true
+      end
       fill_in('params', with: "a = 1.1\nc = 2.2")
       press('Compute')
     end
@@ -139,11 +151,12 @@ DELOREAN
     end
 
     and_by 'select M1 (for dev) sample script' do
-      press('Selection')
+      tab_press('Selection')
       wait_for_ajax
+      find(:gridpanel, 'script_grid', match: :first, wait: 10)
       select_row(1, tg)
       select_row(1, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'compute attrs with empty params' do
@@ -171,10 +184,10 @@ DELOREAN
     end
 
     and_by 'select M2 sample grid' do
-      press('Selection')
+      tab_press('Selection')
       wait_for_ajax
       select_row(2, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'compute attrs with good params' do
@@ -191,19 +204,22 @@ DELOREAN
     end
   end
 
-  it 'deals with malformed params/attrs input' do
+  it 'malformed params/attrs input shows proper errors' do
     log_in_as('dev1')
     go_to_scripting
 
     by 'select M1 sample script' do
       wait_for_ajax
       select_row(1, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'use bad attributes' do
       wait_for_ajax
-      fill_in('attrs', with: "A; y; >")
+      wait_for_element do
+        fill_in('attrs', with: "A; y; >")
+        true
+      end
       press('Compute')
     end
 
@@ -250,19 +266,23 @@ DELOREAN
     end
   end
 
-  it 'computes simple values' do
+  it 'computes simple results' do
     log_in_as('dev1')
     go_to_scripting
 
     by 'select M3 sample script' do
       wait_for_ajax
+      zoom_out(sg)
       select_row(3, sg)
-      press('Testing')
+      tab_press('Testing')
     end
 
     and_by 'use good attr' do
       wait_for_ajax
-      fill_in('attrs', with: "C.p; B.p")
+      wait_for_element do
+        fill_in('attrs', with: "C.p; B.p")
+        true
+      end
       press('Compute')
     end
 
