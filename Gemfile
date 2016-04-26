@@ -19,12 +19,10 @@ group :development, :test do
   gem 'timecop'
   gem 'database_cleaner'
 
-  gem 'netzke-core',  path: File.expand_path('../../netzke-core', __FILE__)
-  #gem 'netzke-core'
-  gem 'netzke-basepack', path: File.expand_path('../../netzke-basepack', __FILE__)
-  #gem 'netzke-basepack'
-  gem 'netzke-testing' #, path: File.expand_path('../../netzke-testing', __FILE__)
+  gem 'netzke-core'
+  gem 'netzke-basepack'
+  gem 'netzke-testing'
 
-  #gem 'marty_rspec', path: File.expand_path('../../marty_rspec', __FILE__)
   gem 'marty_rspec'
+
 end

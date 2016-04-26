@@ -25,23 +25,11 @@ class Marty::PostingGrid < Marty::Grid
     c.init_component = l(<<-JS)
     function() {
        this.callParent();
+
        this.getSelectionModel().on('selectionchange', function(selModel) {
           this.actions.detail &&
           this.actions.detail.setDisabled(!selModel.hasSelection());
-          this.actions.delete &&
-          this.actions.delete.setDisabled(!selModel.hasSelection());
        }, this);
-
-       var me = this;
-       me.getView().on('itemkeydown', function(view, record, item, index, e) {
-          if (e.getKey() === e.SPACE) {
-             record_id = me.getSelectionModel().selected.first().getId();
-             me.getView().fireEvent('itemclick', me, record);
-             me.server.Detail({record_id: record_id});
-             var rowIndex = me.find('id', record.getId());
-             me.getView().select(rowIndex);
-          }
-       });
     }
     JS
 

@@ -27,6 +27,7 @@ class Marty::Grid < ::Netzke::Grid::Base
   def class_can?(op)
     self.class.can_perform_action?(op)
   end
+
   def configure(c)
     super
 
@@ -39,7 +40,15 @@ class Marty::Grid < ::Netzke::Grid::Base
     c.editing                = :both
     c.store_config           = {page_size: 30}
   end
+
   def has_search_action?
     false
   end
+
+  def get_json_sorter(json_col, field)
+    lambda do |r, dir|
+      r.order("#{json_col} ->> '#{field}' " + dir.to_s)
+    end
+  end
+
 end
