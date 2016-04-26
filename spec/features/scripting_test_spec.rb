@@ -18,6 +18,7 @@ feature 'under Applications menu, Scripting (debug) workflows', js: true do
   def go_to_scripting
     press('Applications')
     press('Scripting')
+    expect(page).to have_content 'Scripts'
   end
 
   def with_user(uname, &block)

@@ -23,6 +23,7 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
   def go_to_reporting
     press('Applications')
     press('Reports')
+    expect(page).to have_content 'Report'
   end
 
   def populate_import_type
@@ -69,7 +70,7 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
         wait_for_ajax
 
         #hacky: assumes only 1 combobox without label
-        within(:gridpanel, 'report_select', match: :first) do
+        within(:gridpanel, 'report_select', match: :first, wait: 5) do
           # hacky, hardcoding netzkecombobox dropdown arrow name
           arrow = find(:input, 'nodename')['componentid'] + '-trigger-picker'
           find(:xpath, ".//div[@id='#{arrow}']").click
