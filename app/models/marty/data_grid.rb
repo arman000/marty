@@ -45,31 +45,6 @@ class Marty::DataGrid < Marty::Base
             dg.errors[:base] = "invalid grid modifier expression: #{rs_keep}"
             next
           end
-
-          op, identifier = m[1..2]
-          feature = Marty::Feature.lookup('infinity', identifier)
-
-          unless feature
-            dg.errors[:base] = "feature not found: #{identifier}"
-            next
-          end
-
-          ftype = feature.data_type
-          dg.errors[:base] =
-            "feature #{feature.name} type (#{ftype}) " +
-            "is incompatible with grid dim type (#{type})" unless
-
-            type == ftype || (["int4range", "numrange"].include?(type) &&
-                              ["integer", "float"].include?(ftype))
-
-          if (type == "numrange" || type == "int4range")
-            dg.errors[:base] =
-              "operator required for feature #{feature.name}" unless op
-            next
-          end
-
-          dg.errors[:base] =
-            "operator not allowed for feature #{feature.name}" if op
         end
 
         dg.errors[:base] = "metadata elements must have attr/type/keys" unless
