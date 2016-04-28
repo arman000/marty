@@ -1,4 +1,4 @@
-class LenientDataGrids < ActiveRecord::Migration
+class LenientMartyDataGrids < ActiveRecord::Migration
   include Marty::Migrations
 
   def change

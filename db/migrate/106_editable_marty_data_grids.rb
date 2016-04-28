@@ -1,4 +1,4 @@
-class EditableDataGrids < McflyMigration
+class EditableMartyDataGrids < McflyMigration
   include Marty::Migrations
 
   def change
