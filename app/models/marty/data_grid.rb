@@ -548,7 +548,7 @@ class Marty::DataGrid < Marty::Base
 
   def self.create_from_import(name, import_text, created_dt=nil)
     metadata, data, data_type, lenient = parse(created_dt, import_text, {})
-    dg            = Marty::DataGrid.new
+    dg            = self.new
     dg.name       = name
     dg.data       = data
     dg.data_type  = data_type
