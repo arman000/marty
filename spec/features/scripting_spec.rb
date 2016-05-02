@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'on Data Import', js: true do
+feature 'under Applications menu, Scripting workflows', js: true do
 
   before(:all) do
     self.use_transactional_fixtures = false
@@ -70,7 +70,7 @@ feature 'on Data Import', js: true do
   let(:sg) { gridpanel('script_grid') }
   let(:sf) { gridpanel('script_form') }
 
-  it 'add a script, add a tag' do
+  it 'adding scripts and tags & ensure proper validations' do
     log_in_as('dev1')
     go_to_scripting
 
@@ -135,7 +135,7 @@ feature 'on Data Import', js: true do
     end
   end
 
-  it 'add a script with invalid names' do
+  it 'add a script with invalid names, no scripts get added' do
     log_in_as('dev1')
     go_to_scripting
 
@@ -168,7 +168,7 @@ feature 'on Data Import', js: true do
     end
   end
 
-  it 'has access controls (viewer/anon users)' do
+  it 'has proper access controls (viewer/anon users)' do
     log_in_as('anon')
     # no nav buttons available, but check direct access
     ensure_on('/#scripting')
@@ -235,7 +235,7 @@ feature 'on Data Import', js: true do
     end
   end
 
-  it 'saves changes to scripts' do
+  it 'saving an edited script' do
     log_in_as('dev1')
     go_to_scripting
 

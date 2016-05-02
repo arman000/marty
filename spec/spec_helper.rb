@@ -34,7 +34,9 @@ RSpec.configure do |config|
   config.include DelayedJobHelpers
   config.include CleanDbHelpers
   config.include SpecSetup
-  config.include Marty::TestHelpers::IntegrationHelpers
+  config.include Marty::IntegrationHelpers
+
+  Capybara.default_max_wait_time = 3
 
   # TODO: Continue to remove should syntax from specs - remove this line to see
   # errors
@@ -54,6 +56,18 @@ RSpec.configure do |config|
 
   config.before(:each) do
     Mcfly.whodunnit = UserHelpers.system_user
+  end
+
+  config.after(:each, :js => true) do |example|
+    # save a screenshot on js failures for CI server testing
+    if example.exception
+      meta = example.metadata
+      filename = File.basename(meta[:file_path])
+      line_number = meta[:line_number]
+      screenshot_name = "screenshot-#{filename}-#{line_number}.png"
+      screenshot_path = "#{Rails.root.join("tmp")}/#{screenshot_name}"
+      page.save_screenshot(screenshot_path)
+     end
   end
 
   config.infer_spec_type_from_file_location!
