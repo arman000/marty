@@ -2,7 +2,6 @@ module SpecSetup
   def load_scripts(path, dt)
     Marty::Script.load_scripts(path, dt)
     Marty::ScriptSet.clear_cache
-#    Gemini::RuleScriptSet.clear_cache
   end
 
   def posting(type, dt, comment)

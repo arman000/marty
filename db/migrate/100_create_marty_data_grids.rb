@@ -12,7 +12,7 @@ class CreateMartyDataGrids < McflyMigration
       t.string :data_type, null: true
       t.boolean :lenient, null: false, default: false
     end
-    
+
     change_column :marty_data_grids, :data, "jsonb USING array_to_json(data)::jsonb"
   end
 end

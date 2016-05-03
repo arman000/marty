@@ -13,7 +13,7 @@ module Marty::Migrations
       execute("ALTER TABLE #{table_name} ENABLE TRIGGER USER;")
     end
   end
-  
+
   def add_fk(from_table, to_table, options = {})
     options[:column] ||= "#{to_table.to_s.singularize}_id"
 

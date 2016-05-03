@@ -70,7 +70,6 @@ module Dummy
     config.marty.system_account = 'marty'
     config.marty.local_password = 'marty'
     require 'class_list'
-    #config.marty.class_list = []
     config.marty.roles = [
                           :admin,
                           :dev,
