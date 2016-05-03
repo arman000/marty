@@ -3,6 +3,7 @@ module Marty
     isolate_namespace Marty
 
     config.autoload_paths << File.expand_path("../../../lib", __FILE__)
+    config.autoload_paths << File.expand_path("../../../components", __FILE__)
 
     # generators add rspec tests
     config.generators do |g|
