@@ -73,12 +73,11 @@ module Marty::Migrations
 
   def self.write_view(target_dir, target_view, klass, jsons, excludes, extras)
     colnames = klass.columns_hash.keys
-    user_id_cols = ["user_id", "o_user_id"]
-    excludes += user_id_cols
+    excludes += ["user_id", "o_user_id"]
     joins = ["join marty_users u on main.user_id = u.id",
              "left join marty_users ou on main.o_user_id = ou.id"]
-    columns = ["concat(u.firstname, ' ', u.lastname) AS user_name",
-               "concat(ou.firstname, ' ', ou.lastname) AS obsoleted_user"]
+    columns = ["u.login AS user_name",
+               "ou.login AS obsoleted_user"]
     jointabs = {}
     colnames.each do |c|
       if jsons[c]
