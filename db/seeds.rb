@@ -26,7 +26,7 @@ Marty::Role.all.map { |role|
 }
 
 # Create default PostingType from configuration
-default_p_type =  Rails.configuration.marty.default_posting_type || 'BASE'
+default_p_type =  Rails.configuration.marty.default_posting_type
 
 Marty::PostingType.create(name: default_p_type)
 

@@ -9,5 +9,9 @@ module Marty
     config.generators do |g|
       g.test_framework :rspec, :view_specs => false
     end
+
+    config.before_configuration do |app|
+      app.config.marty.default_posting_type = 'BASE'
+    end
   end
 end
