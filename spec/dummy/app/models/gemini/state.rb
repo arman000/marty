@@ -1,5 +1,7 @@
-class Gemini::State < Gemini::Base
+class Gemini::State < ActiveRecord::Base
   extend Marty::Enum
+
+  self.table_name_prefix = "gemini_"
 
   validates_presence_of :name, :full_name
   validates_uniqueness_of :name, :full_name

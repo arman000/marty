@@ -3,17 +3,6 @@ module Marty::Migrations
     "marty_"
   end
 
-  def disable_triggers(table_name, &block)
-    begin
-      execute("ALTER TABLE #{table_name} DISABLE TRIGGER USER;")
-
-      block.call
-
-    ensure
-      execute("ALTER TABLE #{table_name} ENABLE TRIGGER USER;")
-    end
-  end
-
   def add_fk(from_table, to_table, options = {})
     options[:column] ||= "#{to_table.to_s.singularize}_id"
 
