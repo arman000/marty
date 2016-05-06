@@ -33,6 +33,7 @@ ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection
 RSpec.configure do |config|
   config.include DelayedJobHelpers
   config.include CleanDbHelpers
+  config.include SpecSetup
   config.include Marty::IntegrationHelpers
 
   Capybara.default_max_wait_time = 3
