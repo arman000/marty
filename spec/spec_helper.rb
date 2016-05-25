@@ -3,6 +3,7 @@ ENV["RAILS_ENV"] ||= "test"
 require 'dummy/config/application'
 require 'rspec/rails'
 require 'database_cleaner'
+require 'marty_rspec'
 
 Dummy::Application.initialize!
 
@@ -35,6 +36,8 @@ RSpec.configure do |config|
   config.include CleanDbHelpers
   config.include SpecSetup
   config.include Marty::IntegrationHelpers
+  config.include MartyRspec::Util
+  config.include MartyRspec::NetzkeGrid
 
   Capybara.default_max_wait_time = 3
 

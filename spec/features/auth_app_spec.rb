@@ -23,10 +23,10 @@ feature 'Posting workflows', js: true do
     Marty::NewPostingForm.has_marty_permissions(BASE: :admin)
   end
 
-  let(:pg) { gridpanel('posting_grid') }
-
   it 'create posting and select it' do
     log_in_as('admin1')
+
+    posting_grid = netzke_find('posting_grid')
 
     by 'bring up new posting form' do
       wait_for_ajax
@@ -49,8 +49,8 @@ feature 'Posting workflows', js: true do
 
     and_by 'select new posting' do
       within(:gridpanel, 'posting_window', match: :first) do
-        expect(row_count(pg)).to eq 2
-        select_row(2, pg)
+        expect(posting_grid.row_count).to eq 2
+        posting_grid.select_row(2)
         press('Select')
       end
     end

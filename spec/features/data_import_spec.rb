@@ -49,21 +49,20 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
                             )
   end
 
-  let(:tg) { gridpanel('tag_grid') }
-  let(:sg) { gridpanel('script_grid') }
-  let(:rf) { gridpanel('report_form') }
-
   it 'adds 2 new fannie bups via datareport script' do
     expect do
       log_in_as('marty')
       go_to_reporting
 
+      tag_grid = netzke_find('tag_grid')
+      script_grid = netzke_find('script_grid')
+
       by 'select BASE tag' do
-        select_row(2, tg)
+        tag_grid.select_row(2)
       end
 
       and_by 'select DataReport script & Data Import node' do
-        select_row(2, sg)
+        script_grid.select_row(2)
       end
 
       and_by 'select Data Import node' do
@@ -104,7 +103,8 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
 
       and_by 'background job has shown up' do
         wait_for_ajax
-        expect(row_count(treepanel('promise_view'))).to eq 1
+        promise_view = netzke_find('promise_view', 'treepanel')
+        expect(promise_view.row_count).to eq 1
         find(:xpath, "//tr[contains(@class, 'green-row')]", match: :first)
       end
 
@@ -120,12 +120,15 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
       log_in_as('dev1')
       go_to_reporting
 
+      tag_grid = netzke_find('tag_grid')
+      script_grid = netzke_find('script_grid')
+
       by 'select BASE tag' do
-        select_row(2, tg)
+        tag_grid.select_row(2)
       end
 
       and_by 'select DataReport script & Data Import node' do
-        select_row(2, sg)
+        script_grid.select_row(2)
       end
 
       and_by 'select Data Import node' do
