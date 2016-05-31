@@ -6,14 +6,9 @@ module Marty::Enum
 
     res = @LOOKUP_CACHE[index] ||= find_by_name(index)
 
-    return res if res
+    raise "no such #{self.name}: '#{index}'" unless res
 
-    raise "no such #{self.name}: '#{index}'"
-  end
-
-  def to_s
-    # FIXME: hacky since not all enums have name
-    self.name
+    res
   end
 
   def clear_lookup_cache!
