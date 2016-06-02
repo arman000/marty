@@ -76,7 +76,7 @@ module Dummy
                           :viewer,
                           :user_manager,
                          ]
-    config.marty.default_posting_type = 'BASE'
+    #config.marty.default_posting_type = 'BASE'
     config.secret_key_base = "SECRET_KEY_BASE"
   end
 end
