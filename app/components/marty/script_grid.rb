@@ -3,7 +3,7 @@ class Marty::ScriptGrid < Marty::Grid
   create: [:dev],
   read: :any,
   update: [:dev],
-  delete: [] # [:dev]
+  delete: [:dev]
 
   def configure(c)
     super
@@ -29,12 +29,30 @@ class Marty::ScriptGrid < Marty::Grid
       # if there are no non-DEV tags we get an exception above
       ts = 'infinity'
     end
-
     tb = data_class.table_name
     data_class.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
                      ts, ts).scoping do
       super
     end
+  end
+
+  action :del do |a|
+    a.text     = I18n.t("script_grid.delete")
+    a.tooltip  = I18n.t("script_grid.delete")
+    a.icon     = :script_delete
+    a.disabled = config[:prohibit_delete]
+  end
+
+  endpoint :server_delete do |params, this|
+    return this.netzke_feedback("Permission Denied") if
+      config[:prohibit_delete]
+
+    tag = Marty::Tag.map_to_tag(root_sess[:selected_tag_id])
+
+    return this.netzke_feedback("Can only delete in DEV tag") unless
+      tag && tag.isdev?
+
+    super(params, this)
   end
 
   # override the add_in_form endpoint.  Script creation needs to use
@@ -72,7 +90,7 @@ class Marty::ScriptGrid < Marty::Grid
   end
 
   def default_bbar
-    [:add_in_form]
+    [:add_in_form, :del]
   end
 
   def default_context_menu

@@ -43,6 +43,7 @@ en:
     name: Name
     tag: Associated Tag
     created_dt: Create Date/Time
+    delete: Delete Script
 
   user_grid:
     title: Users
@@ -64,6 +65,7 @@ en:
     discarded: Discarded
     checked_out: Checked out
     print: Print
+    delete: Delete
 
   script_tester:
     attributes: Compute Attributes

@@ -178,6 +178,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
       expect(row_count(sg)).to eq 0
       expect(row_count(tg)).to eq 0
       expect(btn_disabled?('New Script', sg)).to be_truthy
+      expect(btn_disabled?('Delete Script', sg)).to be_truthy
       expect(btn_disabled?('New Tag', tg)).to be_truthy
       log_out
     end
@@ -193,6 +194,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
       select_row(1, tg)
       wait_for_ajax
       expect(btn_disabled?('New Script', sg)).to be_truthy
+      expect(btn_disabled?('Delete Script', sg)).to be_truthy
       expect(btn_disabled?('New Tag', tg)).to be_truthy
       select_row(4, tg)
       wait_for_ajax
@@ -303,6 +305,48 @@ feature 'under Applications menu, Scripting workflows', js: true do
     and_by 'save without changes' do
       press('Save')
       expect(find(:msg)).to have_content 'no save needed'
+    end
+  end
+
+  it 'deletes a script' do
+    log_in_as('dev1')
+    go_to_scripting
+
+    by 'select DEV tag' do
+      wait_for_ajax
+      select_row(1, tg)
+    end
+
+    and_by 'delete script' do
+      select_row(1, sg)
+      press('Delete Script')
+      find(:xpath, "//div[text()='Confirmation']", wait: 5)
+      press('Yes')
+    end
+
+    and_by 'script is gone' do
+      expect(row_count(sg)).to eq 4
+    end
+  end
+
+  it 'only allows delete on DEV tag' do
+    log_in_as('dev1')
+    go_to_scripting
+
+    by 'select not DEV tag' do
+      wait_for_ajax
+      select_row(2, tg)
+    end
+
+    and_by 'delete script' do
+      select_row(1, sg)
+      press('Delete Script')
+      find(:xpath, "//div[text()='Confirmation']", wait: 5)
+      press('Yes')
+    end
+
+    and_by 'delete did not work' do
+       expect(find(:msg)).to have_content 'Can only delete in DEV tag'
     end
   end
 end
