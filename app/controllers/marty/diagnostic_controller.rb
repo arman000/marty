@@ -47,9 +47,9 @@ module Marty
     def git_details app_name = Rails.application.class.parent.to_s
       [
         Diagnostic.new("#{app_name} Git Version", true,
-                       `git describe 2>&1`.strip),
+               `git describe 2>&1`.strip),
         Diagnostic.new("#{app_name} Git Details", true,
-                       `git show --pretty=format:"sha: %h, %D" 2>&1`.strip)
+               `git show --pretty=format:"sha: %h, %D" --no-patch 2>&1`.strip)
       ]
     end
 
