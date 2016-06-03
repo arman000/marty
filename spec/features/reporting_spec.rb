@@ -90,10 +90,6 @@ DELOREAN
     }
   end
 
-  let(:tg) { gridpanel('tag_grid') }
-  let(:sg) { gridpanel('script_grid') }
-  let(:rf) { gridpanel('report_form') }
-
   def select_node node_name
     wait_for_ajax
     #hacky: assumes only 1 combobox without label
@@ -109,14 +105,17 @@ DELOREAN
     log_in_as('dev1')
     go_to_reporting
 
+    tag_grid = netzke_find('tag_grid')
+    script_grid = netzke_find('script_grid')
+
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out(tg)
-      select_row(2, tg)
+      zoom_out
+      tag_grid.select_row(2)
     end
 
     and_by 'select SomeReport script & CC node' do
-      select_row(1, sg)
+      script_grid.select_row(1)
       select_node('CC (csv)')
     end
 
@@ -145,11 +144,11 @@ DELOREAN
     end
 
     and_by 'select 3rd tag' do
-      select_row(3, tg)
+      tag_grid.select_row(3)
     end
 
     and_by 'select SomeReport script' do
-      select_row(1, sg)
+      script_grid.select_row(1)
     end
 
     and_by 'validate script combobox' do
@@ -172,14 +171,17 @@ DELOREAN
     log_in_as('dev1')
     go_to_reporting
 
+    tag_grid = netzke_find('tag_grid')
+    script_grid = netzke_find('script_grid')
+
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out(tg)
-      select_row(2, tg)
+      zoom_out
+      tag_grid.select_row(2)
     end
 
     and_by 'select SomeReport script & AA node' do
-      select_row(1, sg)
+      script_grid.select_row(1)
       select_node('AA (csv)')
     end
 
@@ -201,21 +203,24 @@ DELOREAN
     log_in_as('dev1')
     go_to_reporting
 
+    tag_grid = netzke_find('tag_grid')
+    script_grid = netzke_find('script_grid')
+
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out(tg)
-      select_row(2, tg)
+      zoom_out
+      tag_grid.select_row(2)
     end
 
     and_by 'select SomeReport script & AA node' do
-      select_row(1, sg)
+      script_grid.select_row(1)
       select_node('DD [role: dev] (csv)')
     end
 
     and_by 'generate report disabled' do
       fill_in('Note Rate', with: '3.00')
-      expect(btn_disabled?('Generate Report', rf)).to be_truthy
-      expect(btn_disabled?('Background Report', rf)).to be_falsy
+      expect(btn_disabled?('Generate Report')).to be_truthy
+      expect(btn_disabled?('Background Report')).to be_falsy
     end
   end
 
@@ -223,14 +228,17 @@ DELOREAN
     log_in_as('viewer1')
     go_to_reporting
 
+    tag_grid = netzke_find('tag_grid')
+    script_grid = netzke_find('script_grid')
+
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out(tg)
-      select_row(2, tg)
+      zoom_out
+      tag_grid.select_row(2)
     end
 
     and_by 'select SomeReport script & AA' do
-      select_row(1, sg)
+      script_grid.select_row(1)
     end
 
     and_by 'no DD [role: dev] (csv)' do

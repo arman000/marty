@@ -92,18 +92,18 @@ DELOREAN
     end
   end
 
-  let(:tg) { gridpanel('tag_grid') }
-  let(:sg) { gridpanel('script_grid') }
-
   it 'switches between tags & scripts, computes values and checks for errors' do
     log_in_as('dev1')
     go_to_scripting
 
+    tag_grid = netzke_find('tag_grid')
+    script_grid = netzke_find('script_grid')
+
     by 'select M1 sample script' do
       wait_for_ajax
-      zoom_out(tg)
-      select_row(2, tg)
-      select_row(1, sg)
+      zoom_out
+      tag_grid.select_row(2)
+      script_grid.select_row(1)
       tab_press('Testing')
     end
 
@@ -155,8 +155,8 @@ DELOREAN
       tab_press('Selection')
       wait_for_ajax
       find(:gridpanel, 'script_grid', match: :first, wait: 10)
-      select_row(1, tg)
-      select_row(1, sg)
+      tag_grid.select_row(1)
+      script_grid.select_row(1)
       tab_press('Testing')
     end
 
@@ -187,7 +187,7 @@ DELOREAN
     and_by 'select M2 sample grid' do
       tab_press('Selection')
       wait_for_ajax
-      select_row(2, sg)
+      script_grid.select_row(2)
       tab_press('Testing')
     end
 
@@ -209,9 +209,12 @@ DELOREAN
     log_in_as('dev1')
     go_to_scripting
 
+    tag_grid = netzke_find('tag_grid')
+    script_grid = netzke_find('script_grid')
+
     by 'select M1 sample script' do
       wait_for_ajax
-      select_row(1, sg)
+      script_grid.select_row(1)
       tab_press('Testing')
     end
 
@@ -271,10 +274,13 @@ DELOREAN
     log_in_as('dev1')
     go_to_scripting
 
+    tag_grid = netzke_find('tag_grid')
+    script_grid = netzke_find('script_grid')
+
     by 'select M3 sample script' do
       wait_for_ajax
-      zoom_out(sg)
-      select_row(3, sg)
+      zoom_out
+      script_grid.select_row(3)
       tab_press('Testing')
     end
 
