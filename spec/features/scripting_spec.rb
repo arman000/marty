@@ -66,17 +66,16 @@ feature 'under Applications menu, Scripting workflows', js: true do
     }
   end
 
-  let(:tg) { gridpanel('tag_grid') }
-  let(:sg) { gridpanel('script_grid') }
-  let(:sf) { gridpanel('script_form') }
-
   it 'adding scripts and tags & ensure proper validations' do
     log_in_as('dev1')
     go_to_scripting
 
+    script_grid = netzke_find('script_grid')
+    tag_grid = netzke_find('tag_grid')
+
     by 'select DEV tag' do
       wait_for_ajax
-      select_row(1, tg)
+      tag_grid.select_row(1)
     end
 
     and_by 'add script' do
@@ -90,8 +89,8 @@ feature 'under Applications menu, Scripting workflows', js: true do
     and_by 'select the new script' do
       wait_for_ajax
       within(:gridpanel, 'script_grid', match: :first) do
-        validate_row_values(6, sg, name: 'Xyz', tag: 'DEV')
-        select_row(6, sg)
+        script_grid.validate_row_values(6, name: 'Xyz', tag: 'DEV')
+        script_grid.select_row(6)
       end
     end
 
@@ -118,20 +117,20 @@ feature 'under Applications menu, Scripting workflows', js: true do
     and_by 'new tag shows up' do
       wait_for_ajax
       within(:gridpanel, 'tag_grid', match: :first) do
-        expect(row_count(tg)).to eq 6
+        expect(tag_grid.row_count).to eq 6
       end
     end
 
     and_by 'tag row 2 has 6 scripts' do
-      select_row(2, tg)
+      tag_grid.select_row(2)
       wait_for_ajax
-      expect(row_count(sg)).to eq 6
+      expect(script_grid.row_count).to eq 6
     end
 
     and_by 'tag row 3 has 5 scripts' do
-      select_row(3, tg)
+      tag_grid.select_row(3)
       wait_for_ajax
-      expect(row_count(sg)).to eq 5
+      expect(script_grid.row_count).to eq 5
     end
   end
 
@@ -139,9 +138,12 @@ feature 'under Applications menu, Scripting workflows', js: true do
     log_in_as('dev1')
     go_to_scripting
 
+    script_grid = netzke_find('script_grid')
+    tag_grid = netzke_find('tag_grid')
+
     by 'select DEV tag' do
       wait_for_ajax
-      select_row(1, tg)
+      tag_grid.select_row(1)
     end
 
     and_by 'add script with duplicate name' do
@@ -164,7 +166,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
     and_by 'no script got added' do
       wait_for_ajax
-      expect(row_count(sg)).to eq 5
+      expect(script_grid.row_count).to eq 5
     end
   end
 
@@ -173,13 +175,15 @@ feature 'under Applications menu, Scripting workflows', js: true do
     # no nav buttons available, but check direct access
     ensure_on('/#scripting')
 
+    script_grid = netzke_find('script_grid')
+    tag_grid = netzke_find('tag_grid')
+
     by 'nothing should work & log out' do
       wait_for_ajax
-      expect(row_count(sg)).to eq 0
-      expect(row_count(tg)).to eq 0
-      expect(btn_disabled?('New Script', sg)).to be_truthy
-      expect(btn_disabled?('Delete Script', sg)).to be_truthy
-      expect(btn_disabled?('New Tag', tg)).to be_truthy
+      expect(script_grid.row_count).to eq 0
+      expect(tag_grid.row_count).to eq 0
+      expect(btn_disabled?('New Script')).to be_truthy
+      expect(btn_disabled?('New Tag')).to be_truthy
       log_out
     end
 
@@ -190,16 +194,15 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
     and_by 'viewable but cannot add scripts or tags' do
       wait_for_ajax
-      expect(row_count(sg)).to eq 5
-      select_row(1, tg)
+      expect(script_grid.row_count).to eq 5
+      tag_grid.select_row(1)
       wait_for_ajax
-      expect(btn_disabled?('New Script', sg)).to be_truthy
-      expect(btn_disabled?('Delete Script', sg)).to be_truthy
-      expect(btn_disabled?('New Tag', tg)).to be_truthy
-      select_row(4, tg)
+      expect(btn_disabled?('New Script')).to be_truthy
+      expect(btn_disabled?('New Tag')).to be_truthy
+      tag_grid.select_row(4)
       wait_for_ajax
-      expect(row_count(sg)).to eq 5
-      expect(btn_disabled?('Save', sf)).to be_truthy
+      expect(script_grid.row_count).to eq 5
+      expect(btn_disabled?('Save')).to be_truthy
     end
   end
 
@@ -207,14 +210,18 @@ feature 'under Applications menu, Scripting workflows', js: true do
     log_in_as('dev1')
     go_to_scripting
 
+    script_grid = netzke_find('script_grid')
+    tag_grid = netzke_find('tag_grid')
+
+
     by 'select tag row 2' do
       wait_for_ajax
-      select_row(2, tg)
+      tag_grid.select_row(2)
     end
 
     and_by 'select script row 5' do
       wait_for_ajax
-      select_row(5, sg)
+      script_grid.select_row(5)
     end
 
     and_by 'form displays correct body' do
@@ -223,12 +230,12 @@ feature 'under Applications menu, Scripting workflows', js: true do
     end
 
     and_by 'select different tag' do
-      select_row(4, tg)
+      tag_grid.select_row(4)
     end
 
     and_by 'select script row 5' do
       wait_for_ajax
-      select_row(5, sg)
+      script_grid.select_row(5)
     end
 
     and_by 'form displays updated body' do
@@ -241,14 +248,17 @@ feature 'under Applications menu, Scripting workflows', js: true do
     log_in_as('dev1')
     go_to_scripting
 
+    script_grid = netzke_find('script_grid')
+    tag_grid = netzke_find('tag_grid')
+
     by 'select DEV tag' do
       wait_for_ajax
-      select_row(1, tg)
+      tag_grid.select_row(1)
     end
 
     and_by 'select script row 5' do
       wait_for_ajax
-      select_row(5, sg)
+      script_grid.select_row(5)
     end
 
     and_by 'edit script form body' do
@@ -261,13 +271,13 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
     and_by 'new script does not exist in old tag' do
       wait_for_ajax
-      select_row(2, tg)
+      tag_grid.select_row(2)
       # FIX?  selection change required to refresh script form
-      select_row(1, sg)
-      select_row(5, sg)
+      script_grid.select_row(1)
+      script_grid.select_row(5)
       wait_for_ajax
       expect(page).not_to have_content "#123\n#456\n"
-      select_row(1, sg)
+      script_grid.select_row(1)
     end
 
     and_by 'make new tag' do
@@ -280,11 +290,11 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
     and_by 'new tag contains new script' do
       wait_for_ajax
-      select_row(2, tg)
+      tag_grid.select_row(2)
       wait_for_ajax
-      select_row(5, sg)
+      script_grid.select_row(5)
       expect(page).to have_content "#123\n#456\n"
-      expect(validate_row_values(2, tg, comment: 'ABCD')).to be_truthy
+      tag_grid.validate_row_values(2, comment: 'ABCD')
     end
   end
 
@@ -292,14 +302,17 @@ feature 'under Applications menu, Scripting workflows', js: true do
     log_in_as('dev1')
     go_to_scripting
 
+    script_grid = netzke_find('script_grid')
+    tag_grid = netzke_find('tag_grid')
+
     by 'select DEV tag' do
       wait_for_ajax
-      select_row(1, tg)
+      tag_grid.select_row(1)
     end
 
     and_by 'select script row 1' do
       wait_for_ajax
-      select_row(1, sg)
+      script_grid.select_row(1)
     end
 
     and_by 'save without changes' do
@@ -312,20 +325,23 @@ feature 'under Applications menu, Scripting workflows', js: true do
     log_in_as('dev1')
     go_to_scripting
 
+    script_grid = netzke_find('script_grid')
+    tag_grid = netzke_find('tag_grid')
+
     by 'select DEV tag' do
       wait_for_ajax
-      select_row(1, tg)
+      tag_grid.select_row(1)
     end
 
     and_by 'delete script' do
-      select_row(1, sg)
+      script_grid.select_row(1)
       press('Delete Script')
       find(:xpath, "//div[text()='Confirmation']", wait: 5)
       press('Yes')
     end
 
     and_by 'script is gone' do
-      expect(row_count(sg)).to eq 4
+      expect(script_grid.row_count).to eq 4
     end
   end
 
@@ -333,13 +349,16 @@ feature 'under Applications menu, Scripting workflows', js: true do
     log_in_as('dev1')
     go_to_scripting
 
+    script_grid = netzke_find('script_grid')
+    tag_grid = netzke_find('tag_grid')
+
     by 'select not DEV tag' do
       wait_for_ajax
-      select_row(2, tg)
+      tag_grid.select_row(2)
     end
 
     and_by 'delete script' do
-      select_row(1, sg)
+      script_grid.select_row(1)
       press('Delete Script')
       find(:xpath, "//div[text()='Confirmation']", wait: 5)
       press('Yes')
