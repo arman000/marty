@@ -5,6 +5,24 @@ require 'rspec/rails'
 require 'database_cleaner'
 require 'marty_rspec'
 
+Capybara.register_driver :selenium do |app|
+  client = Selenium::WebDriver::Remote::Http::Default.new
+  profile = Selenium::WebDriver::Firefox::Profile.new
+  profile['general.useragent.override'] = "selenium"
+  profile['browser.helperApps.neverAsk.openFile'] =
+    'application/vnd.ms-excel, text/csv'
+  profile['browser.helperApps.neverAsk.saveToDisk'] =
+    'application/vnd.ms-excel, text/csv'
+
+  profile["browser.download.manager.showWhenStarting"] = false
+  profile["browser.download.folderList"] = 2
+  profile["browser.download.dir"] = DownloadHelper::PATH.to_s
+
+  profile.load_no_focus_lib = true
+
+  Capybara::Selenium::Driver.new(app, :profile => profile, :http_client => client)
+end
+
 Dummy::Application.initialize!
 
 ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
@@ -52,7 +70,11 @@ RSpec.configure do |config|
 
   config.example_status_persistence_file_path = '.rspec-results'
 
+  screenshot_root = "#{Rails.root.join("tmp")}/screenshots/"
+
   config.before(:suite) do
+    `mkdir -p #{screenshot_root}`
+    `rm #{screenshot_root}*`
     DatabaseCleaner.clean_with(:truncation)
     Rails.application.load_seed
   end
@@ -68,8 +90,7 @@ RSpec.configure do |config|
       filename = File.basename(meta[:file_path])
       line_number = meta[:line_number]
       screenshot_name = "screenshot-#{filename}-#{line_number}.png"
-      screenshot_path = "#{Rails.root.join("tmp")}/#{screenshot_name}"
-      page.save_screenshot(screenshot_path)
+      page.save_screenshot("#{screenshot_root}#{screenshot_name}")
      end
   end
 

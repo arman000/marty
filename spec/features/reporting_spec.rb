@@ -2,6 +2,8 @@ require 'spec_helper'
 
 feature 'under Applications menu, Reports workflows', js: true do
   before(:all) do
+    marty_whodunnit
+
     SOME_DATE = "20130520"
     SOME_TIME = "1200"
     SOME_DT   = "#{SOME_DATE} #{SOME_TIME} PST8PDT"
@@ -11,6 +13,10 @@ feature 'under Applications menu, Reports workflows', js: true do
     populate_test_users
     populate_sample_reports
     custom_selectors
+  end
+
+  before(:each) do
+    DownloadHelper::clear_downloads
   end
 
   after(:all) do
@@ -45,6 +51,11 @@ RateField:
     xtype       = ":numberfield"
     name        = "note_rate"
 
+FileUploadField:
+    xtype       = ":filefield"
+    field_label = "Choose File"
+    name        = "file_upload_field"
+
 AA:
     title   = "AA"
     pt_name =?
@@ -73,6 +84,17 @@ DD: BB
     background_only = true
 
     result = 444
+
+EE:
+    title       = "EE"
+    format      = "csv"
+    file_upload_text_field =?
+
+    form = [
+        FileUploadField,
+        ]
+
+    result = file_upload_text_field
 DELOREAN
 
     with_user("dev1") { |u|
@@ -101,7 +123,7 @@ DELOREAN
     end
   end
 
-  it 'run_script displays proper data' do
+  it 'CC node returns proper csv via background report' do
     log_in_as('dev1')
     go_to_reporting
 
@@ -167,7 +189,7 @@ DELOREAN
     end
   end
 
-  it 'run_script generates CSV' do
+  it 'AA node generates proper CSV via generate report' do
     log_in_as('dev1')
     go_to_reporting
 
@@ -194,7 +216,12 @@ DELOREAN
     end
 
     wait_for_element do
-      expect(page).to have_content('XYZ1,XYZ2,XYZ3,XYZ4 1,2,3,4 2,4,6,8 ' +
+      expect(DownloadHelper::download_content_acceptable?).to be_truthy
+    end
+
+    and_by 'validate download' do
+      file = DownloadHelper::download_content
+      expect(file).to have_content('XYZ1,XYZ2,XYZ3,XYZ4 1,2,3,4 2,4,6,8 ' +
                                    '3,6,9,12 4,8,12,16')
     end
   end
@@ -237,7 +264,7 @@ DELOREAN
       tag_grid.select_row(2)
     end
 
-    and_by 'select SomeReport script & AA' do
+    and_by 'select SomeReport script' do
       script_grid.select_row(1)
     end
 
@@ -245,6 +272,46 @@ DELOREAN
       expect(combobox_values('')).to include('AA (csv)',
                                              'CC (csv)',
                                              '---')
+    end
+  end
+
+  it 'file upload field works on bogus report' do
+    log_in_as('viewer1')
+    go_to_reporting
+
+    tag_grid = netzke_find('tag_grid')
+    script_grid = netzke_find('script_grid')
+
+    by 'select 2nd tag' do
+      wait_for_ajax
+      zoom_out
+      tag_grid.select_row(2)
+    end
+
+    and_by 'select SomeReport script & EE' do
+      script_grid.select_row(1)
+      select_node('EE (csv)')
+    end
+
+    and_by 'attaching file' do
+      attach_file('file_upload_field', File.absolute_path('./spec/fixtures/scripts/load_tests/script1.dl'), visible: false)
+    end
+
+    and_by 'do Background Report with delayed jobs' do
+        Delayed::Worker.delay_jobs = false
+        press('Generate Report')
+        wait_for_element { find(:status, 'Busy...') }
+        wait_for_ajax
+        Delayed::Worker.delay_jobs = true
+    end
+
+    wait_for_element do
+      expect(DownloadHelper::download_content_acceptable?).to be_truthy
+    end
+
+    and_by 'validate download' do
+      file = DownloadHelper::download_content
+      expect(file).to have_content('NodeC:')
     end
   end
 end

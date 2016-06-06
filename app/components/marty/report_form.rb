@@ -1,5 +1,7 @@
 class Marty::ReportForm < Marty::Form
 
+  attr_accessor :background_only, :file_field, :text_area_field
+
   # override apply for background generation
   action :apply do |a|
     a.text     = a.tooltip = I18n.t("reporting.background")
@@ -10,7 +12,7 @@ class Marty::ReportForm < Marty::Form
 
   action :foreground do |a|
     a.text     = a.tooltip = I18n.t("reporting.generate")
-    a.handler  = :on_foreground
+    a.handler  = :on_apply
     a.icon     = :report_go
     a.disabled = false
   end
@@ -47,91 +49,51 @@ class Marty::ReportForm < Marty::Form
     [engine, d_params, node]
   end
 
-  def self.run_eval(params)
-    engine, d_params, node = get_report_engine(params)
-
-    raise "Insufficient permissions" unless engine
-    raise "no selected report node" unless String === node
-
-    begin
-      engine.evaluate(node, "result", d_params)
-    rescue => exc
-      Marty::Util.logger.error "run_eval failed: #{exc.backtrace}"
-
-      res = Delorean::Engine.grok_runtime_exception(exc)
-      res["backtrace"] =
-        res["backtrace"].map {|m, line, fn| "#{m}:#{line} #{fn}"}.join('\n')
-      res
-    end
-  end
-
   endpoint :netzke_submit do |params, this|
-    # We get here when user is asking for a background report
-
     engine, d_params, node = self.class.get_report_engine(params)
 
     return this.netzke_feedback "Insufficient permissions to run report!" unless
       engine
 
-    # start background promise to get report result
-    engine.background_eval(node,
-                           d_params,
-                           ["result", "title", "format"],
-                           )
+    file = params[file_field[:name]] if file_field
+    if file
+      return this.netzke_feedback "Must have file upload OR pasted text" if d_params[text_area_field[:name]]
+      file_data = file.read
+      d_params[text_area_field[:name]] = file_data
+    end
 
-    this.netzke_feedback "Report can be accessed from the Jobs Dashboard ..."
+    # start background promise to get report result
+    begin
+      res = engine.background_eval(node,
+                                   d_params,
+                                   ["result", "title", "format"],
+                                  )
+
+      if background_only
+        this.netzke_feedback "Report can be accessed from the Jobs Dashboard ..."
+      else
+        job_id = force_promise_return(res)
+        this.download_report job_id
+      end
+    rescue => exc
+      return this.netzke_feedback "ERROR: #{exc}"
+    end
+  end
+
+  def force_promise_return(res)
+    promise_id = res.__promise__.id
+    res.force
+    promise_id
   end
 
   ######################################################################
 
   js_configure do |c|
-    # Find the mount path for the Marty engine. FIXME: this is likely
-    # very brittle.
-    @@mount_path = Rails.application.routes.routes.detect {
-      |r| r.app.app == Marty::Engine
-    }.format({})
-
-    c.on_foreground = <<-JS
-    function() {
-       var values = this.getForm().getValues();
-       var data = Ext.encode(values);
-
-       var params = {data: data, reptitle: this.reptitle};
-
-       // very hacky -- when selected_testing is set, we assume we're
-       // testing and try to inline the result.
-       if (values["selected_testing"]) {
-          this.repformat = "txt";
-          params["disposition"] = "inline";
-       }
-
-       var form = document.createElement("form");
-
-       form.setAttribute("method", "post");
-       form.setAttribute("action", "#{@@mount_path}/report."+this.repformat);
-
-       // set authenticity token
-       var hiddenField = document.createElement("input");
-       hiddenField.setAttribute("type", "hidden");
-       hiddenField.setAttribute("name", "authenticity_token");
-       hiddenField.setAttribute("value", this.authenticityToken);
-       form.appendChild(hiddenField);
-
-       for (var key in params) {
-          if (params.hasOwnProperty(key)) {
-             var hiddenField = document.createElement("input");
-             hiddenField.setAttribute("type", "hidden");
-             hiddenField.setAttribute("name", key);
-             hiddenField.setAttribute("value", params[key]);
-
-            form.appendChild(hiddenField);
-          }
-       }
-
-       document.body.appendChild(form);
-       form.submit();
-       document.body.removeChild(form);
-    }
+    c.download_report = <<-JS
+      function(jid) {
+        // FIXME: seems pretty hacky
+        window.location = "#{Marty::Util.marty_path}/job/download?job_id=" + jid;
+      }
     JS
   end
 
@@ -200,13 +162,25 @@ class Marty::ReportForm < Marty::Form
     end
 
     # if there's a background_only flag, we disable the foreground submit
-    background_only =
+    @background_only =
       engine.evaluate(root_sess[:selected_node], "background_only") rescue nil
 
     items = Marty::Xl.symbolize_keys(eval_form_items(engine, items), ':')
-
     items = [{html: "<br><b>No input is needed for this report.</b>"}] if
       items.empty?
+
+    @file_field = items.find { |item| item[:xtype] == :filefield }
+    @text_area_field = items.find { |item| item[:xtype] == :textareafield }
+
+    # add hidden field for file upload
+    if @file_field && !@text_area_field
+      @text_area_field = {
+        name:   'file_upload_text_field',
+        xtype:  :textareafield,
+        hidden: true,
+      }
+      items += [@text_area_field]
+    end
 
     # add hidden fields for selected tag/script/node
     items += [:selected_tag_id,
@@ -229,7 +203,9 @@ class Marty::ReportForm < Marty::Form
     c.reptitle           = title
     c.authenticity_token = controller.send(:form_authenticity_token)
 
+    # FIXME: once netzke upgraded, we can change to excluded to hide buttons
     actions[:foreground].disabled = !!background_only
+    actions[:apply].disabled = !background_only
   end
 end
 

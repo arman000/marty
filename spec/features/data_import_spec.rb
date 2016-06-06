@@ -6,9 +6,8 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
     marty_whodunnit
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
-    dt = Time.zone.now
 
-    Marty::Script.load_scripts(nil, dt)
+    Marty::Script.load_scripts(nil, Date.today)
 
     populate_import_type
     populate_bud_category_fannie_bup
@@ -50,6 +49,25 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
                             )
   end
 
+  def select_node node_name
+    wait_for_ajax
+    #hacky: assumes only 1 combobox without label
+    within(:gridpanel, 'report_select', match: :first) do
+      # hacky, hardcoding netzkecombobox dropdown arrow name
+      arrow = find(:input, 'nodename')['componentid'] + '-trigger-picker'
+      find(:xpath, ".//div[@id='#{arrow}']").click
+      find(:xpath, "//li[text()='#{node_name}']").click
+    end
+  end
+
+  # Checkbox Helpers
+  def check name, val = true
+    page.driver.browser.execute_script <<-JS
+      var poc = Ext.ComponentQuery.query("checkbox[name='#{name}']")[0];
+      poc.setValue(#{val});
+    JS
+  end
+
   it 'adds 2 new fannie bups via datareport script' do
     expect do
       log_in_as('marty')
@@ -64,18 +82,7 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
 
       and_by 'select DataReport script & Data Import node' do
         script_grid.select_row(2)
-      end
-
-      and_by 'select Data Import node' do
-        wait_for_ajax
-
-        #hacky: assumes only 1 combobox without label
-        within(:gridpanel, 'report_select', match: :first, wait: 5) do
-          # hacky, hardcoding netzkecombobox dropdown arrow name
-          arrow = find(:input, 'nodename')['componentid'] + '-trigger-picker'
-          find(:xpath, ".//div[@id='#{arrow}']").click
-          find(:xpath, "//li[text()='Data Import Job (csv)']").click
-        end
+        select_node('Data Import Job (csv)')
       end
 
       and_by 'fill form' do
