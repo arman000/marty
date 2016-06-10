@@ -148,7 +148,7 @@ class Marty::DataGrid < Marty::Base
     data_type.constantize rescue nil
   end
 
-  def lookup_grid_distinct(pt, h, return_grid_data=false)
+  def lookup_grid_distinct(pt, h, return_grid_data=false, distinct=true)
     isets = {}
 
     (dir_infos("v") + dir_infos("h")).each do
@@ -221,7 +221,7 @@ class Marty::DataGrid < Marty::Base
       end
 
       raise "Grid #{name}, (#{isets[dir].count}) #{dir} matches > 1." if
-        isets[dir] && isets[dir].count > 1
+        distinct && isets[dir] && isets[dir].count > 1
     end
 
     vi, hi = isets["v"].first, isets["h"].first if isets["v"] && isets["h"]
@@ -237,6 +237,18 @@ class Marty::DataGrid < Marty::Base
       "data"     => (modified_data if return_grid_data),
       "metadata" => (modified_metadata if return_grid_data)
     }
+  end
+
+  # FIXME: added for Apollo -- not sure where this belongs given that
+  # DGs were moved to marty.  Should add documentation about callers
+  # keeping the hash small.
+  cached_delorean_fn :lookup_grid, sig: 4 do
+    |pt, dg, h, distinct|
+    raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
+    raise "non-hash arg #{h}" unless Hash === h
+
+    res = dg.lookup_grid_distinct(pt, h, false, distinct)
+    res["result"]
   end
 
   # FIXME: using cached_delorean_fn just for the caching -- this is
@@ -516,7 +528,7 @@ class Marty::DataGrid < Marty::Base
 
     c_data_type = Marty::DataGrid.convert_data_type(data_type)
 
-    raise "bad data type" unless c_data_type
+    raise "bad data type #{data_type}" unless c_data_type
 
     # based on data type, decide to check using convert or instance
     # lookup.  FIXME: DRY.
