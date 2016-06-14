@@ -6,6 +6,10 @@ require 'database_cleaner'
 require 'marty_rspec'
 
 Capybara.register_driver :selenium do |app|
+  capybara_cfg = Dummy::TestingConfig.get_config("capybara_")
+  if capybara_cfg && capybara_cfg['firefox_path']
+    Selenium::WebDriver::Firefox::Binary.path = capybara_cfg['firefox_path']
+  end
   client = Selenium::WebDriver::Remote::Http::Default.new
   profile = Selenium::WebDriver::Firefox::Profile.new
   profile['general.useragent.override'] = "selenium"
@@ -19,6 +23,23 @@ Capybara.register_driver :selenium do |app|
   profile["browser.download.dir"] = DownloadHelper::PATH.to_s
 
   profile.load_no_focus_lib = true
+
+  if capybara_cfg && capybara_cfg['include_firebug']
+    client.timeout = 600 # <= Page Load Timeout value in seconds
+    profile.add_extension Rails.root.join(capybara_cfg['firebug_path'])
+    profile["extensions.firebug.currentVersion"] = "3.0"
+    profile["extensions.firebug.allPagesActivation"] = "on"
+    profile["extensions.firebug.showFirstRunPage"] = false;
+    ['console', 'net', 'script', 'cookies'].each do |feature|
+      profile["extensions.firebug.#{feature}.enableSites"] = true
+    end
+    profile["extensions.firebug.framePosition"] = "detached"
+    profile["extensions.firebug.showJSErrors"] = true
+    profile["extensions.firebug.showXMLHttpRequests"] =true
+    profile["extensions.firebug.showNetworkErrors"] = true
+    profile["extensions.firebug.showStackTrace"] = true
+    profile["extensions.firebug.defaultPanelName"] = "console"
+  end
 
   Capybara::Selenium::Driver.new(app, :profile => profile, :http_client => client)
 end
@@ -73,8 +94,7 @@ RSpec.configure do |config|
   screenshot_root = "#{Rails.root.join("tmp")}/screenshots/"
 
   config.before(:suite) do
-    `mkdir -p #{screenshot_root}`
-    `rm #{screenshot_root}*`
+    `rm #{screenshot_root}*` if ENV["SCREENSHOT"]
     DatabaseCleaner.clean_with(:truncation)
     Rails.application.load_seed
   end
@@ -85,7 +105,7 @@ RSpec.configure do |config|
 
   config.after(:each, :js => true) do |example|
     # save a screenshot on js failures for CI server testing
-    if example.exception
+    if ENV["SCREENSHOT"] && example.exception
       meta = example.metadata
       filename = File.basename(meta[:file_path])
       line_number = meta[:line_number]

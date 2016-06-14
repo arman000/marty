@@ -15,7 +15,7 @@ feature 'under Applications menu, Reports workflows', js: true do
     custom_selectors
   end
 
-  before(:each) do
+  after(:each) do
     DownloadHelper::clear_downloads
   end
 

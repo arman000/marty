@@ -44,8 +44,5 @@ module DownloadHelper
 
   def clear_downloads
     FileUtils.rm_f(downloads)
-    Timeout.timeout(TIMEOUT) do
-      sleep 0.1 until !downloads.any?
-    end
   end
 end

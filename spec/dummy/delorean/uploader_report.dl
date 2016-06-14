@@ -1,0 +1,18 @@
+import Fields
+import Styles
+
+FileUploadField:
+    xtype       = ":filefield"
+    field_label = "Choose File"
+    name        = "file_upload_field"
+
+EEReport:
+    title       = "EE"
+    format      = "csv"
+    file_upload_text_field =?
+
+    form = [
+        FileUploadField,
+        ]
+
+    result = file_upload_text_field
