@@ -31,23 +31,23 @@ class Marty::ScriptGrid < Marty::Grid
     end
   end
 
-  action :del do |a|
+  action :delete do |a|
     a.text     = I18n.t("script_grid.delete")
     a.tooltip  = I18n.t("script_grid.delete")
     a.icon     = :script_delete
     a.disabled = config[:prohibit_delete]
   end
 
-  endpoint :server_delete do |params, this|
-    return this.netzke_feedback("Permission Denied") if
-      config[:prohibit_delete]
+  endpoint :destroy do |params|
+    return client.netzke_notify("Permission Denied") if
+      !config[:permissions][:delete]
 
     tag = Marty::Tag.map_to_tag(root_sess[:selected_tag_id])
 
-    return this.netzke_feedback("Can only delete in DEV tag") unless
+    return client.netzke_notify("Can only delete in DEV tag") unless
       tag && tag.isdev?
 
-    super(params, this)
+    super(params)
   end
 
   # override the add_in_form endpoint.  Script creation needs to use
@@ -82,7 +82,7 @@ class Marty::ScriptGrid < Marty::Grid
   end
 
   def default_bbar
-    [:add_in_form, :del]
+    [:add_in_form, :delete]
   end
 
   def default_context_menu

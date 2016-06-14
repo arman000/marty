@@ -345,6 +345,23 @@ feature 'under Applications menu, Scripting workflows', js: true do
     end
   end
 
+  it 'prevents non-dev from deleting' do
+    log_in_as('viewer1')
+    go_to_scripting
+
+    script_grid = netzke_find('script_grid')
+    and_by 'delete script' do
+      script_grid.select_row(1)
+      press('Delete Script')
+      find(:xpath, "//div[text()='Confirmation']", wait: 5)
+      press('Yes')
+    end
+
+    and_by 'script is gone' do
+      expect(find(:msg)).to have_content 'Permission Denied'
+    end
+  end
+
   it 'only allows delete on DEV tag' do
     log_in_as('dev1')
     go_to_scripting
