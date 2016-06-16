@@ -11,7 +11,7 @@ class CreateMartyGridIndexNumranges < ActiveRecord::Migration
       t.datetime :created_dt, null: false
       t.references :data_grid, null: false
       t.string :attr, null: false
-      t.numrange :key, null: false
+      t.numrange :key, null: true
       t.integer :index, null: false
     end
 

@@ -50,5 +50,4 @@ class Marty::Grid < ::Netzke::Grid::Base
       r.order("#{json_col} ->> '#{field}' " + dir.to_s)
     end
   end
-
 end

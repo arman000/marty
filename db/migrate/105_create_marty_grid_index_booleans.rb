@@ -11,7 +11,7 @@ class CreateMartyGridIndexBooleans < ActiveRecord::Migration
       t.datetime :created_dt, null: false
       t.references :data_grid, null: false
       t.string :attr, null: false
-      t.boolean :key, null: false
+      t.boolean :key, null: true
       t.integer :index, null: false
     end
 

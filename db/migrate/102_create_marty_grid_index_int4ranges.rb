@@ -11,7 +11,7 @@ class CreateMartyGridIndexInt4ranges < ActiveRecord::Migration
       t.datetime :created_dt, null: false
       t.references :data_grid, null: false
       t.string :attr, null: false
-      t.int4range :key, null: false
+      t.int4range :key, null: true
       t.integer :index, null: false
     end
 
