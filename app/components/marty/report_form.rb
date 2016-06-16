@@ -57,7 +57,10 @@ class Marty::ReportForm < Marty::Form
 
     file = params[file_field[:name]] if file_field
     if file
-      return this.netzke_feedback "Must have file upload OR pasted text" if d_params[text_area_field[:name]]
+      if d_params[text_area_field[:name]]
+        return this.netzke_feedback("Must have file upload OR pasted text")
+      end
+
       file_data = file.read
       d_params[text_area_field[:name]] = file_data
     end

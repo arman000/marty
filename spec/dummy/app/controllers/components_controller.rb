@@ -7,6 +7,6 @@ class ComponentsController < Marty::ApplicationController
   end
 
   def marty
-  	render inline: "<%= netzke :'main_auth_app' %>", layout: true
+    render inline: "<%= netzke :'main_auth_app' %>", layout: true
   end
 end
