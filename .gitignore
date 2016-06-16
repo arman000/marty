@@ -10,6 +10,7 @@ spec/dummy/.sass-cache
 /db/schema.rb
 /spec/dummy/db/schema.rb
 /spec/dummy/config/database.yml
+/spec/dummy/config/testing.yml
 
 # Ignore all logfiles and tempfiles.
 /log/*.log

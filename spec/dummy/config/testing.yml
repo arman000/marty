@@ -1,7 +1,0 @@
-# to include firebug in capybara rspec tests, set include_firebug
-# to true and set firebug_path to the firebug XPI file location
-# to use a different version of firefox, set firefox_path
-capybara_test:
-  include_firebug: false
-  #firebug_path: spec/support/features/firebug-2.0.14.xpi
-  firefox_path: /home/mmatsuo/Downloads/firefox/firefox
