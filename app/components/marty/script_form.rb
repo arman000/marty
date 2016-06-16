@@ -1,18 +1,18 @@
 class Marty::ScriptForm < Marty::Form
   DASH = 0x2012.chr('utf-8')
 
-  css_configure do |c|
+  client_styles do |c|
     c.require :codemirror
     c.require :delorean
   end
 
-  js_configure do |c|
+  client_class do |c|
     c.require :"Ext.ux.form.field.CodeMirror"
     c.require :codemirror
     c.require File.dirname(__FILE__) +
-      "/script_form/javascripts/mode/delorean/delorean.js"
+      "/script_form/client/mode/delorean/delorean.js"
 
-    c.set_action_modes = <<-JS
+    c.set_action_modes = l(<<-JS)
     function(a) {
        this.actions.apply.setDisabled(!a["save"]);
        // style input field text based on whether it is editable
@@ -21,13 +21,13 @@ class Marty::ScriptForm < Marty::Form
     }
     JS
 
-    c.get_script_id = <<-JS
+    c.get_script_id = l(<<-JS)
     function() {
        return this.getForm().findField('id').getValue();
     }
     JS
 
-    c.get_script_body = <<-JS
+    c.get_script_body = l(<<-JS)
     function() {
        return this.getForm().findField('body').getValue();
     }
@@ -35,7 +35,7 @@ class Marty::ScriptForm < Marty::Form
 
     # Sets an editor line class (unset any previous line class).  For
     # now, only one line is classed at a time.
-    c.set_line_error = <<-JS
+    c.set_line_error = l(<<-JS)
     function(line) {
        line -= 1;
        var editor = this.getForm().findField('body').editor;
@@ -51,7 +51,7 @@ class Marty::ScriptForm < Marty::Form
 
     ######################################################################
 
-    c.refresh_parent = <<-JS
+    c.refresh_parent = l(<<-JS)
     function(script_name) {
        this.netzkeGetParentComponent().scriptRefresh(script_name);
     }
@@ -60,7 +60,7 @@ class Marty::ScriptForm < Marty::Form
     ######################################################################
 
     # FIXME: no longer works -- see related FIXME below.
-    c.on_print = <<-JS
+    c.on_print = l(<<-JS)
     function() {
        window.open(
           "/marty/components/#{self.name}.html?script_id=" + this.getScriptId(),
@@ -73,9 +73,9 @@ class Marty::ScriptForm < Marty::Form
 
   ######################################################################
 
-  endpoint :netzke_load do |params, this|
+  endpoint :netzke_load do |params|
 
-    return this.netzke_feedback("Permission Denied") unless
+    return client.netzke_notify("Permission Denied") unless
       self.class.has_any_perm?
 
     script_name = params[:script_name]
@@ -94,15 +94,15 @@ class Marty::ScriptForm < Marty::Form
       "meta" => {},
     }
 
-    this.set_form_values(js_data)
-    this.set_title title
-    this.set_readonly_mode !can_save?(script)
+    client.netzke_set_form_values(js_data)
+    client.set_title title
+    client.netzke_set_readonly_mode !can_save?(script)
 
     modes = {
       save: can_save?(script),
     }
 
-    this.set_action_modes(modes)
+    client.set_action_modes(modes)
   end
 
   def can_save?(script)
@@ -118,9 +118,9 @@ class Marty::ScriptForm < Marty::Form
     a.disabled = true
   end
 
-  endpoint :netzke_submit do |params, this|
+  endpoint :submit do |params|
 
-    return this.netzke_feedback("Permission Denied") unless
+    return client.netzke_notify("Permission Denied") unless
       self.class.has_any_perm?
 
     # copied from corresponding method in form_panel.services
@@ -132,19 +132,19 @@ class Marty::ScriptForm < Marty::Form
     @record = script = Marty::Script.find_by_id(data["id"])
 
     unless script
-      this.netzke_feedback "no record"
+      client.netzke_notify "no record"
       return
     end
 
     if script.body == data["body"]
-      this.netzke_feedback "no save needed"
+      client.netzke_notify "no save needed"
       # clear the error line if any
-      this.set_line_error -1
+      client.set_line_error -1
       return
     end
 
     unless can_save?(script)
-      this.netzke_feedback "Permission denied"
+      client.netzke_notify "Permission denied"
       return
     end
 
@@ -152,27 +152,23 @@ class Marty::ScriptForm < Marty::Form
       dev = Marty::Tag.find_by_name("DEV")
       Marty::ScriptSet.new(dev).parse_check(script.name, data["body"])
     rescue Delorean::ParseError => exc
-      this.netzke_feedback exc.message
-      this.apply_form_errors({})
-      this.set_line_error(exc.line)
+      client.netzke_notify exc.message
+      client.netzke_apply_form_errors({})
+      client.set_line_error(exc.line)
       return
     end
 
     script.body = data["body"]
 
     if script.save
-      this.set_form_values(js_record_data)
-      this.netzke_set_result(true)
-      this.refresh_parent(script.name)
+      client.netzke_set_form_values(js_record_data)
+      client.netzke_set_result(true)
+      client.refresh_parent(script.name)
       return
     end
 
-    data_adapter.errors_array(script).each do |error|
-      flash error: error
-    end
-
-    this.netzke_feedback @flash
-    this.apply_form_errors(build_form_errors(record))
+    client.netzke_notify(model_adapter.errors_array(script).join("\n"))
+    client.netzke_apply_form_errors(build_form_errors(record))
   end
 
   ######################################################################
@@ -186,11 +182,11 @@ class Marty::ScriptForm < Marty::Form
 
   ######################################################################
 
-  def configure_bbar(c)
-    c[:bbar] = [
-                :apply,
-                :print,
-               ]
+  def default_bbar
+    [
+      :apply,
+      :print,
+    ]
   end
 
   ######################################################################

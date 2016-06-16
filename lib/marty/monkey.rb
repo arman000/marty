@@ -145,7 +145,7 @@ module Netzke::Basepack::DataAdapters
         relation = relation.includes(assoc.to_sym).references(assoc.to_sym) if method
       end
 
-      @model_class.const_defined?(:LAZY_LOADED) ? relation.unscoped.count :
+      @model.const_defined?(:LAZY_LOADED) ? relation.unscoped.count :
         relation.count
     end
 

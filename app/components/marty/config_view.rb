@@ -12,10 +12,9 @@ class Marty::ConfigView < Marty::Grid
 
     c.title   = I18n.t('config', default: "Config")
     c.model   = "Marty::Config"
-    c.columns = [:key, :value, :description]
-
-    c.enable_extended_search = false
-    c.data_store.sorters     = {property: :key, direction: 'ASC'}
+    c.attributes = [:key, :value, :description]
+    c.store_config.merge!({sorters: [{property: :key, direction: 'ASC'}]})
+    c.editing = :both
   end
 
   # need a getter / setter to call the []= and [] methods now
@@ -31,7 +30,7 @@ class Marty::ConfigView < Marty::Grid
     }
   end
 
-  def default_fields_for_forms
+  def default_form_items
     [
       :key,
       {
@@ -53,18 +52,17 @@ class Marty::ConfigView < Marty::Grid
     ]
   end
 
-  column :key do |c|
+  attribute :key do |c|
     c.flex = 1
   end
 
-  column :value do |c|
+  attribute :value do |c|
     c.flex = 3
     c.getter  = my_jsonb_getter
     c.setter  = my_jsonb_setter
   end
-  column :description do |c|
+  attribute :description do |c|
     c.flex = 1
-    c.width = 200
   end
 
 end

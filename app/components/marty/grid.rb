@@ -1,9 +1,10 @@
-class Marty::Grid < ::Netzke::Basepack::Grid
+class Marty::Grid < ::Netzke::Grid::Base
+
   extend ::Marty::Permissions
 
   has_marty_permissions read: :any
 
-  def preconfigure_record_window(c)
+  def configure_form_window(c)
     super
     # Fix Add in form/Edit in form modal popup width
     # Netzke 0.10.1 defaults width to 80% of screen which is too wide
@@ -12,30 +13,42 @@ class Marty::Grid < ::Netzke::Basepack::Grid
     c.width = 475
   end
 
-  js_configure do |c|
+  client_class do |c|
     # For some reason the grid update function was removed in Netzke
     # 0.10.1.  So, add it here.
-    c.cm_update = <<-JS
+    c.cm_update = l(<<-JS)
     function() {
       this.store.load();
     }
     JS
+
+  end
+
+  def class_can?(op)
+    self.class.can_perform_action?(op)
   end
 
   def configure(c)
     super
 
-    create = self.class.can_perform_action?(:create)
-    read   = self.class.can_perform_action?(:read)
-    update = self.class.can_perform_action?(:update)
-    delete = self.class.can_perform_action?(:delete)
-
-    c.prohibit_create     = !create
-    c.prohibit_read       = !read
-    c.prohibit_update     = !update
-    c.prohibit_delete     = !delete
-
-    c.enable_edit_inline  = update
-    c.enable_edit_in_form = update
+    c.permissions = {
+      create:      class_can?(:create),
+      read:        class_can?(:read),
+      update:      class_can?(:update),
+      delete:      class_can?(:delete)
+    }
+    c.editing                = :both
+    c.store_config           = {page_size: 30}
   end
+
+  def has_search_action?
+    false
+  end
+
+  def get_json_sorter(json_col, field)
+    lambda do |r, dir|
+      r.order("#{json_col} ->> '#{field}' " + dir.to_s)
+    end
+  end
+
 end

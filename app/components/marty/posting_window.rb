@@ -1,4 +1,4 @@
-class Marty::PostingWindow < Netzke::Basepack::Window
+class Marty::PostingWindow < Netzke::Window::Base
   def configure(c)
     super
 
@@ -12,13 +12,12 @@ class Marty::PostingWindow < Netzke::Basepack::Window
 
   component :posting_grid do |c|
     c.klass			= Marty::PostingGrid
-    c.enable_edit_in_form	= false
-    c.enable_extended_search	= false
     c.rows_per_page		= 12
-    c.column_filters_available 	= true
-    c.prohibit_update		= true
-    c.prohibit_delete		= false # hijacked for selection
-    c.prohibit_create		= true
+    c.permissions = {
+      update:           false,
+      delete:		true, # hijacked for selection
+      create:		false,
+    }
     # c.bbar	= []
   end
 

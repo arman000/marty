@@ -18,10 +18,11 @@ group :development, :test do
   gem 'selenium-webdriver'
   gem 'timecop'
   gem 'database_cleaner'
+
   gem 'netzke-core'
   gem 'netzke-basepack'
-  gem 'netzke-testing' #, path: File.expand_path('../../netzke-testing', __FILE__)
+  gem 'netzke-testing'
 
-  #gem 'marty_rspec', path: File.expand_path('../../marty_rspec', __FILE__)
   gem 'marty_rspec'
+
 end

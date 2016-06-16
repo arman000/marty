@@ -21,17 +21,13 @@ class Marty::UserView < Marty::Grid
 
     c.title ||= I18n.t('users', default: "Users")
     c.model                  = "Marty::User"
-    c.enable_extended_search = false
-    c.enable_edit_inline     = false
+    c.editing                = :in_form
+    c.paging                 = :pagination
     c.multi_select           = false
-
-    c.columns ||= self.class.user_columns
-
-    c.data_store.sorters = {
-      property: :login,
-      direction: 'ASC',
-    } if c.columns.include?(:login)
-
+    c.attributes ||= self.class.user_columns
+    c.store_config.merge!({sorters: [{property: :login,
+                                 direction: 'ASC',
+                                }]}) if c.attributes.include?(:login)
     c.scope = ->(arel) { arel.includes(:roles) }
   end
 
@@ -68,116 +64,104 @@ class Marty::UserView < Marty::Grid
   # override the add_in_form and edit_in_form endpoint. User creation/update
   # needs to use the create_edit_user method.
 
-  endpoint :add_window__add_form__netzke_submit do |params, this|
+  endpoint :add_window__add_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
     data["id"] = nil
 
     unless self.class.can_perform_action?(:create)
-      this.netzke_feedback "Permission Denied"
+      client.netzke_notify "Permission Denied"
       return
     end
 
     user = self.class.create_edit_user(data)
     if user.valid?
-      this.success = true
-      this.on_submit_success
+      client.success = true
+      client.netzke_on_submit_success
     else
-      data_adapter.errors_array(user).each do |error|
-        flash :error => error
-      end
-      this.netzke_feedback(@flash)
+      client.netzke_notify(model_adapter.errors_array(user).join("\n"))
     end
   end
 
-  endpoint :edit_window__edit_form__netzke_submit do |params, this|
+  endpoint :edit_window__edit_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
     unless self.class.can_perform_action?(:update)
-      this.netzke_feedback "Permission Denied"
+      client.netzke_notify "Permission Denied"
       return
     end
 
     user = self.class.create_edit_user(data)
     if user.valid?
-      this.success = true
-      this.on_submit_success
+      client.success = true
+      client.netzke_on_submit_success
     else
-      data_adapter.errors_array(user).each do |error|
-        flash :error => error
-      end
-      this.netzke_feedback(@flash)
+      client.netzke_notify(model_adapter.errors_array(user).join("\n"))
     end
   end
 
-  action :add_in_form do |a|
+  action :add do |a|
+    super(a)
     a.text     = I18n.t("user_grid.new")
     a.tooltip  = I18n.t("user_grid.new")
     a.icon     = :user_add
-    a.disabled = !self.class.can_perform_action?(:create)
   end
 
-  action :edit_in_form do |a|
-    a.disabled = !self.class.can_perform_action?(:update)
+  action :edit do |a|
+    super(a)
     a.icon     = :user_edit
   end
 
-  action :del do |a|
+  action :delete do |a|
+    super(a)
     a.icon     = :user_delete
-  end
-
-  def default_bbar
-    [:add_in_form, :edit_in_form, :del]
   end
 
   def default_context_menu
     []
   end
 
-  column :login do |c|
+  attribute :login do |c|
     c.width = 100
-    c.text  = I18n.t("user_grid.login")
+    c.label  = I18n.t("user_grid.login")
   end
 
-  column :firstname do |c|
+  attribute :firstname do |c|
     c.width = 100
-    c.text  = I18n.t("user_grid.firstname")
+    c.label  = I18n.t("user_grid.firstname")
   end
 
-  column :lastname do |c|
+  attribute :lastname do |c|
     c.width = 100
-    c.text  = I18n.t("user_grid.lastname")
+    c.label  = I18n.t("user_grid.lastname")
   end
 
-  column :active do |c|
+  attribute :active do |c|
     c.width = 60
-    c.text  = I18n.t("user_grid.active")
+    c.label  = I18n.t("user_grid.active")
   end
 
-  column :roles do |c|
+  attribute :roles do |c|
     c.width  = 100
     c.flex   = 1
-    c.text   = I18n.t("user_grid.roles")
-    c.editor = {
-      trigger_action: :all,
-      name: "roles",
-      attr_type: :string,
-      xtype: :combo,
-      store: Marty::Role.pluck(:name).map {|n| I18n.t("roles.#{n}")}.sort,
-      empty_text: I18n.t("user_grid.select_roles"),
-      multi_select: true,
-    }
+    c.label   = I18n.t("user_grid.roles")
+    c.type   = :string,
 
     c.getter = lambda do |r|
       r.roles.map { |ur| I18n.t("roles.#{ur.name}") }.sort
     end
+    c.editor_config = { multi_select: true,
+                        empty_text: I18n.t("user_grid.select_roles"),
+                        store: Marty::Role.pluck(:name).map {
+                          |n| I18n.t("roles.#{n}")}.sort,
+                        type: :string,
+                        xtype: :combo}
   end
 
-  column :created_dt do |c|
-    c.text      = I18n.t("user_grid.created_dt")
+  attribute :created_dt do |c|
+    c.label      = I18n.t("user_grid.created_dt")
     c.format    = "Y-m-d H:i"
     c.read_only = true
   end
-
 end
 
 UserView = Marty::UserView

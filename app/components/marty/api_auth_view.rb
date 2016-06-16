@@ -9,22 +9,19 @@ class Marty::ApiAuthView < Marty::McflyGridPanel
 
     c.title   = I18n.t('api_auth', default: "API Authorization")
     c.model   = "Marty::ApiAuth"
-    c.columns = [:app_name, :api_key, :script_name]
-
-    c.enable_extended_search = false
-
-    c.data_store.sorters = {property: :app_name, direction: 'ASC'}
+    c.attributes = [:app_name, :api_key, :script_name]
+    c.store_config.merge!({sorters: [{property: :app_name, direction: 'ASC'}]})
   end
 
-  column :app_name do |c|
+  attribute :app_name do |c|
     c.flex = 1
   end
 
-  column :api_key do |c|
+  attribute :api_key do |c|
     c.flex = 1
   end
 
-  column :script_name do |c|
+  attribute :script_name do |c|
     c.flex = 1
   end
 end

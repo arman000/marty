@@ -183,38 +183,36 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled  = Marty::Util.warped? || !self.class.has_posting_perm?
   end
 
-  js_configure do |c|
-    c.on_new_posting = <<-JS
+  client_class do |c|
+    c.netzke_on_new_posting = l(<<-JS)
     function(params) {
-      this.netzkeLoadComponent({
-            name: "new_posting_window",
-            callback: function(w) { w.show(); },
+      this.netzkeLoadComponent("new_posting_window",
+            { callback: function(w) { w.show(); },
       });
     }
     JS
 
-    c.on_select_posting = <<-JS
+    c.netzke_on_select_posting = l(<<-JS)
     function(params) {
-      this.netzkeLoadComponent({
-            name: "posting_window",
-            callback: function(w) { w.show(); },
+      this.netzkeLoadComponent("posting_window",
+            { callback: function(w) { w.show(); },
       });
     }
     JS
 
-    c.on_reload = <<-JS
+    c.netzke_on_reload = l(<<-JS)
     function(params) {
       window.location.reload();
     }
     JS
 
-    c.on_select_now = <<-JS
+    c.netzke_on_select_now = l(<<-JS)
     function(params) {
-      this.serverSelectPosting({});
+      this.server.selectPosting({});
     }
     JS
 
-    c.on_reload_scripts = <<-JS
+    c.netzke_on_reload_scripts = l(<<-JS)
     function(params) {
        var me = this;
        Ext.Msg.show({
@@ -224,7 +222,7 @@ class Marty::MainAuthApp < Marty::AuthApp
          buttons: Ext.Msg.OKCANCEL,
          prompt: true,
          fn: function (btn, value) {
-           btn == "ok" && value == "RELOAD" && me.serverReloadScripts({});
+           btn == "ok" && value == "RELOAD" && me.server.reloadScripts({});
          }
        });
     }
@@ -237,13 +235,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.icon      = :timeline_marker
   end
 
-  endpoint :server_select_posting do |params, this|
+  endpoint :select_posting do |params|
     sid = params && params[0]
     Marty::Util.set_posting_id(sid)
     posting = sid && Marty::Posting.find(sid)
 
-    this.netzke_feedback "Selected '#{posting ? posting.name : 'NOW'}'"
-    this.on_reload 1
+    client.netzke_notify "Selected '#{posting ? posting.name : 'NOW'}'"
+    client.netzke_on_reload 1
   end
 
   action :select_now do |a|
@@ -270,9 +268,9 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.disabled = Marty::Util.warped?
   end
 
-  endpoint :server_reload_scripts do |params, this|
+  endpoint :reload_scripts do |params|
     Marty::Script.load_scripts
-    this.netzke_feedback 'Scripts have been reloaded'
+    client.netzke_notify 'Scripts have been reloaded'
   end
 end
 

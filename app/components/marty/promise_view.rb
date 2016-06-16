@@ -1,12 +1,11 @@
-class Marty::PromiseView < Netzke::Basepack::Tree
+class Marty::PromiseView < Netzke::Tree::Base
   extend ::Marty::Permissions
 
-  css_configure do |config|
+  client_styles do |config|
     config.require :promise_view
   end
-
-  js_configure do |config|
-    config.default_get_row_class = <<-JS
+  client_class do |config|
+    config.default_get_row_class = l(<<-JS)
     function(record, index, rowParams, ds) {
        var status = record.get('status');
        if (status === false) return "red-row";
@@ -15,7 +14,7 @@ class Marty::PromiseView < Netzke::Basepack::Tree
     }
     JS
 
-    config.listen_fn = <<-JS
+    config.listen_fn = l(<<-JS)
     function(obj, search_text) {
         var lg = this.ownerCt.ownerCt;
         lg.getStore().getProxy().extraParams.live_search = search_text;
@@ -43,7 +42,7 @@ class Marty::PromiseView < Netzke::Basepack::Tree
     super
     config.title = I18n.t("jobs.promise_view")
     config.model = "Marty::Promise"
-    config.columns = [
+    config.attributes = [
       {name: :title, xtype: :treecolumn},
       :user__login,
       :job_id,
@@ -54,7 +53,7 @@ class Marty::PromiseView < Netzke::Basepack::Tree
       :error,
     ]
     config.root_visible = false
-    config.enable_pagination = false
+    config.paging = :none
     config.bbar = bbar
 
     # garbage collect old promises (hacky to do this here)
@@ -65,8 +64,8 @@ class Marty::PromiseView < Netzke::Basepack::Tree
     [:clear, '->', :refresh, :download]
   end
 
-  js_configure do |config|
-    config.init_component = <<-JS
+  client_class do |config|
+    config.init_component = l(<<-JS)
     function() {
        this.callParent();
        this.getSelectionModel().on('selectionchange', function(selModel) {
@@ -77,7 +76,7 @@ class Marty::PromiseView < Netzke::Basepack::Tree
     }
     JS
 
-    config.on_download = <<-JS
+    config.netzke_on_download = l(<<-JS)
     function() {
        var jid = this.getSelectionModel().selected.first().getId();
        // FIXME: seems pretty hacky
@@ -85,13 +84,13 @@ class Marty::PromiseView < Netzke::Basepack::Tree
     }
     JS
 
-    config.on_refresh = <<-JS
+    config.netzke_on_refresh = l(<<-JS)
     function() {
        this.store.load();
     }
     JS
 
-    config.on_clear = <<-JS
+    config.netzke_on_clear = l(<<-JS)
     function(params) {
        var me = this;
        Ext.Msg.show({
@@ -101,7 +100,7 @@ class Marty::PromiseView < Netzke::Basepack::Tree
          buttons: Ext.Msg.OKCANCEL,
          prompt: true,
          fn: function (btn, value) {
-          (btn == "ok" && value == "CLEAR") && me.serverClear({});
+          (btn == "ok" && value == "CLEAR") && me.server.clear({});
          }
        });
     }
@@ -127,9 +126,9 @@ class Marty::PromiseView < Netzke::Basepack::Tree
     a.icon     = :arrow_refresh
   end
 
-  endpoint :server_clear do |params, this|
+  endpoint :clear do |params|
     Marty::Promise.cleanup(true)
-    this.on_refresh
+    client.on_refresh
   end
 
   def get_records params
@@ -137,38 +136,38 @@ class Marty::PromiseView < Netzke::Basepack::Tree
     Marty::Promise.children_for_id(params[:id], params[search_scope])
   end
 
-  column :title do |config|
+  attribute :title do |config|
     config.text = I18n.t('jobs.title')
     config.width = 300
   end
 
-  column :user__login do |config|
+  attribute :user__login do |config|
     config.text = I18n.t('jobs.user_login')
     config.width = 100
   end
 
-  column :job_id do |config|
+  attribute :job_id do |config|
     config.width = 90
   end
 
-  column :start_dt do |config|
+  attribute :start_dt do |config|
     config.text = I18n.t('jobs.start_dt')
   end
 
-  column :end_dt do |config|
+  attribute :end_dt do |config|
     config.text = I18n.t('jobs.end_dt')
   end
 
-  column :status do |config|
+  attribute :status do |config|
     config.hidden = true
   end
 
-  column :cformat do |config|
+  attribute :cformat do |config|
     config.text = I18n.t('jobs.cformat')
     config.width = 90
   end
 
-  column :error do |config|
+  attribute :error do |config|
     config.getter = ->(record) { record.result.to_s if record.status == false }
     config.flex = 1
   end

@@ -7,49 +7,40 @@ class Marty::PostingGrid < Marty::Grid
 
     c.header             = false
     c.model              = "Marty::Posting"
-    c.columns            = [:name, :created_dt, :user__name, :comment]
+    c.attributes            = [:name, :created_dt, :user__name, :comment]
     c.multi_select       = false
-    c.data_store.sorters = {property: :created_dt, direction: 'DESC'}
+    c.store_config.merge!({sorters: [{property: :created_dt, direction: 'DESC'}],
+                           page_size: 12})
   end
 
   # hijacking delete button
-  action :del do |a|
+  action :delete do |a|
     a.text      = "Select"
     a.tooltip   = "Select"
     a.icon      = :time_go
     a.disabled  = true
   end
 
-  js_configure do |c|
-    c.init_component = <<-JS
+  client_class do |c|
+    c.init_component = l(<<-JS)
     function() {
        this.callParent();
+
        this.getSelectionModel().on('selectionchange', function(selModel) {
           this.actions.detail &&
           this.actions.detail.setDisabled(!selModel.hasSelection());
        }, this);
-
-       var me = this;
-       me.getView().on('itemkeydown', function(view, record, item, index, e) {
-          if (e.getKey() === e.SPACE) {
-             record_id = me.getSelectionModel().selected.first().getId();
-             me.getView().fireEvent('itemclick', me, record);
-             me.serverDetail({record_id: record_id});
-             var rowIndex = me.find('id', record.getId());
-             me.getView().select(rowIndex);
-          }
-       });
     }
     JS
 
-    c.detail = <<-JS
+    c.detail = l(<<-JS)
     function() {
        record_id = this.getSelectionModel().selected.first().getId();
-       this.serverDetail({record_id: record_id});
+       this.server.detail({record_id: record_id});
     }
     JS
 
-    c.show_detail = <<-JS
+    c.netzke_show_detail = l(<<-JS)
     function(details) {
       Ext.create('Ext.Window', {
         height:         150,
@@ -63,7 +54,7 @@ class Marty::PostingGrid < Marty::Grid
     }
     JS
 
-    c.on_del = <<-JS
+    c.netzke_on_delete = l(<<-JS)
       function() {
         var records = [];
         var me = this;
@@ -80,13 +71,13 @@ class Marty::PostingGrid < Marty::Grid
         }
 
         // assumes main_app has serverSelectPosting method
-        main_app.serverSelectPosting(records);
+        main_app.server.selectPosting(records);
       }
       JS
   end
 
   def default_bbar
-    [:del, :detail]
+    [:delete, :detail]
   end
 
   action :detail do |a|
@@ -96,7 +87,7 @@ class Marty::PostingGrid < Marty::Grid
     a.disabled  = true
   end
 
-  endpoint :server_detail do |params, this|
+  endpoint :detail do |params|
     record_id = params[:record_id]
 
     # Prepare an HTML popup with session details such that the
@@ -113,24 +104,24 @@ class Marty::PostingGrid < Marty::Grid
       "<b>User:</b>\t#{pt.user.name}<br/>" +
       "<b>Comment:</b>\t#{pt.comment}"
 
-    this.show_detail html
+    client.netzke_show_detail html
   end
 
-  column :name do |c|
+  attribute :name do |c|
     c.flex      = 1
   end
 
-  column :created_dt do |c|
+  attribute :created_dt do |c|
     c.text      = "Date/Time"
     c.format    = "Y-m-d H:i"
     c.hidden    = true
   end
 
-  column :user__name do |c|
+  attribute :user__name do |c|
     c.width     = 100
   end
 
-  column :comment do |c|
+  attribute :comment do |c|
     c.width     = 100
   end
 

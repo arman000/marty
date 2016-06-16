@@ -29,12 +29,12 @@ class Marty::Scripting < Netzke::Base
       ]
   end
 
-  js_configure do |c|
+  client_class do |c|
 
     c.header = false
     c.layout = :border
 
-    c.init_component = <<-JS
+    c.init_component = l(<<-JS)
     function() {
        var me = this;
        me.callParent();
@@ -50,10 +50,10 @@ class Marty::Scripting < Netzke::Base
              return;
 
           var tag_id = records[0].get('id');
-          me.selectTag({tag_id: tag_id});
+          me.server.selectTag({tag_id: tag_id});
           script_grid.getStore().load();
           var script_name = null;
-          script_form.netzkeLoad({script_name: script_name});
+          script_form.server.netzkeLoad({script_name: script_name});
           }, me);
 
        script_grid.getSelectionModel().on('selectionchange',
@@ -66,35 +66,35 @@ class Marty::Scripting < Netzke::Base
              return;
 
           var script_name = records[0].get('name');
-          me.selectScript({script_name: script_name});
-          script_form.netzkeLoad({script_name: script_name});
+          me.server.selectScript({script_name: script_name});
+          script_form.server.netzkeLoad({script_name: script_name});
           }, me);
     }
     JS
 
-    c.script_refresh = <<-JS
+    c.script_refresh = l(<<-JS)
     function(script_name) {
        if (!script_name) {
-          this.selectScript({});
+          this.server.selectScript({});
           this.netzkeReload();
        }
        else {
-          this.selectScript({script_name: script_name});
+          this.server.selectScript({script_name: script_name});
           this.netzkeGetComponent('tag_grid').getStore().load();
           this.netzkeGetComponent('script_grid').getStore().load();
-          this.netzkeGetComponent('script_form').netzkeLoad(
+          this.netzkeGetComponent('script_form').server.netzkeLoad(
              {script_name: script_name});
        }
     }
     JS
   end
 
-  endpoint :select_tag do |params, this|
+  endpoint :select_tag do |params|
     root_sess[:selected_tag_id]      = params[:tag_id]
     root_sess[:selected_script_name] = nil
   end
 
-  endpoint :select_script do |params, this|
+  endpoint :select_script do |params|
     root_sess[:selected_script_name] = params[:script_name]
   end
 

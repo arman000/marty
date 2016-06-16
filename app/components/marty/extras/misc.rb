@@ -1,6 +1,6 @@
 module Marty::Extras::Misc
   MM_OPTIONS = {
-    editor: {
+    editor_config: {
       trigger_action: :all,
       xtype: :combo,
       store: (1..12).map {|x| [x, "%02d" % x]},
@@ -15,4 +15,17 @@ module Marty::Extras::Misc
     # didn't work.
     default_value: Date.today.month
   }
+  def self.numberfield_cfg(decimal_places)
+    {
+      format: "0." + "0"*decimal_places,
+      xtype: 'numbercolumn',
+      editor_config: { hide_trigger: true,
+                       decimal_precision: decimal_places },
+      field_config: { decimal_precision: decimal_places,
+                      xtype: :numberfield,
+                      hide_trigger: true,
+                      key_nav_enabled: false,
+                      mouse_wheel_enabled: false }
+    }
+  end
 end

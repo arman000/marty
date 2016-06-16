@@ -7,12 +7,12 @@ class Marty::Reporting < Netzke::Base
               ]
   end
 
-  js_configure do |c|
+  client_class do |c|
     c.header   = false
     c.layout   = :border
     c.defaults = {body_style: 'padding:0px'}
 
-    c.select_report = <<-JS
+    c.select_report = l(<<-JS)
     function() {
        // this.netzkeGetComponent('report_form').netzkeLoad({});
        // FIXME: NetzkeReload() doesn't work when performed on

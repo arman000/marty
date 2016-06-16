@@ -29,11 +29,11 @@
 #
 # The JS side of the component will have those regions referenced as this.mainPanel, this.statusBar, and this.menuBar.
 class Marty::SimpleApp < Netzke::Base
-  js_configure do |c|
+  client_class do |c|
     c.extend = "Ext.container.Viewport"
     c.layout = :border
     c.require Netzke::Core.ext_path.join("examples", "ux/statusbar/StatusBar.js"), :statusbar_ext
-    c.mixin
+    c.include :simple_app
   end
 
   def configure(c)

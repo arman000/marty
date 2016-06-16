@@ -3,8 +3,8 @@
 # == Extending Marty::AuthApp
 # DOCFIX
 class Marty::AuthApp < Marty::SimpleApp
-  js_configure do |c|
-    c.mixin
+  client_class do |c|
+    c.include :auth_app
   end
 
   # Set the Logout button if current_user is set
@@ -37,20 +37,19 @@ class Marty::AuthApp < Marty::SimpleApp
     c.text = "Sign out #{Mcfly.whodunnit.name}" if Mcfly.whodunnit
   end
 
-  endpoint :sign_in do |params,this|
+  endpoint :sign_in do |params|
     user = Marty::User.try_to_login(params[:login], params[:password])
-
     if user
       Netzke::Base.controller.set_user(user)
-      this.netzke_set_result(true)
+      client.netzke_set_result(true)
     else
-      this.netzke_set_result(false)
-      this.netzke_feedback("Wrong credentials")
+      client.netzke_set_result(false)
+      client.netzke_notify("Wrong credentials")
     end
   end
 
-  endpoint :sign_out do |params,this|
+  endpoint :sign_out do
     Netzke::Base.controller.logout_user
-    this.netzke_set_result(true)
+    client.netzke_set_result(true)
   end
 end

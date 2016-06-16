@@ -4,8 +4,8 @@ class Marty::NewPostingForm < Marty::Form
   # override this to set permissions for posting types
   has_marty_permissions read: :any
 
-  js_configure do |c|
-    c.close_me = <<-JS
+  client_class do |c|
+    c.close_me = l(<<-JS)
     function() {
       // assume we're embedded in a window
       this.netzkeGetParentComponent().close();
@@ -21,9 +21,9 @@ class Marty::NewPostingForm < Marty::Form
 
   ######################################################################
 
-  endpoint :netzke_submit do |params, this|
-    res = super(params, this)
-    this.close_me
+  endpoint :submit do |params|
+    res = super(params)
+    client.close_me
     res
   end
 

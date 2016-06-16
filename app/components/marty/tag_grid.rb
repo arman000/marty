@@ -10,42 +10,36 @@ class Marty::TagGrid < Marty::Grid
     c.model        = "Marty::Tag"
     c.multi_select = false
 
-    c.columns ||= [:name, :created_dt, :user__name, :comment]
+    c.attributes ||= [:name, :created_dt, :user__name, :comment]
 
-    c.data_store.sorters = {
-      property: :created_dt,
-      direction: 'DESC',
-    }
+    c.store_config.merge!({sorters: [{property: :created_dt,
+                                      direction: 'DESC'}]})
   end
 
-  endpoint :add_window__add_form__netzke_submit do |params, this|
+  endpoint :add_window__add_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    return this.netzke_feedback("Permission Denied") if
-      config[:prohibit_create]
+    return client.netzke_notify("Permission Denied") if
+      !config[:permissions][:create]
 
     # FIXME: disallow tag creation when no script has been modified?
 
     tag = Marty::Tag.do_create(nil, data["comment"])
 
     if tag.valid?
-      this.success = true
-      this.on_submit_success
+      client.success = true
+      client.netzke_on_submit_success
       return
     end
 
-    data_adapter.errors_array(tag).each do |error|
-      flash :error => error
-    end
-
-    this.netzke_feedback(@flash)
+    client.netzke_notify(model_adapter.errors_array(tag).join("\n"))
   end
 
   action :add_in_form do |a|
     a.text     = I18n.t("tag_grid.new")
     a.tooltip  = I18n.t("tag_grid.new")
     a.icon     = :time_add
-    a.disabled = config[:prohibit_create]
+    a.disabled = !config[:permissions][:create]
   end
 
   def default_bbar
@@ -56,24 +50,24 @@ class Marty::TagGrid < Marty::Grid
     []
   end
 
-  def default_fields_for_forms
+  def default_form_items
     [:comment]
   end
 
-  column :name do |c|
+  attribute :name do |c|
   end
 
-  column :created_dt do |c|
+  attribute :created_dt do |c|
     c.text   = "Date/Time"
     c.format = "Y-m-d H:i"
     c.hidden = true
   end
 
-  column :user__name do |c|
+  attribute :user__name do |c|
     c.width  = 100
   end
 
-  column :comment do |c|
+  attribute :comment do |c|
     c.width  = 100
     c.flex   = 1
   end

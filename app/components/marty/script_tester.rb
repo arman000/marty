@@ -9,7 +9,7 @@ class Marty::ScriptTester < Marty::Form
        fieldset(I18n.t("script_tester.attributes"),
                 {
                   name:         "attrs",
-                  attr_type:    :text,
+                  xtype:        :textarea,
                   value:        "",
                   hide_label:   true,
                   min_height:   125,
@@ -19,7 +19,7 @@ class Marty::ScriptTester < Marty::Form
        fieldset(I18n.t("script_tester.parameters"),
                 {
                   name:         "params",
-                  attr_type:    :text,
+                  xtype:        :textarea,
                   value:        "",
                   hide_label:   true,
                   min_height:   125,
@@ -30,8 +30,8 @@ class Marty::ScriptTester < Marty::Form
       ]
   end
 
-  js_configure do |c|
-    c.set_result = <<-JS
+  client_class do |c|
+    c.set_result = l(<<-JS)
     function(html) {
        var result = this.netzkeGetComponent('result');
        result.updateBodyHtml(html);
@@ -47,7 +47,7 @@ class Marty::ScriptTester < Marty::Form
       get_engine(root_sess[:selected_script_name])
   end
 
-  endpoint :netzke_submit do |params, this|
+  endpoint :submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
     attrs = data["attrs"].split(';').map(&:strip).reject(&:empty?)
@@ -59,7 +59,7 @@ class Marty::ScriptTester < Marty::Form
     begin
       phash = ActiveSupport::JSON.decode("{ #{pjson} }")
     rescue MultiJson::DecodeError
-      this.netzke_feedback "Malformed input parameters"
+      client.netzke_notify "Malformed input parameters"
       return
     end
 
@@ -76,11 +76,11 @@ class Marty::ScriptTester < Marty::Form
         "#{a} = #{q}"
       }
 
-      this.netzke_feedback "done"
-      this.set_result result.join("<br/>")
+      client.netzke_notify "done"
+      client.set_result result.join("<br/>")
 
     rescue SystemStackError
-      return this.netzke_feedback "System Stack Error"
+      return client.netzke_notify "System Stack Error"
 
     rescue => exc
       res = Delorean::Engine.grok_runtime_exception(exc)
@@ -88,8 +88,8 @@ class Marty::ScriptTester < Marty::Form
       result = ["Error: #{res['error']}", "Backtrace:"] +
         res["backtrace"].map {|m, line, fn| "#{m}:#{line} #{fn}"}
 
-      this.netzke_feedback "failed"
-      this.set_result '<font color="red">' + result.join("<br/>") + "</font>"
+      client.netzke_notify "failed"
+      client.set_result '<font color="red">' + result.join("<br/>") + "</font>"
     end
   end
 

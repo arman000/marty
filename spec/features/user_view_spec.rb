@@ -66,7 +66,7 @@ feature 'under Sytem menu, User Management worflows', js: true do
       wait_for_ajax
       expect(user_view.row_count).to eq 2
       user_view.select_row(2)
-      press('Edit in form')
+      press('Edit')
 
       within(:gridpanel, 'edit_window', match: :first) do
         fill_in('Login', with: 'new_login')
@@ -113,11 +113,13 @@ feature 'under Sytem menu, User Management worflows', js: true do
     it 'user manager has access' do
       log_in_as('user_manager1')
       go_to_user_view
+      user_view = netzke_find('user_view')
       by 'check buttons' do
         find(:btn, 'New User', match: :first)
         zoom_out
+        user_view.select_row(1)
         expect(btn_disabled?('New User')).to be_falsy
-        expect(btn_disabled?('Edit in form')).to be_falsy
+        expect(btn_disabled?('Edit')).to be_falsy
         expect(btn_disabled?('Delete')).to be_falsy
       end
     end
@@ -125,10 +127,12 @@ feature 'under Sytem menu, User Management worflows', js: true do
     it 'admin has access' do
       log_in_as('admin1')
       go_to_user_view
+      user_view = netzke_find('user_view')
       by 'check buttons' do
         find(:btn, 'New User', match: :first)
+        user_view.select_row(1)
         expect(btn_disabled?('New User')).to be_falsy
-        expect(btn_disabled?('Edit in form')).to be_falsy
+        expect(btn_disabled?('Edit')).to be_falsy
         expect(btn_disabled?('Delete')).to be_falsy
       end
     end
@@ -136,30 +140,26 @@ feature 'under Sytem menu, User Management worflows', js: true do
     it 'viewer denied access' do
       log_in_as('viewer1')
       go_to_user_view_backdoor
+
       user_view = netzke_find('user_view')
       by 'check buttons' do
-        find(:btn, 'New User', match: :first)
-        #selection needed to make delete button disappear
-        wait_for_ajax
         user_view.select_row(1)
-        expect(btn_disabled?('New User')).to be_truthy
-        expect(btn_disabled?('Edit in form')).to be_truthy
-        expect(btn_disabled?('Delete')).to be_truthy
+        expect(page).not_to have_content('New User')
+        expect(page).not_to have_content('Edit')
+        expect(page).not_to have_content('Delete')
       end
     end
 
     it 'developer denied access' do
       log_in_as('dev1')
       go_to_user_view_backdoor
+
       user_view = netzke_find('user_view')
       by 'check buttons' do
-        find(:btn, 'New User', match: :first)
-        #selection needed to make delete button disappear
-        wait_for_ajax
         user_view.select_row(1)
-        expect(btn_disabled?('New User')).to be_truthy
-        expect(btn_disabled?('Edit in form')).to be_truthy
-        expect(btn_disabled?('Delete')).to be_truthy
+        expect(page).not_to have_content('New User')
+        expect(page).not_to have_content('Edit')
+        expect(page).not_to have_content('Delete')
       end
     end
   end

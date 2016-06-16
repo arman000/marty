@@ -1,6 +1,6 @@
 require 'marty/new_posting_form'
 
-class Marty::NewPostingWindow < Netzke::Basepack::Window
+class Marty::NewPostingWindow < Netzke::Window::Base
   def configure(c)
     super
 
