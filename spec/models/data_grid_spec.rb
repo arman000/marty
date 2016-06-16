@@ -110,6 +110,13 @@ true\t456
 false\t123
 EOS
 
+Ge =<<EOS
+ltv\tnumrange\th
+
+>110\t>120
+1.1\t1.1
+EOS
+
     before(:each) do
       #Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
@@ -216,9 +223,22 @@ EOS
     describe "lookup" do
       before(:each) do
         ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "Ga", "Gb",
-         "Gc", "Gd"].each { |g|
+         "Gc", "Gd", "Ge"].each { |g|
           dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
         }
+      end
+
+      it "should handle non-distinct lookups" do
+        pt = 'infinity'
+
+        dg = Marty::DataGrid.lookup(pt, "Ge")
+        res = Marty::DataGrid.lookup_grid(pt, dg, {"ltv"=>500}, false)
+
+        expect(res).to eq(1.1)
+
+        expect {
+          Marty::DataGrid.lookup_grid(pt, dg, {"ltv"=>500}, true)
+        }.to raise_error(RuntimeError)
       end
 
       it "should handle boolean lookups" do

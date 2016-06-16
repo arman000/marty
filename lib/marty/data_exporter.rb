@@ -40,7 +40,7 @@ class Marty::DataExporter
 
     # if all array items are hashes, we merge them
     obj = hash_array_merge(obj, config["transpose"]) if
-      obj.is_a?(Array) && obj.map {|x| x.is_a? Hash}.all?
+      obj.is_a?(Array) && obj.all? {|x| x.is_a? Hash}
 
     # symbolize config keys as expected by CSV.generate
     conf = config.each_with_object({}) { |(k,v), h|
