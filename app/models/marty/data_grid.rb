@@ -13,7 +13,6 @@ class Marty::DataGrid < Marty::Base
   }
 
   ARRSEP = '|'
-  NULLABLE_TYPES = Set["string", "integer"]
 
   class DataGridValidator < ActiveModel::Validator
     def validate(dg)
@@ -195,9 +194,7 @@ class Marty::DataGrid < Marty::Base
               where(q, v).uniq.pluck(:index)
       end
 
-      if v.nil? || (ixa.empty? && NULLABLE_TYPES.member?(type))
-        # NULLABLE_TYPES fields allow NULL key wildcards.  If no match
-        # for key was found, try NULL.
+      if v.nil? || ixa.empty?
         ixa = ix_class.
           where(data_grid_id: group_id,
                 created_dt:   created_dt,

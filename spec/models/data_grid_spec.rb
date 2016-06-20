@@ -117,6 +117,18 @@ ltv\tnumrange\th
 1.1\t1.1
 EOS
 
+Gf = <<EOS
+lenient string
+b\tboolean\tv
+i\tinteger\tv
+i4\tint4range\tv
+n\tnumrange\tv
+
+true\t1\t<10\t<10.0\tY
+\t2\t\t\tM
+false\t\t>10\t\tN
+EOS
+
     before(:each) do
       #Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
@@ -177,20 +189,6 @@ EOS
         }.to raise_error(ActiveRecord::RecordInvalid)
       end
 
-      it "NULL keys are only allowed on string fields" do
-        g_bad = G2.sub(/1\|2/, "")
-
-        expect {
-          dg_from_import("G2", g_bad)
-        }.to raise_error(ActiveRecord::RecordInvalid)
-
-        g_bad = G2.sub(/<=80/, "")
-
-        expect {
-          dg_from_import("G2", g_bad)
-        }.to raise_error(ActiveRecord::RecordInvalid)
-      end
-
       it "Unknown keys for typed grids should raise error" do
         g_bad = G8.sub(/G3/, "XXXXX")
 
@@ -220,17 +218,63 @@ EOS
       end
     end
 
-    describe "lookup" do
+    describe "lookups for infinity" do
+      let(:pt) { 'infinity'}
+
       before(:each) do
         ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "Ga", "Gb",
-         "Gc", "Gd", "Ge"].each { |g|
+         "Gc", "Gd", "Ge", "Gf"].each { |g|
           dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
         }
       end
 
-      it "should handle non-distinct lookups" do
-        pt = 'infinity'
+      context "should handle NULL key values" do
+        let(:dg) { Marty::DataGrid.lookup(pt, "Gf") }
 
+        it 'true returns Y' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"b"=>true}, true)
+          expect(res).to eq('Y')
+        end
+
+        it '13 returns N' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13}, true)
+          expect(res).to eq('N')
+        end
+
+        it '13 & numrange 0 returns nil' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13, "n"=>0}, true)
+          expect(res).to be_nil
+        end
+
+        it '13 & int4range 15 returns N' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13, "i4"=>15}, true)
+          expect(res).to eq('N')
+        end
+
+        it '13 & int4range 1 returns nil' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13, "i4"=>1}, true)
+          expect(res).to be_nil
+        end
+
+        it 'false, 3, numrange 15 returns N' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"b"=>false, "i"=>3, "n"=>15}, true)
+          expect(res).to eq('N')
+        end
+
+        it '13, numrange 15 returns N' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13, "n"=>15}, true)
+          expect(res).to eq('N')
+        end
+      end
+
+      it "should handle non-distinct lookups" do
         dg = Marty::DataGrid.lookup(pt, "Ge")
         res = Marty::DataGrid.lookup_grid(pt, dg, {"ltv"=>500}, false)
 
@@ -475,7 +519,6 @@ EOS
       end
 
       it "should return grid data and metadata simple" do
-        pt = 'infinity'
         expected_data = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], [1.2, 2.3, 3.4],
                          [4.5, 5.6, 6.7]]
         expected_metadata = [{"dir"=>"v",
@@ -502,7 +545,6 @@ EOS
       end
 
       it "should return grid data and metadata multi (following)" do
-        pt = 'infinity'
         expected_data =  [[1.1, 2.2, 3.3],[4.4, 5.5, 6.6],[1.2, 2.3, 3.4],
                           [4.5, 5.6, nil],[11.0, 22.0, 33.0]]
         expected_metadata = [{"dir"=>"v",
@@ -527,7 +569,6 @@ EOS
       end
 
       it "should return grid data and metadata multi (not following)" do
-        pt = 'infinity'
         expected_data = [["G1"], ["G2"], ["G3"]]
         expected_metadata = [{"dir"=>"v",
                               "attr"=>"ltv",
