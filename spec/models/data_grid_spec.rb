@@ -218,7 +218,9 @@ EOS
       end
     end
 
-    describe "lookup" do
+    describe "lookups for infinity" do
+      let(:pt) { 'infinity'}
+
       before(:each) do
         ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "Ga", "Gb",
          "Gc", "Gd", "Ge", "Gf"].each { |g|
@@ -226,42 +228,53 @@ EOS
         }
       end
 
-      it "should handle NULL key values" do
-        pt = 'infinity'
-        dg = Marty::DataGrid.lookup(pt, "Gf")
+      context "should handle NULL key values" do
+        let(:dg) { Marty::DataGrid.lookup(pt, "Gf") }
 
-        res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"b"=>true}, true)
-        expect(res).to eq('Y')
+        it 'true returns Y' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"b"=>true}, true)
+          expect(res).to eq('Y')
+        end
 
-        res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"i"=>13}, true)
-        expect(res).to eq('N')
+        it '13 returns N' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13}, true)
+          expect(res).to eq('N')
+        end
 
-        res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"i"=>13, "n"=>0}, true)
-        expect(res).to be_nil
+        it '13 & numrange 0 returns nil' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13, "n"=>0}, true)
+          expect(res).to be_nil
+        end
 
-        res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"i"=>13, "i4"=>15}, true)
-        expect(res).to eq('N')
+        it '13 & int4range 15 returns N' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13, "i4"=>15}, true)
+          expect(res).to eq('N')
+        end
 
-        res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"i"=>13, "i4"=>1}, true)
-        expect(res).to be_nil
+        it '13 & int4range 1 returns nil' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13, "i4"=>1}, true)
+          expect(res).to be_nil
+        end
 
-        res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"b"=>false, "i"=>3, "n"=>15}, true)
-        expect(res).to eq('N')
+        it 'false, 3, numrange 15 returns N' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"b"=>false, "i"=>3, "n"=>15}, true)
+          expect(res).to eq('N')
+        end
 
-        res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"i"=>13, "n"=>15}, true)
-        expect(res).to eq('N')
+        it '13, numrange 15 returns N' do
+          res = Marty::DataGrid.
+                lookup_grid(pt, dg, {"i"=>13, "n"=>15}, true)
+          expect(res).to eq('N')
+        end
       end
 
       it "should handle non-distinct lookups" do
-        pt = 'infinity'
-
         dg = Marty::DataGrid.lookup(pt, "Ge")
         res = Marty::DataGrid.lookup_grid(pt, dg, {"ltv"=>500}, false)
 
@@ -506,7 +519,6 @@ EOS
       end
 
       it "should return grid data and metadata simple" do
-        pt = 'infinity'
         expected_data = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], [1.2, 2.3, 3.4],
                          [4.5, 5.6, 6.7]]
         expected_metadata = [{"dir"=>"v",
@@ -533,7 +545,6 @@ EOS
       end
 
       it "should return grid data and metadata multi (following)" do
-        pt = 'infinity'
         expected_data =  [[1.1, 2.2, 3.3],[4.4, 5.5, 6.6],[1.2, 2.3, 3.4],
                           [4.5, 5.6, nil],[11.0, 22.0, 33.0]]
         expected_metadata = [{"dir"=>"v",
@@ -558,7 +569,6 @@ EOS
       end
 
       it "should return grid data and metadata multi (not following)" do
-        pt = 'infinity'
         expected_data = [["G1"], ["G2"], ["G3"]]
         expected_metadata = [{"dir"=>"v",
                               "attr"=>"ltv",
