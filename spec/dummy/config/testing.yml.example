@@ -1,0 +1,9 @@
+# when included, this file allows capybara rspec tests to use firebug and/or alternate firefox
+#
+# to use firebug: set include_firebug to true and set firebug XPI file location
+# to use alternate firefox: set alternate firefox_path
+
+capybara_test:
+  include_firebug: true
+  firebug_path: spec/support/features/firebug-2.0.14.xpi
+  firefox_path: /home/<user>/Downloads/firefox/firefox

@@ -21,8 +21,6 @@ group :development, :test do
 
   gem 'netzke-core'
   gem 'netzke-basepack'
-  gem 'netzke-testing'
 
   gem 'marty_rspec'
-
 end
