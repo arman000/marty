@@ -8,8 +8,6 @@ class Marty::NewPostingWindow < Netzke::Window::Base
     c.modal             = true
     c.items             = [:new_posting_form]
     c.lazy_loading      = true
-    c.width             = 350
-    c.height            = 130
   end
 
   component :new_posting_form do |c|

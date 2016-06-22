@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title><%= Rails.application.class.parent %></title>
-  <%= load_netzke theme: "classic" %>
+  <%= load_netzke theme: Rails.configuration.marty.extjs_theme %>
   <%= csrf_meta_tag %>
 </head>
 <body>
