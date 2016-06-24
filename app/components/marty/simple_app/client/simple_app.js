@@ -41,7 +41,7 @@
   },
 
   netzkeLoadComponentByAction: function(action){
-    this.router.add(action.name);
+    this.router.add(action.name.underscore());
   },
 
   onToggleConfigMode: function(params){
