@@ -129,6 +129,16 @@ true\t1\t<10\t<10.0\tY
 false\t\t>10\t\tN
 EOS
 
+Gg = <<EOS
+lenient
+i1\tinteger\tv
+i2\tinteger\tv
+
+\t1\t1
+2\t1\t21
+2\t\t20
+EOS
+
     before(:each) do
       #Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
@@ -223,7 +233,7 @@ EOS
 
       before(:each) do
         ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "Ga", "Gb",
-         "Gc", "Gd", "Ge", "Gf"].each { |g|
+         "Gc", "Gd", "Ge", "Gf", "Gg"].each { |g|
           dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
         }
       end
@@ -272,6 +282,21 @@ EOS
                 lookup_grid(pt, dg, {"i"=>13, "n"=>15}, true)
           expect(res).to eq('N')
         end
+      end
+
+      it "should handle ambiguous lookups" do
+        dg = Marty::DataGrid.lookup(pt, "Gg")
+        res = Marty::DataGrid.
+              lookup_grid(pt, dg, {"i1"=>2, "i2"=>1}, false)
+        expect(res).to eq(21)
+
+        res = Marty::DataGrid.
+              lookup_grid(pt, dg, {"i1"=>3, "i2"=>1}, false)
+        expect(res).to eq(1)
+
+        res = Marty::DataGrid.
+              lookup_grid(pt, dg, {"i1"=>2, "i2"=>3}, false)
+        expect(res).to eq(20)
       end
 
       it "should handle non-distinct lookups" do
