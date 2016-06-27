@@ -9,7 +9,6 @@ class Marty::DataGrid < Marty::Base
     "integer"   => Marty::GridIndexInteger,
     "string"    => Marty::GridIndexString,
     "boolean"   => Marty::GridIndexBoolean,
-    "float"     => true
   }
 
   ARRSEP = '|'
@@ -433,7 +432,7 @@ class Marty::DataGrid < Marty::Base
 
   def self.maybe_get_klass(type)
     begin
-      klass = type.constantize unless INDEX_MAP[type]
+      klass = type.constantize unless INDEX_MAP[type] || type == "float"
     rescue NameError
       raise "unknown header type/klass: #{type}"
     end
@@ -479,6 +478,8 @@ class Marty::DataGrid < Marty::Base
       raise "metadata elements must include attr/type/dir" unless
         attr && type && dir
       raise "bad dir #{dir}" unless ["h", "v"].member? dir
+      raise "unknown metadata type #{type}" unless
+        Marty::DataGrid.type_to_index(type)
 
       res = {
         "attr" => attr,
