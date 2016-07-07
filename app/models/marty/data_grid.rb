@@ -161,6 +161,8 @@ class Marty::DataGrid < Marty::Base
 
       ix_class = INDEX_MAP[type] || INDEX_MAP["string"]
 
+      q = "key IS NULL"
+
       unless v.nil?
         q = case type
             when "boolean"
@@ -169,7 +171,7 @@ class Marty::DataGrid < Marty::Base
               "key @> ?"
             else # "string", "integer", AR klass
               "key @> ARRAY[?]"
-            end
+            end + " OR #{q}"
 
         # FIXME: very hacky -- need to cast numrange/intrange values or
         # we get errors from PG.
@@ -185,26 +187,17 @@ class Marty::DataGrid < Marty::Base
             else # AR class
               v.to_s
             end
-
-        ixa = ix_class.
-              where(data_grid_id: group_id,
-                    created_dt:   created_dt,
-                    attr:         inf["attr"],
-                   ).
-              where(q, v).uniq.pluck(:index)
       end
 
-      if v.nil? || ixa.empty?
-        ixa = ix_class.
-          where(data_grid_id: group_id,
-                created_dt:   created_dt,
-                attr:         inf["attr"],
-                key:          nil,
-                ).uniq.pluck(:index)
-      end
+      ixa = ix_class.
+            where(data_grid_id: group_id,
+                  created_dt:   created_dt,
+                  attr:         inf["attr"],
+                 ).
+            where(q, v).uniq.pluck(:index)
 
       # FIXME: optimization: bail out if one of the sets is empty.
-      # Or, even better, we should submit all the queris together.
+      # Or, even better, we should submit all the queries together.
       isets[dir] = isets[dir] ? isets[dir] & ixa : Set.new(ixa)
     end
 
@@ -459,6 +452,11 @@ class Marty::DataGrid < Marty::Base
 
     raise "must have a blank row separating metadata" unless
       blank_index
+
+    raise "can't import grid with trailing blank column" if
+      rows.map { |r| r.last.nil? }.all?
+
+    raise "last row can't be blank" if rows[-1].all?(&:nil?)
 
     data_type = nil
     lenient   = false
