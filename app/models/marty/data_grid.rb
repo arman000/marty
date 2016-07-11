@@ -222,7 +222,8 @@ class Marty::DataGrid < Marty::Base
         distinct && isets[dir] && isets[dir].count > 1
     end
 
-    vi, hi = isets["v"].first, isets["h"].first if isets["v"] && isets["h"]
+    # deterministic result: pick min index when there's a choice
+    vi, hi = isets["v"].min, isets["h"].min if isets["v"] && isets["h"]
 
     raise "DataGrid lookup failed #{name}" unless (vi && hi) or lenient or
       return_grid_data

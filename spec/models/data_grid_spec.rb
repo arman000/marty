@@ -266,7 +266,7 @@ EOS
 
         it 'true returns Y' do
           res = Marty::DataGrid.lookup_grid(pt, dg, {"b"=>true}, false)
-          expect(['Y', 'M']).to include(res)
+          expect(res).to eq('Y')
         end
 
         it '13 returns N' do
@@ -310,14 +310,14 @@ EOS
         }
 
         res = Marty::DataGrid.lookup_grid(pt, dg, h1, false)
-        expect([8, 10]).to include(res)
+        expect(res).to eq(10)
       end
 
       it "should handle ambiguous lookups (2)" do
         dg = Marty::DataGrid.lookup(pt, "Gg")
         res = Marty::DataGrid.
               lookup_grid(pt, dg, {"i1"=>2, "i2"=>1}, false)
-        expect([21, 1]).to include(res)
+        expect(res).to eq(1)
 
         res = Marty::DataGrid.
               lookup_grid(pt, dg, {"i1"=>3, "i2"=>1}, false)
@@ -504,7 +504,8 @@ EOS
       end
 
       it "should handle DataGrid typed data grids" do
-        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).to eq "Marty::DataGrid"
+        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).
+          to eq "Marty::DataGrid"
         g1 = Marty::DataGrid.lookup('infinity', "G1")
 
         res = lookup_grid_helper('infinity',
@@ -516,7 +517,8 @@ EOS
       end
 
       it "should handle multi DataGrid lookups" do
-        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).to eq "Marty::DataGrid"
+        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).
+          to eq "Marty::DataGrid"
         g1 = Marty::DataGrid.lookup('infinity', "G1")
 
         h = {
