@@ -147,13 +147,11 @@ class Marty::DataGrid < Marty::Base
     data_type.constantize rescue nil
   end
 
-  def lookup_grid_distinct(pt, h, return_grid_data=false, distinct=true)
-    isets = {}
+  def query_grid_dir(h, infos)
+    return [0] if infos.empty?
 
-    (dir_infos("v") + dir_infos("h")).each do
-      |inf|
-
-      dir, type, attr = inf["dir"], inf["type"], inf["attr"]
+    sqla = infos.map do |inf|
+      type, attr = inf["type"], inf["attr"]
 
       next unless h.has_key?(attr)
 
@@ -189,23 +187,33 @@ class Marty::DataGrid < Marty::Base
             end
       end
 
-      ixa = ix_class.
+      # FIXME: could potentially order results by key NULLS LAST.
+      # This would prefer more specific rather than wild card
+      # solutions.  However, would need to figure out how to preserve
+      # ordering on subsequent INTERSECT operations.
+      ixq = ix_class.
+            select(:index).
+            distinct.
             where(data_grid_id: group_id,
                   created_dt:   created_dt,
                   attr:         inf["attr"],
                  ).
-            where(q, v).uniq.pluck(:index)
+            where(q, v).to_sql
+    end.compact
 
-      # FIXME: optimization: bail out if one of the sets is empty.
-      # Or, even better, we should submit all the queries together.
-      isets[dir] = isets[dir] ? isets[dir] & ixa : Set.new(ixa)
-    end
+    sql = sqla.join(" INTERSECT ")
 
-    ["h", "v"].each do |dir|
-      isets[dir] = Set[0] if !isets[dir] && dir_infos(dir).empty?
+    self.class.connection.execute(sql).to_a.map { |h| h["index"].to_i }
+  end
+
+  def lookup_grid_distinct(pt, h, return_grid_data=false, distinct=true)
+    isets = ["h", "v"].each_with_object({}) do |dir, isets|
+      infos = dir_infos(dir)
+
+      isets[dir] = query_grid_dir(h, infos)
 
       unless isets[dir] or return_grid_data
-        attrs = dir_infos(dir).map { |inf| inf["attr"] }
+        attrs = infos.map { |inf| inf["attr"] }
 
         raise "#{dir} attrs not provided: %s" % attrs.join(',')
       end
