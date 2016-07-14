@@ -128,7 +128,7 @@ class Marty::PromiseView < Netzke::Tree::Base
 
   endpoint :clear do |params|
     Marty::Promise.cleanup(true)
-    client.on_refresh
+    client.netzke_on_refresh
   end
 
   def get_records params

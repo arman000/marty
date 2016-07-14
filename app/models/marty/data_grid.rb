@@ -146,19 +146,19 @@ class Marty::DataGrid < Marty::Base
     data_type.constantize rescue nil
   end
 
-  def lookup_grid_distinct(pt, h, return_grid_data=false, distinct=true)
-    isets = {}
+  def query_grid_dir(h, infos)
+    return [0] if infos.empty?
 
-    (dir_infos("v") + dir_infos("h")).each do
-      |inf|
-
-      dir, type, attr = inf["dir"], inf["type"], inf["attr"]
+    sqla = infos.map do |inf|
+      type, attr = inf["type"], inf["attr"]
 
       next unless h.has_key?(attr)
 
       v = h[attr]
 
       ix_class = INDEX_MAP[type] || INDEX_MAP["string"]
+
+      q = "key IS NULL"
 
       unless v.nil?
         q = case type
@@ -168,7 +168,7 @@ class Marty::DataGrid < Marty::Base
               "key @> ?"
             else # "string", "integer", AR klass
               "key @> ARRAY[?]"
-            end
+            end + " OR #{q}"
 
         # FIXME: very hacky -- need to cast numrange/intrange values or
         # we get errors from PG.
@@ -184,34 +184,35 @@ class Marty::DataGrid < Marty::Base
             else # AR class
               v.to_s
             end
-
-        ixa = ix_class.
-              where(data_grid_id: group_id,
-                    created_dt:   created_dt,
-                    attr:         inf["attr"],
-                   ).
-              where(q, v).uniq.pluck(:index)
       end
 
-      if v.nil? || ixa.empty?
-        ixa = ix_class.
-          where(data_grid_id: group_id,
-                created_dt:   created_dt,
-                attr:         inf["attr"],
-                key:          nil,
-                ).uniq.pluck(:index)
-      end
+      # FIXME: could potentially order results by key NULLS LAST.
+      # This would prefer more specific rather than wild card
+      # solutions.  However, would need to figure out how to preserve
+      # ordering on subsequent INTERSECT operations.
+      ixq = ix_class.
+            select(:index).
+            distinct.
+            where(data_grid_id: group_id,
+                  created_dt:   created_dt,
+                  attr:         inf["attr"],
+                 ).
+            where(q, v).to_sql
+    end.compact
 
-      # FIXME: optimization: bail out if one of the sets is empty.
-      # Or, even better, we should submit all the queris together.
-      isets[dir] = isets[dir] ? isets[dir] & ixa : Set.new(ixa)
-    end
+    sql = sqla.join(" INTERSECT ")
 
-    ["h", "v"].each do |dir|
-      isets[dir] = Set[0] if !isets[dir] && dir_infos(dir).empty?
+    self.class.connection.execute(sql).to_a.map { |h| h["index"].to_i }
+  end
+
+  def lookup_grid_distinct(pt, h, return_grid_data=false, distinct=true)
+    isets = ["h", "v"].each_with_object({}) do |dir, isets|
+      infos = dir_infos(dir)
+
+      isets[dir] = query_grid_dir(h, infos)
 
       unless isets[dir] or return_grid_data
-        attrs = dir_infos(dir).map { |inf| inf["attr"] }
+        attrs = infos.map { |inf| inf["attr"] }
 
         raise "#{dir} attrs not provided: %s" % attrs.join(',')
       end
@@ -220,7 +221,8 @@ class Marty::DataGrid < Marty::Base
         distinct && isets[dir] && isets[dir].count > 1
     end
 
-    vi, hi = isets["v"].first, isets["h"].first if isets["v"] && isets["h"]
+    # deterministic result: pick min index when there's a choice
+    vi, hi = isets["v"].min, isets["h"].min if isets["v"] && isets["h"]
 
     raise "DataGrid lookup failed #{name}" unless (vi && hi) or lenient or
       return_grid_data
@@ -342,29 +344,22 @@ class Marty::DataGrid < Marty::Base
     meta_rows = dt_row.empty? ? [] : [dt_row]
 
     meta_rows += metadata.map { |inf|
-      [
-       inf["attr"],
-       inf["type"],
-       inf["dir"],
-       inf["rs_keep"] || "",
-      ]
+      [inf["attr"], inf["type"], inf["dir"], inf["rs_keep"] || ""]
     }
 
     v_infos, h_infos = dir_infos("v"), dir_infos("h")
 
-    h_key_rows = h_infos.map do
-      |inf|
-
+    h_key_rows = h_infos.map { |inf|
       [nil]*v_infos.count + self.class.export_keys(inf)
-    end
+    }
 
     transposed_v_keys = v_infos.empty? ? [[]] :
       v_infos.map {|inf| self.class.export_keys(inf)}.transpose
 
-    data_rows = transposed_v_keys.each_with_index.map do
-      |keys, i|
+    data_rows = transposed_v_keys.each_with_index.map { |keys, i|
       keys + (self.data[i] || [])
-    end
+    }
+
     [meta_rows, h_key_rows, data_rows]
   end
 
@@ -459,8 +454,12 @@ class Marty::DataGrid < Marty::Base
     raise "must have a blank row separating metadata" unless
       blank_index
 
-    data_type = nil
-    lenient   = false
+    raise "can't import grid with trailing blank column" if
+      rows.map { |r| r.last.nil? }.all?
+
+    raise "last row can't be blank" if rows[-1].all?(&:nil?)
+
+    data_type, lenient = nil, false
 
     # check if there's a data_type definition
     dt, *x = rows[0]
@@ -662,10 +661,10 @@ class Marty::DataGrid < Marty::Base
 
   def opposite_sign(op)  # toggle sign and inclusivity
     {
-      lt: :ge,
-      le: :gt,
-      gt: :le,
-      ge: :lt,
+      :<  => :>=,
+      :<= => :>,
+      :>  => :<=,
+      :>= => :<,
     }[op]
   end
 
@@ -683,35 +682,35 @@ class Marty::DataGrid < Marty::Base
       lhv, rhv = orig_lhv || -Float::INFINITY, orig_rhv || Float::INFINITY
 
       case op
-      when :ge, :gt
+      when :>=, :>
         next if value > rhv
 
         if value == rhv
-          if rhop == :le && op == :ge
+          if rhop == :<= && op == :>=
             rewrite_a.push(
-              [index, rewrite_range(lhop, orig_lhv, orig_rhv, :lt)])
+              [index, rewrite_range(lhop, orig_lhv, orig_rhv, :<)])
           end
         elsif value > lhv
           rewrite_a.push(
             [index, rewrite_range(lhop, orig_lhv, value, opposite_sign(op))])
-        elsif value == lhv && lhop == :ge && op == :gt
-          rewrite_a.push([index, rewrite_range(:ge, value, value, :le)])
+        elsif value == lhv && lhop == :>= && op == :>
+          rewrite_a.push([index, rewrite_range(:>=, value, value, :<=)])
         elsif value <= lhv
           prune_a.push(index)
         end
-      when :le, :lt
+      when :<=, :<
         next if value < lhv
 
         if value == lhv
-          if lhop == :ge && op == :le
+          if lhop == :>= && op == :<=
             rewrite_a.push(
-              [index, rewrite_range(:gt, orig_lhv, orig_rhv, rhop)])
+              [index, rewrite_range(:>, orig_lhv, orig_rhv, rhop)])
           end
         elsif value < rhv
           rewrite_a.push(
             [index, rewrite_range(opposite_sign(op), value, orig_rhv, rhop)])
-        elsif value == rhv && rhop == :le && op == :lt
-          rewrite_a.push([index, rewrite_range(:ge, value, value, :le)])
+        elsif value == rhv && rhop == :<= && op == :<
+          rewrite_a.push([index, rewrite_range(:>=, value, value, :<=)])
         elsif value >= rhv
           prune_a.push(index)
         end
@@ -754,18 +753,18 @@ class Marty::DataGrid < Marty::Base
     lhv = lhs.blank? ? nil : lhs.to_f
     rhv = rhs.blank? ? nil : rhs.to_f
 
-    [lboundary == '(' ? :gt : :ge, lhv, rhv, rboundary == ')' ? :lt : :le]
+    [lboundary == '(' ? :> : :>=, lhv, rhv, rboundary == ')' ? :< : :<=]
   end
 
   def rewrite_range(lb, lhv, rhv, rb)
-    lboundary = lb == :gt ? '(' : '['
+    lboundary = lb == :> ? '(' : '['
 
     # even though numranges are float type, we don't want to output ".0"
     # for integer values.  So for values like that we convert to int
     # first before conversion to string
     lvalue = (lhv.to_i == lhv ? lhv.to_i : lhv).to_s
     rvalue = (rhv.to_i == rhv ? rhv.to_i : rhv).to_s
-    rboundary = rb == :lt ? ')' : ']'
+    rboundary = rb == :< ? ')' : ']'
     lboundary + lvalue + ',' + rvalue + rboundary
   end
 
@@ -775,16 +774,8 @@ class Marty::DataGrid < Marty::Base
 
     opstr, ident = match[1..2]
 
-    orig_op = {
-      '<'  => :lt,
-      '>'  => :gt,
-      '<=' => :le,
-      '>=' => :ge,
-      ''   => :inc,
-    }[opstr]
-
     # data grid value is expressed as what to keep
     # we convert to the opposite (what to prune)
-    [opposite_sign(orig_op), ident]
+    [opposite_sign(opstr.to_sym), ident]
   end
 end

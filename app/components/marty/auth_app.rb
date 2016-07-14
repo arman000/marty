@@ -42,9 +42,11 @@ class Marty::AuthApp < Marty::SimpleApp
     if user
       Netzke::Base.controller.set_user(user)
       client.netzke_set_result(true)
+      true
     else
       client.netzke_set_result(false)
       client.netzke_notify("Wrong credentials")
+      false
     end
   end
 
