@@ -139,6 +139,15 @@ i2\tinteger\tv
 2\t\t20
 EOS
 
+Gh = <<EOS
+lenient
+property_state\tstring\tv
+county_name\tstring\tv
+
+NY\t\t10
+\tR\t8
+EOS
+
     before(:each) do
       #Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
@@ -148,6 +157,20 @@ EOS
       dg=Marty::DataGrid.lookup(pt, gridname)
       res=dg.lookup_grid_distinct_entry(pt, params, nil, follow)
       [res["result"], res["name"]]
+    end
+
+    describe "imports" do
+      it "should not allow imports with trailing blank columns" do
+        expect {
+          dg_from_import("G1", G1.gsub("\n", "\t\n"))
+        }.to raise_error(RuntimeError)
+      end
+
+      it "should not allow imports with last blank row" do
+        expect {
+          dg_from_import("Gh", Gh+"\t\t\n")
+        }.to raise_error(RuntimeError)
+      end
     end
 
     describe "validations" do
@@ -233,7 +256,7 @@ EOS
 
       before(:each) do
         ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "Ga", "Gb",
-         "Gc", "Gd", "Ge", "Gf", "Gg"].each { |g|
+         "Gc", "Gd", "Ge", "Gf", "Gg", "Gh"].each { |g|
           dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
         }
       end
@@ -242,32 +265,27 @@ EOS
         let(:dg) { Marty::DataGrid.lookup(pt, "Gf") }
 
         it 'true returns Y' do
-          res = Marty::DataGrid.
-                lookup_grid(pt, dg, {"b"=>true}, true)
+          res = Marty::DataGrid.lookup_grid(pt, dg, {"b"=>true}, false)
           expect(res).to eq('Y')
         end
 
         it '13 returns N' do
-          res = Marty::DataGrid.
-                lookup_grid(pt, dg, {"i"=>13}, true)
+          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13}, true)
           expect(res).to eq('N')
         end
 
         it '13 & numrange 0 returns nil' do
-          res = Marty::DataGrid.
-                lookup_grid(pt, dg, {"i"=>13, "n"=>0}, true)
-          expect(res).to be_nil
+          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13, "n"=>0}, true)
+          expect(res).to eq('N')
         end
 
         it '13 & int4range 15 returns N' do
-          res = Marty::DataGrid.
-                lookup_grid(pt, dg, {"i"=>13, "i4"=>15}, true)
+          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13, "i4"=>15}, true)
           expect(res).to eq('N')
         end
 
         it '13 & int4range 1 returns nil' do
-          res = Marty::DataGrid.
-                lookup_grid(pt, dg, {"i"=>13, "i4"=>1}, true)
+          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13, "i4"=>1}, true)
           expect(res).to be_nil
         end
 
@@ -278,17 +296,28 @@ EOS
         end
 
         it '13, numrange 15 returns N' do
-          res = Marty::DataGrid.
-                lookup_grid(pt, dg, {"i"=>13, "n"=>15}, true)
+          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13, "n"=>15}, true)
           expect(res).to eq('N')
         end
       end
 
       it "should handle ambiguous lookups" do
+        dg = Marty::DataGrid.lookup(pt, "Gh")
+
+        h1 = {
+          "property_state" => "NY",
+          "county_name"    => "R",
+        }
+
+        res = Marty::DataGrid.lookup_grid(pt, dg, h1, false)
+        expect(res).to eq(10)
+      end
+
+      it "should handle ambiguous lookups (2)" do
         dg = Marty::DataGrid.lookup(pt, "Gg")
         res = Marty::DataGrid.
               lookup_grid(pt, dg, {"i1"=>2, "i2"=>1}, false)
-        expect(res).to eq(21)
+        expect(res).to eq(1)
 
         res = Marty::DataGrid.
               lookup_grid(pt, dg, {"i1"=>3, "i2"=>1}, false)
@@ -397,11 +426,12 @@ EOS
       it "should handle matches which also have a wildcard match" do
         dg_from_import("G9", G9)
 
-        res = lookup_grid_helper('infinity',
-                                 "G9",
-                                 {"state" => "CA", "ltv" => 81},
-                                )
-        expect(res).to eq [123,"G9"]
+        expect {
+          res = lookup_grid_helper('infinity',
+                                   "G9",
+                                   {"state" => "CA", "ltv" => 81},
+                                  )
+        }.to raise_error(RuntimeError)
 
         res = lookup_grid_helper('infinity',
                                  "G9",
@@ -474,7 +504,8 @@ EOS
       end
 
       it "should handle DataGrid typed data grids" do
-        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).to eq "Marty::DataGrid"
+        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).
+          to eq "Marty::DataGrid"
         g1 = Marty::DataGrid.lookup('infinity', "G1")
 
         res = lookup_grid_helper('infinity',
@@ -486,7 +517,8 @@ EOS
       end
 
       it "should handle multi DataGrid lookups" do
-        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).to eq "Marty::DataGrid"
+        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).
+          to eq "Marty::DataGrid"
         g1 = Marty::DataGrid.lookup('infinity', "G1")
 
         h = {
