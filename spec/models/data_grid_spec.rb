@@ -148,6 +148,20 @@ NY\t\t10
 \tR\t8
 EOS
 
+Gi =<<EOS
+units\tinteger\tv\t\t
+ltv\tfloat\tv\t\t
+cltv\tfloat\th\t\t
+fico\tnumrange\th\t\t
+
+\t\t80.5\t90.5\t100.5
+\t\t>=600<700\t>=700<750\t>=750
+1|2\t80.5\t1.1\t2.2\t3.3
+1|2\t90.5\t4.4\t5.5\t6.6
+3|4\t100.5\t1.2\t2.3\t3.4
+3|4\t105.5\t4.5\t5.6\t6.7
+EOS
+
     before(:each) do
       #Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
@@ -184,6 +198,15 @@ EOS
         expect(Marty::DataGrid.lookup('infinity', "G1").name).to eq "G1"
         expect(Marty::DataGrid.lookup('infinity', "G2").name).to eq "G2"
         expect(Marty::DataGrid.lookup('infinity', "G3").name).to eq "G3"
+      end
+
+      it "should not allow bad axis types" do
+        expect {
+          dg_from_import("Gi", Gi)
+        }.to raise_error(/unknown metadata type float/)
+        expect {
+          dg_from_import("Gi", Gi.sub(/float/, 'abcdef'))
+        }.to raise_error(/unknown metadata type abcdef/)
       end
 
       it "should not allow dup attr names" do
