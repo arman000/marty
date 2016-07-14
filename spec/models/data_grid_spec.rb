@@ -139,7 +139,7 @@ i2\tinteger\tv
 2\t\t20
 EOS
 
-Gh =<<EOS
+Gi =<<EOS
 units\tinteger\tv\t\t
 ltv\tfloat\tv\t\t
 cltv\tfloat\th\t\t
@@ -152,7 +152,6 @@ fico\tnumrange\th\t\t
 3|4\t100.5\t1.2\t2.3\t3.4
 3|4\t105.5\t4.5\t5.6\t6.7
 EOS
-
 
     before(:each) do
       #Mcfly.whodunnit = Marty::User.find_by_login('marty')
@@ -180,10 +179,10 @@ EOS
 
       it "should not allow bad axis types" do
         expect {
-          dg_from_import("Gh", Gh)
+          dg_from_import("Gi", Gi)
         }.to raise_error(/unknown metadata type float/)
         expect {
-          dg_from_import("Gh", Gh.sub(/float/, 'abcdef'))
+          dg_from_import("Gi", Gi.sub(/float/, 'abcdef'))
         }.to raise_error(/unknown metadata type abcdef/)
       end
 
