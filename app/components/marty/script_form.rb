@@ -162,9 +162,8 @@ class Marty::ScriptForm < Marty::Form
 
     if script.save
       client.netzke_set_form_values(js_record_data)
-      client.netzke_set_result(true)
       client.refresh_parent(script.name)
-      return
+      return true
     end
 
     client.netzke_notify(model_adapter.errors_array(script).join("\n"))

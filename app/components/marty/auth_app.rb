@@ -39,19 +39,14 @@ class Marty::AuthApp < Marty::SimpleApp
 
   endpoint :sign_in do |params|
     user = Marty::User.try_to_login(params[:login], params[:password])
-    if user
-      Netzke::Base.controller.set_user(user)
-      client.netzke_set_result(true)
-      true
-    else
-      client.netzke_set_result(false)
+    user ? Netzke::Base.controller.set_user(user) :
       client.netzke_notify("Wrong credentials")
-      false
-    end
+
+    !!user
   end
 
   endpoint :sign_out do
     Netzke::Base.controller.logout_user
-    client.netzke_set_result(true)
+    true
   end
 end
