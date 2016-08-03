@@ -10,7 +10,6 @@ feature 'under Applications menu, Reports workflows', js: true do
 
     populate_test_users
     populate_sample_reports
-    custom_selectors
   end
 
   after(:all) do
@@ -107,6 +106,8 @@ DELOREAN
 
     tag_grid = netzke_find('tag_grid')
     script_grid = netzke_find('script_grid')
+    posting_combo = netzke_find('Posting', 'combobox')
+    script_combo = netzke_find('', 'combobox')
 
     by 'select 2nd tag' do
       wait_for_ajax
@@ -140,7 +141,7 @@ DELOREAN
 
     and_by 'validate posting combobox' do
       wait_for_ajax
-      expect(combobox_values('Posting')).to include('BASE-20130520-1200')
+      expect(posting_combo.get_values).to include('BASE-20130520-1200')
     end
 
     and_by 'select 3rd tag' do
@@ -152,18 +153,18 @@ DELOREAN
     end
 
     and_by 'validate script combobox' do
-      expect(combobox_values('')).to include('AA (csv)',
-                                             'DD [role: dev] (csv)',
-                                             '---')
+      expect(script_combo.get_values).to include('AA (csv)',
+                                                 'DD [role: dev] (csv)',
+                                                 '---')
     end
 
     and_by 'select AA node' do
       select_node('AA (csv)')
     end
 
-    and_by 'validate posting comobox' do
+    and_by 'validate posting combobox' do
       wait_for_ajax
-      expect(combobox_values('Posting')).to include('BASE-20130520-1200')
+      expect(posting_combo.get_values).to include('BASE-20130520-1200')
     end
   end
 
@@ -230,6 +231,7 @@ DELOREAN
 
     tag_grid = netzke_find('tag_grid')
     script_grid = netzke_find('script_grid')
+    script_combo = netzke_find('', 'combobox')
 
     by 'select 2nd tag' do
       wait_for_ajax
@@ -242,7 +244,7 @@ DELOREAN
     end
 
     and_by 'no DD [role: dev] (csv)' do
-      expect(combobox_values('')).to include('AA (csv)',
+      expect(script_combo.get_values).to include('AA (csv)',
                                              'CC (csv)',
                                              '---')
     end

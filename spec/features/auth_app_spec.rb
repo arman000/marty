@@ -8,8 +8,6 @@ feature 'Posting workflows', js: true do
 
     populate_test_users
 
-    custom_selectors
-
     monkey_patch_new_posting_form
   end
 
@@ -27,6 +25,7 @@ feature 'Posting workflows', js: true do
     log_in_as('admin1')
 
     posting_grid = netzke_find('posting_grid')
+    posting_type_combo = netzke_find('Posting Type', 'combobox')
 
     by 'bring up new posting form' do
       wait_for_ajax
@@ -35,8 +34,8 @@ feature 'Posting workflows', js: true do
     end
 
     and_by 'make posting TEST-A' do
-      click_combobox('Posting Type')
-      select_combobox('BASE', 'Posting Type')
+      posting_type_combo.click
+      posting_type_combo.select_values('BASE')
       fill_in('Comment', with: 'TEST-A')
       press('Create')
     end
@@ -70,8 +69,9 @@ feature 'Posting workflows', js: true do
     end
 
     and_by 'no posting available for adding' do
-      click_combobox('Posting Type')
-      expect(combobox_values('Posting Type')).not_to include 'BASE'
+      posting_type_combo = netzke_find('Posting Type', 'combobox')
+      posting_type_combo.click
+      expect(posting_type_combo.get_values).not_to include 'BASE'
     end
   end
 end

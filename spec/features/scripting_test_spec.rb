@@ -8,7 +8,6 @@ feature 'under Applications menu, Scripting (debug) workflows', js: true do
     populate_test_users
     populate_sample_scripts1
     populate_sample_scripts2
-    custom_selectors
   end
 
   after(:all) do

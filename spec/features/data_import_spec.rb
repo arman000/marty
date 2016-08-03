@@ -13,8 +13,6 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
     populate_import_type
     populate_bud_category_fannie_bup
     populate_test_users
-
-    custom_selectors
   end
 
   after(:all) do
@@ -82,7 +80,8 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
         wait_for_ajax
 
         within(:gridpanel, 'report_form', match: :first) do
-          select_combobox('FB', 'Import Type')
+          import_type_combo = netzke_find('Import Type', 'combobox')
+          import_type_combo.select_values('FB')
           bud_id = Gemini::BudCategory.first.id
           paste("bud_category_id\tnote_rate\tsettlement_mm\tsettlement_yy\tbuy_up\tbuy_down\n#{bud_id}\t9.500\t9\t2014\t0\t0\n#{bud_id}\t9.750\t9\t2014\t0\t0\n",
                 'data_import_field')
@@ -148,7 +147,8 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
         wait_for_ajax
 
         within(:gridpanel, 'report_form', match: :first) do
-          select_combobox('BC', 'Import Type')
+          import_type_combo = netzke_find('Import Type', 'combobox')
+          import_type_combo.select_values('BC')
           paste("name\nConv Fixed 40\n", 'data_import_field')
         end
       end
