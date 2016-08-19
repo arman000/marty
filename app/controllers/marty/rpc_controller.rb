@@ -1,6 +1,4 @@
 class Marty::RpcController < ActionController::Base
-  respond_to :json, :csv
-
   def evaluate
     res = do_eval(params["script"],
                   params["tag"],
