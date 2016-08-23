@@ -65,17 +65,15 @@ class Marty::User < Marty::Base
       # passwords will succeed!  i.e. if a valid user with empty
       # password is sent in, ldap.bind will return OK.
       cf = Rails.configuration.marty.ldap
-      options = {host: cf.host,
-                 port: cf.port,
-                 base: cf.base_dn,
-                 auth: {
-                   method: :simple,
-                   username: cf.domain + "\\" + login,
-                   password: password,
-                 }
-                } + ( cf.encryption &&
-                      { encryption: cf.encryption } || {} )
-      ldap = Net::LDAP.new(options)
+      ldap = Net::LDAP.new(host: cf.host,
+                           port: cf.port,
+                           base: cf.base_dn,
+                           encryption: cf.encryption,
+                           auth: {
+                             method: :simple,
+                             username: cf.domain + "\\" + login,
+                             password: password,
+                           })
       ok = ldap.bind
     else
       raise "bad auth_source: #{auth_source.inspect}"
