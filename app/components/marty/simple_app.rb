@@ -80,6 +80,7 @@ class Marty::SimpleApp < Netzke::Base
       :itemId => 'menu_bar',
       :xtype => 'toolbar',
       :region => 'north',
+      :height => 28,
       :items => menu
     }.merge(overrides)
   end
