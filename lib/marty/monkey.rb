@@ -151,3 +151,18 @@ module Netzke::Basepack::DataAdapters
 
   end
 end
+
+######################################################################
+
+# Add pg_enum migration support -- FIXME: this doesn't belong here
+module ActiveRecord
+  module ConnectionAdapters
+    class TableDefinition
+      def pg_enum(*args)
+        options = args.extract_options!
+        column_names = args
+        column_names.each { |name| column(name, name.to_s.pluralize, options) }
+      end
+    end
+  end
+end

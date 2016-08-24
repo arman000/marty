@@ -55,6 +55,22 @@ module Marty
           },
         } + options
       end
+
+      ######################################################################
+      # PG ENUM field handling
+
+      def enum_column(c, klass)
+        editor_config = {
+          trigger_action: :all,
+          xtype:          :combo,
+          store:          klass::VALUES,
+        }
+        c.merge!(
+          column_config: { editor: editor_config },
+          field_config:  editor_config,
+          type:          :string,
+        )
+      end
     end
   end
 end

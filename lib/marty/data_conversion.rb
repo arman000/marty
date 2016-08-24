@@ -25,6 +25,7 @@ class Marty::DataConversion
     :float_array,
     :json,
     :jsonb,
+    :enum,
   ]
 
   def self.convert(v, type)
@@ -39,11 +40,11 @@ class Marty::DataConversion
     case type
     when :boolean
       case v.to_s.downcase
-      when "true",  "1", "y" then true
-      when "false", "0", "n" then false
+      when "true",  "1", "y", "t" then true
+      when "false", "0", "n", "f" then false
       else raise "unknown boolean: #{v.inspect}"
       end
-    when :string, :text
+    when :string, :text, :enum
       v
     when :integer
       v.to_i
@@ -83,7 +84,7 @@ class Marty::DataConversion
     # key for regular (non-mcfly) AR models which don't have
     # MARTY_IMPORT_UNIQUENESS.
     klass.const_get(:MARTY_IMPORT_UNIQUENESS) rescue [
-    klass.attribute_names.reject{|x| x=="id"}.first.to_sym]
+    klass.column_names.reject{|x| x=="id"}.first.to_sym]
   end
 
   @@associations = {}
