@@ -83,8 +83,8 @@ module Marty::Migrations
       if jsons[c]
         jsons[c].each do |subc|
           if subc.class == Array
-            subcol, type = subc
-            columns.push "f_fixfalse(main.#{c} ->> '#{subcol}')::#{type} " +
+            subcol, type, fn = subc
+            columns.push "#{fn || ''}(main.#{c} ->> '#{subcol}')::#{type} " +
                          "as \"#{c}_#{subcol}\""
           else
             columns.push "main.#{c} ->> '#{subc}' as \"#{c}_#{subc}\""
