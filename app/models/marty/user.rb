@@ -68,6 +68,7 @@ class Marty::User < Marty::Base
       ldap = Net::LDAP.new(host: cf.host,
                            port: cf.port,
                            base: cf.base_dn,
+                           encryption: cf.encryption,
                            auth: {
                              method: :simple,
                              username: cf.domain + "\\" + login,
