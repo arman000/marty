@@ -46,7 +46,6 @@ RSpec.configure do |config|
   config.include SpecSetup
   config.include Marty::IntegrationHelpers
   config.include MartyRSpec::Util
-  config.include MartyRSpec::NetzkeGrid
 
   Capybara.default_max_wait_time = 3
 

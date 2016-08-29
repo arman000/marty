@@ -2,10 +2,6 @@ require 'spec_helper'
 
 feature 'under Sytem menu, User Management worflows', js: true do
 
-  before(:all) do
-    custom_selectors
-  end
-
   def go_to_user_view
     press('System')
     press('User Management')
@@ -40,6 +36,7 @@ feature 'under Sytem menu, User Management worflows', js: true do
     go_to_user_view
 
     user_view = netzke_find('user_view')
+    roles_combo = netzke_find('Roles', 'combobox')
 
     by 'add new user' do
       wait_for_ajax
@@ -56,8 +53,8 @@ feature 'under Sytem menu, User Management worflows', js: true do
         fill_in('First Name', with: 'test_fname')
         fill_in('Last Name', with: 'test_lname')
         check 'Active'
-        click_combobox 'Roles'
-        select_combobox('Admin, Developer, User Manager, Viewer', 'Roles')
+        roles_combo.click
+        roles_combo.select_values('Admin, Developer, User Manager, Viewer')
         press 'OK'
       end
     end
@@ -72,20 +69,21 @@ feature 'under Sytem menu, User Management worflows', js: true do
         fill_in('Login', with: 'new_login')
         fill_in('First Name', with: 'new_fname')
         fill_in('Last Name', with: 'new_lname')
-        click_combobox 'Roles'
-        select_combobox('User Manager, Viewer', 'Roles')
+        roles_combo.click
+        roles_combo.select_values('User Manager, Viewer')
         press 'OK'
       end
     end
 
     and_by 'check row got edited' do
       wait_for_ajax
-      user_view.validate_row_values(2,
-                                    :login => 'new_login',
-                                    :firstname => 'new_fname',
-                                    :lastname => 'new_lname',
-                                    :active => true,
-                                    :roles => 'User Manager,Viewer')
+      expect(user_view.get_row_vals(2)).to netzke_include({
+        :login=>"new_login", 
+        :firstname=>"new_fname", 
+        :lastname=>"new_lname", 
+        :active=>true, 
+        :roles=>"User Manager,Viewer",
+        })
     end
 
     and_by 'delete user fails' do
