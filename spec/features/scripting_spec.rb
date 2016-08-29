@@ -7,8 +7,6 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
-
-    custom_selectors
   end
 
   before(:each) do
@@ -89,7 +87,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
     and_by 'select the new script' do
       wait_for_ajax
       within(:gridpanel, 'script_grid', match: :first) do
-        script_grid.validate_row_values(6, name: 'Xyz', tag: 'DEV')
+        expect(script_grid.get_row_vals(6)).to netzke_include({:name=>"Xyz", :tag=>"DEV"})
         script_grid.select_row(6)
       end
     end
@@ -294,7 +292,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
       wait_for_ajax
       script_grid.select_row(5)
       expect(page).to have_content "#123\n#456\n"
-      tag_grid.validate_row_values(2, comment: 'ABCD')
+      expect(tag_grid.get_row_vals(2)).to netzke_include({:comment=>"ABCD"})
     end
   end
 
