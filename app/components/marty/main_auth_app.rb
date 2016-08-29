@@ -57,7 +57,7 @@ class Marty::MainAuthApp < Marty::AuthApp
               :api_auth_view,
               :reload_scripts,
               :load_seed,
-             ],
+             ] + background_jobs_menu
     }
   end
 
@@ -71,6 +71,21 @@ class Marty::MainAuthApp < Marty::AuthApp
              :promise_view,
             ],
     }
+  end
+
+  def background_jobs_menu
+    [
+       {
+         text: 'Background Jobs',
+         icon: icon_hack(:clock),
+         disabled: !self.class.has_admin_perm?,
+         menu: [
+                :bg_status,
+                :bg_stop,
+                :bg_restart,
+               ]
+       },
+    ]
   end
 
   def warped
@@ -181,6 +196,62 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_admin_perm?
   end
 
+  action :bg_status do |a|
+    a.text     = 'Show Delayed Jobs Status'
+    a.tooltip  = 'Run delayed_job status script'
+    a.icon     = :monitor
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+  action :bg_stop do |a|
+    a.text     = 'Stop Delayed Jobs'
+    a.tooltip  = 'Run delayed_job stop script'
+    a.icon     = :stop
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+  action :bg_restart do |a|
+    a.text     = 'Restart Delayed Jobs'
+    a.tooltip  = 'Run delayed_job restart script using DELAYED_JOB_PARAMS'
+    a.icon     = :arrow_rotate_clockwise
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+   ######################################################################
+
+  def bg_command(param)
+    e, root, p = ENV['RAILS_ENV'], Rails.root, Marty::Config["RUBY_PATH"]
+    # preserve backward compatability with Gemini
+    # for new Rails apps, use 'bin/delayed_job'
+    dj_path = Marty::Config["DELAYED_JOB_PATH"] || 'script/delayed_job'
+    cmd = "export RAILS_ENV=#{e};"
+    # FIXME: Environment looks to be setup incorrectly - this is a hack
+    cmd += "export PATH=#{p}:$PATH;" if p
+    # 2>&1 redirects STDERR to STDOUT since backticks only captures STDOUT
+    cmd += "#{root}/#{dj_path} #{param} 2>&1"
+    cmd
+  end
+
+  endpoint :bg_status do |params|
+    cmd = bg_command('status')
+    res = `#{cmd}`
+    client.show_detail res.html_safe.gsub("\n","<br/>"), 'Delayed Job Status'
+  end
+
+  endpoint :bg_stop do |params|
+    cmd = bg_command("stop")
+    res = `#{cmd}`
+    res = "delayed_job: no instances running. Nothing to stop." if res.length==0
+    client.show_detail res.html_safe.gsub("\n","<br/>"), 'Delayed Job Stop'
+  end
+
+  endpoint :bg_restart do |params|
+    params = Marty::Config["DELAYED_JOB_PARAMS"] || ""
+    cmd = bg_command("restart #{params}")
+    res = `#{cmd}`
+    client.show_detail res.html_safe.gsub("\n","<br/>"), 'Delayed Job Restart'
+  end
+
   ######################################################################
   # Postings
 
@@ -192,6 +263,38 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   client_class do |c|
+    c.show_detail = l(<<-JS)
+    function(details, title) {
+       this.hideLoadmask();
+       Ext.create('Ext.Window', {
+          height:        400,
+          minWidth:      400,
+          maxWidth:      1200,
+          autoWidth:     true,
+          modal:         true,
+          autoScroll:    true,
+          html:          details,
+          title:         title || "Details"
+      }).show();
+    }
+    JS
+
+    c.show_loadmask = l(<<-JS)
+    function(msg) {
+      this.maskCmp = new Ext.LoadMask( {
+        msg: msg || 'Loading...',
+        target: this,
+      });
+      this.maskCmp.show();
+    }
+    JS
+
+    c.hide_loadmask = l(<<-JS)
+    function() {
+      if (this.maskCmp) { this.maskCmp.hide(); };
+    }
+    JS
+
     c.netzke_on_new_posting = l(<<-JS)
     function(params) {
       this.netzkeLoadComponent("new_posting_window",
@@ -239,6 +342,47 @@ class Marty::MainAuthApp < Marty::AuthApp
            btn == "ok" && value == "RELOAD" && me.server.reloadScripts({});
          }
        });
+    }
+    JS
+
+    c.netzke_on_bg_stop = l(<<-JS)
+    function(params) {
+       var me = this;
+       me.showLoadmask('Stopping delayed job...');
+       Ext.Msg.show({
+         title: 'Stop Delayed Jobs',
+         msg: 'Enter STOP and press OK to force a stop of delayed_job',
+         width: 375,
+         buttons: Ext.Msg.OKCANCEL,
+         prompt: true,
+         fn: function (btn, value) {
+           btn == "ok" && value == "STOP" && me.server.bgStop({});
+         }
+       });
+    }
+    JS
+
+    c.netzke_on_bg_restart = l(<<-JS)
+    function(params) {
+       var me = this;
+       me.showLoadmask('Restarting delayed job...');
+       Ext.Msg.show({
+         title: 'Restart Delayed Jobs',
+         msg: 'Enter RESTART and press OK to force a restart of delayed_job',
+         width: 375,
+         buttons: Ext.Msg.OKCANCEL,
+         prompt: true,
+         fn: function (btn, value) {
+           btn == "ok" && value == "RESTART" && me.server.bgRestart({});
+         }
+       });
+    }
+    JS
+
+    c.netzke_on_bg_status = l(<<-JS)
+    function() {
+      this.showLoadmask('Checking delayed job status...');
+      this.server.bgStatus({});
     }
     JS
   end
