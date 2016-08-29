@@ -162,6 +162,15 @@ fico\tnumrange\th\t\t
 3|4\t105.5\t4.5\t5.6\t6.7
 EOS
 
+Gj =<<EOS
+lenient
+client_id\tinteger\tv
+property_state\tstring\tv
+
+\tCA\t0.25
+700127\tCA\t0.35
+EOS
+
     before(:each) do
       #Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
@@ -279,7 +288,7 @@ EOS
 
       before(:each) do
         ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "Ga", "Gb",
-         "Gc", "Gd", "Ge", "Gf", "Gg", "Gh"].each { |g|
+         "Gc", "Gd", "Ge", "Gf", "Gg", "Gh", "Gj"].each { |g|
           dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
         }
       end
@@ -359,6 +368,22 @@ EOS
 
         expect {
           Marty::DataGrid.lookup_grid(pt, dg, {"ltv"=>500}, true)
+        }.to raise_error(RuntimeError)
+      end
+
+      it "should handle non-distinct lookups (2)" do
+        params = {
+          "client_id" => 700127,
+          "property_state" => "CA",
+        }
+        dg = Marty::DataGrid.lookup(pt, "Gj")
+        res = Marty::DataGrid.lookup_grid(pt, dg, params, false)
+
+        # should return the upper left corner match
+        expect(res).to eq(0.25)
+
+        expect {
+          Marty::DataGrid.lookup_grid(pt, dg, params, true)
         }.to raise_error(RuntimeError)
       end
 
