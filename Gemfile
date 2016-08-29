@@ -5,7 +5,6 @@ source "http://rubygems.org"
 # development dependencies will be added by default to the :development group.
 gemspec
 
-gem 'responders'
 gem 'delayed_job_active_record'
 gem 'daemons', '~> 1.1.9'
 gem 'mime-types', '< 3.0', platforms: :ruby_19
