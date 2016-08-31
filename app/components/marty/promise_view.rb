@@ -118,15 +118,6 @@ class Marty::PromiseView < Netzke::Tree::Base
       }
     JS
 
-    config.reconcile_records = l(<<-JS)
-      function(row) {
-        var myStore = this.getStore();
-        if (myStore.getData().getByKey(row.id) == null) {
-          this.netzkeOnRefresh();
-        };
-      }
-    JS
-
     config.netzke_on_download = l(<<-JS)
     function() {
        var jid = this.getSelectionModel().selected.first().getId();
