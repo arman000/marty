@@ -51,6 +51,7 @@ class Marty::PromiseView < Netzke::Tree::Base
       :status,
       :cformat,
       :error,
+      :parent_id,
     ]
     config.root_visible = false
     config.paging = :none
@@ -67,13 +68,63 @@ class Marty::PromiseView < Netzke::Tree::Base
   client_class do |config|
     config.init_component = l(<<-JS)
     function() {
+       me = this;
        this.callParent();
        this.getSelectionModel().on('selectionchange', function(selModel) {
           this.actions.download &&
           this.actions.download.setDisabled(!selModel.hasSelection());
        }, this);
        this.getView().getRowClass = this.defaultGetRowClass;
+       //convenience hotkey
+       this.getView().addElListener('keydown',function(e) {
+         if (e.keyCode === e.R) {
+           me.netzkeOnRefresh();
+         };
+       });
+       this.startAllPolling()
     }
+    JS
+
+    config.start_all_polling = l(<<-JS)
+        function() {
+          me = this;
+          var polling_task = {
+            run: function() {
+              console.log('polling...');
+              me.server.checkPromises(
+                me.clientRunningJobs()
+              );
+            },
+            interval: 10000,
+          };
+
+          // hacky: netzke runs this twice
+          if (Ext.TaskManager.tasks.length == 0) {
+            Ext.TaskManager.start(polling_task);
+          }
+        }
+      JS
+
+    config.client_running_jobs = l(<<-JS)
+      function() {
+        var myStore = this.getStore();
+        var res = {node_count: 0, running: []};
+        for (var i = 0; i < myStore.getCount(); i++) {
+          var row = myStore.getAt(i);
+          if (row.get('status') == null) { res.running.push(row.get('id')) };
+          if (row.get('parent_id') == null) { res.node_count += 1 };
+        };
+        return res;
+      }
+    JS
+
+    config.reconcile_records = l(<<-JS)
+      function(row) {
+        var myStore = this.getStore();
+        if (myStore.getData().getByKey(row.id) == null) {
+          this.netzkeOnRefresh();
+        };
+      }
     JS
 
     config.netzke_on_download = l(<<-JS)
@@ -105,6 +156,17 @@ class Marty::PromiseView < Netzke::Tree::Base
        });
     }
     JS
+  end
+
+  endpoint :check_promises do |params|
+    j_relation = Marty::Promise
+
+    if params['node_count'] != j_relation.where(parent_id: nil).count(:id)
+      client.netzke_on_refresh
+    elsif params['running'] && !params['running'].empty?
+      updated = j_relation.where.not(status: nil).where(id: params['running'])
+      client.netzke_on_refresh if updated.first
+    end
   end
 
   action :clear do |a|
@@ -170,6 +232,10 @@ class Marty::PromiseView < Netzke::Tree::Base
   attribute :error do |config|
     config.getter = ->(record) { record.result.to_s if record.status == false }
     config.flex = 1
+  end
+
+  attribute :parent_id do |config|
+    config.hidden = true
   end
 end
 
