@@ -182,7 +182,14 @@ class Marty::DataGrid < Marty::Base
             when "boolean"
               v
             else # AR class
-              v.to_s
+              # FIXME: really hacky to hard-code "name".  Used to
+              # perform to_s which could lead ot strange failures when
+              # model had no to_s defined.
+              begin
+                String === v ? v : v.name
+              rescue NoMethodError
+                raise "could not get name for #{v}"
+              end
             end
       end
 
@@ -246,6 +253,7 @@ class Marty::DataGrid < Marty::Base
     raise "non-hash arg #{h}" unless Hash === h
 
     res = dg.lookup_grid_distinct(pt, h, false, distinct)
+
     res["result"]
   end
 

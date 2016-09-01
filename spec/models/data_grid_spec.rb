@@ -623,6 +623,17 @@ EOS
         expect(res).to eq [70,"Gb"]
       end
 
+      it "should handle typed (enum) data lookup_grid" do
+        pt = 'infinity'
+        ca = Gemini::State.find_by_name("CA")
+        dg = Marty::DataGrid.lookup(pt, "Gb")
+
+        res = Marty::DataGrid.
+              lookup_grid(pt, dg, {"property_state" => ca}, false)
+
+        expect(res).to eq 70
+      end
+
       it "should return grid data and metadata simple" do
         expected_data = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], [1.2, 2.3, 3.4],
                          [4.5, 5.6, 6.7]]

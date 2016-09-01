@@ -68,11 +68,8 @@ class Marty::Promise < Marty::Base
   end
 
   def self.children_for_id(id, search_order)
-    if id == 'root'
-      where(parent_id: nil).live_search(search_order).order(id: :desc).includes(:children, :user)
-    else
-      find(id).children.live_search(search_order).order(id: :desc).includes(:children, :user)
-    end
+    q = id == 'root' ? where(parent_id: nil) : find(id).children
+    q.live_search(search_order).order(id: :desc).includes(:children, :user)
   end
 
   def leaf
