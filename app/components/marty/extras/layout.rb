@@ -63,13 +63,21 @@ module Marty
         editor_config = {
           trigger_action: :all,
           xtype:          :combo,
-          store:          klass::VALUES,
+
+          # hacky: extjs has issues with forceSelection true and clearing combos
+          store:          klass::VALUES + ['---'],
+          forceSelection: true,
         }
         c.merge!(
           column_config: { editor: editor_config },
           field_config:  editor_config,
           type:          :string,
+          setter:        enum_setter(c.name),
         )
+      end
+
+      def enum_setter(name)
+        lambda {|r, v| r.send("#{name}=", v == '---' || v.empty? ? nil : v)}
       end
     end
   end
