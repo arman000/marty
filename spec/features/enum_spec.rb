@@ -118,7 +118,7 @@ feature 'test netzke + pg_enum compatibility', js: true do
       wait_for_ajax
       aggregate_failures do
         expect(lp_grid.row_count).to eq(2)
-        expect(lp_grid.get_row_vals(1)).to netzke_include({enum_state: ''})
+        expect(lp_grid.get_row_vals(1)).to netzke_include({enum_state: nil})
       end
     end
   end
