@@ -25,8 +25,7 @@ feature 'test netzke + pg_enum compatibility', js: true do
     amort_combo = netzke_find('amortization_type__name', 'combobox')
     mortgage_combo = netzke_find('mortgage_type__name', 'combobox')
     streamline_combo = netzke_find('streamline_type__name', 'combobox')
-    state_combo = netzke_find('state', 'combobox')
-
+    state_combo = netzke_find('enum_state', 'combobox')
 
     and_by 'bring up new window' do
       press('Add')
@@ -80,7 +79,10 @@ feature 'test netzke + pg_enum compatibility', js: true do
       end
 
       wait_for_ajax
-      expect(lp_grid.row_count).to eq(2)
+      aggregate_failures do
+        expect(lp_grid.row_count).to eq(2)
+        expect(lp_grid.get_row_vals(2)).to netzke_include({enum_state: 'CA'})
+      end
     end
 
     and_by 'delete a row' do
@@ -96,7 +98,7 @@ feature 'test netzke + pg_enum compatibility', js: true do
     end
 
     and_by 'fill form w --- for enum value' do
-       within(:gridpanel, 'add_window', match: :first) do
+      within(:gridpanel, 'add_window', match: :first) do
         fill_in("Name", with: 'a_l_p')
         amort_combo.click
         amort_combo.select_values('Fixed')
@@ -114,7 +116,10 @@ feature 'test netzke + pg_enum compatibility', js: true do
       end
 
       wait_for_ajax
-      expect(lp_grid.row_count).to eq(2)
+      aggregate_failures do
+        expect(lp_grid.row_count).to eq(2)
+        expect(lp_grid.get_row_vals(1)).to netzke_include({enum_state: ''})
+      end
     end
   end
 end
