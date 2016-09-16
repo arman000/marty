@@ -149,6 +149,51 @@ module Netzke::Basepack::DataAdapters
         relation.count
     end
 
+    ######################################################################
+    # The following is a hack to get around Netzke's broken handling
+    # of filtering on PostgreSQL enums columns.
+    def predicates_for_and_conditions(conditions)
+      return nil if conditions.empty?
+
+      predicates = conditions.map do |q|
+        q = HashWithIndifferentAccess.new(q)
+
+        attr = q[:attr]
+        method, assoc = method_and_assoc(attr)
+
+        arel_table = assoc ? Arel::Table.new(assoc.klass.table_name.to_sym) :
+                       @model.arel_table
+
+        value = q["value"]
+        op = q["operator"]
+
+        attr_type = attr_type(attr)
+
+        case attr_type
+        when :datetime
+          update_predecate_for_datetime(arel_table[method], op, value.to_date)
+        when :string, :text
+          update_predecate_for_string(arel_table[method], op, value)
+        when :boolean
+          update_predecate_for_boolean(arel_table[method], op, value)
+        when :date
+          update_predecate_for_rest(arel_table[method], op, value.to_date)
+        when :enum
+          # HACKY! monkey patching happens here...
+          update_predecate_for_enum(arel_table[method], op, value)
+        else
+          update_predecate_for_rest(arel_table[method], op, value)
+        end
+      end
+
+      # join them by AND
+      predicates[1..-1].inject(predicates.first){ |r,p| r.and(p)  }
+    end
+
+    def update_predecate_for_enum(table, op, value)
+      col = Arel::Nodes::NamedFunction.new("CAST", [table.as("TEXT")])
+      col.matches "%#{value}%"
+    end
   end
 end
 
