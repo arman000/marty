@@ -56,6 +56,7 @@ class Marty::MainAuthApp < Marty::AuthApp
               :config_view,
               :api_auth_view,
               :reload_scripts,
+              :load_seed,
              ],
     }
   end
@@ -173,6 +174,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_admin_perm?
   end
 
+  action :load_seed do |a|
+    a.text     = 'Load Seeds'
+    a.tooltip  = 'Load Seeds'
+    a.icon     = :arrow_rotate_clockwise
+    a.disabled = !self.class.has_admin_perm?
+  end
+
   ######################################################################
   # Postings
 
@@ -203,6 +211,12 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.netzke_on_reload = l(<<-JS)
     function(params) {
       window.location.reload();
+    }
+    JS
+
+    c.netzke_on_load_seed = l(<<-JS)
+    function(params) {
+      this.server.loadSeed({});
     }
     JS
 
@@ -271,6 +285,11 @@ class Marty::MainAuthApp < Marty::AuthApp
   endpoint :reload_scripts do |params|
     Marty::Script.load_scripts
     client.netzke_notify 'Scripts have been reloaded'
+  end
+
+  endpoint :load_seed do |params|
+    Rails.application.load_seed
+    client.netzke_notify 'Seeds have been loaded'
   end
 end
 
