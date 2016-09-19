@@ -16,6 +16,7 @@ class CreateLoanPrograms < ActiveRecord::Migration
       t.decimal  "arm_lifetime_cap_percent",       precision: 7, scale: 4
       t.integer  "arm_index_type_id"
       t.decimal  "arm_margin_rate_percent",        precision: 7, scale: 4
+      t.pg_enum  :enum_state, null: true
     end
     McflyMigration.new.add_sql 'gemini_loan_programs', false
   end
