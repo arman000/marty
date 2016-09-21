@@ -1,22 +1,38 @@
 class Marty::RpcCall
-  def self.marty_post(host, port, path, script, node, attrs, params)
+  # POST to a remote marty
+  def self.marty_post(host, port, path, script, node, attrs, params, options={})
     http = Net::HTTP.new(host, port)
     request = Net::HTTP::Post.new(path)
     request.add_field('Content-Type', 'application/json')
-    request.body = {
-      "script" => script,
-      "node"   => node,
-      "attrs"  => attrs.to_json,
-      "params" => params.to_json,
-    }.to_json
+    request.body = (options + {
+                      "script" => script,
+                      "node"   => node,
+                      "attrs"  => attrs.to_json,
+                      "params" => params.to_json,
+                    }).to_json
     begin
-      resraw = http.request(request)
+      response = http.request(request)
     rescue => e
       raise "#{e.message} during RPC call to #{host}:#{port}"
     end
-    res = JSON.parse(resraw.body)
+
+    res = JSON.parse(response.body)
     raise res["error"] if res.is_a?(Hash) && !res["error"].blank?
     res
+  end
+
+  def self.marty_download(host, port, path, job_id)
+    params = {job_id: job_id}
+    url = path + '?' + URI.encode(URI.encode_www_form(params))
+
+    http = Net::HTTP.new(host, port)
+    request = Net::HTTP::Get.new(url)
+
+    begin
+      http.request(request)
+    rescue => e
+      raise "#{e.message} during download call to #{host}:#{port}"
+    end
   end
 
   def self.xml_call(host, port, path, body, use_ssl)
@@ -26,14 +42,14 @@ class Marty::RpcCall
     request.add_field('Content-Type', 'xml')
     request.add_field('Accept', 'xml')
     request.body = body
+
     begin
-      resraw = http.request(request)
-      if resraw.class != Net::HTTPOK
-        raise "got #{resraw} during XML call"
-      end
+      response = http.request(request)
+      raise "got #{response} during XML call" if response.class != Net::HTTPOK
     rescue => e
       raise "#{e.message} during RPC call to #{host}:#{port}#{path}"
     end
-    resraw.body
+
+    response.body
   end
 end
