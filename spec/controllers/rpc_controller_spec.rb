@@ -91,10 +91,33 @@ describe Marty::RpcController do
            node: "B",
            attrs: ["e","f"].to_json,
            tag: t1.name,
-           params: { a: 333, d: 5}.to_json
+           params: { a: 333, d: 5}.to_json,
          }
     expect(response.body).to eq([4,20].to_json)
   end
+
+  it "should be able to post background job" do
+    Delayed::Worker.delay_jobs = false
+    post 'evaluate', {
+           format: :json,
+           script: "M1",
+           node: "B",
+           attrs: ["e","f"].to_json,
+           tag: t1.name,
+           params: { a: 333, d: 5}.to_json,
+           background: true,
+         }
+    res = ActiveSupport::JSON.decode response.body
+    expect(res).to include('job_id')
+    job_id = res['job_id']
+
+    promise = Marty::Promise.find_by_id(job_id)
+
+    expect(promise.result).to eq({"e"=>4, "f"=>20})
+
+    Delayed::Worker.delay_jobs = true
+  end
+
   it "should be able to post with complex data" do
     post 'evaluate', {
            format: :json,
