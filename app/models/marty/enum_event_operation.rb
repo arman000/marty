@@ -1,4 +1,4 @@
-class Marty::EnumPromiseOperation < Marty::Base
+class Marty::EnumEventOperation < Marty::Base
   extend Marty::PgEnum
 
   VALUES = Set['UNKNOWN']

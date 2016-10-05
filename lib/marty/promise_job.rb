@@ -56,11 +56,11 @@ class Delorean::BaseModule::NodeCall
     # been reserved yet.
     promise.job_id = job.id
     promise.save!
-    promise_meta = Marty::PromiseMetadata.
+    event = Marty::Event.
                    create!(promise_id: promise.id,
                            klass:      params[:__metadata__][:klass],
                            subject_id: params[:__metadata__][:id],
-                           enum_promise_operation:
+                           enum_event_operation:
                              params[:__metadata__][:operation]) if
       params[:__metadata__]
     Marty::PromiseProxy.new(promise.id, timeout, attr)
