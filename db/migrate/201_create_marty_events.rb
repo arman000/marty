@@ -14,7 +14,7 @@ class CreateMartyEvents < ActiveRecord::Migration
       t.integer  :subject_id, null: false
       t.pg_enum  :enum_event_operation, null: false
       t.datetime :start_dt, null: true
-      t.datetime :endt_dt, null: true
+      t.datetime :end_dt, null: true
       t.integer  :expire_secs, null: true
       t.string   :comment, null: true
     end
