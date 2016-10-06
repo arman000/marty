@@ -44,7 +44,7 @@ class Marty::Event < Marty::Base
       pm["klass"] == klass && pm["subject_id"] == subject_id.to_i &&
         (operation.nil? || pm["enum_event_operation"] == operation)
     end.sort { |a, b| b["start_dt"]  <=> a["start_dt"] }.first
-    Marty::Event.find_by_id(hash["id"])
+    Marty::Event.find_by_id(hash["id"]) if hash
   end
 
   def self.currently_running(klass, subject_id)
