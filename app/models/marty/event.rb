@@ -25,10 +25,11 @@ class Marty::Event < Marty::Base
       pm["klass"] == klass && pm["subject_id"] == subject_id.to_i &&
         pm["enum_event_operation"] == operation
     end.first
-    Marty::Event.find_by_id(hash["id"])
+    #For now we return a bare hash
+    #Marty::Event.find_by_id(hash["id"])
   end
 
-  def self.finish_event(klass, subject_id, operation)
+  def self.finish_event(klass, subject_id, operation, comment='')
     hash = all_running.select do |pm|
       pm["klass"] == klass && pm["subject_id"] == subject_id.to_i &&
         pm["enum_event_operation"] == operation
@@ -36,6 +37,7 @@ class Marty::Event < Marty::Base
     e = Marty::Event.find_by_id(hash["id"])
     raise "can't explicitly finish a promise event" if e.promise_id
     e.end_dt = Time.zone.now
+    e.comment = comment
     e.save!
   end
 
@@ -44,7 +46,7 @@ class Marty::Event < Marty::Base
       pm["klass"] == klass && pm["subject_id"] == subject_id.to_i &&
         (operation.nil? || pm["enum_event_operation"] == operation)
     end.sort { |a, b| b["start_dt"]  <=> a["start_dt"] }.first
-    Marty::Event.find_by_id(hash["id"]) if hash
+    #Marty::Event.find_by_id(hash["id"]) if hash
   end
 
   def self.currently_running(klass, subject_id)
@@ -53,16 +55,23 @@ class Marty::Event < Marty::Base
     end.map { |e| e["enum_event_operation"] }
   end
 
-  def to_display
-    d = self.enum_event_operation.downcase.capitalize
-    if self.end_dt
+  def self.update_comment(hash, comment)
+    hid = hash.is_a?(Hash) ? hash['id'] : hash
+    e = Marty::Event.find_by_id(hid)
+    e.comment = comment
+    e.save!
+  end
+
+  def self.pretty_op(hash)
+    d = hash['enum_event_operation'].downcase.capitalize
+    if hash['end_dt'] #&& !(hash['comment'] =~ /^ERROR/)
       return d.sub(/ing/, 'ed')
     end
     d
   end
 
-  def compact_end_dt
-    self.end_dt ? self.end_dt.strftime("%H:%M") : '---'
+  def self.compact_end_dt(hash)
+    hash['end_dt'] ? hash['end_dt'].strftime("%H:%M") : '---'
   end
 
   def self.all_running
@@ -93,6 +102,7 @@ class Marty::Event < Marty::Base
         h["start_dt"] = Time.zone.parse(h["start_dt"])
         h["end_dt"] = Time.zone.parse(h["end_dt"]) if h["end_dt"]
         h["expire_secs"] = h["expire_secs"].to_i if h["expire_secs"]
+        h["comment"] = h["comment"]
         h
       end
       @all_running[:timestamp] = time_now
@@ -102,16 +112,17 @@ class Marty::Event < Marty::Base
   private_class_method :all_running
 
   def self.all_events
-     @all_running ||= { timestamp: 0, data: [] }
+    @all_events ||= { timestamp: 0, data: [] }
     @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 5
     time_now = Time.now.to_i
-    if time_now - @all_running[:timestamp] > @poll_secs
-      @all_running[:data] =
+    if time_now - @all_events[:timestamp] > @poll_secs
+      @all_events[:data] =
         ActiveRecord::Base.connection.execute(
                "SELECT ev.id,
                    ev.klass,
                    ev.subject_id,
                    ev.enum_event_operation,
+                   ev.comment,
                    coalesce(pr.start_dt, ev.start_dt) start_dt,
                    coalesce(pr.end_dt, ev.end_dt) end_dt,
                    expire_secs
@@ -125,10 +136,10 @@ class Marty::Event < Marty::Base
         h["expire_secs"] = h["expire_secs"].to_i if h["expire_secs"]
         h["comment"] = h["comment"]
         h
-      end
-      @all_running[:timestamp] = time_now
+        end
+      @all_events[:timestamp] = time_now
     end
-    @all_running[:data]
+    @all_events[:data]
   end
-  private_class_method :all_events
+  #private_class_method :all_events
 end
