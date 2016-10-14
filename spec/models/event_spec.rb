@@ -18,24 +18,14 @@ describe Marty::Event do
     Marty::Script.load_script_bodies(promise_bodies, Date.today)
     start_delayed_job
     Marty::Config["MARTY_EVENT_POLL_SECS"] = 1
-  end
 
-  after(:all) do
-    Timecop.return
-    self.use_transactional_fixtures = true
-    restore_clean_db(@clean_file)
-    stop_delayed_job
-  end
-
-  it "does" do
-    Mcfly.whodunnit = UserHelpers.system_user
-    time = Time.zone.now
+    @time = Time.zone.now
     # add events
-    [['testcl1',  123, time, nil,            nil,     'AVM',     'a comment'],
-     ['testcl1',  123, time + 2.second, nil,nil,     'CRA',     'b comment'],
-     ['testcl1',  123, time + 4.seconds, nil,10000,     'PRICING', 'c comment'],
-     ['testcl2', 123, time, nil,             2, 'AVM',     'e comment'],
-     ['testcl2', 123, time + 1.second, nil,  4, 'CRA',     'f comment'],
+    [['testcl1',  123, @time, nil,            nil,     'AVM',     'a comment'],
+     ['testcl1',  123, @time + 2.second, nil,nil,     'CRA',     'b comment'],
+     ['testcl1',  123, @time + 4.seconds, nil,10000,     'PRICING', 'c comment'],
+     ['testcl2', 123, @time, nil,             2, 'AVM',     'e comment'],
+     ['testcl2', 123, @time + 1.second, nil,  4, 'CRA',     'f comment'],
     ].each do
       |klass, subjid, startdt, enddt, expire, op, comment|
       Marty::Event.create!(klass: klass,
@@ -46,7 +36,7 @@ describe Marty::Event do
                          comment: comment,
                          enum_event_operation: op)
     end
-    Marty::Script.load_script_bodies(promise_bodies, Date.today)
+
 
     engine = Marty::ScriptSet.new.get_engine(NAME_I)
     res = engine.background_eval("SLEEPER", {"secs" => 5}, ["a"],
@@ -55,6 +45,15 @@ describe Marty::Event do
                                  operation: 'PRICING'})
     res.force
     sleep 5
+  end
+
+  after(:all) do
+    self.use_transactional_fixtures = true
+    restore_clean_db(@clean_file)
+    stop_delayed_job
+  end
+
+  it "Event tests" do
     expect(Marty::Event.currently_running('testcl1', 123)).to eq(
       ['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq([])
@@ -78,21 +77,21 @@ describe Marty::Event do
         "comment"=>nil,
         "expire_secs"=>nil})
 
-    Timecop.freeze(time+1.second)
+    Timecop.freeze(@time+1.second)
     Marty::Event.clear_cache
     expect(Marty::Event.currently_running('testcl1', 123)).to eq(
       ['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq(
       ['AVM', 'CRA'])
 
-    Timecop.freeze(time+3.seconds)
+    Timecop.freeze(@time+3.seconds)
     Marty::Event.clear_cache
     expect(Marty::Event.currently_running('testcl1', 123)).to eq(
       ['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq(
       ['CRA'])
 
-    Timecop.freeze(time+6.seconds)
+    Timecop.freeze(@time+6.seconds)
     expect(Marty::Event.currently_running('testcl1', 123)).to eq(
       ['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq(
@@ -116,6 +115,12 @@ describe Marty::Event do
                                  "enum_event_operation"=>"AVM",
                                  "comment"=>"wassup",
                                  "expire_secs"=>nil})
-
+    Marty::Event.update_comment(ev.first, "updated")
+    ev = Marty::Event.lookup_event('testcl1', 123, 'AVM')
+    expect(ev.first).to include({"comment"=>"updated"})
+    expect(Marty::Event.compact_end_dt(ev.first)).to match(/\d\d:\d\d/)
+    expect(Marty::Event.pretty_op(ev.first)).to eq('Avm')
+    ev = Marty::Event.lookup_event('testcl1', 123, 'PRICING').first
+    puts Marty::Event.pretty_op(ev)
   end
 end
