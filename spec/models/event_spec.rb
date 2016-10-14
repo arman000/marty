@@ -7,10 +7,21 @@ describe Marty::Event do
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
+
+    # transactional fixtures interfere with queueing jobs
+    self.use_transactional_fixtures = false
+
+    # Needed here because shutting transactional fixtures off
+    # means we lose the globally set user
+    Mcfly.whodunnit = UserHelpers.system_user
+
+    Marty::Script.load_script_bodies(promise_bodies, Date.today)
     start_delayed_job
+    Marty::Config["MARTY_EVENT_POLL_SECS"] = 1
   end
 
   after(:all) do
+    Timecop.return
     self.use_transactional_fixtures = true
     restore_clean_db(@clean_file)
     stop_delayed_job
@@ -19,16 +30,12 @@ describe Marty::Event do
   it "does" do
     Mcfly.whodunnit = UserHelpers.system_user
     time = Time.zone.now
-    min1 = 1.minute
-    min5 = 5.minutes
-    min10 = 10.minutes
     # add events
-    [['testclass', 123, time, nil, nil, 'AVM', 'a comment'],
-     ['testclass', 123, time, time + 5.seconds, 'CRA', 'b comment'],
-     ['testclass', 123, time, time + min10, nil, 'PRICING', 'c comment'],
-     ['testclass2', 123, time, time + min1, nil, 'AVM', 'd comment'],
-     ['testclass2', 123, time, nil, min5, 'AVM',  'e comment'],
-     ['testclass2', 123, time, nil, min10, 'CRA', 'f comment'],
+    [['testcl1',  123, time, nil,            nil,     'AVM',     'a comment'],
+     ['testcl1',  123, time + 2.second, nil,nil,     'CRA',     'b comment'],
+     ['testcl1',  123, time + 4.seconds, nil,10000,     'PRICING', 'c comment'],
+     ['testcl2', 123, time, nil,             2, 'AVM',     'e comment'],
+     ['testcl2', 123, time + 1.second, nil,  4, 'CRA',     'f comment'],
     ].each do
       |klass, subjid, startdt, enddt, expire, op, comment|
       Marty::Event.create!(klass: klass,
@@ -41,24 +48,74 @@ describe Marty::Event do
     end
     Marty::Script.load_script_bodies(promise_bodies, Date.today)
 
-    engine = Marty::ScriptSet.new.get_engine(NAME_A)
-    engine.background_eval("Y", {"p_title" => NAME_B}, ["result"])
-
     engine = Marty::ScriptSet.new.get_engine(NAME_I)
-    engine.background_eval("SLEEPER", {"secs" => 10}, ["a"], {klass: "testclass3",
-                                                              id: 987,
-                                                              operation: 'PRICING'})
-    expect (Marty::Event.currently_running('testclass', 123)).to eq([
-    puts Marty::Event.currently_running('testclass2', 123)
-    puts Marty::Event.currently_running('testclass3', 987)
-    binding.pry
+    res = engine.background_eval("SLEEPER", {"secs" => 5}, ["a"],
+                                {klass: "testcl3",
+                                 id: 987,
+                                 operation: 'PRICING'})
+    res.force
+    sleep 5
+    expect(Marty::Event.currently_running('testcl1', 123)).to eq(
+      ['AVM', 'CRA', 'PRICING'])
+    expect(Marty::Event.currently_running('testcl2', 123)).to eq([])
+    expect(Marty::Event.currently_running('testcl3', 987)).to eq([])
+
+    expect(Marty::Event.last_event('testcl1', 123)).to include(
+      {"klass"=>"testcl1",
+       "subject_id"=>123,
+       "enum_event_operation"=>"PRICING",
+       "comment"=>"c comment", "expire_secs"=>10000})
+    expect(Marty::Event.last_event('testcl2', 123)).to include(
+      {"klass"=>"testcl2",
+       "subject_id"=>123,
+       "enum_event_operation"=>"CRA",
+       "comment"=>"f comment",
+       "expire_secs"=>4})
+    expect(Marty::Event.last_event('testcl3', 987)).to include(
+      {"klass"=>"testcl3",
+        "subject_id"=>987,
+        "enum_event_operation"=>"PRICING",
+        "comment"=>nil,
+        "expire_secs"=>nil})
+
+    Timecop.freeze(time+1.second)
+    Marty::Event.clear_cache
+    expect(Marty::Event.currently_running('testcl1', 123)).to eq(
+      ['AVM', 'CRA', 'PRICING'])
+    expect(Marty::Event.currently_running('testcl2', 123)).to eq(
+      ['AVM', 'CRA'])
+
+    Timecop.freeze(time+3.seconds)
+    Marty::Event.clear_cache
+    expect(Marty::Event.currently_running('testcl1', 123)).to eq(
+      ['AVM', 'CRA', 'PRICING'])
+    expect(Marty::Event.currently_running('testcl2', 123)).to eq(
+      ['CRA'])
+
+    Timecop.freeze(time+6.seconds)
+    expect(Marty::Event.currently_running('testcl1', 123)).to eq(
+      ['AVM', 'CRA', 'PRICING'])
+    expect(Marty::Event.currently_running('testcl2', 123)).to eq(
+      [])
+
+    Timecop.return
+    expect(Marty::Event.currently_running('testcl1', 123)).to eq(
+      ['AVM', 'CRA', 'PRICING'])
+    expect(Marty::Event.op_is_running?('testcl1', 123, 'AVM')).to be_truthy
+    Marty::Event.finish_event('testcl1', 123, 'AVM', 'wassup')
+    Marty::Event.clear_cache
+    expect(Marty::Event.currently_running('testcl1', 123)).to eq(
+      ['CRA', 'PRICING'])
+    expect(Marty::Event.op_is_running?('testcl1', 123, 'AVM')).to be_falsey
+    expect(Marty::Event.op_is_running?('testcl1', 123, 'CRA')).to be_truthy
+
+    ev = Marty::Event.lookup_event('testcl1', 123, 'AVM')
+    expect(ev.length).to eq(1)
+    expect(ev.first).to include({"klass"=>"testcl1",
+                                 "subject_id"=>123,
+                                 "enum_event_operation"=>"AVM",
+                                 "comment"=>"wassup",
+                                 "expire_secs"=>nil})
+
   end
 end
-=begin
-
-test op_is_running?
-test lookup_event
-test finish_event
-test last_event
-test currently_running
-=end
