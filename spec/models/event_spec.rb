@@ -1,6 +1,4 @@
 require 'spec_helper'
-require 'marty'
-require 'delorean_lang'
 require 'job_helper'
 
 describe Marty::Event do
