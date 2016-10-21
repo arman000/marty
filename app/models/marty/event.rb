@@ -105,6 +105,7 @@ class Marty::Event < Marty::Base
   private_class_method :get_data
   def self.clear_cache
     @all_running = nil
+    @all_finished = nil
   end
   def self.all_running
     @all_running ||= { timestamp: 0, data: [] }
@@ -127,4 +128,35 @@ class Marty::Event < Marty::Base
     @all_running[:data]
   end
   private_class_method :all_running
+
+  def self.all_finished
+    @all_finished ||= { timestamp: Time.zone.parse('1970-1-1 00:00:00').to_i,
+                        data: {} }
+    @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 5
+    time_now_i = Time.zone.now.to_i
+    cutoff = Time.zone.at(@all_finished[:timestamp]).
+             strftime('%Y-%m-%d %H:%M:%S.%6N')
+    if time_now_i - @all_finished[:timestamp] > @poll_secs
+      raw = get_data(
+        "SELECT * FROM
+            (SELECT ROW_NUMBER() OVER (PARTITION BY klass,
+                                                    subject_id,
+                                                    enum_event_operation
+                                       ORDER BY end_dt DESC) rownum, *
+             FROM (#{BASE_QUERY}) sub2
+             WHERE end_dt IS NOT NULL and end_dt > '#{cutoff}') sub1
+         WHERE rownum = 1"
+      )
+      @all_finished[:timestamp] = time_now_i
+      raw.each_with_object(@all_finished[:data]) do |ev, hash|
+        subhash = hash[[ev["klass"], ev["subject_id"]]] ||= {}
+        subhash.merge!({ev["enum_event_operation"] => ev["end_dt"]})
+      end
+    end
+    @all_finished[:data]
+  end
+
+  def self.get_finished(klass, id)
+    all_finished[[klass, id]]
+  end
 end
