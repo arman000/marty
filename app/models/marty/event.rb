@@ -150,7 +150,9 @@ class Marty::Event < Marty::Base
       @all_finished[:timestamp] = time_now_i
       raw.each_with_object(@all_finished[:data]) do |ev, hash|
         subhash = hash[[ev["klass"], ev["subject_id"]]] ||= {}
-        subhash.merge!({ev["enum_event_operation"] => ev["end_dt"]})
+        subhash.merge!({ev["enum_event_operation"] =>
+                        ev["end_dt"].strftime("%Y-%m-%d %H:%M:%S")
+                       })
       end
     end
     @all_finished[:data]
