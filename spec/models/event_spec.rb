@@ -56,6 +56,7 @@ describe Marty::Event do
     stop_delayed_job
   end
 
+
   it "Event tests" do
     expect(Marty::Event.currently_running('testcl1', 123)).to eq(
       ['AVM', 'CRA', 'PRICING'])
@@ -141,5 +142,35 @@ describe Marty::Event do
     expect(af[['testcl3', 987]]).to include('PRICING')
     expect(af[['testcl1', 123]]).to include('AVM')
     expect(af[['testcl1', 123]]['AVM']).to start_with(@date_string)
+
+    expect {Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
+                                      "the comment") }.not_to raise_error
+
+    expect {Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
+                                      "the comment") }.
+      to raise_error(%r!AVM is already running for testcl/1234!)
+    expect {Marty::Event.create_event('testcl', 2345, 'AVM', Time.zone.now, 600,
+                                     "the comment") }.not_to raise_error
+    expect {Marty::Event.finish_event('testcl', 1234, 'AVM', "new comment") }.
+      not_to raise_error
+    expect {Marty::Event.finish_event('testcl', 1234, 'AVM', "new comment") }.
+      to raise_error(%r!event testcl/1234/AVM not found!)
+    expect {Marty::Event.finish_event('testcl', 2345, 'AVM', 'foobar') }.
+      not_to raise_error
+    expect {Marty::Event.finish_event('testcl', 2345, 'AVM', 'foobar') }.
+      to raise_error(%r!event testcl/2345/AVM not found!)
+    expect {Marty::Event.create_event('testcl', 1234, 'AMV', Time.zone.now, 600,
+                                      "the comment") }.
+      to raise_error(%r!PG::.*invalid input value for enum.*"AMV"!)
+    Marty::Event.clear_cache
+    af = Marty::Event.all_finished
+    expect(af.count).to eq(5)
+    expect(af).to include(['testcl', 1234])
+    expect(af).to include(['testcl', 2345])
+    expect(af[['testcl', 1234]]).to include('AVM')
+    expect(af[['testcl', 2345]]).to include('AVM')
+    expect(af[['testcl', 1234]]['AVM']).to start_with(@date_string)
+    expect(af[['testcl', 2345]]['AVM']).to start_with(@date_string)
+
   end
 end

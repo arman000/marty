@@ -24,6 +24,18 @@ class Marty::Event < Marty::Base
                 FROM marty_events ev
                 LEFT JOIN marty_promises pr ON ev.promise_id = pr.id "
 
+  def self.running_query(time_now_s)
+    "SELECT * FROM
+       (#{BASE_QUERY}
+        WHERE coalesce(pr.start_dt, ev.start_dt, '1900-1-1') >=
+                   '#{time_now_s}'::timestamp - interval '24 hours') sub
+     WHERE (end_dt IS NULL or end_dt > '#{time_now_s}'::timestamp)
+       AND (expire_secs IS NULL
+        OR expire_secs > EXTRACT (EPOCH FROM '#{time_now_s}'::timestamp - start_dt))
+      ORDER BY start_dt"
+  end
+
+
   def self.op_is_running?(klass, subject_id, operation)
     all_running.select do |pm|
       pm["klass"] == klass && pm["subject_id"].to_i == subject_id.to_i &&
@@ -31,6 +43,34 @@ class Marty::Event < Marty::Base
     end.present?
   end
 
+  def self.create_event(klass,
+                        subject_id,
+                        operation,
+                        start_dt,
+                        expire_secs,
+                        comment=nil)
+
+    # use lookup_event instead of all_running which is throttled
+    evs = self.lookup_event(klass,
+                            subject_id,
+                            operation)
+    running = evs.select do
+      |ev|
+      ev["end_dt"].nil? &&
+        (ev["expire_secs"].nil? ||
+         (Time.zone.now - ev["start_dt"]).truncate < ev["expire_secs"])
+    end.count > 0
+    raise "#{operation} is already running for #{klass}/#{subject_id}" if
+      running.present?
+
+    self.create!(klass: klass,
+                 subject_id: subject_id,
+                 enum_event_operation: operation,
+                 start_dt: start_dt,
+                 expire_secs: expire_secs,
+                 comment: comment)
+
+  end
   def self.lookup_event(klass, subject_id, operation)
     get_data(BASE_QUERY +
              " WHERE klass = '#{klass}'
@@ -42,15 +82,18 @@ class Marty::Event < Marty::Base
   end
 
   def self.finish_event(klass, subject_id, operation, comment=nil)
-    hash = all_running.select do |pm|
-      pm["klass"] == klass && pm["subject_id"] == subject_id.to_i &&
-        pm["enum_event_operation"] == operation
-    end.first
-    e = Marty::Event.find_by_id(hash["id"])
-    raise "can't explicitly finish a promise event" if e.promise_id
-    e.end_dt = Time.zone.now
-    e.comment = comment if comment
-    e.save!
+    time_now_s = Time.zone.now.strftime('%Y-%m-%d %H:%M:%S.%6N')
+    evs = get_data(running_query(time_now_s)).select do |ev|
+      ev["klass"] == klass && ev["subject_id"] == subject_id.to_i &&
+        ev["enum_event_operation"] == operation
+    end
+    raise "event #{klass}/#{subject_id}/#{operation} not found" unless
+      evs.present?
+    ev = Marty::Event.find_by_id(evs.first["id"])
+    raise "can't explicitly finish a promise event" if ev.promise_id
+    ev.end_dt = Time.zone.now
+    ev.comment = comment if comment
+    ev.save!
   end
 
   def self.last_event(klass, subject_id, operation=nil)
@@ -109,20 +152,12 @@ class Marty::Event < Marty::Base
   end
   def self.all_running
     @all_running ||= { timestamp: 0, data: [] }
-    @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 5
+    @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 0
     time_now = Time.zone.now
     time_now_i = time_now.to_i
     time_now_s = time_now.strftime('%Y-%m-%d %H:%M:%S.%6N')
     if time_now_i - @all_running[:timestamp] > @poll_secs
-      @all_running[:data] = get_data(
-        "SELECT * FROM
-               (#{BASE_QUERY}
-                WHERE coalesce(pr.start_dt, ev.start_dt, '1900-1-1') >=
-                         '#{time_now_s}'::timestamp - interval '24 hours') sub
-             WHERE (end_dt IS NULL or end_dt > '#{time_now_s}'::timestamp)
-               AND (expire_secs IS NULL
-                 OR expire_secs > EXTRACT (EPOCH FROM '#{time_now_s}'::timestamp - start_dt))"
-      )
+      @all_running[:data] = get_data(running_query(time_now_s))
       @all_running[:timestamp] = time_now_i
     end
     @all_running[:data]
@@ -132,7 +167,7 @@ class Marty::Event < Marty::Base
   def self.all_finished
     @all_finished ||= { timestamp: Time.zone.parse('1970-1-1 00:00:00').to_i,
                         data: {} }
-    @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 5
+    @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 0
     time_now_i = Time.zone.now.to_i
     cutoff = Time.zone.at(@all_finished[:timestamp]).
              strftime('%Y-%m-%d %H:%M:%S.%6N')
