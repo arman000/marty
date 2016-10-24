@@ -18,12 +18,17 @@ describe Marty::Event do
     Marty::Config["MARTY_EVENT_POLL_SECS"] = 1
 
     @time = Time.zone.now
+    @date_string = @time.strftime('%Y-%m-%d')
+    @old_start = '1970-01-01 08:00:00'
+    @old_end = '1970-01-01 09:00:00'
     # add events
     [['testcl1',  123, @time, nil,            nil,     'AVM',     'a comment'],
      ['testcl1',  123, @time + 2.second, nil,nil,     'CRA',     'b comment'],
      ['testcl1',  123, @time + 4.seconds, nil,10000,     'PRICING', 'c comment'],
      ['testcl2', 123, @time, nil,             2, 'AVM',     'e comment'],
      ['testcl2', 123, @time + 1.second, nil,  4, 'CRA',     'f comment'],
+     ['testcl2', 123, Time.zone.parse(@old_start),
+      Time.zone.parse(@old_end), nil, 'PRICING', 'old event'],
     ].each do
       |klass, subjid, startdt, enddt, expire, op, comment|
       Marty::Event.create!(klass: klass,
@@ -96,6 +101,16 @@ describe Marty::Event do
       [])
 
     Timecop.return
+
+    af = Marty::Event.all_finished
+    expect(af.count).to eq(2)
+    expect(af).to include(['testcl3', 987])
+    expect(af).to include(['testcl2', 123])
+    expect(af[['testcl3', 987]]).to include('PRICING')
+    expect(af[['testcl3', 987]]['PRICING']).to start_with(@date_string)
+    expect(af[['testcl2', 123]]).to include('PRICING')
+    expect(af[['testcl2', 123]]['PRICING']).to eq(@old_end)
+
     expect(Marty::Event.currently_running('testcl1', 123)).to eq(
       ['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.op_is_running?('testcl1', 123, 'AVM')).to be_truthy
@@ -119,6 +134,12 @@ describe Marty::Event do
     expect(Marty::Event.compact_end_dt(ev.first)).to match(/\d\d:\d\d/)
     expect(Marty::Event.pretty_op(ev.first)).to eq('Avm')
     ev = Marty::Event.lookup_event('testcl1', 123, 'PRICING').first
-    puts Marty::Event.pretty_op(ev)
+    expect(Marty::Event.pretty_op(ev)).to eq('Pricing')
+
+    af = Marty::Event.all_finished
+    expect(af.count).to eq(3)
+    expect(af[['testcl3', 987]]).to include('PRICING')
+    expect(af[['testcl1', 123]]).to include('AVM')
+    expect(af[['testcl1', 123]]['AVM']).to start_with(@date_string)
   end
 end
