@@ -14,8 +14,6 @@ module Marty::Migrations
     str_values =
       values.map {|v| ActiveRecord::Base.connection.quote v}.join ','
 
-    ActiveRecord::Base.schema_migrations_table_name
-
     #hacky way to get name
     prefix = prefix_override || tb_prefix
     enum_name = klass.table_name.sub(/^#{prefix}/, '')
