@@ -16,19 +16,16 @@ module Marty::Migrations
 
     #hacky way to get name
     prefix = prefix_override || tb_prefix
-    enum_name = klass.table_name.sub(/^#{prefix}/, '')
+    enum_name = klass.table_name.sub(/^#{prefix}_*/, '')
 
     execute <<-SQL
       CREATE TYPE #{enum_name} AS ENUM (#{str_values});
     SQL
   end
 
-  def update_enum(klass, new_values, prefix_override = nil)
+  def update_enum(klass, prefix_override = nil)
     raise "bad class arg #{klass}" unless
       klass.is_a?(Class) && klass < ActiveRecord::Base
-
-    raise "bad values arg #{new_values}" unless
-      new_values.is_a?(Enumerable) && !new_values.empty?
 
     raise "model class needs VALUES (as Set)" unless
       klass.const_defined?(:VALUES)
@@ -45,9 +42,7 @@ module Marty::Migrations
     db_values = res.first['enum_range'].gsub(/[{}]/, '').split(',')
     ex_values = klass::VALUES - db_values
 
-    raise "discrepancy between new #{klass}::VALUES (#{ex_values.to_a}) & " +
-          "new input values (#{new_values})" if
-      ex_values != Set.new(new_values)
+    puts "no new #{klass}::VALUES to add" if ex_values.empty?
 
     #hack to prevent transaction
     execute("COMMIT;")
