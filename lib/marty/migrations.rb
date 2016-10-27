@@ -3,6 +3,59 @@ module Marty::Migrations
     "marty_"
   end
 
+  def new_enum(klass, prefix_override = nil)
+    raise "bad class arg #{klass}" unless
+      klass.is_a?(Class) && klass < ActiveRecord::Base
+
+    raise "model class needs VALUES (as Set)" unless
+      klass.const_defined?(:VALUES)
+
+    values = klass::VALUES
+    str_values =
+      values.map {|v| ActiveRecord::Base.connection.quote v}.join ','
+
+    #hacky way to get name
+    prefix = prefix_override || tb_prefix
+    enum_name = klass.table_name.sub(/^#{prefix}_*/, '')
+
+    execute <<-SQL
+      CREATE TYPE #{enum_name} AS ENUM (#{str_values});
+    SQL
+  end
+
+  def update_enum(klass, prefix_override = nil)
+    raise "bad class arg #{klass}" unless
+      klass.is_a?(Class) && klass < ActiveRecord::Base
+
+    raise "model class needs VALUES (as Set)" unless
+      klass.const_defined?(:VALUES)
+
+    #hacky way to get name
+    prefix = prefix_override || tb_prefix
+    enum_name = klass.table_name.sub(/^#{prefix}/, '')
+
+    #check values against underlying values
+    res = execute <<-SQL
+      SELECT ENUM_RANGE(null::#{enum_name});
+    SQL
+
+    db_values = res.first['enum_range'].gsub(/[{}]/, '').split(',')
+    ex_values = klass::VALUES - db_values
+
+    puts "no new #{klass}::VALUES to add" if ex_values.empty?
+
+    #hack to prevent transaction
+    execute("COMMIT;")
+    ex_values.each do |v|
+      prepped_v = ActiveRecord::Base.connection.quote(v)
+
+      execute <<-SQL
+        ALTER TYPE #{enum_name} ADD VALUE #{prepped_v};
+      SQL
+    end
+    execute("BEGIN;")
+  end
+
   def add_fk(from_table, to_table, options = {})
     options[:column] ||= "#{to_table.to_s.singularize}_id"
 
