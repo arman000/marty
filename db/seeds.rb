@@ -48,5 +48,5 @@ unless Marty::Tag.find_by_name('DEV')
 end
 
 # one time set up for delayed_job/promises, override as needed
-Marty::Config["DELAYED_JOB_PARAMS"] = "-n 16"
+Marty::Config["DELAYED_JOB_PARAMS"] = "-n 4"
 Marty::Config["DELAYED_JOB_PATH"]   = "bin/delayed_job"
