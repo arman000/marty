@@ -30,6 +30,11 @@ class ActiveRecord::Base
 end
 
 Capybara.register_driver :selenium do |app|
+  # use personal firefox if it exists
+  personal_firefox = File.expand_path('~/firefox/firefox')
+  Selenium::WebDriver::Firefox::Binary.path = personal_firefox if
+    File.exists?(personal_firefox)
+
   client = Selenium::WebDriver::Remote::Http::Default.new
   profile = Selenium::WebDriver::Firefox::Profile.new
   profile.load_no_focus_lib = true
