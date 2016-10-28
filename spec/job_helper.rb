@@ -88,6 +88,13 @@ Y:
     d = [Y(q=i) | ['a'] for i in [1, 2]]
 EOS
 
+NAME_I = "PromiseI"
+SCRIPT_I = <<EOS
+SLEEPER:
+    secs =? nil
+    a = Gemini::Helper.sleep(secs) && secs
+EOS
+
 def promise_bodies
   {
     NAME_A => SCRIPT_A,
@@ -98,5 +105,6 @@ def promise_bodies
     NAME_F => SCRIPT_F,
     NAME_G => SCRIPT_G,
     NAME_H => SCRIPT_H,
+    NAME_I => SCRIPT_I,
   }
 end

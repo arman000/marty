@@ -20,7 +20,6 @@ class Delorean::BaseModule::NodeCall
       raise "bad arg to %" unless args.is_a?(Array)
       attr = nil
     end
-
     script, tag = engine.module_name, engine.sset.tag
     nn = node.is_a?(Class) ? node.name : node.to_s
 
@@ -40,7 +39,6 @@ class Delorean::BaseModule::NodeCall
              parent_id: params[:_parent_id],
              )
     params[:_promise_id] = promise.id
-
     begin
       job = Delayed::Job.enqueue Marty::PromiseJob.
         new(promise, title, script, tag, nn, params, args, hook)
@@ -58,15 +56,22 @@ class Delorean::BaseModule::NodeCall
     # been reserved yet.
     promise.job_id = job.id
     promise.save!
-
+    event = Marty::Event.
+                   create!(promise_id: promise.id,
+                           klass:      params[:__metadata__][:klass],
+                           subject_id: params[:__metadata__][:id],
+                           enum_event_operation:
+                             params[:__metadata__][:operation]) if
+      params[:__metadata__]
     Marty::PromiseProxy.new(promise.id, timeout, attr)
   end
 end
 
-class Delorean::Engine
-  def background_eval(node, params, attrs)
-    raise "background_eval bad params" unless params.is_a?(Hash)
 
+class Delorean::Engine
+  def background_eval(node, params, attrs, meta = {})
+    raise "background_eval bad params" unless params.is_a?(Hash)
+    params[:__metadata__] = meta unless meta.empty?
     nc = Delorean::BaseModule::NodeCall.new({}, self, node, params)
     # start the background promise
     nc | attrs
