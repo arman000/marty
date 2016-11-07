@@ -4,6 +4,7 @@ require 'job_helper'
 describe Marty::Event do
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
+    @save_file = "/tmp/save_#{Process.pid}.psql"
     save_clean_db(@clean_file)
 
     # transactional fixtures interfere with queueing jobs
@@ -48,6 +49,7 @@ describe Marty::Event do
                                  operation: 'PRICING'})
     res.force
     sleep 5
+    save_clean_db(@save_file)
   end
 
   after(:all) do
@@ -56,8 +58,13 @@ describe Marty::Event do
     stop_delayed_job
   end
 
+  before(:each) do
+    restore_clean_db(@save_file, false)
+    Marty::Event.clear_cache
+  end
 
-  it "Event tests" do
+
+  it "reports currently running" do
     expect(Marty::Event.currently_running('testcl1', 123)).to eq(
       ['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq([])
@@ -100,8 +107,11 @@ describe Marty::Event do
       ['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq(
       [])
-
     Timecop.return
+
+  end
+
+  it "misc API tests" do
 
     af = Marty::Event.all_finished
     expect(af.count).to eq(2)
@@ -143,6 +153,9 @@ describe Marty::Event do
     expect(af[['testcl1', 123]]).to include('AVM')
     expect(af[['testcl1', 123]]['AVM']).to start_with(@date_string)
 
+  end
+
+  it "raises on error" do
     expect {Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
                                       "the comment") }.not_to raise_error
 
@@ -164,13 +177,38 @@ describe Marty::Event do
       to raise_error(%r!PG::.*invalid input value for enum.*"AMV"!)
     Marty::Event.clear_cache
     af = Marty::Event.all_finished
-    expect(af.count).to eq(5)
+    expect(af.count).to eq(4)
     expect(af).to include(['testcl', 1234])
     expect(af).to include(['testcl', 2345])
     expect(af[['testcl', 1234]]).to include('AVM')
     expect(af[['testcl', 2345]]).to include('AVM')
     expect(af[['testcl', 1234]]['AVM']).to start_with(@date_string)
     expect(af[['testcl', 2345]]['AVM']).to start_with(@date_string)
+  end
+
+  it "truncates long comment" do
+    long_comment = "comment string abcdefg"*100
+    long_comment_truncated = long_comment.truncate(255)
+    Marty::Event.create_event('testcl', 123, 'PRICING', Time.zone.now, 600,
+                              long_comment)
+    Marty::Event.create!(klass: 'testcl',
+                         subject_id: 456,
+                         enum_event_operation: 'CRA',
+                         start_dt: Time.zone.now,
+                         expire_secs: 600,
+                         comment: long_comment)
+
+    Marty::Event.create_event('testcl', 789, 'AVM', Time.zone.now, 600,
+                              "comment")
+    Marty::Event.finish_event('testcl', 789, 'AVM', long_comment)
+
+    e1 = Marty::Event.lookup_event('testcl', 123, 'PRICING').first
+    e2 = Marty::Event.lookup_event('testcl', 456, 'CRA').first
+    e3 = Marty::Event.lookup_event('testcl', 789, 'AVM').first
+
+    expect(e1["comment"]).to eq(long_comment_truncated)
+    expect(e2["comment"]).to eq(long_comment_truncated)
+    expect(e3["comment"]).to eq(long_comment_truncated)
 
   end
 end

@@ -13,6 +13,10 @@ class Marty::Event < Marty::Base
 
   validates_with EventValidator
 
+  after_validation(on: [:create, :update]) do
+    self.comment = self.comment.truncate(255) if self.comment
+  end
+
   BASE_QUERY = "SELECT ev.id,
                    ev.klass,
                    ev.subject_id,
