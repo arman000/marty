@@ -102,7 +102,7 @@ class Marty::Event < Marty::Base
     hash = all_running.select do |pm|
       pm["klass"] == klass && pm["subject_id"] == subject_id.to_i &&
         (operation.nil? || pm["enum_event_operation"] == operation)
-    end.sort { |a, b| b["start_dt"] <=> a["start_dt"] }.first
+    end.last
 
     return hash if hash
 
@@ -111,7 +111,7 @@ class Marty::Event < Marty::Base
     get_data("SELECT * FROM (#{BASE_QUERY}) sub
               WHERE klass = '#{klass}'
                 AND subject_id = #{subject_id} #{op_sql}
-             ORDER BY start_dt desc").first
+             ORDER BY end_dt desc").first
   end
 
   def self.currently_running(klass, subject_id)
@@ -188,7 +188,8 @@ class Marty::Event < Marty::Base
                                        ORDER BY end_dt DESC) rownum, *
              FROM (#{BASE_QUERY}) sub2
              WHERE end_dt IS NOT NULL and end_dt > '#{cutoff}') sub1
-         WHERE rownum = 1"
+         WHERE rownum = 1
+         ORDER BY end_dt"
       )
       @all_finished[:timestamp] = time_now_i
       raw.each_with_object(@all_finished[:data]) do |ev, hash|
