@@ -13,6 +13,7 @@ class Delorean::BaseModule::NodeCall
   # Monkey-patch '|' method for Delorean NodeCall to create promise
   # jobs and return promise proxy objects.
   def |(args)
+
     if args.is_a?(String)
       attr = args
       args = [attr]
@@ -56,22 +57,25 @@ class Delorean::BaseModule::NodeCall
     # been reserved yet.
     promise.job_id = job.id
     promise.save!
+
     event = Marty::Event.
-                   create!(promise_id: promise.id,
-                           klass:      params[:__metadata__][:klass],
-                           subject_id: params[:__metadata__][:id],
-                           enum_event_operation:
-                             params[:__metadata__][:operation]) if
-      params[:__metadata__]
+            create!(promise_id: promise.id,
+                    klass:      params["p_event"]["klass"],
+                    subject_id: params["p_event"]["id"],
+                    enum_event_operation:
+                      params["p_event"]["operation"]) if
+      params["p_event"]
     Marty::PromiseProxy.new(promise.id, timeout, attr)
   end
 end
 
 
 class Delorean::Engine
-  def background_eval(node, params, attrs, meta = {})
+  def background_eval(node, params, attrs, event = {})
     raise "background_eval bad params" unless params.is_a?(Hash)
-    params[:__metadata__] = meta unless meta.empty?
+    params["p_event"] = event.each_with_object({}) do |(k, v), h|
+      h[k.to_s] = v
+    end unless event.empty?
     nc = Delorean::BaseModule::NodeCall.new({}, self, node, params)
     # start the background promise
     nc | attrs
