@@ -47,6 +47,7 @@ unless Marty::Tag.find_by_name('DEV')
   tag.save!
 end
 
-# one time set up for delayed_job/promises, override as needed
+# one time set up for delayed_job/promises, override only needed
+# if DELAYED_JOB_PATH is not bin/delayed_job
 Marty::Config["DELAYED_JOB_PARAMS"] = "-n 4"
-Marty::Config["DELAYED_JOB_PATH"]   = "bin/delayed_job"
+# Marty::Config["DELAYED_JOB_PATH"]   = "script/delayed_job"

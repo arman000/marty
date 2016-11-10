@@ -221,9 +221,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   def bg_command(param)
     e, root, p = ENV['RAILS_ENV'], Rails.root, Marty::Config["RUBY_PATH"]
-    # preserve backward compatability with Gemini
-    # for new Rails apps, use 'bin/delayed_job'
-    dj_path = Marty::Config["DELAYED_JOB_PATH"] || 'script/delayed_job'
+    dj_path = Marty::Config["DELAYED_JOB_PATH"] || 'bin/delayed_job'
     cmd = "export RAILS_ENV=#{e};"
     # FIXME: Environment looks to be setup incorrectly - this is a hack
     cmd += "export PATH=#{p}:$PATH;" if p
