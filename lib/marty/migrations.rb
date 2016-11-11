@@ -41,7 +41,6 @@ module Marty::Migrations
 
     db_values = res.first['enum_range'].gsub(/[{"}]/, '').split(',')
     ex_values = klass::VALUES - db_values
-
     puts "no new #{klass}::VALUES to add" if ex_values.empty?
 
     #hack to prevent transaction
