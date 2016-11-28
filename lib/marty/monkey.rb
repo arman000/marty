@@ -10,7 +10,8 @@ class Delorean::BaseModule::BaseClass
     alias_method :old_get_attr, :_get_attr
 
     def _get_attr(obj, attr, _e)
-      if Marty::Enum === obj && !obj.respond_to?(attr)
+      if (Marty::Enum === obj ||
+          Marty::PgEnum === obj) && !obj.respond_to?(attr)
         obj[attr]
       else
         old_get_attr(obj, attr, _e)
@@ -114,6 +115,7 @@ class String
   def in_time_zone(zone = ::Time.zone)
     self == 'infinity' ? self : old_in_time_zone(zone)
   end
+
 end
 
 ######################################################################
@@ -197,6 +199,18 @@ module Netzke::Basepack::DataAdapters
   end
 end
 
+class StringEnum < String
+  include Delorean::Model
+  def name
+    self
+  end
+  def id
+    self
+  end
+  delorean_instance_method :name
+  delorean_instance_method :id
+end
+
 ######################################################################
 
 # Add pg_enum migration support -- FIXME: this doesn't belong here
@@ -207,6 +221,15 @@ module ActiveRecord
         options = args.extract_options!
         column_names = args
         column_names.each { |name| column(name, name.to_s.pluralize, options) }
+      end
+    end
+    module PostgreSQL
+      module OID
+        class Enum < Type::Value
+          def type_cast_from_database(value)
+            value && StringEnum.new(value)
+          end
+        end
       end
     end
   end

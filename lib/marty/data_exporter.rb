@@ -80,10 +80,16 @@ class Marty::DataExporter
     end
   end
 
+  def self.get_attrs_in_order(klass, attrs)
+    return attrs unless klass.const_defined?(:EXPORT_ORDER)
+    klass::EXPORT_ORDER.select { |attr| attrs.include?(attr) }
+  end
+
   def self.export_attrs(klass, obj, attrs=nil, exclude_attrs=[])
     col_types = Marty::DataConversion.col_types(klass)
 
-    attr_list = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
+    attr_list_raw = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
+    attr_list = get_attrs_in_order(klass, attr_list_raw)
 
     attr_list.map do
       |c|
@@ -111,7 +117,8 @@ class Marty::DataExporter
   def self.export_headers(klass, attrs=nil, exclude_attrs=[])
     col_types = Marty::DataConversion.col_types(klass)
 
-    attr_list = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
+    attr_list_raw = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
+    attr_list = get_attrs_in_order(klass, attr_list_raw)
 
     attr_list.map do
       |c|
