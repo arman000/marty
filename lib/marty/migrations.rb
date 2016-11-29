@@ -182,7 +182,74 @@ EOSQL
     end
   end
 
-private
+  def self.lines_to_crlf(lines)
+    lines.map do |line|
+      line.encode(line.encoding, :universal_newline => true).
+        encode(line.encoding, :crlf_newline => true)
+    end
+  end
+  def self.generate_sql_migrations(migrations_dir, sql_files_dir)
+    sd = Rails.root.join(sql_files_dir)
+    md = Rails.root.join(migrations_dir)
+    sql_files = Dir.glob("#{sd}/**/*.sql")
+    mig_files = Dir.glob("#{migrations_dir}/*.rb").map do |f|
+      m = /\A.*\/([0-9]+)_v([0-9]+)_sql_(.*)\.rb\z/.match(f)
+      { name: m[3],
+        timestamp: m[1],
+        version: m[2].to_i,
+        raw_sql: "#{md}/sql/#{m[1]}_v#{m[2]}_sql_#{m[3]}.sql"
+      }
+    end.group_by { |a| a[:name] }.each do |k, v|
+      v.sort! { |a, b| b[:version] <=> a[:version] }
+    end
+    time_now = Time.now.utc
+    gen_count = 0
+
+    sql_files.each do |sql|
+      base = File.basename(sql, ".sql")
+      existing = mig_files[base].first rescue nil
+      # must ensure CRLF line endings or SQL Server keep asking about line
+      # endings whenever you generating script
+      sql_lines = lines_to_crlf(File.open(sql, "r").readlines)
+      next if existing && sql_lines == File.open(existing[:raw_sql]).readlines
+
+      timestamp = (time_now + gen_count.seconds).strftime("%Y%m%d%H%M%S")
+      v = existing && existing[:version] + 1 || 1
+      klass = "v#{v}_sql_#{base}"
+      newbase = "#{timestamp}_#{klass}"
+      mig_name = File.join(md, "#{newbase}.rb")
+      sql_snap_literal = Rails.root.join(md, 'sql', "#{newbase}.sql")
+      sql_snap_call =  "Rails.root.join('#{migrations_dir}', 'sql', '#{newbase}.sql')"
+
+      File.open(sql_snap_literal, "w") do |f|
+        f.print sql_lines.join
+      end
+      puts "creating #{newbase}.rb"
+
+      # only split on "GO" at the start of a line with optional whitespace
+      # before EOL.  GO in comments could trigger this and will cause an error
+      File.open(mig_name, "w") do |f|
+        f.print <<OUT
+class #{klass.camelcase} < ActiveRecord::Migration
+
+  def up
+    path = #{sql_snap_call}
+    batches = File.read(path).split(/^GO\\s*$/i)
+    batches.each { |batch| execute batch }
+  end
+
+  def down
+    announce('must rollback manually')
+  end
+
+end
+OUT
+      end
+      gen_count += 1
+    end
+  end
+
+  private
   def fk_opts(from, to, column)
     name = "fk_#{from}_#{to}_#{column}"
     if name.length > 63
