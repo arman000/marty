@@ -55,7 +55,11 @@ class Marty::PromiseView < Netzke::Tree::Base
     config.root_visible = false
     config.paging = :none
     config.bbar = bbar
-
+    config.read_only = true
+    config.permissions = { update: false,
+                           create: false,
+                           delete: false,
+                         }
     # garbage collect old promises (hacky to do this here)
     Marty::Promise.cleanup(false)
   end
