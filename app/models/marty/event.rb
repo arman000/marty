@@ -115,6 +115,7 @@ class Marty::Event < Marty::Base
     get_data("SELECT * FROM (#{BASE_QUERY}) sub
               WHERE klass = '#{klass}'
                 AND subject_id = #{subject_id} #{op_sql}
+                AND end_dt IS NOT NULL
              ORDER BY end_dt desc").first
   end
 

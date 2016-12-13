@@ -78,9 +78,8 @@ describe Marty::Event do
     expect(Marty::Event.last_event('testcl2', 123)).to include(
       {"klass"=>"testcl2",
        "subject_id"=>123,
-       "enum_event_operation"=>"CRA",
-       "comment"=>"f comment",
-       "expire_secs"=>4})
+       "enum_event_operation"=>"PRICING",
+       "comment"=>"old event"})
     expect(Marty::Event.last_event('testcl3', 987)).to include(
       {"klass"=>"testcl3",
         "subject_id"=>987,
