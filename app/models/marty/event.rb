@@ -17,28 +17,39 @@ class Marty::Event < Marty::Base
     self.comment = self.comment.truncate(255) if self.comment
   end
 
-  BASE_QUERY = "SELECT ev.id,
-                   ev.klass,
-                   ev.subject_id,
-                   ev.enum_event_operation,
-                   ev.comment,
-                   coalesce(pr.start_dt, ev.start_dt) start_dt,
-                   coalesce(pr.end_dt, ev.end_dt) end_dt,
-                   expire_secs
-                FROM marty_events ev
-                LEFT JOIN marty_promises pr ON ev.promise_id = pr.id "
-
+  UPDATE_SQL =<<SQL
+  UPDATE marty_events as me
+  SET start_dt = p.start_dt,
+      end_dt = p.end_dt
+  FROM marty_promises p
+  WHERE me.promise_id = p.id
+    AND (   (    p.start_dt IS NOT NULL
+             AND me.start_dt IS NULL
+            )
+         OR (    p.end_dt IS NOT NULL
+             AND me.end_dt IS NULL
+            )
+        )
+SQL
+  BASE_QUERY =<<SQL
+SELECT id,
+            klass,
+            subject_id,
+            enum_event_operation,
+            comment,
+            start_dt,
+            end_dt,
+            expire_secs
+     FROM marty_events
+SQL
   def self.running_query(time_now_s)
-    "SELECT * FROM
-       (#{BASE_QUERY}
-        WHERE coalesce(pr.start_dt, ev.start_dt, '1900-1-1') >=
-                   '#{time_now_s}'::timestamp - interval '24 hours') sub
-     WHERE (end_dt IS NULL or end_dt > '#{time_now_s}'::timestamp)
+    "#{BASE_QUERY}
+     WHERE start_dt >= '#{time_now_s}'::timestamp - interval '24 hours'
+       AND (end_dt IS NULL or end_dt > '#{time_now_s}'::timestamp)
        AND (expire_secs IS NULL
         OR expire_secs > EXTRACT (EPOCH FROM '#{time_now_s}'::timestamp - start_dt))
       ORDER BY start_dt"
   end
-
 
   def self.op_is_running?(klass, subject_id, operation)
     all_running.detect do |pm|
@@ -76,10 +87,10 @@ class Marty::Event < Marty::Base
   end
 
   def self.lookup_event(klass, subject_id, operation)
-    get_data(BASE_QUERY +
-             " WHERE klass = '#{klass}'
-                AND subject_id = #{subject_id}
-                and enum_event_operation = '#{operation}'")
+    get_data("#{BASE_QUERY}
+              WHERE klass = '#{klass}'
+              AND subject_id = #{subject_id}
+              AND enum_event_operation = '#{operation}'")
 
     #For now we return a bare hash
     #Marty::Event.find_by_id(hash["id"])
@@ -112,11 +123,11 @@ class Marty::Event < Marty::Base
 
     op_sql = "AND enum_event_operation = '#{operation}'" if operation
 
-    get_data("SELECT * FROM (#{BASE_QUERY}) sub
+    get_data("#{BASE_QUERY}
               WHERE klass = '#{klass}'
-                AND subject_id = #{subject_id} #{op_sql}
-                AND end_dt IS NOT NULL
-             ORDER BY end_dt desc").first
+              AND subject_id = #{subject_id} #{op_sql}
+              AND end_dt IS NOT NULL
+              ORDER BY end_dt desc").first
   end
 
   def self.currently_running(klass, subject_id)
@@ -143,6 +154,10 @@ class Marty::Event < Marty::Base
     hash['end_dt'] ? hash['end_dt'].strftime("%H:%M") : '---'
   end
 
+  def self.update_start_and_end
+    ActiveRecord::Base.connection.execute(UPDATE_SQL)
+  end
+
   def self.get_data(sql)
     ActiveRecord::Base.connection.execute(sql).to_a.map do |h|
       h["id"]          = h["id"].to_i
@@ -167,6 +182,7 @@ class Marty::Event < Marty::Base
     time_now_i = time_now.to_i
     time_now_s = time_now.strftime('%Y-%m-%d %H:%M:%S.%6N')
     if time_now_i - @all_running[:timestamp] > @poll_secs
+      update_start_and_end
       @all_running[:data] = get_data(running_query(time_now_s))
       @all_running[:timestamp] = time_now_i
     end
@@ -185,6 +201,7 @@ class Marty::Event < Marty::Base
              strftime('%Y-%m-%d %H:%M:%S.%6N')
 
     if time_now_i - @all_finished[:timestamp] > @poll_secs
+      update_start_and_end
       raw = get_data(
         "SELECT * FROM
             (SELECT ROW_NUMBER() OVER (PARTITION BY klass,
