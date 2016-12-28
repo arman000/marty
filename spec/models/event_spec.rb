@@ -69,7 +69,6 @@ describe Marty::Event do
       ['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq([])
     expect(Marty::Event.currently_running('testcl3', 987)).to eq([])
-
     expect(Marty::Event.last_event('testcl1', 123)).to include(
       {"klass"=>"testcl1",
        "subject_id"=>123,
@@ -111,8 +110,17 @@ describe Marty::Event do
   end
 
   it "misc API tests" do
-
+    ev1 = Marty::Event.where(klass: 'testcl3', subject_id: 987).first
     af = Marty::Event.all_finished
+    ev2 = Marty::Event.where(klass: 'testcl3', subject_id: 987).first
+
+    # ev1 should have null start/end
+    # ev2 should have start/end populated from promise
+    expect(ev1.start_dt).to be_nil
+    expect(ev1.end_dt).to be_nil
+    expect(ev2.start_dt).not_to be_nil
+    expect(ev2.end_dt).not_to be_nil
+
     expect(af.count).to eq(2)
     expect(af).to include(['testcl3', 987])
     expect(af).to include(['testcl2', 123])
