@@ -39,7 +39,8 @@ SELECT id,
             comment,
             start_dt,
             end_dt,
-            expire_secs
+            expire_secs,
+            error
      FROM marty_events
 SQL
   def self.running_query(time_now_s)
@@ -96,7 +97,8 @@ SQL
     #Marty::Event.find_by_id(hash["id"])
   end
 
-  def self.finish_event(klass, subject_id, operation, comment=nil)
+  def self.finish_event(klass, subject_id, operation, error=false, comment=nil)
+    raise "error must be true or false" unless [true, false].include?(error)
     time_now_s = Time.zone.now.strftime('%Y-%m-%d %H:%M:%S.%6N')
 
     event = get_data(running_query(time_now_s)).detect do |ev|
@@ -109,6 +111,7 @@ SQL
     ev = Marty::Event.find_by_id(event["id"])
     raise "can't explicitly finish a promise event" if ev.promise_id
     ev.end_dt = Time.zone.now
+    ev.error = error
     ev.comment = comment if comment
     ev.save!
   end
@@ -166,6 +169,7 @@ SQL
       h["end_dt"]      = Time.zone.parse(h["end_dt"]) if h["end_dt"]
       h["expire_secs"] = h["expire_secs"].to_i if h["expire_secs"]
       h["comment"]     = h["comment"]
+      h["error"]       = h["error"]
       h
     end
   end
@@ -215,6 +219,14 @@ SQL
       )
       @all_finished[:timestamp] = time_now_i
       raw.each_with_object(@all_finished[:data]) do |ev, hash|
+        if ev["end_dt"] && ev["error"].nil?
+          real_ev = Marty::Event.where(id: ev["id"]).first
+          promise = Marty::Promise.where(id: real_ev["promise_id"]).first
+          maybe_error = promise.result["error"]
+          ev["error"] = real_ev.error = !!maybe_error
+          real_ev.comment = maybe_error
+          real_ev.save!
+        end
         subhash = hash[[ev["klass"], ev["subject_id"]]] ||= {}
         subhash[ev["enum_event_operation"]] =
           ev["end_dt"].strftime("%Y-%m-%d %H:%M:%S")
