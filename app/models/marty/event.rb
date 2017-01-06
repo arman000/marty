@@ -88,6 +88,7 @@ SQL
   end
 
   def self.lookup_event(klass, subject_id, operation)
+    update_start_and_end
     get_data("#{BASE_QUERY}
               WHERE klass = '#{klass}'
               AND subject_id = #{subject_id}
@@ -133,10 +134,70 @@ SQL
               ORDER BY end_dt desc").first
   end
 
+  def self.last_event_multi(klass, subject_ids_arg, operation=nil)
+    subject_ids = subject_ids_arg.map(&:to_i)
+    events = all_running.select do |pm|
+      pm["klass"] == klass && subject_ids.include?(pm["subject_id"]) &&
+        (operation.nil? || pm["enum_event_operation"] == operation)
+    end.group_by { |ev| ev["subject_id"] }.each_with_object({}) do
+      |(id, evs), h|
+      h[id] = evs.sort { |a, b| a["start_dt"] <=> b["start_dt"] }.first
+    end
+
+    running_ids = events.keys
+    check_fin = subject_ids - running_ids
+
+    if check_fin.present?
+      op_filt = "AND enum_event_operation = '#{operation}'" if operation
+      op_col = ", enum_event_operation" if operation
+
+      fins = get_data("SELECT klass,
+                              subject_id,
+                              enum_event_operation,
+                              comment,
+                              start_dt,
+                              end_dt,
+                              expire_secs,
+                              error
+                       FROM (SELECT klass,
+                                    subject_id,
+                                    enum_event_operation,
+                                    comment,
+                                    start_dt,
+                                    end_dt,
+                                    expire_secs,
+                                    error,
+                                    ROW_NUMBER() OVER (PARTITION BY klass,
+                                                                    subject_id
+                                                                    #{op_col}
+                                                       ORDER BY end_dt DESC) rnum
+                          FROM marty_events
+                          WHERE klass = '#{klass}'
+                            AND subject_id IN (#{check_fin.join(',')})
+                            #{op_filt}
+                            AND end_dt IS NOT NULL) sub
+                       WHERE rnum = 1")
+
+      fins.each do |fin|
+        events[fin["subject_id"]] = fin
+      end
+    end
+    events
+  end
+
   def self.currently_running(klass, subject_id)
     all_running.select do |pm|
       pm["klass"] == klass && pm["subject_id"] == subject_id.to_i
     end.map { |e| e["enum_event_operation"] }
+  end
+
+  def self.currently_running_multi(klass, subject_id_raw)
+    subject_ids = [subject_id_raw].flatten.map(&:to_i)
+    all_running.select do |pm|
+      pm["klass"] == klass && subject_ids.include?(pm["subject_id"])
+    end.each_with_object({}) do |e, h|
+      (h[e["subject_id"]] ||= []) <<  e["enum_event_operation"]
+    end
   end
 
   def self.update_comment(hash, comment)
@@ -158,7 +219,7 @@ SQL
   end
 
   def self.update_start_and_end
-    ActiveRecord::Base.connection.execute(UPDATE_SQL)
+    ActiveRecord::Base.connection.execute(UPDATE_SQL).cmd_tuples
   end
 
   def self.get_data(sql)
@@ -185,8 +246,9 @@ SQL
     time_now = Time.zone.now
     time_now_i = time_now.to_i
     time_now_s = time_now.strftime('%Y-%m-%d %H:%M:%S.%6N')
-    if time_now_i - @all_running[:timestamp] > @poll_secs
-      update_start_and_end
+    upd_count = update_start_and_end
+    if upd_count > 0 ||
+       time_now_i - @all_running[:timestamp] > @poll_secs
       @all_running[:data] = get_data(running_query(time_now_s))
       @all_running[:timestamp] = time_now_i
     end
@@ -204,8 +266,9 @@ SQL
     cutoff = Time.zone.at(@all_finished[:timestamp]).
              strftime('%Y-%m-%d %H:%M:%S.%6N')
 
-    if time_now_i - @all_finished[:timestamp] > @poll_secs
-      update_start_and_end
+    upd_count = update_start_and_end
+    if upd_count > 0 ||
+       time_now_i - @all_finished[:timestamp] > @poll_secs
       raw = get_data(
         "SELECT * FROM
             (SELECT ROW_NUMBER() OVER (PARTITION BY klass,
