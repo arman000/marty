@@ -58,13 +58,21 @@ class Delorean::BaseModule::NodeCall
     promise.job_id = job.id
     promise.save!
 
-    event = Marty::Event.
-            create!(promise_id: promise.id,
-                    klass:      params["p_event"]["klass"],
-                    subject_id: params["p_event"]["id"],
-                    enum_event_operation:
-                      params["p_event"]["operation"]) if
-      params["p_event"]
+    evh = params["p_event"]
+    if evh
+      event, klass, subject_id, operation = evh.values_at("event", "klass",
+                                                          "id", "operation")
+      if event
+        event.promise_id = promise.id
+        event.save!
+      else
+        event = Marty::Event.
+                create!(promise_id: promise.id,
+                        klass:      klass,
+                        subject_id: subject_id,
+                        enum_event_operation: operation)
+      end
+    end
     Marty::PromiseProxy.new(promise.id, timeout, attr)
   end
 end
@@ -106,11 +114,10 @@ class Marty::PromiseJob < Struct.new(:promise,
 
       engine = Marty::ScriptSet.new(tag).get_engine(sname)
 
-      engine.evaluate_attrs(node, attrs, params)
-
-      res = attrs.each_with_object({}) { |attr, h|
-        h[attr] = engine.evaluate(node, attr, params)
-      }
+      attrs_eval = engine.evaluate_attrs(node, attrs, params)
+      res = attrs.zip(attrs_eval).each_with_object({}) do |(attr, val), h|
+        h[attr] = val
+      end
 
       # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
     rescue => exc
