@@ -172,7 +172,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   action :event_view do |a|
     a.text      = I18n.t("event_view")
     a.handler   = :netzke_load_component_by_action
-    a.icon      = :group
+    a.icon      = :application_view_list
     a.disabled  = !self.class.has_admin_perm?
   end
 
