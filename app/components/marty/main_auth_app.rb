@@ -4,6 +4,7 @@ require 'marty/posting_window'
 require 'marty/new_posting_window'
 require 'marty/import_type_view'
 require 'marty/user_view'
+require 'marty/event_view'
 require 'marty/promise_view'
 require 'marty/api_auth_view'
 require 'marty/config_view'
@@ -55,6 +56,7 @@ class Marty::MainAuthApp < Marty::AuthApp
               :user_view,
               :config_view,
               :api_auth_view,
+              :event_view,
               :reload_scripts,
               :load_seed,
              ] + background_jobs_menu
@@ -165,6 +167,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.icon      = :group
     a.disabled  = !self.class.has_admin_perm? &&
       !self.class.has_user_manager_perm?
+  end
+
+  action :event_view do |a|
+    a.text      = I18n.t("event_view")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :application_view_list
+    a.disabled  = !self.class.has_admin_perm?
   end
 
   action :config_view do |a|
@@ -419,6 +428,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
   component :import_type_view
   component :user_view
+  component :event_view
   component :config_view
   component :api_auth_view do |c|
     c.disabled = Marty::Util.warped?

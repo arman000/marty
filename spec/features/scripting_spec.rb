@@ -339,6 +339,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
     end
 
     and_by 'script is gone' do
+      wait_for_ready
       expect(script_grid.row_count).to eq 4
     end
   end
