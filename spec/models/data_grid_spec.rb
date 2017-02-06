@@ -700,7 +700,7 @@ EOS
     end
 
     describe "exports" do
-      it 'should export leninet grids correctly' do
+      it 'should export lenient grids correctly' do
         dg = dg_from_import("Gf", Gf)
         dg2 = dg_from_import("Gf2", dg.export)
 
