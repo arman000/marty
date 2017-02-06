@@ -699,6 +699,15 @@ EOS
       end
     end
 
+    describe "exports" do
+      it 'should export leninet grids correctly' do
+        dg = dg_from_import("Gf", Gf)
+        dg2 = dg_from_import("Gf2", dg.export)
+
+        expect(dg.export).to eq(dg2.export)
+      end
+    end
+
     describe "updates" do
       it "should be possible to modify a grid referenced from a multi-grid" do
         dgb = dg_from_import("Gb", Gb, '1/1/2014')
