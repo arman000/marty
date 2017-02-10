@@ -349,7 +349,7 @@ class Marty::DataGrid < Marty::Base
     dt_row = lenient ? ["lenient"] : []
     dt_row << data_type unless [nil, DEFAULT_DATA_TYPE].member?(data_type)
 
-    meta_rows = dt_row.empty? ? [] : [dt_row.join(' ')]
+    meta_rows = dt_row.empty? ? [] : [[dt_row.join(' ')]]
 
     meta_rows += metadata.map { |inf|
       [inf["attr"], inf["type"], inf["dir"], inf["rs_keep"] || ""]

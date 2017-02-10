@@ -17,6 +17,8 @@ en:
   create_posting: Create
   api_auth: API Authorization
   event_view: Event View
+  data_grid_view: Data Grids
+  data_grid: Data Grids
 
   roles:
     viewer: Viewer
@@ -154,3 +156,6 @@ en:
     api_key: API Key
     app_name: Application Name
     script_name: Script Name
+    data_grid__name: Data Grid
+    breakeven_data_grid__name: Breakeven Data Grid
+    data_grid_view: Data Grids
