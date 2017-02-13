@@ -8,6 +8,7 @@ require 'marty/event_view'
 require 'marty/promise_view'
 require 'marty/api_auth_view'
 require 'marty/config_view'
+require 'marty/data_grid_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
@@ -39,10 +40,10 @@ class Marty::MainAuthApp < Marty::AuthApp
       icon:  icon_hack(:time),
       style: (warped ? "background-color: lightGrey;" : ""),
       menu:  [
-              :new_posting,
-              :select_posting,
-              :select_now,
-             ],
+        :new_posting,
+        :select_posting,
+        :select_now,
+      ],
     }
   end
 
@@ -52,14 +53,14 @@ class Marty::MainAuthApp < Marty::AuthApp
       icon:  icon_hack(:wrench),
       style: "",
       menu:  [
-              :import_type_view,
-              :user_view,
-              :config_view,
-              :api_auth_view,
-              :event_view,
-              :reload_scripts,
-              :load_seed,
-             ] + background_jobs_menu
+        :import_type_view,
+        :user_view,
+        :config_view,
+        :api_auth_view,
+        :event_view,
+        :reload_scripts,
+        :load_seed,
+      ] + background_jobs_menu
     }
   end
 
@@ -68,25 +69,26 @@ class Marty::MainAuthApp < Marty::AuthApp
       text: I18n.t("applications"),
       icon: icon_hack(:application_cascade),
       menu: [
-             :reporting,
-             :scripting,
-             :promise_view,
-            ],
+        :data_grid_view,
+        :reporting,
+        :scripting,
+        :promise_view,
+      ],
     }
   end
 
   def background_jobs_menu
     [
-       {
-         text: 'Background Jobs',
-         icon: icon_hack(:clock),
-         disabled: !self.class.has_admin_perm?,
-         menu: [
-                :bg_status,
-                :bg_stop,
-                :bg_restart,
-               ]
-       },
+      {
+        text: 'Background Jobs',
+        icon: icon_hack(:clock),
+        disabled: !self.class.has_admin_perm?,
+        menu: [
+          :bg_status,
+          :bg_stop,
+          :bg_restart,
+        ]
+      },
     ]
   end
 
@@ -189,6 +191,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.handler   = :netzke_load_component_by_action
     a.icon      = :script_key
     a.disabled  = !self.class.has_admin_perm?
+  end
+
+  action :data_grid_view do |a|
+    a.text      = I18n.t("data_grid_view", default: "Data Grids")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :table_multiple
+    a.disabled  = !self.class.has_any_perm?
   end
 
   action :reload_scripts do |a|
@@ -430,6 +439,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :user_view
   component :event_view
   component :config_view
+  component :data_grid_view
   component :api_auth_view do |c|
     c.disabled = Marty::Util.warped?
   end

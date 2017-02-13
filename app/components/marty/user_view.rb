@@ -1,9 +1,8 @@
-class Marty::UserView < Marty::Grid
-  has_marty_permissions \
-  create: [:admin, :user_manager],
-  read: :any,
-  update: [:admin, :user_manager],
-  delete: [:admin, :user_manager]
+module Marty; class UserView < Marty::Grid
+  has_marty_permissions create: [:admin, :user_manager],
+                        read:   :any,
+                        update: [:admin, :user_manager],
+                        delete: [:admin, :user_manager]
 
   # list of columns to be displayed in the grid view
   def self.user_columns
@@ -19,15 +18,15 @@ class Marty::UserView < Marty::Grid
   def configure(c)
     super
 
-    c.title ||= I18n.t('users', default: "Users")
-    c.model                  = "Marty::User"
-    c.editing                = :in_form
-    c.paging                 = :pagination
-    c.multi_select           = false
-    c.attributes ||= self.class.user_columns
-    c.store_config.merge!({sorters: [{property: :login,
-                                 direction: 'ASC',
-                                }]}) if c.attributes.include?(:login)
+    c.attributes   ||= self.class.user_columns
+    c.title        ||= I18n.t('users', default: "Users")
+    c.model          = "Marty::User"
+    c.editing        = :in_form
+    c.paging         = :pagination
+    c.multi_select   = false
+    c.store_config.merge!(sorters: [{property: :login,
+                                     direction: 'ASC',
+                                    }]) if c.attributes.include?(:login)
     c.scope = ->(arel) { arel.includes(:roles) }
   end
 
@@ -40,14 +39,14 @@ class Marty::UserView < Marty::Grid
     end
 
     # set new roles
-    user.roles = Marty::Role.select {
+    user.roles = Role.select {
       |r| roles.include? I18n.t("roles.#{r.name}")
     }
   end
 
   def self.create_edit_user(data)
     # Creates initial place-holder user object and validate
-    user = data["id"].nil? ? Marty::User.new : Marty::User.find(data["id"])
+    user = data["id"].nil? ? User.new : User.find(data["id"])
 
     self.user_columns.each {
       |c| user.send("#{c}=", data[c.to_s]) unless c == :roles
@@ -101,19 +100,19 @@ class Marty::UserView < Marty::Grid
 
   action :add do |a|
     super(a)
-    a.text     = I18n.t("user_grid.new")
-    a.tooltip  = I18n.t("user_grid.new")
-    a.icon     = :user_add
+    a.text    = I18n.t("user_grid.new")
+    a.tooltip = I18n.t("user_grid.new")
+    a.icon    = :user_add
   end
 
   action :edit do |a|
     super(a)
-    a.icon     = :user_edit
+    a.icon    = :user_edit
   end
 
   action :delete do |a|
     super(a)
-    a.icon     = :user_delete
+    a.icon    = :user_delete
   end
 
   def default_context_menu
@@ -121,47 +120,49 @@ class Marty::UserView < Marty::Grid
   end
 
   attribute :login do |c|
-    c.width = 100
-    c.label  = I18n.t("user_grid.login")
+    c.width   = 100
+    c.label   = I18n.t("user_grid.login")
   end
 
   attribute :firstname do |c|
-    c.width = 100
-    c.label  = I18n.t("user_grid.firstname")
+    c.width   = 100
+    c.label   = I18n.t("user_grid.firstname")
   end
 
   attribute :lastname do |c|
-    c.width = 100
-    c.label  = I18n.t("user_grid.lastname")
+    c.width   = 100
+    c.label   = I18n.t("user_grid.lastname")
   end
 
   attribute :active do |c|
-    c.width = 60
-    c.label  = I18n.t("user_grid.active")
+    c.width   = 60
+    c.label   = I18n.t("user_grid.active")
   end
 
   attribute :roles do |c|
-    c.width  = 100
-    c.flex   = 1
+    c.width   = 100
+    c.flex    = 1
     c.label   = I18n.t("user_grid.roles")
-    c.type   = :string,
+    c.type    = :string,
 
     c.getter = lambda do |r|
       r.roles.map { |ur| I18n.t("roles.#{ur.name}") }.sort
     end
-    c.editor_config = { multi_select: true,
-                        empty_text: I18n.t("user_grid.select_roles"),
-                        store: Marty::Role.pluck(:name).map {
-                          |n| I18n.t("roles.#{n}")}.sort,
-                        type: :string,
-                        xtype: :combo}
+
+    c.editor_config = {
+      multi_select: true,
+      empty_text:   I18n.t("user_grid.select_roles"),
+      store:        Role.pluck(:name).map {|n| I18n.t("roles.#{n}")}.sort,
+      type:         :string,
+      xtype:        :combo,
+    }
   end
 
   attribute :created_dt do |c|
-    c.label      = I18n.t("user_grid.created_dt")
+    c.label     = I18n.t("user_grid.created_dt")
     c.format    = "Y-m-d H:i"
     c.read_only = true
   end
-end
+end; end
 
 UserView = Marty::UserView
