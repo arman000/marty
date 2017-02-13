@@ -4,7 +4,9 @@ module Marty
 
     def index
       if action_methods.include?(params[:testop].to_s)
-        self.send(params[:testop])
+        send(params[:testop])
+      elsif params[:testop] == 'env'
+        send('environment')
       else
         render file: 'public/404', status: 404, layout: false
       end
@@ -13,6 +15,40 @@ module Marty
     def version
       diag_response git_details +
         [Diagnostic.new('Marty Version', true, VERSION)]
+    end
+
+    def environment
+      rbv = "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
+
+      details = [
+        Diagnostic.new('Environment', true, Rails.env),
+        Diagnostic.new('Rails Version', true, Rails.version),
+        Diagnostic.new('Netzke Core Version', true, Netzke::Core::VERSION),
+        Diagnostic.new('Netzke Basepack Version', true,
+                       Netzke::Basepack::VERSION),
+        Diagnostic.new('Ruby Version', true, rbv),
+        Diagnostic.new('RubyGems Version', true, Gem::VERSION),
+        Diagnostic.new('Database Adapter', true,
+                       ActiveRecord::Base.connection.adapter_name)
+      ]
+      begin
+        status = true
+        result = ActiveRecord::Base.connection.execute('SELECT VERSION();')
+        message = result[0]['version'] if result
+      rescue => e
+        status = false
+        message = e.message
+      end
+      details << Diagnostic.new('Database Version', status, message)
+
+      begin
+        status, message = true, ActiveRecord::Migrator.current_version
+      rescue => e
+        status = false
+        message = e.message
+      end
+      details << Diagnostic.new('Database Schema Version', status, message)
+      diag_response details
     end
 
   private
