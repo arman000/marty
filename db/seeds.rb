@@ -49,5 +49,6 @@ end
 
 # one time set up for delayed_job/promises, override only needed
 # if DELAYED_JOB_PATH is not bin/delayed_job
-Marty::Config["DELAYED_JOB_PARAMS"] = "-n 4"
+Marty::Config["DELAYED_JOB_PARAMS"] = "-n 4" unless
+  Marty::Config["DELAYED_JOB_PARAMS"]
 # Marty::Config["DELAYED_JOB_PATH"]   = "script/delayed_job"
