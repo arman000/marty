@@ -27,12 +27,6 @@ class Marty::ScriptForm < Marty::Form
     }
     JS
 
-    c.get_script_body = l(<<-JS)
-    function() {
-       return this.getForm().findField('body').getValue();
-    }
-    JS
-
     # Sets an editor line class (unset any previous line class).  For
     # now, only one line is classed at a time.
     c.set_line_error = l(<<-JS)
@@ -59,14 +53,16 @@ class Marty::ScriptForm < Marty::Form
 
     ######################################################################
 
-    # FIXME: no longer works -- see related FIXME below.
-    c.on_print = l(<<-JS)
-    function() {
-       window.open(
-          "/marty/components/#{self.name}.html?script_id=" + this.getScriptId(),
-          "printing",
-          'width=800,height=700,toolbar=no,location=no,directories=no,'+
-          'status=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=yes');
+    c.netzke_on_do_print = l(<<-JS)
+    function(params) {
+      this.server.doPrint(this.getScriptId());
+    }
+    JS
+
+    c.download_report = l(<<-JS)
+    function(jid) {
+      // FIXME: seems pretty hacky
+      window.location = "#{Marty::Util.marty_path}/job/download?job_id=" + jid;
     }
     JS
   end
@@ -170,13 +166,36 @@ class Marty::ScriptForm < Marty::Form
     client.netzke_apply_form_errors(build_form_errors(record))
   end
 
+  endpoint :do_print do |script_id|
+    return client.netzke_notify("Permission Denied") unless
+      self.class.has_any_perm?
+
+    script = Marty::Script.find_by_id(script_id)
+
+    return client.netzke_notify("bad script") unless script
+
+    begin
+      job_id = Marty::Util.
+               background_report("ScriptReport",
+                                 "PrettyScript",
+                                 {
+                                   "script_id" => script.id,
+                                   "title"     => script.name,
+                                 },
+                                 true,
+                                )
+      client.download_report job_id
+    rescue => exc
+      return client.netzke_notify "ERROR: #{exc}"
+    end
+  end
+
   ######################################################################
 
-  action :print do |a|
+  action :do_print do |a|
     a.text    = I18n.t("script_form.print")
     a.tooltip = I18n.t("script_form.print")
     a.icon    = :printer
-    a.handler = :on_print
   end
 
   ######################################################################
@@ -184,25 +203,11 @@ class Marty::ScriptForm < Marty::Form
   def default_bbar
     [
       :apply,
-      :print,
+      :do_print,
     ]
   end
 
   ######################################################################
-
-  # Used for printing: REALLY FIXME -- this no longer works since the
-  # removal of the component export_content hack. -- To fix, we should
-  # create a ScriptPrint report.  Then, we should have the button run
-  # this report in the foreground.  The problem is that we currently
-  # don't have any delorean files in Marty to create a report.
-  def export_content(format, title, params={})
-    raise "unknown format: #{format}" unless format == "html"
-
-    r = Marty::Script.find_by_id(params[:script_id])
-    res = CodeRay.scan(r.body, :ruby).div(line_numbers: :table)
-
-    [res, "text/html", "inline", "#{title}.html"]
-  end
 
   def configure(c)
     super

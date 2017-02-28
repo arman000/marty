@@ -3,7 +3,7 @@ module Marty::ContentHandler
     "csv"  => ['text/csv',                 'download'],
     "zip"  => ['application/zip',          'download'],
     "xlsx" => ['application/vnd.ms-excel', 'download'],
-    "html" => ['text/html',                'inline'],
+    "html" => ['text/html',                'download'],
     "txt"  => ['text/plain',               'inline'],
     "json" => ['application/json',         'download'],
 
@@ -29,6 +29,8 @@ module Marty::ContentHandler
         res = to_zip(data)
       when nil, "json"
         res, format = data.to_json, "json"
+      when "html"
+        res = data.to_s
       else
         res, format = {error: "Unknown format: #{format}"}.to_json, "json"
       end
