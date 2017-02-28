@@ -7,4 +7,6 @@ module Marty::PgEnum
 
     index
   end
+
+  alias_method :find_by_name, :[]
 end

@@ -34,8 +34,8 @@ class Marty::DataGrid < Marty::Base
       dg.metadata.each do
         |inf|
 
-        attr, type, keys, dir, rs_keep =
-          inf["attr"], inf["type"], inf["keys"], inf["dir"], inf["rs_keep"]
+        attr, type, keys, rs_keep =
+          inf["attr"], inf["type"], inf["keys"], inf["rs_keep"]
 
         unless rs_keep.nil? || rs_keep.empty?
           m = /\A *(<|<=|>|>=)? *([a-z_]+) *\z/.match(rs_keep)
@@ -182,7 +182,14 @@ class Marty::DataGrid < Marty::Base
             when "boolean"
               v
             else # AR class
-              v.to_s
+              # FIXME: really hacky to hard-code "name".  Used to
+              # perform to_s which could lead ot strange failures when
+              # model had no to_s defined.
+              begin
+                String === v ? v : v.name
+              rescue NoMethodError
+                raise "could not get name for #{v}"
+              end
             end
       end
 
@@ -190,35 +197,35 @@ class Marty::DataGrid < Marty::Base
       # This would prefer more specific rather than wild card
       # solutions.  However, would need to figure out how to preserve
       # ordering on subsequent INTERSECT operations.
-      ixq = ix_class.
-            select(:index).
-            distinct.
-            where(data_grid_id: group_id,
-                  created_dt:   created_dt,
-                  attr:         inf["attr"],
-                 ).
-            where(q, v).to_sql
+      ix_class.
+        select(:index).
+        distinct.
+        where(data_grid_id: group_id,
+              created_dt:   created_dt,
+              attr:         inf["attr"],
+             ).
+        where(q, v).to_sql
     end.compact
 
     sql = sqla.join(" INTERSECT ")
 
-    self.class.connection.execute(sql).to_a.map { |h| h["index"].to_i }
+    self.class.connection.execute(sql).to_a.map { |hh| hh["index"].to_i }
   end
 
   def lookup_grid_distinct(pt, h, return_grid_data=false, distinct=true)
-    isets = ["h", "v"].each_with_object({}) do |dir, isets|
+    isets = ["h", "v"].each_with_object({}) do |dir, ih|
       infos = dir_infos(dir)
 
-      isets[dir] = query_grid_dir(h, infos)
+      ih[dir] = query_grid_dir(h, infos)
 
-      unless isets[dir] or return_grid_data
+      unless ih[dir] or return_grid_data
         attrs = infos.map { |inf| inf["attr"] }
 
         raise "#{dir} attrs not provided: %s" % attrs.join(',')
       end
 
-      raise "Grid #{name}, (#{isets[dir].count}) #{dir} matches > 1." if
-        distinct && isets[dir] && isets[dir].count > 1
+      raise "Grid #{name}, (#{ih[dir].count}) #{dir} matches > 1." if
+        distinct && ih[dir] && ih[dir].count > 1
     end
 
     # deterministic result: pick min index when there's a choice
@@ -246,6 +253,7 @@ class Marty::DataGrid < Marty::Base
     raise "non-hash arg #{h}" unless Hash === h
 
     res = dg.lookup_grid_distinct(pt, h, false, distinct)
+
     res["result"]
   end
 
@@ -341,7 +349,7 @@ class Marty::DataGrid < Marty::Base
     dt_row = lenient ? ["lenient"] : []
     dt_row << data_type unless [nil, DEFAULT_DATA_TYPE].member?(data_type)
 
-    meta_rows = dt_row.empty? ? [] : [dt_row]
+    meta_rows = dt_row.empty? ? [] : [[dt_row.join(' ')]]
 
     meta_rows += metadata.map { |inf|
       [inf["attr"], inf["type"], inf["dir"], inf["rs_keep"] || ""]
@@ -427,7 +435,7 @@ class Marty::DataGrid < Marty::Base
 
   def self.maybe_get_klass(type)
     begin
-      klass = type.constantize unless INDEX_MAP[type] || type == "float"
+      type.constantize unless INDEX_MAP[type] || type == "float"
     rescue NameError
       raise "unknown header type/klass: #{type}"
     end
@@ -612,8 +620,8 @@ class Marty::DataGrid < Marty::Base
     metadata_copy, data_copy = metadata.deep_dup, data.deep_dup
 
     metadata_copy.each do |meta|
-      dir, attr, keys, type, rs_keep = meta.values_at(
-                               "dir", "attr", "keys", "type", "rs_keep")
+      dir, keys, type, rs_keep = meta.values_at(
+                         "dir", "keys", "type", "rs_keep")
       next unless rs_keep
 
       if type == "numrange" || type == "int4range"

@@ -16,6 +16,9 @@ en:
   applications: Applications
   create_posting: Create
   api_auth: API Authorization
+  event_view: Event View
+  data_grid_view: Data Grids
+  data_grid: Data Grids
 
   roles:
     viewer: Viewer
@@ -56,6 +59,21 @@ en:
     roles:     Roles
     select_roles: Select one or more roles
     created_dt: Last Checked In
+
+  event_grid:
+    title: Events
+    klass: Class
+    subject_id: ID
+    enum_event_operation: Operation
+    expire_secs: Expire Secs
+    error: Completion Status
+    start_dt: Started At
+    end_dt: Ended At
+    promise_start_dt: Promise Started At
+    promise_end_dt: Promise Ended At
+    promise_job_id: Promise Job ID
+    promise_status: Promise Status
+    comment: Comment
 
   script_form:
     save: Save
@@ -138,3 +156,6 @@ en:
     api_key: API Key
     app_name: Application Name
     script_name: Script Name
+    data_grid__name: Data Grid
+    breakeven_data_grid__name: Breakeven Data Grid
+    data_grid_view: Data Grids

@@ -66,5 +66,37 @@ module Marty
         end
       end
     end
+
+    describe 'GET #environment' do
+      it 'returns http success' do
+        get :environment
+
+        expect(response).to have_http_status(:success)
+      end
+
+      it 'returns the environment details' do
+        get :environment
+
+        aggregate_failures do
+          expect(assigns('details').count).to eq(9)
+          expect(assigns('details').first.methods)
+            .to include(:name, :status, :description)
+          expect(assigns('details').first.description).to eq('test')
+        end
+      end
+
+      it 'returns the appropriate json' do
+        get :environment, format: :json
+
+        aggregate_failures do
+          expect(json_response.first['diag_count']).to eq(9)
+          expect(json_response.first['error_count']).to eq(0)
+          expect(json_response
+                 .find { |d| d['name'] == 'Environment' }['description'])
+            .to eq('test')
+        end
+      end
+    end
+
   end
 end

@@ -13,6 +13,7 @@ class Delorean::BaseModule::NodeCall
   # Monkey-patch '|' method for Delorean NodeCall to create promise
   # jobs and return promise proxy objects.
   def |(args)
+
     if args.is_a?(String)
       attr = args
       args = [attr]
@@ -20,7 +21,6 @@ class Delorean::BaseModule::NodeCall
       raise "bad arg to %" unless args.is_a?(Array)
       attr = nil
     end
-
     script, tag = engine.module_name, engine.sset.tag
     nn = node.is_a?(Class) ? node.name : node.to_s
 
@@ -40,7 +40,6 @@ class Delorean::BaseModule::NodeCall
              parent_id: params[:_parent_id],
              )
     params[:_promise_id] = promise.id
-
     begin
       job = Delayed::Job.enqueue Marty::PromiseJob.
         new(promise, title, script, tag, nn, params, args, hook)
@@ -59,14 +58,32 @@ class Delorean::BaseModule::NodeCall
     promise.job_id = job.id
     promise.save!
 
+    evh = params["p_event"]
+    if evh
+      event, klass, subject_id, operation = evh.values_at("event", "klass",
+                                                          "id", "operation")
+      if event
+        event.promise_id = promise.id
+        event.save!
+      else
+        event = Marty::Event.
+                create!(promise_id: promise.id,
+                        klass:      klass,
+                        subject_id: subject_id,
+                        enum_event_operation: operation)
+      end
+    end
     Marty::PromiseProxy.new(promise.id, timeout, attr)
   end
 end
 
-class Delorean::Engine
-  def background_eval(node, params, attrs)
-    raise "background_eval bad params" unless params.is_a?(Hash)
 
+class Delorean::Engine
+  def background_eval(node, params, attrs, event = {})
+    raise "background_eval bad params" unless params.is_a?(Hash)
+    params["p_event"] = event.each_with_object({}) do |(k, v), h|
+      h[k.to_s] = v
+    end unless event.empty?
     nc = Delorean::BaseModule::NodeCall.new({}, self, node, params)
     # start the background promise
     nc | attrs
@@ -97,11 +114,10 @@ class Marty::PromiseJob < Struct.new(:promise,
 
       engine = Marty::ScriptSet.new(tag).get_engine(sname)
 
-      engine.evaluate_attrs(node, attrs, params)
-
-      res = attrs.each_with_object({}) { |attr, h|
-        h[attr] = engine.evaluate(node, attr, params)
-      }
+      attrs_eval = engine.evaluate_attrs(node, attrs, params)
+      res = attrs.zip(attrs_eval).each_with_object({}) do |(attr, val), h|
+        h[attr] = val
+      end
 
       # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
     rescue => exc
