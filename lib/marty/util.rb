@@ -107,4 +107,18 @@ module Marty::Util
       obj.is_a?(Float)? obj.round(digits) : obj
     end
   end
+
+  # Run a report as a promise and return its promise ID.
+  def self.background_report(script_name, node_name, params, force)
+    engine = Marty::ScriptSet.new.get_engine(script_name)
+    res = engine.background_eval(node_name,
+                                 params,
+                                 ["result", "title", "format"],
+                                )
+
+    promise_id = res.__promise__.id
+    res.force if force
+
+    promise_id
+  end
 end

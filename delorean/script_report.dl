@@ -1,0 +1,12 @@
+IdField:
+    xtype        = ":numberfield"
+    field_label  = "Id"
+    name         = "script_id"
+
+PrettyScript:
+    script_id =? nil
+    title     =? "Script Printing"
+
+    form   = [IdField]
+    result = Marty::Script.pretty_print(script_id)
+    format = "html"

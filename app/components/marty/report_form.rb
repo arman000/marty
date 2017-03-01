@@ -185,7 +185,8 @@ class Marty::ReportForm < Marty::Form
 
       raise "bad form items" unless items.is_a?(Array)
       raise "bad format" unless
-        ["csv", "xlsx", "zip", "json"].member?(format)
+        Marty::ContentHandler::GEN_FORMATS.member?(format)
+
     rescue => exc
       c.title = "ERROR"
       c.items =

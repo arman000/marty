@@ -107,11 +107,14 @@ class Marty::Script < Marty::Base
     elsif Rails.configuration.marty.delorean_scripts_path
       paths = Rails.configuration.marty.delorean_scripts_path
     else
-      paths = ["#{Rails.root}/delorean",
-                File.expand_path('../../../../delorean', __FILE__)]
+      paths = [
+        "#{Rails.root}/delorean",
+        # FIXME: HACKY, wouldn't it be better to use
+        # Gem::Specification.find_by_name("marty").gem_dir??
+        File.expand_path('../../../../delorean', __FILE__),
+      ]
     end
   end
-
 
   def self.delete_scripts
     ActiveRecord::Base.connection.
@@ -138,5 +141,14 @@ class Marty::Script < Marty::Base
     # passed back.  It's likely that nodes which are not from the
     # current tag can caused problems.
     res
+  end
+
+  delorean_fn :pretty_print, sig: 1 do
+    |id|
+    script = find_by_id id
+
+    next "unknown script #{id}" unless script
+
+    CodeRay.scan(script.body, :ruby).div(line_numbers: :table)
   end
 end
