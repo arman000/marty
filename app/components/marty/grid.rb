@@ -32,13 +32,14 @@ class Marty::Grid < ::Netzke::Grid::Base
     super
 
     c.permissions = {
-      create:      class_can?(:create),
-      read:        class_can?(:read),
-      update:      class_can?(:update),
-      delete:      class_can?(:delete)
+      create: class_can?(:create),
+      read:   class_can?(:read),
+      update: class_can?(:update),
+      delete: class_can?(:delete)
     }
-    c.editing                = :both
-    c.store_config           = {page_size: 30}
+
+    c.editing      = :both
+    c.store_config = {page_size: 30}
   end
 
   def has_search_action?
