@@ -40,4 +40,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'coderay'
   s.add_dependency 'net-ldap', '~> 0.12.0'
   s.add_dependency 'rubyzip'
+  s.add_dependency 'sqlite3'
 end

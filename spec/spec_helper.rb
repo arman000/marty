@@ -11,9 +11,12 @@ ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__
 
 Dir[Rails.root.join("../support/**/*.rb")].each { |f| require f }
 
+CLASSES_TO_EXCLUDE_FROM_SHARED = ["Marty::Log"]
 class ActiveRecord::Base
   mattr_accessor :shared_connection
-
+  class << self
+    alias_method :orig_connection, :connection
+  end
   def self.clear_connection
     @@shared_connection = nil
   end
@@ -21,7 +24,8 @@ class ActiveRecord::Base
   clear_connection
 
   def self.connection
-    @@shared_connection || retrieve_connection
+    CLASSES_TO_EXCLUDE_FROM_SHARED.include?(model_name) ? orig_connection :
+      @@shared_connection || retrieve_connection
   end
 
   def self.reset_shared_connection

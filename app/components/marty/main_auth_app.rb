@@ -47,6 +47,20 @@ class Marty::MainAuthApp < Marty::AuthApp
     }
   end
 
+  def log_menu
+    [
+      {
+        text: 'Log Maintenance',
+        icon:  icon_hack(:wrench),
+        disabled: !self.class.has_admin_perm?,
+        menu: [
+          :log_view,
+          :log_cleanup,
+        ]
+      }
+    ]
+  end
+
   def system_menu
     {
       text:  I18n.t("system"),
@@ -60,7 +74,7 @@ class Marty::MainAuthApp < Marty::AuthApp
         :event_view,
         :reload_scripts,
         :load_seed,
-      ] + background_jobs_menu
+      ] + background_jobs_menu + log_menu
     }
   end
 
@@ -235,6 +249,21 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_admin_perm?
   end
 
+  action :log_view do |a|
+    a.text     = 'View Log'
+    a.tooltip  = 'View Log'
+    a.handler  = :netzke_load_component_by_action
+    a.icon      = :cog
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+  action :log_cleanup do |a|
+    a.text     = 'Cleanup Log Table'
+    a.tooltip  = 'Delete old log records'
+    a.icon      = :cog
+    a.disabled = !self.class.has_admin_perm?
+  end
+
    ######################################################################
 
   def bg_command(param)
@@ -266,6 +295,15 @@ class Marty::MainAuthApp < Marty::AuthApp
     cmd = bg_command("restart #{params}")
     res = `#{cmd}`
     client.show_detail res.html_safe.gsub("\n","<br/>"), 'Delayed Job Restart'
+  end
+
+  endpoint :log_cleanup do |params|
+    begin
+      Marty::Log.cleanup(params)
+    rescue => e
+      res = e.message
+      client.show_detail res.html_safe.gsub("\n","<br/>"), 'Log Cleanup'
+    end
   end
 
   ######################################################################
@@ -401,6 +439,23 @@ class Marty::MainAuthApp < Marty::AuthApp
       this.server.bgStatus({});
     }
     JS
+
+    c.netzke_on_log_cleanup = l(<<-JS)
+    function(params) {
+       var me = this;
+       Ext.Msg.show({
+         title: 'Log Cleanup',
+         msg: 'Enter number of days to keep',
+         width: 375,
+         buttons: Ext.Msg.OKCANCEL,
+         prompt: true,
+         fn: function (btn, value) {
+           btn == "ok" && me.server.logCleanup(value);
+         }
+       });
+    }
+    JS
+    
   end
 
   action :select_posting do |a|
@@ -442,6 +497,10 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :data_grid_view
   component :api_auth_view do |c|
     c.disabled = Marty::Util.warped?
+  end
+
+  component :log_view do |c|
+    c.klass = Marty::LogView
   end
 
   endpoint :reload_scripts do |params|
