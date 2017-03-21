@@ -48,6 +48,12 @@ en:
     created_dt: Create Date/Time
     delete: Delete Script
 
+  log_grid:
+    message_type: Type
+    message: Message
+    timestamp: Timestamp
+    details: Details
+
   user_grid:
     title: Users
     new:   New User
