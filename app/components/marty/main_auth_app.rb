@@ -455,7 +455,7 @@ class Marty::MainAuthApp < Marty::AuthApp
        });
     }
     JS
-    
+
   end
 
   action :select_posting do |a|
