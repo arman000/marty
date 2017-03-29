@@ -102,6 +102,16 @@ FAILER:
     a = ERR('I had an error')
 EOS
 
+NAME_K = "PromiseK"
+SCRIPT_K = <<EOS
+LOGGER:
+    msgid =? nil
+
+    result = Gemini::Helper.testlog('message', [msgid]) &&
+             Gemini::Helper.testaction('message %d', msgid)
+
+EOS
+
 def promise_bodies
   {
     NAME_A => SCRIPT_A,
@@ -114,5 +124,6 @@ def promise_bodies
     NAME_H => SCRIPT_H,
     NAME_I => SCRIPT_I,
     NAME_J => SCRIPT_J,
+    NAME_K => SCRIPT_K,
   }
 end
