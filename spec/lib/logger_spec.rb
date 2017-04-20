@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'job_helper'
 
 module Marty
   describe Logger do
@@ -94,6 +95,60 @@ module Marty
                                                       and_call_original
         sleep 1
         Marty::Log.cleanup(0)
+      end
+    end
+  end
+  describe "Exercise" do
+    before(:all) do
+      @clean_file = "/tmp/clean_#{Process.pid}.psql"
+      save_clean_db(@clean_file)
+      # transactional fixtures interfere with queueing jobs
+      self.use_transactional_fixtures = false
+
+      # Needed here because shutting transactional fixtures off
+      # means we lose the globally set user
+      Mcfly.whodunnit = UserHelpers.system_user
+
+      Marty::Script.load_script_bodies(promise_bodies, Date.today)
+      start_delayed_job
+    end
+    after(:all) do
+      restore_clean_db(@clean_file)
+      stop_delayed_job
+      File.unlink("/tmp/logaction.txt")
+      Marty::Log.cleanup(0)
+      self.use_transactional_fixtures = true
+    end
+
+    it "handles heavy load" do
+      File.open(Rails.root.join("log/test.log")) do |f|
+        f.seek(0, IO::SEEK_END)
+        engine = Marty::ScriptSet.new.get_engine(NAME_K)
+        (1..1000).each do |i|
+          engine.background_eval("LOGGER", {"msgid" => i}, ["result"])
+        end
+
+        60.times do
+          running = Marty::Promise.uncached {
+            Marty::Promise.unscoped.where(result: nil)
+          }.count
+          break if running == 0
+          sleep 1
+        end
+
+        # each background_eval writes one line to /tmp/logaction.txt
+        # these must happen no matter what happens in Marty::Logger
+        expect(File.readlines("/tmp/logaction.txt").count).to eq(1000)
+
+        # each background_eval does 10 calls to Marty::Logger.
+        # failures (after 3 retries at 0.1 sec each) are logged to rails log
+        # the total count should be 10000
+        log_count = Marty::Log.all.count
+        failed_count = f.readlines.select do
+          |l|
+          l == "Marty::Logger failure: database is locked\n"
+        end.count
+        expect(log_count + failed_count).to eq(10000)
       end
     end
   end

@@ -36,7 +36,20 @@ class Marty::Log < Marty::Base
       stmt.bind_param(3, Time.zone.now.to_f)
       stmt.bind_param(4, details.pretty_inspect)
 
-      stmt.execute
+      sent = false
+      retries = 3
+      delay = 0.1
+      until sent
+        begin
+          stmt.execute
+          sent = true
+        rescue SQLite3::BusyException
+          raise if retries == 0
+          retries -= 1
+          sleep delay
+        end
+      end
+
     rescue => e
       Marty::Util.logger.error("Marty::Logger failure: #{e.message}")
     ensure
