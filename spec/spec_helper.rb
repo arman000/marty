@@ -7,6 +7,7 @@ require 'marty_rspec'
 
 Dummy::Application.initialize!
 
+ActiveRecord::Migrator.migrate File.expand_path("../../db/migrate/", __FILE__)
 ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
 
 Dir[Rails.root.join("../support/**/*.rb")].each { |f| require f }
