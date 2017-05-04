@@ -15,7 +15,8 @@ support for role-based authorization.
 The Marty framework provides several rake tasks to manage its database tables
 and delorean scripts.
 
-To create the correct migrations for a Marty-based applications:
+To create the correct migrations for a Marty-based application (see below for
+getting the internal dummy application to work):
 
 ```
 $ rake marty:install:migrations
@@ -50,7 +51,7 @@ To delete scripts:
 $ rake marty:delete_scripts
 ```
 
-# Testing
+# Dummy Application & Testing
 
 Make sure that extjs is installed (or symbolically linked) in the
 dummy app at spec/dummy/public.
@@ -63,16 +64,30 @@ You can use the example file by doing:
 $ cp spec/dummy/config/database.yml.example spec/dummy/config/database.yml
 ```
 
+To initialize the dummy application for a demo run:
+
+```bash
+$ bundle install
+$ bundle exec rake db:create db:migrate db:seed app:marty:load_scripts
+$ cd spec/dummy
+$ rails s
+```
+
+The marty dummy app should now be accessible in your browser:
+`localhost:3000`
+
+You can log in using `marty` as both user and password.
+
 To create the test database in prepartion to run your tests:
 
 ```bash
-$ RAILS_ENV=test rake db:create db:migrate
+$ RAILS_ENV=test bundle exec rake db:create
 ```
 
 Then to run the tests:
 
 ```bash
-$ rspec
+$ bundle exec rspec
 ```
 
 # History & Status
