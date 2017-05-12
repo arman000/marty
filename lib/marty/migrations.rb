@@ -249,6 +249,17 @@ OUT
     end
   end
 
+  # some migrations attempt to get the id using the model.
+  # after enumification models have no notion of numeric id
+  # we have to get it from the database
+  def get_old_enum_id(klass, name)
+    ActiveRecord::Base.
+               connection.execute(<<-SQL).to_a.first.try{|v| v['id']}
+      select id from #{klass.table_name} where name =
+         #{ActiveRecord::Base.sanitize(name)}
+    SQL
+  end
+
   private
   def fk_opts(from, to, column)
     name = "fk_#{from}_#{to}_#{column}"
@@ -278,7 +289,24 @@ OUT
     "unique_#{klass.table_name}"
   end
 
+  def get_actual_columns(klass)
+    ha = ActiveRecord::Base.connection.execute(<<-SQL)
+       select column_name from information_schema.columns
+       where table_name = '#{klass.table_name}'
+    SQL
+    cols = ha.to_a.map(&:values).flatten
+  end
+
+  # if the database does not agree with the model regarding columns,
+  # get the actual column name
   def get_attrs(klass)
-    (Mcfly.mcfly_uniqueness(klass) + ['obsoleted_dt']).uniq
+    cols = (Mcfly.mcfly_uniqueness(klass) + ['obsoleted_dt']).uniq.map(&:to_s)
+    act_cols = get_actual_columns(klass)
+    use_cols = cols.map do |col|
+      col_id = col + '_id'
+      act_cols.include?(col) ? col :
+        act_cols.include?(col_id) ? col_id :
+          (raise "problem adding index for #{klass}: cols = #{cols}, act_cols = #{act_cols}")
+    end.map(&:to_sym)
   end
 end

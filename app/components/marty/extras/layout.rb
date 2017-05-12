@@ -75,7 +75,8 @@ module Layout
   end
 
   def enum_setter(name)
-    lambda {|r, v| r.send("#{name}=", v == '---' || v.empty? ? nil : v)}
+    lambda {|r, v| r.send("#{name}=", v.nil? || v.empty? || v == '---' ?
+                                        nil : v)}
   end
 
   ######################################################################

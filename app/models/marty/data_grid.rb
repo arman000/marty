@@ -261,8 +261,12 @@ class Marty::DataGrid < Marty::Base
   # not expected to be called from Delorean.
   cached_delorean_fn :find_class_instance, sig: 3 do
     |pt, klass, v|
-    # FIXME: very hacky -- hard-coded name
-    Marty::DataConversion.find_row(klass, {"name" => v}, pt)
+    if Marty::PgEnum === klass
+      StringEnum.new(v)
+    else
+      # FIXME: very hacky -- hard-coded name
+      Marty::DataConversion.find_row(klass, {"name" => v}, pt)
+    end
   end
 
   def lookup_grid_distinct_entry(pt, h, visited=nil, follow=true,
