@@ -289,24 +289,17 @@ OUT
     "unique_#{klass.table_name}"
   end
 
-  def get_actual_columns(klass)
-    ha = ActiveRecord::Base.connection.execute(<<-SQL)
-       select column_name from information_schema.columns
-       where table_name = '#{klass.table_name}'
-    SQL
-    cols = ha.to_a.map(&:values).flatten
-  end
-
   # if the database does not agree with the model regarding columns,
   # get the actual column name
   def get_attrs(klass)
     cols = (Mcfly.mcfly_uniqueness(klass) + ['obsoleted_dt']).uniq.map(&:to_s)
-    act_cols = get_actual_columns(klass)
+    act_cols = klass.column_names
     use_cols = cols.map do |col|
       col_id = col + '_id'
       act_cols.include?(col) ? col :
         act_cols.include?(col_id) ? col_id :
-          (raise "problem adding index for #{klass}: cols = #{cols}, act_cols = #{act_cols}")
+          (raise "problem adding index for #{klass}: "\
+                 "cols = #{cols}, act_cols = #{act_cols}")
     end.map(&:to_sym)
   end
 end
