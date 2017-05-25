@@ -37,6 +37,7 @@ class Marty::ApiAuth < Marty::Base
                        obsoleted_dt: 'infinity').exists?
     !is_secured || where(api_key: api_key,
                          script_name: script_name,
-                         obsoleted_dt: 'infinity').exists?
+                         obsoleted_dt: 'infinity').pluck(:app_name).first
   end
+
 end
