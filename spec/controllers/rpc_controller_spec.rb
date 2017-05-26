@@ -456,6 +456,17 @@ describe Marty::RpcController do
 
   end
 
+  it "should not log if it should not log" do
+    get 'evaluate', {
+      format: :json,
+      script: "M1",
+      node: "A",
+      attrs: ["a", "b"].to_json,
+      tag: t1.name,
+    }
+    expect(Marty::ApiLog.count).to eq(0)
+  end
+
   it "should handle atom attribute" do
     Marty::ApiConfig.create!(script: "M3",
                              node: "A",
