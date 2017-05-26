@@ -23,8 +23,7 @@ class Marty::ApiLogView < Marty::Grid
     ]
 
     c.store_config.merge!(
-      {sorters: [{ property: :start_time, direction: :desc }],
-       page_size: 300}
+      {sorters: [{ property: :start_time, direction: :desc }]},
     )
   end
 

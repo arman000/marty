@@ -3,17 +3,6 @@ module Marty::Migrations
     "marty_"
   end
 
-  def disable_triggers(table_name, &block)
-    begin
-      execute("ALTER TABLE #{table_name} DISABLE TRIGGER USER;")
-
-      block.call
-
-    ensure
-      execute("ALTER TABLE #{table_name} ENABLE TRIGGER USER;")
-    end
-  end
-
   def new_enum(klass, prefix_override = nil)
     raise "bad class arg #{klass}" unless
       klass.is_a?(Class) && klass < ActiveRecord::Base

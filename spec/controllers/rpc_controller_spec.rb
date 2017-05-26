@@ -130,6 +130,28 @@ describe Marty::RpcController do
     Delayed::Worker.delay_jobs = true
   end
 
+  it "should be able to post background job with non-array attrs" do
+    Delayed::Worker.delay_jobs = false
+    post 'evaluate', {
+           format: :json,
+           script: "M1",
+           node: "B",
+           attrs: "e",
+           tag: t1.name,
+           params: { a: 333, d: 5}.to_json,
+           background: true,
+         }
+    res = ActiveSupport::JSON.decode response.body
+    expect(res).to include('job_id')
+    job_id = res['job_id']
+
+    promise = Marty::Promise.find_by_id(job_id)
+
+    expect(promise.result).to eq({"e"=>4})
+
+    Delayed::Worker.delay_jobs = true
+  end
+
   it "should be able to post with complex data" do
     post 'evaluate', {
            format: :json,
@@ -341,7 +363,6 @@ describe Marty::RpcController do
     expect(response.body).to eq("error,#{expect}")
   end
 
-
   it "should raise validation failure" do
     pending("needs validation call added to rpc_controller")
     Marty::ApiConfig.create!(script: "M4",
@@ -402,6 +423,34 @@ describe Marty::RpcController do
     expect(log.attrs).to eq(attrs)
     expect(log.input).to eq(params)
     expect(log.output).to eq([[9, 9]])
+    expect(log.remote_ip).to eq("0.0.0.0")
+    expect(log.error).to eq(nil)
+
+  end
+
+  it "should log good req [background]" do
+    Marty::ApiConfig.create!(script: "M3",
+                             node: "A",
+                             attr: nil,
+                             logged: true)
+    attrs = ["lc"].to_json
+    params = {"p" => 5}
+    get 'evaluate', {
+      format: :csv,
+      script: "M3",
+      node: "A",
+      attrs: attrs,
+      params: params.to_json,
+      background: true
+    }
+    expect(response.body).to match(/job_id,/)
+    log = Marty::ApiLog.order(id: :desc).first
+
+    expect(log.script).to eq("M3")
+    expect(log.node).to eq("A")
+    expect(log.attrs).to eq(attrs)
+    expect(log.input).to eq(params)
+    expect(log.output).to include("job_id")
     expect(log.remote_ip).to eq("0.0.0.0")
     expect(log.error).to eq(nil)
 
