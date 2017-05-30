@@ -491,29 +491,6 @@ describe Marty::RpcController do
     expect(log.error).to eq(nil)
   end
 
-  it "should log bad req" do
-    Marty::ApiConfig.create!(script: "M3",
-                             node: "A",
-                             attr: nil,
-                             logged: true)
-    attrs = ["lc"].to_json
-    get 'evaluate', {
-      format: :csv,
-      script: "M3",
-      node: "A",
-      attrs: attrs,
-      params: "bad"
-    }
-    log = Marty::ApiLog.order(id: :desc).first
-    expect(log.script).to eq("M3")
-    expect(log.node).to eq("A")
-    expect(log.attrs).to eq(attrs)
-    expect(log.input).to eq(nil)
-    expect(log.output).to eq(nil)
-    expect(log.remote_ip).to eq("0.0.0.0")
-    expect(log.error).to eq("Malformed params")
-  end
-
   it "should support api authorization - api_key not required" do
     api = Marty::ApiAuth.new
     api.app_name = 'TestApp'
@@ -589,7 +566,7 @@ describe Marty::RpcController do
   context "error handling" do
     it 'returns bad attrs if attrs is not a string' do
       get :evaluate, format: :json, attrs: 0
-      expect(response.body).to match(/"error":"Bad attrs"/)
+      expect(response.body).to match(/"error":"Malformed attrs"/)
     end
 
     it 'returns malformed attrs for improperly formatted json' do
