@@ -41,4 +41,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'net-ldap', '~> 0.12.0'
   s.add_dependency 'rubyzip'
   s.add_dependency 'sqlite3'
+  s.add_dependency 'json-schema'
 end

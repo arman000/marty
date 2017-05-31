@@ -79,9 +79,10 @@ class Marty::RpcController < ActionController::Base
         return {error: e.message}
       end
       schemas.each do |attr, schema|
-        # FIXME: JSON::Validator.fully_validate(schema, params)
-        # set validation_error if any schemas had error.. should be string
+        JSON::Validator.fully_validate(schema, params)
       end
+      err = JSON::Validator.validation_errors
+      validation_error = err unless err.empty?
     end
 
     return {error: "Error(s) validating: #{validation_error}"} if
