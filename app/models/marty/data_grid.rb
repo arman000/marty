@@ -262,7 +262,7 @@ class Marty::DataGrid < Marty::Base
   cached_delorean_fn :find_class_instance, sig: 3 do
     |pt, klass, v|
     if Marty::PgEnum === klass
-      StringEnum.new(v)
+      klass.find_by_name(v)
     else
       # FIXME: very hacky -- hard-coded name
       Marty::DataConversion.find_row(klass, {"name" => v}, pt)

@@ -7,6 +7,8 @@ require 'marty/user_view'
 require 'marty/event_view'
 require 'marty/promise_view'
 require 'marty/api_auth_view'
+require 'marty/api_config_view'
+require 'marty/api_log_view'
 require 'marty/config_view'
 require 'marty/data_grid_view'
 
@@ -61,6 +63,21 @@ class Marty::MainAuthApp < Marty::AuthApp
     ]
   end
 
+  def api_menu
+    [
+      {
+        text: 'API Management',
+        icon:  icon_hack(:wrench),
+        disabled: !self.class.has_admin_perm?,
+        menu: [
+          :api_auth_view,
+          :api_config_view,
+          :api_log_view,
+        ]
+      }
+    ]
+  end
+
   def system_menu
     {
       text:  I18n.t("system"),
@@ -70,11 +87,10 @@ class Marty::MainAuthApp < Marty::AuthApp
         :import_type_view,
         :user_view,
         :config_view,
-        :api_auth_view,
         :event_view,
         :reload_scripts,
         :load_seed,
-      ] + background_jobs_menu + log_menu
+      ] + background_jobs_menu + log_menu + api_menu
     }
   end
 
@@ -201,7 +217,21 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   action :api_auth_view do |a|
-    a.text      = I18n.t("api_auth_view", default: "API Authorization")
+    a.text      = 'API Auth Management'
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :script_key
+    a.disabled  = !self.class.has_admin_perm?
+  end
+
+  action :api_config_view do |a|
+    a.text      = 'API Config Management'
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :script_key
+    a.disabled  = !self.class.has_admin_perm?
+  end
+
+  action :api_log_view do |a|
+    a.text      = 'API Log View'
     a.handler   = :netzke_load_component_by_action
     a.icon      = :script_key
     a.disabled  = !self.class.has_admin_perm?
@@ -498,6 +528,8 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :api_auth_view do |c|
     c.disabled = Marty::Util.warped?
   end
+  component :api_log_view
+  component :api_config_view
 
   component :log_view do |c|
     c.klass = Marty::LogView

@@ -7,8 +7,7 @@ class Marty::RpcController < ActionController::Base
                   params["params"] || "{}",
                   params["api_key"] || nil,
                   params["background"],
-                  )
-
+                 )
     respond_to do |format|
       format.json { send_data res.to_json }
       format.csv  {
@@ -21,68 +20,114 @@ class Marty::RpcController < ActionController::Base
 
   private
 
-  def do_eval(sname, tag, node, attrs, params, api_key, background)
-    err = "Marty::RpcController#do_eval,"
-
-    unless attrs.is_a?(String)
-      logger.info "#{err} Bad attrs (must be a string): <#{attrs.inspect}>"
-      return {error: "Bad attrs"}
-    end
-
+  # FIXME: move to (probably) agrim's schema code in lib
+  def get_schemas(tag, sname, node, attrs)
     begin
-      attrs = ActiveSupport::JSON.decode(attrs)
-    rescue JSON::ParserError => e
-      logger.info "#{err} Malformed attrs (json): #{attrs.inspect}, #{e.message}"
-      return {error: "Malformed attrs"}
+      engine = Marty::ScriptSet.new(tag).get_engine(sname+'Schemas')
+      result = engine.evaluate_attrs(node, attrs, {})
+      attrs.zip(result)
+    rescue => e
+      use_message = e.message == 'No such script' ?
+                      'Schema not defined' : 'Problem with schema'
+      raise "Schema error for #{sname}/#{node} "\
+            "attrs=#{attrs.join(',')}: #{use_message}"
+    end
+  end
+
+  def do_eval(sname, tag, node, attrs, params, api_key, background)
+    return {error: "Malformed attrs"} unless attrs.is_a?(String)
+
+    attrs_atom = !attrs.start_with?('[')
+    start_time = Time.zone.now
+
+    if attrs_atom
+      attrs = [attrs]
+    else
+      begin
+        attrs = ActiveSupport::JSON.decode(attrs)
+      rescue JSON::ParserError => e
+        return {error: "Malformed attrs"}
+      end
     end
 
-    unless attrs.is_a?(Array) && attrs.all? {|x| x.is_a? String}
-      logger.info "#{err} Malformed attrs (not string array): <#{attrs.inspect}>"
-      return {error: "Malformed attrs"}
-    end
+    return {error: "Malformed attrs"} unless
+      attrs.is_a?(Array) && attrs.all? {|x| x =~ /\A[a-z][a-zA-Z0-9_]*\z/}
 
-    unless params.is_a?(String)
-      logger.info "#{err} Bad params (must be a string): <#{params.inspect}>"
-      return {error: "Bad params"}
-    end
+    return {error: "Bad params"} unless params.is_a?(String)
 
     begin
       params = ActiveSupport::JSON.decode(params)
+      orig_params = params.clone
     rescue JSON::ParserError => e
-      logger.info "#{err} Malformed params (json): <#{params.inspect}>, #{e.message}"
       return {error: "Malformed params"}
     end
 
-    unless params.is_a?(Hash)
-      logger.info "#{err} Malformed params (not hash): <#{params.inspect}>"
-      return {error: "Malformed params"}
+    return {error: "Malformed params"} unless params.is_a?(Hash)
+
+    need_validate, need_log = [], []
+    Marty::ApiConfig.multi_lookup(sname, node, attrs).each do
+      |attr, log, validate, id|
+      need_validate << attr if validate
+      need_log << id if log
     end
 
-    unless Marty::ApiAuth.authorized?(sname, api_key)
-      logger.info "#{err} permission denied"
-      return {error: "Permission denied" }
+    validation_error = nil
+    if need_validate.present?
+      begin
+        schemas = get_schemas(tag, sname, node, need_validate)
+      rescue => e
+        return {error: e.message}
+      end
+      schemas.each do |attr, schema|
+        # FIXME: JSON::Validator.fully_validate(schema, params)
+        # set validation_error if any schemas had error.. should be string
+      end
     end
+
+    return {error: "Error(s) validating: #{validation_error}"} if
+      validation_error
+
+    auth = Marty::ApiAuth.authorized?(sname, api_key)
+    return {error: "Permission denied" } unless auth
 
     begin
       engine = Marty::ScriptSet.new(tag).get_engine(sname)
     rescue => e
       err_msg = "Can't get engine: #{sname || 'nil'} with tag: " +
-              "#{tag || 'nil'}; message: #{e.message}"
-      logger.info "#{err} #{err_msg}"
+                "#{tag || 'nil'}; message: #{e.message}"
+      logger.info err_msg
       return {error: err_msg}
     end
+
+    retval = nil
 
     begin
       if background
         result = engine.background_eval(node, params, attrs)
-        {"job_id" => result.__promise__.id}
-      else
-        engine.evaluate_attrs(node, attrs, params)
+        return retval = {"job_id" => result.__promise__.id}
       end
+
+      res = engine.evaluate_attrs(node, attrs, params)
+      return retval = (attrs_atom ? res.first : res)
     rescue => exc
-      err_msg = Delorean::Engine.grok_runtime_exception(exc)
-      logger.info "#{err} Evaluation error: #{err_msg}"
-      err_msg
+      err_msg = Delorean::Engine.grok_runtime_exception(exc).symbolize_keys
+      logger.info "Evaluation error: #{err_msg}"
+      return retval = err_msg
+    ensure
+      error = Hash === retval ? retval[:error] : nil
+
+      # FIXME: how do we know this isn't going to fail??
+      Marty::ApiLog.create!(script:     sname,
+                            node:       node,
+                            attrs:      (attrs_atom ? attrs.first : attrs),
+                            input:      orig_params,
+                            output:     error ? nil : retval,
+                            start_time: start_time,
+                            end_time:   Time.zone.now,
+                            error:      error,
+                            remote_ip:  request.remote_ip,
+                            auth_name:  auth,
+                           ) if need_log.present?
     end
   end
 end

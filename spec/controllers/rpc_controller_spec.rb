@@ -42,8 +42,19 @@ A: M3::A
     p =? 10
     c = a * 2
     d = pc - 1
+    ptest = p * 10
     result = [{"a": 123, "b": 456}, {"a": 789, "b": 101112}]
 eof
+
+script4_schema = <<eof
+A:
+    result = { "$schema" : "script4_schema",
+               "properties" : {
+                  "p" : { "type" : "integer" },
+                 }
+             }
+eof
+
 
 describe Marty::RpcController do
   before(:each) {
@@ -63,6 +74,7 @@ describe Marty::RpcController do
                          "M2" => sample_script.gsub(/a/, "aa").gsub(/b/, "bb"),
                          "M3" => sample_script3,
                          "M4" => sample_script4,
+                         "M4Schemas" => script4_schema,
                        }, Date.today + 1.minute)
 
     @p1 = Marty::Posting.do_create("BASE", Date.today + 2.minute, 'a comment')
@@ -114,6 +126,28 @@ describe Marty::RpcController do
     promise = Marty::Promise.find_by_id(job_id)
 
     expect(promise.result).to eq({"e"=>4, "f"=>20})
+
+    Delayed::Worker.delay_jobs = true
+  end
+
+  it "should be able to post background job with non-array attrs" do
+    Delayed::Worker.delay_jobs = false
+    post 'evaluate', {
+           format: :json,
+           script: "M1",
+           node: "B",
+           attrs: "e",
+           tag: t1.name,
+           params: { a: 333, d: 5}.to_json,
+           background: true,
+         }
+    res = ActiveSupport::JSON.decode response.body
+    expect(res).to include('job_id')
+    job_id = res['job_id']
+
+    promise = Marty::Promise.find_by_id(job_id)
+
+    expect(promise.result).to eq({"e"=>4})
 
     Delayed::Worker.delay_jobs = true
   end
@@ -291,6 +325,172 @@ describe Marty::RpcController do
     expect(response.body).to eq("a,b\r\n123,456\r\n789,101112\r\n")
   end
 
+  it "should raise on missing validate schema" do
+    Marty::ApiConfig.create!(script: "M3",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["lc"].to_json
+    params = {"p" => 5}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M3",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = "Schema error for M3/A attrs=lc: Schema not defined\r\n"
+    expect(response.body).to eq("error,#{expect}")
+  end
+
+  it "should raise on missing attr in validate schema" do
+    Marty::ApiConfig.create!(script: "M4",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["lc"].to_json
+    params = {"p" => 5}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M4",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = "Schema error for M4/A attrs=lc: Problem with schema\r\n"
+    expect(response.body).to eq("error,#{expect}")
+  end
+
+  it "should raise validation failure" do
+    pending("needs validation call added to rpc_controller")
+    Marty::ApiConfig.create!(script: "M4",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["lc"].to_json
+    params = {"p" => "132"}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M3",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = "validation error goes here"
+    expect(response.body).to eq("error,#{expect}")
+  end
+
+  it "should validate" do
+    Marty::ApiConfig.create!(script: "M4",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["lc"].to_json
+    params = {"p" => 5}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M3",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect(response.body).to eq("9\r\n9\r\n")
+  end
+
+  it "should log good req" do
+    Marty::ApiConfig.create!(script: "M3",
+                             node: "A",
+                             attr: nil,
+                             logged: true)
+    attrs = ["lc"].to_json
+    params = {"p" => 5}
+    get 'evaluate', {
+      format: :csv,
+      script: "M3",
+      node: "A",
+      attrs: attrs,
+      params: params.to_json
+    }
+    expect(response.body).to eq("9\r\n9\r\n")
+    log = Marty::ApiLog.order(id: :desc).first
+
+    expect(log.script).to eq("M3")
+    expect(log.node).to eq("A")
+    expect(log.attrs).to eq(attrs)
+    expect(log.input).to eq(params)
+    expect(log.output).to eq([[9, 9]])
+    expect(log.remote_ip).to eq("0.0.0.0")
+    expect(log.error).to eq(nil)
+
+  end
+
+  it "should log good req [background]" do
+    Marty::ApiConfig.create!(script: "M3",
+                             node: "A",
+                             attr: nil,
+                             logged: true)
+    attrs = ["lc"].to_json
+    params = {"p" => 5}
+    get 'evaluate', {
+      format: :csv,
+      script: "M3",
+      node: "A",
+      attrs: attrs,
+      params: params.to_json,
+      background: true
+    }
+    expect(response.body).to match(/job_id,/)
+    log = Marty::ApiLog.order(id: :desc).first
+
+    expect(log.script).to eq("M3")
+    expect(log.node).to eq("A")
+    expect(log.attrs).to eq(attrs)
+    expect(log.input).to eq(params)
+    expect(log.output).to include("job_id")
+    expect(log.remote_ip).to eq("0.0.0.0")
+    expect(log.error).to eq(nil)
+
+  end
+
+  it "should not log if it should not log" do
+    get 'evaluate', {
+      format: :json,
+      script: "M1",
+      node: "A",
+      attrs: ["a", "b"].to_json,
+      tag: t1.name,
+    }
+    expect(Marty::ApiLog.count).to eq(0)
+  end
+
+  it "should handle atom attribute" do
+    Marty::ApiConfig.create!(script: "M3",
+                             node: "A",
+                             attr: nil,
+                             logged: true)
+    params = {"p" => 5}
+    get 'evaluate', {
+      format: :csv,
+      script: "M3",
+      node: "A",
+      attrs: "lc",
+      params: params.to_json
+    }
+    expect(response.body).to eq("9\r\n9\r\n")
+    log = Marty::ApiLog.order(id: :desc).first
+    expect(log.script).to eq("M3")
+    expect(log.node).to eq("A")
+    expect(log.attrs).to eq("lc")
+    expect(log.input).to eq(params)
+    expect(log.output).to eq([9, 9])
+    expect(log.remote_ip).to eq("0.0.0.0")
+    expect(log.error).to eq(nil)
+  end
+
   it "should support api authorization - api_key not required" do
     api = Marty::ApiAuth.new
     api.app_name = 'TestApp'
@@ -327,6 +527,9 @@ describe Marty::RpcController do
     api.script_name = 'M3'
     api.save!
 
+    apic = Marty::ApiConfig.create!(script: 'M3',
+                                    logged: true)
+
     get 'evaluate', {
       format: :json,
       script: "M3",
@@ -335,6 +538,13 @@ describe Marty::RpcController do
       api_key: api.api_key,
     }
     expect(response.body).to eq([7].to_json)
+    log = Marty::ApiLog.order(id: :desc).first
+    expect(log.script).to eq('M3')
+    expect(log.node).to eq('C')
+    expect(log.attrs).to eq(%Q!["pc"]!)
+    expect(log.output).to eq([7])
+    expect(log.remote_ip).to eq("0.0.0.0")
+    expect(log.auth_name).to eq("TestApp")
   end
 
   it "should support api authorization - api_key required but incorrect" do
@@ -356,7 +566,7 @@ describe Marty::RpcController do
   context "error handling" do
     it 'returns bad attrs if attrs is not a string' do
       get :evaluate, format: :json, attrs: 0
-      expect(response.body).to match(/"error":"Bad attrs"/)
+      expect(response.body).to match(/"error":"Malformed attrs"/)
     end
 
     it 'returns malformed attrs for improperly formatted json' do
