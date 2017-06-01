@@ -353,7 +353,7 @@ describe Marty::RpcController do
     expect(response.body).to eq("a,b\r\n123,456\r\n789,101112\r\n")
   end
 
-  it "should return an error message on missing schema script" do
+  it "returns an error message on missing schema script" do
     Marty::ApiConfig.create!(script: "M1",
                              node: "A",
                              attr: nil,
@@ -372,7 +372,7 @@ describe Marty::RpcController do
     expect(response.body).to eq("error,#{expect}")
   end
 
-  it "should return an error message on missing attributes in schema script" do
+  it "returns an error message on missing attributes in schema script" do
     Marty::ApiConfig.create!(script: "M4",
                              node: "A",
                              attr: nil,
@@ -391,7 +391,7 @@ describe Marty::RpcController do
     expect(response.body).to eq("error,#{expect}")
   end
 
-  it "should return an error message on invalid schema" do
+  it "returns an error message on invalid schema" do
     Marty::ApiConfig.create!(script: "M3",
                              node: "A",
                              attr: nil,
@@ -410,7 +410,7 @@ describe Marty::RpcController do
     expect(response.body).to eq("error,#{expect}")
   end
 
-  it "should return a validation error when validating a single attribute" do
+  it "returns a validation error when validating a single attribute" do
     Marty::ApiConfig.create!(script: "M4",
                              node: "A",
                              attr: nil,
@@ -430,7 +430,7 @@ describe Marty::RpcController do
     expect(response.body).to include(expect)
   end
 
-  it "should return a validation error when validating multiple attributes" do
+  it "returns a validation error when validating multiple attributes" do
     Marty::ApiConfig.create!(script: "M4",
                              node: "A",
                              attr: nil,
@@ -456,7 +456,7 @@ describe Marty::RpcController do
     expect(response.body).to include(expect)
   end
 
-  it "should validate schema" do
+  it "validates schema" do
     Marty::ApiConfig.create!(script: "M4",
                              node: "A",
                              attr: nil,
@@ -472,27 +472,6 @@ describe Marty::RpcController do
       params: params
     }
     expect(response.body).to eq("9\r\n9\r\n")
-  end
-
-#TODO
-  it "should validate schema -- TODO" do
-    Marty::ApiConfig.create!(script: "M1",
-                             node: "A",
-                             attr: nil,
-                             logged: false,
-                             validated: false)
-#                            validated: true)
-    attrs = ["b"].to_json
-    params = {"a" => 5}.to_json
-    get 'evaluate', {
-      format: :csv,
-      script: "M1",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
-    puts "RESPONSE #{response.body}"
-    expect(response.body).to eq("15\r\n")
   end
 
   it "should log good req" do
