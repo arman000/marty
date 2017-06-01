@@ -42,13 +42,40 @@ A: M3::A
     p =? 10
     c = a * 2
     d = pc - 1
+    e =?
+    f =?
+    g = e * 5 + f
+    h = f + 1
     ptest = p * 10
     result = [{"a": 123, "b": 456}, {"a": 789, "b": 101112}]
 eof
 
+script3_schema = <<eof
+A:
+    pc = { "$schema" : "http://json-schema.org/draft-04/schema#"
+               "properties" : {
+                  "p" : { "type" : "integer" },
+                 }
+             }
+
+eof
+
 script4_schema = <<eof
 A:
-    result = { "$schema" : "script4_schema",
+    d = { "$schema" : "http://json-schema.org/draft-04/schema#",
+               "properties" : {
+                  "p" : { "type" : "integer" },
+                 }
+             }
+
+    g = { "$schema" : "http://json-schema.org/draft-04/schema#",
+               "properties" : {
+                  "e" : { "type" : "integer" },
+                  "f" : { "type" : "integer" },
+                 }
+             }
+
+    lc = { "$schema" : "http://json-schema.org/draft-04/schema#",
                "properties" : {
                   "p" : { "type" : "integer" },
                  }
@@ -74,6 +101,7 @@ describe Marty::RpcController do
                          "M2" => sample_script.gsub(/a/, "aa").gsub(/b/, "bb"),
                          "M3" => sample_script3,
                          "M4" => sample_script4,
+                         "M3Schemas" => script3_schema,
                          "M4Schemas" => script4_schema,
                        }, Date.today + 1.minute)
 
@@ -325,13 +353,51 @@ describe Marty::RpcController do
     expect(response.body).to eq("a,b\r\n123,456\r\n789,101112\r\n")
   end
 
-  it "should raise on missing validate schema" do
+  it "should return an error message on missing schema script" do
+    Marty::ApiConfig.create!(script: "M1",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["b"].to_json
+    params = {"a" => 5}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M1",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = "Schema error for M1/A attrs=b: Schema not defined\r\n"
+    expect(response.body).to eq("error,#{expect}")
+  end
+
+  it "should return an error message on missing attributes in schema script" do
+    Marty::ApiConfig.create!(script: "M4",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["h"].to_json
+    params = {"f" => 5}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M4",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = "Schema error for M4/A attrs=h: Problem with schema\r\n"
+    expect(response.body).to eq("error,#{expect}")
+  end
+
+  it "should return an error message on invalid schema" do
     Marty::ApiConfig.create!(script: "M3",
                              node: "A",
                              attr: nil,
                              logged: false,
                              validated: true)
-    attrs = ["lc"].to_json
+    attrs = ["pc"].to_json
     params = {"p" => 5}.to_json
     get 'evaluate', {
       format: :csv,
@@ -340,11 +406,57 @@ describe Marty::RpcController do
       attrs: attrs,
       params: params
     }
-    expect = "Schema error for M3/A attrs=lc: Schema not defined\r\n"
+    expect = "Schema error for M3/A attrs=pc: Problem with schema\r\n"
     expect(response.body).to eq("error,#{expect}")
   end
 
-  it "should raise on missing attr in validate schema" do
+  it "should return a validation error when validating a single attribute" do
+    Marty::ApiConfig.create!(script: "M4",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["d"].to_json
+    params = {"p" => "132"}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M4",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = '""d""=>[""The property \'#/p\' of type string did not '\
+             'match the following type: integer'
+    expect(response.body).to include(expect)
+  end
+
+  it "should return a validation error when validating multiple attributes" do
+    Marty::ApiConfig.create!(script: "M4",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["d", "g"].to_json
+    params = {"p" => "132", "e" => "55", "f"=>"16"}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M4",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = '""d""=>[""The property \'#/p\' of type string did not '\
+             'match the following type: integer'
+    expect(response.body).to include(expect)
+    expect = '""g""=>[""The property \'#/e\' of type string did not '\
+             'match the following type: integer'
+    expect(response.body).to include(expect)
+    expect = 'The property \'#/f\' of type string did not '\
+             'match the following type: integer'
+    expect(response.body).to include(expect)
+  end
+
+  it "should validate schema" do
     Marty::ApiConfig.create!(script: "M4",
                              node: "A",
                              attr: nil,
@@ -359,46 +471,28 @@ describe Marty::RpcController do
       attrs: attrs,
       params: params
     }
-    expect = "Schema error for M4/A attrs=lc: Problem with schema\r\n"
-    expect(response.body).to eq("error,#{expect}")
-  end
-
-  it "should raise validation failure" do
-    pending("needs validation call added to rpc_controller")
-    Marty::ApiConfig.create!(script: "M4",
-                             node: "A",
-                             attr: nil,
-                             logged: false,
-                             validated: true)
-    attrs = ["lc"].to_json
-    params = {"p" => "132"}.to_json
-    get 'evaluate', {
-      format: :csv,
-      script: "M3",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
-    expect = "validation error goes here"
-    expect(response.body).to eq("error,#{expect}")
-  end
-
-  it "should validate" do
-    Marty::ApiConfig.create!(script: "M4",
-                             node: "A",
-                             attr: nil,
-                             logged: false,
-                             validated: true)
-    attrs = ["lc"].to_json
-    params = {"p" => 5}.to_json
-    get 'evaluate', {
-      format: :csv,
-      script: "M3",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
     expect(response.body).to eq("9\r\n9\r\n")
+  end
+
+#TODO
+  it "should validate schema -- TODO" do
+    Marty::ApiConfig.create!(script: "M1",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: false)
+#                            validated: true)
+    attrs = ["b"].to_json
+    params = {"a" => 5}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M1",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    puts "RESPONSE #{response.body}"
+    expect(response.body).to eq("15\r\n")
   end
 
   it "should log good req" do
