@@ -9,11 +9,11 @@ module Marty
       begin
         enum = curr_schema.schema["pg_enum"].constantize
       rescue
-        msg = "#{self.class.name} error: '#{data}' is not a pg_enum class."
+        msg = "#{self.class.name} error: '#{data}' is not a pg_enum class"
         validation_error(pro, msg, frag, curr_schema, self, opt[:record_errors])
       end
       if !enum::VALUES.include?(data)
-        msg = "#{self.class.name} error: '#{data}' not contained in #{enum}."
+        msg = "#{self.class.name} error: '#{data}' not contained in #{enum}"
         validation_error(pro, msg, frag, curr_schema, self, opt[:record_errors])
       end
     end
@@ -24,7 +24,7 @@ module Marty
       begin
         DateTime.parse(data).in_time_zone(Rails.configuration.time_zone)
       rescue
-        msg = "#{self.class.name} error: Can't parse '#{data}' into a DateTime."
+        msg = "#{self.class.name} error: Can't parse '#{data}' into a DateTime"
         validation_error( processor,
                           msg,
                           frag,
@@ -38,7 +38,6 @@ module Marty
   class JsonSchema < JSON::Schema::Draft4
     @@RAW_URI = "http://json-schema.org/marty-draft/schema#"
 
-    attr_reader :RAW_URI
     def initialize
       super
       @attributes["pg_enum"] = PgEnumAttribute
