@@ -467,36 +467,47 @@ module Marty
 
   end
 
+  ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+  ###                      URI                                ###
+  ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+  class FloorOf8 < JSON::Schema::Attribute
+    def self.validate(curr_schema, data, frag, processor, validator, opt)
+      if data < 8
+        msg = "Error at FloorOf8: Value is below 8"
+        validation_error(processor,
+                         msg,
+                         frag,
+                         curr_schema,
+                         self,
+                         opt[:record_errors])
+      end
+    end
+  end
+
+  class CeilingOf20 < JSON::Schema::Attribute
+    def self.validate(curr_schema, data, frag, processor, validator, opt)
+      if data > 20
+        msg = "Error at CeilingOf20: Value exceeds 20"
+        validation_error(processor,
+                         msg,
+                         frag,
+                         curr_schema,
+                         self,
+                         opt[:record_errors])
+      end
+    end
+  end
+
+
   describe "how @uri behaves as a key to a set of attributes" do
-
-    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-    ###                      URI                                ###
-    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-
-    class FloorOf8 < JSON::Schema::Attribute
-      def self.validate(curr_schema, data, frag, pocessor, validator, opt)
-        if data < 8
-          msg = "Error at FloorOf8: Value is below 8"
-          validation_error(processor, msg, frag, curr_schema, self, opt)
-        end
-      end
-    end
-
-    class CeilingOf20 < JSON::Schema::Attribute
-      def self.validate(curr_schema, data, frag, pocessor, validator, opt)
-        if data > 20
-          msg = "Error at CeilingOf20: Value exceeds 20"
-          validation_error(processor, msg, frag, curr_schema, self, opt)
-        end
-      end
-    end
 
     class BoundSchema < JSON::Schema::Draft4
       def initialize
         super
-        @attributes["floor"] = FloorOf8
-        @attributes["ceiling"] = CeilingOf20
-        @uri = JSON::Util::URI.parse("http://json-schema.org/bound-draft/schema#")
+        @attributes["bound"] = CeilingOf20
+        uri = "http://json-schema.org/bound-draft/schema#"
+        @uri = JSON::Util::URI.parse(uri)
       end
 
       JSON::Validator.register_validator(self.new)
@@ -535,6 +546,73 @@ module Marty
     it "incorrectly validates an attribute not part of its uri" do
       data = {"a" => 'Table'}
       expect(JSON::Validator.validate(bound_uri, data)).to be true
+    end
+
+  end
+
+  describe "how @uri behaves as a key to a set of attributes "\
+           "and seperates conflicting attributes" do
+
+    class BoundFloorSchema < JSON::Schema::Draft4
+      def initialize
+        super
+        @attributes["bound"] = FloorOf8
+        uri = "http://json-schema.org/bound-floor-draft/schema#"
+        @uri = JSON::Util::URI.parse(uri)
+      end
+
+      JSON::Validator.register_validator(self.new)
+    end
+
+    class BoundCeilingSchema < JSON::Schema::Draft4
+      def initialize
+        super
+        @attributes["bound"] = CeilingOf20
+        uri = "http://json-schema.org/bound-ceiling-draft/schema#"
+        @uri = JSON::Util::URI.parse(uri)
+      end
+
+      JSON::Validator.register_validator(self.new)
+    end
+
+    bound_floor_schema = {
+     "$schema" => "http://json-schema.org/bound-floor-draft/schema#",
+      "required"    => ["a"],
+      "properties"  => {
+        "a" => {
+          "bound"    => "",
+        },
+      }
+    }
+
+    bound_ceiling_schema = {
+     "$schema" => "http://json-schema.org/bound-ceiling-draft/schema#",
+      "required"    => ["a"],
+      "properties"  => {
+        "a" => {
+          "bound"    => "",
+        },
+      }
+    }
+
+    it "validates BoundFloorSchema when called with its uri (Positive)" do
+      data = {"a" => 9}
+      expect(JSON::Validator.validate(bound_floor_schema, data)).to be true
+    end
+
+    it "validates BoundFloorSchema when called with its uri (Negative)" do
+      data = {"a" => 7}
+      expect(JSON::Validator.validate(bound_floor_schema, data)).to be false
+    end
+
+    it "validates BoundCeilingSchema when called with its uri (Positive)" do
+      data = {"a" => 19}
+      expect(JSON::Validator.validate(bound_ceiling_schema, data)).to be true
+    end
+
+    it "validates BoundCielingSchema when called with its uri (Negative)" do
+      data = {"a" => 21}
+      expect(JSON::Validator.validate(bound_ceiling_schema, data)).to be false
     end
 
   end
