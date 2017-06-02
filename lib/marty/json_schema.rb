@@ -39,7 +39,7 @@ module Marty
       super
       @attributes["pg_enum"] = PgEnumAttribute
       @attributes["datetime_format"] = DateTimeFormatAttribute
-      @uri = JSON::Util::URI.parse("http://json-schema.org/draft-04/schema#")
+      @uri = JSON::Util::URI.parse("http://json-schema.org/marty-draft/schema#")
     end
 
     JSON::Validator.register_validator(self.new)
