@@ -550,8 +550,7 @@ module Marty
 
   end
 
-  describe "how @uri behaves as a key to a set of attributes "\
-           "and seperates conflicting attributes" do
+  describe "how @uri also behaves as namespace" do
 
     class BoundFloorSchema < JSON::Schema::Draft4
       def initialize
