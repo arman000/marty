@@ -13,11 +13,39 @@ module Marty
   describe JsonSchema do
 
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    ###                      Generic, simple data               ###
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+    simple_schema = {
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
+      "properties" => {
+        "a" => {
+          "type" => "integer"
+        },
+      }
+    }
+
+    it "returns true on correct simple data" do
+      data = {"a" => 5}
+      expect(JSON::Validator.validate(simple_schema, data)).to be true
+    end
+
+    it "returns false on incorrect simple data -- 1" do
+      data = {"a" => 5.2}
+      expect(JSON::Validator.validate(simple_schema, data)).to be false
+    end
+
+    it "returns false on incorrect simple data -- 2" do
+      data = {"a" => "Kangaroo"}
+      expect(JSON::Validator.validate(simple_schema, data)).to be false
+    end
+
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     ###                      PgEnum                             ###
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
     pg_schema_opt = {
-      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
       "properties" => {
         "a" => {
           "pg_enum" => "MammalEnum"
@@ -51,7 +79,7 @@ module Marty
     end
 
     pg_schema_req = {
-      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
       "required" => ["a"],
       "properties" => {
         "a" => {
@@ -71,7 +99,7 @@ module Marty
     end
 
     dt_schema_opt = {
-      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
       "properties" => {
         "a" => {
           "datetime_format" => ""
@@ -109,7 +137,7 @@ module Marty
     end
 
     dt_schema_req = {
-      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
       "required" => ["a"],
       "properties" => {
         "a" => {
@@ -129,7 +157,7 @@ module Marty
     end
 
     pg_dt_schema = {
-      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
       "properties" => {
         "a" => {
           "pg_enum" => "MammalEnum"
@@ -165,7 +193,7 @@ module Marty
     end
 
     pg_dt_int_schema = {
-      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
       "properties" => {
         "a" => {
           "pg_enum" => "MammalEnum"
@@ -190,7 +218,7 @@ module Marty
     end
 
     pg_dt_int_schema_req = {
-      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
       "required" => ["b"],
       "properties" => {
         "a" => {
@@ -211,7 +239,7 @@ module Marty
     end
 
     pg_dt_pg_int_schema = {
-      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
       "required" => ["c"],
       "properties" => {
         "a" => {
@@ -250,7 +278,7 @@ module Marty
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
     nested_schema = {
-      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
       "required" => ["a", "b", "c", "d", "root1", "root2"],
       "properties" => {
         "a" => {
@@ -438,4 +466,77 @@ module Marty
     end
 
   end
+
+  describe "how @uri behaves as a key to a set of attributes" do
+
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    ###                      URI                                ###
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+    class FloorOf8 < JSON::Schema::Attribute
+      def self.validate(curr_schema, data, frag, pocessor, validator, opt)
+        if data < 8
+          msg = "Error at FloorOf8: Value is below 8"
+          validation_error(processor, msg, frag, curr_schema, self, opt)
+        end
+      end
+    end
+
+    class CeilingOf20 < JSON::Schema::Attribute
+      def self.validate(curr_schema, data, frag, pocessor, validator, opt)
+        if data > 20
+          msg = "Error at CeilingOf20: Value exceeds 20"
+          validation_error(processor, msg, frag, curr_schema, self, opt)
+        end
+      end
+    end
+
+    class BoundSchema < JSON::Schema::Draft4
+      def initialize
+        super
+        @attributes["floor"] = FloorOf8
+        @attributes["ceiling"] = CeilingOf20
+        @uri = JSON::Util::URI.parse("http://json-schema.org/bound-draft/schema#")
+      end
+
+      JSON::Validator.register_validator(self.new)
+    end
+
+    marty_uri = {
+     "$schema" => "http://json-schema.org/marty-draft/schema#",
+      "required"    => ["a"],
+      "properties"  => {
+        "a" => {
+          "pg_enum"    => "MammalEnum",
+        },
+      }
+    }
+
+    bound_uri = {
+      "$schema" => "http://json-schema.org/bound-draft/schema#",
+      "required"    => ["a"],
+      "properties"  => {
+        "a" => {
+          "pg_enum"    => "MammalEnum",
+        },
+      }
+    }
+
+    it "validates an attribute dictated by its uri (Positive)" do
+      data = {"a" => 'Dog'}
+      expect(JSON::Validator.validate(marty_uri, data)).to be true
+    end
+
+    it "validates an attribute dictated by its uri (Negative)" do
+      data = {"a" => 'Table'}
+      expect(JSON::Validator.validate(marty_uri, data)).to be false
+    end
+
+    it "incorrectly validates an attribute not part of its uri" do
+      data = {"a" => 'Table'}
+      expect(JSON::Validator.validate(bound_uri, data)).to be true
+    end
+
+  end
+
 end
