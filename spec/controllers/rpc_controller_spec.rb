@@ -50,6 +50,18 @@ A: M3::A
     result = [{"a": 123, "b": 456}, {"a": 789, "b": 101112}]
 eof
 
+sample_script5 = <<eof
+A:
+    f =?
+    res = if f == "Apple"
+        then 0
+        else if f == "Banana"
+        then 1
+        else if f == "Orange"
+        then 2
+        else 9
+eof
+
 script3_schema = <<eof
 A:
     pc = { "properties : {
@@ -77,6 +89,14 @@ A:
             }
 eof
 
+script5_schema = <<eof
+A:
+    res = { "properties" : {
+            "f" : { "pg_enum" : "FruitsEnum" },
+                }
+            }
+eof
+
 
 describe Marty::RpcController do
   before(:each) {
@@ -96,8 +116,10 @@ describe Marty::RpcController do
                          "M2" => sample_script.gsub(/a/, "aa").gsub(/b/, "bb"),
                          "M3" => sample_script3,
                          "M4" => sample_script4,
+                         "M5" => sample_script5,
                          "M3Schemas" => script3_schema,
                          "M4Schemas" => script4_schema,
+                         "M5Schemas" => script5_schema,
                        }, Date.today + 1.minute)
 
     @p1 = Marty::Posting.do_create("BASE", Date.today + 2.minute, 'a comment')
@@ -467,6 +489,47 @@ describe Marty::RpcController do
       params: params
     }
     expect(response.body).to eq("9\r\n9\r\n")
+  end
+
+  class FruitsEnum
+    VALUES=Set['Apple', 'Banana', 'Orange']
+  end
+
+  it "validates schema with a pg_enum (Positive)" do
+    Marty::ApiConfig.create!(script: "M5",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["res"].to_json
+    params = {"f" => "Banana"}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M5",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect(response.body).to eq("1\r\n")
+  end
+
+  it "validates schema with a pg_enum (Negative)" do
+    Marty::ApiConfig.create!(script: "M5",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["res"].to_json
+    params = {"f" => "Beans"}.to_json
+    get 'evaluate', {
+      format: :csv,
+      script: "M5",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = '""res""=>[""Class error: \'Beans\' not contained in FruitsEnum'
+    expect(response.body).to include(expect)
   end
 
   it "should log good req" do
