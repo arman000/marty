@@ -52,34 +52,29 @@ eof
 
 script3_schema = <<eof
 A:
-    pc = { "$schema" : "http://json-schema.org/draft-04/schema#"
-               "properties" : {
+    pc = { "properties : {
                   "p" : { "type" : "integer" },
-                 }
-             }
-
+                }
+            }
 eof
 
 script4_schema = <<eof
 A:
-    d = { "$schema" : "http://json-schema.org/draft-04/schema#",
-               "properties" : {
-                  "p" : { "type" : "integer" },
-                 }
-             }
+    d = { "properties" : {
+            "p" : { "type" : "integer" },
+                }
+            }
 
-    g = { "$schema" : "http://json-schema.org/draft-04/schema#",
-               "properties" : {
+    g = { "properties" : {
                   "e" : { "type" : "integer" },
                   "f" : { "type" : "integer" },
-                 }
-             }
+                }
+          }
 
-    lc = { "$schema" : "http://json-schema.org/draft-04/schema#",
-               "properties" : {
+    lc = { "properties" : {
                   "p" : { "type" : "integer" },
-                 }
-             }
+                }
+            }
 eof
 
 

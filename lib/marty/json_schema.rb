@@ -36,11 +36,19 @@ module Marty
   end
 
   class JsonSchema < JSON::Schema::Draft4
+    @@RAW_URI = "http://json-schema.org/marty-draft/schema#"
+
+    attr_reader :RAW_URI
     def initialize
       super
       @attributes["pg_enum"] = PgEnumAttribute
       @attributes["datetime_format"] = DateTimeFormatAttribute
-      @uri = JSON::Util::URI.parse("http://json-schema.org/marty-draft/schema#")
+      @uri = JSON::Util::URI.parse(@@RAW_URI)
+      @names = ["marty-draft", @@RAW_URI]
+    end
+
+    def self.get_raw_uri
+      @@RAW_URI
     end
 
     JSON::Validator.register_validator(self.new)
