@@ -209,6 +209,21 @@ class StringEnum < String
   end
   delorean_instance_method :name
   delorean_instance_method :id
+
+  def to_yaml(opts = {})
+    YAML::quick_emit(nil, opts) do |out|
+      out.scalar('stringEnum', self.to_s, :plain)
+    end
+  end
+
+  def marshal_dump
+    self.to_s
+  end
+
+end
+YAML::add_domain_type("pennymac.com,2017-06-02", "stringEnum") do
+  |type, val|
+  StringEnum.new(val)
 end
 
 ######################################################################
