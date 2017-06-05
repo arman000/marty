@@ -14,6 +14,7 @@ require 'marty/mcfly_query'
 require 'marty/monkey'
 require 'marty/promise_job'
 require 'marty/lazy_column_loader'
+require 'marty/json_schema'
 
 # This does not get loaded in via bundler unless it is included in the
 # application's Gemfile. Requiring it here removes the need to add it

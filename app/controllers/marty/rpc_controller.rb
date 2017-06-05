@@ -28,7 +28,7 @@ class Marty::RpcController < ActionController::Base
       attrs.zip(result)
     rescue => e
       use_message = e.message == 'No such script' ?
-                      'Schema not defined' : 'Problem with schema'
+                    'Schema not defined' : 'Problem with schema'
       raise "Schema error for #{sname}/#{node} "\
             "attrs=#{attrs.join(',')}: #{use_message}"
     end
@@ -71,21 +71,25 @@ class Marty::RpcController < ActionController::Base
       need_log << id if log
     end
 
-    validation_error = nil
+    validation_error = {}
+    err_count = 0
     if need_validate.present?
       begin
         schemas = get_schemas(tag, sname, node, need_validate)
       rescue => e
         return {error: e.message}
       end
+      opt = { :validate_schema    => true,
+              :errors_as_objects  => true,
+              :version            => Marty::JsonSchema::RAW_URI }
+      to_append = {"\$schema" => Marty::JsonSchema::RAW_URI}
       schemas.each do |attr, schema|
-        # FIXME: JSON::Validator.fully_validate(schema, params)
-        # set validation_error if any schemas had error.. should be string
+        err = JSON::Validator.fully_validate(schema.merge(to_append), params, opt)
+        validation_error[attr] = err.map{ |e| e[:message] } if err.size > 0
+        err_count += err.size
       end
     end
-
-    return {error: "Error(s) validating: #{validation_error}"} if
-      validation_error
+    return {error: "Error(s) validating: #{validation_error}"} if err_count > 0
 
     auth = Marty::ApiAuth.authorized?(sname, api_key)
     return {error: "Permission denied" } unless auth
