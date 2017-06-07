@@ -216,10 +216,13 @@ class StringEnum < String
     end
   end
 
-  def marshal_dump
+  def _dump _
     self.to_s
   end
 
+  def self._load(v)
+    new(v)
+  end
 end
 YAML::add_domain_type("pennymac.com,2017-06-02", "stringEnum") do
   |type, val|
