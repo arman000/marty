@@ -122,10 +122,6 @@ private
     errors.blank?
   end
 
-  delorean_fn :get_roles, sig: 0 do
-     Mcfly.whodunnit.roles
-  end
-
   def user_manager_only
     Marty::User.has_role("user_manager") && !Marty::User.has_role("admin")
   end
