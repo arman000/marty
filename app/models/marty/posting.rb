@@ -83,6 +83,19 @@ class Marty::Posting < Marty::Base
       order("created_dt DESC").limit(limit || 1).to_a
   end
 
+  pg_fn :latest_by_type, {limit: :int4}, # , posting_types: :json},
+    %Q{
+    var json_result = plv8.execute(
+        'SELECT marty_postings.* FROM marty_postings ' +
+        'INNER JOIN marty_posting_types ' +
+        'ON marty_posting_types.id = marty_postings.posting_type_id ' +
+        "WHERE (created_dt <> 'infinity') AND " +
+        "marty_posting_types.name IN ('BASE', 'CLOSE') " +
+        'ORDER BY created_dt DESC LIMIT $1', [limit]);
+
+    return JSON.stringify(json_result);
+    }
+
   delorean_fn :get_last, sig: [0, 1] do
     |posting_type=nil|
 

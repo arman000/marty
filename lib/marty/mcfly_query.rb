@@ -8,6 +8,62 @@ module Mcfly
     end
 
     module ClassMethods
+      def pg_fn(name, options, code)
+        fn = "#{self.table_name}_#{name}"
+
+        # FIXME: figure out how to handle PG function name limit.
+        raise "function name too long #{fn}" if fn.length > 63
+
+        define_singleton_method(name) do |*args|
+          conn = ActiveRecord::Base.connection
+
+          # FIXME: if args.count < options.count, should extend args
+
+          raise "too many arguments" if args.count > options.count
+
+          al = args.map { |a| conn.quote(a) }.join(',')
+
+          JSON.parse conn.execute("SELECT #{fn}(#{al})").first[fn]
+        end
+
+        raise "no signature" unless options
+
+        # only allow known PG types
+        bogus_types = options.values.map(&:to_s) - [
+          "text",
+          "oid",
+          "bool",
+          "int2",
+          "int4",
+          "int8",
+          "float4",
+          "float8",
+          "numeric",
+          "date",
+          "timestamp",
+          "json",
+          "jsonb",
+        ]
+
+        raise "bogus signature types: #{bogus_types}" unless bogus_types.empty?
+
+        # FIXME: for now, allow 0 options to be passed.  Assuming
+        # these will be defaulted to nil.
+        self.const_set(name.to_s.upcase+Delorean::SIG, [0, options.count])
+
+        pg_fn_method(fn, options, code)
+      end
+
+      def pg_fn_method(name, options, code)
+        pg_fn_methods[name.to_sym] = [self, options, code]
+      end
+
+      def pg_fn_methods
+        @@pg_fn_methods ||= {}
+      end
+
+      ######################################################################
+
       def clear_lookup_cache!
         @LOOKUP_CACHE.clear if @LOOKUP_CACHE
       end

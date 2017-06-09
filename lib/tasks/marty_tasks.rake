@@ -23,6 +23,34 @@ namespace :marty do
     Marty::Script.load_scripts(load_dir)
   end
 
+  desc 'load PG functions'
+  task load_pg_fns: :environment do
+    # load all classes so we can see their pg_fn methods
+    Rails.application.eager_load!
+    conn = ActiveRecord::Base.connection
+
+
+    Marty::Base.pg_fn_methods.each do
+      |fn, (_, sig, code)|
+
+      pg_sig = sig.map { |col, type|
+        "#{conn.quote_column_name(col)} #{type}"}.join(',')
+
+      pg_create =<<EOS
+CREATE OR REPLACE FUNCTION #{fn}(#{pg_sig})
+ RETURNS text
+ LANGUAGE plv8
+AS $function$
+#{code}
+$function$
+EOS
+
+      puts pg_create
+
+      conn.execute pg_create
+    end
+  end
+
   desc 'Print out all models and their fields'
   task print_schema: :environment do
     Rails.application.eager_load!
