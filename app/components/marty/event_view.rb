@@ -29,7 +29,8 @@ class Marty::EventView < Marty::Grid
 
     c.store_config.merge!({sorters: [{property: :id,
                                  direction: 'DESC',
-                                }]})
+                                     }]})
+    Marty::Event.cleanup
   end
 
   action :delete do |a|
