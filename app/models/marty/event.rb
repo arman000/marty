@@ -259,7 +259,7 @@ SQL
   def self.all_finished
     @all_finished ||= {
       data:      {},
-      timestamp: Time.zone.parse('1970-1-1 00:00:00').to_i,
+      timestamp: Time.zone.parse('00:00:00').to_i,
     }
     @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 0
     time_now_i = Time.zone.now.to_i

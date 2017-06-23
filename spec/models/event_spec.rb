@@ -144,13 +144,13 @@ describe Marty::Event do
     expect(ev4.end_dt).not_to be_nil
     expect(ev4.error).to be_truthy
 
-    expect(af.count).to eq(4)
+    expect(af.count).to eq(3)
     expect(af).to include(['testcl3', 987])
-    expect(af).to include(['testcl2', 123])
+    expect(af).to include(['testcl1', 234])
     expect(af[['testcl3', 987]]).to include('PRICING')
     expect(af[['testcl3', 987]]['PRICING']).to start_with(@date_string)
-    expect(af[['testcl2', 123]]).to include('PRICING')
-    expect(af[['testcl2', 123]]['PRICING']).to eq(@old_end)
+    expect(af[['testcl1', 234]]).to include('PRICING')
+    expect(af[['testcl1', 234]]['PRICING']).to start_with(@date_string)
 
     expect(Marty::Event.currently_running('testcl1', 123)).
       to eq(['AVM', 'CRA', 'PRICING'])
@@ -195,7 +195,7 @@ describe Marty::Event do
                                  "error"=>"f"})
 
     af = Marty::Event.all_finished
-    expect(af.count).to eq(5)
+    expect(af.count).to eq(4)
     expect(af[['testcl3', 987]]).to include('PRICING')
     expect(af[['testcl1', 123]]).to include('AVM')
     expect(af[['testcl1', 123]]['AVM']).to start_with(@date_string)
@@ -227,7 +227,7 @@ describe Marty::Event do
       to raise_error(%r!PG::.*invalid input value for enum.*"AMV"!)
     Marty::Event.clear_cache
     af = Marty::Event.all_finished
-    expect(af.count).to eq(6)
+    expect(af.count).to eq(5)
     expect(af).to include(['testcl', 1234])
     expect(af).to include(['testcl', 2345])
     expect(af[['testcl', 1234]]).to include('AVM')
