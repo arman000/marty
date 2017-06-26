@@ -17,6 +17,9 @@ class Marty::Event < Marty::Base
     self.comment = self.comment.truncate(255) if self.comment
   end
 
+  # update SQL is used to copy the promise start/end dt to the event
+  # this allows simpler queries from polling code. unfortunately
+  # can't copy the error status since it is stored in the json result
   UPDATE_SQL =<<SQL
   UPDATE marty_events as me
   SET start_dt = p.start_dt,
@@ -31,6 +34,9 @@ class Marty::Event < Marty::Base
             )
         )
 SQL
+
+  # base query used by numerous SQL ; it will be combined with various
+  # filters
   BASE_QUERY =<<SQL
 SELECT id,
             klass,
@@ -43,6 +49,8 @@ SELECT id,
             error
      FROM marty_events
 SQL
+
+  # get a list of running events
   def self.running_query(time_now_s)
     "#{BASE_QUERY}
      WHERE start_dt >= '#{time_now_s}'::timestamp - interval '24 hours'
@@ -52,6 +60,7 @@ SQL
       ORDER BY start_dt"
   end
 
+  # check if klass/id/op is running
   def self.op_is_running?(klass, subject_id, operation)
     all_running.detect do |pm|
       pm["klass"] == klass && pm["subject_id"].to_i == subject_id.to_i &&
@@ -59,6 +68,7 @@ SQL
     end
   end
 
+  # create event if one is not already running
   def self.create_event(klass,
                         subject_id,
                         operation,
@@ -87,6 +97,7 @@ SQL
                 )
   end
 
+  # lookup events by klass, subject_id, operation
   def self.lookup_event(klass, subject_id, operation)
     update_start_and_end
     get_data("#{BASE_QUERY}
@@ -98,6 +109,7 @@ SQL
     #Marty::Event.find_by_id(hash["id"])
   end
 
+  # mark event as finished
   def self.finish_event(klass, subject_id, operation, error=false, comment=nil)
     raise "error must be true or false" unless [true, false].include?(error)
     time_now_s = Time.zone.now.strftime('%Y-%m-%d %H:%M:%S.%6N')
@@ -117,6 +129,8 @@ SQL
     ev.save!
   end
 
+  # find the last event either running or finished for a klass/id
+  # and optional operation
   def self.last_event(klass, subject_id, operation=nil)
     hash = all_running.select do |pm|
       pm["klass"] == klass && pm["subject_id"] == subject_id.to_i &&
@@ -134,6 +148,8 @@ SQL
               ORDER BY end_dt desc").first
   end
 
+  # find the last event either running or finished for a list of ids
+  # for a given klass and optional operation
   def self.last_event_multi(klass, subject_ids_arg, operation=nil)
     subject_ids = subject_ids_arg.map(&:to_i)
     events = all_running.select do |pm|
@@ -147,6 +163,7 @@ SQL
     running_ids = events.keys
     check_fin = subject_ids - running_ids
 
+    # for ids with nothing running, find the last finished event
     if check_fin.present?
       op_filt = "AND enum_event_operation = '#{operation}'" if operation
       op_col = ", enum_event_operation" if operation
@@ -185,12 +202,14 @@ SQL
     events
   end
 
+  # get any currently running ops for a klass/id
   def self.currently_running(klass, subject_id)
     all_running.select do |pm|
       pm["klass"] == klass && pm["subject_id"] == subject_id.to_i
     end.map { |e| e["enum_event_operation"] }
   end
 
+  # get any currently running ops for a klass and list of ids
   def self.currently_running_multi(klass, subject_id_raw)
     subject_ids = [subject_id_raw].flatten.map(&:to_i)
     all_running.select do |pm|
@@ -218,10 +237,13 @@ SQL
     hash['end_dt'] ? hash['end_dt'].strftime("%H:%M") : '---'
   end
 
+  # update start and end from promise;  return the number of updates
+  # (>0 invalidates the cache for all_finished and all_running)
   def self.update_start_and_end
     ActiveRecord::Base.connection.execute(UPDATE_SQL).cmd_tuples
   end
 
+  # run a query and return a standard hash array
   def self.get_data(sql)
     ActiveRecord::Base.connection.execute(sql).to_a.map do |h|
       h["id"]          = h["id"].to_i
@@ -240,6 +262,7 @@ SQL
     @poll_secs = @all_running = @all_finished = nil
   end
 
+  # get list of all running events (cached)
   def self.all_running
     @all_running ||= { timestamp: 0, data: [] }
     @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 0
@@ -256,6 +279,9 @@ SQL
   end
   private_class_method :all_running
 
+  # get list of all finished events (cached)
+  # returns a hash with key [Klass, id]
+  # and value hash with { operation => time completed }
   def self.all_finished
     @all_finished ||= {
       data:      {},
@@ -283,12 +309,18 @@ SQL
       @all_finished[:timestamp] = time_now_i
       raw.each_with_object(@all_finished[:data]) do |ev, hash|
         if ev["end_dt"] && ev["error"].nil?
-          real_ev = Marty::Event.where(id: ev["id"]).first
-          promise = Marty::Promise.where(id: real_ev["promise_id"]).first
-          maybe_error = promise.result["error"]
-          ev["error"] = real_ev.error = !!maybe_error
-          real_ev.comment = maybe_error
-          real_ev.save!
+          # check and copy if there was an error in the promise
+          real_ev = Marty::Event.find(ev["id"])
+          if real_ev.promise_id
+            promise = Marty::Promise.find(real_ev.promise_id)
+            # promise is not guaranteed to exist
+            if promise
+              maybe_error = promise.result["error"]
+              ev["error"] = real_ev.error = !!maybe_error
+              real_ev.comment = maybe_error if maybe_error
+              real_ev.save!
+            end
+          end
         end
         subhash = hash[[ev["klass"], ev["subject_id"]]] ||= {}
         subhash[ev["enum_event_operation"]] =

@@ -28,3 +28,6 @@ spec/dummy/.sass-cache
 /spec/dummy/public/extjs
 .rspec
 .rspec-results
+
+\#*
+.\#*
