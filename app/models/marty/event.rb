@@ -259,7 +259,7 @@ SQL
   def self.all_finished
     @all_finished ||= {
       data:      {},
-      timestamp: Time.zone.parse('1970-1-1 00:00:00').to_i,
+      timestamp: Time.zone.parse('00:00:00').to_i,
     }
     @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 0
     time_now_i = Time.zone.now.to_i
@@ -301,4 +301,13 @@ SQL
   def self.get_finished(klass, id)
     all_finished[[klass, id]]
   end
+
+  def self.cleanup
+    begin
+      where('start_dt < ?', Time.zone.now - 48.hours).destroy_all
+    rescue => exc
+      Marty::Util.logger.error("event GC error: #{exc}")
+    end
+  end
+
 end
