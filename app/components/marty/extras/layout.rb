@@ -74,6 +74,20 @@ module Layout
     )
   end
 
+  def enum_array(c, klass)
+    editor_config = {
+      multi_select: true,
+      store:        klass::VALUES.to_a.sort,
+      type:         :string,
+      xtype:        :combo,
+    }
+    c.merge!(
+      type:          :string,
+      column_config: { editor: editor_config },
+      field_config:  editor_config,
+    )
+  end
+
   def enum_setter(name)
     lambda {|r, v| r.send("#{name}=", v.nil? || v.empty? || v == '---' ?
                                         nil : v)}
