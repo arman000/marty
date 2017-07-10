@@ -53,11 +53,16 @@ Conv Fixed 30	2.250	1.123	2.345	12	2012
 EOF
 
 loan_programs =<<EOF
-name	amortization_type	mortgage_type	streamline_type	high_balance_indicator
-Conv Fixed 30 Year	Fixed	Conventional	Not Streamlined	false
-Conv Fixed 30 Year HB	Fixed	Conventional	Not Streamlined	true
-Conv Fixed 30 Year DURP <=80	Fixed	Conventional	DURP	false
-Conv Fixed 30 Year DURP <=80 HB	Fixed	Conventional	DURP	true
+name	amortization_type	mortgage_type	streamline_type	high_balance_indicator	state_array
+Conv Fixed 30 Year	Fixed	Conventional	Not Streamlined	false	
+Conv Fixed 30 Year HB	Fixed	Conventional	Not Streamlined	true	TN
+Conv Fixed 30 Year DURP <=80	Fixed	Conventional	DURP	false	TN,CT
+Conv Fixed 30 Year DURP <=80 HB	Fixed	Conventional	DURP	true	"CA,NY"
+EOF
+
+loan_programs_comma =<<EOF
+name,amortization_type,mortgage_type,state_array,streamline_type,high_balance_indicator
+FHA Fixed 15 Year,Fixed,FHA,"FL,NV,ME",Not Streamlined,false
 EOF
 
 fannie_bup4 =<<EOF
@@ -340,6 +345,20 @@ EOF
       else
         raise "should have had an exception"
       end
+    end
+
+    it "should load enum array types" do
+      Marty::DataImporter.do_import(Gemini::LoanProgram, loan_programs)
+      Marty::DataImporter.do_import(Gemini::LoanProgram, loan_programs_comma,
+                                    'infinity', nil, nil, ',')
+      lpset = Gemini::LoanProgram.all.pluck(:name, :state_array).to_set
+      expect(lpset).to eq([["Conv Fixed 30 Year", nil],
+                           ["Conv Fixed 30 Year HB", ["TN"]],
+                           ["Conv Fixed 30 Year DURP <=80", ["TN", "CT"]],
+                           ["Conv Fixed 30 Year DURP <=80 HB", ["CA","NY"]],
+                           ["FHA Fixed 15 Year", ["FL","NV","ME"]]
+                          ].to_set)
+
     end
 
     it "should properly handle cases where an association item is missing" do
