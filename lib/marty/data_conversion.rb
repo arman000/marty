@@ -72,7 +72,8 @@ class Marty::DataConversion
     when :numrange, :int4range, :int8range
       v.to_s
     when :float_array, :json, :jsonb
-      JSON.parse Marty::DataExporter.decode_json(v)
+      # v might be base64 or might be a readable string
+      JSON.parse Marty::DataExporter.decode_json(v) rescue JSON.parse(v)
     else
       raise "unknown type #{type} for #{v.inspect}}"
     end
@@ -189,7 +190,6 @@ class Marty::DataConversion
       |(k,v), h|
       h[k.to_s] = v == '' ? nil : v
     }
-
     key_groups.each_with_object({}) do
       |(ga, g), h|
 
