@@ -54,6 +54,22 @@ module Layout
     } + options
   end
 
+  def jsonb_field(name, options={})
+    {
+        name:        name,
+        width:       "100%",
+        height:      150,
+        xtype:       :textareafield,
+        auto_scroll: true,
+        spellcheck:  false,
+        allow_blank: false,
+        field_style: {
+          font_family: 'courier new',
+          font_size:   '12px'
+        },
+    }.merge(options)
+  end
+
   ######################################################################
   # PG ENUM field handling
 

@@ -17,14 +17,17 @@ class Marty::ConfigView < Marty::Grid
     c.editing = :both
   end
 
-  # need a getter / setter to call the []= and [] methods now
-  # since value is no longer stored as is
   def my_jsonb_getter
-    lambda { |r| Marty::Config[r.key].to_json }
+    lambda { |r| v = Marty::Config[r.key]; v && v.to_json || '' }
+  end
+  def my_jsonb_pretty_getter
+    lambda { |r| v = Marty::Config[r.key]
+      v && JSON.pretty_generate(v) || '' }
   end
 
   def my_jsonb_setter
     lambda { |r, v|
+      return r.set_value(nil) if v.blank?
       decoded = ActiveSupport::JSON.decode(v) rescue nil
       r.set_value(decoded)
     }
@@ -33,21 +36,10 @@ class Marty::ConfigView < Marty::Grid
   def default_form_items
     [
       :key,
-      {
-        name:        :value,
-        width:       "100%",
-        height:      150,
-        xtype:       :textareafield,
-        auto_scroll: true,
-        spellcheck:  false,
-        allow_blank: false,
-        field_style: {
-          font_family: 'courier new',
-          font_size:   '12px'
-        },
-        getter:  my_jsonb_getter,
-        setter:  my_jsonb_setter,
-      },
+      jsonb_field(:value, {
+                    getter:  my_jsonb_pretty_getter,
+                    setter:  my_jsonb_setter,
+                  }),
       textarea_field(:description),
     ]
   end
@@ -56,7 +48,7 @@ class Marty::ConfigView < Marty::Grid
     c.flex = 1
   end
 
-  attribute :value do |c|
+  column :value do |c|
     c.flex = 3
     c.getter  = my_jsonb_getter
     c.setter  = my_jsonb_setter
