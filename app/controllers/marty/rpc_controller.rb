@@ -84,7 +84,11 @@ class Marty::RpcController < ActionController::Base
               :version            => Marty::JsonSchema::RAW_URI }
       to_append = {"\$schema" => Marty::JsonSchema::RAW_URI}
       schemas.each do |attr, schema|
-        err = JSON::Validator.fully_validate(schema.merge(to_append), params, opt)
+        begin
+          err = JSON::Validator.fully_validate(schema.merge(to_append), params, opt)
+        rescue => e
+          return {error: e.message}
+        end
         validation_error[attr] = err.map{ |e| e[:message] } if err.size > 0
         err_count += err.size
       end
