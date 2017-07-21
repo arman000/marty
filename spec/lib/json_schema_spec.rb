@@ -171,7 +171,8 @@ module Marty
       "$schema" => "http://json-schema.org/marty-draft/schema#",
       "properties" => {
         "a" => {
-          "datetime_format" => ""
+          "type"   => "string",
+          "format" => "date-time"
         }
       }
     }
@@ -206,7 +207,8 @@ module Marty
       "required" => ["a"],
       "properties" => {
         "a" => {
-          "datetime_format" => ""
+          "type"   => "string",
+          "format" => "date-time"
         }
       }
     }
@@ -232,7 +234,8 @@ module Marty
           "pg_enum" => "MammalEnum"
         },
         "b" => {
-          "datetime_format" => ""
+          "type"   => "string",
+          "format" => "date-time"
         },
       }
     }
@@ -264,7 +267,8 @@ module Marty
           "pg_enum" => "MammalEnum"
         },
         "b" => {
-          "datetime_format" => ""
+          "type"   => "string",
+          "format" => "date-time"
         },
         "c" => {
           "type" => "integer"
@@ -290,7 +294,8 @@ module Marty
           "pg_enum" => "MammalEnum"
         },
         "b" => {
-          "datetime_format" => ""
+          "type"   => "string",
+          "format" => "date-time"
         },
         "c" => {
           "type" => "integer"
@@ -311,7 +316,8 @@ module Marty
           "pg_enum" => "MammalEnum"
         },
         "b" => {
-          "datetime_format" => ""
+          "type"   => "string",
+          "format" => "date-time"
         },
         "c" => {
           "pg_enum" => "ElectronicsEnum"
@@ -350,7 +356,8 @@ module Marty
           "pg_enum" => "MammalEnum"
         },
         "b" => {
-          "datetime_format" => ""
+          "type"   => "string",
+          "format" => "date-time"
         },
         "c" => {
           "pg_enum" => "ElectronicsEnum"

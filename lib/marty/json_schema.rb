@@ -19,7 +19,7 @@ module Marty
     end
   end
 
-  class DateTimeFormatAttribute < JSON::Schema::Attribute
+  class DateTimeFormat < JSON::Schema::FormatAttribute
     def self.validate(cur_sch, data, frag, pro, validator, opt={})
       begin
         DateTime.parse(data).in_time_zone(Rails.configuration.time_zone)
@@ -35,11 +35,11 @@ module Marty
 
     def initialize
       super
-      @attributes["pg_enum"]         = PgEnumAttribute
-      @attributes["datetime_format"] = DateTimeFormatAttribute
-      @formats["date"]               = JSON::Schema::DateFormat
-      @uri = JSON::Util::URI.parse(RAW_URI)
-      @names = ["marty-draft", RAW_URI]
+      @attributes["pg_enum"] = PgEnumAttribute
+      @formats["date-time"]  = DateTimeFormat
+      @formats["date"]       = JSON::Schema::DateFormat
+      @uri                   = JSON::Util::URI.parse(RAW_URI)
+      @names                 = ["marty-draft", RAW_URI]
     end
 
     JSON::Validator.register_validator(self.new)
