@@ -98,7 +98,70 @@ module Marty
       expect(JSON::Validator.validate(pg_schema_req, data)).to be false
     end
 
-    dt_schema_opt = {
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    ###                      Date Format                        ###
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+    date_schema_opt = {
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
+      "properties" => {
+        "a" => {
+          "date_format" => ""
+        }
+      }
+    }
+
+    it "returns true on a properly formatted date" do
+      data = {"a" => '2017-05-22'}
+      expect(JSON::Validator.validate(date_schema_opt, data)).to be true
+    end
+
+    it "vacuously returns true on a field not validated" do
+      data = {"b" => 'Today is May 22nd'}
+      expect(JSON::Validator.validate(date_schema_opt, data)).to be true
+    end
+
+    # TODO verify that this is ok
+    it "returns true on an properly formatted datetime" do
+      data = {"a" => '2017-05-22T14:51:44Z'}
+      expect(JSON::Validator.validate(date_schema_opt, data)).to be true
+    end
+
+    it "returns true when an optional field is not supplied" do
+      data = {}
+      expect(JSON::Validator.validate(date_schema_opt, data)).to be true
+    end
+
+    it "returns false when a nil date is passed even when date is optional" do
+      data = {"a" => nil}
+      expect(JSON::Validator.validate(date_schema_opt, data)).to be false
+    end
+
+    date_schema_req = {
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
+      "required" => ["a"],
+      "properties" => {
+        "a" => {
+          "date_format" => ""
+        }
+      }
+    }
+
+    it "returns false when a required date field is not supplied" do
+      data = {}
+      expect(JSON::Validator.validate(date_schema_req, data)).to be false
+    end
+
+    it "returns false when a nil date is passed when dt is required" do
+      data = {"a" => nil}
+      expect(JSON::Validator.validate(date_schema_req, data)).to be false
+    end
+
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    ###                      DateTime Format                    ###
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+    datetime_schema_opt = {
       "$schema" => "http://json-schema.org/marty-draft/schema#",
       "properties" => {
         "a" => {
@@ -107,36 +170,32 @@ module Marty
       }
     }
 
-    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-    ###                      DateTime Format                    ###
-    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-
     it "returns true on a properly formatted datetime" do
       data = {"a" => '2017-05-22T14:51:44Z'}
-      expect(JSON::Validator.validate(dt_schema_opt, data)).to be true
+      expect(JSON::Validator.validate(datetime_schema_opt, data)).to be true
     end
 
     it "vacuously returns true on a field not validated" do
       data = {"b" => 'Today is May 22nd'}
-      expect(JSON::Validator.validate(dt_schema_opt, data)).to be true
+      expect(JSON::Validator.validate(datetime_schema_opt, data)).to be true
     end
 
     it "returns false on an improperly formatted datetime" do
       data = {"a" => '2017-30-22T14:51:44Z'}
-      expect(JSON::Validator.validate(dt_schema_opt, data)).to be false
+      expect(JSON::Validator.validate(datetime_schema_opt, data)).to be false
     end
 
     it "returns true when an opt field is not supplied" do
       data = {}
-      expect(JSON::Validator.validate(dt_schema_opt, data)).to be true
+      expect(JSON::Validator.validate(datetime_schema_opt, data)).to be true
     end
 
     it "returns false when a nil dt is passed even when dt is opt" do
       data = {"a" => nil}
-      expect(JSON::Validator.validate(dt_schema_opt, data)).to be false
+      expect(JSON::Validator.validate(datetime_schema_opt, data)).to be false
     end
 
-    dt_schema_req = {
+    datetime_schema_req = {
       "$schema" => "http://json-schema.org/marty-draft/schema#",
       "required" => ["a"],
       "properties" => {
@@ -148,13 +207,17 @@ module Marty
 
     it "returns false when a required field is not supplied" do
       data = {}
-      expect(JSON::Validator.validate(dt_schema_req, data)).to be false
+      expect(JSON::Validator.validate(datetime_schema_req, data)).to be false
     end
 
     it "returns false when a nil dt is passed when dt is required" do
       data = {"a" => nil}
-      expect(JSON::Validator.validate(dt_schema_req, data)).to be false
+      expect(JSON::Validator.validate(datetime_schema_req, data)).to be false
     end
+
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    ###                 PgEnum & DateTime Format                ###
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
     pg_dt_schema = {
       "$schema" => "http://json-schema.org/marty-draft/schema#",
@@ -167,10 +230,6 @@ module Marty
         },
       }
     }
-
-    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-    ###                 PgEnum & DateTime Format                ###
-    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
     it "validates both pg_enum and dt format when both are correct" do
       data = {"a" => 'Dog', "b" => '2017-05-22T14:51:44Z'}

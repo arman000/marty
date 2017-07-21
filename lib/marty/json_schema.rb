@@ -20,17 +20,23 @@ module Marty
   end
 
   class DateTimeFormatAttribute < JSON::Schema::Attribute
-    def self.validate(curr_schema, data, frag, processor, validator, options={})
+    def self.validate(cur_sch, data, frag, pro, validator, opt={})
       begin
         DateTime.parse(data).in_time_zone(Rails.configuration.time_zone)
       rescue
         msg = "#{self.class.name} error: Can't parse '#{data}' into a DateTime"
-        validation_error( processor,
-                          msg,
-                          frag,
-                          curr_schema,
-                          self,
-                          options[:record_errors])
+        validation_error(pro, msg, frag, cur_sch, self, opt[:record_errors])
+      end
+    end
+  end
+
+  class DateFormatAttribute < JSON::Schema::Attribute
+    def self.validate(cur_sch, data, frag, pro, validator, opt={})
+      begin
+        Date.parse(data)
+      rescue
+        msg = "#{self.class.name} error: Can't parse '#{data}' into a Date"
+        validation_error(pro, msg, frag, cur_sch, self, opt[:record_errors])
       end
     end
   end
@@ -40,8 +46,9 @@ module Marty
 
     def initialize
       super
-      @attributes["pg_enum"] = PgEnumAttribute
+      @attributes["pg_enum"]         = PgEnumAttribute
       @attributes["datetime_format"] = DateTimeFormatAttribute
+      @attributes["date_format"]     = DateFormatAttribute
       @uri = JSON::Util::URI.parse(RAW_URI)
       @names = ["marty-draft", RAW_URI]
     end
