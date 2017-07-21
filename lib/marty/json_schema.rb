@@ -30,17 +30,6 @@ module Marty
     end
   end
 
-  class DateFormatAttribute < JSON::Schema::Attribute
-    def self.validate(cur_sch, data, frag, pro, validator, opt={})
-      begin
-        Date.parse(data)
-      rescue
-        msg = "#{self.class.name} error: Can't parse '#{data}' into a Date"
-        validation_error(pro, msg, frag, cur_sch, self, opt[:record_errors])
-      end
-    end
-  end
-
   class JsonSchema < JSON::Schema::Draft4
     RAW_URI = "http://json-schema.org/marty-draft/schema#"
 
@@ -48,7 +37,7 @@ module Marty
       super
       @attributes["pg_enum"]         = PgEnumAttribute
       @attributes["datetime_format"] = DateTimeFormatAttribute
-      @attributes["date_format"]     = DateFormatAttribute
+      @formats["date"]               = JSON::Schema::DateFormat
       @uri = JSON::Util::URI.parse(RAW_URI)
       @names = ["marty-draft", RAW_URI]
     end

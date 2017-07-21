@@ -106,7 +106,8 @@ module Marty
       "$schema" => "http://json-schema.org/marty-draft/schema#",
       "properties" => {
         "a" => {
-          "date_format" => ""
+          "type"   => "string",
+          "format" => "date"
         }
       }
     }
@@ -121,13 +122,17 @@ module Marty
       expect(JSON::Validator.validate(date_schema_opt, data)).to be true
     end
 
-    # TODO verify that this is ok
-    it "returns true on an properly formatted datetime" do
-      data = {"a" => '2017-05-22T14:51:44Z'}
-      expect(JSON::Validator.validate(date_schema_opt, data)).to be true
+    it "returns false on an improperly formatted date" do
+      data = {"a" => '2017-05-32'}
+      expect(JSON::Validator.validate(date_schema_opt, data)).to be false
     end
 
-    it "returns true when an optional field is not supplied" do
+    it "returns false on an properly formatted datetime" do
+      data = {"a" => '2017-05-22T14:51:44Z'}
+      expect(JSON::Validator.validate(date_schema_opt, data)).to be false
+    end
+
+    it "returns true when an optional date is not supplied" do
       data = {}
       expect(JSON::Validator.validate(date_schema_opt, data)).to be true
     end
@@ -142,7 +147,8 @@ module Marty
       "required" => ["a"],
       "properties" => {
         "a" => {
-          "date_format" => ""
+          "type"   => "string",
+          "format" => "date"
         }
       }
     }
@@ -152,7 +158,7 @@ module Marty
       expect(JSON::Validator.validate(date_schema_req, data)).to be false
     end
 
-    it "returns false when a nil date is passed when dt is required" do
+    it "returns false when a nil date is passed when date is required" do
       data = {"a" => nil}
       expect(JSON::Validator.validate(date_schema_req, data)).to be false
     end
