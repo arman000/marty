@@ -641,11 +641,11 @@ describe Marty::RpcController do
       attrs: attrs,
       params: params
     }
-    expect = "uninitialized constant Marty::PgEnumAttribute::VALUES"
+    expect = "Unrecognized PgEnum for attribute res"
     res_hsh = JSON.parse(response.body)
     expect(res_hsh.keys.size).to eq(1)
     expect(res_hsh.keys[0]).to eq("error")
-    expect(res_hsh.values[0]).to eq(expect)
+    expect(res_hsh.values[0]).to include(expect)
   end
 
   it "validates pgenum with capitalization issues" do
@@ -654,8 +654,8 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              validated: true)
-    skip "pending until a solution is found that handles autoload "\
-         "issues involving constantize"
+    skip "pending until a solution is found that handles "\
+         "autoload issues involving constantize"
     attrs = ["res"].to_json
     params = {"b" => "Annual"}.to_json
     get 'evaluate', {
