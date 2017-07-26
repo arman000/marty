@@ -83,10 +83,16 @@ class Marty::RpcController < ActionController::Base
               :errors_as_objects  => true,
               :version            => Marty::JsonSchema::RAW_URI }
       to_append = {"\$schema" => Marty::JsonSchema::RAW_URI}
-      schemas.each do |attr, schema|
-        err = JSON::Validator.fully_validate(schema.merge(to_append), params, opt)
-        validation_error[attr] = err.map{ |e| e[:message] } if err.size > 0
-        err_count += err.size
+      schemas.each do |attr, sch|
+        begin
+          er = JSON::Validator.fully_validate(sch.merge(to_append), params, opt)
+        rescue NameError
+          return {error: "Unrecognized PgEnum for attribute #{attr}"}
+        rescue => ex
+          return {error: ex.message}
+        end
+        validation_error[attr] = er.map{ |e| e[:message] } if er.size > 0
+        err_count += er.size
       end
     end
     return {error: "Error(s) validating: #{validation_error}"} if err_count > 0

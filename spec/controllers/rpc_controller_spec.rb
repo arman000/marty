@@ -62,6 +62,24 @@ A:
         else 9
 eof
 
+sample_script6 = <<eof
+A:
+    b =?
+    res = b + 1
+eof
+
+sample_script7 = <<eof
+A:
+    b =?
+    res = b
+eof
+
+sample_script8 = <<eof
+A:
+    b =?
+    res = 123
+eof
+
 script3_schema = <<eof
 A:
     pc = { "properties : {
@@ -97,6 +115,30 @@ A:
             }
 eof
 
+script6_schema = <<eof
+A:
+    res = { "properties" : {
+            "b" : { "type" : "float" },
+                }
+            }
+eof
+
+script7_schema = <<eof
+A:
+    res = { "properties" : {
+            "b" : { "pg_enum" : "NonExistantEnum" },
+                }
+            }
+eof
+
+script8_schema = <<eof
+A:
+    res = { "properties" : {
+            "b" : { "pg_enum" : "Gemini::MiDurationType" },
+                }
+            }
+eof
+
 
 describe Marty::RpcController do
   before(:each) {
@@ -117,9 +159,15 @@ describe Marty::RpcController do
                          "M3" => sample_script3,
                          "M4" => sample_script4,
                          "M5" => sample_script5,
+                         "M6" => sample_script6,
+                         "M7" => sample_script7,
+                         "M8" => sample_script8,
                          "M3Schemas" => script3_schema,
                          "M4Schemas" => script4_schema,
                          "M5Schemas" => script5_schema,
+                         "M6Schemas" => script6_schema,
+                         "M7Schemas" => script7_schema,
+                         "M8Schemas" => script8_schema,
                        }, Date.today + 1.minute)
 
     @p1 = Marty::Posting.do_create("BASE", Date.today + 2.minute, 'a comment')
@@ -370,7 +418,7 @@ describe Marty::RpcController do
     expect(response.body).to eq("a,b\r\n123,456\r\n789,101112\r\n")
   end
 
-  it "returns an error message on missing schema script" do
+  it "returns an error message on missing schema script (csv)" do
     Marty::ApiConfig.create!(script: "M1",
                              node: "A",
                              attr: nil,
@@ -387,6 +435,28 @@ describe Marty::RpcController do
     }
     expect = "Schema error for M1/A attrs=b: Schema not defined\r\n"
     expect(response.body).to eq("error,#{expect}")
+  end
+
+  it "returns an error message on missing schema script (json)" do
+    Marty::ApiConfig.create!(script: "M1",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["b"].to_json
+    params = {"a" => 5}.to_json
+    get 'evaluate', {
+      format: :json,
+      script: "M1",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = "Schema error for M1/A attrs=b: Schema not defined"
+    res_hsh = JSON.parse(response.body)
+    expect(res_hsh.keys.size).to eq(1)
+    expect(res_hsh.keys[0]).to eq("error")
+    expect(res_hsh.values[0]).to eq(expect)
   end
 
   it "returns an error message on missing attributes in schema script" do
@@ -491,6 +561,30 @@ describe Marty::RpcController do
     expect(response.body).to eq("9\r\n9\r\n")
   end
 
+  it "catches JSON::Validator exceptions" do
+    Marty::ApiConfig.create!(script: "M6",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["res"].to_json
+    params = {"b" => 5.22}.to_json
+    get 'evaluate', {
+      format: :json,
+      script: "M6",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = 'The property \'#/properties/b/type\' of type string '\
+             'did not match one or more of the required schemas'
+    res_hsh = JSON.parse(response.body)
+    expect(res_hsh.keys.size).to eq(1)
+    expect(res_hsh.keys[0]).to eq("error")
+    expect(res_hsh.values[0]).to eq(expect)
+  end
+
+
   class FruitsEnum
     VALUES=Set['Apple', 'Banana', 'Orange']
   end
@@ -530,6 +624,47 @@ describe Marty::RpcController do
     }
     expect = '""res""=>[""Class error: \'Beans\' not contained in FruitsEnum'
     expect(response.body).to include(expect)
+  end
+
+  it "validates schema with a non-existant enum" do
+    Marty::ApiConfig.create!(script: "M7",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    attrs = ["res"].to_json
+    params = {"b" => "MemberOfANonExistantEnum"}.to_json
+    get 'evaluate', {
+      format: :json,
+      script: "M7",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
+    expect = "Unrecognized PgEnum for attribute res"
+    res_hsh = JSON.parse(response.body)
+    expect(res_hsh.keys.size).to eq(1)
+    expect(res_hsh.keys[0]).to eq("error")
+    expect(res_hsh.values[0]).to include(expect)
+  end
+
+  it "validates pgenum with capitalization issues" do
+    Marty::ApiConfig.create!(script: "M8",
+                             node: "A",
+                             attr: nil,
+                             logged: false,
+                             validated: true)
+    skip "pending until a solution is found that handles "\
+         "autoload issues involving constantize"
+    attrs = ["res"].to_json
+    params = {"b" => "Annual"}.to_json
+    get 'evaluate', {
+      format: :json,
+      script: "M8",
+      node: "A",
+      attrs: attrs,
+      params: params
+    }
   end
 
   it "should log good req" do
