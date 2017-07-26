@@ -46,7 +46,7 @@ class Marty::DataConversion
       end
     when :string, :text, :enum
       v
-    when :enum_array
+    when :enum_array, :string_array, :integer_array
       "'{#{v}}'"
     when :integer
       v.to_i

@@ -53,16 +53,17 @@ Conv Fixed 30	2.250	1.123	2.345	12	2012
 EOF
 
 loan_programs =<<EOF
-name	amortization_type	mortgage_type	streamline_type	high_balance_indicator	state_array
-Conv Fixed 30 Year	Fixed	Conventional	Not Streamlined	false	
-Conv Fixed 30 Year HB	Fixed	Conventional	Not Streamlined	true	TN
-Conv Fixed 30 Year DURP <=80	Fixed	Conventional	DURP	false	TN,CT
-Conv Fixed 30 Year DURP <=80 HB	Fixed	Conventional	DURP	true	"CA,NY"
+name	amortization_type	mortgage_type	streamline_type	high_balance_indicator	state_array	test_int_array	test_string_array
+Conv Fixed 30 Year	Fixed	Conventional	Not Streamlined	false		1	foo
+Conv Fixed 30 Year HB	Fixed	Conventional	Not Streamlined	true	TN	"1,2"	foo,bar
+Conv Fixed 30 Year DURP <=80	Fixed	Conventional	DURP	false	TN,CT	1,2,3	"foo,bar"
+Conv Fixed 30 Year DURP <=80 HB	Fixed	Conventional	DURP	true	"CA,NY"		foo,hi mom
 EOF
 
 loan_programs_comma =<<EOF
-name,amortization_type,mortgage_type,state_array,streamline_type,high_balance_indicator
-FHA Fixed 15 Year,Fixed,FHA,"FL,NV,ME",Not Streamlined,false
+name,amortization_type,mortgage_type,state_array,test_string_array,streamline_type,high_balance_indicator
+FHA Fixed 15 Year,Fixed,FHA,"FL,NV,ME","ABC,DEF",Not Streamlined,false
+FHA Fixed 100 Year,Fixed,FHA,"FL,NV,ME","XYZ,""hi mom""",Not Streamlined,false
 EOF
 
 fannie_bup4 =<<EOF
@@ -347,16 +348,24 @@ EOF
       end
     end
 
-    it "should load enum array types" do
+    it "should load array types" do
       Marty::DataImporter.do_import(Gemini::LoanProgram, loan_programs)
       Marty::DataImporter.do_import(Gemini::LoanProgram, loan_programs_comma,
                                     'infinity', nil, nil, ',')
-      lpset = Gemini::LoanProgram.all.pluck(:name, :state_array).to_set
-      expect(lpset).to eq([["Conv Fixed 30 Year", nil],
-                           ["Conv Fixed 30 Year HB", ["TN"]],
-                           ["Conv Fixed 30 Year DURP <=80", ["TN", "CT"]],
-                           ["Conv Fixed 30 Year DURP <=80 HB", ["CA","NY"]],
-                           ["FHA Fixed 15 Year", ["FL","NV","ME"]]
+      lpset = Gemini::LoanProgram.all.pluck(:name, :state_array,
+                                            :test_int_array,
+                                            :test_string_array).to_set
+      expect(lpset).to eq([["Conv Fixed 30 Year", nil, [1], ['foo']],
+                           ["Conv Fixed 30 Year HB", ["TN"], [1, 2],
+                            ['foo', 'bar']],
+                           ["Conv Fixed 30 Year DURP <=80", ["TN", "CT"],
+                            [1, 2, 3], ['foo', 'bar']],
+                           ["Conv Fixed 30 Year DURP <=80 HB", ["CA", "NY"],
+                            nil, ['foo', 'hi mom']],
+                           ["FHA Fixed 15 Year", ["FL","NV","ME"], nil,
+                            ['ABC', 'DEF']],
+                           ["FHA Fixed 100 Year", ["FL","NV","ME"], nil,
+                            ['XYZ', 'hi mom']]
                           ].to_set)
 
     end
