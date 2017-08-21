@@ -99,7 +99,7 @@ class Marty::ApplicationController < ActionController::Base
   def logout_user
     if Marty::User.current
       cookies.delete :autologin
-      Marty::Token.delete_all(["user_id = ?", Marty::User.current.id]) unless
+      Marty::Token.where(user_id: Marty::User.current.id).delete_all unless
         Marty::Util.db_in_recovery?
       self.set_user(nil)
     end
