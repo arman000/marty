@@ -67,7 +67,7 @@ module ActiveRecord
             super
           end
 
-          def type_cast_for_database(value)
+          def deserialize(value)
             super
           end
         end
@@ -84,7 +84,7 @@ module ActiveRecord
         class Array
 
           # In the 4.2.1 version of this code, under Mutable, the code
-          # checks for raw_old_value != type_cast_for_database(new_value)
+          # checks for raw_old_value != deserialize(new_value)
           #
           # Since this is comparing db (string) version, we end up
           # comparing "{1}"!="{1.0}" for float arrays. The following
@@ -95,7 +95,7 @@ module ActiveRecord
 
 
           def changed_in_place?(raw_old_value, new_value)
-            new_value != type_cast_from_database(raw_old_value)
+            new_value != deserialize(raw_old_value)
           end
 
         end
