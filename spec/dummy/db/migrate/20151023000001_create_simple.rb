@@ -1,4 +1,4 @@
-class CreateSimple < ActiveRecord::Migration
+class CreateSimple < ActiveRecord::Migration[4.2]
   def up
     McflyMigration.new.create_table 'gemini_simples' do |t|
       t.string "some_name"

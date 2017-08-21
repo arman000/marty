@@ -1,4 +1,4 @@
-class CreateTypes < ActiveRecord::Migration
+class CreateTypes < ActiveRecord::Migration[4.2]
   def up
     create_table 'gemini_amortization_types' do |t|
       t.string "name", null: false

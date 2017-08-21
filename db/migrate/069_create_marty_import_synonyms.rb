@@ -1,4 +1,4 @@
-class CreateMartyImportSynonyms < ActiveRecord::Migration
+class CreateMartyImportSynonyms < ActiveRecord::Migration[4.2]
   include Marty::Migrations
 
   def change

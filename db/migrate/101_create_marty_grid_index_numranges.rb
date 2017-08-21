@@ -1,4 +1,4 @@
-class CreateMartyGridIndexNumranges < ActiveRecord::Migration
+class CreateMartyGridIndexNumranges < ActiveRecord::Migration[4.2]
   include Marty::Migrations
 
   def change

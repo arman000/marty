@@ -1,4 +1,4 @@
-class AddUserRolesToImportTypes < ActiveRecord::Migration
+class AddUserRolesToImportTypes < ActiveRecord::Migration[4.2]
   include Marty::Migrations
 
   def change

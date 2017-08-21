@@ -230,7 +230,7 @@ EOSQL
       # before EOL.  GO in comments could trigger this and will cause an error
       File.open(mig_name, "w") do |f|
         f.print <<OUT
-class #{klass.camelcase} < ActiveRecord::Migration
+class #{klass.camelcase} < ActiveRecord::Migration[4.2]
 
   def up
     path = #{sql_snap_call}
