@@ -4,7 +4,7 @@ require 'job_helper'
 module Marty
   describe Logger do
     before(:all) do
-      self.use_transactional_fixtures = false
+      self.use_transactional_tests = false
     end
     before(:each) do
       @db =  SQLite3::Database.new(Marty::Log.logfile)
@@ -14,7 +14,7 @@ module Marty
       @db.close
     end
     after(:all) do
-      self.use_transactional_fixtures = true
+      self.use_transactional_tests = true
     end
 
     it "logs" do
@@ -103,7 +103,7 @@ module Marty
       @clean_file = "/tmp/clean_#{Process.pid}.psql"
       save_clean_db(@clean_file)
       # transactional fixtures interfere with queueing jobs
-      self.use_transactional_fixtures = false
+      self.use_transactional_tests = false
       Marty::Log.cleanup(0)
 
       # Needed here because shutting transactional fixtures off
@@ -118,7 +118,7 @@ module Marty
       stop_delayed_job
       File.unlink("/tmp/logaction.txt")
       Marty::Log.cleanup(0)
-      self.use_transactional_fixtures = true
+      self.use_transactional_tests = true
     end
 
     it "handles heavy load" do

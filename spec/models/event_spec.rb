@@ -8,7 +8,7 @@ describe Marty::Event do
     save_clean_db(@clean_file)
 
     # transactional fixtures interfere with queueing jobs
-    self.use_transactional_fixtures = false
+    self.use_transactional_tests = false
 
     # Needed here because shutting transactional fixtures off
     # means we lose the globally set user
@@ -65,7 +65,7 @@ describe Marty::Event do
   end
 
   after(:all) do
-    self.use_transactional_fixtures = true
+    self.use_transactional_tests = true
     restore_clean_db(@clean_file)
     stop_delayed_job
   end
