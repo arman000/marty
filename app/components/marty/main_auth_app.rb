@@ -31,7 +31,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   def icon_hack(name)
     # There's a Netzke bug whereby, using an icon name in a hash
     # doesn't generate a proper URL.
-    "#{Netzke::Core.ext_uri}/../images/icons/#{name}.png"
+    "#{Netzke::Core.ext_uri}/icons/#{name}.png"
   end
 
   def posting_menu
