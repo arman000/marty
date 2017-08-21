@@ -1,4 +1,4 @@
-class CreateGeminiStates < ActiveRecord::Migration
+class CreateGeminiStates < ActiveRecord::Migration[4.2]
   def change
     create_table :gemini_states do |t|
       t.string :name, null: false

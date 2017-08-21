@@ -1,4 +1,4 @@
-class CreateMartyApiConfigs < ActiveRecord::Migration
+class CreateMartyApiConfigs < ActiveRecord::Migration[4.2]
   def change
     create_table :marty_api_configs do |t|
       t.timestamps null: false

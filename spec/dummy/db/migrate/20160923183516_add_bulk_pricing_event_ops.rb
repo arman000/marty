@@ -1,4 +1,4 @@
-class AddBulkPricingEventOps < ActiveRecord::Migration
+class AddBulkPricingEventOps < ActiveRecord::Migration[4.2]
   def change
     execute("COMMIT;")
     execute "ALTER TYPE enum_event_operations ADD VALUE 'PRICING';"
