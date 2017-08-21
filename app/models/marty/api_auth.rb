@@ -11,12 +11,12 @@ class Marty::ApiAuth < Marty::Base
     def validate(api)
       api.errors.add(
         :base,
-        message: "API Key length must be #{KEY_SIZE*2}") if
+        "API Key length must be #{KEY_SIZE*2}") if
         api.api_key && api.api_key.length != KEY_SIZE*2
 
         api.errors.add(
           :base,
-          message: "Script Name must reference a valid script") if
+          "Script Name must reference a valid script") if
         Marty::Script.find_script(api.script_name, nil).nil?
     end
   end
