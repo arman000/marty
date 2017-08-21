@@ -11,7 +11,7 @@ describe Marty::JobController, slow: true do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
     # transactional fixtures interfere with queueing jobs
-    self.use_transactional_fixtures = false
+    self.use_transactional_tests = false
 
     # Needed here because shutting transactional fixtures off
     # means we lose the globally set uesr
