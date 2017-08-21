@@ -4,7 +4,7 @@ class Marty::ImportType < Marty::Base
       klass = entry.get_model_class
 
       unless klass.is_a?(Class) && klass < ActiveRecord::Base
-        entry.errors[:base] = "bad model name"
+        entry.errors.add :base, message: "bad model name"
         return
       end
 
@@ -13,7 +13,7 @@ class Marty::ImportType < Marty::Base
         entry.validation_function,
         entry.preprocess_function,
       ].each { |func|
-        entry.errors[:base] = "unknown class method #{func}" if
+        entry.errors.add(:base, message: "unknown class method #{func}") if
         func && !klass.respond_to?(func.to_sym)
       }
     end
