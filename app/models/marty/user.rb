@@ -137,6 +137,6 @@ private
     errors.add :base,
     "Users cannot be deleted - set 'Active' to false to disable the account"
 
-    errors.blank?
+    throw :abort unless errors.blank?
   end
 end
