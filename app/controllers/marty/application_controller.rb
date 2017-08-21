@@ -11,7 +11,7 @@ class Marty::ApplicationController < ActionController::Base
     cookies.delete(:autologin)
   end
 
-  before_filter :session_expiration,
+  before_action :session_expiration,
   :user_setup
 
   def get_conf
