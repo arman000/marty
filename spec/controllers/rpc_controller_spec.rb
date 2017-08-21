@@ -384,7 +384,7 @@ describe Marty::RpcController do
   let(:p2) { @p2 }
 
   it "should be able to post" do
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "B",
@@ -397,7 +397,7 @@ describe Marty::RpcController do
 
   it "should be able to post background job" do
     Delayed::Worker.delay_jobs = false
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "B",
@@ -419,7 +419,7 @@ describe Marty::RpcController do
 
   it "should be able to post background job with non-array attr" do
     Delayed::Worker.delay_jobs = false
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "B",
@@ -440,7 +440,7 @@ describe Marty::RpcController do
   end
 
   it "should be able to post with complex data" do
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "D",
@@ -456,7 +456,7 @@ describe Marty::RpcController do
   it "should be able to post (JSON) with complex data" do
     @request.env['CONTENT_TYPE'] = 'application/json'
     @request.env['ACCEPT'] = 'application/json'
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "D",
@@ -1205,7 +1205,7 @@ describe Marty::RpcController do
     end
 
     it 'returns malformed attrs for improperly formatted json' do
-      get :evaluate, format: :json, attrs: "{"
+      get :evaluate, params: { format: :json, attrs: "{" }
       expect(response.body).to match(/"error":"Malformed attrs"/)
     end
 
@@ -1213,7 +1213,7 @@ describe Marty::RpcController do
       get :evaluate, format: :json, attrs: "{}"
       expect(response.body).to match(/"error":"Malformed attrs"/)
 
-      get :evaluate, format: :json, attrs: "[0]"
+      get :evaluate, params: { format: :json, attrs: "[0]" }
       expect(response.body).to match(/"error":"Malformed attrs"/)
     end
 
