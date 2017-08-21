@@ -31,7 +31,7 @@ describe Marty::RpcController do
     # try the test 3 times for fun
     (0..2).each {
       tags.each_with_index { |t, i|
-        get 'evaluate', {
+        get 'evaluate', params: {
           format: :json,
           script: "B",
           node: "B",
