@@ -28,7 +28,7 @@ class Marty::RpcController < ActionController::Base
       attrs.zip(result)
     rescue => e
       use_message = e.message == 'No such script' ?
-                    'Schema not defined' : 'Problem with schema'
+                    'Schema not defined' : 'Problem with schema: ' + e.message
       raise "Schema error for #{sname}/#{node} "\
             "attrs=#{attrs.join(',')}: #{use_message}"
     end
@@ -64,32 +64,36 @@ class Marty::RpcController < ActionController::Base
 
     return {error: "Malformed params"} unless params.is_a?(Hash)
 
-    need_validate, need_log = [], []
+    need_input_validate, need_output_validate, strict_validate, need_log =
+                                                                [], [], [], []
     Marty::ApiConfig.multi_lookup(sname, node, attrs).each do
-      |attr, log, validate, id|
-      need_validate << attr if validate
+      |attr, log, input_validate, output_validate, strict, id|
+      need_input_validate << attr if input_validate
+      need_output_validate << attr + "_" if output_validate
+      strict_validate << attr if strict
       need_log << id if log
     end
 
+    opt = { :validate_schema    => true,
+                :errors_as_objects  => true,
+                :version            => Marty::JsonSchema::RAW_URI }
+    to_append = {"\$schema" => Marty::JsonSchema::RAW_URI}
+
     validation_error = {}
     err_count = 0
-    if need_validate.present?
+    if need_input_validate.present?
       begin
-        schemas = get_schemas(tag, sname, node, need_validate)
+        schemas = get_schemas(tag, sname, node, need_input_validate)
       rescue => e
         return {error: e.message}
       end
-      opt = { :validate_schema    => true,
-              :errors_as_objects  => true,
-              :version            => Marty::JsonSchema::RAW_URI }
-      to_append = {"\$schema" => Marty::JsonSchema::RAW_URI}
       schemas.each do |attr, sch|
         begin
           er = JSON::Validator.fully_validate(sch.merge(to_append), params, opt)
         rescue NameError
           return {error: "Unrecognized PgEnum for attribute #{attr}"}
         rescue => ex
-          return {error: ex.message}
+          return {error: "#{attr}: #{ex.message}"}
         end
         validation_error[attr] = er.map{ |e| e[:message] } if er.size > 0
         err_count += er.size
@@ -116,8 +120,42 @@ class Marty::RpcController < ActionController::Base
         result = engine.background_eval(node, params, attrs)
         return retval = {"job_id" => result.__promise__.id}
       end
-
       res = engine.evaluate_attrs(node, attrs, params)
+
+      validation_error = {}
+      err_count = 0
+      if need_output_validate.present?
+        begin
+          schemas = get_schemas(tag, sname, node, need_output_validate)
+        rescue => e
+          return {error: e.message}
+        end
+        pairs = attrs.zip(res)
+        pairs.zip(schemas).each do |(attr, res), (_, sch)|
+          begin
+            er = JSON::Validator.fully_validate(sch.merge(to_append), res, opt)
+          rescue NameError
+            return {error: "Unrecognized PgEnum for attribute #{attr}"}
+          rescue => ex
+            return {error: "#{attr}: #{ex.message}"}
+          end
+          validation_error[attr] = er.map{ |e| e[:message] } if er.size > 0
+          err_count += er.size
+        end
+        if err_count > 0
+          res = pairs.map do |attr, res|
+            is_strict = strict_validate.include?(attr)
+            the_error = validation_error[attr]
+
+            Marty::Logger.error("API #{sname}:#{node}.#{attr}",
+                                {error:  the_error,
+                                 data: res}) if the_error
+            is_strict && the_error ?
+              {error: "Error(s) validating: #{the_error}"} : res
+          end
+        end
+      end
+
       return retval = (attrs_atom ? res.first : res)
     rescue => exc
       err_msg = Delorean::Engine.grok_runtime_exception(exc).symbolize_keys
