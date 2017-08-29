@@ -126,21 +126,26 @@ class Marty::Script < Marty::Base
 
   delorean_fn :eval_to_hash, sig: 5 do
     |dt, script, node, attrs, params|
-    tag = Marty::Tag.find_match(dt)
-
-    # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
-    # params. So, need to clone it.
-    params = params.clone
-
-    raise "no tag found for #{dt}" unless tag
+    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
-    res = engine.eval_to_hash(node, attrs, params)
+    # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
+    # params. So, need to clone it.
+    engine.eval_to_hash(node, attrs, params.clone)
 
     # FIXME: should sanitize res to make sure that no nodes are being
     # passed back.  It's likely that nodes which are not from the
     # current tag can caused problems.
-    res
+  end
+
+  delorean_fn :evaluate, sig: 5 do
+    |dt, script, node, attr, params|
+    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
+
+    engine = Marty::ScriptSet.new(tag).get_engine(script)
+    # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
+    # params. So, need to clone it.
+    engine.evaluate(node, attr, params.clone)
   end
 
   delorean_fn :pretty_print, sig: 1 do
