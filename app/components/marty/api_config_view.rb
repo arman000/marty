@@ -13,7 +13,9 @@ class Marty::ApiConfigView < Marty::Grid
       :node,
       :attr,
       :logged,
-      :validated,
+      :input_validated,
+      :output_validated,
+      :strict_validate,
       :created_at,
       :updated_at,
     ]
@@ -47,11 +49,11 @@ class Marty::ApiConfigView < Marty::Grid
       c.setter = lambda { |r, v| r.send("#{a}=", v.blank? ? nil : v) }
     end
   end
-  attribute :logged do |c|
-    c.width = 100
-  end
-  attribute :validated do |c|
-    c.width = 110
+  [:logged, :input_validated, :output_validated, :strict_validate].each do
+    |a|
+    attribute a do |c|
+      c.width = 110
+    end
   end
   [:created_at, :updated_at].each do |a|
     attribute a do |c|
@@ -64,7 +66,9 @@ class Marty::ApiConfigView < Marty::Grid
       :node,
       :attr,
       :logged,
-      :validated,
+      :input_validated,
+      :output_validated,
+      :strict_validate,
     ]
   end
 
