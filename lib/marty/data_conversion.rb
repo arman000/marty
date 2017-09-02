@@ -46,6 +46,8 @@ class Marty::DataConversion
       end
     when :string, :text, :enum
       v
+    when :enum_array, :string_array, :integer_array
+      "{#{v}}"
     when :integer
       v.to_i
     when :float
@@ -188,6 +190,7 @@ class Marty::DataConversion
       |(k,v), h|
       h[k.to_s] = v == '' ? nil : v
     }
+
     key_groups.each_with_object({}) do
       |(ga, g), h|
 
