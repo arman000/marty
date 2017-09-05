@@ -18,6 +18,7 @@ feature 'logger view', js: true, capybara: true do
   before(:all) do
     self.use_transactional_fixtures = false
     @db =  SQLite3::Database.new(Marty::Log.logfile)
+    @db.execute("delete from log")
 
     info_s = { info: 'message' }
     error_s = [1, 2, 3, { error: 'message' }]

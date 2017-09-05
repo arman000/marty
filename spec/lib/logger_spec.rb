@@ -8,9 +8,9 @@ module Marty
     end
     before(:each) do
       @db =  SQLite3::Database.new(Marty::Log.logfile)
+      @db.execute "delete from log"
     end
     after(:each) do
-      @db.execute "delete from log"
       @db.close
     end
     after(:all) do
@@ -104,6 +104,7 @@ module Marty
       save_clean_db(@clean_file)
       # transactional fixtures interfere with queueing jobs
       self.use_transactional_fixtures = false
+      Marty::Log.cleanup(0)
 
       # Needed here because shutting transactional fixtures off
       # means we lose the globally set user

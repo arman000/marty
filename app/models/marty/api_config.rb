@@ -6,7 +6,8 @@ class Marty::ApiConfig < Marty::Base
            "AND (attr IS NULL OR attr = ?)",
            script, node, attr]).
            order('node nulls last, attr nulls last').
-           pluck(:logged, :validated, :id)
+           pluck(:logged, :input_validated, :output_validated, :strict_validate,
+                 :id)
     res.first
   end
   def self.multi_lookup(script, node, attrs)

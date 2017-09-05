@@ -47,7 +47,7 @@ A: M3::A
     g = e * 5 + f
     h = f + 1
     ptest = p * 10
-    result = [{"a": 123, "b": 456}, {"a": 789, "b": 101112}]
+    result = [{"a": p, "b": 456}, {"a": 789, "b": p}]
 eof
 
 sample_script5 = <<eof
@@ -60,6 +60,8 @@ A:
         else if f == "Orange"
         then 2
         else 9
+    result =  [{"a": "str", "b": 456}, {"a": 789, "b": "str"}]
+    result2 = [{"a": "str", "b": 456}, {"a": 789, "b": "str"}]
 eof
 
 sample_script6 = <<eof
@@ -80,6 +82,13 @@ A:
     res = 123
 eof
 
+sample_script9 = <<eof
+A:
+    b =?
+    res = b + 1
+    result = [{"a": 1, "b": res}, {"a": 789, "b": res}]
+eof
+
 script3_schema = <<eof
 A:
     pc = { "properties : {
@@ -94,6 +103,7 @@ A:
             "p" : { "type" : "integer" },
                 }
             }
+    d_ = { "type" : "integer" }
 
     g = { "properties" : {
                   "e" : { "type" : "integer" },
@@ -101,10 +111,29 @@ A:
                 }
           }
 
+    g_ = { "type" : "integer" }
+
     lc = { "properties" : {
                   "p" : { "type" : "integer" },
                 }
             }
+
+    result = { "properties" : {
+            "p" : { "type" : "integer" },
+                }
+             }
+
+    result_ = {
+                 "type": "array",
+                 "minItems": 1,
+                 "items": {
+                   "type": "object",
+                   "properties": {
+                       "a": { "type" : "integer" },
+                       "b": { "type" : "integer" }
+                }
+              }
+          }
 eof
 
 script5_schema = <<eof
@@ -113,6 +142,39 @@ A:
             "f" : { "pg_enum" : "FruitsEnum" },
                 }
             }
+
+    result = { "properties" : {
+            "f" : { "pg_enum" : "FruitsEnum" },
+                }
+            }
+
+    result_ = { "type": "array",
+                 "minItems": 1,
+                 "items": {
+                   "type": "object",
+                   "properties": {
+                       "a": { "type" : "integer" },
+                       "b": { "type" : "string" }
+                   }
+                }
+             }
+
+    result2 = { "properties" : {
+            "f" : { "pg_enum" : "FruitsEnum" },
+                }
+            }
+
+    result2_ = { "type": "array",
+                 "minItems": 1,
+                 "items": {
+                   "type": "object",
+                   "properties": {
+                       "a": { "type" : "integer" },
+                       "b": { "type" : "string" }
+                   }
+                }
+             }
+
 eof
 
 script6_schema = <<eof
@@ -139,6 +201,31 @@ A:
             }
 eof
 
+script9_schema = <<eof
+A:
+    res = { "properties" : {
+            "b" : { "type" : "number" },
+                }
+            }
+
+    result = { "properties" : {
+            "b" : { "type" : "number" },
+                }
+            }
+
+    result_ = {  "type": "array",
+                 "minItems": 1,
+                 "items": {
+                   "type": "object",
+                   "properties": {
+                       "a": { "type" : "integer" },
+                       "b": { "type" : "integer" },
+                       "c": { "type" : "string" }
+                   },
+                   "required" : ["a", "b", "c"]
+                }
+          }
+eof
 
 describe Marty::RpcController do
   before(:each) {
@@ -162,12 +249,14 @@ describe Marty::RpcController do
                          "M6" => sample_script6,
                          "M7" => sample_script7,
                          "M8" => sample_script8,
+                         "M9" => sample_script9,
                          "M3Schemas" => script3_schema,
                          "M4Schemas" => script4_schema,
                          "M5Schemas" => script5_schema,
                          "M6Schemas" => script6_schema,
                          "M7Schemas" => script7_schema,
                          "M8Schemas" => script8_schema,
+                         "M9Schemas" => script9_schema,
                        }, Date.today + 1.minute)
 
     @p1 = Marty::Posting.do_create("BASE", Date.today + 2.minute, 'a comment')
@@ -415,7 +504,7 @@ describe Marty::RpcController do
       attrs: ["result"].to_json,
     }
     # puts 'Z'*40, request.inspect
-    expect(response.body).to eq("a,b\r\n123,456\r\n789,101112\r\n")
+    expect(response.body).to eq("a,b\r\n10,456\r\n789,10\r\n")
   end
 
   it "returns an error message on missing schema script (csv)" do
@@ -423,7 +512,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["b"].to_json
     params = {"a" => 5}.to_json
     get 'evaluate', {
@@ -442,7 +531,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["b"].to_json
     params = {"a" => 5}.to_json
     get 'evaluate', {
@@ -464,7 +553,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["h"].to_json
     params = {"f" => 5}.to_json
     get 'evaluate', {
@@ -474,8 +563,8 @@ describe Marty::RpcController do
       attrs: attrs,
       params: params
     }
-    expect = "Schema error for M4/A attrs=h: Problem with schema\r\n"
-    expect(response.body).to eq("error,#{expect}")
+    expect = "Schema error for M4/A attrs=h: Problem with schema"
+    expect(response.body).to include("error,#{expect}")
   end
 
   it "returns an error message on invalid schema" do
@@ -483,7 +572,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["pc"].to_json
     params = {"p" => 5}.to_json
     get 'evaluate', {
@@ -493,7 +582,8 @@ describe Marty::RpcController do
       attrs: attrs,
       params: params
     }
-    expect = "Schema error for M3/A attrs=pc: Problem with schema\r\n"
+    expect = "Schema error for M3/A attrs=pc: Problem with schema: "\
+             "syntax error M3Schemas:2\r\n"
     expect(response.body).to eq("error,#{expect}")
   end
 
@@ -502,7 +592,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["d"].to_json
     params = {"p" => "132"}.to_json
     get 'evaluate', {
@@ -522,7 +612,8 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true,
+                             output_validated: true)
     attrs = ["d", "g"].to_json
     params = {"p" => "132", "e" => "55", "f"=>"16"}.to_json
     get 'evaluate', {
@@ -531,7 +622,7 @@ describe Marty::RpcController do
       node: "A",
       attrs: attrs,
       params: params
-    }
+        }
     expect = '""d""=>[""The property \'#/p\' of type string did not '\
              'match the following type: integer'
     expect(response.body).to include(expect)
@@ -543,12 +634,125 @@ describe Marty::RpcController do
     expect(response.body).to include(expect)
   end
 
+  context "output_validation" do
+    before(:all) do
+      @db =  SQLite3::Database.new(Marty::Log.logfile)
+    end
+    before(:each) do
+      @logid = @db.execute('select max(id) from log').first.first || 0 rescue 0
+    end
+    after(:all) do
+      @db.close
+    end
+    it "validates output" do
+      Marty::ApiConfig.create!(script: "M4",
+                               node: "A",
+                               attr: nil,
+                               logged: false,
+                               input_validated: true,
+                               output_validated: true)
+      attrs = ["d", "g", "result"].to_json
+      params = {"p" => 132, "e" => 55, "f"=>16}.to_json
+      get 'evaluate', {
+            format: :json,
+            script: "M4",
+            node: "A",
+            attrs: attrs,
+            params: params
+          }
+      res_hash = JSON.parse(response.body)
+      expect(res_hash).to eq([135,291,[{"a"=>132,"b"=>456},
+                                       {"a"=>789,"b"=>132}]])
+      logs = Marty::Log.where("id > #{@logid}").to_a
+      expect(logs.count).to eq(0)
+    end
+
+    it "validates output (bad type, with strict/non strict errors)" do
+      Marty::ApiConfig.create!(script: "M5",
+                               node: "A",
+                               attr: nil,
+                               logged: false,
+                               input_validated: true,
+                               output_validated: true,
+                               strict_validate: true)
+      Marty::ApiConfig.create!(script: "M5",
+                               node: "A",
+                               attr: "result2",
+                               logged: false,
+                               input_validated: true,
+                               output_validated: true,
+                               strict_validate: false)
+      attrs = ["result", "result2"].to_json
+      params = {"f" => "Banana"}.to_json
+      get 'evaluate', {
+            format: :json,
+            script: "M5",
+            node: "A",
+            attrs: attrs,
+            params: params
+          }
+      res_hash = JSON.parse(response.body)
+      expect(res_hash[0]).to include("error")
+      expect1 = "The property '#/0/b' of type integer did not match the "\
+               "following type: string"
+      expect2 = "The property '#/0/a' of type string did not match the "\
+                "following type: integer"
+      expect(res_hash[0]["error"]).to include(expect1)
+      expect(res_hash[0]["error"]).to include(expect2)
+
+      logs = Marty::Log.where("id > #{@logid}").to_a
+      expect(logs.count).to eq(2)
+      expect(logs[0].message).to eq("API M5:A.result")
+      expect(logs[1].message).to eq("API M5:A.result2")
+      logs.each do |ml|
+        expect(ml.details).to include(expect1)
+        expect(ml.details).to include(expect2)
+        expect(ml.details).to include(
+         ":data=>[{\"a\"=>\"str\", \"b\"=>456}, {\"a\"=>789, \"b\"=>\"str\"}]}")
+      end
+    end
+
+    it "validates output (missing item)" do
+      logid = @db.execute('select max(id) from log').first.first rescue 0
+      Marty::ApiConfig.create!(script: "M9",
+                               node: "A",
+                               attr: nil,
+                               logged: false,
+                               input_validated: true,
+                               output_validated: true,
+                               strict_validate: true)
+      attrs = ["result"].to_json
+      params = {"b" => 122}.to_json
+      get 'evaluate', {
+            format: :json,
+            script: "M9",
+            node: "A",
+            attrs: attrs,
+            params: params
+          }
+      res_hash = JSON.parse(response.body)
+      expect(res_hash[0]).to include("error")
+      expect1 = "The property '#/0' did not contain a required property of 'c'"
+      expect2 = "The property '#/1' did not contain a required property of 'c'"
+      expect(res_hash[0]["error"]).to include(expect1)
+      expect(res_hash[0]["error"]).to include(expect2)
+
+      logs = Marty::Log.where("id > #{@logid}").to_a
+      expect(logs.count).to eq(1)
+      expect(logs[0].message).to eq("API M9:A.result")
+      expect(logs[0].details).to include(expect1)
+      expect(logs[0].details).to include(expect2)
+      expect(logs[0].details).to include(
+         ":data=>[{\"a\"=>1, \"b\"=>123}, {\"a\"=>789, \"b\"=>123}]")
+    end
+  end
+
   it "validates schema" do
     Marty::ApiConfig.create!(script: "M4",
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["lc"].to_json
     params = {"p" => 5}.to_json
     get 'evaluate', {
@@ -566,7 +770,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["res"].to_json
     params = {"b" => 5.22}.to_json
     get 'evaluate', {
@@ -576,7 +780,7 @@ describe Marty::RpcController do
       attrs: attrs,
       params: params
     }
-    expect = 'The property \'#/properties/b/type\' of type string '\
+    expect = 'res: The property \'#/properties/b/type\' of type string '\
              'did not match one or more of the required schemas'
     res_hsh = JSON.parse(response.body)
     expect(res_hsh.keys.size).to eq(1)
@@ -594,7 +798,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["res"].to_json
     params = {"f" => "Banana"}.to_json
     get 'evaluate', {
@@ -612,7 +816,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["res"].to_json
     params = {"f" => "Beans"}.to_json
     get 'evaluate', {
@@ -631,7 +835,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     attrs = ["res"].to_json
     params = {"b" => "MemberOfANonExistantEnum"}.to_json
     get 'evaluate', {
@@ -653,7 +857,7 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: false,
-                             validated: true)
+                             input_validated: true)
     skip "pending until a solution is found that handles "\
          "autoload issues involving constantize"
     attrs = ["res"].to_json
