@@ -40,7 +40,6 @@ feature 'under Sytem menu, User Management worflows', js: true do
 
     by 'add new user' do
       wait_for_ajax
-      zoom_out
       press('New User')
       within(:gridpanel, 'add_window', match: :first) do
         press 'OK'
@@ -78,10 +77,10 @@ feature 'under Sytem menu, User Management worflows', js: true do
     and_by 'check row got edited' do
       wait_for_ajax
       expect(user_view.get_row_vals(2)).to netzke_include({
-        :login=>"new_login", 
-        :firstname=>"new_fname", 
-        :lastname=>"new_lname", 
-        :active=>true, 
+        :login=>"new_login",
+        :firstname=>"new_fname",
+        :lastname=>"new_lname",
+        :active=>true,
         :roles=>"User Manager,Viewer",
         })
     end
@@ -114,7 +113,6 @@ feature 'under Sytem menu, User Management worflows', js: true do
       user_view = netzke_find('user_view')
       by 'check buttons' do
         find(:btn, 'New User', match: :first)
-        zoom_out
         user_view.select_row(1)
         expect(btn_disabled?('New User')).to be_falsy
         expect(btn_disabled?('Edit')).to be_falsy

@@ -17,6 +17,7 @@ group :development, :test do
   gem 'rspec-rails', '~>3.0'
   gem 'capybara'
   gem 'selenium-webdriver'
+  gem 'chromedriver-helper'
   gem 'timecop'
   gem 'database_cleaner'
 
