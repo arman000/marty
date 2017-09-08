@@ -34,19 +34,6 @@ class ActiveRecord::Base
   end
 end
 
-Capybara.register_driver :selenium do |app|
-  # use personal firefox if it exists
-  personal_firefox = File.expand_path('~/firefox/firefox')
-  Selenium::WebDriver::Firefox::Binary.path = personal_firefox if
-    File.exists?(personal_firefox)
-
-  client = Selenium::WebDriver::Remote::Http::Default.new
-  profile = Selenium::WebDriver::Firefox::Profile.new
-  profile.load_no_focus_lib = true
-  Capybara::Selenium::Driver.new(app, :profile => profile,
-                                 :http_client => client)
-end
-
 Capybara.register_driver :chrome do |app|
   Capybara::Selenium::Driver.new(app, browser: :chrome)
 end
@@ -61,7 +48,6 @@ Capybara.register_driver :headless_chrome do |app|
                                  desired_capabilities: capabilities
 end
 
-# Capybara.javascript_driver = :chrome
 Capybara.javascript_driver = :headless_chrome
 
 ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection
