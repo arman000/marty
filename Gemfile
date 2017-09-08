@@ -18,7 +18,8 @@ group :development, :test do
   gem 'pry-rails'
   gem 'rspec-rails', '~>3.0'
   gem 'capybara'
-  gem "selenium-webdriver", '~> 2.53.4'
+  gem 'selenium-webdriver'
+  gem 'chromedriver-helper'
   gem 'timecop'
   gem 'database_cleaner'
 

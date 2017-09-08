@@ -121,7 +121,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -187,7 +186,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -219,7 +217,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -245,7 +242,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
