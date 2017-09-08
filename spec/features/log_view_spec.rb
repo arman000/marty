@@ -72,9 +72,10 @@ feature 'logger view', js: true, capybara: true do
         find(:xpath, "//input[contains(@id, 'textfield')]", wait: 5).set(days)
         press('OK')
         wait_for_ready
-        find(:refresh).click
+        find('.x-tool-refresh').click
         wait_for_ready
       end
+      sleep 0.5
       cnt = logview.row_count()
       expect(cnt).to eq(exp_count)
       types = logview.col_values('message_type', cnt, 0)

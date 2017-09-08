@@ -653,7 +653,7 @@ describe Marty::RpcController do
                                output_validated: true)
       attrs = ["d", "g", "result"].to_json
       params = {"p" => 132, "e" => 55, "f"=>16}.to_json
-      get 'evaluate', {
+      get 'evaluate', params: {
             format: :json,
             script: "M4",
             node: "A",
@@ -684,7 +684,7 @@ describe Marty::RpcController do
                                strict_validate: false)
       attrs = ["result", "result2"].to_json
       params = {"f" => "Banana"}.to_json
-      get 'evaluate', {
+      get 'evaluate', params: {
             format: :json,
             script: "M5",
             node: "A",
@@ -723,7 +723,7 @@ describe Marty::RpcController do
                                strict_validate: true)
       attrs = ["result"].to_json
       params = {"b" => 122}.to_json
-      get 'evaluate', {
+      get 'evaluate', params: {
             format: :json,
             script: "M9",
             node: "A",
