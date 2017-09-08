@@ -172,7 +172,7 @@ describe Marty::Event do
                                  "enum_event_operation"=>"AVM",
                                  "comment"=>"wassup",
                                  "expire_secs"=>nil,
-                                 "error"=>'f'})
+                                 "error"=> false})
     Marty::Event.update_comment(ev.first, "updated")
     ev = Marty::Event.lookup_event('testcl1', 123, 'AVM')
     expect(ev.first).to include({"comment"=>"updated"})
@@ -192,7 +192,7 @@ describe Marty::Event do
                                  "enum_event_operation"=>"PRICING",
                                  "comment"=>"c comment",
                                  "expire_secs"=>nil,
-                                 "error"=>"f"})
+                                 "error"=>false})
 
     af = Marty::Event.all_finished
     expect(af.count).to eq(4)
