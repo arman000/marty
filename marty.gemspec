@@ -28,14 +28,13 @@ Gem::Specification.new do |s|
 
   s.add_dependency "pg", "~> 0.21"
 
-  s.add_dependency 'netzke-core', '~> 1.0.0'
-  s.add_dependency 'netzke-basepack', '~> 1.0.0'
-  s.add_development_dependency 'netzke-testing', '~> 1.0.0'
+  s.add_dependency 'netzke', '6.5.0.0'
 
   s.add_dependency 'axlsx', '2.1.0pre'
 
+
   s.add_dependency 'delorean_lang', '~> 0.3.33'
-  s.add_dependency 'mcfly', '0.0.19'
+  # s.add_dependency 'mcfly', '0.0.19'
 
   s.add_dependency 'coderay'
   # FIXME: for some reason 0.16.1 doesn't work at PennyMac -- investigate
