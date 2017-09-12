@@ -151,7 +151,8 @@ class Marty::RpcController < ActionController::Base
                                 {error:  the_error,
                                  data: res}) if the_error
             is_strict && the_error ?
-              {error: "Error(s) validating: #{the_error}"} : res
+              {error: "Error(s) validating: #{the_error}",
+               data: res} : res
           end
         end
       end
