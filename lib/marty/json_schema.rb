@@ -5,15 +5,18 @@ module Marty
   private
   class PgEnumAttribute < JSON::Schema::Attribute
     def self.validate(curr_schema, data, frag, pro, validator, opt={})
-      enum = nil
+      values = nil
+      path = '#/' + frag.join('/')
       begin
-        enum = curr_schema.schema["pg_enum"].constantize
-      rescue
-        msg = "#{self.class.name} error: '#{data}' is not a pg_enum class"
+        cs = curr_schema.schema["pg_enum"]
+        enum = cs.constantize
+        values = enum::VALUES
+      rescue => e
+        msg = "The property '#{path}': '#{cs}' is not a pg_enum class"
         validation_error(pro, msg, frag, curr_schema, self, opt[:record_errors])
       end
-      if !enum::VALUES.include?(data)
-        msg = "#{self.class.name} error: '#{data}' not contained in #{enum}"
+      if values && !values.include?(data)
+        msg = "The property '#{path}' value '#{data}' not contained in #{enum}"
         validation_error(pro, msg, frag, curr_schema, self, opt[:record_errors])
       end
     end

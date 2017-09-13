@@ -8,6 +8,10 @@ class ElectronicsEnum
   VALUES=Set['Phone','Keyboard','Terminator']
 end
 
+class NotAnEnum
+  HI = "MOM"
+end
+
 module Marty
 
   describe JsonSchema do
@@ -24,20 +28,28 @@ module Marty
         },
       }
     }
+    opt = { :validate_schema    => true,
+                :errors_as_objects  => false,
+                :version            => Marty::JsonSchema::RAW_URI }
 
-    it "returns true on correct simple data" do
+    it "returns no error on correct simple data" do
       data = {"a" => 5}
-      expect(JSON::Validator.validate(simple_schema, data)).to be true
+      expect(JSON::Validator.fully_validate(simple_schema, data, opt)).to eq([])
     end
 
-    it "returns false on incorrect simple data -- 1" do
+    it "returns error on incorrect simple data -- 1" do
       data = {"a" => 5.2}
-      expect(JSON::Validator.validate(simple_schema, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(simple_schema, data, opt)[0]).to include(
+      "property '#/a' of type number did not match the following type: integer")
     end
 
-    it "returns false on incorrect simple data -- 2" do
+    it "returns error on incorrect simple data -- 2" do
       data = {"a" => "Kangaroo"}
-      expect(JSON::Validator.validate(simple_schema, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(simple_schema, data, opt)[0]).to include(
+      "property '#/a' of type string did not match the following type: integer")
+
     end
 
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -53,29 +65,33 @@ module Marty
       }
     }
 
-    it "returns true on correct existing enums" do
+    it "returns no error on correct existing enums" do
       data = {"a" => 'Dog'}
-      expect(JSON::Validator.validate(pg_schema_opt, data)).to be true
+      expect(JSON::Validator.fully_validate(pg_schema_opt, data, opt)).to eq([])
     end
 
-    it "vacuously returns true on a field not validated" do
+    it "vacuously returns no error on a field not validated" do
       data = {"b" => 'Dawg'}
-      expect(JSON::Validator.validate(pg_schema_opt, data)).to be true
+      expect(JSON::Validator.fully_validate(pg_schema_opt, data, opt)).to eq([])
     end
 
-    it "returns false on non-existant enums" do
+    it "returns error on non-existant enums" do
       data = {"a" => 'Beer'}
-      expect(JSON::Validator.validate(pg_schema_opt, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(pg_schema_opt, data, opt)[0]).to include(
+         "property '#/a' value 'Beer' not contained in MammalEnum")
     end
 
-    it "returns true when a optional field is not suppplied" do
+    it "returns no error when a optional field is not suppplied" do
       data = {}
-      expect(JSON::Validator.validate(pg_schema_opt, data)).to be true
+      expect(JSON::Validator.fully_validate(pg_schema_opt, data, opt)).to eq([])
     end
 
-    it "returns false when a nil enum is passed even when enum is optional" do
+    it "returns error when a nil enum is passed even when enum is optional" do
       data = {"a" => nil}
-      expect(JSON::Validator.validate(pg_schema_opt, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(pg_schema_opt, data, opt)[0]).to include(
+        "property '#/a' value '' not contained in MammalEnum")
     end
 
     pg_schema_req = {
@@ -88,14 +104,52 @@ module Marty
       }
     }
 
-    it "returns false when a required field is not supplied" do
+    it "returns error when a required field is not supplied" do
       data = {}
-      expect(JSON::Validator.validate(pg_schema_req, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(pg_schema_req, data, opt)[0]).to include(
+         "property '#/' did not contain a required property of 'a'")
     end
 
-    it "returns false when a nil enum is passed when enum is required" do
+    it "returns error when a nil enum is passed when enum is required" do
       data = {"a" => nil}
-      expect(JSON::Validator.validate(pg_schema_req, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(pg_schema_req, data, opt)[0]).to include(
+       "property '#/a' value '' not contained in MammalEnum")
+    end
+
+    pg_schema_req_bad = {
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
+      "required" => ["a"],
+      "properties" => {
+        "a" => {
+          "pg_enum" => "NotAnEnum"
+        },
+      }
+    }
+
+    it "returns raises meaningful error on schema enum error"  do
+      data = {"a" => nil}
+      expect(JSON::Validator.
+              fully_validate(pg_schema_req_bad, data, opt)[0]).to include(
+        "property '#/a': 'NotAnEnum' is not a pg_enum class")
+    end
+
+    pg_schema_req_bad2 = {
+      "$schema" => "http://json-schema.org/marty-draft/schema#",
+      "required" => ["a"],
+      "properties" => {
+        "a" => {
+          "pg_enum" => "NotEvenAClass"
+        },
+      }
+    }
+
+    it "returns raises meaningful error on schema enum error"  do
+      data = {"a" => nil}
+      expect(JSON::Validator.
+              fully_validate(pg_schema_req_bad2, data, opt)[0]).to include(
+         "property '#/a': 'NotEvenAClass' is not a pg_enum class")
     end
 
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -122,14 +176,18 @@ module Marty
       expect(JSON::Validator.validate(date_schema_opt, data)).to be true
     end
 
-    it "returns false on an improperly formatted date" do
+    it "returns error on an improperly formatted date" do
       data = {"a" => '2017-05-32'}
-      expect(JSON::Validator.validate(date_schema_opt, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(date_schema_opt, data, opt)[0]).to include(
+        "property '#/a' must be a date in the format of YYYY-MM-DD")
     end
 
-    it "returns false on an properly formatted datetime" do
+    it "returns error on an properly formatted datetime" do
       data = {"a" => '2017-05-22T14:51:44Z'}
-      expect(JSON::Validator.validate(date_schema_opt, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(date_schema_opt, data, opt)[0]).to include(
+        "property '#/a' must be a date in the format of YYYY-MM-DD")
     end
 
     it "returns true when an optional date is not supplied" do
@@ -137,9 +195,11 @@ module Marty
       expect(JSON::Validator.validate(date_schema_opt, data)).to be true
     end
 
-    it "returns false when a nil date is passed even when date is optional" do
+    it "returns error when a nil date is passed even when date is optional" do
       data = {"a" => nil}
-      expect(JSON::Validator.validate(date_schema_opt, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(date_schema_opt, data, opt)[0]).to include(
+         "property '#/a' of type null did not match the following type: string")
     end
 
     date_schema_req = {
@@ -153,14 +213,18 @@ module Marty
       }
     }
 
-    it "returns false when a required date field is not supplied" do
+    it "returns error when a required date field is not supplied" do
       data = {}
-      expect(JSON::Validator.validate(date_schema_req, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(date_schema_req, data, opt)[0]).to include(
+         "property '#/' did not contain a required property of 'a'")
     end
 
-    it "returns false when a nil date is passed when date is required" do
+    it "returns error when a nil date is passed when date is required" do
       data = {"a" => nil}
-      expect(JSON::Validator.validate(date_schema_req, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(date_schema_req, data, opt)[0]).to include(
+         "property '#/a' of type null did not match the following type: string")
     end
 
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -187,9 +251,11 @@ module Marty
       expect(JSON::Validator.validate(datetime_schema_opt, data)).to be true
     end
 
-    it "returns false on an improperly formatted datetime" do
+    it "returns error on an improperly formatted datetime" do
       data = {"a" => '2017-30-22T14:51:44Z'}
-      expect(JSON::Validator.validate(datetime_schema_opt, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(datetime_schema_opt, data, opt)[0]).to include(
+        "property '#/a' must be a date/time in the ISO-8601 format")
     end
 
     it "returns true when an opt field is not supplied" do
@@ -197,9 +263,11 @@ module Marty
       expect(JSON::Validator.validate(datetime_schema_opt, data)).to be true
     end
 
-    it "returns false when a nil dt is passed even when dt is opt" do
+    it "returns error when a nil dt is passed even when dt is opt" do
       data = {"a" => nil}
-      expect(JSON::Validator.validate(datetime_schema_opt, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(datetime_schema_opt, data, opt)[0]).to include(
+           "property '#/a' of type null did not match the following type: string")
     end
 
     datetime_schema_req = {
@@ -213,14 +281,18 @@ module Marty
       }
     }
 
-    it "returns false when a required field is not supplied" do
+    it "returns error when a required field is not supplied" do
       data = {}
-      expect(JSON::Validator.validate(datetime_schema_req, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(datetime_schema_req, data, opt)[0]).to include(
+           "property '#/' did not contain a required property of 'a'")
     end
 
-    it "returns false when a nil dt is passed when dt is required" do
+    it "returns error when a nil dt is passed when dt is required" do
       data = {"a" => nil}
-      expect(JSON::Validator.validate(datetime_schema_req, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(datetime_schema_req, data, opt)[0]).to include(
+        "property '#/a' of type null did not match the following type: string")
     end
 
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -420,7 +492,7 @@ module Marty
 
     it "validates a complex nested schema when incorrect -- 1" do
       data = { "a" => 'Dog',
-               "b" => '2017-05-32T14:51:44Z', #
+               "b" => '2017-05-32T14:51:44Z', # note DD
                "root1" => [ { "x" => {"w" => 0, "t" => 'Bear',  "f" => 0.0},
                               "y" => 'Phone' },
                             { "x" => {"w" => 1, "t" => 'Human', "f" => 5.0},
@@ -449,7 +521,9 @@ module Marty
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.validate(nested_schema, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(nested_schema, data, opt)[0]).to include(
+         "property '#/root1/0/x/t' value 'Bar' not contained in MammalEnum")
     end
 
     it "validates a complex nested schema when incorrect -- 3" do
@@ -466,7 +540,9 @@ module Marty
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.validate(nested_schema, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(nested_schema, data, opt)[0]).to include(
+            "property '#/root1/1/x/f' was not divisible by 5.0")
     end
 
     it "validates a complex nested schema when incorrect -- 4" do
@@ -483,7 +559,10 @@ module Marty
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.validate(nested_schema, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(nested_schema, data, opt)[0]).to include(
+                      "property '#/root1/1/y' value 'Trminator' not contained "\
+                      "in ElectronicsEnum")
     end
 
     it "validates a complex nested schema when incorrect -- 5" do
@@ -500,7 +579,9 @@ module Marty
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.validate(nested_schema, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(nested_schema, data, opt)[0]).to include(
+       "property '#/root1/2/x/w' did not have a maximum value of 3, inclusively")
     end
 
     it "validates a complex nested schema when incorrect -- 6" do
@@ -510,14 +591,16 @@ module Marty
                               "y" => 'Phone' },
                             { "x" => {"w" => 1, "t" => 'Human', "f" => 5.0},
                               "y" => 'Terminator' },
-                            { "x" => {"w" => 5, "t" => 'Dog',   "f" => 65.0}, #
+                            { "x" => {"w" => -5, "t" => 'Dog',   "f" => 65.0}, #
                               "y" => 'Phone' } ],
                "root2" => [ {"m1" => 'Cat', "e" => 'Keyboard', "m2" => 'Dog' },
                             {"m1" => 'Dog', "e" => 'Phone',    "m2" => 'Cow' }],
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.validate(nested_schema, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(nested_schema, data, opt)[0]).to include(
+       "property '#/root1/2/x/w' did not have a minimum value of 0, inclusively")
     end
 
     it "validates a complex nested schema when incorrect -- 7" do
@@ -534,7 +617,9 @@ module Marty
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.validate(nested_schema, data)).to be false
+      expect(JSON::Validator.
+              fully_validate(nested_schema, data, opt)[0]).to include(
+          "property '#/root2/1/e' value 'Dog' not contained in ElectronicsEnum")
     end
 
   end
