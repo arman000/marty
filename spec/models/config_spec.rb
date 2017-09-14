@@ -15,6 +15,11 @@ module Marty
         expect(Marty::Config["testval"]).to eq(val)
       end
 
+      def testval_fail(val)
+        expect{testval(val)}.to raise_error(ActiveRecord::RecordInvalid,
+                                            'Validation failed: bad JSON value')
+      end
+
       it "should handle various structures correctly" do
         testval("[1,2,3]")
         testval("[1,\"2,3\"]")
@@ -45,6 +50,20 @@ module Marty
           Marty::Config.del("k#{i}")
           expect(Marty::Config["k#{i}"]).to eq(nil)
         }
+      end
+
+      it "should allow the assignment of individual boolean values" do
+        testval(true)
+        testval(false)
+      end
+
+      it "should not allow the assignment of individual nil (null) values" do
+        testval_fail(nil)
+      end
+
+      it "should allow nil (null) to exist in other structures" do
+        testval([nil, 1, 2, nil])
+        testval({"key1"  => nil, "key2" => false, "key3" => 'val'})
       end
     end
   end
