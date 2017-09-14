@@ -17,12 +17,12 @@ class Marty::ConfigView < Marty::Grid
   end
 
   def my_jsonb_getter
-    lambda { |r| v = Marty::Config[r.key]; v && v.to_json || '' }
+    lambda { |r| v = Marty::Config[r.key]; !v.nil? && v.to_json || '' }
   end
 
   def my_jsonb_pretty_getter
     lambda { |r| v = Marty::Config[r.key]
-      v && (JSON.pretty_generate(v) rescue v.to_json) || '' }
+      !v.nil? && (JSON.pretty_generate(v) rescue v.to_json) || '' }
   end
 
   def my_jsonb_setter
