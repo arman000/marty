@@ -826,7 +826,7 @@ describe Marty::RpcController do
       attrs: attrs,
       params: params
     }
-    expect = '""res""=>[""Class error: \'Beans\' not contained in FruitsEnum'
+    expect = "property '#/f' value 'Beans' not contained in FruitsEnum"
     expect(response.body).to include(expect)
   end
 
@@ -845,7 +845,7 @@ describe Marty::RpcController do
       attrs: attrs,
       params: params
     }
-    expect = "Unrecognized PgEnum for attribute res"
+    expect = "property '#/b': 'NonExistantEnum' is not a pg_enum"
     res_hsh = JSON.parse(response.body)
     expect(res_hsh.keys.size).to eq(1)
     expect(res_hsh.keys[0]).to eq("error")
