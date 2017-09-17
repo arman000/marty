@@ -1,4 +1,4 @@
-class AddApiConfigsValidateResult < ActiveRecord::Migration
+class AddApiConfigsValidateResult < ActiveRecord::Migration[4.2]
   def change
     rename_column :marty_api_configs, :validated, :input_validated
     add_column :marty_api_configs, :output_validated, :boolean, null: false,
