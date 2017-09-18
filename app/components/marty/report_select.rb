@@ -113,7 +113,7 @@ class Marty::ReportSelect < Marty::Form
       next if roles && !roles.any?{ |r| Marty::User.has_role(r) }
 
       begin
-        title, format = engine.evaluate_attrs(node, ["title", "format"])
+        title, format = engine.evaluate(node, ["title", "format"])
         format ? [node, "#{title} (#{format})"] : nil
       rescue
         [node, node]

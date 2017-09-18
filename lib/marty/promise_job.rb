@@ -114,7 +114,7 @@ class Marty::PromiseJob < Struct.new(:promise,
 
       engine = Marty::ScriptSet.new(tag).get_engine(sname)
 
-      attrs_eval = engine.evaluate_attrs(node, attrs, params)
+      attrs_eval = engine.evaluate(node, attrs, params)
       res = attrs.zip(attrs_eval).each_with_object({}) do |(attr, val), h|
         h[attr] = val
       end

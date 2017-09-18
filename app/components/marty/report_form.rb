@@ -178,7 +178,7 @@ class Marty::ReportForm < Marty::Form
       raise engine.to_s if engine.is_a?(Hash)
 
       items, title, format = engine.
-        evaluate_attrs(root_sess[:selected_node],
+        evaluate(root_sess[:selected_node],
                        ["form", "title", "format"],
                        {},
                        )
