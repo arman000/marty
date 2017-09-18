@@ -43,7 +43,7 @@ describe Marty::Xl do
   before(:each) do
     code = STYLE_CODE.clone
     engine.parse(code)
-    @ws =  engine.evaluate_attrs("S", ["result"]).flatten(1)
+    @ws =  engine.evaluate("S", ["result"]).flatten(1)
   end
 
   it "should be able to create a spreadsheet with overlapping border styles" do

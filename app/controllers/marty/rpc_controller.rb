@@ -24,7 +24,7 @@ class Marty::RpcController < ActionController::Base
   def get_schemas(tag, sname, node, attrs)
     begin
       engine = Marty::ScriptSet.new(tag).get_engine(sname+'Schemas')
-      result = engine.evaluate_attrs(node, attrs, {})
+      result = engine.evaluate(node, attrs, {})
       attrs.zip(result)
     rescue => e
       use_message = e.message == 'No such script' ?
@@ -120,7 +120,7 @@ class Marty::RpcController < ActionController::Base
         result = engine.background_eval(node, params, attrs)
         return retval = {"job_id" => result.__promise__.id}
       end
-      res = engine.evaluate_attrs(node, attrs, params)
+      res = engine.evaluate(node, attrs, params)
 
       validation_error = {}
       err_count = 0

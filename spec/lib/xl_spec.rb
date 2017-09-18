@@ -95,7 +95,7 @@ describe Marty::Xl do
     map = {'C1' => c[0].to_s, 'C2' => c[1].to_s}
     map.each { |k,v| code.sub!(k,v)  }
     engine.parse(code)
-    engine.evaluate_attrs("M", ["result"]).flatten(1)
+    engine.evaluate("M", ["result"]).flatten(1)
   end
 
   before(:all) do
