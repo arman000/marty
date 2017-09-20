@@ -123,6 +123,11 @@ class Marty::DataChange
       do_export(pt, klass.constantize, sort_field, exclude_attrs)
   end
 
+  delorean_fn :do_pg_enum_export, sig: 1 do
+    |klass|
+    Marty::DataExporter.do_pg_enum_export(klass.constantize)
+  end
+
   delorean_fn :export_changes, sig: 3 do
     |t0, t1, class_name|
 
