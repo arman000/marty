@@ -100,7 +100,6 @@ DELOREAN
 
     by 'select M1 sample script' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
       script_grid.select_row(1)
       tab_press('Testing')
@@ -278,7 +277,6 @@ DELOREAN
 
     by 'select M3 sample script' do
       wait_for_ajax
-      zoom_out
       script_grid.select_row(3)
       tab_press('Testing')
     end

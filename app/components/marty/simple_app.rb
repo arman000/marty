@@ -32,7 +32,7 @@ class Marty::SimpleApp < Netzke::Base
   client_class do |c|
     c.extend = "Ext.container.Viewport"
     c.layout = :border
-    c.require Netzke::Core.ext_path.join("examples", "ux/statusbar/StatusBar.js"), :statusbar_ext
+    c.require Netzke::Core.ext_path.join("packages/ux/classic/src/statusbar/StatusBar.js"), :statusbar_ext
     c.include :simple_app
   end
 

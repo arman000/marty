@@ -48,6 +48,7 @@ feature 'Posting workflows', js: true do
 
     and_by 'select new posting' do
       within(:gridpanel, 'posting_window', match: :first) do
+        wait_for_ajax
         expect(posting_grid.row_count).to eq 2
         posting_grid.select_row(2)
         press('Select')

@@ -16,19 +16,19 @@ class Marty::DataGrid < Marty::Base
   class DataGridValidator < ActiveModel::Validator
     def validate(dg)
 
-      dg.errors[:base] = "'#{dg.data_type}' not a defined type or class" unless
+      dg.errors.add(:base, "'#{dg.data_type}' not a defined type or class") unless
         Marty::DataGrid.convert_data_type(dg.data_type)
 
-      dg.errors[:base] = "data must be array of arrays" unless
+      dg.errors.add(:base, "data must be array of arrays") unless
         dg.data.is_a?(Array) && dg.data.all? {|a| a.is_a? Array}
 
-      dg.errors[:base] = "metadata must be an array of hashes" unless
+      dg.errors.add(:base, "metadata must be an array of hashes") unless
         dg.metadata.is_a?(Array) && dg.metadata.all? {|a| a.is_a? Hash}
 
-      dg.errors[:base] = "metadata must contain only h/v dirs" unless
+      dg.errors.add(:base, "metadata must contain only h/v dirs") unless
         dg.metadata.all? {|h| ["h", "v"].member? h["dir"]}
 
-      dg.errors[:base] = "metadata item attrs must be unique" unless
+      dg.errors.add(:base, "metadata item attrs must be unique") unless
         dg.metadata.map {|h| h["attr"]}.uniq.length == dg.metadata.length
 
       dg.metadata.each do
@@ -40,22 +40,22 @@ class Marty::DataGrid < Marty::Base
         unless rs_keep.nil? || rs_keep.empty?
           m = /\A *(<|<=|>|>=)? *([a-z_]+) *\z/.match(rs_keep)
           unless m
-            dg.errors[:base] = "invalid grid modifier expression: #{rs_keep}"
+            dg.errors.add(:base, "invalid grid modifier expression: #{rs_keep}")
             next
           end
         end
 
-        dg.errors[:base] = "metadata elements must have attr/type/keys" unless
+        dg.errors.add(:base, "metadata elements must have attr/type/keys") unless
           attr && type && keys
 
         # enforce Delorean attr syntax (a bit Draconian)
-        dg.errors[:base] = "bad attribute '#{attr}'" unless
+        dg.errors.add(:base, "bad attribute '#{attr}'") unless
           attr =~ /^[a-z][A-Za-z0-9_]*$/
 
-        dg.errors[:base] = "unknown metadata type #{type}" unless
+        dg.errors.add(:base, "unknown metadata type #{type}") unless
           Marty::DataGrid.type_to_index(type)
 
-        dg.errors[:base] = "bad metadata keys" unless
+        dg.errors.add(:base, "bad metadata keys") unless
           keys.is_a?(Array) && keys.length>0
       end
 
@@ -69,10 +69,10 @@ class Marty::DataGrid < Marty::Base
       v_zip_keys = v_keys.empty? ? [] : v_keys[0].zip(*v_keys[1..-1])
       h_zip_keys = h_keys.empty? ? [] : h_keys[0].zip(*h_keys[1..-1])
 
-      dg.errors[:base] = "duplicate horiz. key combination" unless
+      dg.errors.add(:base, "duplicate horiz. key combination") unless
         h_zip_keys.uniq.length == h_zip_keys.length
 
-      dg.errors[:base] = "duplicate vertical key combination" unless
+      dg.errors.add(:base, "duplicate vertical key combination") unless
         v_zip_keys.uniq.length == v_zip_keys.length
     end
   end
@@ -588,7 +588,7 @@ class Marty::DataGrid < Marty::Base
     self.data       = data
     self.data_type  = data_type
     self.lenient    = !!lenient
-    self.metadata   = metadata
+    self.metadata   = metadata unless self.metadata == metadata # Otherwise changed will depend on order in hashes
     self.created_dt = created_dt if created_dt
     save!
   end

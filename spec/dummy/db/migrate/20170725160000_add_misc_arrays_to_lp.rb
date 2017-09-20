@@ -1,4 +1,4 @@
-class AddMiscArraysToLp < ActiveRecord::Migration
+class AddMiscArraysToLp < ActiveRecord::Migration[4.2]
   def change
     add_column :gemini_loan_programs, :test_int_array, :integer,
                array: true, null: true

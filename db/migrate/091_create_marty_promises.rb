@@ -1,4 +1,4 @@
-class CreateMartyPromises < ActiveRecord::Migration
+class CreateMartyPromises < ActiveRecord::Migration[4.2]
   include Marty::Migrations
 
   def change(*args)

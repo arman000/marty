@@ -94,7 +94,7 @@ DELOREAN
     #hacky: assumes only 1 combobox without label
     within(:gridpanel, 'report_select', match: :first) do
       # hacky, hardcoding netzkecombobox dropdown arrow name
-      arrow = find(:input, 'nodename')['componentid'] + '-trigger-picker'
+      arrow = find(:input, 'nodename')['data-componentid'] + '-trigger-picker'
       find(:xpath, ".//div[@id='#{arrow}']").click
       find(:xpath, "//li[text()='#{node_name}']").click
     end
@@ -111,7 +111,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -177,7 +176,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -209,7 +207,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -235,7 +232,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 

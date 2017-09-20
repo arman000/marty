@@ -1,4 +1,4 @@
-class CreateHeadVersions < McflyMigration
+class CreateHeadVersions < McflyMigration[4.2]
   include Marty::Migrations
 
   def change

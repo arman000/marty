@@ -7,13 +7,13 @@ module Marty
 
     describe 'GET #index' do
       it 'returns http success' do
-        get :index, testop: :version
+        get :index, params: { testop: :version }
 
         expect(response).to have_http_status(:success)
       end
 
       it 'returns the current version' do
-        get :index, testop: :version
+        get :index, params: { testop: :version }
 
         aggregate_failures do
           expect(assigns('details').count).to eq(3)
@@ -24,7 +24,7 @@ module Marty
       end
 
       it 'returns the appropriate json' do
-        get :index, {format: :json, testop: :version}
+        get :index, params: { testop: :version }, format: :json
 
         aggregate_failures do
           expect(json_response.first['diag_count']).to eq(3)
