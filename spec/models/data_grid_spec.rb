@@ -171,9 +171,23 @@ property_state\tstring\tv
 700127\tCA\t0.35
 EOS
 
+    def load_plv_sql
+      glb = Rails.root.to_s +
+            '/lib/sample_data/*.sql'
+
+      Dir.glob(glb).map do
+        |sql_file|
+        File.read(sql_file)
+      end.each {|x| ActiveRecord::Base.connection.execute(x)}
+    end
+    
     before(:each) do
       #Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
+    end
+
+    before(:all) do
+      load_plv_sql
     end
 
     def lookup_grid_helper(pt, gridname, params, follow=false)

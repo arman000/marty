@@ -1,5 +1,4 @@
 class Marty::DataGrid < Marty::Base
-
   # If data_type is nil, assume float
   DEFAULT_DATA_TYPE = "float"
 
@@ -13,6 +12,7 @@ class Marty::DataGrid < Marty::Base
 
   ARRSEP = '|'
 
+
   class DataGridValidator < ActiveModel::Validator
     def validate(dg)
 
@@ -21,10 +21,8 @@ class Marty::DataGrid < Marty::Base
 
       dg.errors[:base] = "data must be array of arrays" unless
         dg.data.is_a?(Array) && dg.data.all? {|a| a.is_a? Array}
-
       dg.errors[:base] = "metadata must be an array of hashes" unless
         dg.metadata.is_a?(Array) && dg.metadata.all? {|a| a.is_a? Hash}
-
       dg.errors[:base] = "metadata must contain only h/v dirs" unless
         dg.metadata.all? {|h| ["h", "v"].member? h["dir"]}
 
@@ -146,7 +144,74 @@ class Marty::DataGrid < Marty::Base
     data_type.constantize rescue nil
   end
 
-  def query_grid_dir(h, infos)
+  #
+  #
+  # START PLV8 ADDITIONS
+  #
+  #
+
+  def self.clear_dtcache
+    @@dtcache = {}
+  end
+
+  PLV_DT_FMT = "%Y-%m-%d %H:%M:%S.%N6"
+
+  def plv_lookup_grid_distinct(h_passed, ret_grid_data=false, distinct=true)
+    row_info = {"id"         => id,
+                "group_id"   => group_id,
+                "created_dt" =>
+                (@@dtcache ||= {})[id] ||= created_dt.strftime(PLV_DT_FMT)
+               }
+    h = metadata.each_with_object({}) do |m, h|
+      attr = m["attr"]
+      inc = h_passed.fetch(attr, :__nf__)
+      next if inc == :__nf__
+      h[attr] = (defined? inc.name) ? inc.name : inc
+    end
+
+    fn = "lookup_grid_distinct"
+    hjson = "'#{h.to_json}'::JSONB"
+    rijson = "'#{row_info.to_json}'::JSONB"
+    params = "#{hjson}, #{rijson}, #{ret_grid_data}, #{distinct}"
+    sql = "SELECT #{fn}(#{params})"
+    raw = ActiveRecord::Base.connection.execute(sql)[0][fn]
+    res = JSON.parse(raw)
+    if res["error"]
+      msg = res["error"]
+      parms, sqls, ress, dg = res["error_extra"].values_at(
+                                "params", "sql",
+                                "results", "dg")
+      raise "DG #{name}: Error in PLV8 call: #{msg}\n"\
+            "params: #{parms}\n"\
+            "sqls: #{sqls}\n"\
+            "results: #{ress}\n"\
+            "dg: #{dg}\n"\
+            "ri: #{row_info}" if res["error"]
+    end
+=begin
+    File.open("/tmp/dg.txt", "a") do |f|
+      f.puts '='*10
+      f.puts 'PLV8'
+      f.puts "DG: #{name}"
+      f.puts "ids: #{id}/#{group_id}"
+      f.puts "created_dt: #{created_dt}"
+      PP.pp(metadata, f)
+      PP.pp(data, f)
+      PP.pp(row_info, f)
+      PP.pp(params, f)
+      PP.pp(res, f)
+    end
+=end
+    if ret_grid_data
+      md, mmd = modify_grid(h_passed)
+      res["data"] = md
+      res["metadata"] = mmd
+    end
+    res
+  end
+
+  # added just_sql for debugging purposes
+  def query_grid_dir(h, infos, just_sql: false)
     return [0] if infos.empty?
 
     sqla = infos.map do |inf|
@@ -205,22 +270,20 @@ class Marty::DataGrid < Marty::Base
               attr:         inf["attr"],
              ).
         where(q, v).to_sql
-    end.compact
-
+      end.compact
     sql = sqla.join(" INTERSECT ")
-
+    return sql if just_sql
     self.class.connection.execute(sql).to_a.map { |hh| hh["index"].to_i }
   end
 
-  def lookup_grid_distinct(pt, h, return_grid_data=false, distinct=true)
+  def lookup_grid_distinct(pt, h, ret_grid_data=false, distinct=true)
     isets = ["h", "v"].each_with_object({}) do |dir, ih|
       infos = dir_infos(dir)
 
       ih[dir] = query_grid_dir(h, infos)
 
-      unless ih[dir] or return_grid_data
+      unless ih[dir] or ret_grid_data
         attrs = infos.map { |inf| inf["attr"] }
-
         raise "#{dir} attrs not provided: %s" % attrs.join(',')
       end
 
@@ -230,18 +293,31 @@ class Marty::DataGrid < Marty::Base
 
     # deterministic result: pick min index when there's a choice
     vi, hi = isets["v"].min, isets["h"].min if isets["v"] && isets["h"]
-
     raise "DataGrid lookup failed #{name}" unless (vi && hi) or lenient or
-      return_grid_data
+      ret_grid_data
 
-    modified_data, modified_metadata = modify_grid(h) if return_grid_data
-
-    return {
+    modified_data, modified_metadata = modify_grid(h) if ret_grid_data
+    x={
       "result"   => (data[vi][hi] if vi && hi),
       "name"     => name,
-      "data"     => (modified_data if return_grid_data),
-      "metadata" => (modified_metadata if return_grid_data)
+      "data"     => (modified_data if ret_grid_data),
+      "metadata" => (modified_metadata if ret_grid_data)
     }
+=begin
+    File.open("/tmp/dg.txt", "a") do |f|
+      f.puts '='*10
+      f.puts 'ORIG'
+      f.puts "DG: #{name}"
+      f.puts "ids: #{id}/#{group_id}"
+      f.puts "created_dt: #{created_dt}"
+      PP.pp(metadata, f)
+      PP.pp(data, f)
+      PP.pp({"id"=>id, "created_dt"=>created_dt}, f)
+      PP.pp(h, f)
+      PP.pp(x, f)
+    end
+=end
+    x
   end
 
   # FIXME: added for Apollo -- not sure where this belongs given that
@@ -252,8 +328,18 @@ class Marty::DataGrid < Marty::Base
     raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
     raise "non-hash arg #{h}" unless Hash === h
 
-    res = dg.lookup_grid_distinct(pt, h, false, distinct)
+    res = ENV['DGORIG'] ? dg.lookup_grid_distinct(pt, h, false, distinct) :
+            dg.plv_lookup_grid_distinct(h, false, distinct)
+    res["result"]
+  end
 
+  # identical to lookup_grid delorean fn, but calls plv
+  cached_delorean_fn :plv_lookup_grid, sig: 4 do
+    |pt, dg, h, distinct|
+    raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
+    raise "non-hash arg #{h}" unless Hash === h
+
+    res = dg.plv_lookup_grid_distinct(h, false, distinct)
     res["result"]
   end
 
@@ -283,7 +369,9 @@ class Marty::DataGrid < Marty::Base
     #   "data"     => <grid's data array>
     #   "metadata" => <grid's metadata (array of hashes)>
 
-    vhash = lookup_grid_distinct(pt, h, return_grid_data)
+    vhash = ENV['DGORIG'] ?
+              lookup_grid_distinct(pt, h, return_grid_data) :
+              plv_lookup_grid_distinct(h, return_grid_data)
 
     return vhash if vhash["result"].nil? || !data_type
 
