@@ -432,7 +432,6 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.netzke_on_bg_stop = l(<<-JS)
     function(params) {
        var me = this;
-       me.showLoadmask('Stopping delayed job...');
        Ext.Msg.show({
          title: 'Stop Delayed Jobs',
          msg: 'Enter STOP and press OK to force a stop of delayed_job',
@@ -440,7 +439,10 @@ class Marty::MainAuthApp < Marty::AuthApp
          buttons: Ext.Msg.OKCANCEL,
          prompt: true,
          fn: function (btn, value) {
-           btn == "ok" && value == "STOP" && me.server.bgStop({});
+           if (btn == "ok" && value == "STOP") {
+             me.showLoadmask('Stopping delayed job...');
+             me.server.bgStop({});
+           }
          }
        });
     }
@@ -449,7 +451,6 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.netzke_on_bg_restart = l(<<-JS)
     function(params) {
        var me = this;
-       me.showLoadmask('Restarting delayed job...');
        Ext.Msg.show({
          title: 'Restart Delayed Jobs',
          msg: 'Enter RESTART and press OK to force a restart of delayed_job',
@@ -457,7 +458,10 @@ class Marty::MainAuthApp < Marty::AuthApp
          buttons: Ext.Msg.OKCANCEL,
          prompt: true,
          fn: function (btn, value) {
-           btn == "ok" && value == "RESTART" && me.server.bgRestart({});
+           if (btn == "ok" && value == "RESTART") {
+             me.showLoadmask('Restarting delayed job...');
+             me.server.bgRestart({});
+           }
          }
        });
     }
