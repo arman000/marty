@@ -129,7 +129,6 @@ class Marty::DataExporter
 
       # remove _id
       c = c[0..-4]
-
       assoc_keys = type[:assoc_keys]
 
       # if association has a single key, just use col name
