@@ -153,10 +153,6 @@ class Marty::DataExporter
     do_export_query_result(klass, query.order(sort_field || :id), exclude_attrs)
   end
 
-  def self.do_pg_enum_export(klass)
-    return klass.get_all if klass.is_a? Marty::PgEnum
-  end
-
   def self.do_export_query_result(klass, qres, exclude_attrs=[])
     # strip _id from assoc fields
     header = [ export_headers(klass, nil, exclude_attrs).flatten ]
