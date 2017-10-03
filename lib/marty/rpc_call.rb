@@ -1,7 +1,9 @@
 class Marty::RpcCall
   # POST to a remote marty
-  def self.marty_post(host, port, path, script, node, attrs, params, options={})
+  def self.marty_post(host, port, path, script, node, attrs, params, options={},
+                      ssl=false)
     http = Net::HTTP.new(host, port)
+    http.use_ssl = ssl
     request = Net::HTTP::Post.new(path)
     request.add_field('Content-Type', 'application/json')
     request.body = (options + {
