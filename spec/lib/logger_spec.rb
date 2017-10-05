@@ -7,48 +7,36 @@ module Marty
       self.use_transactional_fixtures = false
     end
     before(:each) do
-      @db =  SQLite3::Database.new(Marty::Log.logfile)
-      @db.execute "delete from log"
-    end
-    after(:each) do
-      @db.close
+      Marty::Log.delete_all
     end
     after(:all) do
       self.use_transactional_fixtures = true
     end
 
+    it "log has its own connection" do
+      expect(Marty::Log.connection).not_to equal(Marty::Posting.connection)
+      expect(Marty::Posting.connection).to equal(Marty::Script.connection)
+    end
+
     it "logs" do
-      File.open(Rails.root.join("log/test.log")) do |f|
-        f.seek(0, IO::SEEK_END)
-        info_s = { info: 'message' }
-        error_s = [1, 2, 3, { error: 'message' }]
-        fatal_s = ["string", 123, { fatal: "message", another_key: 'value' }]
-        Marty::Logger.info('info message', info_s)
-        Marty::Logger.error('error message', error_s)
-        Marty::Logger.fatal('fatal message', fatal_s)
-        rails_log = f.readlines
-        log = @db.execute "select * from log"
-        log_detail = []
-        log_ts = []
-        log.each do |l|
-          id, type, msg, ts, detail_str = l
-          log_detail[id] = [type, msg, detail_str]
-          log_ts[id] = ts
-        end
-        expect(rails_log).to eq(["info message\n",
-                                 "error message\n",
-                                 "fatal message\n"])
-        expect(log_detail[1]).to eq(["info", "info message",
-                                     info_s.pretty_inspect])
-        expect(log_detail[2]).to eq(["error", "error message",
-                                     error_s.pretty_inspect])
-        expect(log_detail[3]).to eq(["fatal", "fatal message",
-                                     fatal_s.pretty_inspect])
-        (1..3).each do |idx|
-          expect(log_ts[idx]).to be_within(5).of(Time.zone.now.to_i)
-        end
+      info_s = {'info' => 'message'}
+      error_s = [1, 2, 3, {'error' =>'message'}]
+      fatal_s = ["string", 123, {'fatal' => "message",
+                                 'another_key' => 'value'}]
+      Marty::Logger.info('info message', info_s)
+      Marty::Logger.error('error message', error_s)
+      Marty::Logger.fatal('fatal message', fatal_s)
+      log = Marty::Log.all
+      log_detail = log.map{|l| [l[:message_type], l[:message], l[:details]]}
+      log_ts = log.map{|l| l[:timestamp]}
+      expect(log_detail[0]).to eq(["info", "info message", info_s])
+      expect(log_detail[1]).to eq(["error", "error message", error_s])
+      expect(log_detail[2]).to eq(["fatal", "fatal message", fatal_s])
+      log_ts.each do |ts|
+        expect(ts.to_i).to be_within(5).of(Time.zone.now.to_i)
       end
     end
+
     it "with_logging" do
       bd = 'block description'
       the_error = 'error during my block'
@@ -64,40 +52,11 @@ module Marty
       log = Marty::Log.first
       expect(log.message_type).to eq('error')
       expect(log.message).to eq(bd)
-      expect(log.details).to eq({ message: the_error,
-                                  data: data }.pretty_inspect)
+      expect(log.details).to eq({ "message" => the_error,
+                                  "data" => JSON.parse(data.to_json)})
     end
   end
-  describe "Logger errors" do
-    it "fails gracefully" do
-      allow(Marty::Log).to receive(:db_init).
-                            and_raise("Error initializing DB")
-      Marty::Log.instance_variable_set(:@db, nil)
-      File.open(Rails.root.join("log/test.log")) do |f|
-        f.seek(0, IO::SEEK_END)
-        expect{Marty::Logger.info('info message', [1,2,3])}.not_to raise_error
-        rails_log = f.readlines
-        expect(rails_log).to eq(["info message\n",
-                                 "Marty::Logger failure: Error initializing DB\n"])
-      end
-    end
-    it "fails gracefully in ensure" do
-      Marty::Logger.info('init db', [])
-      close_err = 'Error closing statement'
-      allow_any_instance_of(SQLite3::Statement).to receive(:close).
-                                                   and_raise(close_err)
-      File.open(Rails.root.join("log/test.log")) do |f|
-        f.seek(0, IO::SEEK_END)
-        expect{Marty::Logger.info('ensure message', [1,2,3])}.not_to raise_error
-        rails_log = f.readlines
-        expect(rails_log).to eq(["ensure message\n"])
-        allow_any_instance_of(SQLite3::Statement).to receive(:close).
-                                                      and_call_original
-        sleep 1
-        Marty::Log.cleanup(0)
-      end
-    end
-  end
+
   describe "Exercise" do
     before(:all) do
       @clean_file = "/tmp/clean_#{Process.pid}.psql"

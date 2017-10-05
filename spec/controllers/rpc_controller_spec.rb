@@ -353,6 +353,10 @@ describe Marty::RpcController do
     @data_json = [@data].to_json
   }
 
+  after(:each) do
+    Marty::Log.delete_all
+  end
+
   let(:t1) { @t1 }
   let(:t2) { @t2 }
   let(:p0) { @p0 }
@@ -716,15 +720,6 @@ describe Marty::RpcController do
   end
 
   context "output_validation" do
-    before(:all) do
-      @db =  SQLite3::Database.new(Marty::Log.logfile)
-    end
-    before(:each) do
-      @logid = @db.execute('select max(id) from log').first.first || 0 rescue 0
-    end
-    after(:all) do
-      @db.close
-    end
     it "validates output" do
       Marty::ApiConfig.create!(script: "M4",
                                node: "A",
@@ -744,7 +739,7 @@ describe Marty::RpcController do
       res_hash = JSON.parse(response.body)
       expect(res_hash).to eq([135,291,[{"a"=>132,"b"=>456},
                                        {"a"=>789,"b"=>132}]])
-      logs = Marty::Log.where("id > #{@logid}").to_a
+      logs = Marty::Log.all
       expect(logs.count).to eq(0)
     end
 
@@ -781,20 +776,19 @@ describe Marty::RpcController do
       expect(res_hash[0]["error"]).to include(expect1)
       expect(res_hash[0]["error"]).to include(expect2)
 
-      logs = Marty::Log.where("id > #{@logid}").to_a
+      logs = Marty::Log.all
       expect(logs.count).to eq(2)
       expect(logs[0].message).to eq("API M5:A.result")
       expect(logs[1].message).to eq("API M5:A.result2")
       logs.each do |ml|
-        expect(ml.details).to include(expect1)
-        expect(ml.details).to include(expect2)
-        expect(ml.details).to include(
-         ":data=>[{\"a\"=>\"str\", \"b\"=>456}, {\"a\"=>789, \"b\"=>\"str\"}]}")
+        expect(ml.details["error"].join).to include(expect1)
+        expect(ml.details["error"].join).to include(expect2)
+        expect(ml.details["data"]).to eq([{"a"=>"str", "b"=>456},
+                                          {"a"=>789, "b"=>"str"}])
       end
     end
 
     it "validates output (missing item)" do
-      logid = @db.execute('select max(id) from log').first.first rescue 0
       Marty::ApiConfig.create!(script: "M9",
                                node: "A",
                                attr: nil,
@@ -818,13 +812,13 @@ describe Marty::RpcController do
       expect(res_hash[0]["error"]).to include(expect1)
       expect(res_hash[0]["error"]).to include(expect2)
 
-      logs = Marty::Log.where("id > #{@logid}").to_a
+      logs = Marty::Log.all
       expect(logs.count).to eq(1)
       expect(logs[0].message).to eq("API M9:A.result")
-      expect(logs[0].details).to include(expect1)
-      expect(logs[0].details).to include(expect2)
-      expect(logs[0].details).to include(
-         ":data=>[{\"a\"=>1, \"b\"=>123}, {\"a\"=>789, \"b\"=>123}]")
+      expect(logs[0].details["error"].join).to include(expect1)
+      expect(logs[0].details["error"].join).to include(expect2)
+      expect(logs[0].details["data"]).to eq([{"a"=>1, "b"=>123},
+                                             {"a"=>789, "b"=>123}])
     end
   end
 
