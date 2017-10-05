@@ -23,6 +23,7 @@ module Marty::Migrations
     SQL
   end
 
+  # NOTE: calling migrations need to disable_ddl_transaction!
   def update_enum(klass, prefix_override = nil)
     raise "bad class arg #{klass}" unless
       klass.is_a?(Class) && klass < ActiveRecord::Base
@@ -41,10 +42,9 @@ module Marty::Migrations
 
     db_values = res.first['enum_range'].gsub(/[{"}]/, '').split(',')
     ex_values = klass::VALUES - db_values
-    puts "no new #{klass}::VALUES to add" if ex_values.empty?
 
-    #hack to prevent transaction
-    execute("COMMIT;")
+    return if ex_values.empty?
+
     ex_values.each do |v|
       prepped_v = ActiveRecord::Base.connection.quote(v)
 
@@ -52,7 +52,6 @@ module Marty::Migrations
         ALTER TYPE #{enum_name} ADD VALUE #{prepped_v};
       SQL
     end
-    execute("BEGIN;")
   end
 
   def add_fk(from_table, to_table, options = {})
@@ -77,9 +76,9 @@ module Marty::Migrations
   # created_dt/obsoleted_dt need to be indexed since they appear in
   # almost all queries.
   MCFLY_INDEX_COLUMNS = [
-                         :created_dt,
-                         :obsoleted_dt,
-                        ]
+    :created_dt,
+    :obsoleted_dt,
+  ]
 
   def add_mcfly_index(tb, *attrs)
     tb = "#{tb_prefix}#{tb}" unless
