@@ -187,6 +187,7 @@ EOSQL
         encode(line.encoding, :crlf_newline => true)
     end
   end
+
   def self.generate_sql_migrations(migrations_dir, sql_files_dir)
     sd = Rails.root.join(sql_files_dir)
     md = Rails.root.join(migrations_dir)
@@ -218,7 +219,8 @@ EOSQL
       newbase = "#{timestamp}_#{klass}"
       mig_name = File.join(md, "#{newbase}.rb")
       sql_snap_literal = Rails.root.join(md, 'sql', "#{newbase}.sql")
-      sql_snap_call =  "Rails.root.join('#{migrations_dir}', 'sql', '#{newbase}.sql')"
+      sql_snap_call =
+        "Rails.root.join('#{migrations_dir}', 'sql', '#{newbase}.sql')"
 
       File.open(sql_snap_literal, "w") do |f|
         f.print sql_lines.join
