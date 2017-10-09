@@ -89,6 +89,35 @@ A:
     result = [{"a": 1, "b": res}, {"a": 789, "b": res}]
 eof
 
+sample_script10 = <<eof
+A:
+    opt1 =?
+    optn =?
+    opttf =?
+    opttrue =?
+    optfalse =?
+    req1 =?
+    req2 =?
+    req3 =?
+
+    optif = if opttf == true
+               then opttrue
+               else if opttf == false
+                    then optfalse
+                    else nil
+
+    v1 = if req1 == 'no opts'
+            then req2
+            else if req1 == "opt1"
+                    then opt1
+                    else if req2 != 'no opts'
+                            then optn
+                            else if req3 == "opttf"
+                                   then optif
+                                   else 'req3'
+
+eof
+
 script3_schema = <<eof
 A:
     pc = { "properties : {
@@ -227,6 +256,56 @@ A:
           }
 eof
 
+script10_schema = <<eof
+A:
+    properties = {
+              "opt1" :     { "type" : "string" },
+              "opttf" :    { "type" : "boolean" },
+              "opttrue" :  { "type" : "string" },
+              "optfalse" : { "type" : "string" },
+              "req1" :     { "pg_enum" : "CondEnum" },
+              "req2" :     { "pg_enum" : "CondEnum" }
+         }
+
+    req1_is_opt1 = Marty::SchemaHelper.enum_is('req1', ['opt1'])
+    req2_is_not_no_opts = Marty::SchemaHelper.not(
+                            Marty::SchemaHelper.enum_is('req2', ['no opts']))
+    req3_is_opttf = Marty::SchemaHelper.enum_is('req3', ['opttf'])
+    opttf_is_true = Marty::SchemaHelper.bool_is('opttf', true)
+    opttf_is_false = Marty::SchemaHelper.bool_is('opttf', false)
+
+    # opt1 is required if req1 == 'opt1'
+    opt1_check = Marty::SchemaHelper.required_if(['opt1'], req1_is_opt1)
+
+    # optn is required if req2 != 'no opts'
+    optn_check = Marty::SchemaHelper.required_if(['optn'], req2_is_not_no_opts)
+
+    # opttf is required if req3 == 'opttf'
+    opttf_check = Marty::SchemaHelper.required_if(['opttf'], req3_is_opttf)
+
+    # opttrue is required if opttf is true
+    opttrue_check = Marty::SchemaHelper.required_if(['opttrue'], opttf_is_true)
+
+    # optfalse is required if opttf is false
+    optfalse_check = Marty::SchemaHelper.required_if(['optfalse'],
+                                                     opttf_is_false)
+
+    # opttf is optional (contingent on req3) so eval of opttrue_check
+    # and optfalse_check is dependent upon opttf existing
+    opttruefalse_check = Marty::SchemaHelper.dep_check('opttf',
+                                                    opttrue_check,
+                                                    optfalse_check)
+
+    v1 = { "properties": properties,
+           "required": ["req1", "req2", "req3"],
+           "allOf": [
+                     opt1_check,
+                     optn_check,
+                     opttf_check,
+                     opttruefalse_check
+             ] }
+eof
+
 describe Marty::RpcController do
   before(:each) {
     @routes = Marty::Engine.routes
@@ -250,6 +329,7 @@ describe Marty::RpcController do
                          "M7" => sample_script7,
                          "M8" => sample_script8,
                          "M9" => sample_script9,
+                         "M10" => sample_script10,
                          "M3Schemas" => script3_schema,
                          "M4Schemas" => script4_schema,
                          "M5Schemas" => script5_schema,
@@ -257,6 +337,7 @@ describe Marty::RpcController do
                          "M7Schemas" => script7_schema,
                          "M8Schemas" => script8_schema,
                          "M9Schemas" => script9_schema,
+                         "M10Schemas" => script10_schema,
                        }, Date.today + 1.minute)
 
     @p1 = Marty::Posting.do_create("BASE", Date.today + 2.minute, 'a comment')
@@ -792,6 +873,9 @@ describe Marty::RpcController do
   class FruitsEnum
     VALUES=Set['Apple', 'Banana', 'Orange']
   end
+  class CondEnum
+    VALUES=Set['no opts','opt1','opt2','opttf']
+  end
 
   it "validates schema with a pg_enum (Positive)" do
     Marty::ApiConfig.create!(script: "M5",
@@ -1031,6 +1115,61 @@ describe Marty::RpcController do
       api_key: api.api_key + 'x',
     }
     expect(response.body).to match(/"error":"Permission denied"/)
+  end
+
+  context "conditional validation" do
+    before(:all) do
+      Marty::ApiConfig.create!(script: "M10",
+                               node: "A",
+                               attr: nil,
+                               logged: false,
+                               input_validated: true,
+                               output_validated: false,
+                               strict_validate: false)
+    end
+    def do_call(req1, req2, req3, optionals={})
+      attrs = ["v1"].to_json
+      params = optionals.merge({"req1" => req1,
+                                "req2"=> req2,
+                                "req3"=> req3}).to_json
+      get 'evaluate', {
+            format: :json,
+            script: "M10",
+            node: "A",
+            attrs: attrs,
+            params: params
+          }
+    end
+
+    it "does conditional" do
+      aggregate_failures "conditionals" do
+        [# first group has all required fields
+          [['opt1', 'no opts', 'no opts', opt1: 'hi mom'], "hi mom"],
+          [['no opts', 'no opts', 'no opts', opt1: 'hi mom'], "no opts"],
+          [['opt2', 'opt2', 'no opts', optn: 'foo'], 'foo'],
+          [['opt2', 'no opts', 'opt2'], 'req3'],
+          [['opt2', 'no opts', 'opttf', opttf: true, opttrue: 'bar'], 'bar'],
+          [['opt2', 'no opts', 'opttf', opttf: false, optfalse: 'baz'], 'baz'],
+          # second group is missing fields
+          [['opt1', 'no opts', 'no opts'],
+           "did not contain a required property of 'opt1'"],
+          [['opt2', 'opt2', 'no opts',],
+           "did not contain a required property of 'optn'"],
+          [['opt2', 'no opts', 'opttf'],
+           "did not contain a required property of 'opttf'"],
+          [['opt2', 'no opts', 'opttf', opttf: true],
+           "did not contain a required property of 'opttrue'"],
+          [['opt2', 'no opts', 'opttf', opttf: false],
+           "did not contain a required property of 'optfalse'"],
+        ].each do
+          |a, exp|
+          do_call(*a)
+          res_hash = JSON.parse(response.body)
+          got = res_hash.is_a?(Array) ? res_hash[0] : res_hash["error"]
+          expect(got).to include(exp)
+        end
+      end
+    end
   end
 
   context "error handling" do

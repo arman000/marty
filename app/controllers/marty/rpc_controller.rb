@@ -34,6 +34,24 @@ class Marty::RpcController < ActionController::Base
     end
   end
 
+  def _get_errors(errs)
+    if errs.is_a?(Array)
+      errs.map { |err| _get_errors(err) }
+    elsif errs.is_a?(Hash)
+      if !errs.include?(:failed_attribute)
+        errs.map { |k, v| _get_errors(v) }
+      else
+        fa, message, errors = errs.values_at(:failed_attribute,
+                                             :message, :errors)
+        (['AllOf','AnyOf','Not'].include?(fa) ? [] : [message]) +
+          _get_errors(errors || {})
+      end
+    end
+  end
+  def get_errors(errs)
+    _get_errors(errs).flatten
+  end
+
   def do_eval(sname, tag, node, attrs, params, api_key, background)
     return {error: "Malformed attrs"} unless attrs.is_a?(String)
 
@@ -95,7 +113,8 @@ class Marty::RpcController < ActionController::Base
         rescue => ex
           return {error: "#{attr}: #{ex.message}"}
         end
-        validation_error[attr] = er.map{ |e| e[:message] } if er.size > 0
+
+        validation_error[attr] = get_errors(er) if er.size > 0
         err_count += er.size
       end
     end
