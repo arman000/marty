@@ -1,5 +1,3 @@
-require 'sqlite3'
-
 class Marty::Logger
 
   def self.method_missing(m, *args, &block)
@@ -17,10 +15,9 @@ class Marty::Logger
     begin
       yield
     rescue => e
-      error(error_message, { message: e.message,
-                             data: error_data })
+      error(error_message, { "message" => e.message,
+                             "data" => error_data})
       raise "#{error_message}: #{e.message}"
     end
   end
-
 end
