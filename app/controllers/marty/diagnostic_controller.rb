@@ -1,28 +1,7 @@
+        require 'erb'
 module Marty
+  ENV["DUMMY_DB"] = 'marty_dev'
   class DiagnosticController < ActionController::Base
-
-    class Info
-      attr_accessor :name, :status, :result
-      def initialize(name, description, status = true)
-        @name, @status, @description = name, status, description
-      end
-
-      def status_text
-        case status
-        when true
-          "Passed"
-        when false
-          "Failed"
-        else
-          "Unknown"
-        end
-      end
-    end
-
-    layout false
-    before_filter :params_check
-    attr_accessor :details
-
     D_FORMAT  = '%Y-%m-%d'
     T_FORMAT  = '%H:%M:%S'
     DT_FORMAT = D_FORMAT + ' ' + T_FORMAT
@@ -30,221 +9,239 @@ module Marty
     CLG       = ' disabled - environment is in clg mode'
     SANDBOX   = ' disabled - environment is in sandbox mode'
 
-    OPS = [
-      'login',
-      'dbgemini',
-      'rpc',
-      'flux',
-      'bloomberg',
-      'bloombergterminal',
-      'rabbitmq',
-      'backgroundjob',
-      'servertime',
-      'dw',
-      'mmsapi',
-      'bdmmsapi',
-      'fnma',
-      'fnma2',
-      'fhlmc_pls',
-      'fhlmc_trs',
-      'errors',
-      'errors_external',
-      'all',
-      'all_external',
-      'version',
-      'environment',
-      'nodes'
-    ]
-
-    AGOPS = [
-      'gemini_health'
-    ]
-
-    def testop
-      unless OPS.member? params[:testop]
-        render file: 'public/400', formats: [:html], status: 400, layout: false
-        return
-      end
+    layout false
+    before_filter :params_check
+    def test
       @show_detail = true
       @details     = []
       @data        = ''
       @read_only   = Marty::Util.db_in_recovery?
-
-      @result = [self.send(:"#{params[:testop]}_test")]
-
-      respond_to do |format|
-        format.html
-        format.json {
-          render json: [
-                   {error_count: error_count},
-                   {diag_count: diag_count},
-                 ] + @result
-        }
+      begin
+        @result = send(:"#{params[:op]}")
+      rescue NoMethodError
+        render file: 'public/404', formats: [:html], status: 400, layout: false
+      else
+        respond_to do |format|
+          format.html
+          format.json {render json: @result}
+        end
       end
     end
 
-    private
-
-
-    # queries pg_stat_activity to determine pg connections
-    def fetch_pg_connections
-      info = ActiveRecord::Base.connection.execute("SELECT datname,"\
-                                                   "application_name,"\
-                                                   "state,"\
-                                                   "pid,"\
-                                                   "client_addr "\
-                                                   "FROM pg_stat_activity")
-      info.each_with_object({}) do |x, h|
-        h[x["datname"]] ||= []
-        h[x["datname"]] << {"name"   => x["application_name"],
-                            "address"=> x["client_addr"],
-                            "state"  => x["state"],
-                            "pid"    => x["pid"]}
-      end
-    end
-
-    def resolve_target_nodes db, target
-      db_conns = fetch_pg_connections
-      gemini_conns = db_conns[ENV[db]].select{|x|
-        x['name'].include? target}
-      gemini_conns.map{|x| x['address']}.uniq.compact
-    end
-
-    def gemini_nodes
-      resolve_target_nodes("GEMINI_DB", "Passenger")
-    end
-
-    # request diag test information from node
-    def get_nodal_diag node, test
-      ssl = ENV['HTTPS'] == 'on'
-      uri = Addressable::URI.new(host: node, port: ssl ? 443 : request.port)
-      uri.query_values = {testop: test}
-      uri.scheme = ssl ? 'https' : 'http'
-      uri.path = '/diag.json'
-      JSON.parse(open(uri,
-                      {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE}).readlines[0])
-    end
-
-    def construct_agg_obj resp, opts = {}
-      obj = {"details" => resp.select{|x| x["name"] &&
-                                      !(x["status"] &&
-                                        opts[:filter])}}
-      return obj unless opts[:cumm_status]
-      obj + {"cumm_status" => resp.all?{|x| x['error_count'].to_i == 0}}
-    end
-
-    # performs the desired test accross nodes and returns a hash
-    def aggregate_test test, nodes, opts = {}
-      nodes.each_with_object({}){
-        |n, h| h[n] = construct_agg_obj(get_nodal_diag(n, test), opts)}
-    end
-
-    # the main funcion that aggregates tests and determines other information
-    def gemini_health_test
-      @nodes = gemini_nodes
-      @tests = {"all" => all_consistency,
-                "version" => target_consistency("version"),
-                "environment" => target_consistency("environment")}
-    end
-
-    def all_consistency
-      test =  aggregate_test("all", @nodes, cumm_status: true)
-      test + {"agg_status" => @nodes.all?{|x| test[x]["cumm_status"]},
-              "show_nodes" => true}
-    end
-
-    # gets aws credentials based on role, which can be used for api req
-    def get_aws_credentials
-      role = "cf-gemini-dev-2-geminiappSuperUserRole-1UD17HK16BY7I"
-      uri = URI.parse("http://169.254.169.254/latest/meta-data/iam/"\
-                      "security-credentials/#{role}")
-      credentials = JSON.parse(Net::HTTP.get(uri))
-    end
-
-    # uses aws-sigv4 gem to sign request for authentication
-    # hard-coded tag value for now
-    def get_aws_instances
-      creds = get_aws_credentials
-      service = 'ec2'
-      host    = "ec2.us-west-2.amazonaws.com"
-      region  = 'us-west-2'
-      action  = 'DescribeInstances'
-      version = '2016-11-15'
-      tag     = 'cf-gemini-dev-2'
-
-      url = URI.parse("https://#{host}/?Action=#{action}&Version=#{version}"\
-                      "&Filter.1.Name=tag-value"\
-                      "&Filter.1.Value.1=#{tag}")
-      signer = Aws::Sigv4::Signer.new(service:           service,
-                                      region:            region,
-                                      access_key_id:     creds["AccessKeyId"],
-                                      secret_access_key: creds["SecretAccessKey"],
-                                      session_token:     creds["Token"])
-      signature =  signer.presign_url(http_method:'GET', url: url)
-
-      http = Net::HTTP.new(host, 443)
-      http.use_ssl = true
-      Hash.from_xml(Net::HTTP.get(signature))["DescribeInstancesResponse"]
-    end
-
-    def resolve_aws_gemini_ips
-      get_aws_instances["reservationSet"]["item"].
-        map{|i| i["instancesSet"]["item"]["privateIpAddress"]}
-    end
-
-    def target_consistency target
-      test = aggregate_test(target, @nodes)
-      data = test.map{|x| x[1]}
-      status = data.uniq.count == 1
-      test + {"agg_status" => status}
+    public
+    ############################################################################
+    #
+    # Helpers for Diagnostic Controllers
+    #
+    ############################################################################
+    def params_check
+      params[:op] = 'errors' unless(params.has_key?(:op))
     end
 
     def diag_count
-      details.count
+      @result.respond_to?(:tests) ? @result.tests.count : 1
     end
 
     def error_count
-      details.count {|d| !d.status}
-    end
-
-    def params_check
-      params[:testop] = 'errors' unless(params.has_key?(:testop))
-      params[:testop] = 'environment' if params[:testop] == 'env'
+      @result.respond_to?(:tests) ? @result.tests.count(false) :
+        (@result.status ? 1 : 0)
     end
 
     def db_server_name
       ActiveRecord::Base.connection_config[:host] || 'undefined'
     end
 
-    def errors_test
-      @show_detail = false
-      all_test
-      @data = "Error count=#{error_count}"
+    def create_report name, tests
+      Report.new(name, tests, self)
     end
 
-    def all_test
+    ############################################################################
+    #
+    # Diagnostics, Nodal Diagnostics, and Reports
+    #
+    ############################################################################
+
+    # Reports
+    # Report objects perform tests and group them together for display.
+    def report
+      tests = ['version', 'environment']
+      Report.new('Report', tests, self)
     end
 
-    def errors_external_test
-      @show_detail = false
-      all_external_test
-      @data = "Error count=#{error_count}"
+    def nodal_report
+      tests = ['nodal_environment', 'nodal_version']
+      create_report('Nodal Report', tests)
     end
 
-    def version_test
-      app_name = Rails.application.class.parent_name
+    # Nodal Diagnostics
+    # Nodal diagnostics will call the specified test (diag) on all nodes.
+    def nodal_version
+      NodalDiag.new('version', consistency: false)
+    end
+
+    def nodal_environment
+      NodalDiag.new('environment', consistency: true)
+    end
+
+    # Diagnostics
+    # Diagnostics are local to the node.
+    def version
       begin
         gitv, gits = `cd #{Rails.root.to_s}; git describe;`.strip, true
       rescue
         gitv, gits = "Failed accessing git", false
       end
+      details = [Info.new("Git"      , gitv, gits),
+                 Info.new('Marty'    , Marty::VERSION),
+                 Info.new('Delorean' , Delorean::VERSION),
+                 Info.new('Mcfly'    , Mcfly::VERSION)]
+      Diag.new('version', details)
+    end
 
-      infos = [Info.new("#{app_name} Git Version" , gits, gitv),
-               Info.new('Marty Version', true, Marty::VERSION),
-               Info.new('Delorean Version', true, Delorean::VERSION),
-               Info.new('Mcfly Version', true, Mcfly::VERSION)]
+    def environment
+      rbv = "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
+      details = [Info.new('Environment'     , Rails.env),
+                 Info.new('Rails'           , Rails.version),
+                 Info.new('Netzke Core'     , Netzke::Core::VERSION),
+                 Info.new('Netzke Basepack' , Netzke::Basepack::VERSION),
+                 Info.new('Ruby'            , rbv),
+                 Info.new('RubyGems'        , Gem::VERSION),
+                 Info.new('Database Adapter', ActiveRecord::Base.
+                                                connection.adapter_name),
+                 Info.new('Database Server' , db_server_name)]
+      Diag.new('environment', details)
+    end
 
-      Diagnostic.new(name: "version", details: infos)
+    ############################################################################
+    #
+    # Info, Diag, NodalDiag, and Report Classes
+    #
+    ############################################################################
+
+    # Info object packs information together for easier display.
+    class Info
+      attr_accessor :name, :status, :details
+      def initialize(name, details, status = true)
+        @name, @status, @details = name, status, details
+      end
+
+      def status_css
+        status ? "passed" : "failed"
+      end
+    end
+
+    # Diag object packs Info objects together for easier display.
+    class Diag
+      attr_accessor :name, :infos, :status
+      def initialize(name, infos, opts ={})
+        @name, @infos, @status = name, infos, infos.all?{|x| x.status}
+      end
+
+      def display label=nil
+        display = <<-ERB
+                <table>
+                  <th><%= label.nil? ? @name : label %></th>
+                  <th></th>
+                  <% @infos.each do |i| %>
+                    <tr class="<%= i.status_css %>">
+                      <td><%= i.name %></td>
+                      <td class="overflow"><%= i.details %></td>
+                    </tr>
+                  <% end %>
+                </table>
+                ERB
+        ERB.new(display.html_safe).result(binding)
+      end
+    end
+
+    # NodalDiag performs tests on all nodes that are discoverable.
+    class NodalDiag
+      attr_accessor :name, :diags, :nodes, :consistent, :consistency, :status
+      def initialize(test, opts={})
+        @test, @nodes = test.downcase.capitalize, get_nodes
+        @diags = get_nodal_diags(test.downcase).sum
+        @status = @nodes.all?{|n| @diags[n].status}
+        @consistent = @nodes.map{|n| @diags[n].infos}.uniq.length == 1
+        @consistency = opts[:consistency]
+      end
+
+      def get_nodal_diags test
+        @nodes.map do |n|
+          ssl = ENV['HTTPS'] == 'on'
+          uri = Addressable::URI.new(host: n, port: ssl ? 443 : 80)
+          uri.query_values = {op: test}
+          uri.scheme = ssl ? 'https' : 'http'
+          uri.path = '/marty/diagnostic/test.json'
+          opts = {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE}
+          {n => reconstruct_diag(JSON.parse(open(uri, opts).readlines[0]))}
+        end
+      end
+
+      def get_pg_connections
+        info = ActiveRecord::Base.connection.execute("SELECT datname,"\
+                                                     "application_name,"\
+                                                     "state,"\
+                                                     "pid,"\
+                                                     "client_addr "\
+                                                     "FROM pg_stat_activity")
+        info.each_with_object({}) do |x, h|
+          h[x["datname"]] ||= []
+          h[x["datname"]] << {"name"   => x["application_name"],
+                              "address"=> x["client_addr"],
+                              "state"  => x["state"],
+                              "pid"    => x["pid"]}
+        end
+      end
+
+      def reconstruct_diag diag
+        Diag.new(diag["name"], diag["infos"].map{|x|
+                   Info.new(x['name'], x['details'], x['status'])})
+      end
+
+      def resolve_target_nodes target
+        db = ActiveRecord::Base.connection_config[:database]
+        db_conns = get_pg_connections
+        target_conns = db_conns[db].select{|x|
+          x['name'].include? target}
+        target_conns.map{|x| x['address']}.uniq.compact
+      end
+
+      def get_nodes
+        nodes = resolve_target_nodes("Passenger")
+        !nodes.empty? ? nodes : ['127.0.0.1']
+      end
+
+      def display
+        display = <<-ERB
+                  <div class="wrapper">
+                     <h3><%= @test %></h3>
+                    <% @nodes.each do |n| %>
+                    <%= @diags[n].display n %>
+                    <% break if @consistent && @consistency %>
+                    <% end %>
+                  </div>
+                  ERB
+        ERB.new(display.html_safe).result(binding)
+      end
+    end
+
+    class Report
+      attr_accessor :name, :tests, :status
+      def initialize(name, tests, controller, opts ={})
+        @name, @tests = name, tests.map{|t| controller.send(t.to_sym)}
+      end
+
+      def display
+        display = <<-ERB
+                  <h3><%= @name %></h3>
+                  <div class="wrapper">
+                    <% @tests.each do |t| %>
+                      <%= t.display %>
+                    <% end %>
+                  </div>
+                  ERB
+        ERB.new(display.html_safe).result(binding)
+      end
     end
   end
 end
