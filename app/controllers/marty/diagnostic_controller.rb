@@ -15,7 +15,7 @@ module Marty
       @data        = ''
       @read_only   = Marty::Util.db_in_recovery?
       begin
-        @result = send(:"#{params[:op]}")
+        @result = send(:"#{params[:op]}") unless params[:op] == 'test'
       rescue NoMethodError
         render file: 'public/404', formats: [:html], status: 404, layout: false
       else        respond_to do |format|
@@ -248,11 +248,15 @@ module Marty
         err     = !@consistent && @consistency
         display = <<-ERB
                   <div class="wrapper">
-                    <h3><%= @test %></h3>
-                    <h4><%= "Issues Detected" if err%></h4>
+                    <h3><%=@test%></h3>
+                    <h4><%= "Issues Detected" if err %></h4>
                     <% @nodes.each do |n| %>
-                    <%= @diags[n].display(n, "error" if err) %>
-                    <% break if @consistent && @consistency %>
+                      <% if @consistent && consistency %>
+                        <%= @diags[n].display('All') %>
+                        <% break %>
+                      <% else %>
+                        <%= @diags[n].display(n, ("error" if err)) %>
+                      <% end %>
                     <% end %>
                   </div>
                   ERB
