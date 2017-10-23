@@ -1,6 +1,5 @@
-        require 'erb'
+require 'erb'
 module Marty
-  ENV["DUMMY_DB"] = 'marty_dev'
   class DiagnosticController < ActionController::Base
     D_FORMAT  = '%Y-%m-%d'
     T_FORMAT  = '%H:%M:%S'
@@ -19,11 +18,12 @@ module Marty
       begin
         @result = send(:"#{params[:op]}")
       rescue NoMethodError
-        render file: 'public/404', formats: [:html], status: 400, layout: false
-      else
-        respond_to do |format|
+        render file: 'public/404', formats: [:html], status: 404, layout: false
+      else        respond_to do |format|
           format.html
-          format.json {render json: @result}
+          format.json {render json: {"error_count" => error_count,
+                                     "diag_count"  => diag_count,
+                                     "result"      => @result}}
         end
       end
     end
@@ -39,12 +39,11 @@ module Marty
     end
 
     def diag_count
-      @result.respond_to?(:tests) ? @result.tests.count : 1
+      @result.count
     end
 
     def error_count
-      @result.respond_to?(:tests) ? @result.tests.count(false) :
-        (@result.status ? 1 : 0)
+      @result.errors
     end
 
     def db_server_name
@@ -55,6 +54,10 @@ module Marty
       Report.new(name, tests, self)
     end
 
+    def get_nodes
+      NodalDiag.get_nodes
+    end
+
     ############################################################################
     #
     # Diagnostics, Nodal Diagnostics, and Reports
@@ -62,7 +65,6 @@ module Marty
     ############################################################################
 
     # Reports
-    # Report objects perform tests and group them together for display.
     def report
       tests = ['version', 'environment']
       Report.new('Report', tests, self)
@@ -73,43 +75,58 @@ module Marty
       create_report('Nodal Report', tests)
     end
 
-    # Nodal Diagnostics
-    # Nodal diagnostics will call the specified test (diag) on all nodes.
+    # Nodal Diagnostics.
     def nodal_version
       NodalDiag.new('version', consistency: false)
     end
 
     def nodal_environment
-      NodalDiag.new('environment', consistency: true)
+      NodalDiag.new('environment', consistency: false)
     end
 
     # Diagnostics
-    # Diagnostics are local to the node.
     def version
       begin
         gitv, gits = `cd #{Rails.root.to_s}; git describe;`.strip, true
       rescue
         gitv, gits = "Failed accessing git", false
       end
-      details = [Info.new("Git"      , gitv, gits),
-                 Info.new('Marty'    , Marty::VERSION),
-                 Info.new('Delorean' , Delorean::VERSION),
-                 Info.new('Mcfly'    , Mcfly::VERSION)]
-      Diag.new('version', details)
+      infos = [Info.new("Git"      , gitv, gits),
+               Info.new('Marty'    , Marty::VERSION),
+               Info.new('Delorean' , Delorean::VERSION),
+               Info.new('Mcfly'    , Mcfly::VERSION)]
+      Diag.new('version', infos)
     end
 
     def environment
       rbv = "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
-      details = [Info.new('Environment'     , Rails.env),
-                 Info.new('Rails'           , Rails.version),
-                 Info.new('Netzke Core'     , Netzke::Core::VERSION),
-                 Info.new('Netzke Basepack' , Netzke::Basepack::VERSION),
-                 Info.new('Ruby'            , rbv),
-                 Info.new('RubyGems'        , Gem::VERSION),
-                 Info.new('Database Adapter', ActiveRecord::Base.
-                                                connection.adapter_name),
-                 Info.new('Database Server' , db_server_name)]
-      Diag.new('environment', details)
+      infos = [Info.new('Environment'     , Rails.env),
+               Info.new('Rails'           , Rails.version),
+               Info.new('Netzke Core'     , Netzke::Core::VERSION),
+               Info.new('Netzke Basepack' , Netzke::Basepack::VERSION),
+               Info.new('Ruby'            , rbv),
+               Info.new('RubyGems'        , Gem::VERSION),
+               Info.new('Database Adapter', ActiveRecord::Base.
+                                              connection.adapter_name),
+               Info.new('Database Server' , db_server_name)]
+      begin
+        status = true
+        result = ActiveRecord::Base.connection.execute('SELECT VERSION();')
+        message = result[0]['version'] if result
+      rescue => e
+        status = false
+        message = e.message
+      end
+      infos << Info.new('Database Version', message, status)
+
+      begin
+        status, message = true, ActiveRecord::Migrator.current_version
+      rescue => e
+        status = false
+        message = e.message
+      end
+      infos << Info.new('Database Schema Version', message, status)
+      Diag.new('environment', infos)
     end
 
     ############################################################################
@@ -152,32 +169,54 @@ module Marty
                 ERB
         ERB.new(display.html_safe).result(binding)
       end
+
+      def errors
+        @infos.count {|x| !x.status}
+      end
+
+      def count
+        @infos.count
+      end
     end
 
     # NodalDiag performs tests on all nodes that are discoverable.
     class NodalDiag
       attr_accessor :name, :diags, :nodes, :consistent, :consistency, :status
       def initialize(test, opts={})
-        @test, @nodes = test.downcase.capitalize, get_nodes
+        @test, @nodes = test.downcase.capitalize, NodalDiag.get_nodes
         @diags = get_nodal_diags(test.downcase).sum
         @status = @nodes.all?{|n| @diags[n].status}
         @consistent = @nodes.map{|n| @diags[n].infos}.uniq.length == 1
         @consistency = opts[:consistency]
       end
 
+      def errors
+        @nodes.map{|n| @diags[n].errors}.sum
+      end
+
+      def count
+        @nodes.map{|n| @diags[n].count}.sum
+      end
+
       def get_nodal_diags test
         @nodes.map do |n|
           ssl = ENV['HTTPS'] == 'on'
-          uri = Addressable::URI.new(host: n, port: ssl ? 443 : 80)
+          uri = Addressable::URI.new(host: n, port: ssl ? 443 : 3000)
           uri.query_values = {op: test}
           uri.scheme = ssl ? 'https' : 'http'
           uri.path = '/marty/diagnostic/test.json'
           opts = {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE}
-          {n => reconstruct_diag(JSON.parse(open(uri, opts).readlines[0]))}
+          {n => reconstruct_diag(JSON.parse(open(uri,
+                                                 opts).readlines[0])['result'])}
         end
       end
 
-      def get_pg_connections
+      def reconstruct_diag diag
+        Diag.new(diag["name"], diag["infos"].map{|x|
+                   Info.new(x['name'], x['details'], x['status'])})
+      end
+
+      def self.get_pg_connections
         info = ActiveRecord::Base.connection.execute("SELECT datname,"\
                                                      "application_name,"\
                                                      "state,"\
@@ -193,12 +232,7 @@ module Marty
         end
       end
 
-      def reconstruct_diag diag
-        Diag.new(diag["name"], diag["infos"].map{|x|
-                   Info.new(x['name'], x['details'], x['status'])})
-      end
-
-      def resolve_target_nodes target
+      def self.resolve_target_nodes target
         db = ActiveRecord::Base.connection_config[:database]
         db_conns = get_pg_connections
         target_conns = db_conns[db].select{|x|
@@ -206,7 +240,7 @@ module Marty
         target_conns.map{|x| x['address']}.uniq.compact
       end
 
-      def get_nodes
+      def self.get_nodes
         nodes = resolve_target_nodes("Passenger")
         !nodes.empty? ? nodes : ['127.0.0.1']
       end
@@ -241,6 +275,14 @@ module Marty
                   </div>
                   ERB
         ERB.new(display.html_safe).result(binding)
+      end
+
+      def errors
+        @tests.map{|t| t.errors}.sum
+      end
+
+      def count
+        @tests.map{|t| t.count}.sum
       end
     end
   end
