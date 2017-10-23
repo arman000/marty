@@ -23,6 +23,7 @@
       td { padding: 9px;
       border: none;
       }
+      th.error  { background-color: #ff5555 }
       tr.passed { background-color: #d0e9c6 }
       tr.failed { background-color: #ff5555 }
       td.desc { font-size: 10pt; }
@@ -45,9 +46,13 @@
     </style>
   </head>
   <body>
+    <% if @show_detail %>
     <div style="text-align:center">
       <h1><%=Rails.application.class.parent_name%> Diagnostic &#x26E8</h1>
       <%== @result.display %>
-</div>
+    </div>
+    <% else %>
+      <%= @data %>
+    <% end %>
 </body>
 </html>

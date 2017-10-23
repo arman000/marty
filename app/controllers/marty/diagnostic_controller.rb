@@ -12,7 +12,6 @@ module Marty
     before_filter :params_check
     def test
       @show_detail = true
-      @details     = []
       @data        = ''
       @read_only   = Marty::Util.db_in_recovery?
       begin
@@ -77,11 +76,11 @@ module Marty
 
     # Nodal Diagnostics.
     def nodal_version
-      NodalDiag.new('version', consistency: false)
+      NodalDiag.new('version', consistency: true)
     end
 
     def nodal_environment
-      NodalDiag.new('environment', consistency: false)
+      NodalDiag.new('environment', consistency: true)
     end
 
     # Diagnostics
@@ -154,10 +153,10 @@ module Marty
         @name, @infos, @status = name, infos, infos.all?{|x| x.status}
       end
 
-      def display label=nil
+      def display label=nil, error=''
         display = <<-ERB
                 <table>
-                  <th><%= label.nil? ? @name : label %></th>
+                  <th class="<%=error%>"><%= label.nil? ? @name : label %></th>
                   <th></th>
                   <% @infos.each do |i| %>
                     <tr class="<%= i.status_css %>">
@@ -246,11 +245,13 @@ module Marty
       end
 
       def display
+        err     = !@consistent && @consistency
         display = <<-ERB
                   <div class="wrapper">
-                     <h3><%= @test %></h3>
+                    <h3><%= @test %></h3>
+                    <h4><%= "Issues Detected" if err%></h4>
                     <% @nodes.each do |n| %>
-                    <%= @diags[n].display n %>
+                    <%= @diags[n].display(n, "error" if err) %>
                     <% break if @consistent && @consistency %>
                     <% end %>
                   </div>
