@@ -144,6 +144,20 @@ module Marty
       def status_css
         status ? "passed" : "failed"
       end
+
+      def display
+        display = <<-ERB
+                <table>
+                  <th>Info</th>
+                  <th></th>
+                    <tr class="<%= status_css %>">
+                      <td><%= @name %></td>
+                      <td class="overflow"><%= @details %></td>
+                    </tr>
+                </table>
+                ERB
+        ERB.new(display.html_safe).result(binding)
+      end
     end
 
     # Diag object packs Info objects together for easier display.
@@ -185,7 +199,7 @@ module Marty
         @test, @nodes = test.downcase.capitalize, NodalDiag.get_nodes
         @diags = get_nodal_diags(test.downcase).sum
         @status = @nodes.all?{|n| @diags[n].status}
-        @consistent = @nodes.map{|n| @diags[n].infos}.uniq.length == 1
+        @consistent = @nodes.map{|n| @diags[n].infos.to_json}.uniq.length == 1
         @consistency = opts[:consistency]
       end
 
@@ -200,7 +214,7 @@ module Marty
       def get_nodal_diags test
         @nodes.map do |n|
           ssl = ENV['HTTPS'] == 'on'
-          uri = Addressable::URI.new(host: n, port: ssl ? 443 : 3000)
+          uri = Addressable::URI.new(host: n, port: ssl ? 443 : 80)
           uri.query_values = {op: test}
           uri.scheme = ssl ? 'https' : 'http'
           uri.path = '/marty/diagnostic/test.json'
@@ -251,7 +265,7 @@ module Marty
                     <h3><%=@test%></h3>
                     <h4><%= "Issues Detected" if err %></h4>
                     <% @nodes.each do |n| %>
-                      <% if @consistent && consistency %>
+                      <% if @consistent && @consistency %>
                         <%= @diags[n].display('All') %>
                         <% break %>
                       <% else %>
