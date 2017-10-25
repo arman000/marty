@@ -188,10 +188,10 @@ EOSQL
     end
   end
 
-  def self.generate_sql_migrations(migrations_dir, sql_files_dir, ext="sql")
+  def self.generate_sql_migrations(migrations_dir, sql_files_dir)
     sd = Rails.root.join(sql_files_dir)
     md = Rails.root.join(migrations_dir)
-    sql_files = Dir.glob("#{sd}/**/*.#{ext}")
+    sql_files = Dir.glob("#{sd}/**/*.sql")
     mig_files = Dir.glob("#{migrations_dir}/*.rb").map do |f|
       m = /\A.*\/([0-9]+)_v([0-9]+)_sql_(.*)\.rb\z/.match(f)
       { name: m[3],
@@ -206,7 +206,7 @@ EOSQL
     gen_count = 0
 
     sql_files.each do |sql|
-      base = File.basename(sql, ".#{ext}")
+      base = File.basename(sql, ".sql")
       existing = mig_files[base].first rescue nil
       # must ensure CRLF line endings or SQL Server keep asking about line
       # endings whenever you generating script

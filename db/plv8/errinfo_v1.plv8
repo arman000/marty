@@ -11,8 +11,8 @@ RETURNS JSONB AS $$
                     res += m[1];
                  }
             }
-            return { "error": `${res} ${err.message}` }
+            return { "error": `${res} ${err.message}` };
       }
-      else return err;
-      
+      else return { "error": err };
+
 $$ LANGUAGE plv8;

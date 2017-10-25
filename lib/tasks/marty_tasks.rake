@@ -34,9 +34,4 @@ namespace :marty do
       puts
     end
   end
-
-  task :generate_migrations_plv8 do
-    Marty::Migrations.generate_sql_migrations('db/migrate', 'db/plv8', 'js')
-  end
-
 end

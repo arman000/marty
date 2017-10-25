@@ -12,7 +12,6 @@ class Marty::DataGrid < Marty::Base
 
   ARRSEP = '|'
 
-
   class DataGridValidator < ActiveModel::Validator
     def validate(dg)
 
@@ -21,8 +20,10 @@ class Marty::DataGrid < Marty::Base
 
       dg.errors[:base] = "data must be array of arrays" unless
         dg.data.is_a?(Array) && dg.data.all? {|a| a.is_a? Array}
+
       dg.errors[:base] = "metadata must be an array of hashes" unless
         dg.metadata.is_a?(Array) && dg.metadata.all? {|a| a.is_a? Hash}
+
       dg.errors[:base] = "metadata must contain only h/v dirs" unless
         dg.metadata.all? {|h| ["h", "v"].member? h["dir"]}
 
@@ -144,12 +145,6 @@ class Marty::DataGrid < Marty::Base
     data_type.constantize rescue nil
   end
 
-  #
-  #
-  # START PLV8 ADDITIONS
-  #
-  #
-
   def self.clear_dtcache
     @@dtcache = {}
   end
@@ -160,7 +155,7 @@ class Marty::DataGrid < Marty::Base
     row_info = {"id"         => id,
                 "group_id"   => group_id,
                 "created_dt" =>
-                (@@dtcache ||= {})[id] ||= created_dt.strftime(PLV_DT_FMT)
+              (@@dtcache ||= {})[created_dt] ||= created_dt.strftime(PLV_DT_FMT)
                }
     h = metadata.each_with_object({}) do |m, h|
       attr = m["attr"]
@@ -176,6 +171,7 @@ class Marty::DataGrid < Marty::Base
     sql = "SELECT #{fn}(#{params})"
     raw = ActiveRecord::Base.connection.execute(sql)[0][fn]
     res = JSON.parse(raw)
+
     if res["error"]
       msg = res["error"]
       parms, sqls, ress, dg = res["error_extra"].values_at(
@@ -188,20 +184,7 @@ class Marty::DataGrid < Marty::Base
             "dg: #{dg}\n"\
             "ri: #{row_info}" if res["error"]
     end
-=begin
-    File.open("/tmp/dg.txt", "a") do |f|
-      f.puts '='*10
-      f.puts 'PLV8'
-      f.puts "DG: #{name}"
-      f.puts "ids: #{id}/#{group_id}"
-      f.puts "created_dt: #{created_dt}"
-      PP.pp(metadata, f)
-      PP.pp(data, f)
-      PP.pp(row_info, f)
-      PP.pp(params, f)
-      PP.pp(res, f)
-    end
-=end
+
     if ret_grid_data
       md, mmd = modify_grid(h_passed)
       res["data"] = md
@@ -210,131 +193,10 @@ class Marty::DataGrid < Marty::Base
     res
   end
 
-  # added just_sql for debugging purposes
-  def query_grid_dir(h, infos, just_sql: false)
-    return [0] if infos.empty?
-
-    sqla = infos.map do |inf|
-      type, attr = inf["type"], inf["attr"]
-
-      next unless h.has_key?(attr)
-
-      v = h[attr]
-
-      ix_class = INDEX_MAP[type] || INDEX_MAP["string"]
-
-      q = "key IS NULL"
-
-      unless v.nil?
-        q = case type
-            when "boolean"
-              "key = ?"
-            when "numrange", "int4range"
-              "key @> ?"
-            else # "string", "integer", AR klass
-              "key @> ARRAY[?]"
-            end + " OR #{q}"
-
-        # FIXME: very hacky -- need to cast numrange/intrange values or
-        # we get errors from PG.
-        v = case type
-            when "string"
-              v.to_s
-            when "numrange"
-              v.to_f
-            when "int4range", "integer"
-              v.to_i
-            when "boolean"
-              v
-            else # AR class
-              # FIXME: really hacky to hard-code "name".  Used to
-              # perform to_s which could lead ot strange failures when
-              # model had no to_s defined.
-              begin
-                String === v ? v : v.name
-              rescue NoMethodError
-                raise "could not get name for #{v}"
-              end
-            end
-      end
-
-      # FIXME: could potentially order results by key NULLS LAST.
-      # This would prefer more specific rather than wild card
-      # solutions.  However, would need to figure out how to preserve
-      # ordering on subsequent INTERSECT operations.
-      ix_class.
-        select(:index).
-        distinct.
-        where(data_grid_id: group_id,
-              created_dt:   created_dt,
-              attr:         inf["attr"],
-             ).
-        where(q, v).to_sql
-      end.compact
-    sql = sqla.join(" INTERSECT ")
-    return sql if just_sql
-    self.class.connection.execute(sql).to_a.map { |hh| hh["index"].to_i }
-  end
-
-  def lookup_grid_distinct(pt, h, ret_grid_data=false, distinct=true)
-    isets = ["h", "v"].each_with_object({}) do |dir, ih|
-      infos = dir_infos(dir)
-
-      ih[dir] = query_grid_dir(h, infos)
-
-      unless ih[dir] or ret_grid_data
-        attrs = infos.map { |inf| inf["attr"] }
-        raise "#{dir} attrs not provided: %s" % attrs.join(',')
-      end
-
-      raise "Grid #{name}, (#{ih[dir].count}) #{dir} matches > 1." if
-        distinct && ih[dir] && ih[dir].count > 1
-    end
-
-    # deterministic result: pick min index when there's a choice
-    vi, hi = isets["v"].min, isets["h"].min if isets["v"] && isets["h"]
-    raise "DataGrid lookup failed #{name}" unless (vi && hi) or lenient or
-      ret_grid_data
-
-    modified_data, modified_metadata = modify_grid(h) if ret_grid_data
-    x={
-      "result"   => (data[vi][hi] if vi && hi),
-      "name"     => name,
-      "data"     => (modified_data if ret_grid_data),
-      "metadata" => (modified_metadata if ret_grid_data)
-    }
-=begin
-    File.open("/tmp/dg.txt", "a") do |f|
-      f.puts '='*10
-      f.puts 'ORIG'
-      f.puts "DG: #{name}"
-      f.puts "ids: #{id}/#{group_id}"
-      f.puts "created_dt: #{created_dt}"
-      PP.pp(metadata, f)
-      PP.pp(data, f)
-      PP.pp({"id"=>id, "created_dt"=>created_dt}, f)
-      PP.pp(h, f)
-      PP.pp(x, f)
-    end
-=end
-    x
-  end
-
   # FIXME: added for Apollo -- not sure where this belongs given that
   # DGs were moved to marty.  Should add documentation about callers
   # keeping the hash small.
   cached_delorean_fn :lookup_grid, sig: 4 do
-    |pt, dg, h, distinct|
-    raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
-    raise "non-hash arg #{h}" unless Hash === h
-
-    res = ENV['DGORIG'] ? dg.lookup_grid_distinct(pt, h, false, distinct) :
-            dg.plv_lookup_grid_distinct(h, false, distinct)
-    res["result"]
-  end
-
-  # identical to lookup_grid delorean fn, but calls plv
-  cached_delorean_fn :plv_lookup_grid, sig: 4 do
     |pt, dg, h, distinct|
     raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
     raise "non-hash arg #{h}" unless Hash === h
@@ -369,9 +231,7 @@ class Marty::DataGrid < Marty::Base
     #   "data"     => <grid's data array>
     #   "metadata" => <grid's metadata (array of hashes)>
 
-    vhash = ENV['DGORIG'] ?
-              lookup_grid_distinct(pt, h, return_grid_data) :
-              plv_lookup_grid_distinct(h, return_grid_data)
+    vhash = plv_lookup_grid_distinct(h, return_grid_data)
 
     return vhash if vhash["result"].nil? || !data_type
 
@@ -379,7 +239,11 @@ class Marty::DataGrid < Marty::Base
 
     return vhash if String === c_data_type
 
-    v = Marty::DataGrid.find_class_instance(pt, c_data_type, vhash["result"])
+    res = vhash["result"]
+
+    v =  Marty::PgEnum === res ?
+      c_data_type.find_by_name(res) :
+      Marty::DataConversion.find_row(c_data_type, {"name" => res}, pt)
 
     return vhash.merge({"result" => v}) unless (Marty::DataGrid === v && follow)
 

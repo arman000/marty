@@ -4,8 +4,8 @@ lookup_grid_distinct(h JSONB,
                      return_grid_data boolean default false,
                      dis boolean default false)
 RETURNS JSONB AS $$
-//    var sqls = []
-//    var ress = []
+    var sqls = []
+    var ress = []
     try {
     var query_dir = plv8.find_function('query_grid_dir');
     var errinfo = plv8.find_function('errinfo');
@@ -20,12 +20,12 @@ RETURNS JSONB AS $$
            ih[dir] = [0]
            return
         }
-        a = query_dir(h, infos, row_info, dg['group_id']);
-//        sqls.push(a);
+        a = query_dir(h, infos, row_info);
+        sqls.push(a);
         ih[dir] = []
         if (a) {
             res = plv8.execute(a[0], a[1]);
-//            ress.push(res);
+            ress.push(res);
             for (var j = 0; j < res.length; j++)
             {
                 ih[dir].push(res[j]["index"])
@@ -54,18 +54,13 @@ RETURNS JSONB AS $$
             };
     } catch (err) {
          ei = errinfo(err);
-/*
-         plv8.elog(INFO, '********');
-         plv8.elog(INFO, '');
-         plv8.elog(INFO, `ERROR: ${JSON.stringify(ei)}`);
-         for (var k=0; k<sqls.length; ++k) {
-             plv8.elog(INFO, `sql = ${sqls[k][0]}`);
-             plv8.elog(INFO, `args = ${JSON.stringify(sqls[k][1])}`);
-             plv8.elog(INFO, `res = ${JSON.stringify(ress[k])}`);
-         }
-         plv8.elog(INFO, `params: ${JSON.stringify(h)}`);
-         plv8.elog(INFO, `dg: ${JSON.stringify(dg)}`);
-*/
+
+         ei["error_extra"] = {}
+         ei["error_extra"]["sql"] = sqls;
+         ei["error_extra"]["results"] = ress;
+         ei["error_extra"]["params"] = h;
+         ei["error_extra"]["dg"] = dg;
+
          return ei;
     }
 $$ LANGUAGE plv8;
