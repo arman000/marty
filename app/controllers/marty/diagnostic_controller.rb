@@ -10,12 +10,12 @@ module Marty
 
     layout false
     before_filter :params_check
-    def test
+    def op
       @show_detail = true
       @data        = ''
       @read_only   = Marty::Util.db_in_recovery?
       begin
-        @result = send(:"#{params[:op]}") unless params[:op] == 'test'
+        @result = send(:"#{params[:op]}") unless params[:op] == 'op'
       rescue NoMethodError
         render file: 'public/404', formats: [:html], status: 404, layout: false
       else        respond_to do |format|
@@ -50,7 +50,7 @@ module Marty
     end
 
     def create_report name, tests
-      Report.new(name, tests, self)
+      Report.new(self, name, tests)
     end
 
     def get_nodes
@@ -64,9 +64,9 @@ module Marty
     ############################################################################
 
     # Reports
-    def report
+    def local_report
       tests = ['version', 'environment']
-      Report.new('Report', tests, self)
+      create_report('Local Report', tests)
     end
 
     def nodal_report
@@ -211,13 +211,13 @@ module Marty
         @nodes.map{|n| @diags[n].count}.sum
       end
 
-      def get_nodal_diags test
+      def get_nodal_diags op
         @nodes.map do |n|
           ssl = ENV['HTTPS'] == 'on'
           uri = Addressable::URI.new(host: n, port: ssl ? 443 : 80)
-          uri.query_values = {op: test}
+          uri.query_values = {op: op}
           uri.scheme = ssl ? 'https' : 'http'
-          uri.path = '/marty/diagnostic/test.json'
+          uri.path = '/marty/diag.json'
           opts = {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE}
           {n => reconstruct_diag(JSON.parse(open(uri,
                                                  opts).readlines[0])['result'])}
@@ -280,7 +280,7 @@ module Marty
 
     class Report
       attr_accessor :name, :tests, :status
-      def initialize(name, tests, controller, opts ={})
+      def initialize(controller, name, tests, opts ={})
         @name, @tests = name, tests.map{|t| controller.send(t.to_sym)}
       end
 
