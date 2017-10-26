@@ -148,30 +148,26 @@ class Marty::ReportForm < Marty::Form
        var wnd            = window.open("about:blank", "", "_blank");
        wnd.document.title = this.reptitle
 
-       // new parameter names for cleaner uri
-       var script     = values['selected_script_name'];
-       values['node'] = values['selected_node'];
-
        // check for early uri generation and exit with error message
-       if (script == null) {
+       if (values['selected_script_name'] == null) {
          wnd.document.write("Please select a report before generating uri.");
        }
        else {
-         values['tag']    = values['selected_tag_id'];
-         values['format'] = this.repformat;
-         values['title']  = this.reptitle;
+         params = {
+           "format": this.repformat,
+           "reptitle": this.reptitle
+         }
 
-         // remove extra parameters
-         delete values['selected_testing'];
-         delete values['selected_tag_id'];
-         delete values['selected_node'];
-         delete values['selected_script_name'];
+         for (var key in values) {
+           if (values[key] == "") {delete values[key]}
+         }
+         data = Ext.encode(values)
 
          // construct uri
-         var uri = window.location.host + '/report?script=' + script
-         for (var key in values) {
-           if (values[key] == "") continue;
-           uri += '&' + key + '=' + values[key];
+         var uri = window.location.host + '/report?data=' + data
+         for (var key in params) {
+           if (params[key] == "") continue;
+           uri += '&' + key + '=' + params[key];
          }
          uri = encodeURI(uri)
          if (uri.length > CHAR_LIMIT) {uri = 'ERROR: URI > BROWSER CHAR LIMIT'}

@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  get 'report', to: 'marty/report#uri'
+  get 'report', to: 'marty/report#index'
 end
 
 Marty::Engine.routes.draw do
