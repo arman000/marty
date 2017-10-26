@@ -149,28 +149,29 @@ class Marty::ReportForm < Marty::Form
        // check for early uri generation and exit with error message
        if (values['selected_script_name'] == null) {
          alert("Please select a report before generating uri.");
+         return;
        }
-       else {
-         params = {
-           "format": this.repformat,
-           "reptitle": this.reptitle
-         }
 
-         for (var key in values) {
-           if (values[key] == "") {delete values[key]}
-         }
-         data = Ext.encode(values)
-
-         // construct uri
-         var uri = '/report?data=' + data
-         for (var key in params) {
-           if (params[key] == "") continue;
-           uri += '&' + key + '=' + params[key];
-         }
-         uri = encodeURI(uri)
-         if (uri.length > CHAR_LIMIT) {alert("ERROR: URI > BROWSER CHAR LIMIT")}
-         else {window.open(uri, "", "_blank")}
+       params = {
+         "format": this.repformat,
+         "reptitle": this.reptitle
        }
+
+       for (var key in values) {if (values[key] == "") {delete values[key]}}
+       data = Ext.encode(values)
+
+       // construct uri
+       var uri = '/report?data=' + data
+       for (var key in params) {
+         if (params[key] == "") continue;
+         uri += '&' + key + '=' + params[key];
+       }
+       uri = encodeURI(uri)
+       if (uri.length > CHAR_LIMIT) {
+         alert("ERROR: URI > BROWSER CHAR LIMIT");
+         return;
+       }
+       window.open(uri, "", "_blank")
     }
     JS
   end
