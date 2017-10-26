@@ -1,4 +1,15 @@
 class Marty::ReportController < Marty::ApplicationController
+  def uri
+    # prepare data to be sent to index
+    data = {"selected_script_name" => params.delete('script'),
+            "selected_node"        => params.delete('node')}
+    data += {"selected_tag_id" => params.delete('tag')} if params['tag']
+    params.each{|k,v| data[k] = v}
+    params[:reptitle] = params[:title]
+    params[:data]     = data.to_json
+    index
+  end
+
   def index
     format, req_disposition, title =
       params[:format], params[:disposition], params[:reptitle]

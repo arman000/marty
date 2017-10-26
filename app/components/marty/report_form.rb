@@ -14,11 +14,17 @@ class Marty::ReportForm < Marty::Form
     a.disabled = false
   end
 
+  action :link do |a|
+    a.text     = a.tooltip = I18n.t("reporting.uri")
+    a.icon     = :link_go
+    a.disabled = false
+  end
+
   ######################################################################
 
   def default_bbar
     [
-      '->', :apply, :foreground
+      '->', :apply, :foreground, :link
     ]
   end
 
@@ -132,6 +138,45 @@ class Marty::ReportForm < Marty::Form
        document.body.appendChild(form);
        form.submit();
        document.body.removeChild(form);
+    }
+    JS
+
+    c.netzke_on_link = l(<<-JS)
+    function() {
+       var CHAR_LIMIT     = 4096
+       var values         = this.getForm().getValues();
+       var wnd            = window.open("about:blank", "", "_blank");
+       wnd.document.title = this.reptitle
+
+       // new parameter names for cleaner uri
+       var script     = values['selected_script_name'];
+       values['node'] = values['selected_node'];
+
+       // check for early uri generation and exit with error message
+       if (script == null) {
+         wnd.document.write("Please select a report before generating uri.");
+       }
+       else {
+         values['tag']    = values['selected_tag_id'];
+         values['format'] = this.repformat;
+         values['title']  = this.reptitle;
+
+         // remove extra parameters
+         delete values['selected_testing'];
+         delete values['selected_tag_id'];
+         delete values['selected_node'];
+         delete values['selected_script_name'];
+
+         // construct uri
+         var uri = window.location.host + '/report?script=' + script
+         for (var key in values) {
+           if (values[key] == "") continue;
+           uri += '&' + key + '=' + values[key];
+         }
+         uri = encodeURI(uri)
+         if (uri.length > CHAR_LIMIT) {uri = 'ERROR: URI > BROWSER CHAR LIMIT'}
+         wnd.document.write(uri)
+       }
     }
     JS
   end
