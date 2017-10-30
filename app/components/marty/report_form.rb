@@ -171,7 +171,7 @@ class Marty::ReportForm < Marty::Form
          alert("ERROR: URI > BROWSER CHAR LIMIT");
          return;
        }
-       window.open(uri, "", "_blank")
+       var win = window.open(uri, '', '_blank')
     }
     JS
   end
@@ -271,7 +271,7 @@ class Marty::ReportForm < Marty::Form
     c.reptitle           = title
     c.authenticity_token = controller.send(:form_authenticity_token)
 
-    actions[:foreground].disabled = !!background_only
+    [:foreground, :link].each{|a| actions[a].disabled = !!background_only}
   end
 end
 
