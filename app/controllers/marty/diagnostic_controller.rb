@@ -3,12 +3,9 @@ module Marty
   class DiagnosticController < ActionController::Base
     layout false
     def op
-      @show_detail = true
-      @data        = ''
-      @read_only   = Marty::Util.db_in_recovery?
       begin
         # inject request into Base class of all diagnostics
-        Base.request = request
+        Base.request   = request
         params[:scope] = 'nodal' unless params[:scope]
         diag = self.class.get_sub_class(params[:op])
         @result = params[:scope] == 'local' ? diag.generate : diag.aggregate
@@ -23,7 +20,7 @@ module Marty
     end
 
     def self.get_sub_class klass
-      (name + '::' + klass.downcase.camelize).constantize
+      const_get(klass.downcase.camelize)
     end
 
     private
@@ -33,18 +30,15 @@ module Marty
     #
     ############################################################################
     class Base
-      attr_accessor :request
-      @@request = nil
-
-      D_FORMAT  = '%Y-%m-%d'
-      T_FORMAT  = '%H:%M:%S'
-      DT_FORMAT = D_FORMAT + ' ' + T_FORMAT
-      READ_ONLY = ' disabled - database is in read-only mode'
-      CLG       = ' disabled - environment is in clg mode'
-      SANDBOX   = ' disabled - environment is in sandbox mode'
+      @@request     = nil
+      @@read_only   = Marty::Util.db_in_recovery?
 
       def self.request= req
        @@request = req
+      end
+
+      def self.request
+        @@request
       end
 
       def self.aggregate op_name=name.demodulize
@@ -60,16 +54,28 @@ module Marty
           uri.scheme = ssl ? 'https' : 'http'
           uri.path = '/marty/diag.json'
           opts = {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE}
-          {n => (JSON.parse(open(uri, opts).readlines[0]))}
+          {n => JSON.parse(open(uri, opts).readlines[0])}
          end.sum
+      end
+
+      def self.errors data
+        data.keys.count{|n| is_failure?(data[n])}
       end
 
       def self.diff data
         data.keys.map{|n| data[n]}.uniq.length != 1
       end
 
-      def self.package status, message
-        {name.demodulize.capitalize => [status, message]}
+      def self.package message
+        {name.demodulize => message}
+      end
+
+      def self.is_failure? message
+        message.to_s.include?('Failure')
+      end
+
+      def self.error message
+        "Failure: (#{message})"
       end
 
       def self.display data, type='nodal'
@@ -87,9 +93,10 @@ module Marty
                                              '<small>consistent</small>'%></th>
                     <th class=<%=issues%>></th>
                     <% result.each do |name, value| %>
-                      <tr class="<%=value.first ? "passed" : "failed"%>">
+                      <tr class="<%=is_failure?(value) ? 'failed' :
+                                    'passed' %>">
                         <td><%=name%></td>
-                        <td class="overflow"><%=value.last%></td>
+                        <td class="overflow"><%=value%></td>
                       </tr>
                     <% end %>
                     </table>
@@ -126,10 +133,9 @@ module Marty
 
       def self.get_nodes
         nodes = resolve_target_nodes("Passenger")
-        !nodes.empty? ? nodes : ['127.0.0.1']
+        nodes.empty? ? ['127.0.0.1'] : nodes
       end
     end
-
     ############################################################################
     #
     # Diagnostic Definitions
@@ -139,15 +145,15 @@ module Marty
     class Version < Base
       def self.generate
         begin
-          message, status = `cd #{Rails.root.to_s}; git describe;`.strip, true
+          message = `cd #{Rails.root.to_s}; git describe;`.strip
         rescue
-          message, status = "Failed accessing git", false
+          message = error("Failed accessing git")
         end
         {
-          'Git'      => [status, message],
-          'Marty'    => [true, Marty::VERSION],
-          'Delorean' => [true, Delorean::VERSION],
-          'Mcfly'    => [true, Mcfly::VERSION]
+          'Git'      => message,
+          'Marty'    => Marty::VERSION,
+          'Delorean' => Delorean::VERSION,
+          'Mcfly'    => Mcfly::VERSION
         }
       end
     end
@@ -165,58 +171,54 @@ module Marty
         ActiveRecord::Base.connection.execute('SELECT NOW();')
       end
 
-      def self.db_version_info
+      def self.db_version
         begin
         message = ActiveRecord::Base.connection.
                     execute('SELECT VERSION();')[0]['version']
         rescue => e
-          return [false, e.message]
+          return error(message)
         end
-        [true, message]
+        message
       end
 
-      def self.db_schema_info
+      def self.db_schema
         begin
-          message = AciveRecord::Migrator.current_version
+          message = ActiveRecord::Migrator.current_version
         rescue => e
-          return [false, e.message]
+          return error(e.message)
         end
-        [true, message]
+        message
       end
     end
 
     class Environment < Database
       def self.generate
         rbv = "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
-        infos = {'Environment'             => [true, Rails.env],
-                 'Rails'                   => [true, Rails.version],
-                 'Netzke Core'             => [true, Netzke::Core::VERSION],
-                 'Netzke Basepack'         => [true, Netzke::Basepack::VERSION],
-                 'Ruby'                    => [true, rbv],
-                 'RubyGems'                => [true, Gem::VERSION],
-                 'Database Adapter'        => [true, db_adapter_name],
-                 'Database Server'         => [true, db_server_name],
-                 'Database Version'        => db_version_info,
-                 'Database Schema Version' => db_schema_info}
-        begin
-          status, message = true, ActiveRecord::Migrator.current_version
-        rescue => e
-          status = false
-          message = e.message
-        end
-        infos['Database Schema Version'] = [status, message]
-        infos
+        infos = {'Environment'             => Rails.env,
+                 'Rails'                   => Rails.version,
+                 'Netzke Core'             => Netzke::Core::VERSION,
+                 'Netzke Basepack'         => Netzke::Basepack::VERSION,
+                 'Ruby'                    => rbv,
+                 'RubyGems'                => Gem::VERSION,
+                 'Database Adapter'        => db_adapter_name,
+                 'Database Server'         => db_server_name,
+                 'Database Version'        => db_version,
+                 'Database Schema Version' => db_schema}
       end
     end
 
     class Nodes < Base
       def self.generate
-        a_nodes  = AwsInstanceInfo.is_aws? ? AwsInstanceInfo.new.nodes : []
-        a_status = !a_nodes.empty?
-        {"Postgres Connections" => [true, get_nodes.sort.join(', ')],
-         "Amazon Instances"     => [a_status,
-                                    a_status ? a_nodes.sort.join(', ') :
-                                      'Could not retrieve metadata.']}
+        a_nodes  = AwsInstanceInfo.is_aws? ? AwsInstanceInfo.new.nodes.sort : []
+        pg_nodes = get_nodes.sort
+        message  = pg_nodes == a_nodes ? g_nodes.join(', ') :
+                     error("Postgres: [#{pg_nodes.join(', ')}]"\
+                           " - AWS: [#{a_nodes.join(', ')}]")
+        {"PG/AWS" => message}
+      end
+
+      def self.aggregate
+        {'local' => generate}
       end
     end
 
@@ -237,7 +239,8 @@ module Marty
       self.diags = ['nodes', 'version', 'environment']
 
       def self.get_diag_klass diag
-        (name.chomp(name.demodulize) + diag.capitalize).constantize
+        controller = name.split(name.demodulize)[0].constantize
+        controller.const_get(diag.capitalize)
       end
 
       def self.generate
