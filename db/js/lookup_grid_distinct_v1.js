@@ -1,12 +1,11 @@
-CREATE OR REPLACE FUNCTION  -- add 4 to reported error no
-lookup_grid_distinct(h JSONB,
-                     row_info JSONB,
-                     return_grid_data boolean default false,
-                     dis boolean default false)
-RETURNS JSONB AS $$
-    var sqls = []
-    var ress = []
-    try {
+// PARAM: h JSONB
+// PARAM: row_info JSONB
+// PARAM: return_grid_data boolean default false
+// PARAM: dis boolean default false
+// RETURN: JSONB
+var sqls = []
+var ress = []
+try {
     var query_dir = plv8.find_function('query_grid_dir');
     var errinfo = plv8.find_function('errinfo');
     var ih = {};
@@ -17,8 +16,8 @@ RETURNS JSONB AS $$
         var infos = dg["metadata"].filter(function(md) { return md["dir"] == dir; });
         if (infos.length == 0)
         {
-           ih[dir] = [0]
-           return
+            ih[dir] = [0]
+            return
         }
         a = query_dir(h, infos, row_info);
         sqls.push(a);
@@ -32,17 +31,17 @@ RETURNS JSONB AS $$
             }
         }
         if (dis && ih[dir].length > 1)  {
-          throw Error("matches > 1");
+            throw Error("matches > 1");
         }
     });
-    if ((ih["v"].length == 0 || ih["h"].length == 0) && !dg['lenient'] && !return_grid_data)
-       {
-         throw Error("Data Grid lookup failed");
-       }
-
+    if ((ih["v"].length == 0 || ih["h"].length == 0) &&
+        !dg['lenient'] && !return_grid_data) {
+        throw Error("Data Grid lookup failed");
+    }
+    
     vi = ih["v"].length > 0 ? Math.min.apply(9999, ih["v"]) : null
     hi = ih["h"].length > 0 ? Math.min.apply(9999, ih["h"]) : null
-
+    
     var result = null;
     if (vi!==null && hi!==null) {
         result = dg["data"][vi][hi];
@@ -51,16 +50,15 @@ RETURNS JSONB AS $$
              "name"   : dg["name"],
              "data"   : return_grid_data ? dg["data"] : null,
              "metadata" : return_grid_data ? dg["metadata"] : null
-            };
-    } catch (err) {
-         ei = errinfo(err);
+           };
+} catch (err) {
+    ei = errinfo(err);
 
-         ei["error_extra"] = {}
-         ei["error_extra"]["sql"] = sqls;
-         ei["error_extra"]["results"] = ress;
-         ei["error_extra"]["params"] = h;
-         ei["error_extra"]["dg"] = dg;
+    ei["error_extra"] = {}
+    ei["error_extra"]["sql"] = sqls;
+    ei["error_extra"]["results"] = ress;
+    ei["error_extra"]["params"] = h;
+    ei["error_extra"]["dg"] = dg;
 
-         return ei;
-    }
-$$ LANGUAGE plv8;
+    return ei;
+}
