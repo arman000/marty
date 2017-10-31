@@ -10,7 +10,7 @@ module Marty
         diag = self.class.get_sub_class(params[:op])
         @result = params[:scope] == 'local' ? diag.generate : diag.aggregate
       rescue NameError
-        render file: 'public/404', formats: [:html], status: 404, layout: false
+        render file: 'public/400', formats: [:html], status: 400, layout: false
       else
         respond_to do |format|
           format.html {@result = diag.display(@result, params[:scope])}
@@ -89,9 +89,9 @@ module Marty
                 <% data.each do |node, result| %>
                     <table>
                     <% issues = ('error' if inconsistent) %>
-                    <th class=<%=issues%>><%=inconsistent ? node :
+                    <th class="<%=issues%>"><%=inconsistent ? node :
                                              '<small>consistent</small>'%></th>
-                    <th class=<%=issues%>></th>
+                    <th class="<%=issues%>"></th>
                     <% result.each do |name, value| %>
                       <tr class="<%=is_failure?(value) ? 'failed' :
                                     'passed' %>">
@@ -211,7 +211,7 @@ module Marty
       def self.generate
         a_nodes  = AwsInstanceInfo.is_aws? ? AwsInstanceInfo.new.nodes.sort : []
         pg_nodes = get_nodes.sort
-        message  = pg_nodes == a_nodes ? g_nodes.join(', ') :
+        message  = pg_nodes == a_nodes ? pg_nodes.join(', ') :
                      error("Postgres: [#{pg_nodes.join(', ')}]"\
                            " - AWS: [#{a_nodes.join(', ')}]")
         {"PG/AWS" => message}

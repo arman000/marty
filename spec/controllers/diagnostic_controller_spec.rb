@@ -25,6 +25,87 @@ module Marty
        'Database Schema Version' => described_class::Database.db_schema}
     end
 
+    def version_display
+      <<-ERB
+      <h3>Version</h3>
+      <div class="wrapper">
+      <table>
+        <th class=""><small>consistent</small></th>
+        <th class=""></th>
+        <tr class="passed">
+          <td>Git</td>
+          <td class="overflow"></td>
+        </tr>
+        <tr class="passed">
+          <td>Marty</td>
+          <td class="overflow">#{Marty::VERSION}</td>
+        </tr>
+        <tr class="passed">
+          <td>Delorean</td>
+          <td class="overflow">#{Delorean::VERSION}</td>
+        </tr>
+        <tr class="passed">
+          <td>Mcfly</td>
+          <td class="overflow">#{Mcfly::VERSION}</td>
+        </tr>
+      </table>
+      </div>
+      ERB
+    end
+
+    def version_display_fail val
+      <<-ERB
+      <h3>Version</h3>
+      <h3 class="error"> &#x26a0; Issues Detected </h3>
+      <div class="wrapper">
+      <table>
+        <th class="error">node1</th>
+        <th class="error"></th>
+        <tr class="passed">
+          <td>Git</td>
+          <td class="overflow"></td>
+        </tr>
+        <tr class="passed">
+          <td>Marty</td>
+          <td class="overflow">#{Marty::VERSION}</td>
+        </tr>
+        <tr class="passed">
+          <td>Delorean</td>
+          <td class="overflow">#{Delorean::VERSION}</td>
+        </tr>
+        <tr class="passed">
+          <td>Mcfly</td>
+          <td class="overflow">#{Mcfly::VERSION}</td>
+        </tr>
+      </table>
+      <table>
+        <th class="error">node2</th>
+        <th class="error"></th>
+        <tr class="passed">
+          <td>Git</td>
+          <td class="overflow"></td>
+        </tr>
+        <tr class="passed">
+          <td>Marty</td>
+          <td class="overflow">#{val}</td>
+        </tr>
+        <tr class="passed">
+          <td>Delorean</td>
+          <td class="overflow">#{Delorean::VERSION}</td>
+        </tr>
+        <tr class="passed">
+          <td>Mcfly</td>
+          <td class="overflow">#{Mcfly::VERSION}</td>
+        </tr>
+      </table>
+      </div>
+      ERB
+    end
+
+    def minimize(str)
+      str.gsub(/\s+/, "")
+    end
+
     describe 'GET #op' do
       it 'returns http success with local scope' do
         get :op, op: 'version', scope: 'local'
@@ -38,40 +119,72 @@ module Marty
 
       it 'returns the correct environment JSON' do
         get :op, format: :json, op: 'environment', scope: 'local'
-
         expect(assigns('result')).to eq(environment)
+      end
+
+      it 'produces an html display of the diagnostic (version)' do
+        test = described_class::Version.display({'stub' => version})
+        expect(minimize(test)).to eq(minimize(version_display))
+      end
+
+      it 'masks consistent nodes for display (version)' do
+        data = {'node1' => version, 'node2' => version}
+        test = described_class::Version.display(data)
+        expect(minimize(test)).to eq(minimize(version_display))
+      end
+
+      it 'displays all nodes when there is an inconsistent node (version)' do
+        ver       = '0.0.0'
+        data      = {'node1' => version, 'node2' => version + {'Marty' => ver}}
+        expected  = version_display_fail(ver)
+        test      = described_class::Version.display(data)
+        expect(minimize(expected)).to eq(minimize(test))
       end
     end
 
-    describe 'diagnostic Base class' do
+    describe 'diagnostic classes and aggregate functions' do
       it 'has access to DiagnosticController request' do
         get :op, op: 'version', scope: 'local'
         expect(described_class::Base.request).not_to eq(nil)
       end
 
-      #it 'returns aggregate version JSON' do
-      #  allow(Net::HTTP).to receive(:get_response).and_return ['127.0.0.1']
-      #  described_class::Base.request.port = 3000
-      #  described_class::Base.get_nodal_diags('version')
-      #end
+      it 'can aggregate diagnostics and return appropriate JSON' do
+        # simulate open-uri nodal diag request
+        uri_stub = {:open => nil, :readlines => [version.to_json]}
+        nodes    = ['node1', 'node2', 'node3']
+        expected = nodes.each_with_object({}){|n, h| h[n] = version}
 
-      # returns true if inconsistent or false if consistent
+        # mock nodes and diag request to node
+        allow(described_class::Base.request).to receive(:port).and_return(nil)
+        allow(described_class::Base).to receive(:get_nodes).and_return(nodes)
+        allow(described_class::Base).to receive_message_chain(uri_stub)
+
+        # perform aggregation using Base class function and Version class
+        expect(described_class::Base.get_nodal_diags('version')).to eq(expected)
+        expect(described_class::Version.aggregate).to eq(expected)
+      end
+
+      # returns true if there are differences in nodes for Base/Version
       it 'determines diff of aggregate diagnostic' do
         inconsistent = {'1' => version, '2' => version + {'Git' => '123'}}
         consistent = inconsistent + {'2' => version}
         aggregate_failures do
           expect(described_class::Base.diff(inconsistent)).to eq(true)
           expect(described_class::Base.diff(consistent)).to eq(false)
+          expect(described_class::Version.diff(inconsistent)).to eq(true)
+          expect(described_class::Version.diff(consistent)).to eq(false)
         end
       end
 
-      it 'detects errors in diagnostic' do
+      it 'can detects errors in diagnostic' do
         error_free = version
         error_test = version + {'Git' => described_class::Base.
                                            error('Failed accessing git')}
         aggregate_failures do
           expect(described_class::Base.errors(error_free)).to eq(0)
           expect(described_class::Base.errors(error_test)).to eq(1)
+          expect(described_class::Version.errors(error_free)).to eq(0)
+          expect(described_class::Version.errors(error_test)).to eq(1)
         end
       end
     end
