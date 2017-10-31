@@ -11,6 +11,9 @@ gem 'mime-types', '< 3.0', platforms: :ruby_19
 gem 'rails', '~> 4.2.1'
 gem 'pg', '~> 0.18.4'
 gem 'sqlite3'
+# for signing of aws ec2 requests
+gem 'aws-sigv4', '~> 1.0', '>= 1.0.2'
+
 
 group :development, :test do
   gem 'pry-rails'
