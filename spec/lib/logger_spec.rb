@@ -10,6 +10,7 @@ module Marty
       Marty::Log.delete_all
     end
     after(:all) do
+      Marty::Log.delete_all
       self.use_transactional_fixtures = true
     end
 

@@ -34,6 +34,11 @@ class Marty::RpcController < ActionController::Base
     end
   end
 
+  def massage_message(msg)
+    m = %r|'#/([^']+)' of type ([^ ]+) matched the disallowed schema|.match(msg)
+    return msg unless m
+    "disallowed parameter '#{m[1]}' of type #{m[2]} was received"
+  end
   def _get_errors(errs)
     if errs.is_a?(Array)
       errs.map { |err| _get_errors(err) }
@@ -41,10 +46,11 @@ class Marty::RpcController < ActionController::Base
       if !errs.include?(:failed_attribute)
         errs.map { |k, v| _get_errors(v) }
       else
-        fa, message, errors = errs.values_at(:failed_attribute,
-                                             :message, :errors)
-        (['AllOf','AnyOf','Not'].include?(fa) ? [] : [message]) +
-          _get_errors(errors || {})
+        fa, fragment, message, errors = errs.values_at(:failed_attribute,
+                                                       :fragment,
+                                                       :message, :errors)
+        ((['AllOf','AnyOf','Not'].include?(fa) && fragment =='#/') ?
+           [] : [massage_message(message)]) + _get_errors(errors || {})
       end
     end
   end

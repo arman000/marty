@@ -259,12 +259,13 @@ eof
 script10_schema = <<eof
 A:
     properties = {
-              "opt1" :     { "type" : "string" },
-              "opttf" :    { "type" : "boolean" },
-              "opttrue" :  { "type" : "string" },
-              "optfalse" : { "type" : "string" },
-              "req1" :     { "pg_enum" : "CondEnum" },
-              "req2" :     { "pg_enum" : "CondEnum" }
+              "opt1" :        { "type" : "string" },
+              "opttf" :       { "type" : "boolean" },
+              "opttrue" :     { "type" : "string" },
+              "optfalse" :    { "type" : "string" },
+              "optdisallow" : { "type" : "string" },
+              "req1" :        { "pg_enum" : "CondEnum" },
+              "req2" :        { "pg_enum" : "CondEnum" }
          }
 
     req1_is_opt1 = Marty::SchemaHelper.enum_is('req1', ['opt1'])
@@ -290,11 +291,22 @@ A:
     optfalse_check = Marty::SchemaHelper.required_if(['optfalse'],
                                                      opttf_is_false)
 
+    # optdisallow is not allowed if opttf is false
+    optdisallow_check = Marty::SchemaHelper.disallow_if_conds(['optdisallow'],
+                                                        opttf_is_false)
+
     # opttf is optional (contingent on req3) so eval of opttrue_check
     # and optfalse_check is dependent upon opttf existing
     opttruefalse_check = Marty::SchemaHelper.dep_check('opttf',
                                                     opttrue_check,
-                                                    optfalse_check)
+                                                    optfalse_check,
+                                                    optdisallow_check)
+
+    dip_check = Marty::SchemaHelper.disallow_if_present('opttf',
+                                                        'opt3', 'opt4')
+
+    dinp_check = Marty::SchemaHelper.disallow_if_not_present('opttf',
+                                                        'opt5', 'opt6')
 
     v1 = { "properties": properties,
            "required": ["req1", "req2", "req3"],
@@ -302,7 +314,9 @@ A:
                      opt1_check,
                      optn_check,
                      opttf_check,
-                     opttruefalse_check
+                     opttruefalse_check,
+                     dip_check,
+                     dinp_check
              ] }
 eof
 
@@ -1126,6 +1140,12 @@ describe Marty::RpcController do
       params = optionals.merge({"req1" => req1,
                                 "req2"=> req2,
                                 "req3"=> req3}).to_json
+
+      # to see what the schema helpers generated:
+      # engine = Marty::ScriptSet.new(nil).get_engine("M10Schemas")
+      # x=engine.evaluate("A", ["v1"],  {})
+      # binding.pry
+
       get 'evaluate', {
             format: :json,
             script: "M10",
@@ -1133,18 +1153,21 @@ describe Marty::RpcController do
             attrs: attrs,
             params: params
           }
+
     end
 
     it "does conditional" do
       aggregate_failures "conditionals" do
-        [# first group has all required fields
+        [
+          # first group has all required fields
           [['opt1', 'no opts', 'no opts', opt1: 'hi mom'], "hi mom"],
           [['no opts', 'no opts', 'no opts', opt1: 'hi mom'], "no opts"],
           [['opt2', 'opt2', 'no opts', optn: 'foo'], 'foo'],
           [['opt2', 'no opts', 'opt2'], 'req3'],
           [['opt2', 'no opts', 'opttf', opttf: true, opttrue: 'bar'], 'bar'],
           [['opt2', 'no opts', 'opttf', opttf: false, optfalse: 'baz'], 'baz'],
-          # second group is missing fields
+
+          # second group is missing fields or has other errors
           [['opt1', 'no opts', 'no opts'],
            "did not contain a required property of 'opt1'"],
           [['opt2', 'opt2', 'no opts',],
@@ -1155,11 +1178,23 @@ describe Marty::RpcController do
            "did not contain a required property of 'opttrue'"],
           [['opt2', 'no opts', 'opttf', opttf: false],
            "did not contain a required property of 'optfalse'"],
+          [['opt2', 'no opts', 'opttf', opttf: false, optfalse: "val",
+            optdisallow: "hi mom"],
+           "disallowed parameter 'optdisallow' of type string was received"],
+          [['opt2', 'no opts', 'opttf', opttf: false, optfalse: "val",
+            opt3: "hi"],
+           "disallowed parameter 'opt3' of type string was received"],
+          [['opt2', 'no opts', 'opttf', opttf: true, opttrue: "val",
+            opt4: "mom"],
+           "disallowed parameter 'opt4' of type string was received"],
+          [['opt2', 'no opts', 'xyz', opt5: "hi"],
+           "disallowed parameter 'opt5' of type string was received"],
         ].each do
           |a, exp|
           do_call(*a)
           res_hash = JSON.parse(response.body)
           got = res_hash.is_a?(Array) ? res_hash[0] : res_hash["error"]
+
           expect(got).to include(exp)
         end
       end

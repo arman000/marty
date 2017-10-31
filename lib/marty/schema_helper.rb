@@ -25,6 +25,47 @@ class Marty::SchemaHelper
   end
 
   # if conds is true, var_array columns we be required
+  delorean_fn :disallow_if_conds, sig: [2, 20] do
+    |var_array, *conds_array|
+    {"anyOf"=>[{"not"=>{"allOf"=> conds_array}},
+               {"properties"=> var_array.each_with_object({}) do
+                  |v,h|
+                  h[v] = { "not" => {} }
+                end
+               }]}
+  end
+
+
+  # if param is present, disallow cols
+  delorean_fn :disallow_if_present, sig: [2, 20] do
+    |dep_column, *var_array|
+    dep_check(dep_column,
+              {"properties"=> var_array.each_with_object({}) do
+                 |v,h|
+                 h[v] = { "not" => {} }
+               end
+              })
+  end
+
+  # if param is not present, disallow cols
+  # note: small problem, probably not fixable:
+  #  if this condition fails (i.e. dep_column is not present,
+  #  but var(s) in var_array are are present)
+  #  it will report both the required clause and the not clauses
+  #  as failed.   so the caller will see a message that a
+  #  required field is missing (which is not really a required field)
+  delorean_fn :disallow_if_not_present, sig: [2, 20] do
+    |dep_column, *var_array|
+    { "anyOf" => [
+        {"required" => [dep_column] },
+        {"properties"=> var_array.each_with_object({}) do
+           |v,h|
+           h[v] = { "not" => {} }
+         end
+        }]}
+  end
+
+  # if conds is true, var_array columns are not allowed
   delorean_fn :required_if, sig: [2, 20] do
     |var_array, *conds_array|
     {"anyOf"=>[{"not"=>{"allOf"=> conds_array}},
