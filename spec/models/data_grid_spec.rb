@@ -718,7 +718,6 @@ EOS
 
         res = dgc.lookup_grid_distinct_entry('2/2/2014',
                                              {"property_state" => "CA"})
-
         expect(res["result"]).to eq(70)
 
         res = dgc.lookup_grid_distinct_entry('2/2/2015',

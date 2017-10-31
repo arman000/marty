@@ -1,5 +1,4 @@
 class Marty::DataGrid < Marty::Base
-
   # If data_type is nil, assume float
   DEFAULT_DATA_TYPE = "float"
 
@@ -146,102 +145,52 @@ class Marty::DataGrid < Marty::Base
     data_type.constantize rescue nil
   end
 
-  def query_grid_dir(h, infos)
-    return [0] if infos.empty?
-
-    sqla = infos.map do |inf|
-      type, attr = inf["type"], inf["attr"]
-
-      next unless h.has_key?(attr)
-
-      v = h[attr]
-
-      ix_class = INDEX_MAP[type] || INDEX_MAP["string"]
-
-      q = "key IS NULL"
-
-      unless v.nil?
-        q = case type
-            when "boolean"
-              "key = ?"
-            when "numrange", "int4range"
-              "key @> ?"
-            else # "string", "integer", AR klass
-              "key @> ARRAY[?]"
-            end + " OR #{q}"
-
-        # FIXME: very hacky -- need to cast numrange/intrange values or
-        # we get errors from PG.
-        v = case type
-            when "string"
-              v.to_s
-            when "numrange"
-              v.to_f
-            when "int4range", "integer"
-              v.to_i
-            when "boolean"
-              v
-            else # AR class
-              # FIXME: really hacky to hard-code "name".  Used to
-              # perform to_s which could lead ot strange failures when
-              # model had no to_s defined.
-              begin
-                String === v ? v : v.name
-              rescue NoMethodError
-                raise "could not get name for #{v}"
-              end
-            end
-      end
-
-      # FIXME: could potentially order results by key NULLS LAST.
-      # This would prefer more specific rather than wild card
-      # solutions.  However, would need to figure out how to preserve
-      # ordering on subsequent INTERSECT operations.
-      ix_class.
-        select(:index).
-        distinct.
-        where(data_grid_id: group_id,
-              created_dt:   created_dt,
-              attr:         inf["attr"],
-             ).
-        where(q, v).to_sql
-    end.compact
-
-    sql = sqla.join(" INTERSECT ")
-
-    self.class.connection.execute(sql).to_a.map { |hh| hh["index"].to_i }
+  def self.clear_dtcache
+    @@dtcache = {}
   end
 
-  def lookup_grid_distinct(pt, h, return_grid_data=false, distinct=true)
-    isets = ["h", "v"].each_with_object({}) do |dir, ih|
-      infos = dir_infos(dir)
+  PLV_DT_FMT = "%Y-%m-%d %H:%M:%S.%N6"
 
-      ih[dir] = query_grid_dir(h, infos)
-
-      unless ih[dir] or return_grid_data
-        attrs = infos.map { |inf| inf["attr"] }
-
-        raise "#{dir} attrs not provided: %s" % attrs.join(',')
-      end
-
-      raise "Grid #{name}, (#{ih[dir].count}) #{dir} matches > 1." if
-        distinct && ih[dir] && ih[dir].count > 1
+  def plv_lookup_grid_distinct(h_passed, ret_grid_data=false, distinct=true)
+    row_info = {"id"         => id,
+                "group_id"   => group_id,
+                "created_dt" =>
+              (@@dtcache ||= {})[created_dt] ||= created_dt.strftime(PLV_DT_FMT)
+               }
+    h = metadata.each_with_object({}) do |m, h|
+      attr = m["attr"]
+      inc = h_passed.fetch(attr, :__nf__)
+      next if inc == :__nf__
+      h[attr] = (defined? inc.name) ? inc.name : inc
     end
 
-    # deterministic result: pick min index when there's a choice
-    vi, hi = isets["v"].min, isets["h"].min if isets["v"] && isets["h"]
+    fn = "lookup_grid_distinct"
+    hjson = "'#{h.to_json}'::JSONB"
+    rijson = "'#{row_info.to_json}'::JSONB"
+    params = "#{hjson}, #{rijson}, #{ret_grid_data}, #{distinct}"
+    sql = "SELECT #{fn}(#{params})"
+    raw = ActiveRecord::Base.connection.execute(sql)[0][fn]
+    res = JSON.parse(raw)
 
-    raise "DataGrid lookup failed #{name}" unless (vi && hi) or lenient or
-      return_grid_data
+    if res["error"]
+      msg = res["error"]
+      parms, sqls, ress, dg = res["error_extra"].values_at(
+                                "params", "sql",
+                                "results", "dg")
+      raise "DG #{name}: Error in PLV8 call: #{msg}\n"\
+            "params: #{parms}\n"\
+            "sqls: #{sqls}\n"\
+            "results: #{ress}\n"\
+            "dg: #{dg}\n"\
+            "ri: #{row_info}" if res["error"]
+    end
 
-    modified_data, modified_metadata = modify_grid(h) if return_grid_data
-
-    return {
-      "result"   => (data[vi][hi] if vi && hi),
-      "name"     => name,
-      "data"     => (modified_data if return_grid_data),
-      "metadata" => (modified_metadata if return_grid_data)
-    }
+    if ret_grid_data
+      md, mmd = modify_grid(h_passed)
+      res["data"] = md
+      res["metadata"] = mmd
+    end
+    res
   end
 
   # FIXME: added for Apollo -- not sure where this belongs given that
@@ -252,8 +201,7 @@ class Marty::DataGrid < Marty::Base
     raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
     raise "non-hash arg #{h}" unless Hash === h
 
-    res = dg.lookup_grid_distinct(pt, h, false, distinct)
-
+    res = dg.plv_lookup_grid_distinct(h, false, distinct)
     res["result"]
   end
 
@@ -283,7 +231,7 @@ class Marty::DataGrid < Marty::Base
     #   "data"     => <grid's data array>
     #   "metadata" => <grid's metadata (array of hashes)>
 
-    vhash = lookup_grid_distinct(pt, h, return_grid_data)
+    vhash = plv_lookup_grid_distinct(h, return_grid_data)
 
     return vhash if vhash["result"].nil? || !data_type
 
@@ -291,7 +239,11 @@ class Marty::DataGrid < Marty::Base
 
     return vhash if String === c_data_type
 
-    v = Marty::DataGrid.find_class_instance(pt, c_data_type, vhash["result"])
+    res = vhash["result"]
+
+    v =  Marty::PgEnum === res ?
+      c_data_type.find_by_name(res) :
+      Marty::DataConversion.find_row(c_data_type, {"name" => res}, pt)
 
     return vhash.merge({"result" => v}) unless (Marty::DataGrid === v && follow)
 

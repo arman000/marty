@@ -303,4 +303,24 @@ OUT
                  "cols = #{cols}, act_cols = #{act_cols}")
     end.map(&:to_sym)
   end
+
+  def self.get_plv8_migration(file)
+    fnname = %r(/([^/]+)_v[0-9]+\.js\z).match(file)[1]
+    lines=File.readlines(file)
+    parts = lines.map do |line|
+      next [:param, $1] if %r(\A// PARAM[:] (.*)$).match(line)
+      next [:ret, $1]  if %r(\A// RETURN[:] (.*)$).match(line)
+      [:body, line]
+    end.group_by(&:first)
+    args = parts[:param].map{ |(_,l)| l}.join(",\n")
+    ret =  parts[:ret][0][1]
+    body = parts[:body].map{ |(_,l)| l}.join
+    <<EOT
+CREATE OR REPLACE FUNCTION #{fnname} (
+#{args}
+) RETURNS #{ret} AS $$
+#{body}
+$$ LANGUAGE plv8;
+EOT
+  end
 end
