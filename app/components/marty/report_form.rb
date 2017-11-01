@@ -15,7 +15,7 @@ class Marty::ReportForm < Marty::Form
   end
 
   action :link do |a|
-    a.text     = a.tooltip = I18n.t("reporting.uri")
+    a.text     = a.tooltip = I18n.t("reporting.link")
     a.icon     = :link_go
     a.disabled = false
   end
@@ -143,12 +143,11 @@ class Marty::ReportForm < Marty::Form
 
     c.netzke_on_link = l(<<-JS)
     function() {
-       var CHAR_LIMIT     = 4096
-       var values         = this.getForm().getValues();
+       var values = this.getForm().getValues();
 
-       // check for early uri generation and exit with error message
+       // check for early url generation and exit with error message
        if (values['selected_script_name'] == null) {
-         alert("Please select a report before generating uri.");
+         alert("Please select a report before generating url.");
          return;
        }
 
@@ -160,19 +159,17 @@ class Marty::ReportForm < Marty::Form
        for (var key in values) {if (values[key] == "") {delete values[key]}}
        data = Ext.encode(values)
 
-       // construct uri
-       var uri = '/report?data=' + data
+       // construct url
+       var proto_host = location.protocol + '//' + location.host
+       var url  = proto_host + '/report?data=' + data
        for (var key in params) {
          if (params[key] == "") continue;
-         uri += '&' + key + '=' + params[key];
+         url += '&' + key + '=' + params[key];
        }
-       uri = encodeURI(uri)
-       if (uri.length > CHAR_LIMIT) {
-         alert("ERROR: URI > BROWSER CHAR LIMIT");
-         return;
-       }
-       var win = window.open(uri, '', '_blank')
-    }
+       url = encodeURI(url)
+       var win = window.open('');
+       win.document.write(url.link(url));
+     }
     JS
   end
 

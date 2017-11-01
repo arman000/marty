@@ -119,7 +119,7 @@ en:
     select_script: Select Script
     generate: Generate Report
     background: Background Report
-    uri: Generate URI
+    link: Generate URL
 
   jobs:
     promise_view: Jobs Dashboard
