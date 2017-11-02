@@ -193,7 +193,7 @@ class Marty::RpcController < ActionController::Base
       # FIXME: how do we know this isn't going to fail??
       end_time = Time.zone.now
       Marty::Log.create!(message_type: 'api',
-                         message: '#{script} - #{node}',
+                         message: "#{sname} - #{node}",
                          timestamp: end_time,
                          details:{script:     sname,
                                   node:       node,

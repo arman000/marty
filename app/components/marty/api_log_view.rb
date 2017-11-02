@@ -2,10 +2,18 @@ class Marty::ApiLogView < Marty::Grid
   include Marty::Extras::Layout
   has_marty_permissions read: :admin,
                         update: :admin
-
-  JSONB_DATE_OPS = {'gt' => '>',
-                    'lt' => '<',
-                    'eq' => '='}
+  @@attrs = [
+             :script,
+             :node,
+             :attrs,
+             :input,
+             :output,
+             :error,
+             :remote_ip,
+             :auth_name,
+             :start_time,
+             :end_time,
+            ]
 
   def configure(c)
     super
@@ -13,17 +21,8 @@ class Marty::ApiLogView < Marty::Grid
     c.paging = :buffered
     c.title = 'Api Log View'
     c.model = Marty::Log
-    c.attributes = [:script,
-                    :node,
-                    :attrs,
-                    :input,
-                    :output,
-                    :error,
-                    :remote_ip,
-                    :auth_name,
-                    :start_time,
-                    :end_time]
-
+    c.attributes = @@attrs
+    c.scope = {message_type: 'api'}
     c.store_config.merge!(sorters: [{property: :timestamp, direction: 'DESC'}])
   end
 
@@ -47,17 +46,12 @@ class Marty::ApiLogView < Marty::Grid
     ]
   end
 
-  [:script,
-   :node,
-   :attrs,
-   :input,
-   :output,
-   :error,
-   :remote_ip,
-   :auth_name,
-  ].each do |a|
+  # FIXME: datetime of virtual attributes is not working due to netzke renderer?
+  # workaround: leaving as string and filtering by LIKE
+  @@attrs.each do |a|
     attribute a do |c|
       c.filterable = true
+      c.read_only  = true
       c.sorting_scope = lambda {
         |r, dir|
         r.order("details->>'#{a.to_s}'" + dir.to_s)
@@ -66,20 +60,24 @@ class Marty::ApiLogView < Marty::Grid
         |r, v, op|
         r.where("details->>'#{a.to_s}' #{op} '#{v}%'")
       }
+      case a
+      when :start_time, :end_time
+        c.getter = lambda {
+          |r|
+          r.send(a).to_datetime.strftime('%Y-%m-%d %H:%I:%S.%L')
+        }
+      when :input, :output
+        c.getter = lambda { |r| r.send(a).pretty_inspect }
+        c.width     = 900
+        c.read_only = true
+      end
     end
   end
 
-  [:start_time, :end_time].each do |a|
-    attribute a do |c|
-      c.type = :date
-      c.sorting_scope = lambda {
-        |r, dir|
-        r.order("details->>'#{a.to_s}'" + dir.to_s)
-      }
-      c.filter_with = lambda {
-        |r, v, op|
-        r.where("details->>'#{a.to_s}' #{JSONB_DATE_OPS[op]} '#{v}%'")
-      }
+  [:input, :output].each do |a|
+    column a do |c|
+      c.width  = 250
+      c.getter = lambda { |r| r.send(a).to_json }
     end
   end
 end

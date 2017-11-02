@@ -12,6 +12,7 @@ class Marty::Log < Marty::Base
   end
 
   def add_field_accessors
+    return unless has_attribute?(:details)
     num_fields = details.try(:keys).try(:count) || 0
     details.keys.each {|field| add_store_accessor field} if num_fields > 0
   end
