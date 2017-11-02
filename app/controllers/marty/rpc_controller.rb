@@ -191,17 +191,22 @@ class Marty::RpcController < ActionController::Base
       error = Hash === retval ? retval[:error] : nil
 
       # FIXME: how do we know this isn't going to fail??
-      Marty::ApiLog.create!(script:     sname,
-                            node:       node,
-                            attrs:      (attrs_atom ? attrs.first : attrs),
-                            input:      orig_params,
-                            output:     error ? nil : retval,
-                            start_time: start_time,
-                            end_time:   Time.zone.now,
-                            error:      error,
-                            remote_ip:  request.remote_ip,
-                            auth_name:  auth,
-                           ) if need_log.present?
+      end_time = Time.zone.now
+      Marty::Log.create!(message_type: 'api',
+                         message: '#{script} - #{node}',
+                         timestamp: end_time,
+                         details:{script:     sname,
+                                  node:       node,
+                                  attrs:      (attrs_atom ? attrs.first : attrs),
+                                  input:      orig_params,
+                                  output:     error ? nil : retval,
+                                  start_time: start_time,
+                                  end_time:   end_time,
+                                  error:      error,
+                                  remote_ip:  request.remote_ip,
+                                  auth_name:  auth
+                                 }
+                        ) if need_log.present?
     end
   end
 end

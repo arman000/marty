@@ -3,40 +3,33 @@ class Marty::ApiLogView < Marty::Grid
   has_marty_permissions read: :admin,
                         update: :admin
 
+  JSONB_DATE_OPS = {'gt' => '>',
+                    'lt' => '<',
+                    'eq' => '='}
+
   def configure(c)
     super
     c.editing = :in_form
     c.paging = :buffered
     c.title = 'Api Log View'
-    c.model = Marty::ApiLog
-    c.attributes = [
-      :script,
-      :node,
-      :attrs,
-      :start_time,
-      :end_time,
-      :input,
-      :output,
-      :error,
-      :remote_ip,
-      :auth_name,
-    ]
+    c.model = Marty::Log
+    c.attributes = [:script,
+                    :node,
+                    :attrs,
+                    :input,
+                    :output,
+                    :error,
+                    :remote_ip,
+                    :auth_name,
+                    :start_time,
+                    :end_time]
 
-    c.store_config.merge!(
-      {sorters: [{ property: :start_time, direction: :desc }]},
-    )
+    c.store_config.merge!(sorters: [{property: :timestamp, direction: 'DESC'}])
   end
 
   component :edit_window do |c|
     super(c)
     c.width = 1200
-  end
-
-  [:script, :node, :attrs, :remote_ip, :auth_name, :start_time,
-   :end_time].each do |a|
-    attribute a do |c|
-      c.read_only = true
-    end
   end
 
   def default_form_items
@@ -54,20 +47,40 @@ class Marty::ApiLogView < Marty::Grid
     ]
   end
 
-  [:input, :output].each do |a|
+  [:script,
+   :node,
+   :attrs,
+   :input,
+   :output,
+   :error,
+   :remote_ip,
+   :auth_name,
+  ].each do |a|
     attribute a do |c|
-      c.text = a.to_s
-      c.width     = 900
-      c.read_only = true
-      c.type = :string
-      c.getter = lambda { |r| r.send(a).pretty_inspect }
-    end
-    column a do |c|
-      c.width = 250
-      c.type = :string
-      c.getter = lambda { |r| r.send(a).to_json }
+      c.filterable = true
+      c.sorting_scope = lambda {
+        |r, dir|
+        r.order("details->>'#{a.to_s}'" + dir.to_s)
+      }
+      c.filter_with = lambda {
+        |r, v, op|
+        r.where("details->>'#{a.to_s}' #{op} '#{v}%'")
+      }
     end
   end
 
+  [:start_time, :end_time].each do |a|
+    attribute a do |c|
+      c.type = :date
+      c.sorting_scope = lambda {
+        |r, dir|
+        r.order("details->>'#{a.to_s}'" + dir.to_s)
+      }
+      c.filter_with = lambda {
+        |r, v, op|
+        r.where("details->>'#{a.to_s}' #{JSONB_DATE_OPS[op]} '#{v}%'")
+      }
+    end
+  end
 end
 ApiLogView = Marty::ApiLogView
