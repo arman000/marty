@@ -26,7 +26,7 @@ for (var sqlidx=1, i = 0; i < infos.length; i++) {
     var attr = infos[i]["attr"];
     var v = h[attr];
     if (!h.hasOwnProperty(attr)) {
-        //throw Error(`missing attr ${attr}`)
+        //throw Error("missing attr " + attr)
         continue;
     }
     switch (type) {
@@ -34,14 +34,14 @@ for (var sqlidx=1, i = 0; i < infos.length; i++) {
     case "numrange":
     case "int4range":
     case "integer":
-        tab = `marty_grid_index_${type}s`;
+        tab = "marty_grid_index_" + type + "s";
         break;
     default:
         tab = 'marty_grid_index_strings';
     };
 
-    sql = `SELECT DISTINCT index from ${tab} ` +
-        "WHERE data_grid_id = $" + sqlidx++ +
+    sql = "SELECT DISTINCT index from " + tab +
+        " WHERE data_grid_id = $" + sqlidx++ +
         " AND created_dt = $"    + sqlidx++ +
         " AND attr = $"          + sqlidx++ + ' ';
 

@@ -11,6 +11,6 @@ if (stack) {
             res += m[1];
         }
     }
-    return { "error": `${res} ${err.message}` };
+    return { "error": res + " " + err.message };
 }
 else return { "error": err };
