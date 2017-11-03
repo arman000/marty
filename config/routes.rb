@@ -1,3 +1,7 @@
+Rails.application.routes.draw do
+  get 'report', to: 'marty/report#index'
+end
+
 Marty::Engine.routes.draw do
   match via: [:get, :post], "rpc/:action(.:format)" => "rpc", as: :rpc
   get "job/:action" => "job", as: :job

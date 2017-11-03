@@ -100,6 +100,17 @@ DELOREAN
     end
   end
 
+  def generate_rep_url format: 'csv'
+    URI.encode("http://#{Capybara.current_session.server.host}"\
+               ":#{Capybara.current_session.server.port}"\
+               '/report?data='\
+               '{"pt_name":"XYZ",'\
+               '"selected_tag_id":"3",'\
+               '"selected_script_name":"SomeReport",'\
+               '"selected_node":"AA",'\
+               "\"selected_testing\":\"true\"}&format=#{format}&reptitle=AA")
+  end
+
   it 'run_script displays proper data' do
     log_in_as('dev1')
     go_to_reporting
@@ -247,6 +258,46 @@ DELOREAN
       expect(script_combo.get_values).to include('AA (csv)',
                                              'CC (csv)',
                                              '---')
+    end
+  end
+
+  it 'can generate an url that can be used to access report' do
+    log_in_as('dev1')
+    go_to_reporting
+
+    tag_grid = netzke_find('tag_grid')
+    script_grid = netzke_find('script_grid')
+
+    by 'select 2nd tag' do
+      wait_for_ajax
+      zoom_out
+      tag_grid.select_row(2)
+    end
+
+    and_by 'select SomeReport script & AA node' do
+      script_grid.select_row(1)
+      select_node('AA (csv)')
+    end
+
+    and_by 'fill form and navigate to generated link' do
+      wait_for_ajax
+      set_field_value('XYZ', '', 'pt_name')
+      set_field_value('true', 'textfield', 'selected_testing')
+      new_window = window_opened_by {press("Generate URL")}
+      within_window new_window do
+        url = generate_rep_url
+        expect(page).to have_content(url)
+      end
+      new_window.close
+    end
+  end
+
+  it 'can generate report through generated url' do
+    url = generate_rep_url(format: 'txt') + URI.encode('&disposition=inline')
+    visit url
+    wait_for_element do
+      expect(page).to have_content('XYZ1,XYZ2,XYZ3,XYZ4 1,2,3,4 2,4,6,8 ' +
+                                   '3,6,9,12 4,8,12,16')
     end
   end
 end

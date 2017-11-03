@@ -14,11 +14,17 @@ class Marty::ReportForm < Marty::Form
     a.disabled = false
   end
 
+  action :link do |a|
+    a.text     = a.tooltip = I18n.t("reporting.link")
+    a.icon     = :link_go
+    a.disabled = false
+  end
+
   ######################################################################
 
   def default_bbar
     [
-      '->', :apply, :foreground
+      '->', :apply, :foreground, :link
     ]
   end
 
@@ -134,6 +140,37 @@ class Marty::ReportForm < Marty::Form
        document.body.removeChild(form);
     }
     JS
+
+    c.netzke_on_link = l(<<-JS)
+    function() {
+       var values = this.getForm().getValues();
+
+       // check for early url generation and exit with error message
+       if (values['selected_script_name'] == null) {
+         alert("Please select a report before generating url.");
+         return;
+       }
+
+       params = {
+         "format": this.repformat,
+         "reptitle": this.reptitle
+       }
+
+       for (var key in values) {if (values[key] == "") {delete values[key]}}
+       data = Ext.encode(values)
+
+       // construct url
+       var proto_host = location.protocol + '//' + location.host
+       var url  = proto_host + '/report?data=' + data
+       for (var key in params) {
+         if (params[key] == "") continue;
+         url += '&' + key + '=' + params[key];
+       }
+       url = encodeURI(url)
+       var win = window.open('');
+       win.document.write(url.link(url));
+     }
+    JS
   end
 
   endpoint :netzke_load do |params|
@@ -231,7 +268,7 @@ class Marty::ReportForm < Marty::Form
     c.reptitle           = title
     c.authenticity_token = controller.send(:form_authenticity_token)
 
-    actions[:foreground].disabled = !!background_only
+    [:foreground, :link].each{|a| actions[a].disabled = !!background_only}
   end
 end
 
