@@ -2,18 +2,25 @@ class Marty::ApiLogView < Marty::Grid
   include Marty::Extras::Layout
   has_marty_permissions read: :admin,
                         update: :admin
+
+  DATE_OP_MAP = {
+    'eq' => '=',
+    'gt' => '>',
+    'lt' => '<'
+  }
+
   @@attrs = [
-             :script,
-             :node,
-             :attrs,
-             :input,
-             :output,
-             :error,
-             :remote_ip,
-             :auth_name,
-             :start_time,
-             :end_time,
-            ]
+    :script,
+    :node,
+    :attrs,
+    :input,
+    :output,
+    :error,
+    :remote_ip,
+    :auth_name,
+    :start_time,
+    :end_time,
+  ]
 
   def configure(c)
     super
@@ -46,12 +53,11 @@ class Marty::ApiLogView < Marty::Grid
     ]
   end
 
-  # FIXME: datetime of virtual attributes is not working due to netzke renderer?
-  # workaround: leaving as string and filtering by LIKE
   @@attrs.each do |a|
     attribute a do |c|
       c.filterable = true
       c.read_only  = true
+
       c.sorting_scope = lambda {
         |r, dir|
         r.order("details->>'#{a.to_s}'" + dir.to_s)
@@ -59,12 +65,16 @@ class Marty::ApiLogView < Marty::Grid
       c.filter_with = lambda {
         |r, v, op|
         r.where("details->>'#{a.to_s}' #{op} '#{v}%'")
-      }
+      } unless [:start_time, :endtime].include?(a)
+
       case a
       when :start_time, :end_time
-        c.getter = lambda {
-          |r|
-          r.send(a).to_datetime.strftime('%Y-%m-%d %H:%I:%S.%L')
+        c.type   = :datetime
+        c.format = 'Y-m-d h:i:s'
+        c.getter = lambda {|r| Time.zone.parse(r.send(a)) }
+        c.filter_with = lambda {
+          |r, v, op|
+          r.where("(details->>'#{a.to_s}')::date #{DATE_OP_MAP[op]} '#{v}%'")
         }
       when :input, :output
         c.getter = lambda { |r| r.send(a).pretty_inspect }
