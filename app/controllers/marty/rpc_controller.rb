@@ -155,10 +155,13 @@ class Marty::RpcController < ActionController::Base
         rescue => e
           return {error: e.message}
         end
+        shash = Hash[schemas]
         pairs = attrs.zip(res)
-        pairs.zip(schemas).each do |(attr, res), (_, sch)|
+        pairs.each do |attr, result|
+          next unless sch = shash[attr+"_"]
+          next if result.is_a?(Hash) && result["error"]
           begin
-            er = JSON::Validator.fully_validate(sch.merge(to_append), res, opt)
+            er = JSON::Validator.fully_validate(sch.merge(to_append), result, opt)
           rescue NameError
             return {error: "Unrecognized PgEnum for attribute #{attr}"}
           rescue => ex
@@ -168,20 +171,19 @@ class Marty::RpcController < ActionController::Base
           err_count += er.size
         end
         if err_count > 0
-          res = pairs.map do |attr, res|
-            is_strict = strict_validate.include?(attr)
-            the_error = validation_error[attr]
+          res = pairs.map do |attr, result|
+            next result unless shash[attr+"_"]
+            next result unless the_error = validation_error[attr]
 
             Marty::Logger.error("API #{sname}:#{node}.#{attr}",
                                 {error:  the_error,
-                                 data: res}) if the_error
-            is_strict && the_error ?
+                                 data: result})
+            strict_validate.include?(attr) ?
               {error: "Error(s) validating: #{the_error}",
-               data: res} : res
+               data: result} : result
           end
         end
       end
-
       return retval = (attrs_atom ? res.first : res)
     rescue => exc
       err_msg = Delorean::Engine.grok_runtime_exception(exc).symbolize_keys
