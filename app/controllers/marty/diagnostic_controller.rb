@@ -83,7 +83,7 @@ module Marty
         display = <<-ERB
                 <% inconsistent = diff(data) %>
                 <h3><%=name.demodulize%></h3>
-                <%='<h3 class="error">&#x26a0; Issues Detected</h3>' if
+                <%='<h3 class="error">Issues Detected</h3>' if
                    inconsistent%>
                 <div class="wrapper">
                 <% data.each do |node, result| %>
