@@ -56,7 +56,7 @@ module Marty
     def version_display_fail val
       <<-ERB
       <h3>Version</h3>
-      <h3 class="error"> &#x26a0; Issues Detected </h3>
+      <h3 class="error">Issues Detected </h3>
       <div class="wrapper">
       <table>
         <th class="error">node1</th>
