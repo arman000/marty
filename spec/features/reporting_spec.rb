@@ -105,7 +105,6 @@ DELOREAN
                ":#{Capybara.current_session.server.port}"\
                '/report?data='\
                '{"pt_name":"XYZ",'\
-               '"selected_tag_id":"3",'\
                '"selected_script_name":"SomeReport",'\
                '"selected_node":"AA",'\
                "\"selected_testing\":\"true\"}&format=#{format}&reptitle=AA")
@@ -267,12 +266,6 @@ DELOREAN
 
     tag_grid = netzke_find('tag_grid')
     script_grid = netzke_find('script_grid')
-
-    by 'select 2nd tag' do
-      wait_for_ajax
-      zoom_out
-      tag_grid.select_row(2)
-    end
 
     and_by 'select SomeReport script & AA node' do
       script_grid.select_row(1)
