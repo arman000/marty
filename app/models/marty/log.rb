@@ -3,20 +3,6 @@ class Marty::Log < Marty::Base
   # based on the current AR connection (i.e. duplicates AR connection)
   establish_connection
 
-  # create json object accessors from the fields in details if possible
-  after_initialize :add_field_accessors
-  after_save       :add_field_accessors
-
-  def add_store_accessor field
-    singleton_class.class_eval {store_accessor :details, field}
-  end
-
-  def add_field_accessors
-    return unless has_attribute?(:details)
-    num_fields = details.try(:keys).try(:count) || 0
-    details.keys.each {|field| add_store_accessor field} if num_fields > 0
-  end
-
   def self.write_log(type, message, details)
     begin
       create!(message_type: type,

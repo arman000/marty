@@ -1015,13 +1015,13 @@ describe Marty::RpcController do
     expect(response.body).to eq("9\r\n9\r\n")
     log = Marty::Log.order(id: :desc).first
 
-    expect(log.script).to eq("M3")
-    expect(log.node).to eq("A")
-    expect(log.attrs).to eq(attrs)
-    expect(log.input).to eq(params)
-    expect(log.output).to eq([[9,9]])
-    expect(log.remote_ip).to eq("0.0.0.0")
-    expect(log.error).to eq(nil)
+    expect(log.details['script']).to eq("M3")
+    expect(log.details['node']).to eq("A")
+    expect(log.details['attrs']).to eq(attrs)
+    expect(log.details['input']).to eq(params)
+    expect(log.details['output']).to eq([[9,9]])
+    expect(log.details['remote_ip']).to eq("0.0.0.0")
+    expect(log.details['error']).to eq(nil)
 
   end
 
@@ -1072,13 +1072,13 @@ describe Marty::RpcController do
     expect(response.body).to eq("9\r\n9\r\n")
     log = Marty::Log.order(id: :desc).first
 
-    expect(log.script).to eq("M3")
-    expect(log.node).to eq("A")
-    expect(log.attrs).to eq("lc")
-    expect(log.input).to eq(params)
-    expect(log.output).to eq([9, 9])
-    expect(log.remote_ip).to eq("0.0.0.0")
-    expect(log.error).to eq(nil)
+    expect(log.details['script']).to eq("M3")
+    expect(log.details['node']).to eq("A")
+    expect(log.details['attrs']).to eq("lc")
+    expect(log.details['input']).to eq(params)
+    expect(log.details['output']).to eq([9, 9])
+    expect(log.details['remote_ip']).to eq("0.0.0.0")
+    expect(log.details['error']).to eq(nil)
 
   end
 
@@ -1132,12 +1132,12 @@ describe Marty::RpcController do
     expect(response.body).to eq([7].to_json)
     log = Marty::Log.order(id: :desc).first
 
-    expect(log.script).to eq("M3")
-    expect(log.node).to eq("C")
-    expect(log.attrs).to eq(attrs)
-    expect(log.output).to eq([7])
-    expect(log.remote_ip).to eq("0.0.0.0")
-    expect(log.auth_name).to eq("TestApp")
+    expect(log.details['script']).to eq("M3")
+    expect(log.details['node']).to eq("C")
+    expect(log.details['attrs']).to eq(attrs)
+    expect(log.details['output']).to eq([7])
+    expect(log.details['remote_ip']).to eq("0.0.0.0")
+    expect(log.details['auth_name']).to eq("TestApp")
   end
 
   it "should support api authorization - api_key required but incorrect" do

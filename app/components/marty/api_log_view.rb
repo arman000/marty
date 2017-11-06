@@ -55,9 +55,9 @@ class Marty::ApiLogView < Marty::Grid
 
   @@attrs.each do |a|
     attribute a do |c|
-      c.filterable = true
-      c.read_only  = true
-
+      c.filterable    = true
+      c.read_only     = true
+      c.getter        = lambda {|r| r.details[a.to_s] }
       c.sorting_scope = lambda {
         |r, dir|
         r.order("details->>'#{a.to_s}'" + dir.to_s)
@@ -69,15 +69,15 @@ class Marty::ApiLogView < Marty::Grid
 
       case a
       when :start_time, :end_time
-        c.type   = :datetime
-        c.format = 'Y-m-d h:i:s'
-        c.getter = lambda {|r| Time.zone.parse(r.send(a)) }
+        c.type        = :datetime
+        c.format      = 'Y-m-d h:i:s'
+        c.getter      = lambda {|r| Time.zone.parse(r.details[a.to_s])}
         c.filter_with = lambda {
           |r, v, op|
           r.where("(details->>'#{a.to_s}')::date #{DATE_OP_MAP[op]} '#{v}%'")
         }
       when :input, :output
-        c.getter = lambda { |r| r.send(a).pretty_inspect }
+        c.getter    = lambda { |r| r.details[a.to_s].pretty_inspect }
         c.width     = 900
         c.read_only = true
       end
@@ -87,7 +87,7 @@ class Marty::ApiLogView < Marty::Grid
   [:input, :output].each do |a|
     column a do |c|
       c.width  = 250
-      c.getter = lambda { |r| r.send(a).to_json }
+      c.getter = lambda { |r| r.details[a.to_s].to_json }
     end
   end
 end
