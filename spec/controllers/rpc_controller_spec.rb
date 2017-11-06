@@ -968,23 +968,23 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: true)
-    attrs = ["lc"].to_json
+    attrs = ["lc"]
     params = {"p" => 5}
     get 'evaluate', {
       format: :csv,
       script: "M3",
       node: "A",
-      attrs: attrs,
+      attrs: attrs.to_json,
       params: params.to_json
     }
     expect(response.body).to eq("9\r\n9\r\n")
-    log = Marty::ApiLog.order(id: :desc).first
+    log = Marty::Log.order(id: :desc).first
 
     expect(log.script).to eq("M3")
     expect(log.node).to eq("A")
     expect(log.attrs).to eq(attrs)
     expect(log.input).to eq(params)
-    expect(log.output).to eq([[9, 9]])
+    expect(log.output).to eq([[9,9]])
     expect(log.remote_ip).to eq("0.0.0.0")
     expect(log.error).to eq(nil)
 
@@ -995,26 +995,18 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: true)
-    attrs = ["lc"].to_json
+    attrs = ["lc"]
     params = {"p" => 5}
     get 'evaluate', {
       format: :csv,
       script: "M3",
       node: "A",
-      attrs: attrs,
+      attrs: attrs.to_json,
       params: params.to_json,
       background: true
     }
     expect(response.body).to match(/job_id,/)
-    log = Marty::ApiLog.order(id: :desc).first
-
-    expect(log.script).to eq("M3")
-    expect(log.node).to eq("A")
-    expect(log.attrs).to eq(attrs)
-    expect(log.input).to eq(params)
-    expect(log.output).to include("job_id")
-    expect(log.remote_ip).to eq("0.0.0.0")
-    expect(log.error).to eq(nil)
+    log = Marty::Log.order(id: :desc).first
 
   end
 
@@ -1026,7 +1018,7 @@ describe Marty::RpcController do
       attrs: ["a", "b"].to_json,
       tag: t1.name,
     }
-    expect(Marty::ApiLog.count).to eq(0)
+    expect(Marty::Log.count).to eq(0)
   end
 
   it "should handle atom attribute" do
@@ -1043,7 +1035,8 @@ describe Marty::RpcController do
       params: params.to_json
     }
     expect(response.body).to eq("9\r\n9\r\n")
-    log = Marty::ApiLog.order(id: :desc).first
+    log = Marty::Log.order(id: :desc).first
+
     expect(log.script).to eq("M3")
     expect(log.node).to eq("A")
     expect(log.attrs).to eq("lc")
@@ -1051,6 +1044,7 @@ describe Marty::RpcController do
     expect(log.output).to eq([9, 9])
     expect(log.remote_ip).to eq("0.0.0.0")
     expect(log.error).to eq(nil)
+
   end
 
   it "should support api authorization - api_key not required" do
@@ -1092,18 +1086,20 @@ describe Marty::RpcController do
     apic = Marty::ApiConfig.create!(script: 'M3',
                                     logged: true)
 
+    attrs = ["pc"]
     get 'evaluate', {
       format: :json,
       script: "M3",
       node: "C",
-      attrs: ["pc"].to_json,
+      attrs: attrs.to_json,
       api_key: api.api_key,
     }
     expect(response.body).to eq([7].to_json)
-    log = Marty::ApiLog.order(id: :desc).first
-    expect(log.script).to eq('M3')
-    expect(log.node).to eq('C')
-    expect(log.attrs).to eq(%Q!["pc"]!)
+    log = Marty::Log.order(id: :desc).first
+
+    expect(log.script).to eq("M3")
+    expect(log.node).to eq("C")
+    expect(log.attrs).to eq(attrs)
     expect(log.output).to eq([7])
     expect(log.remote_ip).to eq("0.0.0.0")
     expect(log.auth_name).to eq("TestApp")

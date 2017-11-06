@@ -3,40 +3,39 @@ class Marty::ApiLogView < Marty::Grid
   has_marty_permissions read: :admin,
                         update: :admin
 
+  DATE_OP_MAP = {
+    'eq' => '=',
+    'gt' => '>',
+    'lt' => '<'
+  }
+
+  @@attrs = [
+    :script,
+    :node,
+    :attrs,
+    :input,
+    :output,
+    :error,
+    :remote_ip,
+    :auth_name,
+    :start_time,
+    :end_time,
+  ]
+
   def configure(c)
     super
     c.editing = :in_form
     c.paging = :buffered
     c.title = 'Api Log View'
-    c.model = Marty::ApiLog
-    c.attributes = [
-      :script,
-      :node,
-      :attrs,
-      :start_time,
-      :end_time,
-      :input,
-      :output,
-      :error,
-      :remote_ip,
-      :auth_name,
-    ]
-
-    c.store_config.merge!(
-      {sorters: [{ property: :start_time, direction: :desc }]},
-    )
+    c.model = Marty::Log
+    c.attributes = @@attrs
+    c.scope = {message_type: 'api'}
+    c.store_config.merge!(sorters: [{property: :timestamp, direction: 'DESC'}])
   end
 
   component :edit_window do |c|
     super(c)
     c.width = 1200
-  end
-
-  [:script, :node, :attrs, :remote_ip, :auth_name, :start_time,
-   :end_time].each do |a|
-    attribute a do |c|
-      c.read_only = true
-    end
   end
 
   def default_form_items
@@ -54,20 +53,42 @@ class Marty::ApiLogView < Marty::Grid
     ]
   end
 
-  [:input, :output].each do |a|
+  @@attrs.each do |a|
     attribute a do |c|
-      c.text = a.to_s
-      c.width     = 900
-      c.read_only = true
-      c.type = :string
-      c.getter = lambda { |r| r.send(a).pretty_inspect }
-    end
-    column a do |c|
-      c.width = 250
-      c.type = :string
-      c.getter = lambda { |r| r.send(a).to_json }
+      c.filterable = true
+      c.read_only  = true
+
+      c.sorting_scope = lambda {
+        |r, dir|
+        r.order("details->>'#{a.to_s}'" + dir.to_s)
+      }
+      c.filter_with = lambda {
+        |r, v, op|
+        r.where("details->>'#{a.to_s}' #{op} '#{v}%'")
+      } unless [:start_time, :endtime].include?(a)
+
+      case a
+      when :start_time, :end_time
+        c.type   = :datetime
+        c.format = 'Y-m-d h:i:s'
+        c.getter = lambda {|r| Time.zone.parse(r.send(a)) }
+        c.filter_with = lambda {
+          |r, v, op|
+          r.where("(details->>'#{a.to_s}')::date #{DATE_OP_MAP[op]} '#{v}%'")
+        }
+      when :input, :output
+        c.getter = lambda { |r| r.send(a).pretty_inspect }
+        c.width     = 900
+        c.read_only = true
+      end
     end
   end
 
+  [:input, :output].each do |a|
+    column a do |c|
+      c.width  = 250
+      c.getter = lambda { |r| r.send(a).to_json }
+    end
+  end
 end
 ApiLogView = Marty::ApiLogView
