@@ -50,6 +50,9 @@ class Marty::DataExporter
     # FIXME: very hacky to default row_sep to CRLF
     conf[:row_sep] ||= "\r\n"
 
+    # remove non CSV.generate options before entering generate blocks
+    readable = conf.delete(:readable)
+
     # FIXME: the following is ridiculously complex. We have different
     # data paths for hashes and arrays.  Also, arrays can turn into
     # hashes is all their items are hashes!  We map to complex objects
@@ -69,7 +72,7 @@ class Marty::DataExporter
         csv << x.map { |v|
           case v
           when Array, Hash
-            encode_json(v.to_json)
+            readable ? v.to_s : encode_json(v.to_json)
           when nil
             nil
           else
