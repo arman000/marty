@@ -152,11 +152,13 @@ class Marty::DataGrid < Marty::Base
   PLV_DT_FMT = "%Y-%m-%d %H:%M:%S.%N6"
 
   def plv_lookup_grid_distinct(h_passed, ret_grid_data=false, distinct=true)
-    row_info = {"id"         => id,
-                "group_id"   => group_id,
-                "created_dt" =>
-              (@@dtcache ||= {})[created_dt] ||= created_dt.strftime(PLV_DT_FMT)
-               }
+    row_info = {
+      "id"         => id,
+      "group_id"   => group_id,
+      "created_dt" => (
+        @@dtcache ||= {})[created_dt] ||= created_dt.strftime(PLV_DT_FMT)
+    }
+
     h = metadata.each_with_object({}) do |m, h|
       attr = m["attr"]
       inc = h_passed.fetch(attr, :__nf__)
@@ -164,19 +166,19 @@ class Marty::DataGrid < Marty::Base
       h[attr] = (defined? inc.name) ? inc.name : inc
     end
 
-    fn = "lookup_grid_distinct"
-    hjson = "'#{h.to_json}'::JSONB"
+    fn     = "lookup_grid_distinct"
+    hjson  = "'#{h.to_json}'::JSONB"
     rijson = "'#{row_info.to_json}'::JSONB"
     params = "#{hjson}, #{rijson}, #{ret_grid_data}, #{distinct}"
-    sql = "SELECT #{fn}(#{params})"
-    raw = ActiveRecord::Base.connection.execute(sql)[0][fn]
-    res = JSON.parse(raw)
+    sql    = "SELECT #{fn}(#{params})"
+    raw    = ActiveRecord::Base.connection.execute(sql)[0][fn]
+    res    = JSON.parse(raw)
 
     if res["error"]
       msg = res["error"]
       parms, sqls, ress, dg = res["error_extra"].values_at(
-                                "params", "sql",
-                                "results", "dg")
+                           "params", "sql", "results", "dg")
+
       raise "DG #{name}: Error in PLV8 call: #{msg}\n"\
             "params: #{parms}\n"\
             "sqls: #{sqls}\n"\
