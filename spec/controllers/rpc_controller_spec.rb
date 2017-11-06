@@ -46,7 +46,9 @@ A: M3::A
     f =?
     g = e * 5 + f
     h = f + 1
+    i =?
     ptest = p * 10
+    ii = i
     result = [{"a": p, "b": 456}, {"a": 789, "b": p}]
 eof
 
@@ -133,6 +135,10 @@ A:
                 }
             }
     d_ = { "type" : "integer" }
+
+    ii = {}
+
+    ii_ = { "type" : "integer" }
 
     g = { "properties" : {
                   "e" : { "type" : "integer" },
@@ -738,6 +744,35 @@ describe Marty::RpcController do
       Marty::ApiConfig.create!(script: "M4",
                                node: "A",
                                attr: nil,
+                               logged: false,
+                               input_validated: true,
+                               output_validated: true,
+                               strict_validate: true)
+      attrs = ["d", "g", "ii", "result"].to_json
+      params = {"p" => 132, "e" => 55, "f"=>16, "i"=>"string"}.to_json
+      get 'evaluate', {
+            format: :json,
+            script: "M4",
+            node: "A",
+            attrs: attrs,
+            params: params
+          }
+      res_hash = JSON.parse(response.body)
+      errpart = "of type string did not match the following type: integer"
+      expect(res_hash[0]).to eq(135)
+      expect(res_hash[1]).to eq(291)
+      expect(res_hash[2]["error"]).to include(errpart)
+      expect(res_hash[3]).to eq([{"a"=>132,"b"=>456},
+                                 {"a"=>789,"b"=>132}])
+      logs = Marty::Log.all
+      expect(logs.count).to eq(1)
+      expect(logs[0].details["error"][0]).to include(errpart)
+    end
+    it "validates output 2" do
+      # not all attrs being validated
+      Marty::ApiConfig.create!(script: "M4",
+                               node: "A",
+                               attr: "result",
                                logged: false,
                                input_validated: true,
                                output_validated: true)
