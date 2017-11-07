@@ -32,13 +32,13 @@ describe Marty::RpcController do
     (0..2).each {
       tags.each_with_index { |t, i|
         get 'evaluate', {
-          format: :json,
-          script: "B",
-          node: "B",
-          attrs: ["b"].to_json,
-          tag: t.name,
-        }
-        response.body.should == [i].to_json
+              format: :json,
+              script: "B",
+              node: "B",
+              attrs: "b",
+              tag: t.name,
+            }
+        response.body.should == i.to_json
       }
     }
   end

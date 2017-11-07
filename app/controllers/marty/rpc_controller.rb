@@ -19,18 +19,15 @@ class Marty::RpcController < ActionController::Base
   end
 
   private
-
   # FIXME: move to (probably) agrim's schema code in lib
-  def get_schemas(tag, sname, node, attrs)
+  def get_schema(tag, sname, node, attrs)
     begin
-      engine = Marty::ScriptSet.new(tag).get_engine(sname+'Schemas')
-      result = engine.evaluate(node, attrs, {})
-      attrs.zip(result)
+      Marty::ScriptSet.new(tag).get_engine(sname+'Schemas').
+        evaluate(node, attrs, {})
     rescue => e
       use_message = e.message == 'No such script' ?
-                    'Schema not defined' : 'Problem with schema: ' + e.message
-      raise "Schema error for #{sname}/#{node} "\
-            "attrs=#{attrs.join(',')}: #{use_message}"
+                      'Schema not defined' : 'Problem with schema: ' + e.message
+      raise "Schema error for #{sname}/#{node} attrs=#{attrs}: #{use_message}"
     end
   end
 
@@ -39,6 +36,7 @@ class Marty::RpcController < ActionController::Base
     return msg unless m
     "disallowed parameter '#{m[1]}' of type #{m[2]} was received"
   end
+
   def _get_errors(errs)
     if errs.is_a?(Array)
       errs.map { |err| _get_errors(err) }
@@ -54,29 +52,26 @@ class Marty::RpcController < ActionController::Base
       end
     end
   end
+
   def get_errors(errs)
     _get_errors(errs).flatten
   end
 
   def do_eval(sname, tag, node, attrs, params, api_key, background)
-    return {error: "Malformed attrs"} unless attrs.is_a?(String)
-
-    attrs_atom = !attrs.start_with?('[')
-    start_time = Time.zone.now
-
-    if attrs_atom
-      attrs = [attrs]
-    else
-      begin
-        attrs = ActiveSupport::JSON.decode(attrs)
-      rescue JSON::ParserError => e
-        return {error: "Malformed attrs"}
-      end
-    end
+    # FIXME: small patch to allow for single attr array
+    attrs = ActiveSupport::JSON.decode(attrs) rescue attrs
 
     return {error: "Malformed attrs"} unless
-      attrs.is_a?(Array) && attrs.all? {|x| x =~ /\A[a-z][a-zA-Z0-9_]*\z/}
+      attrs.is_a?(String) || (attrs.is_a?(Array) && attrs.count == 1)
 
+    # if attrs is a single attr array, remember to return as an array
+    if attrs.is_a? (Array)
+      attrs = attrs[0]
+      ret_arr = true
+    end
+
+    start_time = Time.zone.now
+    return {error: "Malformed attrs"} unless attrs =~ /\A[a-z][a-zA-Z0-9_]*\z/
     return {error: "Bad params"} unless params.is_a?(String)
 
     begin
@@ -87,44 +82,34 @@ class Marty::RpcController < ActionController::Base
     end
 
     return {error: "Malformed params"} unless params.is_a?(Hash)
+    need_log,
+    need_input_validate,
+    need_output_validate,
+    need_strict_validate = Marty::ApiConfig.lookup(sname, node, attrs)
+    opt                  = {validate_schema:   true,
+                            errors_as_objects: true,
+                            version:           Marty::JsonSchema::RAW_URI }
+    to_append            = {"\$schema" => Marty::JsonSchema::RAW_URI}
+    validation_error     = nil
 
-    need_input_validate, need_output_validate, strict_validate, need_log =
-                                                                [], [], [], []
-    Marty::ApiConfig.multi_lookup(sname, node, attrs).each do
-      |attr, log, input_validate, output_validate, strict, id|
-      need_input_validate << attr if input_validate
-      need_output_validate << attr + "_" if output_validate
-      strict_validate << attr if strict
-      need_log << id if log
-    end
-
-    opt = { :validate_schema    => true,
-                :errors_as_objects  => true,
-                :version            => Marty::JsonSchema::RAW_URI }
-    to_append = {"\$schema" => Marty::JsonSchema::RAW_URI}
-
-    validation_error = {}
-    err_count = 0
-    if need_input_validate.present?
+    if need_input_validate
       begin
-        schemas = get_schemas(tag, sname, node, need_input_validate)
+        schema = get_schema(tag, sname, node, attrs)
       rescue => e
         return {error: e.message}
       end
-      schemas.each do |attr, sch|
-        begin
-          er = JSON::Validator.fully_validate(sch.merge(to_append), params, opt)
-        rescue NameError
-          return {error: "Unrecognized PgEnum for attribute #{attr}"}
-        rescue => ex
-          return {error: "#{attr}: #{ex.message}"}
-        end
-
-        validation_error[attr] = get_errors(er) if er.size > 0
-        err_count += er.size
+      begin
+        er = JSON::Validator.
+               fully_validate(schema.merge(to_append), params, opt)
+      rescue NameError
+        return {error: "Unrecognized PgEnum for attribute #{attrs}"}
+      rescue => ex
+        return {error: "#{attrs}: #{ex.message}"}
       end
+      validation_error = get_errors(er) if er.size > 0
     end
-    return {error: "Error(s) validating: #{validation_error}"} if err_count > 0
+    return {error: "Error(s) validating: #{validation_error}"} if
+      validation_error
 
     auth = Marty::ApiAuth.authorized?(sname, api_key)
     return {error: "Permission denied" } unless auth
@@ -145,46 +130,33 @@ class Marty::RpcController < ActionController::Base
         result = engine.background_eval(node, params, attrs)
         return retval = {"job_id" => result.__promise__.id}
       end
+
       res = engine.evaluate(node, attrs, params)
 
-      validation_error = {}
-      err_count = 0
-      if need_output_validate.present?
+      if need_output_validate && !(res.is_a?(Hash) && res['error'])
         begin
-          schemas = get_schemas(tag, sname, node, need_output_validate)
+          schema = get_schema(tag, sname, node, attrs + '_')
         rescue => e
           return {error: e.message}
         end
-        shash = Hash[schemas]
-        pairs = attrs.zip(res)
-        pairs.each do |attr, result|
-          next unless sch = shash[attr+"_"]
-          next if result.is_a?(Hash) && result["error"]
-          begin
-            er = JSON::Validator.fully_validate(sch.merge(to_append), result, opt)
-          rescue NameError
-            return {error: "Unrecognized PgEnum for attribute #{attr}"}
-          rescue => ex
-            return {error: "#{attr}: #{ex.message}"}
-          end
-          validation_error[attr] = er.map{ |e| e[:message] } if er.size > 0
-          err_count += er.size
-        end
-        if err_count > 0
-          res = pairs.map do |attr, result|
-            next result unless shash[attr+"_"]
-            next result unless the_error = validation_error[attr]
 
-            Marty::Logger.error("API #{sname}:#{node}.#{attr}",
-                                {error:  the_error,
-                                 data: result})
-            strict_validate.include?(attr) ?
-              {error: "Error(s) validating: #{the_error}",
-               data: result} : result
-          end
+        begin
+          er = JSON::Validator.fully_validate(schema.merge(to_append), res, opt)
+        rescue NameError
+          return {error: "Unrecognized PgEnum for attribute #{attrs}"}
+        rescue => ex
+          return {error: "#{attrs}: #{ex.message}"}
+        end
+
+        if er.size > 0
+          errors = er.map{|e| e[:message]}
+          Marty::Logger.error("API #{sname}:#{node}.#{attrs}",
+                              {error: errors, data: res})
+          res = need_strict_validate ? {error: "Error(s) validating: #{errors}",
+                                        data: res} : res
         end
       end
-      return retval = (attrs_atom ? res.first : res)
+      return retval = ret_arr ? [res] : res
     rescue => exc
       err_msg = Delorean::Engine.grok_runtime_exception(exc).symbolize_keys
       logger.info "Evaluation error: #{err_msg}"
@@ -195,7 +167,7 @@ class Marty::RpcController < ActionController::Base
                            "#{sname} - #{node}",
                            {script:     sname,
                             node:       node,
-                            attrs:      (attrs_atom ? attrs.first : attrs),
+                            attrs:       (ret_arr ? [attrs] : attrs),
                             input:      orig_params,
                             output:     error ? nil : retval,
                             start_time: start_time,
