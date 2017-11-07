@@ -145,7 +145,7 @@ module Marty
     class Version < Base
       def self.generate
         begin
-          message = `cd #{Rails.root.to_s}; git describe;`.strip
+          message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
         rescue
           message = error("Failed accessing git")
         end
