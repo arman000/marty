@@ -370,7 +370,7 @@ describe Marty::RpcController do
     @p2 = Marty::Posting.do_create("BASE", Date.today + 4.minute, 'a comment')
     @data = [["some data",7,[1,2,3],{foo: "bar", baz: "quz"},5,"string"],
              ["some more data",[1,2,3],5,{foo: "bar", baz: "quz"},5,"string"]]
-    @data_json = [@data].to_json
+    @data_json = @data.to_json
   }
 
   after(:each) do
@@ -388,11 +388,11 @@ describe Marty::RpcController do
            format: :json,
            script: "M1",
            node: "B",
-           attrs: ["e","f"].to_json,
+           attrs: "e",
            tag: t1.name,
            params: { a: 333, d: 5}.to_json,
          }
-    expect(response.body).to eq([4,20].to_json)
+    expect(response.body).to eq(4.to_json)
   end
 
   it "should be able to post background job" do
@@ -401,7 +401,7 @@ describe Marty::RpcController do
            format: :json,
            script: "M1",
            node: "B",
-           attrs: ["e","f"].to_json,
+           attrs: "e",
            tag: t1.name,
            params: { a: 333, d: 5}.to_json,
            background: true,
@@ -412,12 +412,12 @@ describe Marty::RpcController do
 
     promise = Marty::Promise.find_by_id(job_id)
 
-    expect(promise.result).to eq({"e"=>4, "f"=>20})
+    expect(promise.result).to eq({"e"=>4})
 
     Delayed::Worker.delay_jobs = true
   end
 
-  it "should be able to post background job with non-array attrs" do
+  it "should be able to post background job with non-array attr" do
     Delayed::Worker.delay_jobs = false
     post 'evaluate', {
            format: :json,
@@ -444,12 +444,13 @@ describe Marty::RpcController do
            format: :json,
            script: "M1",
            node: "D",
-           attrs: ["out"].to_json,
+           attrs: "out",
            tag: t1.name,
            params: {in: @data}.to_json
          }
     expect(response.body).to eq(@data_json)
   end
+
   # content-type: application/json structures the request a little differently
   # so we also test that
   it "should be able to post (JSON) with complex data" do
@@ -459,155 +460,154 @@ describe Marty::RpcController do
            format: :json,
            script: "M1",
            node: "D",
-           attrs: ["out"].to_json,
+           attrs:"out",
            tag: t1.name,
            params: {in: @data}.to_json
          }
     expect(response.body).to eq(@data_json)
   end
+
   it "should be able to run scripts" do
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      node: "A",
-      attrs: ["a", "b"].to_json,
-      tag: t1.name,
-    }
+          format: :json,
+          script: "M1",
+          node: "A",
+          attrs: "a",
+          tag: t1.name,
+        }
     # puts 'Z'*40, request.inspect
-    expect(response.body).to eq([123.0, 369.0].to_json)
+    expect(response.body).to eq(123.0.to_json)
 
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      node: "A",
-      attrs: ["a", "b"].to_json,
-      params: {"a" => 4.5}.to_json,
-      tag: t1.name,
-    }
-    expect(response.body).to eq([4.5,13.5].to_json)
+          format: :json,
+          script: "M1",
+          node: "A",
+          attrs: "a",
+          params: {"a" => 4.5}.to_json,
+          tag: t1.name,
+        }
+    expect(response.body).to eq(4.5.to_json)
 
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      node: "B",
-      attrs: ["a", "b", "c"].to_json,
-      params: {"a" => 4.5}.to_json,
-      tag: t1.name,
-    }
-    expect(response.body).to eq([4.5, 13.5, 18.0].to_json)
+          format: :json,
+          script: "M1",
+          node: "B",
+          attrs: "a",
+          params: {"a" => 4.5}.to_json,
+          tag: t1.name,
+        }
+    expect(response.body).to eq(4.5.to_json)
 
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      tag: "DEV",
-      node: "AA",
-      attrs: ["a", "b"].to_json,
-      params: {"a" => 3.3}.to_json,
-    }
-    res = ActiveSupport::JSON.decode(response.body).flatten.map{|x| x.round(8)}
-    expect(res).to eq([3.3, 9.9])
+          format: :json,
+          script: "M1",
+          tag: "DEV",
+          node: "AA",
+          attrs: "a",
+          params: {"a" => 3.3}.to_json,
+        }
+    expect(response.body).to eq(3.3.to_json)
   end
 
   it "should be able to use posting name for tags" do
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      node: "A",
-      attrs: ["a", "b"].to_json,
-      tag: p0.name,
-    }
+          format: :json,
+          script: "M1",
+          node: "A",
+          attrs: "a",
+          tag: p0.name,
+        }
     expect(response.body["error"]).to_not be_nil
 
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      node: "A",
-      attrs: ["a", "b"].to_json,
-      params: {"a" => 4.5}.to_json,
-      tag: p1.name,
-    }
-    expect(response.body).to eq([4.5,13.5].to_json)
+          format: :json,
+          script: "M1",
+          node: "A",
+          attrs: "a",
+          params: {"a" => 4.5}.to_json,
+          tag: p1.name,
+        }
+    expect(response.body).to eq(4.5.to_json)
 
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      node: "B",
-      attrs: ["a", "b", "c"].to_json,
-      params: {"a" => 4.5}.to_json,
-      tag: p2.name,
-    }
-    expect(response.body).to eq([4.5, 13.5, 18.0].to_json)
+          format: :json,
+          script: "M1",
+          node: "B",
+          attrs: "a",
+          params: {"a" => 4.5}.to_json,
+          tag: p2.name,
+        }
+    expect(response.body).to eq(4.5.to_json)
 
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      tag: "NOW",
-      node: "AA",
-      attrs: ["a", "b"].to_json,
-      params: {"a" => 3.3}.to_json,
-    }
-    res = ActiveSupport::JSON.decode(response.body).flatten.map{|x| x.round(8)}
-    expect(res).to eq([3.3, 9.9])
+          format: :json,
+          script: "M1",
+          tag: "NOW",
+          node: "AA",
+          attrs: "a",
+          params: {"a" => 3.3}.to_json,
+        }
+    expect(response.body).to eq(3.3.to_json)
   end
 
   it "should be able to run scripts 2" do
     get 'evaluate', {
-      format: :json,
-      script: "M3",
-      node: "C",
-      attrs: ["pc"].to_json,
-    }
+          format: :json,
+          script: "M3",
+          node: "C",
+          attrs: "pc",
+        }
     # puts 'Z'*40, request.inspect
-    expect(response.body).to eq([7].to_json)
+    expect(response.body).to eq(7.to_json)
 
     get 'evaluate', {
-      format: :json,
-      script: "M3",
-      node: "B",
-      attrs: ["pc"].to_json,
-    }
+          format: :json,
+          script: "M3",
+          node: "B",
+          attrs: "pc",
+        }
     # puts 'Z'*40, request.inspect
-    expect(response.body).to eq([9].to_json)
+    expect(response.body).to eq(9.to_json)
 
     get 'evaluate', {
-      format: :json,
-      script: "M3",
-      node: "A",
-      attrs: ["pc"].to_json,
-    }
+          format: :json,
+          script: "M3",
+          node: "A",
+          attrs: "pc",
+        }
     # puts 'Z'*40, request.inspect
     expect(response.body).to match(/"error":"undefined parameter p"/)
   end
 
   it "should be able to handle imports" do
     get 'evaluate', {
-      format: :json,
-      script: "M4",
-      node: "A",
-      attrs: ["a", "c", "d", "pc"].to_json,
-    }
+          format: :json,
+          script: "M4",
+          node: "A",
+          attrs: "a",
+        }
     # puts 'Z'*40, request.inspect
-    expect(response.body).to eq([2,4,13,14].to_json)
+    expect(response.body).to eq(2.to_json)
   end
 
   it "should support CSV" do
     get 'evaluate', {
-      format: :csv,
-      script: "M4",
-      node: "A",
-      attrs: ["a", "c", "d", "pc", "lc"].to_json,
-    }
+          format: :csv,
+          script: "M4",
+          node: "A",
+          attrs: "a",
+        }
     # puts 'Z'*40, request.inspect
-    expect(response.body).to eq("2\r\n4\r\n13\r\n14\r\n14,14\r\n")
+    expect(response.body).to eq("2\r\n")
   end
 
   it "should support CSV (2)" do
     get 'evaluate', {
-      format: :csv,
-      script: "M4",
-      node: "A",
-      attrs: ["result"].to_json,
-    }
+          format: :csv,
+          script: "M4",
+          node: "A",
+          attrs: "result",
+        }
     # puts 'Z'*40, request.inspect
     expect(response.body).to eq("a,b\r\n10,456\r\n789,10\r\n")
   end
@@ -618,15 +618,15 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["b"].to_json
+    attr = "b"
     params = {"a" => 5}.to_json
     get 'evaluate', {
-      format: :csv,
-      script: "M1",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :csv,
+          script: "M1",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
     expect = "Schema error for M1/A attrs=b: Schema not defined\r\n"
     expect(response.body).to eq("error,#{expect}")
   end
@@ -637,20 +637,20 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["b"].to_json
+    attr = "b"
     params = {"a" => 5}.to_json
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :json,
+          script: "M1",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
     expect = "Schema error for M1/A attrs=b: Schema not defined"
-    res_hsh = JSON.parse(response.body)
-    expect(res_hsh.keys.size).to eq(1)
-    expect(res_hsh.keys[0]).to eq("error")
-    expect(res_hsh.values[0]).to eq(expect)
+    res = JSON.parse(response.body)
+    expect(res.keys.size).to eq(1)
+    expect(res.keys[0]).to eq("error")
+    expect(res.values[0]).to eq(expect)
   end
 
   it "returns an error message on missing attributes in schema script" do
@@ -659,15 +659,15 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["h"].to_json
+    attr = "h"
     params = {"f" => 5}.to_json
     get 'evaluate', {
-      format: :csv,
-      script: "M4",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :csv,
+          script: "M4",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
     expect = "Schema error for M4/A attrs=h: Problem with schema"
     expect(response.body).to include("error,#{expect}")
   end
@@ -678,15 +678,15 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["pc"].to_json
+    attr = "pc"
     params = {"p" => 5}.to_json
     get 'evaluate', {
-      format: :csv,
-      script: "M3",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :csv,
+          script: "M3",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
     expect = "Schema error for M3/A attrs=pc: Problem with schema: "\
              "syntax error M3Schemas:2\r\n"
     expect(response.body).to eq("error,#{expect}")
@@ -698,43 +698,16 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["d"].to_json
+    attr = "d"
     params = {"p" => "132"}.to_json
     get 'evaluate', {
-      format: :csv,
-      script: "M4",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
-    expect = '""d""=>[""The property \'#/p\' of type string did not '\
-             'match the following type: integer'
-    expect(response.body).to include(expect)
-  end
-
-  it "returns a validation error when validating multiple attributes" do
-    Marty::ApiConfig.create!(script: "M4",
-                             node: "A",
-                             attr: nil,
-                             logged: false,
-                             input_validated: true,
-                             output_validated: true)
-    attrs = ["d", "g"].to_json
-    params = {"p" => "132", "e" => "55", "f"=>"16"}.to_json
-    get 'evaluate', {
-      format: :csv,
-      script: "M4",
-      node: "A",
-      attrs: attrs,
-      params: params
+          format: :csv,
+          script: "M4",
+          node: "A",
+          attrs: attr,
+          params: params
         }
-    expect = '""d""=>[""The property \'#/p\' of type string did not '\
-             'match the following type: integer'
-    expect(response.body).to include(expect)
-    expect = '""g""=>[""The property \'#/e\' of type string did not '\
-             'match the following type: integer'
-    expect(response.body).to include(expect)
-    expect = 'The property \'#/f\' of type string did not '\
+    expect = '[""The property \'#/p\' of type string did not '\
              'match the following type: integer'
     expect(response.body).to include(expect)
   end
@@ -748,51 +721,24 @@ describe Marty::RpcController do
                                input_validated: true,
                                output_validated: true,
                                strict_validate: true)
-      attrs = ["d", "g", "ii", "result"].to_json
+      attr = "ii"
       params = {"p" => 132, "e" => 55, "f"=>16, "i"=>"string"}.to_json
       get 'evaluate', {
             format: :json,
             script: "M4",
             node: "A",
-            attrs: attrs,
+            attrs: attr,
             params: params
           }
-      res_hash = JSON.parse(response.body)
+      res = JSON.parse(response.body)
       errpart = "of type string did not match the following type: integer"
-      expect(res_hash[0]).to eq(135)
-      expect(res_hash[1]).to eq(291)
-      expect(res_hash[2]["error"]).to include(errpart)
-      expect(res_hash[3]).to eq([{"a"=>132,"b"=>456},
-                                 {"a"=>789,"b"=>132}])
+      expect(res['error']).to include(errpart)
       logs = Marty::Log.all
       expect(logs.count).to eq(1)
       expect(logs[0].details["error"][0]).to include(errpart)
     end
-    it "validates output 2" do
-      # not all attrs being validated
-      Marty::ApiConfig.create!(script: "M4",
-                               node: "A",
-                               attr: "result",
-                               logged: false,
-                               input_validated: true,
-                               output_validated: true)
-      attrs = ["d", "g", "result"].to_json
-      params = {"p" => 132, "e" => 55, "f"=>16}.to_json
-      get 'evaluate', {
-            format: :json,
-            script: "M4",
-            node: "A",
-            attrs: attrs,
-            params: params
-          }
-      res_hash = JSON.parse(response.body)
-      expect(res_hash).to eq([135,291,[{"a"=>132,"b"=>456},
-                                       {"a"=>789,"b"=>132}]])
-      logs = Marty::Log.all
-      expect(logs.count).to eq(0)
-    end
 
-    it "validates output (bad type, with strict/non strict errors)" do
+    it "validates output (bad type, with strict errors)" do
       Marty::ApiConfig.create!(script: "M5",
                                node: "A",
                                attr: nil,
@@ -800,6 +746,35 @@ describe Marty::RpcController do
                                input_validated: true,
                                output_validated: true,
                                strict_validate: true)
+
+      attr = "result"
+      params = {"f" => "Banana"}.to_json
+      get 'evaluate', {
+            format: :json,
+            script: "M5",
+            node: "A",
+            attrs: attr,
+            params: params
+          }
+      res = JSON.parse(response.body)
+      expect(res).to include("error")
+      expect1 = "The property '#/0/b' of type integer did not match the "\
+                "following type: string"
+      expect2 = "The property '#/0/a' of type string did not match the "\
+                "following type: integer"
+      expect(res["error"]).to include(expect1)
+      expect(res["error"]).to include(expect2)
+
+      logs = Marty::Log.all
+      expect(logs.count).to eq(1)
+      expect(logs[0].message).to eq("API M5:A.result")
+      expect(logs[0].details["error"].join).to include(expect1)
+      expect(logs[0].details["error"].join).to include(expect2)
+      expect(logs[0].details["data"]).to eq([{"a"=>"str", "b"=>456},
+                                             {"a"=>789, "b"=>"str"}])
+    end
+
+    it "validates output (bad type, with non strict errors)" do
       Marty::ApiConfig.create!(script: "M5",
                                node: "A",
                                attr: "result2",
@@ -807,34 +782,26 @@ describe Marty::RpcController do
                                input_validated: true,
                                output_validated: true,
                                strict_validate: false)
-      attrs = ["result", "result2"].to_json
+      attr = "result2"
       params = {"f" => "Banana"}.to_json
       get 'evaluate', {
             format: :json,
             script: "M5",
             node: "A",
-            attrs: attrs,
+            attrs: attr,
             params: params
           }
-      res_hash = JSON.parse(response.body)
-      expect(res_hash[0]).to include("error")
       expect1 = "The property '#/0/b' of type integer did not match the "\
-               "following type: string"
+                "following type: string"
       expect2 = "The property '#/0/a' of type string did not match the "\
                 "following type: integer"
-      expect(res_hash[0]["error"]).to include(expect1)
-      expect(res_hash[0]["error"]).to include(expect2)
-
       logs = Marty::Log.all
-      expect(logs.count).to eq(2)
-      expect(logs[0].message).to eq("API M5:A.result")
-      expect(logs[1].message).to eq("API M5:A.result2")
-      logs.each do |ml|
-        expect(ml.details["error"].join).to include(expect1)
-        expect(ml.details["error"].join).to include(expect2)
-        expect(ml.details["data"]).to eq([{"a"=>"str", "b"=>456},
-                                          {"a"=>789, "b"=>"str"}])
-      end
+      expect(logs.count).to eq(1)
+      expect(logs[0].message).to eq("API M5:A.result2")
+      expect(logs[0].details["error"].join).to include(expect1)
+      expect(logs[0].details["error"].join).to include(expect2)
+      expect(logs[0].details["data"]).to eq([{"a"=>"str", "b"=>456},
+                                             {"a"=>789, "b"=>"str"}])
     end
 
     it "validates output (missing item)" do
@@ -845,21 +812,22 @@ describe Marty::RpcController do
                                input_validated: true,
                                output_validated: true,
                                strict_validate: true)
-      attrs = ["result"].to_json
+      attr = "result"
       params = {"b" => 122}.to_json
       get 'evaluate', {
             format: :json,
             script: "M9",
             node: "A",
-            attrs: attrs,
+            attrs: attr,
             params: params
           }
-      res_hash = JSON.parse(response.body)
-      expect(res_hash[0]).to include("error")
+
+      res = JSON.parse(response.body)
+      expect(res).to include("error")
       expect1 = "The property '#/0' did not contain a required property of 'c'"
       expect2 = "The property '#/1' did not contain a required property of 'c'"
-      expect(res_hash[0]["error"]).to include(expect1)
-      expect(res_hash[0]["error"]).to include(expect2)
+      expect(res["error"]).to include(expect1)
+      expect(res["error"]).to include(expect2)
 
       logs = Marty::Log.all
       expect(logs.count).to eq(1)
@@ -877,15 +845,15 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["lc"].to_json
+    attr = "lc"
     params = {"p" => 5}.to_json
     get 'evaluate', {
-      format: :csv,
-      script: "M4",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :csv,
+          script: "M4",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
     expect(response.body).to eq("9\r\n9\r\n")
   end
 
@@ -895,21 +863,21 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["res"].to_json
+    attr = "res"
     params = {"b" => 5.22}.to_json
     get 'evaluate', {
-      format: :json,
-      script: "M6",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :json,
+          script: "M6",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
     expect = 'res: The property \'#/properties/b/type\' of type string '\
              'did not match one or more of the required schemas'
-    res_hsh = JSON.parse(response.body)
-    expect(res_hsh.keys.size).to eq(1)
-    expect(res_hsh.keys[0]).to eq("error")
-    expect(res_hsh.values[0]).to eq(expect)
+    res = JSON.parse(response.body)
+    expect(res.keys.size).to eq(1)
+    expect(res.keys[0]).to eq("error")
+    expect(res.values[0]).to eq(expect)
   end
 
 
@@ -926,15 +894,15 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["res"].to_json
+    attr = "res"
     params = {"f" => "Banana"}.to_json
     get 'evaluate', {
-      format: :csv,
-      script: "M5",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :csv,
+          script: "M5",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
     expect(response.body).to eq("1\r\n")
   end
 
@@ -944,15 +912,15 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["res"].to_json
+    attr = "res"
     params = {"f" => "Beans"}.to_json
     get 'evaluate', {
-      format: :csv,
-      script: "M5",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :csv,
+          script: "M5",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
     expect = "property '#/f' value 'Beans' not contained in FruitsEnum"
     expect(response.body).to include(expect)
   end
@@ -963,20 +931,20 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: false,
                              input_validated: true)
-    attrs = ["res"].to_json
+    attr = "res"
     params = {"b" => "MemberOfANonExistantEnum"}.to_json
     get 'evaluate', {
-      format: :json,
-      script: "M7",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :json,
+          script: "M7",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
     expect = "property '#/b': 'NonExistantEnum' is not a pg_enum"
-    res_hsh = JSON.parse(response.body)
-    expect(res_hsh.keys.size).to eq(1)
-    expect(res_hsh.keys[0]).to eq("error")
-    expect(res_hsh.values[0]).to include(expect)
+    res = JSON.parse(response.body)
+    expect(res.keys.size).to eq(1)
+    expect(res.keys[0]).to eq("error")
+    expect(res.values[0]).to include(expect)
   end
 
   it "validates pgenum with capitalization issues" do
@@ -987,15 +955,15 @@ describe Marty::RpcController do
                              input_validated: true)
     skip "pending until a solution is found that handles "\
          "autoload issues involving constantize"
-    attrs = ["res"].to_json
+    attr = "res"
     params = {"b" => "Annual"}.to_json
     get 'evaluate', {
-      format: :json,
-      script: "M8",
-      node: "A",
-      attrs: attrs,
-      params: params
-    }
+          format: :json,
+          script: "M8",
+          node: "A",
+          attrs: attr,
+          params: params
+        }
   end
 
   it "should log good req" do
@@ -1003,23 +971,23 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: true)
-    attrs = ["lc"]
+    attr = "lc"
     params = {"p" => 5}
     get 'evaluate', {
-      format: :csv,
-      script: "M3",
-      node: "A",
-      attrs: attrs.to_json,
-      params: params.to_json
-    }
+          format: :csv,
+          script: "M3",
+          node: "A",
+          attrs: attr,
+          params: params.to_json
+        }
     expect(response.body).to eq("9\r\n9\r\n")
     log = Marty::Log.order(id: :desc).first
 
     expect(log.details['script']).to eq("M3")
     expect(log.details['node']).to eq("A")
-    expect(log.details['attrs']).to eq(attrs)
+    expect(log.details['attrs']).to eq(attr)
     expect(log.details['input']).to eq(params)
-    expect(log.details['output']).to eq([[9,9]])
+    expect(log.details['output']).to eq([9, 9])
     expect(log.details['remote_ip']).to eq("0.0.0.0")
     expect(log.details['error']).to eq(nil)
 
@@ -1030,16 +998,16 @@ describe Marty::RpcController do
                              node: "A",
                              attr: nil,
                              logged: true)
-    attrs = ["lc"]
+    attr = "lc"
     params = {"p" => 5}
     get 'evaluate', {
-      format: :csv,
-      script: "M3",
-      node: "A",
-      attrs: attrs.to_json,
-      params: params.to_json,
-      background: true
-    }
+          format: :csv,
+          script: "M3",
+          node: "A",
+          attrs: attr,
+          params: params.to_json,
+          background: true
+        }
     expect(response.body).to match(/job_id,/)
     log = Marty::Log.order(id: :desc).first
 
@@ -1047,12 +1015,12 @@ describe Marty::RpcController do
 
   it "should not log if it should not log" do
     get 'evaluate', {
-      format: :json,
-      script: "M1",
-      node: "A",
-      attrs: ["a", "b"].to_json,
-      tag: t1.name,
-    }
+          format: :json,
+          script: "M1",
+          node: "A",
+          attrs: "a",
+          tag: t1.name,
+        }
     expect(Marty::Log.count).to eq(0)
   end
 
@@ -1063,12 +1031,12 @@ describe Marty::RpcController do
                              logged: true)
     params = {"p" => 5}
     get 'evaluate', {
-      format: :csv,
-      script: "M3",
-      node: "A",
-      attrs: "lc",
-      params: params.to_json
-    }
+          format: :csv,
+          script: "M3",
+          node: "A",
+          attrs: "lc",
+          params: params.to_json
+        }
     expect(response.body).to eq("9\r\n9\r\n")
     log = Marty::Log.order(id: :desc).first
 
@@ -1089,12 +1057,12 @@ describe Marty::RpcController do
     api.save!
 
     get 'evaluate', {
-      format: :json,
-      script: "M3",
-      node: "C",
-      attrs: ["pc"].to_json,
-    }
-    expect(response.body).to eq([7].to_json)
+          format: :json,
+          script: "M3",
+          node: "C",
+          attrs: "pc",
+        }
+    expect(response.body).to eq(7.to_json)
   end
 
   it "should support api authorization - api_key required but missing" do
@@ -1104,11 +1072,11 @@ describe Marty::RpcController do
     api.save!
 
     get 'evaluate', {
-      format: :json,
-      script: "M3",
-      node: "C",
-      attrs: ["pc"].to_json,
-    }
+          format: :json,
+          script: "M3",
+          node: "C",
+          attrs: "pc",
+        }
     expect(response.body).to match(/"error":"Permission denied"/)
   end
 
@@ -1121,21 +1089,21 @@ describe Marty::RpcController do
     apic = Marty::ApiConfig.create!(script: 'M3',
                                     logged: true)
 
-    attrs = ["pc"]
+    attr = "pc"
     get 'evaluate', {
-      format: :json,
-      script: "M3",
-      node: "C",
-      attrs: attrs.to_json,
-      api_key: api.api_key,
-    }
-    expect(response.body).to eq([7].to_json)
+          format: :json,
+          script: "M3",
+          node: "C",
+          attrs: attr,
+          api_key: api.api_key,
+        }
+    expect(response.body).to eq(7.to_json)
     log = Marty::Log.order(id: :desc).first
 
     expect(log.details['script']).to eq("M3")
     expect(log.details['node']).to eq("C")
-    expect(log.details['attrs']).to eq(attrs)
-    expect(log.details['output']).to eq([7])
+    expect(log.details['attrs']).to eq(attr)
+    expect(log.details['output']).to eq(7)
     expect(log.details['remote_ip']).to eq("0.0.0.0")
     expect(log.details['auth_name']).to eq("TestApp")
   end
@@ -1147,12 +1115,12 @@ describe Marty::RpcController do
     api.save!
 
     get 'evaluate', {
-      format: :json,
-      script: "M3",
-      node: "C",
-      attrs: ["pc"].to_json,
-      api_key: api.api_key + 'x',
-    }
+          format: :json,
+          script: "M3",
+          node: "C",
+          attrs: "pc",
+          api_key: api.api_key + 'x',
+        }
     expect(response.body).to match(/"error":"Permission denied"/)
   end
 
@@ -1167,21 +1135,21 @@ describe Marty::RpcController do
                                strict_validate: false)
     end
     def do_call(req1, req2, req3, optionals={})
-      attrs = ["v1"].to_json
+      attr = "v1"
       params = optionals.merge({"req1" => req1,
                                 "req2"=> req2,
                                 "req3"=> req3}).to_json
 
       # to see what the schema helpers generated:
       # engine = Marty::ScriptSet.new(nil).get_engine("M10Schemas")
-      # x=engine.evaluate("A", ["v1"],  {})
+      # x=engine.evaluate("A", "v1",  {})
       # binding.pry
 
       get 'evaluate', {
             format: :json,
             script: "M10",
             node: "A",
-            attrs: attrs,
+            attrs: attr,
             params: params
           }
 
@@ -1223,17 +1191,15 @@ describe Marty::RpcController do
         ].each do
           |a, exp|
           do_call(*a)
-          res_hash = JSON.parse(response.body)
-          got = res_hash.is_a?(Array) ? res_hash[0] : res_hash["error"]
-
-          expect(got).to include(exp)
+          res = JSON.parse(response.body)
+          expect(res.is_a?(Hash) ? res['error'] : res).to include(exp)
         end
       end
     end
   end
 
   context "error handling" do
-    it 'returns bad attrs if attrs is not a string' do
+    it 'returns bad attrs if attr is not a string' do
       get :evaluate, format: :json, attrs: 0
       expect(response.body).to match(/"error":"Malformed attrs"/)
     end
@@ -1243,7 +1209,7 @@ describe Marty::RpcController do
       expect(response.body).to match(/"error":"Malformed attrs"/)
     end
 
-    it 'returns malformed attrs if attrs is not an array of strings' do
+    it 'returns malformed attrs if attr is not an array of strings' do
       get :evaluate, format: :json, attrs: "{}"
       expect(response.body).to match(/"error":"Malformed attrs"/)
 
@@ -1252,29 +1218,29 @@ describe Marty::RpcController do
     end
 
     it 'returns bad params if params is not a string' do
-      get(:evaluate, format: :json, params: 0)
+      get :evaluate, format: :json,  attrs: "e", params: 0
       expect(response.body).to match(/"error":"Bad params"/)
     end
 
     it 'returns malformed params for improperly formatted json' do
-      get :evaluate, format: :json, params: "{"
+      get :evaluate, format: :json, attrs: "e", params: "{"
       expect(response.body).to match(/"error":"Malformed params"/)
     end
 
     it 'returns malformed params if params is not a hash' do
-      get :evaluate, format: :json, params: "[0]"
+      get :evaluate, format: :json, attrs: "e", params: "[0]"
       expect(response.body).to match(/"error":"Malformed params"/)
     end
 
     it 'returns engine/tag lookup error if script not found' do
-      get :evaluate, format: :json, script: 'M1', tag: 'invalid'
+      get :evaluate, format: :json, script: 'M1', attrs: "e", tag: 'invalid'
       expect(response.body).to match(/"error":"Can't get engine:/)
-      get :evaluate, format: :json, script: 'Invalid', tag: t1.name
+      get :evaluate, format: :json, script: 'Invalid', attrs: "e", tag: t1.name
       expect(response.body).to match(/"error":"Can't get engine:/)
     end
 
     it 'returns the script runtime error (no node specified)' do
-      get :evaluate, format: :json, script: 'M1', tag: t1.name
+      get :evaluate, format: :json, script: 'M1', attrs: "e", tag: t1.name
       expect(response.body).to match(/"error":"bad node/)
     end
   end
