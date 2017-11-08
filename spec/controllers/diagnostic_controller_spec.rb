@@ -13,10 +13,12 @@ module Marty
     end
 
     def version
-      {"Marty"    => Marty::VERSION,
-       "Delorean" => Delorean::VERSION,
-       "Mcfly"    => Mcfly::VERSION,
-       "Git"      => git,}
+      {
+        "Marty"    => Marty::VERSION,
+        "Delorean" => Delorean::VERSION,
+        "Mcfly"    => Mcfly::VERSION,
+        "Git"      => git,
+      }
     end
 
     def environment
