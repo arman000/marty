@@ -20,14 +20,14 @@ class Marty::RpcController < ActionController::Base
 
   private
   # FIXME: move to (probably) agrim's schema code in lib
-  def get_schema(tag, sname, node, attrs)
+  def get_schema(tag, sname, node, attr)
     begin
       Marty::ScriptSet.new(tag).get_engine(sname+'Schemas').
-        evaluate(node, attrs, {})
+        evaluate(node, attr, {})
     rescue => e
       use_message = e.message == 'No such script' ?
                       'Schema not defined' : 'Problem with schema: ' + e.message
-      raise "Schema error for #{sname}/#{node} attrs=#{attrs}: #{use_message}"
+      raise "Schema error for #{sname}/#{node} attrs=#{attr}: #{use_message}"
     end
   end
 
@@ -57,21 +57,21 @@ class Marty::RpcController < ActionController::Base
     _get_errors(errs).flatten
   end
 
-  def do_eval(sname, tag, node, attrs, params, api_key, background)
+  def do_eval(sname, tag, node, attr, params, api_key, background)
     # FIXME: small patch to allow for single attr array
-    attrs = ActiveSupport::JSON.decode(attrs) rescue attrs
+    attr = ActiveSupport::JSON.decode(attr) rescue attr
 
     return {error: "Malformed attrs"} unless
-      attrs.is_a?(String) || (attrs.is_a?(Array) && attrs.count == 1)
+      attr.is_a?(String) || (attr.is_a?(Array) && attr.count == 1)
 
-    # if attrs is a single attr array, remember to return as an array
-    if attrs.is_a? (Array)
-      attrs = attrs[0]
+    # if attr is a single attr array, remember to return as an array
+    if attr.is_a? Array
+      attr = attr[0]
       ret_arr = true
     end
 
     start_time = Time.zone.now
-    return {error: "Malformed attrs"} unless attrs =~ /\A[a-z][a-zA-Z0-9_]*\z/
+    return {error: "Malformed attrs"} unless attr =~ /\A[a-z][a-zA-Z0-9_]*\z/
     return {error: "Bad params"} unless params.is_a?(String)
 
     begin
@@ -85,7 +85,7 @@ class Marty::RpcController < ActionController::Base
     need_log,
     need_input_validate,
     need_output_validate,
-    need_strict_validate = Marty::ApiConfig.lookup(sname, node, attrs)
+    need_strict_validate = Marty::ApiConfig.lookup(sname, node, attr)
     opt                  = {validate_schema:   true,
                             errors_as_objects: true,
                             version:           Marty::JsonSchema::RAW_URI }
@@ -94,7 +94,7 @@ class Marty::RpcController < ActionController::Base
 
     if need_input_validate
       begin
-        schema = get_schema(tag, sname, node, attrs)
+        schema = get_schema(tag, sname, node, attr)
       rescue => e
         return {error: e.message}
       end
@@ -102,9 +102,9 @@ class Marty::RpcController < ActionController::Base
         er = JSON::Validator.
                fully_validate(schema.merge(to_append), params, opt)
       rescue NameError
-        return {error: "Unrecognized PgEnum for attribute #{attrs}"}
+        return {error: "Unrecognized PgEnum for attribute #{attr}"}
       rescue => ex
-        return {error: "#{attrs}: #{ex.message}"}
+        return {error: "#{attr}: #{ex.message}"}
       end
       validation_error = get_errors(er) if er.size > 0
     end
@@ -127,15 +127,15 @@ class Marty::RpcController < ActionController::Base
 
     begin
       if background
-        result = engine.background_eval(node, params, attrs)
+        result = engine.background_eval(node, params, attr)
         return retval = {"job_id" => result.__promise__.id}
       end
 
-      res = engine.evaluate(node, attrs, params)
+      res = engine.evaluate(node, attr, params)
 
       if need_output_validate && !(res.is_a?(Hash) && res['error'])
         begin
-          schema = get_schema(tag, sname, node, attrs + '_')
+          schema = get_schema(tag, sname, node, attr + '_')
         rescue => e
           return {error: e.message}
         end
@@ -143,14 +143,14 @@ class Marty::RpcController < ActionController::Base
         begin
           er = JSON::Validator.fully_validate(schema.merge(to_append), res, opt)
         rescue NameError
-          return {error: "Unrecognized PgEnum for attribute #{attrs}"}
+          return {error: "Unrecognized PgEnum for attribute #{attr}"}
         rescue => ex
-          return {error: "#{attrs}: #{ex.message}"}
+          return {error: "#{attr}: #{ex.message}"}
         end
 
         if er.size > 0
           errors = er.map{|e| e[:message]}
-          Marty::Logger.error("API #{sname}:#{node}.#{attrs}",
+          Marty::Logger.error("API #{sname}:#{node}.#{attr}",
                               {error: errors, data: res})
           res = need_strict_validate ? {error: "Error(s) validating: #{errors}",
                                         data: res} : res
@@ -167,7 +167,7 @@ class Marty::RpcController < ActionController::Base
                            "#{sname} - #{node}",
                            {script:     sname,
                             node:       node,
-                            attrs:       (ret_arr ? [attrs] : attrs),
+                            attrs:       (ret_arr ? [attr] : attr),
                             input:      orig_params,
                             output:     error ? nil : retval,
                             start_time: start_time,
