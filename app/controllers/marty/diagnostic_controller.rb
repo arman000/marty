@@ -58,6 +58,11 @@ module Marty
          end.sum
       end
 
+      def self.find_failures data
+        data.each_with_object({}){
+          |(k,v), h| h[k] = v.include?('Failure') ? 'F' : 'P'}
+      end
+
       def self.errors data
         data.keys.count{|n| is_failure?(data[n])}
       end
@@ -143,7 +148,7 @@ module Marty
     #
     ############################################################################
     class Version < Base
-      def self.get_versions
+      def self.generate
         begin
           message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
         rescue
@@ -155,10 +160,6 @@ module Marty
           'Mcfly'    => Mcfly::VERSION,
           'Git'      => message,
         }
-      end
-
-      def self.generate
-        get_versions
       end
     end
 
@@ -225,7 +226,7 @@ module Marty
     class Env < Base
       def self.filter_env filter=''
         ENV.sort.each_with_object({}){|(k,v),h|
-          to_block = ['PASSWORD', 'SECRET', 'DEBUG']
+          to_block = ['PASSWORD', 'SECRET', 'DEBUG', 'SCRIPT_URI', 'SCRIPT_URL']
           h[k] = v if to_block.all?{|b| !k.include?(b)} && k.include?(filter)}
       end
 
@@ -235,8 +236,7 @@ module Marty
 
       def self.aggregate
         envs = get_nodal_diags(name.demodulize)
-        return package({}) unless diff(envs)
-        envs
+        diff(envs) ? envs : package({})
       end
     end
 
