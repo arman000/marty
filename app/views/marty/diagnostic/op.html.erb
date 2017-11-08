@@ -50,8 +50,9 @@
     </style>
   </head>
   <body>
-  <div style="text-align:center">
-    <h1><%=Rails.application.class.parent_name%> Diagnostic</h1>
+    <div style="text-align:center">
+      <h1><%=Rails.application.class.parent_name%> Diagnostic</h1>
+      <h3><i><%= DateTime.now %></i></h3>
     <%== @result %>
   </div>
 </body>

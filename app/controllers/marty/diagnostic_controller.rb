@@ -143,18 +143,22 @@ module Marty
     #
     ############################################################################
     class Version < Base
-      def self.generate
+      def self.get_versions
         begin
           message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
         rescue
           message = error("Failed accessing git")
         end
         {
-          'Git'      => message,
           'Marty'    => Marty::VERSION,
           'Delorean' => Delorean::VERSION,
-          'Mcfly'    => Mcfly::VERSION
+          'Mcfly'    => Mcfly::VERSION,
+          'Git'      => message,
         }
+      end
+
+      def self.generate
+        get_versions
       end
     end
 
@@ -216,9 +220,23 @@ module Marty
                            " - AWS: [#{a_nodes.join(', ')}]")
         {"PG/AWS" => message}
       end
+    end
+
+    class Env < Base
+      def self.filter_env filter=''
+        ENV.sort.each_with_object({}){|(k,v),h|
+          to_block = ['PASSWORD', 'SECRET', 'DEBUG']
+          h[k] = v if to_block.all?{|b| !k.include?(b)} && k.include?(filter)}
+      end
+
+      def self.generate
+        filter_env
+      end
 
       def self.aggregate
-        {'local' => generate}
+        envs = get_nodal_diags(name.demodulize)
+        return package({}) unless diff(envs)
+        envs
       end
     end
 
