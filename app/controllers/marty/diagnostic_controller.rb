@@ -94,9 +94,12 @@ module Marty
                 <% data.each do |node, result| %>
                     <table>
                     <% issues = ('error' if inconsistent) %>
-                    <th class="<%=issues%>"><%=inconsistent ? node :
-                                             '<small>consistent</small>'%></th>
-                    <th class="<%=issues%>"></th>
+                    <th colspan="2" class="<%=issues%>">
+                      <small>
+                        <%=inconsistent ? node :
+                           (type == 'local' ? 'local' : 'consistent') %>
+                      </small>
+                    </th>
                     <% result.each do |name, value| %>
                       <tr class="<%=is_failure?(value) ? 'failed' :
                                     'passed' %>">
