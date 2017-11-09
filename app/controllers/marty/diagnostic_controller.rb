@@ -58,6 +58,11 @@ module Marty
          end.sum
       end
 
+      def self.find_failures data
+        data.each_with_object({}){
+          |(k,v), h| h[k] = v.include?('Failure') ? 'F' : 'P'}
+      end
+
       def self.errors data
         data.keys.count{|n| is_failure?(data[n])}
       end
@@ -89,9 +94,12 @@ module Marty
                 <% data.each do |node, result| %>
                     <table>
                     <% issues = ('error' if inconsistent) %>
-                    <th class="<%=issues%>"><%=inconsistent ? node :
-                                             '<small>consistent</small>'%></th>
-                    <th class="<%=issues%>"></th>
+                    <th colspan="2" class="<%=issues%>">
+                      <small>
+                        <%=inconsistent ? node :
+                           (type == 'local' ? 'local' : 'consistent') %>
+                      </small>
+                    </th>
                     <% result.each do |name, value| %>
                       <tr class="<%=is_failure?(value) ? 'failed' :
                                     'passed' %>">
@@ -150,10 +158,10 @@ module Marty
           message = error("Failed accessing git")
         end
         {
-          'Git'      => message,
           'Marty'    => Marty::VERSION,
           'Delorean' => Delorean::VERSION,
-          'Mcfly'    => Mcfly::VERSION
+          'Mcfly'    => Mcfly::VERSION,
+          'Git'      => message,
         }
       end
     end
@@ -216,9 +224,31 @@ module Marty
                            " - AWS: [#{a_nodes.join(', ')}]")
         {"PG/AWS" => message}
       end
+    end
+
+    class Env < Base
+      def self.filter_env filter=''
+        env = ENV.clone
+
+        # obfuscate SECRET_KEY_BASE for comparison
+        env['SECRET_KEY_BASE'] = env['SECRET_KEY_BASE'][0,4] if
+          env['SECRET_KEY_BASE']
+
+        # remove SCRIPT_URI, SCRIPT_URL as calling node differs
+        ['SCRIPT_URI', 'SCRIPT_URL'].each{|k| env.delete(k)}
+
+        to_block = ['PASSWORD', 'DEBUG']
+        env.sort.each_with_object({}){|(k,v),h|
+          h[k] = v if to_block.all?{|b| !k.include?(b)} && k.include?(filter)}
+      end
+
+      def self.generate
+        filter_env
+      end
 
       def self.aggregate
-        {'local' => generate}
+        envs = get_nodal_diags(name.demodulize)
+        diff(envs) ? envs : package({})
       end
     end
 

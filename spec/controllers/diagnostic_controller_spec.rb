@@ -4,11 +4,21 @@ module Marty
     before(:each) { @routes = Marty::Engine.routes }
     let(:json_response) { JSON.parse(response.body) }
 
+    def git
+      begin
+        message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
+      rescue
+        message = error("Failed accessing git")
+      end
+    end
+
     def version
-      {"Git"      => "",
-       "Marty"    => Marty::VERSION,
-       "Delorean" => Delorean::VERSION,
-       "Mcfly"    => Mcfly::VERSION}
+      {
+        "Marty"    => Marty::VERSION,
+        "Delorean" => Delorean::VERSION,
+        "Mcfly"    => Mcfly::VERSION,
+        "Git"      => git,
+      }
     end
 
     def environment
@@ -30,12 +40,7 @@ module Marty
       <h3>Version</h3>
       <div class="wrapper">
       <table>
-        <th class=""><small>consistent</small></th>
-        <th class=""></th>
-        <tr class="passed">
-          <td>Git</td>
-          <td class="overflow"></td>
-        </tr>
+        <th colspan="2" class=""><small>consistent</small></th>
         <tr class="passed">
           <td>Marty</td>
           <td class="overflow">#{Marty::VERSION}</td>
@@ -47,6 +52,10 @@ module Marty
         <tr class="passed">
           <td>Mcfly</td>
           <td class="overflow">#{Mcfly::VERSION}</td>
+        </tr>
+        <tr class="passed">
+          <td>Git</td>
+          <td class="overflow">#{git}</td>
         </tr>
       </table>
       </div>
@@ -59,12 +68,7 @@ module Marty
       <h3 class="error">Issues Detected </h3>
       <div class="wrapper">
       <table>
-        <th class="error">node1</th>
-        <th class="error"></th>
-        <tr class="passed">
-          <td>Git</td>
-          <td class="overflow"></td>
-        </tr>
+        <th colspan="2" class="error"><small>node1</small></th>
         <tr class="passed">
           <td>Marty</td>
           <td class="overflow">#{Marty::VERSION}</td>
@@ -77,14 +81,13 @@ module Marty
           <td>Mcfly</td>
           <td class="overflow">#{Mcfly::VERSION}</td>
         </tr>
-      </table>
-      <table>
-        <th class="error">node2</th>
-        <th class="error"></th>
         <tr class="passed">
           <td>Git</td>
-          <td class="overflow"></td>
+          <td class="overflow">#{git}</td>
         </tr>
+      </table>
+      <table>
+        <th colspan="2" class="error"><small>node2</small></th>
         <tr class="passed">
           <td>Marty</td>
           <td class="overflow">#{val}</td>
@@ -96,6 +99,10 @@ module Marty
         <tr class="passed">
           <td>Mcfly</td>
           <td class="overflow">#{Mcfly::VERSION}</td>
+        </tr>
+        <tr class="passed">
+          <td>Git</td>
+          <td class="overflow">#{git}</td>
         </tr>
       </table>
       </div>

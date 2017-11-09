@@ -20,12 +20,13 @@
       th { padding: 9px;
            border: none;
            background-color: #d6d6d6 }
-      td { padding: 9px;
-      border: none;
-      }
+      td { text-align: left;
+           padding: 9px;
+         }
       th.error  { background-color: #ff5555;
                   color: #ffffff;
       }
+      tr { text-align: center;}
       tr.passed { background-color: #d0e9c6 }
       tr.failed { background-color: #ff5555;
                   color: #ffffff
@@ -50,8 +51,9 @@
     </style>
   </head>
   <body>
-  <div style="text-align:center">
-    <h1><%=Rails.application.class.parent_name%> Diagnostic</h1>
+    <div style="text-align:center">
+      <h1><%=Rails.application.class.parent_name%> Diagnostic</h1>
+      <h3><i><%= DateTime.now %></i></h3>
     <%== @result %>
   </div>
 </body>
