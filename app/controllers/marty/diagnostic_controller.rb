@@ -228,8 +228,17 @@ module Marty
 
     class Env < Base
       def self.filter_env filter=''
-        ENV.sort.each_with_object({}){|(k,v),h|
-          to_block = ['PASSWORD', 'SECRET', 'DEBUG', 'SCRIPT_URI', 'SCRIPT_URL']
+        env = ENV.clone
+
+        # obfuscate SECRET_KEY_BASE for comparison
+        env['SECRET_KEY_BASE'] = env['SECRET_KEY_BASE'][0,4] if
+          env['SECRET_KEY_BASE']
+
+        # remove SCRIPT_URI, SCRIPT_URL as calling node differs
+        ['SCRIPT_URI', 'SCRIPT_URL'].each{|k| env.delete(k)}
+
+        to_block = ['PASSWORD', 'DEBUG']
+        env.sort.each_with_object({}){|(k,v),h|
           h[k] = v if to_block.all?{|b| !k.include?(b)} && k.include?(filter)}
       end
 

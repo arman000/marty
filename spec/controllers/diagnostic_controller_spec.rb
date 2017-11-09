@@ -40,8 +40,7 @@ module Marty
       <h3>Version</h3>
       <div class="wrapper">
       <table>
-        <th class=""><small>consistent</small></th>
-        <th class=""></th>
+        <th colspan="2" class=""><small>consistent</small></th>
         <tr class="passed">
           <td>Marty</td>
           <td class="overflow">#{Marty::VERSION}</td>
@@ -69,8 +68,7 @@ module Marty
       <h3 class="error">Issues Detected </h3>
       <div class="wrapper">
       <table>
-        <th class="error">node1</th>
-        <th class="error"></th>
+        <th colspan="2" class="error"><small>node1</small></th>
         <tr class="passed">
           <td>Marty</td>
           <td class="overflow">#{Marty::VERSION}</td>
@@ -89,8 +87,7 @@ module Marty
         </tr>
       </table>
       <table>
-        <th class="error">node2</th>
-        <th class="error"></th>
+        <th colspan="2" class="error"><small>node2</small></th>
         <tr class="passed">
           <td>Marty</td>
           <td class="overflow">#{val}</td>
