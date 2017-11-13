@@ -376,8 +376,12 @@ module Marty
       end
 
       def get_private_ips
-        get_instances['reservationSet']['item'].
-          map{|i| i['instancesSet']['item']['privateIpAddress']}
+        get_instances['reservationSet']['item'].map{
+          |i|
+          item = i['instancesSet']['item']
+          item.is_a?(Array) ? item.map{|i| i['privateIpAddress']} :
+            item['privateIpAddress']
+        }.flatten
       end
     end
   end
