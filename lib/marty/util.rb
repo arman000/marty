@@ -108,6 +108,21 @@ module Marty::Util
     end
   end
 
+  # Run a report as a promise and return its promise ID.
+  def self.background_report(script_name, node_name, params, force)
+    engine = Marty::ScriptSet.new.get_engine(script_name)
+    res = engine.background_eval(node_name,
+                                 params,
+                                 ["result", "title", "format"],
+                                )
+
+    promise_id = res.__promise__.id
+    res.force if force
+
+    promise_id
+  end
+
+  # generates the report path to report described by script, node, and params
   def self.gen_report_path(script, node, params = {})
     engine = Marty::ScriptSet.new.get_engine(script)
     format = engine.evaluate(node, 'format')
