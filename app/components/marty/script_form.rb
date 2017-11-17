@@ -59,10 +59,9 @@ class Marty::ScriptForm < Marty::Form
     }
     JS
 
-    c.download_report = l(<<-JS)
-    function(jid) {
-      // FIXME: seems pretty hacky
-      window.location = "#{Marty::Util.marty_path}/job/download?job_id=" + jid;
+    c.get_report = l(<<-JS)
+    function(report_path) {
+      window.location = report_path;
     }
     JS
   end
@@ -175,16 +174,15 @@ class Marty::ScriptForm < Marty::Form
     return client.netzke_notify("bad script") unless script
 
     begin
-      job_id = Marty::Util.
-               background_report("ScriptReport",
-                                 "PrettyScript",
-                                 {
-                                   "script_id" => script.id,
-                                   "title"     => script.name,
-                                 },
-                                 true,
-                                )
-      client.download_report job_id
+      rep_params = {
+        script_id: script.id,
+        title: script.name
+      }
+
+      path = Marty::Util.gen_report_path("ScriptReport",
+                                         "PrettyScript",
+                                         rep_params)
+      client.get_report(path)
     rescue => exc
       return client.netzke_notify "ERROR: #{exc}"
     end

@@ -121,4 +121,15 @@ module Marty::Util
 
     promise_id
   end
+
+  # generates the report path to report described by script, node, and params
+  def self.gen_report_path(script, node, params = {})
+    engine = Marty::ScriptSet.new.get_engine(script)
+    format = engine.evaluate(node, 'format')
+    title  = params.delete(:title) || engine.evaluate(node, 'title')
+    data   = ({selected_script_name: script,
+               selected_node: node} + params).to_json
+    URI.encode("#{Marty::Util.marty_path}/report?data=#{data}"\
+               "&reptitle=#{title}&format=#{format}")
+  end
 end
