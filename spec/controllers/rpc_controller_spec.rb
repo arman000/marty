@@ -1191,7 +1191,7 @@ describe Marty::RpcController do
         ].each do
           |a, exp|
           do_call(*a)
-          res = JSON.parse(response.body)
+          res = JSON.parse(response.body) rescue response.body
           expect(res.is_a?(Hash) ? res['error'] : res).to include(exp)
         end
       end
