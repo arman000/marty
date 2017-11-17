@@ -43,19 +43,19 @@ module Marty
         <th colspan="2" class=""><small>consistent</small></th>
         <tr class="passed">
           <td>Marty</td>
-          <td class="overflow">#{Marty::VERSION}</td>
+          <td class="overflow"><p>#{Marty::VERSION}</p></td>
         </tr>
         <tr class="passed">
           <td>Delorean</td>
-          <td class="overflow">#{Delorean::VERSION}</td>
+          <td class="overflow"><p>#{Delorean::VERSION}</p></td>
         </tr>
         <tr class="passed">
           <td>Mcfly</td>
-          <td class="overflow">#{Mcfly::VERSION}</td>
+          <td class="overflow"><p>#{Mcfly::VERSION}</p></td>
         </tr>
         <tr class="passed">
           <td>Git</td>
-          <td class="overflow">#{git}</td>
+          <td class="overflow"><p>#{git}</p></td>
         </tr>
       </table>
       </div>
@@ -71,38 +71,38 @@ module Marty
         <th colspan="2" class="error"><small>node1</small></th>
         <tr class="passed">
           <td>Marty</td>
-          <td class="overflow">#{Marty::VERSION}</td>
+          <td class="overflow"><p>#{Marty::VERSION}</p></td>
         </tr>
         <tr class="passed">
           <td>Delorean</td>
-          <td class="overflow">#{Delorean::VERSION}</td>
+          <td class="overflow"><p>#{Delorean::VERSION}</p></td>
         </tr>
         <tr class="passed">
           <td>Mcfly</td>
-          <td class="overflow">#{Mcfly::VERSION}</td>
+          <td class="overflow"><p>#{Mcfly::VERSION}</p></td>
         </tr>
         <tr class="passed">
           <td>Git</td>
-          <td class="overflow">#{git}</td>
+          <td class="overflow"><p>#{git}</p></td>
         </tr>
       </table>
       <table>
         <th colspan="2" class="error"><small>node2</small></th>
         <tr class="passed">
           <td>Marty</td>
-          <td class="overflow">#{val}</td>
+          <td class="overflow"><p>#{val}</p></td>
         </tr>
         <tr class="passed">
           <td>Delorean</td>
-          <td class="overflow">#{Delorean::VERSION}</td>
+          <td class="overflow"><p>#{Delorean::VERSION}</p></td>
         </tr>
         <tr class="passed">
           <td>Mcfly</td>
-          <td class="overflow">#{Mcfly::VERSION}</td>
+          <td class="overflow"><p>#{Mcfly::VERSION}</p></td>
         </tr>
         <tr class="passed">
           <td>Git</td>
-          <td class="overflow">#{git}</td>
+          <td class="overflow"><p>#{git}</p></td>
         </tr>
       </table>
       </div>
