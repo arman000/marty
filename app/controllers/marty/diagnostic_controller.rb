@@ -192,13 +192,12 @@ module Marty
       def self.db_schema
         begin
           current = ActiveRecord::Migrator.current_version
-          last    = ActiveRecord::Migrator.last_version
+          needs_migration = ActiveRecord::Migrator.needs_migration?
         rescue => e
           return error(e.message)
         end
-        current < last ? error("Migration is needed.\n"\
-                               "Current Version: #{current}\n"\
-                               "Last Version: #{last}") : current
+        needs_migration ? error("Migration is needed.\n"\
+                                "Current Version: #{current}") : current
       end
     end
 
