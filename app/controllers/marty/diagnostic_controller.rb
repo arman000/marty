@@ -183,8 +183,8 @@ module Marty
 
       def self.db_version
         begin
-        message = ActiveRecord::Base.connection.
-                    execute('SELECT VERSION();')[0]['version']
+          message = ActiveRecord::Base.connection.
+                      execute('SELECT VERSION();')[0]['version']
         rescue => e
           return error(message)
         end
@@ -193,11 +193,13 @@ module Marty
 
       def self.db_schema
         begin
-          message = ActiveRecord::Migrator.current_version
+          current = ActiveRecord::Migrator.current_version
+          needs_migration = ActiveRecord::Migrator.needs_migration?
         rescue => e
           return error(e.message)
         end
-        message
+        needs_migration ? error("Migration is needed.\n"\
+                                "Current Version: #{current}") : current
       end
     end
 
