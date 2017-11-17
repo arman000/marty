@@ -1,4 +1,6 @@
+include ActionView::Helpers::TextHelper
 require 'erb'
+
 module Marty
   class DiagnosticController < ActionController::Base
     layout false
@@ -80,7 +82,7 @@ module Marty
       end
 
       def self.error message
-        "Failure: (#{message})"
+        "Failure: #{message}"
       end
 
       def self.display data, type='nodal'
@@ -104,7 +106,7 @@ module Marty
                       <tr class="<%=is_failure?(value) ? 'failed' :
                                     'passed' %>">
                         <td><%=name%></td>
-                        <td class="overflow"><%=value%></td>
+                        <td class="overflow"><%=simple_format(value.to_s)%></td>
                       </tr>
                     <% end %>
                     </table>
@@ -217,11 +219,17 @@ module Marty
 
     class Nodes < Base
       def self.generate
-        a_nodes  = AwsInstanceInfo.is_aws? ? AwsInstanceInfo.new.nodes.sort : []
+        begin
+          a_nodes  = AwsInstanceInfo.new.nodes.sort if AwsInstanceInfo.is_aws?
+        rescue => e
+          a_nodes = [e.message]
+        end
         pg_nodes = get_nodes.sort
-        message  = pg_nodes == a_nodes ? pg_nodes.join(', ') :
-                     error("Postgres: [#{pg_nodes.join(', ')}]"\
-                           " - AWS: [#{a_nodes.join(', ')}]")
+        message  = a_nodes.nil? || pg_nodes == a_nodes ? pg_nodes.join("\n") :
+                     error("There is a discrepancy between nodes connected to "\
+                           "Postgres and those discovered through AWS EC2.\n"\
+                           "Postgres: \n#{pg_nodes.join("\n")}\n"\
+                           "AWS: \n#{a_nodes.join("\n")}")
         {"PG/AWS" => message}
       end
     end
