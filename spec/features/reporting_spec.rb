@@ -256,31 +256,6 @@ DELOREAN
     end
   end
 
-  it 'can generate an url that can be used to access report' do
-    log_in_as('dev1')
-    go_to_reporting
-
-    tag_grid = netzke_find('tag_grid')
-    script_grid = netzke_find('script_grid')
-
-    and_by 'select SomeReport script & AA node' do
-      script_grid.select_row(1)
-      select_node('AA (csv)')
-    end
-
-    and_by 'fill form and navigate to generated link' do
-      wait_for_ajax
-      set_field_value('XYZ', '', 'pt_name')
-      set_field_value('true', 'textfield', 'selected_testing')
-      new_window = window_opened_by {press("Generate URL")}
-      within_window new_window do
-        url = generate_rep_url
-        expect(page).to have_content(url)
-      end
-      new_window.close
-    end
-  end
-
   it 'can generate report through generated url' do
     url = generate_rep_url(format: 'txt') + URI.encode('&disposition=inline')
     visit url

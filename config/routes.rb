@@ -5,5 +5,6 @@ end
 Marty::Engine.routes.draw do
   match via: [:get, :post], "rpc/evaluate(.:format)" => "rpc", as: :rpc
   match via: [:get, :post], "report(.:format)" => "report#index", as: :report
+  get  'job/download' => 'job', as: :job
   get  'diag', to: 'diagnostic/#op'
 end

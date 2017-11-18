@@ -3,7 +3,7 @@ require 'spec_helper'
 feature 'logger view', js: true, capybara: true do
 
   before(:all) do
-    self.use_transactional_fixtures = false
+    self.use_transactional_tests = false
     Marty::Log.delete_all
 
     info_s = { info: 'message' }
@@ -36,7 +36,7 @@ feature 'logger view', js: true, capybara: true do
   after(:all) do
     restore_clean_db(@clean_file)
     Marty::Log.delete_all
-    self.use_transactional_fixtures = true
+    self.use_transactional_tests = true
   end
 
   let(:logview) { netzke_find('log_view') }

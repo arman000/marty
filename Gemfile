@@ -7,7 +7,7 @@ gemspec
 
 gem 'delayed_job_active_record'
 gem 'daemons', '~> 1.1.9'
-gem 'rails', '~> 5.1.1'
+gem 'rails', '~> 5.0.6'
 gem 'pg'
 gem 'sqlite3'
 # for signing of aws ec2 requests
@@ -24,7 +24,7 @@ group :development, :test do
   gem 'database_cleaner'
   gem 'rails-controller-testing'
 
-  gem 'mcfly', git: 'https://github.com/haydenmcfarland/mcfly.git', branch: 'rails5'
+  gem 'mcfly'
   gem 'netzke', '6.5.0.0'
 
 # gem 'marty_rspec', path: File.expand_path('../../marty_rspec', __FILE__) 

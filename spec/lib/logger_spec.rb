@@ -11,7 +11,7 @@ module Marty
     end
     after(:all) do
       Marty::Log.delete_all
-      self.use_transactional_fixtures = true
+      self.use_transactional_tests = true
     end
 
     it "log has its own connection" do
