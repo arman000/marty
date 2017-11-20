@@ -162,7 +162,7 @@ module Marty
         expected = nodes.each_with_object({}){|n, h| h[n] = version}
 
         # mock nodes and diag request to node
-        allow(described_class::Base.request).to receive(:port).and_return(nil)
+        allow(described_class::Base.request).to receive(:port).and_return(3000)
         allow(described_class::Base).to receive(:get_nodes).and_return(nodes)
         allow(described_class::Base).to receive_message_chain(uri_stub)
 
