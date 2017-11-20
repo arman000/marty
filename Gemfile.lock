@@ -14,6 +14,12 @@ PATH
       rubyzip
       sqlite3
 
+PATH
+  remote: ../marty_rspec
+  specs:
+    marty_rspec (0.1)
+      rspec-by
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -102,8 +108,6 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.7.0)
       mini_mime (>= 0.1.1)
-    marty_rspec (0.1)
-      rspec-by
     mcfly (0.0.19)
       delorean_lang (~> 0.1)
       pg (~> 0.17)
@@ -219,7 +223,7 @@ DEPENDENCIES
   database_cleaner
   delayed_job_active_record
   marty!
-  marty_rspec
+  marty_rspec!
   netzke-basepack
   netzke-core
   netzke-testing

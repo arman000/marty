@@ -1,0 +1,6 @@
+BaseCode:
+    p1 =?
+    p2 =?
+    flavor =?
+
+    base_value = "%s --> %d" % [flavor, p1*p2]
