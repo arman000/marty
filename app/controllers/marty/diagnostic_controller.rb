@@ -262,6 +262,70 @@ module Marty
       end
     end
 
+    class DelayedJob < Base
+      def self.delayed_job_count
+        db = ActiveRecord::Base.connection_config[:database]
+        get_pg_connections[db].count{|c| c['pid'] if
+          c['name'].include?('delayed_job')}
+      end
+
+      def self.pretty hash
+        hash.keys.map{|k| k + " => " + hash[k].to_s}.join("\n")
+      end
+
+      def self.verify_history delayed_versions
+        @@history ||= delayed_versions
+        @@history == delayed_versions
+      end
+
+      def self.validate data
+        data.each_with_object({}) do
+          |(k,v), h|
+          h[k] = v.count > 1 ? error("\n" + v.join("\n")) :
+                   v[0] != ENV['DELAYED_VER'] ? error(v[0]) : v[0]
+        end
+      end
+
+      def self.generate
+        count = delayed_job_count
+        return {'Status' => ['No delayed jobs are running.']} if count.zero?
+
+        # we will only iterate by half of the total delayed workers to avoid
+        # excess use of delayed job time
+        count = (count/2).zero? ? 1 : count/2
+
+        d_engine = Marty::ScriptSet.new.get_engine("Diagnostics")
+        res = d_engine.evaluate('VersionDelay', 'result', {'count' => count-1})
+
+        # merge results and remove duplicates
+        res.each_with_object({}){
+          |r, h|
+          h[r[0]] ||= []
+          h[r[0]] << r[1]
+        }.each_with_object({}){|(k,v), h| h[k] = v.uniq}
+      end
+
+      def self.aggregate
+        d_vers = validate(generate)
+
+        unless verify_history(d_vers)
+          a = @@history.to_a
+          b = d_vers.to_a
+          @@history = d_vers
+          d_vers += {"WARN" => error(["Result different from "\
+                                      "#{Marty::Helper.my_ip}'s history.",
+                                      "#{pretty(Hash[a - b])}"].join("\n"))}
+        end
+        package(d_vers)
+      end
+
+      def self.diff data
+        data = data[name.demodulize] if data[name.demodulize]
+        data.keys.map{|k| data[k]}.flatten.uniq.count != 1 ||
+          data[data.keys[0]] != ENV['DELAYED_VER']
+      end
+    end
+
     ############################################################################
     #
     # Reports
