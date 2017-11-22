@@ -1,4 +1,4 @@
-class CreateMartyScripts < McflyMigration
+class CreateMartyScripts < McflyMigration[4.2]
   include Marty::Migrations
 
   def change

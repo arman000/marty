@@ -1,4 +1,4 @@
-class CreateMartyLogs < ActiveRecord::Migration
+class CreateMartyLogs < ActiveRecord::Migration[4.2]
   def change
     create_table :marty_logs do |t|
       t.string :message_type, null: false

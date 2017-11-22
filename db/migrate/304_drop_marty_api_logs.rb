@@ -1,4 +1,4 @@
-class DropMartyApiLogs < ActiveRecord::Migration
+class DropMartyApiLogs < ActiveRecord::Migration[4.2]
   def self.up
     drop_table :marty_api_logs
   end

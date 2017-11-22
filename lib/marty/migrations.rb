@@ -65,12 +65,13 @@ module Marty::Migrations
       to_table.to_s.start_with?(tb_prefix) ||
       to_table.to_s.start_with?("marty_")
 
-    add_foreign_key(from_table,
-                    to_table,
-                    fk_opts(from_table,
-                            to_table,
-                            options[:column]).update(options),
-                    )
+    opts = fk_opts(from_table,
+                   to_table,
+                   options[:column]).update(options)
+
+    add_foreign_key(from_table, to_table, opts) unless
+      foreign_key_exists?(from_table, to_table)
+
   end
 
   # created_dt/obsoleted_dt need to be indexed since they appear in
@@ -97,14 +98,15 @@ module Marty::Migrations
 
     attrs = get_attrs(klass)
 
+    opts = {unique: true,
+            name: unique_index_name(klass)}
+
     add_index(klass.table_name.to_sym,
               attrs,
-              unique: true,
-              name: unique_index_name(klass)
-              ) unless index_exists?(klass.table_name.to_sym,
-                                     attrs,
-                                     name: unique_index_name(klass),
-                                     unique: true)
+              opts
+             ) unless index_exists?(klass.table_name.to_sym,
+                                    attrs,
+                                    opts)
 
   end
 
@@ -257,7 +259,7 @@ OUT
     ActiveRecord::Base.
                connection.execute(<<-SQL).to_a.first.try{|v| v['id']}
       select id from #{klass.table_name} where name =
-         #{ActiveRecord::Base.sanitize(name)}
+         #{ActiveRecord::Base.connection.quote(name)}
     SQL
   end
 
@@ -282,7 +284,8 @@ OUT
     attrs.each { |a|
       options = index_opts(tb, a)
       options[:order] = {a.to_sym => "NULLS LAST"}
-      add_index tb.to_sym, a, options
+      add_index tb.to_sym, a, options unless
+        index_exists?(tb.to_sym, a, options)
     }
   end
 

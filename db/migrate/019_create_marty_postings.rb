@@ -1,4 +1,4 @@
-class CreateMartyPostings < McflyAppendOnlyMigration
+class CreateMartyPostings < McflyAppendOnlyMigration[4.2]
   include Marty::Migrations
 
   def change
