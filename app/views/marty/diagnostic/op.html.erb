@@ -22,15 +22,13 @@
            background-color: #d6d6d6 }
       td { text-align: left;
            padding: 9px;
-         }
-      th.error  { background-color: #ff5555;
-                  color: #ffffff;
       }
+
+      th.error  { background-color: #ff5555;}
       tr { text-align: center;}
-      tr.passed { background-color: #d0e9c6 }
-      tr.failed { background-color: #ff5555;
-                  color: #ffffff
-      }
+      td.passed { background-color: #d0e9c6 }
+      td.error  { background-color: #ff5555;
+                  color: #ffffff;}
       td.desc { font-size: 10pt; }
       p  { white-space: pre-line;}
       h1 { display: block;
@@ -40,6 +38,7 @@
            font-size: 18pt;
            color: #ffffff;
            line-height: 1.5em; }
+      h1.error {background-color: #ff5555;}
       h2 {text-align: center;}
       h3.error {color: red;}
       h3 {text-align: center;}
@@ -53,7 +52,9 @@
   </head>
   <body>
     <div style="text-align:center">
-      <h1><%=Rails.application.class.parent_name%> Diagnostic</h1>
+      <h1 class="<%= 'error' if @result.to_s.include?('error') %>">
+	<%=Rails.application.class.parent_name%> Diagnostic
+      </h1>
       <h3><i><%= DateTime.now %></i></h3>
     <%== @result %>
   </div>

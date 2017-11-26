@@ -85,33 +85,55 @@ module Marty
         "Failure: #{message}"
       end
 
+      def self.get_targets data
+        data.each_with_object({}) do |(_, v), h|
+          v.each do |k, r|
+            r = r.to_s
+            h[k] ||= r
+            h[k] = r if h[k] < r
+          end
+        end
+      end
+
       def self.display data, type='nodal'
         data = {'local' => data} if type == 'local'
         display = <<-ERB
-                <% inconsistent = diff(data) %>
-                <h3><%=name.demodulize%></h3>
-                <%='<h3 class="error">Issues Detected</h3>' if
-                   inconsistent%>
-                <div class="wrapper">
-                <% data.each do |node, result| %>
-                    <table>
-                    <% issues = ('error' if inconsistent) %>
-                    <th colspan="2" class="<%=issues%>">
-                      <small>
-                        <%=inconsistent ? node :
-                           (type == 'local' ? 'local' : 'consistent') %>
-                      </small>
+                  <% inconsistent = diff(data) %>
+                  <h3><%=name.demodulize%></h3>
+                  <%='<h3 class="error">Issues Detected</h3>' if
+                     inconsistent%>
+                  <div class="wrapper">
+                  <table>
+
+                  <%# Create node table headers if applicable %>
+                  <tr>
+                  <%='<th></th>' if inconsistent %>
+                  <% data.keys.each do |node| %>
+                    <th <%='colspan="2"' unless inconsistent %> scope="col">
+                      <%= inconsistent ? node :
+                          (type == 'local' ? 'local' : 'consistent') %>
                     </th>
-                    <% result.each do |name, value| %>
-                      <tr class="<%=is_failure?(value) ? 'failed' :
-                                    'passed' %>">
-                        <td><%=name%></td>
-                        <td class="overflow"><%=simple_format(value.to_s)%></td>
-                      </tr>
-                    <% end %>
-                    </table>
                   <% break unless inconsistent %>
-                <% end %>
+                  <% end %>
+                  </tr>
+
+                  <%# Create row headers and display node results %>
+                  <% data[data.keys.first].each do |key, value| %>
+                  <tr>
+                    <th scope="row"><%= key %></th>
+                    <% targets = get_targets(data) %>
+                    <% data.each do |_node, result| %>
+                      <td class="overflow <%= (is_failure?(value) ||
+                          (result[key].to_s != targets[key].to_s)) ? 'error' :
+                          'passed' %>">
+                        <%= simple_format(result[key].to_s) %>
+                      </td>
+                    <% break unless inconsistent %>
+                    <% end %>
+                  </tr>
+                  <% end %>
+
+                 </table>
                 </div>
                 ERB
         ERB.new(display.html_safe).result(binding)
@@ -269,15 +291,6 @@ module Marty
           c['name'].include?('delayed_job')}
       end
 
-      def self.pretty hash
-        hash.keys.map{|k| k + " => " + hash[k].to_s}.join("\n")
-      end
-
-      def self.verify_history delayed_versions
-        @@history ||= delayed_versions
-        @@history == delayed_versions
-      end
-
       def self.validate data
         data.each_with_object({}) do
           |(k,v), h|
@@ -288,7 +301,7 @@ module Marty
 
       def self.generate
         count = delayed_job_count
-        return {'Status' => ['No delayed jobs are running.']} if count.zero?
+        return {'Issue' => ['No delayed jobs are running.']} if count.zero?
 
         # we will only iterate by half of the total delayed workers to avoid
         # excess use of delayed job time
@@ -306,17 +319,7 @@ module Marty
       end
 
       def self.aggregate
-        d_vers = validate(generate)
-
-        unless verify_history(d_vers)
-          a = @@history.to_a
-          b = d_vers.to_a
-          @@history = d_vers
-          d_vers += {"WARN" => error(["Result different from "\
-                                      "#{Marty::Helper.my_ip}'s history.",
-                                      "#{pretty(Hash[a - b])}"].join("\n"))}
-        end
-        package(d_vers)
+        package(validate(generate))
       end
 
       def self.diff data

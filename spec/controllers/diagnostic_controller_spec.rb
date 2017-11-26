@@ -39,25 +39,31 @@ module Marty
       <<-ERB
       <h3>Version</h3>
       <div class="wrapper">
-      <table>
-        <th colspan="2" class=""><small>consistent</small></th>
-        <tr class="passed">
-          <td>Marty</td>
-          <td class="overflow"><p>#{Marty::VERSION}</p></td>
-        </tr>
-        <tr class="passed">
-          <td>Delorean</td>
-          <td class="overflow"><p>#{Delorean::VERSION}</p></td>
-        </tr>
-        <tr class="passed">
-          <td>Mcfly</td>
-          <td class="overflow"><p>#{Mcfly::VERSION}</p></td>
-        </tr>
-        <tr class="passed">
-          <td>Git</td>
-          <td class="overflow"><p>#{git}</p></td>
-        </tr>
-      </table>
+        <table>
+          <tr>
+            <th colspan="2" scope="col">consistent</th>
+          </tr>
+          <tr>
+            <th scope="row">Marty</th>
+            <td class="overflow passed"><p>#{Marty::VERSION}</p>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Delorean</th>
+            <td class="overflow passed"><p>#{Delorean::VERSION}</p>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Mcfly</th>
+            <td class="overflow passed"><p>#{Mcfly::VERSION}</p>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Git</th>
+            <td class="overflow passed"><p>#{git}</p>
+            </td>
+          </tr>
+        </table>
       </div>
       ERB
     end
@@ -68,42 +74,31 @@ module Marty
       <h3 class="error">Issues Detected </h3>
       <div class="wrapper">
       <table>
-        <th colspan="2" class="error"><small>node1</small></th>
-        <tr class="passed">
-          <td>Marty</td>
-          <td class="overflow"><p>#{Marty::VERSION}</p></td>
-        </tr>
-        <tr class="passed">
-          <td>Delorean</td>
-          <td class="overflow"><p>#{Delorean::VERSION}</p></td>
-        </tr>
-        <tr class="passed">
-          <td>Mcfly</td>
-          <td class="overflow"><p>#{Mcfly::VERSION}</p></td>
-        </tr>
-        <tr class="passed">
-          <td>Git</td>
-          <td class="overflow"><p>#{git}</p></td>
-        </tr>
-      </table>
-      <table>
-        <th colspan="2" class="error"><small>node2</small></th>
-        <tr class="passed">
-          <td>Marty</td>
-          <td class="overflow"><p>#{val}</p></td>
-        </tr>
-        <tr class="passed">
-          <td>Delorean</td>
-          <td class="overflow"><p>#{Delorean::VERSION}</p></td>
-        </tr>
-        <tr class="passed">
-          <td>Mcfly</td>
-          <td class="overflow"><p>#{Mcfly::VERSION}</p></td>
-        </tr>
-        <tr class="passed">
-          <td>Git</td>
-          <td class="overflow"><p>#{git}</p></td>
-        </tr>
+         <tr>
+            <th></th>
+            <th scope="col">node1</th>
+            <th scope="col">node2</th>
+          </tr>
+          <tr>
+            <th scope="row">Marty</th>
+            <td class="overflow passed"><p>#{Marty::VERSION}</p></td>
+            <td class="overflow error"><p>#{val}</p></td>
+          </tr>
+          <tr>
+            <th scope="row">Delorean</th>
+            <td class="overflow passed"><p>#{Delorean::VERSION}</p></td>
+            <td class="overflow passed"><p>#{Delorean::VERSION}</p></td>
+          </tr>
+          <tr>
+            <th scope="row">Mcfly</th>
+            <td class="overflow passed"><p>#{Mcfly::VERSION}</p></td>
+            <td class="overflow passed"><p>#{Mcfly::VERSION}</p></td>
+          </tr>
+          <tr>
+            <th scope="row">Git</th>
+            <td class="overflow passed"><p>#{git}</p></td>
+            <td class="overflow passed"><p>#{git}</p></td>
+          </tr>
       </table>
       </div>
       ERB
@@ -145,7 +140,7 @@ module Marty
         data      = {'node1' => version, 'node2' => version + {'Marty' => ver}}
         expected  = version_display_fail(ver)
         test      = described_class::Version.display(data)
-        expect(minimize(expected)).to eq(minimize(test))
+        expect(minimize(test)).to eq(minimize(expected))
       end
     end
 
