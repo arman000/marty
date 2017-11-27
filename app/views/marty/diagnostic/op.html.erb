@@ -4,31 +4,31 @@
     <title><%=Rails.application.class.parent_name%> Diagnostic</title>
     <style type="text/css">
       body { margin: auto;
-             margin-bottom: 50px;
-             border: 0;
-             background-color: #fff;
-             color: #333333;
-             font-family: Arial, Helvetica, Verdana, sans-serif;
-             font-weight: normal;
-             font-size: 9pt; }
+       margin-bottom: 50px;
+       border: 0;
+       background-color: #fff;
+       color: #333333;
+       font-family: Arial, Helvetica, Verdana, sans-serif;
+       font-weight: normal;
+       font-size: 9pt; }
       table { border: none;
-              border-collapse: collapse;
-              display: inline-block;
-              margin: 0px 5px 0px 5px;
-              text-align: left;
+        border-collapse: collapse;
+        display: inline-block;
+        margin: 0px 5px 0px 5px;
+        text-align: left;
       }
       th { padding: 9px;
            border: none;
            background-color: #d6d6d6 }
       td { text-align: left;
            padding: 9px;
-      }
-
-      th.error  { background-color: #ff5555;}
+         }
       tr { text-align: center;}
+      tr.passed { background-color: #d0e9c6 }
       td.passed { background-color: #d0e9c6 }
       td.error  { background-color: #ff5555;
-                  color: #ffffff;}
+            color: #ffffff;}
+      th.error  { background-color: #ff5555;}
       td.desc { font-size: 10pt; }
       p  { white-space: pre-line;}
       h1 { display: block;
@@ -43,20 +43,20 @@
       h3.error {color: red;}
       h3 {text-align: center;}
       td.overflow { max-width: 350px;
-         overflow: auto; }
+              overflow: auto; }
       .wrapper {
-         overflow-x: auto;
-         white-space: nowrap;
-         display: block;}
+          overflow-x: auto;
+          white-space: nowrap;
+          display: block;}
     </style>
   </head>
   <body>
     <div style="text-align:center">
       <h1 class="<%= 'error' if @result.to_s.include?('error') %>">
-	<%=Rails.application.class.parent_name%> Diagnostic
+        <%=Rails.application.class.parent_name%> Diagnostic
       </h1>
       <h3><i><%= DateTime.now %></i></h3>
-    <%== @result %>
-  </div>
-</body>
+      <%== @result %>
+    </div>
+  </body>
 </html>

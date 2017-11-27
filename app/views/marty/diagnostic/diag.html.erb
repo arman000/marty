@@ -1,0 +1,34 @@
+<% inconsistent = diff(data) %>
+<h3><%=name.demodulize%></h3>
+<%='<h3 class="error">Issues Detected</h3>' if
+                     inconsistent%>
+<div class="wrapper">
+  <table>
+    <%# Create node table headers if applicable %>
+    <tr>
+      <%='<th></th>' if inconsistent %>
+      <% data.keys.each do |node| %>
+        <th <%='colspan="2"' unless inconsistent %> scope="col">
+          <%= inconsistent ? node :
+                          (type == 'local' ? 'local' : 'consistent') %>
+        </th>
+        <% break unless inconsistent %>
+      <% end %>
+    </tr>
+    <%# Create row headers and display node results %>
+    <% data[data.keys.first].each do |key, value| %>
+      <tr>
+        <th scope="row"><%= key %></th>
+        <% targets = get_targets(data) %>
+        <% data.each do |_node, result| %>
+          <td class="overflow <%= (is_failure?(value) ||
+                          (result[key].to_s != targets[key].to_s)) ? 'error' :
+                          'passed' %>">
+            <%= simple_format(result[key].to_s) %>
+          </td>
+          <% break unless inconsistent %>
+        <% end %>
+      </tr>
+    <% end %>
+  </table>
+</div>

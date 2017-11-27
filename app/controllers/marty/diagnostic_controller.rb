@@ -6,8 +6,10 @@ module Marty
     layout false
     def op
       begin
-        # inject request into Base class of all diagnostics
-        Base.request   = request
+        # inject request object into base class of all diagnostics
+        Base.request = request
+
+        # determine if request is aggregate and return result
         params[:scope] = 'nodal' unless params[:scope]
         diag = self.class.get_sub_class(params[:op])
         @result = params[:scope] == 'local' ? diag.generate : diag.aggregate
@@ -32,15 +34,16 @@ module Marty
     #
     ############################################################################
     class Base
-      @@request     = nil
-      @@read_only   = Marty::Util.db_in_recovery?
-
-      def self.request= req
-       @@request = req
-      end
+      @@read_only = Marty::Util.db_in_recovery?
+      @@template = ActionController::Base.new.lookup_context.
+                     find_template("marty/diagnostic/diag").identifier
 
       def self.request
         @@request
+      end
+
+      def self.request= req
+        @@request = req
       end
 
       def self.aggregate op_name=name.demodulize
@@ -48,7 +51,7 @@ module Marty
       end
 
       def self.get_nodal_diags op_name, scope='local'
-         self.get_nodes.map do |n|
+        self.get_nodes.map do |n|
           ssl = ENV['HTTPS'] == 'on'
           uri = Addressable::URI.new(host: n, port: ssl ? 443 : @@request.port)
           uri.query_values = {op: op_name.underscore,
@@ -57,7 +60,7 @@ module Marty
           uri.path = '/marty/diag.json'
           opts = {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE}
           {n => JSON.parse(open(uri, opts).readlines[0])}
-         end.sum
+        end.sum
       end
 
       def self.find_failures data
@@ -85,6 +88,7 @@ module Marty
         "Failure: #{message}"
       end
 
+      # determine "target" (highest) value for tests
       def self.get_targets data
         data.each_with_object({}) do |(_, v), h|
           v.each do |k, r|
@@ -97,46 +101,7 @@ module Marty
 
       def self.display data, type='nodal'
         data = {'local' => data} if type == 'local'
-        display = <<-ERB
-                  <% inconsistent = diff(data) %>
-                  <h3><%=name.demodulize%></h3>
-                  <%='<h3 class="error">Issues Detected</h3>' if
-                     inconsistent%>
-                  <div class="wrapper">
-                  <table>
-
-                  <%# Create node table headers if applicable %>
-                  <tr>
-                  <%='<th></th>' if inconsistent %>
-                  <% data.keys.each do |node| %>
-                    <th <%='colspan="2"' unless inconsistent %> scope="col">
-                      <%= inconsistent ? node :
-                          (type == 'local' ? 'local' : 'consistent') %>
-                    </th>
-                  <% break unless inconsistent %>
-                  <% end %>
-                  </tr>
-
-                  <%# Create row headers and display node results %>
-                  <% data[data.keys.first].each do |key, value| %>
-                  <tr>
-                    <th scope="row"><%= key %></th>
-                    <% targets = get_targets(data) %>
-                    <% data.each do |_node, result| %>
-                      <td class="overflow <%= (is_failure?(value) ||
-                          (result[key].to_s != targets[key].to_s)) ? 'error' :
-                          'passed' %>">
-                        <%= simple_format(result[key].to_s) %>
-                      </td>
-                    <% break unless inconsistent %>
-                    <% end %>
-                  </tr>
-                  <% end %>
-
-                 </table>
-                </div>
-                ERB
-        ERB.new(display.html_safe).result(binding)
+        ERB.new(File.open(@@template).read).result(binding)
       end
 
       def self.get_pg_connections
@@ -192,7 +157,7 @@ module Marty
 
     class Database < Base
       def self.db_server_name
-        ActiveRecord::Base.connection_config[:host] || 'undefined'
+        ActiveRecord::Base.connection_config[:host] || error('undefined')
       end
 
       def self.db_adapter_name
@@ -228,16 +193,18 @@ module Marty
     class Environment < Database
       def self.generate
         rbv = "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
-        infos = {'Environment'             => Rails.env,
-                 'Rails'                   => Rails.version,
-                 'Netzke Core'             => Netzke::Core::VERSION,
-                 'Netzke Basepack'         => Netzke::Basepack::VERSION,
-                 'Ruby'                    => rbv,
-                 'RubyGems'                => Gem::VERSION,
-                 'Database Adapter'        => db_adapter_name,
-                 'Database Server'         => db_server_name,
-                 'Database Version'        => db_version,
-                 'Database Schema Version' => db_schema}
+        {
+          'Environment'             => Rails.env,
+          'Rails'                   => Rails.version,
+          'Netzke Core'             => Netzke::Core::VERSION,
+          'Netzke Basepack'         => Netzke::Basepack::VERSION,
+          'Ruby'                    => rbv,
+          'RubyGems'                => Gem::VERSION,
+          'Database Adapter'        => db_adapter_name,
+          'Database Server'         => db_server_name,
+          'Database Version'        => db_version,
+          'Database Schema Version' => db_schema
+        }
       end
     end
 
