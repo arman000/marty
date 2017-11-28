@@ -9,7 +9,5 @@ module Marty
     config.generators do |g|
       g.test_framework :rspec, :view_specs => false
     end
-
-    config.assets.precompile << 'marty/diagnostic.css'
   end
 end

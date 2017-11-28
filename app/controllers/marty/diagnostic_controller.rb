@@ -6,8 +6,10 @@ module Marty
     layout false
     def op
       begin
-        # inject request into Base class of all diagnostics
-        Base.request   = request
+        # inject request object into base class of all diagnostics
+        Base.request = request
+
+        # determine if request is aggregate and return result
         params[:scope] = 'nodal' unless params[:scope]
         diag = self.class.get_sub_class(params[:op])
         @result = params[:scope] == 'local' ? diag.generate : diag.aggregate
@@ -32,15 +34,16 @@ module Marty
     #
     ############################################################################
     class Base
-      @@request     = nil
-      @@read_only   = Marty::Util.db_in_recovery?
-
-      def self.request= req
-       @@request = req
-      end
+      @@read_only = Marty::Util.db_in_recovery?
+      @@template = ActionController::Base.new.lookup_context.
+                     find_template("marty/diagnostic/diag").identifier
 
       def self.request
         @@request
+      end
+
+      def self.request= req
+        @@request = req
       end
 
       def self.aggregate op_name=name.demodulize
@@ -48,7 +51,7 @@ module Marty
       end
 
       def self.get_nodal_diags op_name, scope='local'
-         self.get_nodes.map do |n|
+        self.get_nodes.map do |n|
           ssl = ENV['HTTPS'] == 'on'
           uri = Addressable::URI.new(host: n, port: ssl ? 443 : @@request.port)
           uri.query_values = {op: op_name.underscore,
@@ -57,7 +60,7 @@ module Marty
           uri.path = '/marty/diag.json'
           opts = {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE}
           {n => JSON.parse(open(uri, opts).readlines[0])}
-         end.sum
+        end.sum
       end
 
       def self.find_failures data
@@ -85,36 +88,20 @@ module Marty
         "Failure: #{message}"
       end
 
+      # determine "target" (highest) value for tests
+      def self.get_targets data
+        data.each_with_object({}) do |(_, v), h|
+          v.each do |k, r|
+            r = r.to_s
+            h[k] ||= r
+            h[k] = r if h[k] < r
+          end
+        end
+      end
+
       def self.display data, type='nodal'
         data = {'local' => data} if type == 'local'
-        display = <<-ERB
-                <% inconsistent = diff(data) %>
-                <h3><%=name.demodulize%></h3>
-                <%='<h3 class="error">Issues Detected</h3>' if
-                   inconsistent%>
-                <div class="wrapper">
-                <% data.each do |node, result| %>
-                    <table>
-                    <% issues = ('error' if inconsistent) %>
-                    <th colspan="2" class="<%=issues%>">
-                      <small>
-                        <%=inconsistent ? node :
-                           (type == 'local' ? 'local' : 'consistent') %>
-                      </small>
-                    </th>
-                    <% result.each do |name, value| %>
-                      <tr class="<%=is_failure?(value) ? 'failed' :
-                                    'passed' %>">
-                        <td><%=name%></td>
-                        <td class="overflow"><%=simple_format(value.to_s)%></td>
-                      </tr>
-                    <% end %>
-                    </table>
-                  <% break unless inconsistent %>
-                <% end %>
-                </div>
-                ERB
-        ERB.new(display.html_safe).result(binding)
+        ERB.new(File.open(@@template).read).result(binding)
       end
 
       def self.get_pg_connections
@@ -170,7 +157,7 @@ module Marty
 
     class Database < Base
       def self.db_server_name
-        ActiveRecord::Base.connection_config[:host] || 'undefined'
+        ActiveRecord::Base.connection_config[:host] || error('undefined')
       end
 
       def self.db_adapter_name
@@ -206,16 +193,18 @@ module Marty
     class Environment < Database
       def self.generate
         rbv = "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
-        infos = {'Environment'             => Rails.env,
-                 'Rails'                   => Rails.version,
-                 'Netzke Core'             => Netzke::Core::VERSION,
-                 'Netzke Basepack'         => Netzke::Basepack::VERSION,
-                 'Ruby'                    => rbv,
-                 'RubyGems'                => Gem::VERSION,
-                 'Database Adapter'        => db_adapter_name,
-                 'Database Server'         => db_server_name,
-                 'Database Version'        => db_version,
-                 'Database Schema Version' => db_schema}
+        {
+          'Environment'             => Rails.env,
+          'Rails'                   => Rails.version,
+          'Netzke Core'             => Netzke::Core::VERSION,
+          'Netzke Basepack'         => Netzke::Basepack::VERSION,
+          'Ruby'                    => rbv,
+          'RubyGems'                => Gem::VERSION,
+          'Database Adapter'        => db_adapter_name,
+          'Database Server'         => db_server_name,
+          'Database Version'        => db_version,
+          'Database Schema Version' => db_schema
+        }
       end
     end
 
@@ -269,15 +258,6 @@ module Marty
           c['name'].include?('delayed_job')}
       end
 
-      def self.pretty hash
-        hash.keys.map{|k| k + " => " + hash[k].to_s}.join("\n")
-      end
-
-      def self.verify_history delayed_versions
-        @@history ||= delayed_versions
-        @@history == delayed_versions
-      end
-
       def self.validate data
         data.each_with_object({}) do
           |(k,v), h|
@@ -288,7 +268,7 @@ module Marty
 
       def self.generate
         count = delayed_job_count
-        return {'Status' => ['No delayed jobs are running.']} if count.zero?
+        return {'Issue' => ['No delayed jobs are running.']} if count.zero?
 
         # we will only iterate by half of the total delayed workers to avoid
         # excess use of delayed job time
@@ -306,17 +286,7 @@ module Marty
       end
 
       def self.aggregate
-        d_vers = validate(generate)
-
-        unless verify_history(d_vers)
-          a = @@history.to_a
-          b = d_vers.to_a
-          @@history = d_vers
-          d_vers += {"WARN" => error(["Result different from "\
-                                      "#{Marty::Helper.my_ip}'s history.",
-                                      "#{pretty(Hash[a - b])}"].join("\n"))}
-        end
-        package(d_vers)
+        package(validate(generate))
       end
 
       def self.diff data
