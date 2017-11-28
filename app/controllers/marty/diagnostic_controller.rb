@@ -34,9 +34,10 @@ module Marty
     #
     ############################################################################
     class Base
+      @@request   = nil
       @@read_only = Marty::Util.db_in_recovery?
-      @@template = ActionController::Base.new.lookup_context.
-                     find_template("marty/diagnostic/diag").identifier
+      @@template  = ActionController::Base.new.lookup_context.
+                      find_template("marty/diagnostic/diag").identifier
 
       def self.request
         @@request
