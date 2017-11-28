@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    marty (1.0.53)
+    marty (1.0.54)
       axlsx (= 2.1.0pre)
       coderay
       delorean_lang (~> 0.1)
@@ -226,4 +226,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   1.16.0.pre.2
+   1.16.0
