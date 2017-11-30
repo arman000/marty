@@ -202,7 +202,7 @@ end
 class StringEnum < String
   include Delorean::Model
   def name
-    self
+    self.to_s
   end
   def id
     self
@@ -224,6 +224,7 @@ class StringEnum < String
     new(v)
   end
 end
+
 YAML::add_domain_type("pennymac.com,2017-06-02", "stringEnum") do
   |type, val|
   StringEnum.new(val)
@@ -250,5 +251,61 @@ module ActiveRecord
         end
       end
     end
+  end
+end
+
+######################################################################
+
+class ActiveRecord::Relation
+  def mcfly_pt(pt, cls=nil)
+    cls ||= self.klass
+    tb = cls.table_name
+    self.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
+  end
+end
+
+######################################################################
+
+class ActiveRecord::Base
+  class << self
+    alias_method :old_joins, :joins
+
+    def joins(*args)
+      # when joins args are strings, checks to see if they're
+      # associations attrs.  If so, convert them to symbols for joins
+      # to work properly.
+      new_args = args.map {|a|
+        self.reflections.has_key?(a) ? a.to_sym : a
+      }
+      old_joins(*new_args)
+    end
+  end
+end
+
+args_hack = [[ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]] +
+            [[Object, nil]]*10
+
+Delorean::RUBY_WHITELIST.merge!(
+  count:    [ActiveRecord::Relation],
+  distinct: args_hack,
+  group:    args_hack,
+  joins:    args_hack,
+  limit:    [ActiveRecord::Relation, Integer],
+  not:      args_hack,
+  order:    args_hack,
+  pluck:    args_hack,
+  select:   args_hack,
+  where:    args_hack,
+  mcfly_pt: [ActiveRecord::Relation,
+             [Date, Time, ActiveSupport::TimeWithZone, String],
+             [nil, Class]],
+)
+
+######################################################################
+
+module Mcfly::Controller
+  # define mcfly user to be Flowscape's current_user.
+  def user_for_mcfly
+    find_current_user rescue nil
   end
 end

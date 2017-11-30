@@ -10,7 +10,7 @@
 
 require 'marty/engine'
 require 'marty/railtie'
-require 'marty/mcfly_query'
+require 'marty/mcfly_model'
 require 'marty/monkey'
 require 'marty/promise_job'
 require 'marty/lazy_column_loader'
