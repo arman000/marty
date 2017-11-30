@@ -5,7 +5,7 @@ require 'rspec/rails'
 require 'database_cleaner'
 require 'marty_rspec'
 
-Dummy::Application.initialize!
+Dummy::Application.initialize! unless Dummy::Application.initialized?
 
 ActiveRecord::Migrator.migrate File.expand_path("../../db/migrate/", __FILE__)
 ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)

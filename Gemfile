@@ -26,7 +26,9 @@ group :development, :test do
   gem 'netzke-core'
   gem 'netzke-basepack'
   gem 'netzke-testing'
+  gem 'rspec-instafail', require: false
 
   gem 'marty_rspec'
 
+  # gem 'delorean_lang', path: File.expand_path('../../delorean', __FILE__)
 end

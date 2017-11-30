@@ -1,5 +1,5 @@
 module Gemini
-  class FannieBup < ActiveRecord::Base
+  class FannieBup < Marty::Base
     extend Gemini::Extras::DataImport
     extend Gemini::Extras::SettlementImport
 

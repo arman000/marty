@@ -86,11 +86,8 @@ class Marty::DataGrid < Marty::Base
   validates_with DataGridValidator
   validates_with Marty::NameValidator, field: :name
 
-  gen_mcfly_lookup :lookup, {
-    name: false,
-  }
-
-  gen_mcfly_lookup :get_all, {}, mode: :all
+  gen_mcfly_lookup :lookup, [:name], cache: true
+  gen_mcfly_lookup :get_all, [], mode: nil
 
   cached_mcfly_lookup :lookup_id, sig: 2 do
     |pt, group_id|

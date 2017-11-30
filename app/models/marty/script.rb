@@ -10,11 +10,8 @@ class Marty::Script < Marty::Base
 
   belongs_to :user, class_name: "Marty::User"
 
-  gen_mcfly_lookup :lookup, {
-    name: false,
-  }
-
-  gen_mcfly_lookup :get_all, {}, mode: :all
+  gen_mcfly_lookup :lookup, [:name], cache: true
+  gen_mcfly_lookup :get_all, {}, mode: nil
 
   # find script by name/tag
   def self.find_script(sname, tag=nil)
