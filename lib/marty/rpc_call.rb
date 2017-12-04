@@ -23,11 +23,12 @@ class Marty::RpcCall
     res
   end
 
-  def self.marty_download(host, port, path, job_id)
+  def self.marty_download(host, port, path, job_id, ssl=false)
     params = {job_id: job_id}
     url = path + '?' + URI.encode(URI.encode_www_form(params))
 
     http = Net::HTTP.new(host, port)
+    http.use_ssl = ssl
     request = Net::HTTP::Get.new(url)
 
     begin
