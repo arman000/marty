@@ -160,7 +160,9 @@ class Marty::DataGrid < Marty::Base
       attr = m["attr"]
       inc = h_passed.fetch(attr, :__nf__)
       next if inc == :__nf__
-      h[attr] = (defined? inc.name) ? inc.name : inc
+      val = (defined? inc.name) ? inc.name : inc
+      h[attr] = val.is_a?(String) ?
+                  ActiveRecord::Base.connection.quote(val)[1..-2] : val
     end
 
     fn     = "lookup_grid_distinct"
