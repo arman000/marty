@@ -697,6 +697,39 @@ EOS
         expect(res["data"]).to eq (expected_data)
         expect(res["metadata"]).to eq (expected_metadata)
       end
+
+      it "should handle all characters in grid inputs" do
+        dg = Marty::DataGrid.lookup(pt, 'G1')
+        5000.times do
+          st = 30.times.map{rand(224)+32}.pack('U*')
+          res = dg.lookup_grid_distinct_entry(pt, { "ltv" => 10,
+                                                    "fico" => 690,
+                                                    "state" => st }, nil,
+                                              false, true)
+        end
+      end
+      it "should handle all quote chars in grid inputs" do
+        dg = Marty::DataGrid.lookup(pt, 'G1')
+        # single, double, backslash, grave, acute, unicode quotes: left single,
+        # right single, left double, right double
+        quotes = ["'", '"', '\\', '`', "\u00b4", "\u2018", "\u2019",
+                  "\u201C", "\u201D"]
+        100.times do
+          st = 30.times.map{quotes[rand(9)]}.join
+          res = dg.lookup_grid_distinct_entry(pt, { "ltv" => 10,
+                                                    "fico" => 690,
+                                                    "state" => st }, nil,
+                                              false, true)
+        end
+      end
+      it "should handle quote chars in object name" do
+        dg = Marty::DataGrid.lookup(pt, 'G1')
+        st = Gemini::State.new(name: "'\\")
+        res = dg.lookup_grid_distinct_entry(pt, { "ltv" => 10,
+                                                  "fico" => 690,
+                                                  "state" => st }, nil,
+                                            false, true)
+      end
     end
 
     describe "exports" do

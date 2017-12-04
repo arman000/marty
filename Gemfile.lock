@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    marty (1.1.0)
+    marty (1.1.2)
       axlsx (= 2.1.0pre)
       coderay
       delorean_lang (~> 0.3.24)
@@ -198,7 +198,7 @@ GEM
     thor (0.20.0)
     thread_safe (0.3.6)
     timecop (0.9.1)
-    treetop (1.6.8)
+    treetop (1.6.9)
       polyglot (~> 0.3)
     tzinfo (1.2.3)
       thread_safe (~> 0.1)
