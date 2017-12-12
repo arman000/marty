@@ -269,17 +269,24 @@ SQL
     upd_count = update_start_and_end
     if upd_count > 0 ||
        time_now_i - @all_finished[:timestamp] > @poll_secs
-      raw = get_data(
-        "SELECT * FROM
-            (SELECT ROW_NUMBER() OVER (PARTITION BY klass,
-                                                    subject_id,
-                                                    enum_event_operation
-                                       ORDER BY end_dt DESC) rownum, *
-             FROM (#{BASE_QUERY}) sub2
-             WHERE end_dt IS NOT NULL and end_dt > '#{cutoff}') sub1
-         WHERE rownum = 1
-         ORDER BY end_dt"
-      )
+      raw = get_data("
+        SELECT * FROM (SELECT  id
+                             , klass
+                             , subject_id
+                             , enum_event_operation
+                             , start_dt
+                             , end_dt
+                             , expire_secs
+                             , comment
+                             , error
+                             , ROW_NUMBER() OVER (PARTITION BY
+                                                            klass
+                                                          , subject_id
+                                                          , enum_event_operation
+                                                  ORDER BY  end_dt DESC) row_num
+                       FROM marty_events
+                       WHERE end_dt > '#{cutoff}') sub
+        WHERE row_num = 1")
       @all_finished[:timestamp] = time_now_i
       raw.each_with_object(@all_finished[:data]) do |ev, hash|
         if ev["end_dt"] && ev["error"].nil?
