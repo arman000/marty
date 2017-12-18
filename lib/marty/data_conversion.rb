@@ -46,8 +46,6 @@ class Marty::DataConversion
       end
     when :string, :text, :enum
       v
-    when :enum_array, :string_array, :integer_array
-      "'{#{v}}'"
     when :integer
       v.to_i
     when :float
@@ -71,7 +69,7 @@ class Marty::DataConversion
       end
     when :numrange, :int4range, :int8range
       v.to_s
-    when :float_array, :json, :jsonb
+    when :float_array, :json, :jsonb, :enum_array, :string_array, :integer_array
       # v might be base64 or might be a readable string
       JSON.parse Marty::DataExporter.decode_json(v) rescue JSON.parse(v)
     else
