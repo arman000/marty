@@ -1,4 +1,4 @@
-class Gemini::RuleScriptSet < Marty::RuleScriptSet
+class Gemini::MyRuleScriptSet < Marty::RuleScriptSet
   def self.node_name
     "Node2"
   end

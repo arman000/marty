@@ -1,4 +1,4 @@
-class Gemini::XyzRuleSubType < ActiveRecord::Base
+class Gemini::XyzRuleType < ActiveRecord::Base
   extend Marty::PgEnum
 
   VALUES = ['XRule','YRule', 'ZRule']

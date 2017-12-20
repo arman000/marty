@@ -45,7 +45,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
         cache[dgname] = dgid
       end
     end
-    computed_w_grids = dgres + rule.computed_results
+    computed_w_grids = dgres + rule.results
 
     write = lambda { |k, v| k + (v == :parameter ? " =?" : " = #{v}") }
 
@@ -54,9 +54,9 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     results_part = computed_w_grids.map(&write).join("\n")
     code = self.class.body_start + self.class.indent(cguards_part +
                                                      results_part)
-    #puts '='*40
-    #puts code
-    #puts '-'*10
+  #  puts '='*40
+  #  puts code
+  #  puts '-'*10
     code
   end
 
@@ -72,7 +72,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     sname = "RULE_#{rule.group_id}_#{rule.created_dt.to_f}"
     # is it a dev posting?
     if Mcfly.is_infinity(pt)
-      max_dt = Marty::Rule.
+      max_dt = rule.class.
         order("created_dt DESC").limit(1).pluck(:created_dt).first
 
       @@dengines_dt ||= max_dt

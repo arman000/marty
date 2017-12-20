@@ -1,9 +1,12 @@
-class Gemini::MyRuleView < Marty::BaseRuleView
+class Gemini::MyRuleView < Marty::DeloreanRuleView
   has_marty_permissions create: :admin,
                         read: :admin,
                         update: :admin,
                         delete: :admin
 
+  def self.base_fields
+    super + [:other_flag]
+  end
   def configure(c)
     super
     c.title = 'My Rules'
@@ -14,8 +17,7 @@ class Gemini::MyRuleView < Marty::BaseRuleView
   end
 
   attribute :other_flag do |c|
-    c.getter = lambda { |r| r.attrs[name]||false}
-    c.type = :boolean
+    c.width = 75
   end
 
   def form_items_grids
@@ -27,22 +29,21 @@ class Gemini::MyRuleView < Marty::BaseRuleView
   def default_form_items
     [
       hbox(
-        vbox(*[:name] +
-             form_items_attrs +
+        vbox(*form_items_attrs +
              form_items_guards +
              form_items_grids,
              border: false,
              width: "40%",
         ),
         vbox(width: '2%', border: false),
-        vbox(*form_items_simple_results,
+        vbox(
              width: '55%', border: false),
         height: '56%',
         border: false,
       ),
       hbox(
         vbox(*form_items_computed_guards +
-             form_items_computed_results,
+             form_items_results,
              width: '99%',
              border: false
         ),
@@ -53,5 +54,10 @@ class Gemini::MyRuleView < Marty::BaseRuleView
   end
 
   self.init_fields
+
+  attribute :rule_type do |c|
+    c.width = 200
+    enum_column(c, Gemini::MyRuleType)
+  end
 
 end

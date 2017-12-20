@@ -1,17 +1,16 @@
-class Gemini::MyRule < Marty::Rule
+class Gemini::MyRule < Marty::DeloreanRule
+  self.table_name = 'gemini_my_rules'
 
-  before_validation do
-    self.attrs ||= {}
-    self.attrs['type'] = 'MyRule'
-    self.attrs['engine'] = 'Gemini::RuleScriptSet'
+  gen_mcfly_lookup :lookup, {
+    name: false,
+  }
+
+  cached_mcfly_lookup :lookup_id, sig: 2 do
+    |pt, group_id|
+    find_by_group_id group_id
   end
 
-  def self.attr_info
-    h = super
-    h["subtype"][:enum] = Gemini::RuleSubType
-    h["other_flag"] = {type: :boolean, width: 50}
-    h
-  end
+  mcfly_validates_uniqueness_of :name, scope: [:start_dt, :end_dt]
 
   def self.guard_info
     super + {"g_array" => { multi: true, type: :string,
@@ -28,10 +27,6 @@ class Gemini::MyRule < Marty::Rule
                             width: 100},
              "g_integer" => { type: :integer,
                               width: 100}}
-  end
-
-  def self.default_scope
-    where("attrs->>'type' = 'MyRule'")
   end
 
   mcfly_lookup :get_matches, sig: 3 do

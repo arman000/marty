@@ -1,6 +1,6 @@
-class AddRuleSubTypeEnum < ActiveRecord::Migration
+class AddRuleTypeEnums < ActiveRecord::Migration
   def change
-    [Gemini::XyzRuleSubType, Gemini::RuleSubType, Gemini::GuardOne,
+    [Gemini::XyzRuleType, Gemini::MyRuleType, Gemini::GuardOne,
      Gemini::GuardTwo, Gemini::XyzEnum].each do |cl|
       values = cl::VALUES
       str_values = values.map {|v| ActiveRecord::Base.connection.quote v}.

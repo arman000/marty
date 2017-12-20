@@ -62,7 +62,17 @@ feature 'rule view', js: true do
     c.send_keys([:down, :down, :down, :down, ' ', :escape])
     sleep 1.0
   end
-
+  # idx 0 is the start dt, 1 is the end dt
+  def date_fill_in(idx, value)
+    dt = all(:xpath, "//input[contains(@name, 'datefield')]")[idx]
+    dt.native.clear()
+    dt.native.send_keys(value)
+  end
+  def time_fill_in(idx,value)
+    tm = all(:xpath, "//input[contains(@name, 'timefield')]")[idx]
+    tm.native.clear()
+    tm.native.send_keys(value)
+  end
   it "rule workflow" do
     log_in_as('marty')
     page.driver.browser.manage.window.maximize
@@ -72,17 +82,22 @@ feature 'rule view', js: true do
     press('Add')
     fill_in('name', with: 'abc')
     press('OK')
-    expect(page).to have_content("Required field 'subtype' is missing")
+    expect(page).to have_content("Rule type can't be blank")
+    expect(page).to have_content("Start dt can't be blank")
     # create and verify rule
-    fill_in('subtype', with: 'SimpleRule')
+    fill_in('rule_type', with: 'SimpleRule')
+    date_fill_in(0, '2013-01-01')
+    time_fill_in(0, '11:03:01')
+    date_fill_in(1, '2030-01-01')
+    time_fill_in(1, '08:03:01')
     press("OK")
     wait_for_ajax
     expect(mrv.row_count()).to eq(5)
     expect(mrv.get_row_vals(1)).to include({"name"=>"abc",
-                                            "subtype"=>"SimpleRule",
-                                            "start_dt"=>"",
-                                            "end_dt"=>"",
-                                            "other_flag"=>nil,
+                                            "rule_type"=>"SimpleRule",
+                                            "start_dt"=>"2013-01-01T19:03:01.000Z",
+                                            "end_dt"=>"2030-01-01T16:03:01.000Z",
+                                            "other_flag"=>false,
                                             "g_array"=>"",
                                             "g_single"=>"",
                                             "g_string"=>"",
@@ -91,20 +106,19 @@ feature 'rule view', js: true do
                                             "g_integer"=>nil,
                                             "computed_guards"=>"",
                                             "grids"=>"",
-                                            "simple_results"=>"",
-                                            "computed_results"=>""})
+                                            "results"=>"",
+                                            })
     r = Gemini::MyRule.lookup('infinity','abc')
     expect(r.as_json).to include({"user_id"=>1,
                                   "o_user_id"=>nil,
                                   "name"=>"abc",
-                                  "attrs"=>{"type"=>"MyRule",
-                                            "engine"=>"Gemini::RuleScriptSet",
-                                            "subtype"=>"SimpleRule"},
+                                  "engine"=>"Gemini::MyRuleScriptSet",
+                                  "rule_type"=>"SimpleRule",
                                   "simple_guards"=>{},
                                   "computed_guards"=>{},
                                   "grids"=>{},
-                                  "simple_results"=>{},
-                                  "computed_results"=>{}})
+                                  "results"=>{},
+                                  })
     # type validation (string with values list)
     mrv.select_row(1)
     press("Edit")
@@ -128,9 +142,9 @@ feature 'rule view', js: true do
     press("OK")
     wait_for_ajax
     exp = {"name"=>"abc",
-           "subtype"=>"SimpleRule",
-           "start_dt"=>"",
-           "end_dt"=>"",
+           "rule_type"=>"SimpleRule",
+           "start_dt"=>"2013-01-01T19:03:01.000Z",
+           "end_dt"=>"2030-01-01T16:03:01.000Z",
            "other_flag"=>true,
            "g_array"=>"G1V1,G1V3",
            "g_single"=>"G2V2",
@@ -140,8 +154,8 @@ feature 'rule view', js: true do
            "g_integer"=>123,
            "computed_guards"=>"",
            "grids"=>"{\"grid1\":\"DataGrid1\",\"grid2\":\"DataGrid2\"}",
-           "simple_results"=>"",
-           "computed_results"=>""}
+           "results"=>"",
+          }
     expect(mrv.get_row_vals(1)).to include(exp)
     # grid edits
     press("Edit")
@@ -154,38 +168,37 @@ feature 'rule view', js: true do
     press("Edit")
     fill_in(:computed_guards, with: 'sadf asdf ljsf')
     press("OK")
-    exp = "Computed - Error in field computed_guards: syntax error"
+    exp = "Computed - Error in field computed_guards: Syntax error on line 1"
     expect(page).to have_content(exp)
     fill_in(:computed_guards, with: 'sadf = 123j s /*fdjOIb')
     press("OK")
     exp = "Computed - Error in field computed_guards: syntax error"
     expect(page).to have_content(exp)
     fill_in(:computed_guards, with: '')
-    fill_in(:computed_results, with: 'sadf asdf ljsf')
+    fill_in(:results, with: %Q(abc = "def"\ndef = 5\nxyz=def+10\nsadf asdf lsf))
     press("OK")
-    exp = "Computed - Error in field computed_results: syntax error"
+    exp = "Computed - Error in field results: Syntax error on line 4"
     expect(page).to have_content(exp)
-    fill_in(:computed_results, with: '')
-    fill_in(:simple_results, with: '*DVSJwefjf13r/')
-    press("OK")
-    exp = "Simple results - Syntax error on line 1"
-    expect(page).to have_content(exp)
-    fill_in(:simple_results, with: 'abc = def')
-    press("OK")
-    expect(page).to have_content(exp)
-    fill_in(:simple_results,
+    fill_in(:results,
             with: %Q(abc = "def"\ndef = "abc"\nklm = "3"\nabc = "xyz"))
-    exp = "Simple results - Keyword 'abc' specified more than once (line 4)"
+    exp = "Computed - Error in field results: Keyword 'abc' specified more"\
+          " than once (line 4)"
     press("OK")
     expect(page).to have_content(exp)
-    fill_in(:simple_results,
+    fill_in(:results,
             with: %Q(abc = "def"\ndef = "abc"\nklm = "3"))
     press("OK")
 
+    press("Dup in form")
+    press("OK")
+    exp = Regexp.new("Can't have rule with same name and overlapping start"\
+                     "/end dates - abc")
+    expect(page).to have_content(exp)
+    press("Cancel")
     # column sorting, etc
     go_to_xyz_rules
     xrv = netzke_find("xyz_rule_view")
-    expect(page).to have_content("Rule Type")
+    expect(page).to have_content("Rule type")
     expect(xrv.col_values(:name, 5, 0)).to eq(["ZRule1", "ZRule2",
                                                     "ZRule3", "ZRule4",
                                                     "ZRule5"])
@@ -200,10 +213,9 @@ feature 'rule view', js: true do
     exp = {"user_id"=>1,
            "o_user_id"=>nil,
            "name"=>"ZRule1",
-           "attrs"=>{"type"=>"XyzRule",
-                     "engine"=>"Gemini::XyzRuleScriptSet",
-                     "subtype"=>"ZRule",
-                     "start_dt"=>"2017-1-1 08:01:00"},
+           "engine"=>"Gemini::XyzRuleScriptSet",
+           "rule_type"=>"ZRule",
+           "start_dt"=>DateTime.parse("2017-1-1 08:01:00"),
            "simple_guards"=>{"g_date"=>"2017-1-1",
                              "g_range1"=>"[100,200)",
                              "g_range2"=>"[30,40)",
@@ -212,10 +224,10 @@ feature 'rule view', js: true do
                              "g_datetime"=>"2017-1-1 12:00:01"},
            "computed_guards"=>{},
            "grids"=>{"grid1"=>"DataGrid1"},
-           "simple_results"=>{},
-           "computed_results"=>
+           "results"=>
            {"bvlen"=>"base_value.length",
             "bv"=>"base_value"}}
+
     expect(r.first.as_json).to include(exp)
     expect(xrv.col_values(:g_string, 5, 0)).to eq(["aaa", "bbb", "ccc",
                                                    "ddd", "eee"])

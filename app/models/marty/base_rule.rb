@@ -1,10 +1,7 @@
 class Marty::BaseRule < Marty::Base
-  self.table_name = 'marty_rules'
+  self.abstract_class = true
   has_mcfly
 
-  def self.attr_info
-    {}
-  end
   def self.guard_info
     {}
   end
@@ -23,12 +20,13 @@ class Marty::BaseRule < Marty::Base
     types << :boolean if [true, false].include?(v)
     types
   end
-  def check(name, h, errtype)
+  def check(name, h)
     multi, type, enum, values, req = h.values_at(:multi, :type, :enum, :values,
                                                  :required)
     ns = "'#{name}'"
     expmulti = multi ? 'multi' : 'single'
-    v = errtype == :attributes ? attrs[name] : simple_guards[name]
+    errtype = :guards
+    v = simple_guards[name]
     type ||= :string
     return errors[errtype] << "- Required field #{ns} is missing" if
       v.blank? && req
@@ -49,69 +47,32 @@ class Marty::BaseRule < Marty::Base
            %Q(- Bad value#{p} '#{bad.join("', '")}' for #{ns}) if bad.present?
   end
   def validate
-    self.class.attr_info.each { |name, h| check(name, h, :attributes) }
-    self.class.guard_info.each { |name, h| check(name, h, :guards) }
-    if computed_guards.present? || computed_results.present?
-      begin
-        eclass = attrs["engine"].try(:constantize) || Marty::RuleScriptSet
-        engine = eclass.new('infinity').get_engine(self)
-      rescue => e
-        f = get_parse_error_field(e)
-        return errors[:computed] = "- Error in field #{f}: #{e} "
-      end
-    end
+    self.class.guard_info.each { |name, h| check(name, h) }
     grids.each do |vn, gn|
       return errors[:grids] << "- Bad grid name '#{gn}' for '#{vn}'" unless
         gn.blank? || Marty::DataGrid.lookup('infinity', gn)
     end
-    # errors in computed jsons are detected earlier by creating an engine
-    err = simple_results.delete("~~ERROR~~")
-    errors[:simple_results] = " - " + err.capitalize if err
+    cg_err = computed_guards.delete("~~ERROR~~")
+    errors[:computed] <<
+      "- Error in field computed_guards: #{cg_err.capitalize}" if cg_err
+    res_err = results.delete("~~ERROR~~")
+    errors[:computed] <<
+      "- Error in field results: #{res_err.capitalize}" if res_err
   end
-
-  def get_parse_error_field(exc)
-    e = attrs['engine']
-    kl = e && e.constantize || Marty::RuleScriptSet
-    line = exc.line ? exc.line - kl.body_lines : 0
-    errs = {}
-    errs[:computed_guards] = computed_guards.keys.count
-
-    # 1 code line per each grid
-    # plus 2 per each unique grid
-    # plus 2 code lines for pt and params__
-    gridlines = grids.present? ? 2 + grids.values.to_set.count * 2 +
-                                 grids.keys.count : 0
-    errs[:grids] = gridlines
-    errs[:computed_results] = computed_results.keys.count
-    line_count = 0
-    errs.each do |k,v|
-      line_count += v
-      return k if line <= line_count
-    end
-    errs.keys.last
-  end
-
 
   validates_presence_of :name
-  mcfly_validates_uniqueness_of :name
   validate :validate
 
   before_validation(on: [:create, :update]) do
-    self.attrs             ||= {}
     self.simple_guards     ||= {}
     self.computed_guards   ||= {}
     self.grids             ||= {}
-    self.simple_results    ||= {}
-    self.computed_results  ||= {}
-  end
-
-  gen_mcfly_lookup :lookup, {
-    name: false,
-  }
-
-  cached_mcfly_lookup :lookup_id, sig: 2 do
-    |pt, group_id|
-    find_by_group_id group_id
+    self.results           ||= {}
+    # identify result values that are fixed, stash them (removing quotes)
+    fixed = self.results.each_with_object({}) do |(k, v), h|
+      h[k] = v[1..-2] if JSON.parse("[#{v}]") rescue nil
+    end
+    self.fixed_results = fixed
   end
 
   class DupKeyError < StandardError
@@ -124,7 +85,7 @@ class Marty::BaseRule < Marty::Base
     end
   end
 
-  def self.simple_to_hashstr(s, unquoted)
+  def self.simple_to_hashstr(s)
     pairs = []
     keys = Set.new
     s.lines.each.with_index(1) do |line, idx|
@@ -133,7 +94,7 @@ class Marty::BaseRule < Marty::Base
       begin
         m = /\A\s*([a-z0-9][a-z0-9_]*)\s*=\s*(.*)\s*\z/.match(line)
         k, v = m[1], m[2]
-        v = unquoted ? [v].to_json[1..-2] : v
+        v = [v].to_json[1..-2]
         raise DupKeyError.new(k, idx) if keys.include?(k)
         raise unless /\A['"].*['"]\z/.match(v)
         keys << k
@@ -149,47 +110,12 @@ class Marty::BaseRule < Marty::Base
     "{#{kvs}}"
   end
 
-  def self.hash_to_simple(h, unquoted)
+  def self.hash_to_simple(h)
     return unless h && h.present?
     fmt = '%-' +  h.keys.map(&:length).max.to_s + 's = %s'
-    h.map do |k, v|
-      vstr = unquoted ? v : [v].to_json[1..-2]
+    h.map do |k, vstr|
       fmt % [k, vstr]
     end.join("\n") || ''
-  end
-
-  def compute(params)
-    eclass = attrs["engine"].try(:constantize) || Marty::RuleScriptSet
-    engine = eclass.new(params["pt"]).get_engine(self) if
-      computed_guards.present? || computed_results.present?
-
-    if computed_guards.present?
-      cg_keys = computed_guards.keys
-      begin
-        res = engine.evaluate(eclass.node_name,
-                              cg_keys,
-                              params.clone)
-      rescue => e
-        raise e, "Error (guard) in rule '#{id}:#{name}': #{e}", e.backtrace
-      end
-      return Hash[cg_keys.zip(res).select{|k,v| !v}] unless res.all?
-    end
-
-    if computed_results.present?
-      #fixme except tmp vars
-      compute_keys = computed_results.keys + grids.keys
-      begin
-        eval_result = engine.evaluate(
-          eclass.node_name,
-          compute_keys,
-          params + {
-            "params__" => params
-          })
-      rescue => e
-        raise e, "Error (result) in rule '#{id}:#{name}': #{e}", e.backtrace
-      end
-      Hash[compute_keys.zip(eval_result)]
-    end
   end
 
   def self.get_subq(field, subfield, multi, type, vraw)
@@ -206,20 +132,19 @@ class Marty::BaseRule < Marty::Base
   end
 
   def self.get_matches_(pt, attrs, params)
-    q = select("DISTINCT ON (name) *")
+    q = select("DISTINCT ON (name) *").where(attrs)
 
-    m = lambda { |isnull, dbfield, h, k, vraw|
+    params.each do |k, vraw|
+      h = guard_info
       next unless h[k]
       multi, type = h[k].values_at(:multi, :type)
       filts = [vraw].flatten.map do |v|
-        qstr = get_subq(dbfield, k, multi, type, v)
+        qstr = get_subq('simple_guards', k, multi, type, v)
       end.join(" OR ")
-      isn = isnull ? "#{dbfield}->'#{k}' IS NULL OR" : ''
+      isn = "simple_guards->'#{k}' IS NULL OR"
       q = q.where("(#{isn} #{filts})")
-    }
-    attrs.each { |k, v| m.call(false, 'attrs', attr_info, k, v) }
-    params.each { |k, v| m.call(true, 'simple_guards', guard_info, k, v) }
-  #  puts q.to_sql
+    end
+    #puts q.to_sql
     q.order(:name)
   end
 

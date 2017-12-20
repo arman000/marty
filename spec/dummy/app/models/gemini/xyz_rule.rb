@@ -1,17 +1,16 @@
-class Gemini::XyzRule < Marty::Rule
+class Gemini::XyzRule < Marty::DeloreanRule
+  self.table_name = 'gemini_xyz_rules'
 
-  before_validation do
-    self.attrs ||= {}
-    self.attrs['type'] = 'XyzRule'
-    self.attrs['engine'] = 'Gemini::XyzRuleScriptSet'
+  gen_mcfly_lookup :lookup, {
+    name: false,
+  }
+
+  cached_mcfly_lookup :lookup_id, sig: 2 do
+    |pt, group_id|
+    find_by_group_id group_id
   end
 
-  def self.attr_info
-    h = super
-    h["subtype"][:enum] = Gemini::XyzRuleSubType
-    h["subtype"][:label] = "Rule Type"
-    h
-  end
+  mcfly_validates_uniqueness_of :name, scope: [:start_dt, :end_dt]
 
   def self.guard_info
     super + {"flavors" => { multi: true, type: :string,
@@ -33,10 +32,6 @@ class Gemini::XyzRule < Marty::Rule
              "g_integer" => { type: :integer,
                               width: 100}
     }
-  end
-
-  def self.default_scope
-    where("attrs->>'type' = 'XyzRule'")
   end
 
   mcfly_lookup :get_matches, sig: 3 do

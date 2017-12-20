@@ -2,20 +2,24 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   include Marty::Extras::Layout
 
   def self.klass
-    Marty::Rule
+    Marty::BaseRule
   end
   def klass
     self.class.klass
   end
 
-  FIELDS = [:computed_guards, :grids, :simple_results, :computed_results]
+  def self.base_fields
+    [:name]
+  end
+  def self.computed_fields
+    [:computed_guards, :grids, :results]
+  end
   def configure(c)
     super
     c.model = self.class.klass
     c.title = I18n.t('rule')
-    c.attributes = [:name] + (klass.attr_info + klass.guard_info).
-                             reject{|_, h| h[:hidden]}.
-                             map { |name, _| name.to_sym } + FIELDS
+    c.attributes = self.class.base_fields + klass.guard_info.reject{|_, h|
+      h[:hidden]}.map { |name, _| name.to_sym } + self.class.computed_fields
     c.store_config.merge!(sorters: [{property: :name, direction: 'ASC'}])
     c.editing      = :in_form
     c.paging       = :pagination
@@ -34,18 +38,18 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     lambda { |r| md = r.send(c); md.present? && md.to_json || '' }
   end
 
-  def jsonb_simple_getter(c, unquoted=false)
-    lambda {|r| Marty::BaseRule.hash_to_simple(r.send(c), unquoted) }
+  def jsonb_simple_getter(c)
+    lambda {|r| Marty::BaseRule.hash_to_simple(r.send(c)) }
   end
 
-  def jsonb_simple_setter(c, unquoted=false)
+  def jsonb_simple_setter(c)
     msg = "#{c}="
     lambda { |r, v|
       return r.send(msg, nil) if v.blank?
 
       begin
         v = ActiveSupport::JSON.decode(
-          Marty::BaseRule.simple_to_hashstr(v, unquoted))
+          Marty::BaseRule.simple_to_hashstr(v))
       rescue => e
         v = { "~~ERROR~~": e.message }
       end
@@ -65,10 +69,6 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
 
   def json_sort_scope(c)
     lambda { |r, dir| r.order("#{c}::text " + dir.to_s) }
-  end
-
-  def default_form_items
-   [:name, :attrs, :computed_guards, :grids, :simple_results,:computed_results]
   end
 
   component :add_window do |c|
@@ -109,52 +109,44 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def form_items_attrs
-    klass.attr_info.reject{|_, h| h[:hidden]}.keys.map{|x|x.to_sym}
+    self.class.base_fields
   end
 
   def form_items_guards
     klass.guard_info.reject{|_, h| h[:hidden]}.keys.map{|x|x.to_sym}
   end
 
-  def form_items_simple_results
-    [jsonb_field(:simple_results,
-                 getter: jsonb_simple_getter(:simple_results, false),
-                 setter: jsonb_simple_setter(:simple_results, false),
-                 height: 150)]
-  end
-
   def form_items_grids
     [jsonb_field(:grids,
-                 getter: jsonb_simple_getter(:grids, false),
-                 setter: jsonb_simple_setter(:grids, false),
+                 getter: jsonb_simple_getter(:grids),
+                 setter: jsonb_simple_setter(:grids),
                  height: 75)]
   end
 
   def form_items_computed_guards
     [jsonb_field(:computed_guards,
-                 getter: jsonb_simple_getter(:computed_guards, true),
-                 setter: jsonb_simple_setter(:computed_guards, true),
+                 getter: jsonb_simple_getter(:computed_guards),
+                 setter: jsonb_simple_setter(:computed_guards),
                  height: 150)]
   end
 
-  def form_items_computed_results
-    [jsonb_field(:computed_results,
-                 getter: jsonb_simple_getter(:computed_results, true),
-                 setter: jsonb_simple_setter(:computed_results, true),
+  def form_items_results
+    [jsonb_field(:results,
+                 getter: jsonb_simple_getter(:results),
+                 setter: jsonb_simple_setter(:results),
                  height: 150)]
   end
 
   def default_form_items
     [
       hbox(
-        vbox(*[:name] +
-             form_items_attrs +
+        vbox(*form_items_attrs +
              form_items_guards,
              border: false,
              width: "40%",
         ),
         vbox(width: '2%', border: false),
-        vbox(*form_items_simple_results,
+        vbox(
              width: '55%', border: false),
         height: '40%',
         border: false,
@@ -162,7 +154,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       hbox(
         vbox(*form_items_computed_guards +
              form_items_grids +
-             form_items_computed_results,
+             form_items_results,
              width: '99%',
              border: false
         ),
@@ -191,8 +183,8 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       end
       # for some unexplained reason the getter/setter need the full
       # class qualification
-      c.getter = Marty::BaseRuleView.jsonb_field_getter(meth, namestr)
-      c.setter = Marty::BaseRuleView.jsonb_field_setter(meth, namestr)
+      c.getter = Marty::DeloreanRuleView.jsonb_field_getter(meth, namestr)
+      c.setter = Marty::DeloreanRuleView.jsonb_field_setter(meth, namestr)
       c.sorting_scope = get_json_sorter(meth, namestr)
       c.filter_with = lambda do |rel, value, op|
         v = ActiveRecord::Base.connection.quote(value)[1..-2]
@@ -202,17 +194,27 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     end
   end
 
-  def self.init_fields
-    klass.attr_info.reject{|_,h|h[:hidden]}.each do |namestr, h|
-      field_maker(namestr, h, :attrs)
-    end
+  attribute :start_dt do |c|
+    c.width = 150
+    c.format = 'Y-m-d H:i'
+  end
 
+  attribute :end_dt do |c|
+    c.width = 150
+    c.format = 'Y-m-d H:i'
+  end
+
+  attribute :rule_type do |c|
+    c.width = 200
+  end
+
+  def self.init_fields
     klass.guard_info.each do |namestr, h|
       field_maker(namestr, h, :simple_guards)
     end
   end
 
-  FIELDS.each do |a|
+  computed_fields.each do |a|
     column a do |c|
       c.flex   = 1
       c.getter = jsonb_getter(a.to_s)
