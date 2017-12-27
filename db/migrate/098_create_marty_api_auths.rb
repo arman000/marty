@@ -1,4 +1,4 @@
-class CreateMartyApiAuths < McflyMigration[4.2]
+class CreateMartyApiAuths < McflyMigration
   include Marty::Migrations
 
   def change

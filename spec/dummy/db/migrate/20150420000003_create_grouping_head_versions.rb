@@ -1,4 +1,4 @@
-class CreateGroupingHeadVersions < McflyMigration[4.2]
+class CreateGroupingHeadVersions < McflyMigration
   include Marty::Migrations
 
   def change

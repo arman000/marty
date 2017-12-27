@@ -1,6 +1,6 @@
 class CreateLoanPrograms < ActiveRecord::Migration[4.2]
   def up
-    McflyMigration[4.2].new.create_table 'gemini_loan_programs' do |t|
+    McflyMigration.new.create_table 'gemini_loan_programs' do |t|
       t.string   "name",                                                                   null: false
       t.integer  "amortization_type_id",                                                   null: false
       t.integer  "mortgage_type_id",                                                       null: false
@@ -18,7 +18,7 @@ class CreateLoanPrograms < ActiveRecord::Migration[4.2]
       t.decimal  "arm_margin_rate_percent",        precision: 7, scale: 4
       t.pg_enum  :enum_state, null: true
     end
-    McflyMigration[4.2].new.add_sql 'gemini_loan_programs', false
+    McflyMigration.new.add_sql 'gemini_loan_programs', false
   end
 
   def down

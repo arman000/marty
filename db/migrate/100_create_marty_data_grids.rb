@@ -1,4 +1,4 @@
-class CreateMartyDataGrids < McflyMigration[4.2]
+class CreateMartyDataGrids < McflyMigration
   include Marty::Migrations
 
   def change

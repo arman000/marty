@@ -1,4 +1,4 @@
-class CreateGroupings < McflyAppendOnlyMigration[4.2]
+class CreateGroupings < McflyAppendOnlyMigration
   include Marty::Migrations
 
   def change
