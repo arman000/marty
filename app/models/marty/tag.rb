@@ -40,7 +40,7 @@ class Marty::Tag < Marty::Base
     # many different types of arguments.
 
     case tag_id
-    when Fixnum, /\A[0-9]+\z/
+    when Integer, /\A[0-9]+\z/
       tag = find_by_id(tag_id)
     when String
       tag = find_by_name(tag_id)

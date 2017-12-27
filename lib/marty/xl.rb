@@ -107,14 +107,14 @@ class Marty::Xl
     x1, y1, x2, y2, w, h = d[1]
     column_offset, row_offset = offset
 
-    y_coords = y2.is_a?(Fixnum) || d[0] != "image" ? [y1, y2] : [y1]
-    x_coords = x2.is_a?(Fixnum) || d[0] != "image" ? [x1, x2] : [x1]
+    y_coords = y2.is_a?(Integer) || d[0] != "image" ? [y1, y2] : [y1]
+    x_coords = x2.is_a?(Integer) || d[0] != "image" ? [x1, x2] : [x1]
 
     # add the row offset:
     y1, y2 = y_coords.map { |y|
-      if y.is_a?(Fixnum)
+      if y.is_a?(Integer)
         row_offset + y
-      elsif y.is_a?(Hash) && y["off"].is_a?(Fixnum)
+      elsif y.is_a?(Hash) && y["off"].is_a?(Integer)
         last_row + y["off"]
       else
         raise "bad offset #{y}"
@@ -123,7 +123,7 @@ class Marty::Xl
 
     # add the column offset:
     x1, x2 = x_coords.map { |x|
-      raise "bad range point #{x}" unless x.is_a? Fixnum
+      raise "bad range point #{x}" unless x.is_a? Integer
       column_offset + x
     }
 
@@ -341,12 +341,12 @@ class Marty::Xl
 
     y1, y2 = [y1, y2].map { |y|
       next y unless y.is_a?(Hash)
-      raise "bad offset #{y}" unless y["off"].is_a?(Fixnum)
+      raise "bad offset #{y}" unless y["off"].is_a?(Integer)
       ws.rows.last.row_index + y["off"]
     }
 
     [x1, y1, x2, y2].each { |x|
-      raise "bad range point #{x}" unless x.is_a? Fixnum
+      raise "bad range point #{x}" unless x.is_a? Integer
     }
     Axlsx.cell_r(x1, y1) + ":" + Axlsx.cell_r(x2, y2)
   end
@@ -400,7 +400,7 @@ class Marty::Xl
         op, offset, data = opl
         raise "bad offset #{offset}" unless
           offset.is_a?(Array) && offset.length == 2 &&
-          offset.all? {|x| x.is_a? Fixnum}
+          offset.all? {|x| x.is_a? Integer}
         # column offset, row offset:
         column_offset, row_offset = offset
         r_number, last_row = row_offset, row_offset
@@ -443,7 +443,7 @@ class Marty::Xl
 
         # FIXME: need to handle Array?
         raise "non hash arg for row_style" unless style.is_a?(Hash)
-        raise "bad row num #{opl}" unless row_num.is_a?(Fixnum)
+        raise "bad row num #{opl}" unless row_num.is_a?(Integer)
 
         style = self.class.symbolize_keys(style, ':')
 
@@ -490,14 +490,14 @@ class Marty::Xl
           range.is_a?(Array) && range.length == 6
         x1, y1, x2, y2, w, h = range
         raise "bad image range, width or height #{range}" unless
-          [ x1, y1, w, h ].all? {|x| x.is_a? Fixnum}
+          [ x1, y1, w, h ].all? {|x| x.is_a? Integer}
         ws.add_image(image_src: "#{Rails.public_path}/images/#{img}",
                      noSelect: true,
                      noMove: true) do |image|
           image.width  = w
           image.height = h
           image.start_at x1, y1
-          image.end_at x2, y2 if x2.is_a?(Fixnum) && y2.is_a?(Fixnum)
+          image.end_at x2, y2 if x2.is_a?(Integer) && y2.is_a?(Integer)
         end
       else
         raise "unknown op #{opl[0]}"

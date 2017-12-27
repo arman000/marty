@@ -65,7 +65,7 @@ module Marty
           []
 
         raise "bad cleaner function result" unless
-          cleaner_ids.all? {|id| id.is_a?(Fixnum) }
+          cleaner_ids.all? {|id| id.is_a?(Integer) }
 
         eline = 0
 
