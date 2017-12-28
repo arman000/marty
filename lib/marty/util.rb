@@ -7,7 +7,7 @@ module Marty::Util
 
   def self.get_posting
     sid = Netzke::Base.session && Netzke::Base.session[:posting]
-    return unless sid.is_a? Fixnum
+    return unless sid.is_a? Integer
     sid && Marty::Posting.find_by_id(sid)
   end
 
