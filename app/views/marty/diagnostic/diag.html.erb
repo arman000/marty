@@ -1,34 +1,30 @@
-<% inconsistent = diff(data) %>
 <h3><%=name.demodulize%></h3>
-<%='<h3 class="error">Issues Detected</h3>' if
-                     inconsistent%>
+<%='<h3 class="error">Inconsistency Detected</h3>' unless consistent %>
 <div class="wrapper">
   <table>
-    <%# Create node table headers if applicable %>
+    <%# create node table headers if applicable %>
     <tr>
-      <%='<th></th>' if inconsistent %>
+      <%='<th></th>' unless success %>
       <% data.keys.each do |node| %>
-        <th <%='colspan="2"' unless inconsistent %> scope="col">
-          <%= inconsistent ? node :
-                          (type == 'local' ? 'local' : 'consistent') %>
+        <th <%='colspan="2"' if success %> scope="col">
+          <%= success ? 'consistent' : node %>
         </th>
-        <% break unless inconsistent %>
+        <% break if success %>
       <% end %>
     </tr>
-    <%# Create row headers and display node results %>
-    <% data[data.keys.first].each do |key, value| %>
+    <%# create row headers and display node results %>
+    <% data.values.map{|v| v.keys}.flatten.compact.uniq.each do |test| %>
       <tr>
-        <th scope="row"><%= key %></th>
-        <% targets = get_targets(data) %>
-        <% data.each do |_node, result| %>
-          <td class="overflow <%= (is_failure?(value) ||
-                          (result[key].to_s != targets[key].to_s)) ? 'error' :
-                          'passed' %>">
-            <%= simple_format(result[key].to_s) %>
+        <th class="data" scope="row"><%= test %></th>
+        <% data.values.each do |diagnostic| %>
+          <td class="overflow <%= display_info_css(diagnostic[test]) %>">
+            <%= display_info_description(diagnostic[test]) %>
           </td>
-          <% break unless inconsistent %>
+          <% break if success %>
         <% end %>
       </tr>
     <% end %>
   </table>
 </div>
+
+<%= display_alert_message if fatal? %>
