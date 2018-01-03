@@ -82,7 +82,7 @@ class Marty::PromiseView < Netzke::Tree::Base
 
     config.netzke_on_download = l(<<-JS)
     function() {
-       var jid = this.getSelectionModel().selected.first().getId();
+       var jid = this.getSelectionModel().getSelection()[0].getId();
        // FIXME: seems pretty hacky
        window.location = "#{Marty::Util.marty_path}/job/download?job_id=" + jid;
     }
