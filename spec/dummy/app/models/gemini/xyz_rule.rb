@@ -39,5 +39,19 @@ class Gemini::XyzRule < Marty::DeloreanRule
     get_matches_(pt, attrs, params)
   end
 
+  def compute_xyz(pt, xyz_param)
+    # Given a set of parameters, compute the RULE adjustment.  Returns
+    # {} if precondition is not met.
+
+    xyz_keys =  computed_guards.select{|k,_|k.starts_with?("xyz_")}.keys
+    return {} unless xyz_keys.present?
+
+    eclass = engine && engine.constantize || Marty::RuleScriptSet
+    engine = eclass.new(pt).get_engine(self)
+    res = engine.evaluate("XyzNode", xyz_keys, {"xyz_param"=>xyz_param})
+
+    res.all?
+  end
+
 
 end

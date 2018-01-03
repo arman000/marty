@@ -70,7 +70,9 @@ class Marty::BaseRule < Marty::Base
     self.results           ||= {}
     # identify result values that are fixed, stash them (removing quotes)
     fixed = self.results.each_with_object({}) do |(k, v), h|
-      h[k] = v[1..-2] if JSON.parse("[#{v}]") rescue nil
+      jp = JSON.parse("[#{v}]") rescue nil
+      next unless jp
+      h[k] = jp[0]
     end
     self.fixed_results = fixed
   end

@@ -23,6 +23,9 @@ namespace :marty do
     Marty::Script.load_scripts(load_dir)
   end
 
+  # currently this is for delorean style rules only.  if other types were ever
+  # added (eg some sort of SQL rule like apollo has), that would probably be
+  # a new rake task
   desc 'generate rule table migration'
   task :generate_rule_table_migration, [:table] => :environment do |t, args|
     (puts "Usage: rake marty:generate_rule_table_migration[<table name>]"

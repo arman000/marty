@@ -11,8 +11,8 @@ class Marty::DeloreanRule < Marty::BaseRule
         where("(start_dt, coalesce(end_dt, 'infinity')) OVERLAPS (?, ?)",
               start_dt, end_dt || 'infinity').exists?
       return errors[:base] <<
-          "Can't have rule with same name and overlapping start/end dates"\
-          " - #{name}"
+             "Can't have rule with same name and overlapping start/end dates"\
+             " - #{name}"
     end
 
     return errors[:base] = "Start date must be before end date" if
@@ -23,67 +23,55 @@ class Marty::DeloreanRule < Marty::BaseRule
         eclass = engine && engine.constantize || Marty::RuleScriptSet
         eng = eclass.new('infinity').get_engine(self)
       rescue => e
-        f = get_parse_error_field(e)
-        return errors[:computed] = "- Error in field #{f}: #{e} "
+        return errors[:computed] = "- " + e.message
       end
     end
   end
 
-  def get_parse_error_field(exc)
-    kl = engine && engine.constantize || Marty::RuleScriptSet
-    begin
-      line = exc.line ? exc.line - kl.body_lines : 0
-    rescue => e
-      binding.pry
-    end
-    errs = {}
-    errs[:computed_guards] = computed_guards.keys.count
-
-    # 1 code line per each grid
-    # plus 2 per each unique grid
-    # plus 2 code lines for pt and params__
-    gridlines = grids.present? ? 2 + grids.values.to_set.count * 2 +
-                                 grids.keys.count : 0
-    errs[:grids] = gridlines
-    errs[:results] = results.keys.count
-    line_count = 0
-    errs.each do |k,v|
-      line_count += v
-      return k if line <= line_count
-    end
-    errs.keys.last
+  def compg_keys
+    computed_guards.keys
   end
 
-  def compute(params)
+  def compres_keys
+    results.keys.reject{|k|k.starts_with?("tmp_")} + grids.keys
+  end
+
+  def compute(params, dgparams=params)
     eclass = engine && engine.constantize || Marty::RuleScriptSet
     engine = eclass.new(params["pt"]).get_engine(self) if
       computed_guards.present? || results.present?
 
     if computed_guards.present?
-      cg_keys = computed_guards.keys
       begin
         res = engine.evaluate(eclass.node_name,
-                              cg_keys,
+                              compg_keys,
                               params.clone)
       rescue => e
         raise e, "Error (guard) in rule '#{id}:#{name}': #{e}", e.backtrace
       end
-      return Hash[cg_keys.zip(res).select{|k,v| !v}] unless res.all?
+      return Hash[compg_keys.zip(res).select{|k,v| !v}] unless res.all?
     end
 
     if results.present?
-      compute_keys = results.keys.reject{|k|k.starts_with?("tmp_")} + grids.keys
       begin
         eval_result = engine.evaluate(
           eclass.node_name,
-          compute_keys,
+          compres_keys,
           params + {
-            "params__" => params
+            "dgparams__" => dgparams,
           })
       rescue => e
         raise e, "Error (result) in rule '#{id}:#{name}': #{e}", e.backtrace
       end
-      Hash[compute_keys.zip(eval_result)]
+      Hash[compres_keys.zip(eval_result)]
+    elsif grids.present?
+      pt = params['pt']
+      gres = {}
+      grids.each_with_object({}) do |(gvar, gname), h|
+        dg = Marty::DataGrid.lookup(pt,gname)
+        dgr = dg && dg.lookup_grid_distinct_entry(pt, dgparams)
+        h[gvar] = dgr
+      end
     end
   end
 

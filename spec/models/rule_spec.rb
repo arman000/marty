@@ -75,27 +75,27 @@ module Marty::RuleSpec
       it "detects errors in computed results" do
         @rule_type = "SimpleRule"
         @results = {"does_not_compute"=> "zvjsdf12.z8*"}
-        @grids = {"grid1"=>"Grid1","grid2"=>"Grid2"}
+        @grids = {"grid1"=>"DataGrid1","grid2"=>"DataGrid2"}
         exp = /Computed - Error in field results: syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "detects errors in computed results 2" do
         @rule_type = "SimpleRule"
         @results = {"does_not_compute"=> "zvjsdf12.z8*"}
-        @grids = {"grid1"=>"Grid1","grid2"=>"Grid1","grid3"=>"Grid3"}
+        @grids = {"grid1"=>"DataGrid1","grid2"=>"DataGrid1","grid3"=>"DataGrid3"}
         exp = /Computed - Error in field results: syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "detects errors in computed results 3" do
         @rule_type = "SimpleRule"
         @results = {"does_not_compute"=> "zvjsdf12.z8*"}
-        @grids = {"grid1"=>"Grid1","grid2"=>"Grid1","grid3"=>"Grid1"}
+        @grids = {"grid1"=>"DataGrid1","grid2"=>"DataGrid1","grid3"=>"DataGrid1"}
         exp = /Computed - Error in field results: syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "reports bad grid names" do
         @rule_type = "SimpleRule"
-        @grids = {"grid1"=>"xyz","grid2"=>"Grid2","grid3"=>"Grid1"}
+        @grids = {"grid1"=>"xyz","grid2"=>"DataGrid2","grid3"=>"DataGrid1"}
         exp = /Grids - Bad grid name 'xyz' for 'grid1'/
         expect{subject}.to raise_error(exp)
       end
@@ -117,6 +117,25 @@ module Marty::RuleSpec
         @results = {"x"=>"zx sdf wer"}
         exp = /Computed - Error in field results: syntax error/
         expect{subject}.to raise_error(exp)
+      end
+      it "rule script stuff overrides 1" do
+        @rule_type = 'XRule'
+        @computed_guards = {"abc"=>"true", "xyz_guard"=> "err err err"}
+        exp = /Computed - Error in field xyz: syntax error/
+        expect{subject}.to raise_error(exp)
+      end
+      it "rule script stuff overrides 2" do
+        @rule_type = 'XRule'
+        @computed_guards = {"abc"=>"err err err", "xyz_guard"=> "xyz_param"}
+        exp = /Computed - Error in field computed_guards: syntax error/
+        expect{subject}.to raise_error(exp)
+      end
+      it "rule script stuff overrides 3" do
+        @rule_type = 'XRule'
+        @computed_guards = {"abc"=>"true", "xyz_guard"=> "!xyz_param"}
+        rule = subject
+        expect(rule.compute_xyz('infinity',true)).to be false
+        expect(rule.compute_xyz('infinity',false)).to be true
       end
       it "no error" do
         @rule_type = 'XRule'
@@ -218,6 +237,9 @@ module Marty::RuleSpec
       end
       it "returns simple results via #fixed_results" do
         expect(simple.fixed_results["simple_result"]).to eq("b value")
+        expect(simple.fixed_results["sr2"]).to eq(true)
+        expect(simple.fixed_results["sr3"]).to eq(123)
+        expect(simple.fixed_results.count).to eq(3)
       end
       it "returns computed results" do
         c = complex.compute({"pt"=>Time.zone.now,
