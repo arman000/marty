@@ -1,5 +1,5 @@
 class Gemini::XyzRuleType < ActiveRecord::Base
   extend Marty::PgEnum
 
-  VALUES = ['XRule','YRule', 'ZRule']
+  VALUES = Set['XRule','YRule', 'ZRule']
 end

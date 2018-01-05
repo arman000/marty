@@ -1,5 +1,5 @@
 class Gemini::XyzEnum < ActiveRecord::Base
   extend Marty::PgEnum
 
-  VALUES = ['Vanilla', 'Chocolate', 'Strawberry']
+  VALUES = Set['Vanilla', 'Chocolate', 'Strawberry']
 end

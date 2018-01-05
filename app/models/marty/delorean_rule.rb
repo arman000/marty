@@ -5,7 +5,6 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   def validate
     super
-
     if self.class.where(obsoleted_dt: 'infinity', name: name).
         where.not(id: id).
         where("(start_dt, coalesce(end_dt, 'infinity')) OVERLAPS (?, ?)",
@@ -33,7 +32,8 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def compres_keys
-    results.keys.reject{|k|k.starts_with?("tmp_")} + grids.keys
+    results.keys.reject{|k|k.starts_with?("tmp_")} +
+      grids.keys.map{|k|k.ends_with?("_grid") ? k : k + "_grid"}
   end
 
   def compute(params, dgparams=params)
@@ -53,24 +53,30 @@ class Marty::DeloreanRule < Marty::BaseRule
     end
 
     if results.present?
-      begin
-        eval_result = engine.evaluate(
-          eclass.node_name,
-          compres_keys,
-          params + {
-            "dgparams__" => dgparams,
-          })
-      rescue => e
-        raise e, "Error (result) in rule '#{id}:#{name}': #{e}", e.backtrace
+      if fixed_results.keys.sort == results.keys.sort
+        eval_result = fixed_results
+      else
+        begin
+          eval_result = engine.evaluate(
+            eclass.node_name,
+            compres_keys,
+            params + {
+              "dgparams__" => dgparams,
+            })
+        rescue => e
+          raise e, "Error (result) in rule '#{id}:#{name}': #{e}", e.backtrace
+        end
+        Hash[compres_keys.zip(eval_result)]
       end
-      Hash[compres_keys.zip(eval_result)]
     elsif grids.present?
       pt = params['pt']
       gres = {}
       grids.each_with_object({}) do |(gvar, gname), h|
+        usename = gvar.ends_with?("_grid") ? gvar : gvar + "_grid"
+        next h[usename] = gres[gname] if gres[gname]
         dg = Marty::DataGrid.lookup(pt,gname)
         dgr = dg && dg.lookup_grid_distinct_entry(pt, dgparams)
-        h[gvar] = dgr
+        h[usename] = gres[gname] = dgr["result"] if dgr
       end
     end
   end
@@ -82,11 +88,6 @@ class Marty::DeloreanRule < Marty::BaseRule
        where("end_dt >= ? OR end_dt IS NULL", rule_dt) if rule_dt
     #puts q.to_sql
     q.order("start_dt DESC NULLS LAST")
-  end
-
-  mcfly_lookup :get_matches, sig: 3 do
-    |pt, attrs, params|
-    get_matches_(pt, attrs, params)
   end
 
 end

@@ -92,7 +92,7 @@ feature 'rule view', js: true do
     time_fill_in(1, '08:03:01')
     press("OK")
     wait_for_ajax
-    expect(mrv.row_count()).to eq(5)
+    expect(mrv.row_count()).to eq(7)
     expect(mrv.get_row_vals(1)).to include({"name"=>"abc",
                                             "rule_type"=>"SimpleRule",
                                             "start_dt"=>"2013-01-01T19:03:01.000Z",

@@ -46,13 +46,14 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
              }
     attrs = rule.grids.each_with_object(dghash) do
       |(dgid, dgname), h|
+        final_name = dgid.ends_with?("_grid") ?  dgid : dgid + "_grid"
       if cache[dgname]
-        h[dgid] = "#{cache[dgname]}"
+        h[final_name] = "#{cache[dgname]}"
       else
         h["#{dgid}_dg__"] = "Marty::DataGrid.lookup(pt,'#{dgname}')"
         h["#{dgid}_h__"] = "#{dgid}_dg__.lookup_grid_distinct_entry(pt,dgparams__)"
-        h[dgid] = "#{dgid}_h__ && #{dgid}_h__.result"
-        cache[dgname] = dgid
+        h[final_name] = "#{dgid}_h__ && #{dgid}_h__.result"
+        cache[dgname] = final_name
       end
     end
     write_code(attrs)

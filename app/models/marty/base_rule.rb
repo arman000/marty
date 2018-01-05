@@ -34,17 +34,17 @@ class Marty::BaseRule < Marty::Base
     gotmulti = v.is_a?(Array) ? 'multi' : 'single'
     return errors[errtype] << "- Wrong arity for #{ns} (expected #{expmulti} "\
                               "got #{gotmulti})" if expmulti != gotmulti
-    vs = [v].flatten
+    vs = [v].flatten.to_set
     vs.each do |vv|
       return errors[errtype] << "- Wrong type for #{ns}" unless
         gettypes(vv).member?(type)
     end
     return unless enum || values
-    vals = enum && enum::VALUES || values
+    vals = enum && enum::VALUES || values.to_set
     bad = (vs - vals)
     p = bad.count > 1 ? 's' : ''
     return errors[errtype] <<
-           %Q(- Bad value#{p} '#{bad.join("', '")}' for #{ns}) if bad.present?
+           %Q(- Bad value#{p} '#{bad.to_a.join("', '")}' for #{ns}) if bad.present?
   end
   def validate
     self.class.guard_info.each { |name, h| check(name, h) }
@@ -58,6 +58,17 @@ class Marty::BaseRule < Marty::Base
     res_err = results.delete("~~ERROR~~")
     errors[:computed] <<
       "- Error in field results: #{res_err.capitalize}" if res_err
+
+    same_name_diff_guards = self.class.
+        where(obsoleted_dt: 'infinity', name: self.name).
+        # id is nil on new rules
+        where.not(id: self.id).
+        where("simple_guards != '#{self.simple_guards.to_json}'")
+
+    errors[:base] =
+      "Can't have rule with same name and different type/guards" +
+      " - #{self.name}" if same_name_diff_guards.exists?
+
   end
 
   validates_presence_of :name
@@ -134,6 +145,7 @@ class Marty::BaseRule < Marty::Base
   end
 
   def self.get_matches_(pt, attrs, params)
+
     q = select("DISTINCT ON (name) *").where(attrs)
 
     params.each do |k, vraw|
@@ -144,14 +156,11 @@ class Marty::BaseRule < Marty::Base
         qstr = get_subq('simple_guards', k, multi, type, v)
       end.join(" OR ")
       isn = "simple_guards->'#{k}' IS NULL OR"
+
       q = q.where("(#{isn} #{filts})")
     end
-    #puts q.to_sql
+    #print q.to_sql
     q.order(:name)
   end
 
-  mcfly_lookup :get_matches, sig: 3 do
-    |pt, attrs, params|
-    get_matches_(pt, attrs, params)
-  end
 end

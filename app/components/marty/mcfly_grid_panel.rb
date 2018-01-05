@@ -60,7 +60,6 @@ class Marty::McflyGridPanel < Marty::Grid
   end
 
   client_class do |c|
-    # FIXME: consider moving this to Marty
     c.include :dup_in_form
   end
 

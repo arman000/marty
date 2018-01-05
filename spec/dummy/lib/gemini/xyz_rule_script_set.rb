@@ -13,14 +13,8 @@ class Gemini::XyzRuleScriptSet < Marty::RuleScriptSet
   end
   def get_code(rule)
     x = xyz_code(rule)
-    code = super + (x.blank? ? '' :
+    super + (x.blank? ? '' :
       "XyzNode:\n    xyz_param =? nil\n" + self.class.indent(x))
-
-   # puts '='*40
-   # puts code
-   # puts '-'*10
-
-    code
   end
   def code_section_counts(rule)
     super + { xyz: xyz_code(rule).count("\n") }

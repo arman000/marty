@@ -155,8 +155,8 @@ module Marty::RuleSpec
                                             {'rule_type'=>'SimpleRule',
                                             'other_flag'=>true},
                                             {})
-        expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule2")
+        expect(lookup.to_a.count).to eq(3)
+        expect(lookup.map{|l|l.name}.to_set).to eq(Set["Rule2","Rule2a","Rule2b"])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'ComplexRule',
                                             'other_flag'=>false},
@@ -174,9 +174,10 @@ module Marty::RuleSpec
         expect(lookup).to eq([])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'SimpleRule'},
-                                            {'g_bool'=>true, "g_range"=>25})
+                                            {'g_bool'=>true, "g_range"=>25,
+                                             'g_integer'=>99})
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule2")
+        expect(lookup.first.name).to eq("Rule2a")
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'SimpleRule'},
                                             {'g_bool'=>true, "g_range"=>75})
@@ -200,12 +201,13 @@ module Marty::RuleSpec
         expect(lookup).to eq([])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'SimpleRule'}, {})
-        expect(lookup.to_a.count).to eq(2)
+        expect(lookup.to_a.count).to eq(4)
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_dt'=>"2017-3-1 02:00:00"},
                                             {})
-        expect(lookup.to_a.count).to eq(3)
-        expect(lookup.pluck(:name).to_set).to eq(Set["Rule1","Rule2","Rule3"])
+        expect(lookup.to_a.count).to eq(5)
+        expect(lookup.pluck(:name).to_set).to eq(Set["Rule1", "Rule2", "Rule2a",
+                                                     "Rule2b", "Rule3"])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_dt'=>"2017-4-1 16:00:00"},
                                             {})
@@ -230,6 +232,14 @@ module Marty::RuleSpec
         Gemini::MyRule.get_matches('infinity',
                                    {'rule_type'=>'SimpleRule'},
                                    {'g_bool'=>true, "g_range"=>25}).first }
+      let(:simple2a) {
+        Gemini::MyRule.get_matches('infinity',
+                                   {'rule_type'=>'SimpleRule'},
+                                   {'g_bool'=>true, "g_integer"=>99}).first }
+      let(:simple2b) {
+        Gemini::MyRule.get_matches('infinity',
+                                   {'rule_type'=>'SimpleRule'},
+                                   {'g_bool'=>true, "g_integer"=>999}).first }
       it "computed guards work" do
         c = complex.compute({"pt"=>Time.zone.now,
                              'param2'=>'def'})
@@ -240,6 +250,21 @@ module Marty::RuleSpec
         expect(simple.fixed_results["sr2"]).to eq(true)
         expect(simple.fixed_results["sr3"]).to eq(123)
         expect(simple.fixed_results.count).to eq(3)
+        allow_any_instance_of(Delorean::Engine).
+          to receive(:evaluate).and_raise('hi mom')
+        expect{simple.compute({"pt"=>Time.now})}.to raise_error(/hi mom/)
+        # simple2a should return results without evaluation (they are all fixed)
+        expect(simple2a.compute({"pt"=>Time.zone.now})).to eq(
+                                       {"simple_result"=>"b value",
+                                        "sr2"=>true,
+                                        "sr3"=>123})
+        # simple2b should return grid results without evaluation
+        expect(simple2b.compute({"pt"=>Time.zone.now,
+                                 'param1'=> 66,
+                                 'param2'=>'abc',
+                                 'paramb'=>false})).to eq({"grid1_grid"=>3,
+                                                           "grid2_grid"=>1300})
+
       end
       it "returns computed results" do
         c = complex.compute({"pt"=>Time.zone.now,
@@ -247,7 +272,7 @@ module Marty::RuleSpec
                              'param2'=>'abc',
                              'paramb'=>false})
         expect(c).to eq({"simple_result"=>"c value",
-                         "computed_value"=>19, "grid1"=>3, "grid2"=>1300})
+                         "computed_value"=>19, "grid1_grid"=>3, "grid2_grid"=>1300})
       end
       it "returns computed results (with delorean import)" do
         c = xyz.compute({"pt"=>Time.zone.now+1,
@@ -255,7 +280,7 @@ module Marty::RuleSpec
                          "p2"=>3,
                          "flavor"=>"cherry"})
         expect(c).to eq({"bvlength"=>13,"bv"=>"cherry --> 36",
-                         "grid1"=>19})
+                         "grid1_grid"=>19})
       end
     end
   end
