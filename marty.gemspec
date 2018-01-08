@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.files       = `git ls-files`.split($\)
   s.licenses    = ['MIT']
 
-  s.add_dependency "pg", "~> 0.17"
+  s.add_dependency "pg", "~> 0.21"
 
   s.add_dependency 'netzke-core', '~> 1.0.0'
   s.add_dependency 'netzke-basepack', '~> 1.0.0'
@@ -38,7 +38,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'mcfly', '0.0.19'
 
   s.add_dependency 'coderay'
-  s.add_dependency 'net-ldap', '~> 0.12.0'
+  s.add_dependency 'net-ldap', '~> 0.16.1'
   s.add_dependency 'rubyzip'
   s.add_dependency 'sqlite3'
   s.add_dependency 'json-schema'

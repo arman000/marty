@@ -7,10 +7,10 @@ PATH
       delorean_lang (~> 0.3.33)
       json-schema
       mcfly (= 0.0.19)
-      net-ldap (~> 0.12.0)
+      net-ldap (~> 0.16.1)
       netzke-basepack (~> 1.0.0)
       netzke-core (~> 1.0.0)
-      pg (~> 0.17)
+      pg (~> 0.21)
       rubyzip
       sqlite3
 
@@ -112,7 +112,7 @@ GEM
     mini_mime (1.0.0)
     mini_portile2 (2.3.0)
     minitest (5.10.3)
-    net-ldap (0.12.1)
+    net-ldap (0.16.1)
     netzke-basepack (1.0.1.0)
     netzke-core (1.0.1.0)
       execjs
