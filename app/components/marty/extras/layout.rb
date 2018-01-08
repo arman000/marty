@@ -80,7 +80,10 @@ module Layout
 
       # hacky: extjs has issues with forceSelection true and clearing combos
       store:          klass::VALUES + ['---'],
-      forceSelection: true,
+
+      # we can dynamically add enums (i.e. they're not in VALUES) --
+      # turn off forced selection.
+      # forceSelection: true,
     }
     c.merge!(
       column_config: { editor: editor_config },
@@ -105,8 +108,7 @@ module Layout
   end
 
   def enum_setter(name)
-    lambda {|r, v| r.send("#{name}=", v.nil? || v.empty? || v == '---' ?
-                                        nil : v)}
+    lambda {|r, v| r.send("#{name}=", v.blank? || v == '---' ? nil : v)}
   end
 
   ######################################################################
