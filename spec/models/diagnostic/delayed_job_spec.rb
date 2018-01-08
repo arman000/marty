@@ -10,11 +10,8 @@ describe Diagnostic::DelayedJob do
     end
   end
 
-  before(:all) do
-    Marty::Script.load_scripts(nil, Date.today)
-  end
-
   before(:each) do
+    Marty::Script.load_scripts(nil, Date.today)
     allow(Diagnostic::DelayedJob).to receive(:scope).and_return(nil)
   end
 
