@@ -19,4 +19,7 @@ class Gemini::XyzRuleScriptSet < Marty::RuleScriptSet
   def code_section_counts(rule)
     super + { xyz: xyz_code(rule).count("\n") }
   end
+  def self.rule_pfx
+    "XYZRULE"
+  end
 end

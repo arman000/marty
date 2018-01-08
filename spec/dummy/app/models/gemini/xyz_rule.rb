@@ -39,6 +39,9 @@ class Gemini::XyzRule < Marty::DeloreanRule
     get_matches_(pt, attrs, params)
   end
 
+  def compute(*args)
+    base_compute(*args)
+  end
   def compute_xyz(pt, xyz_param)
     # Given a set of parameters, compute the RULE adjustment.  Returns
     # {} if precondition is not met.

@@ -99,10 +99,22 @@ module Marty::RuleSpec
         exp = /Grids - Bad grid name 'xyz' for 'grid1'/
         expect{subject}.to raise_error(exp)
       end
+      it "sets guard defaults correctly" do
+        vals = Gemini::MyRule.all.map do
+          |r|
+          [r.name, r.simple_guards["g_has_default"]]
+        end
+        expect(vals).to eq([["Rule1", "different"],
+                            ["Rule2", "string default"],
+                            ["Rule2a", "string default"],
+                            ["Rule2b", "string default"],
+                            ["Rule3", "string default"],
+                            ["Rule4", "string default"]])
+      end
     end
     context "validation (xyz type)" do
       subject do
-        Gemini::XyzRule.create!(name: "testrule",
+        r=Gemini::XyzRule.create!(name: "testrule",
                                 rule_type: @rule_type,
                                 start_dt: @start_dt || '2013-1-1',
                                 end_dt: @end_dt,
@@ -110,7 +122,8 @@ module Marty::RuleSpec
                                computed_guards: @computed_guards || {},
                                grids: @grids || {},
                                results: @results || {}
-                              )
+                               )
+        r.reload
       end
       it "detects script errors" do
         @rule_type = 'XRule'
@@ -249,7 +262,11 @@ module Marty::RuleSpec
         expect(simple.fixed_results["simple_result"]).to eq("b value")
         expect(simple.fixed_results["sr2"]).to eq(true)
         expect(simple.fixed_results["sr3"]).to eq(123)
-        expect(simple.fixed_results.count).to eq(3)
+        ssq = "string with single quotes"
+        expect(simple.fixed_results["single_quote"]).to eq(ssq)
+        swh = " string that contains a # character"
+        expect(simple.fixed_results["stringwithhash"]).to eq(swh)
+        expect(simple.fixed_results.count).to eq(5)
         allow_any_instance_of(Delorean::Engine).
           to receive(:evaluate).and_raise('hi mom')
         expect{simple.compute({"pt"=>Time.now})}.to raise_error(/hi mom/)

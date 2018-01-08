@@ -99,6 +99,9 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     errs.keys.last
   end
 
+  def self.rule_pfx
+    "RULE"
+  end
 
   def get_engine(rule)
     begin
@@ -110,7 +113,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
         rule.id
 
       # unique name for specific version of rule
-      sname = "RULE_#{rule.group_id}_#{rule.created_dt.to_f}"
+      sname = "#{self.class.rule_pfx}_#{rule.group_id}_#{rule.created_dt.to_f}"
 
       # is it a dev posting?
       if Mcfly.is_infinity(pt)

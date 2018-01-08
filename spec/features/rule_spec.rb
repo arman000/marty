@@ -80,6 +80,7 @@ feature 'rule view', js: true do
     mrv = netzke_find("my_rule_view")
     # test required field
     press('Add')
+    wait_for_ajax
     fill_in('name', with: 'abc')
     press('OK')
     expect(page).to have_content("Rule type can't be blank")
@@ -114,7 +115,8 @@ feature 'rule view', js: true do
                                   "name"=>"abc",
                                   "engine"=>"Gemini::MyRuleScriptSet",
                                   "rule_type"=>"SimpleRule",
-                                  "simple_guards"=>{},
+                                  "simple_guards"=>{"g_has_default"=>
+                                                    "string default"},
                                   "computed_guards"=>{},
                                   "grids"=>{},
                                   "results"=>{},

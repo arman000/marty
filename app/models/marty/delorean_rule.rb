@@ -3,6 +3,26 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   validates_presence_of :rule_type, :start_dt
 
+  def json_check(fname, field,  passed_opts = {})
+    err = field.delete("~~ERROR~~")
+    return [:syntax, err] if err
+
+    default_opts = { required: [],
+                     defined: [],
+                     ignore_proc: Proc.new{|_|false} }
+    opts = default_opts + passed_opts
+
+    keys = field.keys.reject(&ignore_proc)
+    missing = required - keys
+    unk = keys - defined
+
+    return [:unknown, unk] if unk.present?
+
+    return [:missing, missing] if missing.present?
+
+    return []
+  end
+
   def validate
     super
     if self.class.where(obsoleted_dt: 'infinity', name: name).
@@ -27,6 +47,25 @@ class Marty::DeloreanRule < Marty::BaseRule
     end
   end
 
+  def self.find_fixed(results)
+    results.each_with_object({}) do |(k, v), h|
+      v_wo_comment = /\A([^#]+)/.match(v)[1] if v.include?("#")
+      # if v contains a #, try cut it there and attempt parse that way first
+      jp = (v_wo_comment && JSON.parse("[#{v_wo_comment}]") rescue nil) ||
+           (JSON.parse("[#{v}]") rescue nil)
+      next h[k] = jp[0] if jp
+      # json doesn't like single quotes, so handle those manually
+      m = %r{\A'(.*)'\z}.match(v)
+      next unless m
+      h[k] = m[1]
+    end
+  end
+
+  before_validation(on: [:create, :update]) do
+    # identify result values that are fixed, stash them (removing quotes)
+    self.fixed_results = self.class.find_fixed(self.results)
+  end
+
   def compg_keys
     computed_guards.keys
   end
@@ -36,7 +75,7 @@ class Marty::DeloreanRule < Marty::BaseRule
       grids.keys.map{|k|k.ends_with?("_grid") ? k : k + "_grid"}
   end
 
-  def compute(params, dgparams=params)
+  def base_compute(params, dgparams=params)
     eclass = engine && engine.constantize || Marty::RuleScriptSet
     engine = eclass.new(params["pt"]).get_engine(self) if
       computed_guards.present? || results.present?
@@ -52,10 +91,9 @@ class Marty::DeloreanRule < Marty::BaseRule
       return Hash[compg_keys.zip(res).select{|k,v| !v}] unless res.all?
     end
 
-    if results.present?
-      if fixed_results.keys.sort == results.keys.sort
-        eval_result = fixed_results
-      else
+    grids_computed = false
+    grid_results = {}
+    if (results.keys - fixed_results.keys).present?
         begin
           eval_result = engine.evaluate(
             eclass.node_name,
@@ -63,15 +101,18 @@ class Marty::DeloreanRule < Marty::BaseRule
             params + {
               "dgparams__" => dgparams,
             })
+          grids_computed = true
         rescue => e
-          raise e, "Error (result) in rule '#{id}:#{name}': #{e}", e.backtrace
+          raise e, "Error (results) in rule '#{id}:#{name}': #{e}", e.backtrace
         end
-        Hash[compres_keys.zip(eval_result)]
-      end
-    elsif grids.present?
+        result = Hash[compres_keys.zip(eval_result)]
+    elsif fixed_results.keys.sort == results.keys.sort
+      result = fixed_results
+    end
+    if grids.present? && !grids_computed
       pt = params['pt']
       gres = {}
-      grids.each_with_object({}) do |(gvar, gname), h|
+      grid_results = grids.each_with_object({}) do |(gvar, gname), h|
         usename = gvar.ends_with?("_grid") ? gvar : gvar + "_grid"
         next h[usename] = gres[gname] if gres[gname]
         dg = Marty::DataGrid.lookup(pt,gname)
@@ -79,6 +120,8 @@ class Marty::DeloreanRule < Marty::BaseRule
         h[usename] = gres[gname] = dgr["result"] if dgr
       end
     end
+    #binding.pry if name == 'Conv FICO/LTV'
+    result + grid_results
   end
 
   def self.get_matches_(pt, attrs, params)

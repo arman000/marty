@@ -26,12 +26,18 @@ class Gemini::MyRule < Marty::DeloreanRule
              "g_range" => { type: :range,
                             width: 100},
              "g_integer" => { type: :integer,
-                              width: 100}}
+                              width: 100},
+             "g_has_default" => { type:  :string,
+                                  default: "string default"}}
   end
 
   mcfly_lookup :get_matches, sig: 3 do
     |pt, attrs, params|
     get_matches_(pt, attrs, params)
+  end
+
+  def compute(*args)
+    base_compute(*args)
   end
 
 end

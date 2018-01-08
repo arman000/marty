@@ -79,13 +79,13 @@ class Marty::BaseRule < Marty::Base
     self.computed_guards   ||= {}
     self.grids             ||= {}
     self.results           ||= {}
-    # identify result values that are fixed, stash them (removing quotes)
-    fixed = self.results.each_with_object({}) do |(k, v), h|
-      jp = JSON.parse("[#{v}]") rescue nil
-      next unless jp
-      h[k] = jp[0]
+  end
+
+  before_create do
+    self.class.guard_info.each do |k,v|
+      next if v[:default].blank? || self.simple_guards.include?(k)
+      self.simple_guards[k] = v[:default]
     end
-    self.fixed_results = fixed
   end
 
   class DupKeyError < StandardError
@@ -150,16 +150,19 @@ class Marty::BaseRule < Marty::Base
 
     params.each do |k, vraw|
       h = guard_info
-      next unless h[k]
-      multi, type = h[k].values_at(:multi, :type)
+      use_k = (h[k] && k) ||
+              (h[k+"_array"] && k+"_array") ||
+              (h[k+"_range"] && k+"_range")
+      next unless use_k
+      multi, type = h[use_k].values_at(:multi, :type)
       filts = [vraw].flatten.map do |v|
-        qstr = get_subq('simple_guards', k, multi, type, v)
+        qstr = get_subq('simple_guards', use_k, multi, type, v)
       end.join(" OR ")
-      isn = "simple_guards->'#{k}' IS NULL OR"
+      isn = "simple_guards->'#{use_k}' IS NULL OR"
 
       q = q.where("(#{isn} #{filts})")
     end
-    #print q.to_sql
+   # print q.to_sql
     q.order(:name)
   end
 

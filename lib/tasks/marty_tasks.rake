@@ -51,6 +51,7 @@ namespace :marty do
               t.json  :computed_guards,  null: false, default: {}
               t.jsonb :grids,            null: false, default: {}
               t.json  :results,          null: false, default: {}
+              # only needed for delorean type rules
               t.jsonb :fixed_results,    null: false, default: {}
             end
             execute("CREATE OR REPLACE FUNCTION to_numrange(val text) "\\
