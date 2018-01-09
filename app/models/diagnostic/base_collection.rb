@@ -1,5 +1,5 @@
 # used to group separate diagnostics into one diagnostic
-class Diagnostic::Collection < Diagnostic::ByStatus
+class Diagnostic::Collection < Diagnostic::Base
   class_attribute :diagnostics
   self.diagnostics = []
 
