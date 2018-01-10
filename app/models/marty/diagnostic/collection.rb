@@ -1,4 +1,4 @@
-class Diagnostic::Collection < Diagnostic::Base
+class Marty::Diagnostic::Collection < Marty::Diagnostic::Base
   class_attribute :diagnostics
   self.diagnostics = []
   self.status_only = true

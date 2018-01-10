@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Diagnostic::Base do
+describe Marty::Diagnostic::Base do
   def sample_data consistent=true
-    node_data_a = Diagnostic::Base.pack(include_ip=false){'A'}
-    node_data_b = Diagnostic::Base.pack(include_ip=false){'B'}
+    node_data_a = Marty::Diagnostic::Base.pack(include_ip=false){'A'}
+    node_data_b = Marty::Diagnostic::Base.pack(include_ip=false){'B'}
 
     data = {
       'NodeA' => node_data_a,
@@ -18,8 +18,8 @@ describe Diagnostic::Base do
     a = sample_data
     b = sample_data(consistent=false)
 
-    expect(Diagnostic::Base.consistent?(a)).to eq(true)
-    expect(Diagnostic::Base.consistent?(b)).to eq(false)
+    expect(Marty::Diagnostic::Base.consistent?(a)).to eq(true)
+    expect(Marty::Diagnostic::Base.consistent?(b)).to eq(false)
   end
 
   it 'can produce a valid diagnostic hash from a String' do
@@ -31,7 +31,7 @@ describe Diagnostic::Base do
       }
     }
 
-    expect(Diagnostic::Base.pack(include_ip=false){'A'}).to eq(expected)
+    expect(Marty::Diagnostic::Base.pack(include_ip=false){'A'}).to eq(expected)
   end
 
   it 'can produce a valid diagnostic hash from a Hash' do
@@ -58,13 +58,15 @@ describe Diagnostic::Base do
       },
     }
 
-    expect(Diagnostic::Base.pack(include_ip=false){test_a}).to eq(expected)
-    expect(Diagnostic::Base.pack(include_ip=false){test_a}).to eq(expected)
+    expect(Marty::Diagnostic::Base.
+             pack(include_ip=false){test_a}).to eq(expected)
+    expect(Marty::Diagnostic::Base.
+             pack(include_ip=false){test_a}).to eq(expected)
   end
 
   it 'can produce a valid diagnostic hash from an error Hash' do
-    test = Diagnostic::Base.pack(include_ip=false){
-      Diagnostic::Base.error('E')
+    test = Marty::Diagnostic::Base.pack(include_ip=false){
+      Marty::Diagnostic::Base.error('E')
     }
 
     expected = {
@@ -81,7 +83,9 @@ describe Diagnostic::Base do
     test_a = {
       'ImportantA' => 'A',
       'ImportantB' => 'B',
-      'ImportantC' => Diagnostic::Base.create_info('C') + {'extra' => 'D'}
+      'ImportantC' => Marty::Diagnostic::Base.create_info('C') + {
+        'extra' => 'D'
+      }
     }
 
     test_b = {
@@ -92,7 +96,7 @@ describe Diagnostic::Base do
       }
     }
 
-    expect{Diagnostic::Base.pack{test_a}}.to raise_error(RuntimeError)
-    expect{Diagnostic::Base.pack{test_b}}.to raise_error(RuntimeError)
+    expect{Marty::Diagnostic::Base.pack{test_a}}.to raise_error(RuntimeError)
+    expect{Marty::Diagnostic::Base.pack{test_b}}.to raise_error(RuntimeError)
   end
 end

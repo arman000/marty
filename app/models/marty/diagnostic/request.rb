@@ -1,4 +1,4 @@
-class Diagnostic::Request
+class Marty::Diagnostic::Request
   def self.request
     raise 'Request object has not been been injected into #{name}' unless
       @@request

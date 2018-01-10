@@ -1,4 +1,4 @@
-module Diagnostic::Packer
+module Marty::Diagnostic::Packer
   # expects a block that returns either a String or a Hash value and formats
   # it into a diagnostic info object.
   def pack include_ip=true
@@ -25,7 +25,7 @@ module Diagnostic::Packer
                raise "Invalid Data Type: (#{data}, #{data.class}) "\
                      "`package` expects a String or Hash value."
              end
-      include_ip ? {Diagnostic::Node.my_ip => info} : info
+      include_ip ? {Marty::Diagnostic::Node.my_ip => info} : info
     end
   end
 

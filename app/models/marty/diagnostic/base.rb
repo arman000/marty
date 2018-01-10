@@ -1,5 +1,5 @@
-class Diagnostic::Base < Diagnostic::Request
-  extend Diagnostic::Packer
+class Marty::Diagnostic::Base < Marty::Diagnostic::Request
+  extend Marty::Diagnostic::Packer
   include ActionView::Helpers::TextHelper
 
   # all diagnostics have `aggregatable` set to true.
@@ -19,7 +19,7 @@ class Diagnostic::Base < Diagnostic::Request
   end
 
   def self.fatal?
-    name == 'Diagnostic::Fatal'
+    name.include?('Fatal')
   end
 
   def self.process_status_only infos

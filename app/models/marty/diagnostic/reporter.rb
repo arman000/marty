@@ -1,4 +1,4 @@
-class Diagnostic::Reporter < Diagnostic::Request
+class Marty::Diagnostic::Reporter < Marty::Diagnostic::Request
   class_attribute :reports, :diagnostics
 
   self.reports = {}
@@ -17,9 +17,9 @@ class Diagnostic::Reporter < Diagnostic::Request
   end
 
   private
-  def self.resolve_diagnostic name
-    return name.constantize unless name.slice('Diagnostic::').nil?
-    ('Diagnostic::' + name.downcase.camelize).constantize
+  def self.resolve_diagnostic diag_name
+    return diag_name.constantize unless diag_name.slice(name.deconstantize).nil?
+    (name.deconstantize + '::' + diag_name.camelize).constantize
   end
 
   def self.unresolve_diagnostic klass
@@ -30,9 +30,9 @@ class Diagnostic::Reporter < Diagnostic::Request
     diagnostics.each_with_object({}){
       |d, h|
       begin
-        h[d.name] = d.generate
+        h[d.name.demodulize] = d.generate
       rescue => e
-        h.deep_merge!(Diagnostic::Fatal.message(e.message, type: d.name))
+        h.deep_merge!(Marty::Diagnostic::Fatal.message(e.message, type: d.name))
       end
     }
   end
@@ -73,7 +73,7 @@ class Diagnostic::Reporter < Diagnostic::Request
     ops = diagnostics.map{|d| unresolve_diagnostic(d) if d.aggregatable}.compact
     return {} if ops.empty?
 
-    nodes = Diagnostic::Node.get_nodes - [Diagnostic::Node.my_ip]
+    nodes = Marty::Diagnostic::Node.get_nodes - [Marty::Diagnostic::Node.my_ip]
     remote = nodes.sort.map do |n|
       Thread.new do
         uri = Addressable::URI.new(host: n, port: request.port)
@@ -92,13 +92,13 @@ class Diagnostic::Reporter < Diagnostic::Request
           response = req.start {|http| http.get(uri.to_s)}
           next JSON.parse(response.body) if response.code == "200"
 
-          Diagnostic::Fatal.message(response.body,
-                                    type: response.message,
-                                    node: uri.host)
+          Marty::Diagnostic::Fatal.message(response.body,
+                                           type: response.message,
+                                           node: uri.host)
         rescue => e
-          Diagnostic::Fatal.message(e.message,
-                                    type: e.class,
-                                    node: uri.host)
+          Marty::Diagnostic::Fatal.message(e.message,
+                                           type: e.class,
+                                           node: uri.host)
         end
       end
     end

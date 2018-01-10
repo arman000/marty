@@ -1,4 +1,4 @@
-module Diagnostic::Database
+module Marty::Diagnostic::Database
   def self.db_name
     ActiveRecord::Base.connection_config[:database]
   end

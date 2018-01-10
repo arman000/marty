@@ -1,4 +1,4 @@
-class Diagnostic::Aws::Ec2Instance
+class Marty::Diagnostic::Aws::Ec2Instance
   attr_reader :id, :doc, :role, :creds, :version, :host, :tag, :nodes
 
   # aws reserved host used to get instance meta-data
