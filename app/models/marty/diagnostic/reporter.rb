@@ -1,8 +1,9 @@
 class Marty::Diagnostic::Reporter < Marty::Diagnostic::Request
-  class_attribute :reports, :diagnostics
+  class_attribute :reports, :diagnostics, :namespaces
 
   self.reports = {}
   self.diagnostics = []
+  self.namespaces = ['Marty']
 
   def self.run request
     self.request = request
@@ -18,8 +19,15 @@ class Marty::Diagnostic::Reporter < Marty::Diagnostic::Request
 
   private
   def self.resolve_diagnostic diag_name
-    return diag_name.constantize unless diag_name.slice(name.deconstantize).nil?
-    (name.deconstantize + '::' + diag_name.camelize).constantize
+    diag_name = diag_name.camelize
+    klass = nil
+    self.namespaces.each do |n|
+      klass = (n + '::Diagnostic::' + diag_name).constantize rescue nil
+      break if klass
+    end
+    raise NameError.new("#{diag_name} could not be resolved by #{name}") if
+      klass.nil?
+    klass
   end
 
   def self.unresolve_diagnostic klass
@@ -32,7 +40,8 @@ class Marty::Diagnostic::Reporter < Marty::Diagnostic::Request
       begin
         h[d.name.demodulize] = d.generate
       rescue => e
-        h.deep_merge!(Marty::Diagnostic::Fatal.message(e.message, type: d.name))
+        h.deep_merge!(Marty::Diagnostic::Fatal.message(e.message,
+                                                       type: d.name.demodulize))
       end
     }
   end

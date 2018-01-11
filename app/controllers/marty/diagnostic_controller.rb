@@ -1,5 +1,10 @@
 module Marty
   class DiagnosticController < ActionController::Base
+    def self.inherited(klass)
+      Diagnostic::Reporter.namespaces.unshift(klass.name.deconstantize)
+      super
+    end
+
     def op
       begin
         @result = Diagnostic::Reporter.run(request)
@@ -27,6 +32,10 @@ module Marty
         'display' => Diagnostic::Reporter.displays(data),
         'errors' => errors
       }
+    end
+
+    def self.add_report name, diagnostics
+      Diagnostic::Reporter.reports[name] = diagnostics
     end
   end
 end

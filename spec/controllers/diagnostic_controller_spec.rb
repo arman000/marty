@@ -1,4 +1,10 @@
 require 'spec_helper'
+
+# used for testing controller inheritance
+module Test
+  module Diagnostic; end
+end
+
 module Marty
   RSpec.describe DiagnosticController, type: :controller do
     before(:each) { @routes = Marty::Engine.routes }
@@ -26,11 +32,24 @@ module Marty
 
         expected = {
           'data' => {
-            'Diagnostic::Version' => versions
+            'Version' => versions
           }
         }
 
         expect(assigns('result')).to eq(expected)
+      end
+    end
+
+    describe 'Inheritance behavior' do
+      it 'appends namespace to reporter and resolves in order of inheritance' do
+        class Test::SomeController < DiagnosticController; end
+        expect(Diagnostic::Reporter.namespaces).to include('Test')
+
+        class Test::Diagnostic::Version; end
+        expect(Diagnostic::Reporter.resolve_diagnostic('Version').name).
+          to include('Test')
+
+        Diagnostic::Reporter.namespaces.shift
       end
     end
   end
