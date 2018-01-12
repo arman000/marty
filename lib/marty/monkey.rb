@@ -239,7 +239,11 @@ module ActiveRecord
       def pg_enum(*args)
         options = args.extract_options!
         column_names = args
-        column_names.each { |name| column(name, name.to_s.pluralize, options) }
+
+        enum = options.delete(:enum)
+
+        column_names.each { |name|
+          column(name, enum || name.to_s.pluralize, options) }
       end
     end
     module PostgreSQL
