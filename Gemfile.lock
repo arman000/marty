@@ -81,6 +81,7 @@ GEM
       execjs
     coffee-script-source (1.12.2)
     concurrent-ruby (1.0.5)
+    connection_pool (2.2.1)
     crass (1.0.3)
     daemons (1.1.9)
     database_cleaner (1.6.2)
@@ -226,6 +227,7 @@ DEPENDENCIES
   aws-sigv4 (~> 1.0, >= 1.0.2)
   capybara
   chromedriver-helper
+  connection_pool
   daemons (~> 1.1.9)
   database_cleaner
   delayed_job_active_record

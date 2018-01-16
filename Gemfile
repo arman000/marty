@@ -23,6 +23,7 @@ group :development, :test do
   gem 'timecop'
   gem 'database_cleaner'
   gem 'rails-controller-testing'
+  gem 'connection_pool'
 
   gem 'mcfly'
   gem 'netzke', '6.5.0.0'
