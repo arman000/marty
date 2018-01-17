@@ -1,4 +1,4 @@
-class Marty::Diagnostic::EnvironmentVariables < Marty::Diagnostic::Base
+module Marty::Diagnostic; class EnvironmentVariables < Base
   def self.env filter=''
     env = ENV.clone
 
@@ -32,4 +32,5 @@ class Marty::Diagnostic::EnvironmentVariables < Marty::Diagnostic::Base
       }
     }
   end
+end
 end

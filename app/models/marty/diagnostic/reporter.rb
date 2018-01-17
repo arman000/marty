@@ -1,4 +1,4 @@
-class Marty::Diagnostic::Reporter < Marty::Diagnostic::Request
+module Marty::Diagnostic; class Reporter < Request
   class_attribute :reports, :diagnostics, :namespaces
 
   self.reports = {}
@@ -40,8 +40,7 @@ class Marty::Diagnostic::Reporter < Marty::Diagnostic::Request
       begin
         h[d.name.demodulize] = d.generate
       rescue => e
-        h.deep_merge!(Marty::Diagnostic::Fatal.message(e.message,
-                                                       type: d.name.demodulize))
+        h.deep_merge!(Fatal.message(e.message, type: d.name.demodulize))
       end
     }
   end
@@ -82,7 +81,7 @@ class Marty::Diagnostic::Reporter < Marty::Diagnostic::Request
     ops = diagnostics.map{|d| unresolve_diagnostic(d) if d.aggregatable}.compact
     return {} if ops.empty?
 
-    nodes = Marty::Diagnostic::Node.get_nodes - [Marty::Diagnostic::Node.my_ip]
+    nodes = Node.get_nodes - [Node.my_ip]
     remote = nodes.sort.map do |n|
       Thread.new do
         uri = Addressable::URI.new(host: n, port: request.port)
@@ -101,17 +100,14 @@ class Marty::Diagnostic::Reporter < Marty::Diagnostic::Request
           response = req.start {|http| http.get(uri.to_s)}
           next JSON.parse(response.body) if response.code == "200"
 
-          Marty::Diagnostic::Fatal.message(response.body,
-                                           type: response.message,
-                                           node: uri.host)
+          Fatal.message(response.body, type: response.message, node: uri.host)
         rescue => e
-          Marty::Diagnostic::Fatal.message(e.message,
-                                           type: e.class,
-                                           node: uri.host)
+          Fatal.message(e.message, type: e.class, node: uri.host)
         end
       end
     end
 
     remote.empty? ? {} : remote.map(&:join).map(&:value).reduce(:deep_merge)
   end
+end
 end

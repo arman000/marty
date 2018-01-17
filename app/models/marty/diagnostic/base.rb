@@ -1,5 +1,5 @@
-class Marty::Diagnostic::Base < Marty::Diagnostic::Request
-  extend Marty::Diagnostic::Packer
+module Marty::Diagnostic; class Base < Request
+  extend Packer
   include ActionView::Helpers::TextHelper
 
   # all diagnostics have `aggregatable` set to true.
@@ -10,9 +10,9 @@ class Marty::Diagnostic::Base < Marty::Diagnostic::Request
   self.aggregatable = true
   self.status_only = false
 
-  @@read_only = Marty::Util.db_in_recovery?
+  @@read_only = Util.db_in_recovery?
   @@template  = ActionController::Base.new.lookup_context.
-                find_template("marty/diagnostic/diag").identifier
+                    find_template("marty/diagnostic/diag").identifier
 
   def self.generate
     raise "generate has not been defined for #{name}"
@@ -66,4 +66,5 @@ class Marty::Diagnostic::Base < Marty::Diagnostic::Request
   def self.display_info_description info
     new.simple_format(info ? info['description'] : 'N/A')
   end
+end
 end

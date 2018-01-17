@@ -5,7 +5,7 @@
 # `DELAYED_VER` environment variable should be set in the
 # delayed jobs initializer.
 #
-class Marty::Diagnostic::DelayedJob < Marty::Diagnostic::Base
+module Marty::Diagnostic; class DelayedJob < Base
   self.aggregatable = false
 
   def self.generate
@@ -42,8 +42,9 @@ class Marty::Diagnostic::DelayedJob < Marty::Diagnostic::Base
   end
 
   def self.delayed_worker_count
-    db = Marty::Diagnostic::Database.db_name
-    Marty::Diagnostic::Node.get_postgres_connections[db].
+    db = Database.db_name
+    Node.get_postgres_connections[db].
       count{|conn| conn['application_name'].include?('delayed_job')}
   end
+end
 end

@@ -1,4 +1,4 @@
-class Marty::Diagnostic::Version < Marty::Diagnostic::Base
+module Marty::Diagnostic; class Version < Base
   def self.generate
     pack do
       begin
@@ -25,9 +25,10 @@ class Marty::Diagnostic::Version < Marty::Diagnostic::Base
 
   def self.db_schema
     begin
-      Marty::Diagnostic::Database.db_schema
+      Database.db_schema
     rescue => e
       error(e.message)
     end
   end
+end
 end

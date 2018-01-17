@@ -1,4 +1,4 @@
-class Marty::Diagnostic::Collection < Marty::Diagnostic::Base
+module Marty::Diagnostic; class Collection < Base
   class_attribute :diagnostics
   self.diagnostics = []
   self.status_only = true
@@ -7,4 +7,5 @@ class Marty::Diagnostic::Collection < Marty::Diagnostic::Base
     raise 'No diagnostics assigned to collection.' if diagnostics.empty?
     diagnostics.map{|d| d.generate}.reduce(:deep_merge)
   end
+end
 end
