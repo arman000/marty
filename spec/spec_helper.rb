@@ -49,9 +49,9 @@ end
 
 register_chrome_driver
 register_chrome_driver(:headless,
-                       {chromeOptions: {args: %w[headless disable-gpu]}})
+                       chromeOptions: {args: %w[headless disable-gpu]})
 
-Capybara.javascript_driver = ENV['HEADLESS'] == 'true' ? :headless_chrome : :chrome
+Capybara.javascript_driver = ENV['HEADLESS'] == 'true' ? :headless : :chrome
 
 ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection
 
