@@ -6,6 +6,7 @@ PATH
       coderay
       delorean_lang (~> 0.3.33)
       json-schema
+      mcfly (= 0.0.20)
       net-ldap (= 0.12.1)
       netzke (= 6.5.0.0)
       pg (~> 0.21)

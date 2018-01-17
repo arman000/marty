@@ -34,7 +34,7 @@ Gem::Specification.new do |s|
 
 
   s.add_dependency 'delorean_lang', '~> 0.3.33'
-  # s.add_dependency 'mcfly', '0.0.19'
+  s.add_dependency 'mcfly', '0.0.20'
 
   s.add_dependency 'coderay'
   # FIXME: for some reason 0.16.1 doesn't work at PennyMac -- investigate
