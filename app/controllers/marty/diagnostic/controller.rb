@@ -1,12 +1,12 @@
-module Marty; class DiagnosticController < ActionController::Base
+module Marty::Diagnostic; class Controller < ActionController::Base
   def self.inherited(klass)
-    Diagnostic::Reporter.namespaces.unshift(klass.name.deconstantize)
+    Reporter.namespaces.unshift(klass.name.deconstantize)
     super
   end
 
   def op
     begin
-      @result = Diagnostic::Reporter.run(request)
+      @result = Reporter.run(request)
     rescue NameError
       render file: 'public/400', formats: [:html], status: 400, layout: false
     else
@@ -26,15 +26,15 @@ module Marty; class DiagnosticController < ActionController::Base
   def display_parameters
     local  = params[:scope] == 'local'
     data   = local ? @result : @result['data']
-    errors = local ?  Diagnostic::Reporter.errors(data) : @result['errors']
+    errors = local ? Reporter.errors(data) : @result['errors']
     {
-      'display' => Diagnostic::Reporter.displays(data),
+      'display' => Reporter.displays(data),
       'errors' => errors
     }
   end
 
   def self.add_report name, diagnostics
-    Diagnostic::Reporter.reports[name] = diagnostics
+    Reporter.reports[name] = diagnostics
   end
 end
 end
