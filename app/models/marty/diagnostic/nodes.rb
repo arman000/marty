@@ -1,3 +1,5 @@
+require_relative 'aws/ec2_instance'
+
 module Marty::Diagnostic; class Nodes < Base
   def self.generate
     pack do
