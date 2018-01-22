@@ -6,6 +6,12 @@ module Marty::RuleSpec
       @save_file = "/tmp/save_#{Process.pid}.psql"
       save_clean_db(@save_file)
       Marty::Script.load_scripts
+      Marty::Config['RULEOPTS_MYRULE']={'simple_result'=>{},
+                                        'computed_value'=>{},
+                                       }
+      Marty::Config['RULEOPTS_XYZ']={'bvlength'=>{},
+                                     'bv'=>{},
+                                    }
     end
     after(:all) do
       restore_clean_db(@save_file)

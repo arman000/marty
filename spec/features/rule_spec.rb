@@ -103,7 +103,7 @@ feature 'rule view', js: true do
                                             "g_single"=>"",
                                             "g_string"=>"",
                                             "g_bool"=>nil,
-                                            "g_range"=>"",
+                                            "g_range"=>nil,
                                             "g_integer"=>nil,
                                             "computed_guards"=>"",
                                             "grids"=>"",
@@ -138,7 +138,7 @@ feature 'rule view', js: true do
     press("OK")
     expect(page).to have_content("Wrong type for 'g_range'")
     # validate rule
-    fill_in(:g_range, with: "(,100]")
+    fill_in(:g_range, with: "<=100")
     netzke_find('Grid1', 'combobox').select_values("DataGrid1")
     netzke_find('Grid2', 'combobox').select_values("DataGrid2")
     press("OK")
@@ -152,7 +152,7 @@ feature 'rule view', js: true do
            "g_single"=>"G2V2",
            "g_string"=>"Hi Mom",
            "g_bool"=>true,
-           "g_range"=>"(,100]",
+           "g_range"=>"<=100",
            "g_integer"=>123,
            "computed_guards"=>"",
            "grids"=>"{\"grid1\":\"DataGrid1\",\"grid2\":\"DataGrid2\"}",

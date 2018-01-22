@@ -30,6 +30,9 @@ class Gemini::MyRule < Marty::DeloreanRule
              "g_has_default" => { type:  :string,
                                   default: "string default"}}
   end
+  def self.results_cfg_var
+    'RULEOPTS_MYRULE'
+  end
 
   mcfly_lookup :get_matches, sig: 3 do
     |pt, attrs, params|

@@ -66,15 +66,22 @@ class Marty::DeloreanRule < Marty::BaseRule
     self.fixed_results = self.class.find_fixed(self.results)
   end
 
+  def self.results_cfg_var
+    "NOT DEFINED"
+  end
+
   def compg_keys
     computed_guards.keys
   end
 
   def compres_keys
-    results.keys.reject{|k|k.starts_with?("tmp_")} +
+    defkeys = (Marty::Config[self.class.results_cfg_var] || {}).keys +
+              ["adjustment", "breakeven"]
+    results.keys.select{|k| defkeys.include?(k)} + grid_keys
+  end
+  def grid_keys
       grids.keys.map{|k|k.ends_with?("_grid") ? k : k + "_grid"}
   end
-
   def base_compute(params, dgparams=params)
     eclass = engine && engine.constantize || Marty::RuleScriptSet
     engine = eclass.new(params["pt"]).get_engine(self) if
@@ -90,7 +97,6 @@ class Marty::DeloreanRule < Marty::BaseRule
       end
       return Hash[compg_keys.zip(res).select{|k,v| !v}] unless res.all?
     end
-
     grids_computed = false
     grid_results = {}
     if (results.keys - fixed_results.keys).present?
@@ -120,7 +126,6 @@ class Marty::DeloreanRule < Marty::BaseRule
         h[usename] = gres[gname] = dgr["result"] if dgr
       end
     end
-    #binding.pry if name == 'Conv FICO/LTV'
     result + grid_results
   end
 

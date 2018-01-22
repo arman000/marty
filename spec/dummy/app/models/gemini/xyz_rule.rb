@@ -12,6 +12,9 @@ class Gemini::XyzRule < Marty::DeloreanRule
 
   mcfly_validates_uniqueness_of :name, scope: [:start_dt, :end_dt]
 
+  def self.results_cfg_var
+    'RULEOPTS_XYZ'
+  end
   def self.guard_info
     super + {"flavors" => { multi: true, type: :string,
                             enum: Gemini::XyzEnum,

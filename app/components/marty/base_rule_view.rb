@@ -18,8 +18,11 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     super
     c.model = self.class.klass
     c.title = I18n.t('rule')
-    c.attributes = self.class.base_fields + klass.guard_info.reject{|_, h|
-      h[:hidden]}.map { |name, _| name.to_sym } + self.class.computed_fields
+    c.attributes = self.class.base_fields +
+                   klass.guard_info.
+                     sort_by{|_, h| h[:order] || 0}.
+                     reject{|_, h| h[:hidden]}.
+                     map { |name, _| name.to_sym } + self.class.computed_fields
     c.store_config.merge!(sorters: [{property: :name, direction: 'ASC'}])
     c.editing      = :in_form
     c.paging       = :pagination
@@ -87,7 +90,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     c.width = 150
   end
 
-  def self.grid_column(c)
+  def self.grid_column(c, label=nil)
     editor_config = {
       trigger_action: :all,
       xtype:          :combo,
@@ -96,7 +99,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       forceSelection: true,
     }
     {
-      name: c,
+      name: label || c,
       width: 200,
       column_config: { editor: editor_config },
       field_config:  editor_config,
@@ -183,24 +186,29 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       end
       # for some unexplained reason the getter/setter need the full
       # class qualification
-      c.getter = Marty::DeloreanRuleView.jsonb_field_getter(meth, namestr)
-      c.setter = Marty::DeloreanRuleView.jsonb_field_setter(meth, namestr)
-      c.sorting_scope = get_json_sorter(meth, namestr)
-      c.filter_with = lambda do |rel, value, op|
-        v = ActiveRecord::Base.connection.quote(value)[1..-2]
-        rel.where("#{meth}->>'#{namestr}' like '%#{v}%'")
+      if h[:type] != :range
+        c.getter = Marty::DeloreanRuleView.jsonb_field_getter(meth, namestr)
+        c.setter = Marty::DeloreanRuleView.jsonb_field_setter(meth, namestr)
+        c.filter_with = lambda do |rel, value, op|
+          v = ActiveRecord::Base.connection.quote(value)[1..-2]
+          rel.where("#{meth}->>'#{namestr}' like '%#{v}%'")
+        end
+      else
+        c.getter = range_getter(namestr, meth)
+        c.setter = range_setter(namestr, meth)
+        c.filterable = false
       end
-
+      c.sorting_scope = get_json_sorter(meth, namestr)
     end
   end
 
   attribute :start_dt do |c|
-    c.width = 150
+    c.width = 100
     c.format = 'Y-m-d H:i'
   end
 
   attribute :end_dt do |c|
-    c.width = 150
+    c.width = 100
     c.format = 'Y-m-d H:i'
   end
 
