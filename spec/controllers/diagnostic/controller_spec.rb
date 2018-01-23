@@ -143,7 +143,7 @@ module Marty::Diagnostic
 
         class Test::Diagnostic::Version; end
         expect(Reporter.resolve_diagnostic('Version').name).
-          to include('Test')
+          to eq('Test::Diagnostic::Version')
 
         Reporter.namespaces.shift
       end
