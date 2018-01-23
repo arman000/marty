@@ -1,4 +1,4 @@
-module Diagnostic::Node
+module Marty::Diagnostic::Node
   def self.my_ip
     begin
       Socket.ip_address_list.detect{|intf| intf.ipv4_private?}.ip_address
@@ -21,7 +21,7 @@ module Diagnostic::Node
   end
 
   def self.get_target_connections target
-    get_postgres_connections[Diagnostic::Database.db_name].select{|conn|
+    get_postgres_connections[Marty::Diagnostic::Database.db_name].select{|conn|
       conn['application_name'].include?(target)
     }.map{|conn|
       conn['client_addr'] == '127.0.0.1' ? my_ip : conn['client_addr']

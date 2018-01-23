@@ -1,5 +1,5 @@
-class Diagnostic::Env < Diagnostic::Base
-  def self.environment_variables filter=''
+module Marty::Diagnostic; class EnvironmentVariables < Base
+  def self.env filter=''
     env = ENV.clone
 
     # obfuscate SECRET_KEY_BASE for comparison
@@ -16,7 +16,7 @@ class Diagnostic::Env < Diagnostic::Base
 
   def self.generate
     pack do
-      environment_variables
+      env
     end
   end
 
@@ -32,4 +32,5 @@ class Diagnostic::Env < Diagnostic::Base
       }
     }
   end
+end
 end

@@ -1,8 +1,9 @@
-class Diagnostic::Reporter < Diagnostic::Request
-  class_attribute :reports, :diagnostics
+module Marty::Diagnostic; class Reporter < Request
+  class_attribute :reports, :diagnostics, :namespaces
 
   self.reports = {}
   self.diagnostics = []
+  self.namespaces = ['Marty']
 
   def self.run request
     self.request = request
@@ -17,9 +18,16 @@ class Diagnostic::Reporter < Diagnostic::Request
   end
 
   private
-  def self.resolve_diagnostic name
-    return name.constantize unless name.slice('Diagnostic::').nil?
-    ('Diagnostic::' + name.downcase.camelize).constantize
+  def self.resolve_diagnostic diag_name
+    diag_name = diag_name.camelize
+    klass = nil
+    self.namespaces.each do |n|
+      klass = (n + '::Diagnostic::' + diag_name).constantize rescue nil
+      break if klass
+    end
+    raise NameError.new("#{diag_name} could not be resolved by #{name}") if
+      klass.nil?
+    klass
   end
 
   def self.unresolve_diagnostic klass
@@ -30,9 +38,9 @@ class Diagnostic::Reporter < Diagnostic::Request
     diagnostics.each_with_object({}){
       |d, h|
       begin
-        h[d.name] = d.generate
+        h[d.name.demodulize] = d.generate
       rescue => e
-        h.deep_merge!(Diagnostic::Fatal.message(e.message, type: d.name))
+        h.deep_merge!(Fatal.message(e.message, type: d.name.demodulize))
       end
     }
   end
@@ -73,7 +81,7 @@ class Diagnostic::Reporter < Diagnostic::Request
     ops = diagnostics.map{|d| unresolve_diagnostic(d) if d.aggregatable}.compact
     return {} if ops.empty?
 
-    nodes = Diagnostic::Node.get_nodes - [Diagnostic::Node.my_ip]
+    nodes = Node.get_nodes - [Node.my_ip]
     remote = nodes.sort.map do |n|
       Thread.new do
         uri = Addressable::URI.new(host: n, port: request.port)
@@ -92,17 +100,14 @@ class Diagnostic::Reporter < Diagnostic::Request
           response = req.start {|http| http.get(uri.to_s)}
           next JSON.parse(response.body) if response.code == "200"
 
-          Diagnostic::Fatal.message(response.body,
-                                    type: response.message,
-                                    node: uri.host)
+          Fatal.message(response.body, type: response.message, node: uri.host)
         rescue => e
-          Diagnostic::Fatal.message(e.message,
-                                    type: e.class,
-                                    node: uri.host)
+          Fatal.message(e.message, type: e.class, node: uri.host)
         end
       end
     end
 
     remote.empty? ? {} : remote.map(&:join).map(&:value).reduce(:deep_merge)
   end
+end
 end

@@ -1,4 +1,4 @@
-class Diagnostic::Request
+module Marty::Diagnostic; class Request
   def self.request
     raise 'Request object has not been been injected into #{name}' unless
       @@request
@@ -25,4 +25,5 @@ class Diagnostic::Request
   def self.ssl?
     request.port == 443
   end
+end
 end

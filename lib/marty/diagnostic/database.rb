@@ -1,4 +1,4 @@
-module Diagnostic::Database
+module Marty::Diagnostic::Database
   def self.db_name
     ActiveRecord::Base.connection_config[:database]
   end
@@ -23,6 +23,6 @@ module Diagnostic::Database
     current = ActiveRecord::Migrator.current_version
     raise "Migration is needed.\nCurrent Version: #{current}" if
       ActiveRecord::Migrator.needs_migration?
-    current
+    current.to_s
   end
 end

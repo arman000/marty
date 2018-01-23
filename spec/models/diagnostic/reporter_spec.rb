@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'job_helper'
 
-describe Diagnostic::Reporter do
+describe Marty::Diagnostic::Reporter do
   # used to stub request object
   class DummyRequest
     attr_accessor :params, :port
@@ -21,7 +21,7 @@ describe Diagnostic::Reporter do
 
   def aggregate_data opts={}
     {
-      'Diagnostic::Dummy' => {
+      'Dummy' => {
         'NodeA' => {
           'ImportantTest' => {
             'description' => 'A',
@@ -34,8 +34,8 @@ describe Diagnostic::Reporter do
   end
 
   def aggregate_consistency_data diagnostic='Base'
-    original_a = Diagnostic::Base.create_info('A')
-    original_b = Diagnostic::Base.create_info('B')
+    original_a = Marty::Diagnostic::Base.create_info('A')
+    original_b = Marty::Diagnostic::Base.create_info('B')
 
     data = {
       'CONSTANTA' => original_a,
@@ -43,11 +43,10 @@ describe Diagnostic::Reporter do
       'CONSTANTB2' => original_b,
     }
 
-    different_b = Diagnostic::Base.create_info('C')
+    different_b = Marty::Diagnostic::Base.create_info('C')
 
-    key = "Diagnostic::" + diagnostic
     test = {
-      key => {
+      diagnostic => {
         'NodeA' => data,
         'NodeB' => data + {
           'CONSTANTB' => different_b,
@@ -56,12 +55,12 @@ describe Diagnostic::Reporter do
       }
     }
 
-    inconsistent_b = Diagnostic::Base.create_info('B', true, false)
-    inconsistent_c = Diagnostic::Base.create_info('C', true, false)
+    inconsistent_b = Marty::Diagnostic::Base.create_info('B', true, false)
+    inconsistent_c = Marty::Diagnostic::Base.create_info('C', true, false)
 
-    if diagnostic == 'Env'
+    if diagnostic == 'EnvironmentVariables'
       expected = {
-        key => {
+        diagnostic => {
           'NodeA' => {
             'CONSTANTB' => inconsistent_b,
             'CONSTANTB2' => inconsistent_b,
@@ -74,7 +73,7 @@ describe Diagnostic::Reporter do
       }
     else
       expected = {
-        key => {
+        diagnostic => {
           'NodeA' => {
             'CONSTANTA' => original_a + {'consistent' => true},
             'CONSTANTB' => inconsistent_b,
@@ -92,11 +91,11 @@ describe Diagnostic::Reporter do
   end
 
   def info v, status, consistent
-    Diagnostic::Base.create_info(v, status, consistent)
+    Marty::Diagnostic::Base.create_info(v, status, consistent)
   end
 
   def version_data consistent = true
-    Diagnostic::Base.pack(include_ip=false){
+    Marty::Diagnostic::Base.pack(include_ip=false){
       {
         "Marty"    => info(Marty::VERSION, true, consistent),
         "Delorean" => info(Delorean::VERSION, true, true),
@@ -112,17 +111,17 @@ describe Diagnostic::Reporter do
 
   describe 'display mechanism for version diagnostic' do
     before(:all) do
-      Diagnostic::Reporter.diagnostics = [Diagnostic::Version]
+      Marty::Diagnostic::Reporter.diagnostics = [Marty::Diagnostic::Version]
     end
 
     before(:each) do
-      Diagnostic::Reporter.request = DummyRequest.new
+      Marty::Diagnostic::Reporter.request = DummyRequest.new
     end
 
     it 'masks consistent nodes for display (version)' do
-      Diagnostic::Reporter.request.params = params(scope='local')
+      Marty::Diagnostic::Reporter.request.params = params(scope='local')
       data = {
-        'Diagnostic::Version' => {
+        'Version' => {
           'NodeA' => version_data,
           'NodeB' => version_data,
         }
@@ -159,19 +158,19 @@ describe Diagnostic::Reporter do
       </div>
       ERB
 
-      test = Diagnostic::Reporter.displays(data)
+      test = Marty::Diagnostic::Reporter.displays(data)
       expect(minimize(test)).to eq(minimize(expected))
     end
 
     it 'displays all nodes when there is an inconsistent node (version)' do
-      Diagnostic::Reporter.request.params = params
+     Marty:: Diagnostic::Reporter.request.params = params
       bad_ver = '0.0.0'
 
       data = {
-        'Diagnostic::Version' => {
+        'Version' => {
           'NodeA' => version_data(consistent=false),
           'NodeB' => version_data + {
-            'Marty' => Diagnostic::Base.create_info(bad_ver, true, false)
+            'Marty' => Marty::Diagnostic::Base.create_info(bad_ver, true, false)
           },
         }
       }
@@ -210,41 +209,41 @@ describe Diagnostic::Reporter do
       </div>
       ERB
 
-      test = Diagnostic::Reporter.displays(data)
+      test = Marty::Diagnostic::Reporter.displays(data)
       expect(minimize(test)).to eq(minimize(expected))
     end
 
     it 'can detect errors in diagnostic for display and api' do
-      Diagnostic::Reporter.request.params = params
+      Marty::Diagnostic::Reporter.request.params = params
       n  = aggregate_data
       e  = aggregate_data(status: false)
       c  = aggregate_data(consistent: false)
       ce = aggregate_data(status: false, consistent: false)
 
       aggregate_failures do
-        expect(Diagnostic::Reporter.errors(n)).to eq({})
-        expect(Diagnostic::Reporter.errors(e)).not_to eq({})
-        expect(Diagnostic::Reporter.errors(c)).not_to eq({})
-        expect(Diagnostic::Reporter.errors(ce)).not_to eq({})
+        expect(Marty::Diagnostic::Reporter.errors(n)).to eq({})
+        expect(Marty::Diagnostic::Reporter.errors(e)).not_to eq({})
+        expect(Marty::Diagnostic::Reporter.errors(c)).not_to eq({})
+        expect(Marty::Diagnostic::Reporter.errors(ce)).not_to eq({})
       end
     end
 
     it 'can survive and display fatal errors' do
-      Diagnostic::Reporter.request.params = params
+      Marty::Diagnostic::Reporter.request.params = params
 
-      a_err_a = Diagnostic::Fatal.message('A',
-                                          node: 'NodeA')
+      a_err_a = Marty::Diagnostic::Fatal.message('A',
+                                                 node: 'NodeA')
 
-      a_err_b = Diagnostic::Fatal.message('B',
-                                          node: 'NodeA')
+      a_err_b = Marty::Diagnostic::Fatal.message('B',
+                                                 node: 'NodeA')
 
-      b_err_c = Diagnostic::Fatal.message('C',
-                                          node: 'NodeB',
-                                          type: 'OtherError')
+      b_err_c = Marty::Diagnostic::Fatal.message('C',
+                                                 node: 'NodeB',
+                                                 type: 'OtherError')
 
-      c_err_d = Diagnostic::Fatal.message('D',
-                                          node: 'NodeC',
-                                          type: 'OtherOtherError')
+      c_err_d = Marty::Diagnostic::Fatal.message('D',
+                                                 node: 'NodeC',
+                                                 type: 'OtherOtherError')
 
       data = [a_err_a, a_err_b, b_err_c, c_err_d].reduce(:deep_merge)
 
@@ -300,20 +299,20 @@ describe Diagnostic::Reporter do
       </h3>
       ERB
 
-      result = Diagnostic::Reporter.displays(data)
+      result = Marty::Diagnostic::Reporter.displays(data)
       expect(minimize(result)).to eq(minimize(expected))
     end
   end
 
   describe 'aggregation consistency functionality' do
     it 'env diagnostic' do
-      test, expected = aggregate_consistency_data('Env')
-      expect(Diagnostic::Reporter.consistency(test)).to eq(expected)
+      test, expected = aggregate_consistency_data('EnvironmentVariables')
+      expect(Marty::Diagnostic::Reporter.consistency(test)).to eq(expected)
     end
 
     it 'marks data as consistent/inconsistent' do
       test, expected = aggregate_consistency_data
-      expect(Diagnostic::Reporter.consistency(test)).to eq(expected)
+      expect(Marty::Diagnostic::Reporter.consistency(test)).to eq(expected)
     end
   end
 end
