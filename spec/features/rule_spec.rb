@@ -93,7 +93,7 @@ feature 'rule view', js: true do
     time_fill_in(1, '08:03:01')
     press("OK")
     wait_for_ajax
-    expect(mrv.row_count()).to eq(7)
+    expect(mrv.row_count()).to eq(8)
     expect(mrv.get_row_vals(1)).to include({"name"=>"abc",
                                             "rule_type"=>"SimpleRule",
                                             "start_dt"=>"2013-01-01T19:03:01.000Z",
@@ -170,20 +170,20 @@ feature 'rule view', js: true do
     press("Edit")
     fill_in(:computed_guards, with: 'sadf asdf ljsf')
     press("OK")
-    exp = "Computed - Error in field computed_guards: Syntax error on line 1"
+    exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error on line 1"
     expect(page).to have_content(exp)
     fill_in(:computed_guards, with: 'sadf = 123j s /*fdjOIb')
     press("OK")
-    exp = "Computed - Error in field computed_guards: syntax error"
+    exp = "Computed - Error in rule 'abc' field 'computed_guards': syntax error"
     expect(page).to have_content(exp)
     fill_in(:computed_guards, with: '')
     fill_in(:results, with: %Q(abc = "def"\ndef = 5\nxyz=def+10\nsadf asdf lsf))
     press("OK")
-    exp = "Computed - Error in field results: Syntax error on line 4"
+    exp = "Computed - Error in rule 'abc' field 'results': Syntax error on line 4"
     expect(page).to have_content(exp)
     fill_in(:results,
             with: %Q(abc = "def"\ndef = "abc"\nklm = "3"\nabc = "xyz"))
-    exp = "Computed - Error in field results: Keyword 'abc' specified more"\
+    exp = "Computed - Error in rule 'abc' field 'results': Keyword 'abc' specified more"\
           " than once (line 4)"
     press("OK")
     expect(page).to have_content(exp)

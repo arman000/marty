@@ -54,10 +54,10 @@ class Marty::BaseRule < Marty::Base
     end
     cg_err = computed_guards.delete("~~ERROR~~")
     errors[:computed] <<
-      "- Error in field computed_guards: #{cg_err.capitalize}" if cg_err
+      "- Error in rule '#{name}' field 'computed_guards': #{cg_err.capitalize}" if cg_err
     res_err = results.delete("~~ERROR~~")
     errors[:computed] <<
-      "- Error in field results: #{res_err.capitalize}" if res_err
+      "- Error in rule '#{name}' field 'results': #{res_err.capitalize}" if res_err
 
     same_name_diff_guards = self.class.
         where(obsoleted_dt: 'infinity', name: self.name).

@@ -82,27 +82,36 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     write_code(rule.results)
   end
 
+  def grid_init(rule)
+    if rule.grids.present? || rule.results.keys.any?{|k|k.ends_with?("_grid")}
+      write_code({ "pt" => :parameter,
+                   "dgparams__" => :parameter,
+                 })
+    else
+      ''
+    end
+  end
   def get_code(rule)
-    grid_init = write_code({ "pt" => :parameter,
-                             "dgparams__" => :parameter,
-                           }) if rule.grids.present? ||
-                                 rule.results.keys.any?{|k|k.ends_with?("_grid")}
+    grid_i = grid_init(rule)
     grid_c = grid_code(rule)
     result_c = result_code(rule)
     guard_c = guard_code(rule)
 
-    code = self.class.body_start + self.class.indent((grid_init||'') +
+    code = self.class.body_start + self.class.indent(grid_i +
                                                      guard_c +
                                                      grid_c +
                                                      result_c)
     #puts '='*40
-    #  puts code
-    #  puts '-'*10
+    #puts rule.name
+    #puts '-'
+    #puts code
+    #puts '-'*10
     code
   end
 
   def code_section_counts(rule)
     errs = {}
+    errs[:grid_params] = grid_init(rule).count("\n")
     errs[:computed_guards] = guard_code(rule).count("\n")
     errs[:grids] = grid_code(rule).count("\n")
     errs[:results] = result_code(rule).count("\n")
@@ -159,7 +168,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
       end
     rescue Delorean::ParseError => e
       f = get_parse_error_field(rule, e)
-      raise "Error in field #{f}: #{e}"
+      raise "Error in rule '#{rule.name}' field '#{f}': #{e}"
     end
   end
 
