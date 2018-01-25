@@ -21,17 +21,17 @@ module Marty::Diagnostic
 
     describe 'GET #op' do
       it 'returns http success' do
-        get :op, format: :json, op: 'version'
+        get :op, params: {format: :json, op: 'version'}
         expect(response).to have_http_status(:success)
       end
 
       it 'a request injects the request object into Diagnostic classes' do
-        get :op, format: :json, op: 'version'
+        get :op, params: {format: :json, op: 'version'}
         expect(Reporter.request).not_to eq(nil)
       end
 
       it 'returns the current version JSON' do
-        get :op, format: :json, op: 'version', data: 'true'
+        get :op, params: {format: :json, op: 'version', data: 'true'}
 
         # generate version data and declare all values consistent
         versions = Version.generate.each_with_object({}){
@@ -127,10 +127,11 @@ module Marty::Diagnostic
           }
         }
 
-        get :op,
-            format: :json,
-            op: 'version, environment_variables, nodes',
-            data: 'true'
+        get :op, params: {
+              format: :json,
+              op: 'version, environment_variables, nodes',
+              data: 'true'
+            }
 
         expect(JSON.parse(response.body)).to eq(expected)
       end
