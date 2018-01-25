@@ -8,6 +8,7 @@ module Marty::RuleSpec
       Marty::Script.load_scripts
       Marty::Config['RULEOPTS_MYRULE']={'simple_result'=>{},
                                         'computed_value'=>{},
+                                        'final_value'=>{},
                                        }
       Marty::Config['RULEOPTS_XYZ']={'bvlength'=>{},
                                      'bv'=>{},
@@ -115,7 +116,8 @@ module Marty::RuleSpec
                             ["Rule2a", "string default"],
                             ["Rule2b", "string default"],
                             ["Rule3", "string default"],
-                            ["Rule4", "string default"]])
+                            ["Rule4", "string default"],
+                            ["Rule5", "foo"]])
       end
     end
     context "validation (xyz type)" do
@@ -259,6 +261,10 @@ module Marty::RuleSpec
         Gemini::MyRule.get_matches('infinity',
                                    {'rule_type'=>'SimpleRule'},
                                    {'g_bool'=>true, "g_integer"=>999}).first }
+      let(:altgridmethod) {
+        Gemini::MyRule.get_matches('infinity',
+                                   {'rule_type'=>'ComplexRule'},
+                                   {"g_integer"=>3757}).first }
       it "computed guards work" do
         c = complex.compute({"pt"=>Time.zone.now,
                              'param2'=>'def'})
@@ -304,6 +310,12 @@ module Marty::RuleSpec
                          "flavor"=>"cherry"})
         expect(c).to eq({"bvlength"=>13,"bv"=>"cherry --> 36",
                          "grid1_grid"=>19})
+      end
+      it "grids embedded in result work properly and receive prior attrs" do
+        v = altgridmethod.compute({"pt"=>Time.zone.now,
+                                   'param1'=> 45,
+                                   'param2' => 1})
+        expect(v["final_value"]).to eq(15)
       end
     end
   end

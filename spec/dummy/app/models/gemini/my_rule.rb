@@ -19,7 +19,7 @@ class Gemini::MyRule < Marty::DeloreanRule
                              enum: Gemini::GuardTwo,
                              width: 100},
              "g_string" => { type: :string,
-                             values: ["Hi Mom", "abc", "def"],
+                             values: ["Hi Mom", "abc", "def", "zzz"],
                              width: 100},
              "g_bool" => { type: :boolean,
                            width: 100},

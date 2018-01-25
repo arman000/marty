@@ -34,29 +34,44 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     k + (v == :parameter ? " =?" : " = #{v}")
   end
 
+  def paramify_h(h)
+    "{" + h.keys.reject{|k|k.ends_with?("__")}.
+                         map {|k| %Q("#{k}": #{k}) }.join(",\n") + "}"
+  end
+
+  def expand_grid_code(h, dgid, dgname, cache, extra_params)
+    final_name = dgid.ends_with?("_grid") ?  dgid : dgid + "_grid"
+    if cache[dgname]
+      h[final_name] = "#{cache[dgname]}"
+    else
+      h["#{dgid}_dg__"] = "Marty::DataGrid.lookup(pt,'#{dgname}')"
+      h["#{dgid}_dgp__"] = "dgparams__ + \n" + self.class.indent(paramify_h(h))
+      lgde = "lookup_grid_distinct_entry"
+      h["#{dgid}_h__"] = "#{dgid}_dg__.#{lgde}(pt,#{dgid}_dgp__)"
+      h[final_name] = "#{dgid}_h__ && #{dgid}_h__.result"
+      cache[dgname] = final_name
+    end
+  end
+
   def write_code(attrs)
-    attrs.blank? ? "" : attrs.map { |k, v| write_attr(k, v) }.join("\n") + "\n"
+    return '' if attrs.blank?
+    newh = attrs.each_with_object({}) do |(k, v), h|
+      if k.ends_with?("_grid")
+        expand_grid_code(h, k, v, {}, h)
+      else
+        h[k] = v
+      end
+    end
+    newh.map { |k, v| write_attr(k, v) }.join("\n") + "\n"
   end
 
   def grid_code(rule)
-    return '' unless rule.grids.present?
-    cache = {}
-    dghash = { "pt" => :parameter,
-               "dgparams__" => :parameter,
-             }
-    attrs = rule.grids.each_with_object(dghash) do
-      |(dgid, dgname), h|
-        final_name = dgid.ends_with?("_grid") ?  dgid : dgid + "_grid"
-      if cache[dgname]
-        h[final_name] = "#{cache[dgname]}"
-      else
-        h["#{dgid}_dg__"] = "Marty::DataGrid.lookup(pt,'#{dgname}')"
-        h["#{dgid}_h__"] = "#{dgid}_dg__.lookup_grid_distinct_entry(pt,dgparams__)"
-        h[final_name] = "#{dgid}_h__ && #{dgid}_h__.result"
-        cache[dgname] = final_name
-      end
+    dgcache = {}
+    h = {}
+    rule.grids.each do |k, v|
+      expand_grid_code(h, k, v, dgcache, {})
     end
-    write_code(attrs)
+    h.map { |k, v| write_attr(k, v) }.join("\n") + "\n"
   end
 
   def guard_code(rule)
@@ -68,16 +83,21 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def get_code(rule)
+    grid_init = write_code({ "pt" => :parameter,
+                             "dgparams__" => :parameter,
+                           }) if rule.grids.present? ||
+                                 rule.results.keys.any?{|k|k.ends_with?("_grid")}
     grid_c = grid_code(rule)
     result_c = result_code(rule)
     guard_c = guard_code(rule)
 
-    code = self.class.body_start + self.class.indent(guard_c +
+    code = self.class.body_start + self.class.indent((grid_init||'') +
+                                                     guard_c +
                                                      grid_c +
                                                      result_c)
-  #  puts '='*40
-  #  puts code
-  #  puts '-'*10
+    #puts '='*40
+    #  puts code
+    #  puts '-'*10
     code
   end
 
