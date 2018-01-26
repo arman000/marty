@@ -10,7 +10,7 @@ module Marty::Diagnostic; class Base < Request
   self.aggregatable = true
   self.status_only = false
 
-  @@read_only = Util.db_in_recovery?
+  @@read_only = Marty::Util.db_in_recovery?
   @@template  = ActionController::Base.new.lookup_context.
                     find_template("marty/diagnostic/diag").identifier
 
