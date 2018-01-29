@@ -115,7 +115,7 @@ class Marty::DeloreanRule < Marty::BaseRule
     q=q.where("start_dt <= ?", rule_dt).
        where("end_dt >= ? OR end_dt IS NULL", rule_dt) if rule_dt
     #puts q.to_sql
-    q.order("start_dt DESC NULLS LAST")
+    q
   end
 
 end

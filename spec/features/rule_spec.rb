@@ -196,6 +196,12 @@ feature 'rule view', js: true do
     exp = Regexp.new("Can't have rule with same name and overlapping start"\
                      "/end dates - abc")
     expect(page).to have_content(exp)
+    netzke_find('Single Guard', 'combobox').select_values("G2V3")
+    press("OK")
+    exp = Regexp.new("Can't have rule with same name and different "\
+                     "type/guards - abc")
+    expect(page).to have_content(exp)
+
     press("Cancel")
     # column sorting, etc
     go_to_xyz_rules

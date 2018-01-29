@@ -128,10 +128,6 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     errs.keys.last
   end
 
-  def self.rule_pfx
-    "RULE"
-  end
-
   def get_engine(rule)
     begin
       # if rule is a str => importing a regular Script (i.e. not rule)
@@ -141,8 +137,10 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
       return sset.parse_check("New RULE #{rule.name}", get_code(rule)) unless
         rule.id
 
+      rule_pfx = rule.class.name.demodulize
+
       # unique name for specific version of rule
-      sname = "#{self.class.rule_pfx}_#{rule.group_id}_#{rule.created_dt.to_f}"
+      sname = "#{rule_pfx}_#{rule.group_id}_#{rule.created_dt.to_f}"
 
       # is it a dev posting?
       if Mcfly.is_infinity(pt)

@@ -37,12 +37,55 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     []
   end
 
+  class DupKeyError < StandardError
+    def initialize(key, lineno)
+      @key    = key
+      @lineno = lineno
+    end
+    def message
+      "keyword '#{@key}' specified more than once (line #{@lineno})"
+    end
+  end
+
+  def self.simple_to_hashstr(s)
+    pairs = []
+    keys = Set.new
+    s.lines.each.with_index(1) do |line, idx|
+      next if /\A\s*\z/.match(line)
+      line.chomp!
+      begin
+        m = /\A\s*([a-z0-9][a-z0-9_]*)\s*=\s*(.*)\s*\z/.match(line)
+        k, v = m[1], m[2]
+        v = [v].to_json[1..-2]
+        raise DupKeyError.new(k, idx) if keys.include?(k)
+        raise unless /\A['"].*['"]\z/.match(v)
+        keys << k
+      rescue DupKeyError => e
+        raise
+      rescue => e
+        raise "syntax error on line #{idx}"
+      end
+      pairs << [k, v]
+    end
+
+    kvs = pairs.map { |k, v| %Q("#{k}":#{v}) }.join(",")
+    "{#{kvs}}"
+  end
+
+  def self.hash_to_simple(h)
+    return unless h && h.present?
+    fmt = '%-' +  h.keys.map(&:length).max.to_s + 's = %s'
+    h.map do |k, vstr|
+      fmt % [k, vstr]
+    end.join("\n") || ''
+  end
+
   def jsonb_getter(c)
     lambda { |r| md = r.send(c); md.present? && md.to_json || '' }
   end
 
   def jsonb_simple_getter(c)
-    lambda {|r| Marty::BaseRule.hash_to_simple(r.send(c)) }
+    lambda {|r| Marty::BaseRuleView.hash_to_simple(r.send(c)) }
   end
 
   def jsonb_simple_setter(c)
@@ -52,7 +95,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
 
       begin
         v = ActiveSupport::JSON.decode(
-          Marty::BaseRule.simple_to_hashstr(v))
+          Marty::BaseRuleView.simple_to_hashstr(v))
       rescue => e
         v = { "~~ERROR~~": e.message }
       end

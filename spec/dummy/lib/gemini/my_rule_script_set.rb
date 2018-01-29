@@ -10,7 +10,4 @@ class Gemini::MyRuleScriptSet < Marty::RuleScriptSet
     END
     super + indent(params)
   end
-  def self.rule_pfx
-    "MYRULE"
-  end
 end
