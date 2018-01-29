@@ -3,26 +3,6 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   validates_presence_of :rule_type, :start_dt
 
-  def json_check(fname, field,  passed_opts = {})
-    err = field.delete("~~ERROR~~")
-    return [:syntax, err] if err
-
-    default_opts = { required: [],
-                     defined: [],
-                     ignore_proc: Proc.new{|_|false} }
-    opts = default_opts + passed_opts
-
-    keys = field.keys.reject(&ignore_proc)
-    missing = required - keys
-    unk = keys - defined
-
-    return [:unknown, unk] if unk.present?
-
-    return [:missing, missing] if missing.present?
-
-    return []
-  end
-
   def validate
     super
     if self.class.where(obsoleted_dt: 'infinity', name: name).
