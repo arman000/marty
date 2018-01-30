@@ -4,6 +4,7 @@ module Marty
 
     config.autoload_paths << File.expand_path("../../../lib", __FILE__)
     config.autoload_paths << File.expand_path("../../../components", __FILE__)
+    config.autoload_paths << File.expand_path("../../../other", __FILE__)
 
     # generators add rspec tests
     config.generators do |g|
