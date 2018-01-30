@@ -81,7 +81,7 @@ class Marty::LogView < Marty::Grid
     c.text      = I18n.t("log_grid.details")
     c.width     = 900
     c.read_only = true
-    c.getter    = lambda { |r| r.details.to_s}
+    c.getter    = lambda { |r| r.details.pretty_inspect}
   end
 end
 

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    marty (1.2.0)
+    marty (1.2.1)
       axlsx (= 2.1.0pre)
       coderay
       delorean_lang (~> 0.3.33)
@@ -83,7 +83,7 @@ GEM
     delayed_job_active_record (4.1.2)
       activerecord (>= 3.0, < 5.2)
       delayed_job (>= 3.0, < 5)
-    delorean_lang (0.3.34)
+    delorean_lang (0.3.33)
       activerecord (>= 3.2)
       treetop (~> 1.5)
     diff-lcs (1.3)

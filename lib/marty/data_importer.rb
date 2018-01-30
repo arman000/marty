@@ -85,7 +85,6 @@ module Marty
         end
 
         ids = {}
-
         # raise an error if record referenced more than once.
         res.each_with_index do
           |(op, id), line|

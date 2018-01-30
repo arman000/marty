@@ -154,15 +154,30 @@ module Layout
   ######################################################################
   # make sure to validate range vals on the model (e.g. see rule.rb)
 
-  def range_getter(name)
-    lambda { |r|
-      Marty::Util.pg_range_to_human(r.send(name))
-    }
+  def range_getter(name, json_field=nil)
+    if json_field
+      lambda { |r| Marty::Util.pg_range_to_human(r.send(json_field)[name]) }
+    else
+      lambda { |r| Marty::Util.pg_range_to_human(r.send(name)) }
+    end
   end
 
-  def range_setter(name)
-    lambda do |r, v|
-      r.send("#{name}=", v && (Marty::Util.human_to_pg_range(v) rescue v))
+  def range_setter(name, json_field=nil)
+    if json_field
+      lambda do |r, v|
+        cookedv = v && v.present? && (Marty::Util.human_to_pg_range(v) rescue v)
+        h  = r.send(json_field)
+        if cookedv
+          r.send("#{json_field}=", h + {name=>cookedv})
+        else
+          h.delete(name)
+          r.send("#{json_field}=", h)
+        end
+      end
+    else
+      lambda do |r, v|
+        r.send("#{name}=", v && (Marty::Util.human_to_pg_range(v) rescue v))
+      end
     end
   end
 

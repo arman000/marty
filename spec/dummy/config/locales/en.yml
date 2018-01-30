@@ -3,3 +3,13 @@
 
 en:
   hello: "Hello world"
+  rule: "Rules"
+  
+  attributes:
+    g_array: "Array Guard"
+    g_single: "Single Guard"
+    g_bool: "Bool Guard"
+    g_range: "Range Guard"
+    g_range1: "Range Guard 1"
+    g_range2: "Range Guard 2"
+    other_flag: "Other"

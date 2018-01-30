@@ -11,6 +11,8 @@ class Gemini::CmAuthApp < Marty::MainAuthApp
         icon: icon_hack(:database_key),
         menu: [
           :loan_program_view,
+          :my_rule_view,
+          :xyz_rule_view,
         ],
       }
     ]
@@ -21,7 +23,23 @@ class Gemini::CmAuthApp < Marty::MainAuthApp
     a.handler = :netzke_load_component_by_action
   end
 
+  action :my_rule_view do |a|
+    a.text    = a.tooltip = 'My Rules'
+    a.handler = :netzke_load_component_by_action
+  end
+
+  action :xyz_rule_view do |a|
+    a.text    = a.tooltip = 'Xyz Rules'
+    a.handler = :netzke_load_component_by_action
+  end
+
   component :loan_program_view do |c|
     c.klass = Gemini::LoanProgramView
+  end
+  component :my_rule_view do |c|
+    c.klass = Gemini::MyRuleView
+  end
+  component :xyz_rule_view do |c|
+    c.klass = Gemini::XyzRuleView
   end
 end

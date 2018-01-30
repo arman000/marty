@@ -37,4 +37,5 @@ module Marty::IntegrationHelpers
     log_in(username, Rails.configuration.marty.local_password)
     ensure_on("/")
   end
+
 end
