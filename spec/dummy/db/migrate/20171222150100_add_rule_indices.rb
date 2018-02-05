@@ -1,4 +1,4 @@
-class AddRuleIndices < ActiveRecord::Migration
+class AddRuleIndices < ActiveRecord::Migration[4.2]
   def change
     ['gemini_my_rules',  'g_array',    :array,
      'gemini_my_rules',  'g_single',   :scalar,

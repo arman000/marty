@@ -1,4 +1,4 @@
-class AddRuleTypeEnums < ActiveRecord::Migration
+class AddRuleTypeEnums < ActiveRecord::Migration[4.2]
   def change
     [Gemini::XyzRuleType, Gemini::MyRuleType, Gemini::GuardOne,
      Gemini::GuardTwo, Gemini::XyzEnum].each do |cl|
