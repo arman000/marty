@@ -302,7 +302,7 @@ feature 'rule view', js: true do
     expect(JSON.parse(gvs[names.index('Rule2b')])).to eq(g1h +
                                                          {"grid2"=>"DataGrid2"})
     expect(JSON.parse(rvs[names.index('Rule5')])["other_grid"]).to eq(
-                                                               "DataGrid4 new")
+                                                               '"DataGrid4 new"')
 
   end
 end

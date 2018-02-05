@@ -45,13 +45,14 @@ class Marty::DeloreanRule < Marty::BaseRule
     computed_guards.keys
   end
 
-  def compres_keys
+  def comp_res_keys(ecl)
     defkeys = (Marty::Config[self.class.results_cfg_var] || {}).keys +
               ["adjustment", "breakeven"]
-    results.keys.select{|k| defkeys.include?(k)} + grid_keys
+    results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
+       select{|k| defkeys.include?(k)} + grid_keys(ecl)
   end
-  def grid_keys
-      grids.keys.map{|k|k.ends_with?("_grid") ? k : k + "_grid"}
+  def grid_keys(eclass)
+      grids.keys.map{|k| eclass.grid_final_name(k) }
   end
   def base_compute(params, dgparams=params)
     eclass = engine && engine.constantize || Marty::RuleScriptSet
@@ -70,11 +71,12 @@ class Marty::DeloreanRule < Marty::BaseRule
     end
     grids_computed = false
     grid_results = {}
+    crkeys = comp_res_keys(eclass)
     if (results.keys - fixed_results.keys).present?
         begin
           eval_result = engine.evaluate(
             eclass.node_name,
-            compres_keys,
+            crkeys,
             params + {
               "dgparams__" => dgparams,
             })
@@ -82,7 +84,7 @@ class Marty::DeloreanRule < Marty::BaseRule
         rescue => e
           raise e, "Error (results) in rule '#{id}:#{name}': #{e}", e.backtrace
         end
-        result = Hash[compres_keys.zip(eval_result)]
+        result = Hash[crkeys.zip(eval_result)]
     elsif fixed_results.keys.sort == results.keys.sort
       result = fixed_results
     end
@@ -90,7 +92,7 @@ class Marty::DeloreanRule < Marty::BaseRule
       pt = params['pt']
       gres = {}
       grid_results = grids.each_with_object({}) do |(gvar, gname), h|
-        usename = gvar.ends_with?("_grid") ? gvar : gvar + "_grid"
+        usename = eclass.grid_final_name(gvar)
         next h[usename] = gres[gname] if gres[gname]
         dg = Marty::DataGrid.lookup(pt,gname)
         dgr = dg && dg.lookup_grid_distinct_entry(pt, dgparams)
@@ -113,8 +115,8 @@ class Marty::DeloreanRule < Marty::BaseRule
     Proc.new do |old, new|
       klass.where(obsoleted_dt: 'infinity').each do |r|
         r.grids.each { |k, v| r.grids[k] = new if v == old }
-        r.results.each { |k, v| r.results[k] = new if
-                         k.ends_with?("_grid") && v == old }
+        r.results.each { |k, v| r.results[k] = %Q("#{new}") if
+                         k.ends_with?("_grid") && r.fixed_results[k] == old }
         r.save! if r.changed?
       end
     end

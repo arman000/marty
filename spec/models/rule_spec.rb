@@ -9,6 +9,7 @@ module Marty::RuleSpec
       Marty::Config['RULEOPTS_MYRULE']={'simple_result'=>{},
                                         'computed_value'=>{},
                                         'final_value'=>{},
+                                        'grid_sum'=>{}
                                        }
       Marty::Config['RULEOPTS_XYZ']={'bvlength'=>{},
                                      'bv'=>{},
@@ -265,6 +266,10 @@ module Marty::RuleSpec
         Gemini::MyRule.get_matches('infinity',
                                    {'rule_type'=>'ComplexRule'},
                                    {"g_integer"=>3757}).first }
+      let(:gridcomputedname) {
+        Gemini::MyRule.get_matches('infinity',
+                                   {'rule_type'=>'ComplexRule'},
+                                   {"g_string"=>"Hi Mom", "g_integer"=>11}).first }
       it "computed guards work" do
         c = complex.compute({"pt"=>Time.zone.now,
                              'param2'=>'def'})
@@ -291,8 +296,8 @@ module Marty::RuleSpec
         expect(simple2b.compute({"pt"=>Time.zone.now,
                                  'param1'=> 66,
                                  'param2'=>'abc',
-                                 'paramb'=>false})).to eq({"grid1_grid"=>3,
-                                                           "grid2_grid"=>1300})
+                                 'paramb'=>false})).to eq({"grid1_grid_result"=>3,
+                                                           "grid2_grid_result"=>1300})
 
       end
       it "returns computed results" do
@@ -301,7 +306,8 @@ module Marty::RuleSpec
                              'param2'=>'abc',
                              'paramb'=>false})
         expect(c).to eq({"simple_result"=>"c value",
-                         "computed_value"=>19, "grid1_grid"=>3, "grid2_grid"=>1300})
+                         "computed_value"=>19, "grid1_grid_result"=>3,
+                         "grid2_grid_result"=>1300})
       end
       it "returns computed results (with delorean import)" do
         c = xyz.compute({"pt"=>Time.zone.now+1,
@@ -309,7 +315,15 @@ module Marty::RuleSpec
                          "p2"=>3,
                          "flavor"=>"cherry"})
         expect(c).to eq({"bvlength"=>13,"bv"=>"cherry --> 36",
-                         "grid1_grid"=>19})
+                         "grid1_grid_result"=>19})
+      end
+      it "reports bad grid name" do
+        exp = Regexp.new("Error .results. in rule '\\d+:Rule4': "\
+                         "grid 'computed_name_grid' .'DataGridX'. not found")
+        expect{gridcomputedname.compute({"pt"=>Time.zone.now,
+                             'param1'=> 66,
+                             'param2'=>'abc',
+                             'paramb'=>false})}.to raise_error(exp)
       end
       it "grids embedded in result work properly and receive prior attrs" do
         v = altgridmethod.compute({"pt"=>Time.zone.now,
