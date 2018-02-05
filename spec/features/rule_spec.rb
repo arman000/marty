@@ -203,9 +203,7 @@ feature 'rule view', js: true do
     netzke_find('Single Guard', 'combobox').select_values("G2V3")
     press("OK")
     wait_for_ajax
-    exp = Regexp.new("Can't have rule with same name and different "\
-                     "type/guards - abc")
-    expect(page).to have_content(exp)
+    expect(page).to have_content(/record must be unique/)
 
     press("Cancel")
     # column sorting, etc

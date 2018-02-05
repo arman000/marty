@@ -76,7 +76,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     dgcache = {}
     h = {}
     rule.grids.each do |k, v|
-      expand_grid_code(h, k, %Q("#{v}"), dgcache, {})
+      expand_grid_code(h, k.ends_with?('_grid')?k:k+'_grid', %Q("#{v}"), dgcache, {})
     end
     h.map { |k, v| write_attr(k, v) }.join("\n") + "\n"
   end
