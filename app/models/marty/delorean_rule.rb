@@ -5,15 +5,6 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   def validate
     super
-    if self.class.where(obsoleted_dt: 'infinity', name: name).
-        where.not(id: id).
-        where("(start_dt, coalesce(end_dt, 'infinity')) OVERLAPS (?, ?)",
-              start_dt, end_dt || 'infinity').exists?
-      return errors[:base] <<
-             "Can't have rule with same name and overlapping start/end dates"\
-             " - #{name}"
-    end
-
     return errors[:base] = "Start date must be before end date" if
       start_dt && end_dt && start_dt >= end_dt
 
@@ -116,6 +107,21 @@ class Marty::DeloreanRule < Marty::BaseRule
        where("end_dt >= ? OR end_dt IS NULL", rule_dt) if rule_dt
     #puts q.to_sql
     q
+  end
+
+  def self.get_grid_rename_handler(klass)
+    Proc.new do |old, new|
+      klass.where(obsoleted_dt: 'infinity').each do |r|
+        r.grids.each { |k, v| r.grids[k] = new if v == old }
+        r.results.each { |k, v| r.results[k] = new if
+                         k.ends_with?("_grid") && v == old }
+        r.save! if r.changed?
+      end
+    end
+  end
+
+  def self.init_dg_handler
+    Marty::DataGrid.register_rule_handler(get_grid_rename_handler(self))
   end
 
 end

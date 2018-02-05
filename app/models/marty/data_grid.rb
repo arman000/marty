@@ -105,13 +105,22 @@ class Marty::DataGrid < Marty::Base
     self
   end
 
+  def self.register_rule_handler(handler)
+    (@@rule_handlers ||= []) << handler
+  end
+  def update_rules(old, new)
+    @@rule_handlers.each { |rh| rh.call(old, new) }
+  end
+
   # FIXME: not sure what's the right way to perform the save in a
   # transaction -- i.e. together with build_index.  before_save would
   # be OK, but then save inside it would cause an infinite loop.
   def save!
     if self.changed?
       transaction do
+        nc, nw, n = [name_changed?, name_was, name]
         res = super
+        update_rules(nw, n) if nc && nw.present?
         reload
         build_index
         res

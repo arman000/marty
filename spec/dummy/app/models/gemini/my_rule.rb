@@ -10,7 +10,7 @@ class Gemini::MyRule < Marty::DeloreanRule
     find_by_group_id group_id
   end
 
-  mcfly_validates_uniqueness_of :name, scope: [:start_dt, :end_dt]
+  mcfly_validates_uniqueness_of :name
 
   def self.guard_info
     super + {"g_array" => { multi: true, type: :string,
@@ -43,4 +43,5 @@ class Gemini::MyRule < Marty::DeloreanRule
     base_compute(*args)
   end
 
+  self.init_dg_handler
 end

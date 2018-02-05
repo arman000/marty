@@ -79,9 +79,9 @@ module Marty
 
             Marty::DataConversion.create_or_update(klass, row, dt)
           end
-        rescue => exc
+#        rescue => exc
           # to find problems with the importer, comment out the rescue block
-          raise Marty::DataImporterError.new(exc.to_s, [eline])
+#          raise Marty::DataImporterError.new(exc.to_s, [eline])
         end
 
         ids = {}

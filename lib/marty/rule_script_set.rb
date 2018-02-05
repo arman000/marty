@@ -40,11 +40,15 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def expand_grid_code(h, dgid, dgname, cache, extra_params)
-    final_name = dgid.ends_with?("_grid") ?  dgid : dgid + "_grid"
+    final_name = dgid.ends_with?("_grid") ?  dgid + "_result" :
+                   dgid + "_grid_result"
     if cache[dgname]
       h[final_name] = "#{cache[dgname]}"
     else
-      h["#{dgid}_dg__"] = "Marty::DataGrid.lookup(pt,'#{dgname}')"
+      h["#{dgid}_dg__"] = <<~EOS
+      Marty::DataGrid.lookup(pt,'#{dgname}') ||
+        ERR("grid '#{dgid}' ('#{dgname}') not found")
+      EOS
       h["#{dgid}_dgp__"] = "dgparams__ + \n" + self.class.indent(paramify_h(h))
       lgde = "lookup_grid_distinct_entry"
       h["#{dgid}_h__"] = "#{dgid}_dg__.#{lgde}(pt,#{dgid}_dgp__)"
@@ -106,6 +110,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     #puts '-'
     #puts code
     #puts '-'*10
+
     code
   end
 
