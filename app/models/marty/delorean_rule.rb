@@ -46,8 +46,7 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def comp_res_keys(ecl)
-    defkeys = (Marty::Config[self.class.results_cfg_var] || {}).keys +
-              ["adjustment", "breakeven"]
+    defkeys = (Marty::Config[self.class.results_cfg_var] || {}).keys
     results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
        select{|k| defkeys.include?(k)} + grid_keys(ecl)
   end
