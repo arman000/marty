@@ -5,15 +5,6 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   def validate
     super
-    if self.class.where(obsoleted_dt: 'infinity', name: name).
-        where.not(id: id).
-        where("(start_dt, coalesce(end_dt, 'infinity')) OVERLAPS (?, ?)",
-              start_dt, end_dt || 'infinity').exists?
-      return errors[:base] <<
-             "Can't have rule with same name and overlapping start/end dates"\
-             " - #{name}"
-    end
-
     return errors[:base] = "Start date must be before end date" if
       start_dt && end_dt && start_dt >= end_dt
 
@@ -54,13 +45,13 @@ class Marty::DeloreanRule < Marty::BaseRule
     computed_guards.keys
   end
 
-  def compres_keys
-    defkeys = (Marty::Config[self.class.results_cfg_var] || {}).keys +
-              ["adjustment", "breakeven"]
-    results.keys.select{|k| defkeys.include?(k)} + grid_keys
+  def comp_res_keys(ecl)
+    defkeys = (Marty::Config[self.class.results_cfg_var] || {}).keys
+    results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
+       select{|k| defkeys.include?(k)} + grid_keys(ecl)
   end
-  def grid_keys
-      grids.keys.map{|k|k.ends_with?("_grid") ? k : k + "_grid"}
+  def grid_keys(eclass)
+      grids.keys.map{|k| eclass.grid_final_name(k) }
   end
   def base_compute(params, dgparams=params)
     eclass = engine && engine.constantize || Marty::RuleScriptSet
@@ -79,11 +70,12 @@ class Marty::DeloreanRule < Marty::BaseRule
     end
     grids_computed = false
     grid_results = {}
+    crkeys = comp_res_keys(eclass)
     if (results.keys - fixed_results.keys).present?
         begin
           eval_result = engine.evaluate(
             eclass.node_name,
-            compres_keys,
+            crkeys,
             params + {
               "dgparams__" => dgparams,
             })
@@ -91,7 +83,7 @@ class Marty::DeloreanRule < Marty::BaseRule
         rescue => e
           raise e, "Error (results) in rule '#{id}:#{name}': #{e}", e.backtrace
         end
-        result = Hash[compres_keys.zip(eval_result)]
+        result = Hash[crkeys.zip(eval_result)]
     elsif fixed_results.keys.sort == results.keys.sort
       result = fixed_results
     end
@@ -99,7 +91,7 @@ class Marty::DeloreanRule < Marty::BaseRule
       pt = params['pt']
       gres = {}
       grid_results = grids.each_with_object({}) do |(gvar, gname), h|
-        usename = gvar.ends_with?("_grid") ? gvar : gvar + "_grid"
+        usename = eclass.grid_final_name(gvar)
         next h[usename] = gres[gname] if gres[gname]
         dg = Marty::DataGrid.lookup(pt,gname)
         dgr = dg && dg.lookup_grid_distinct_entry(pt, dgparams)
@@ -116,6 +108,21 @@ class Marty::DeloreanRule < Marty::BaseRule
        where("end_dt >= ? OR end_dt IS NULL", rule_dt) if rule_dt
     #puts q.to_sql
     q
+  end
+
+  def self.get_grid_rename_handler(klass)
+    Proc.new do |old, new|
+      klass.where(obsoleted_dt: 'infinity').each do |r|
+        r.grids.each { |k, v| r.grids[k] = new if v == old }
+        r.results.each { |k, v| r.results[k] = %Q("#{new}") if
+                         k.ends_with?("_grid") && r.fixed_results[k] == old }
+        r.save! if r.changed?
+      end
+    end
+  end
+
+  def self.init_dg_handler
+    Marty::DataGrid.register_rule_handler(get_grid_rename_handler(self))
   end
 
 end

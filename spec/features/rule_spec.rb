@@ -83,6 +83,7 @@ feature 'rule view', js: true do
     wait_for_ajax
     fill_in('name', with: 'abc')
     press('OK')
+    wait_for_ajax
     expect(page).to have_content("Rule type can't be blank")
     expect(page).to have_content("Start dt can't be blank")
     # create and verify rule
@@ -126,6 +127,7 @@ feature 'rule view', js: true do
     press("Edit")
     fill_in(:g_string, with: "12345")
     press("OK")
+    wait_for_ajax
     expect(page).to have_content("Bad value '12345' for 'g_string'")
     # type validation (range)
     fill_in(:g_string, with: "Hi Mom")
@@ -136,6 +138,7 @@ feature 'rule view', js: true do
     fill_in(:g_integer, with: 123)
     fill_in(:g_range, with: "asfd")
     press("OK")
+    wait_for_ajax
     expect(page).to have_content("Wrong type for 'g_range'")
     # validate rule
     fill_in(:g_range, with: "<=100")
@@ -170,15 +173,18 @@ feature 'rule view', js: true do
     press("Edit")
     fill_in(:computed_guards, with: 'sadf asdf ljsf')
     press("OK")
+    wait_for_ajax
     exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error on line 1"
     expect(page).to have_content(exp)
     fill_in(:computed_guards, with: 'sadf = 123j s /*fdjOIb')
     press("OK")
+    wait_for_ajax
     exp = "Computed - Error in rule 'abc' field 'computed_guards': syntax error"
     expect(page).to have_content(exp)
     fill_in(:computed_guards, with: '')
     fill_in(:results, with: %Q(abc = "def"\ndef = 5\nxyz=def+10\nsadf asdf lsf))
     press("OK")
+    wait_for_ajax
     exp = "Computed - Error in rule 'abc' field 'results': Syntax error on line 4"
     expect(page).to have_content(exp)
     fill_in(:results,
@@ -186,21 +192,18 @@ feature 'rule view', js: true do
     exp = "Computed - Error in rule 'abc' field 'results': Keyword 'abc' specified more"\
           " than once (line 4)"
     press("OK")
+    wait_for_ajax
     expect(page).to have_content(exp)
     fill_in(:results,
             with: %Q(abc = "def"\ndef = "abc"\nklm = "3"))
     press("OK")
+    wait_for_ajax
 
     press("Dup in form")
-    press("OK")
-    exp = Regexp.new("Can't have rule with same name and overlapping start"\
-                     "/end dates - abc")
-    expect(page).to have_content(exp)
     netzke_find('Single Guard', 'combobox').select_values("G2V3")
     press("OK")
-    exp = Regexp.new("Can't have rule with same name and different "\
-                     "type/guards - abc")
-    expect(page).to have_content(exp)
+    wait_for_ajax
+    expect(page).to have_content(/record must be unique/)
 
     press("Cancel")
     # column sorting, etc
@@ -261,5 +264,43 @@ feature 'rule view', js: true do
                                                %Q({"grid1":"DataGrid2"}),
                                                %Q({"grid1":"DataGrid1"}),
                                                %Q({"grid1":"DataGrid1"})])
+    press("Applications")
+    press("Data Grids")
+    dgv = netzke_find("data_grid_view")
+    cvs = dgv.col_values(:name, 4, 0)
+    ind1 = cvs.index("DataGrid1")+1
+    ind4 = cvs.index("DataGrid4")+1
+    dgv.select_row(ind1)
+    press("Edit")
+    fill_in("Name", with: "DataGrid1 new")
+    press("OK")
+    wait_for_ajax
+    dgv.select_row(ind4)
+    press("Edit")
+    fill_in("Name", with: "DataGrid4 new")
+    press("OK")
+    wait_for_ajax
+
+    go_to_xyz_rules
+    wait_for_ajax
+
+    names = xrv.col_values(:name, 5, 0)
+    gvs = xrv.col_values(:grids, 5, 0)
+    g1h = {"grid1"=>"DataGrid1 new"}
+    expect(JSON.parse(gvs[names.index("ZRule1")])).to eq(g1h)
+    expect(JSON.parse(gvs[names.index("ZRule2")])).to eq(g1h)
+
+    go_to_my_rules
+    wait_for_ajax
+
+    names = mrv.col_values(:name, 8, 0)
+    gvs = mrv.col_values(:grids, 8, 0)
+    rvs = mrv.col_values(:results, 8, 0)
+    expect(JSON.parse(gvs[names.index('abc')])).to eq(g1h)
+    expect(JSON.parse(gvs[names.index('Rule2b')])).to eq(g1h +
+                                                         {"grid2"=>"DataGrid2"})
+    expect(JSON.parse(rvs[names.index('Rule5')])["other_grid"]).to eq(
+                                                               '"DataGrid4 new"')
+
   end
 end

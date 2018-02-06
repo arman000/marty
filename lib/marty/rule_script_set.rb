@@ -39,12 +39,19 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
                          map {|k| %Q("#{k}": #{k}) }.join(",\n") + "}"
   end
 
+  def self.grid_final_name(dgid)
+    dgid.ends_with?("_grid") ?  dgid + "_result" : dgid + "_grid_result"
+  end
   def expand_grid_code(h, dgid, dgname, cache, extra_params)
-    final_name = dgid.ends_with?("_grid") ?  dgid : dgid + "_grid"
+    final_name = self.class.grid_final_name(dgid)
     if cache[dgname]
       h[final_name] = "#{cache[dgname]}"
     else
-      h["#{dgid}_dg__"] = "Marty::DataGrid.lookup(pt,'#{dgname}')"
+      h[dgid] = dgname
+      h["#{dgid}_dg__"] = <<~EOS
+      Marty::DataGrid.lookup(pt,#{dgid}) ||
+        ERR("grid '#{dgid}' ('%s') not found" % #{dgid})
+      EOS
       h["#{dgid}_dgp__"] = "dgparams__ + \n" + self.class.indent(paramify_h(h))
       lgde = "lookup_grid_distinct_entry"
       h["#{dgid}_h__"] = "#{dgid}_dg__.#{lgde}(pt,#{dgid}_dgp__)"
@@ -69,7 +76,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     dgcache = {}
     h = {}
     rule.grids.each do |k, v|
-      expand_grid_code(h, k, v, dgcache, {})
+      expand_grid_code(h, k.ends_with?('_grid')?k:k+'_grid', %Q("#{v}"), dgcache, {})
     end
     h.map { |k, v| write_attr(k, v) }.join("\n") + "\n"
   end
@@ -106,6 +113,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     #puts '-'
     #puts code
     #puts '-'*10
+
     code
   end
 

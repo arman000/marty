@@ -10,7 +10,7 @@ class Gemini::XyzRule < Marty::DeloreanRule
     find_by_group_id group_id
   end
 
-  mcfly_validates_uniqueness_of :name, scope: [:start_dt, :end_dt]
+  mcfly_validates_uniqueness_of :name
 
   def self.results_cfg_var
     'RULEOPTS_XYZ'
@@ -59,5 +59,5 @@ class Gemini::XyzRule < Marty::DeloreanRule
     res.all?
   end
 
-
+  self.init_dg_handler
 end

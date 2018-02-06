@@ -58,17 +58,6 @@ class Marty::BaseRule < Marty::Base
     res_err = results.delete("~~ERROR~~")
     errors[:computed] <<
       "- Error in rule '#{name}' field 'results': #{res_err.capitalize}" if res_err
-
-    same_name_diff_guards = self.class.
-        where(obsoleted_dt: 'infinity', name: self.name).
-        # id is nil on new rules
-        where.not(id: self.id).
-        where("simple_guards != '#{self.simple_guards.to_json}'")
-
-    errors[:base] =
-      "Can't have rule with same name and different type/guards" +
-      " - #{self.name}" if same_name_diff_guards.exists?
-
   end
 
   validates_presence_of :name
