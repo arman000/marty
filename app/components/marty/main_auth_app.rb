@@ -5,6 +5,7 @@ require 'marty/new_posting_window'
 require 'marty/import_type_view'
 require 'marty/user_view'
 require 'marty/event_view'
+require 'marty/scheduled_job_view'
 require 'marty/promise_view'
 require 'marty/api_auth_view'
 require 'marty/api_config_view'
@@ -103,6 +104,7 @@ class Marty::MainAuthApp < Marty::AuthApp
         :reporting,
         :scripting,
         :promise_view,
+        :scheduled_job_view,
       ],
     }
   end
@@ -117,6 +119,8 @@ class Marty::MainAuthApp < Marty::AuthApp
           :bg_status,
           :bg_stop,
           :bg_restart,
+          :bg_scheduler_stop,
+          :bg_scheduler_restart,
         ]
       },
     ]
@@ -188,6 +192,13 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   action :promise_view do |a|
     a.text      = I18n.t("jobs.promise_view")
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :report_magnify
+    a.disabled  = !self.class.has_any_perm?
+  end
+
+  action :scheduled_job_view do |a|
+    a.text      = "Scheduled Jobs"
     a.handler   = :netzke_load_component_by_action
     a.icon      = :report_magnify
     a.disabled  = !self.class.has_any_perm?
@@ -279,6 +290,20 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_admin_perm?
   end
 
+  action :bg_scheduler_stop do |a|
+    a.text     = 'Stop Scheduler'
+    a.tooltip  = 'Delete scheduler life row entry.'
+    a.icon     = :clock_stop
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+  action :bg_scheduler_restart do |a|
+    a.text     = 'Restart Scheduler'
+    a.tooltip  = 'Recreate scheduler life row entry.'
+    a.icon     = :clock_red
+    a.disabled = !self.class.has_admin_perm?
+  end
+
   action :log_view do |a|
     a.text     = 'View Log'
     a.tooltip  = 'View Log'
@@ -325,6 +350,20 @@ class Marty::MainAuthApp < Marty::AuthApp
     cmd = bg_command("restart #{params}")
     res = `#{cmd}`
     client.show_detail res.html_safe.gsub("\n","<br/>"), 'Delayed Job Restart'
+  end
+
+  endpoint :bg_scheduler_stop do |params|
+    res = "#{Marty::SchedulerLife.delete_all} SchedulerLive(s) deleted."
+    client.show_detail res.html_safe.gsub("\n","<br/>"), 'Scheduler Stop'
+  end
+
+  endpoint :bg_scheduler_restart do |params|
+    d_msg = "#{Marty::SchedulerLife.delete_all} SchedulerLive(s) deleted."
+    Marty::Delayed::Scheduler.deploy
+    c_msg = "#{Marty::SchedulerLife.count} Scheduler deployed."
+
+    client.show_detail (d_msg + "\n" + c_msg).html_safe.gsub("\n","<br/>"),
+                       'Scheduler Restart'
   end
 
   endpoint :log_cleanup do |params|
@@ -474,6 +513,19 @@ class Marty::MainAuthApp < Marty::AuthApp
     }
     JS
 
+    c.netzke_on_bg_scheduler_stop = l(<<-JS)
+    function() {
+      this.showLoadmask('Stopping scheduler...');
+      this.server.bgSchedulerStop({});
+    }
+    JS
+    c.netzke_on_bg_scheduler_restart = l(<<-JS)
+    function() {
+      this.showLoadmask('Restarting scheduler...');
+      this.server.bgSchedulerRestart({});
+    }
+    JS
+
     c.netzke_on_log_cleanup = l(<<-JS)
     function(params) {
        var me = this;
@@ -520,6 +572,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
   component :reporting
   component :promise_view
+  component :scheduled_job_view
   component :posting_window
   component :new_posting_window do |c|
     c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?

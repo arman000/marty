@@ -1,0 +1,45 @@
+.gray-row {
+    background-color: #DCDCDC;
+}
+
+.green-row {
+    background-color: #91FF91;
+}
+
+.orange-row {
+    background-color: #FF9D5C;
+}
+
+.pink-row {
+    background-color: #FFCCFF;
+}
+
+.red-row {
+    background-color: #FF4545;
+}
+
+.x-grid-item-selected {
+    font-weight: bold;
+}
+
+.x-grid-item-selected .gray-row {
+    background-color: #B3B3B3;
+}
+
+.x-grid-item-selected .green-row {
+    background-color: #549454; /* V: 58 */
+}
+
+.x-grid-item-selected .orange-row {
+    background-color: #B87243; /* V: 74 */
+}
+
+.x-grid-item-selected .pink-row {
+    background-color: #B590B5;
+}
+
+.x-grid-item-selected .red-row {
+    background-color: #BD3333; /* V: 74 */
+}
+
+

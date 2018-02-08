@@ -51,3 +51,8 @@ end
 # if DELAYED_JOB_PATH is not bin/delayed_job
 Marty::Config["DELAYED_JOB_PARAMS"] ||= "-n 4 --sleep-delay 5"
 # Marty::Config["DELAYED_JOB_PATH"]   = "script/delayed_job"
+
+# scheduler default seed values
+Marty::Config['SCHEDULER_DEPLOY_ON_INITIALIZATION'] = false
+Marty::Config['SCHEDULER_HEARTBEAT']                = 60
+Marty::Config['SCHEDULER_MAX_JOB_TIME']             = 5.minutes

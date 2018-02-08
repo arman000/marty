@@ -1,5 +1,6 @@
 class Marty::BaseRuleView < Marty::McflyGridPanel
   include Marty::Extras::Layout
+  extend Marty::Extras::Columns
 
   def self.klass
     Marty::BaseRule
@@ -72,37 +73,6 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     "{#{kvs}}"
   end
 
-  def self.hash_to_simple(h)
-    return unless h && h.present?
-    fmt = '%-' +  h.keys.map(&:length).max.to_s + 's = %s'
-    h.map do |k, vstr|
-      fmt % [k, vstr]
-    end.join("\n") || ''
-  end
-
-  def jsonb_getter(c)
-    lambda { |r| md = r.send(c); md.present? && md.to_json || '' }
-  end
-
-  def jsonb_simple_getter(c)
-    lambda {|r| Marty::BaseRuleView.hash_to_simple(r.send(c)) }
-  end
-
-  def jsonb_simple_setter(c)
-    msg = "#{c}="
-    lambda { |r, v|
-      return r.send(msg, nil) if v.blank?
-
-      begin
-        v = ActiveSupport::JSON.decode(
-          Marty::BaseRuleView.simple_to_hashstr(v))
-      rescue => e
-        v = { "~~ERROR~~": e.message }
-      end
-      r.send(msg, v)
-    }
-  end
-
   def self.jsonb_field_getter(j, c, nullbool=nil)
     lambda do |r|
       rv = r.send(j)[c]
@@ -117,10 +87,6 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       v = bool ? rv.to_s.downcase == 'true' : rv
       rv == '' || rv == '---' ? r.send(j).delete(c) : r.send(j)[c] = v
     end
-  end
-
-  def json_sort_scope(c)
-    lambda { |r, dir| r.order("#{c}::text " + dir.to_s) }
   end
 
   component :add_window do |c|
@@ -175,24 +141,15 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def form_items_grids
-    [jsonb_field(:grids,
-                 getter: jsonb_simple_getter(:grids),
-                 setter: jsonb_simple_setter(:grids),
-                 height: 75)]
+    [jsonb_field(:grids, height: 75)]
   end
 
   def form_items_computed_guards
-    [jsonb_field(:computed_guards,
-                 getter: jsonb_simple_getter(:computed_guards),
-                 setter: jsonb_simple_setter(:computed_guards),
-                 height: 150)]
+    [jsonb_field(:computed_guards, height: 150)]
   end
 
   def form_items_results
-    [jsonb_field(:results,
-                 getter: jsonb_simple_getter(:results),
-                 setter: jsonb_simple_setter(:results),
-                 height: 150)]
+    [jsonb_field(:results, height: 150)]
   end
 
   def default_form_items
@@ -287,14 +244,6 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   computed_fields.each do |a|
-    column a do |c|
-      c.flex   = 1
-      c.getter = jsonb_getter(a.to_s)
-      c.sorting_scope = json_sort_scope(a)
-      c.filter_with = lambda do |rel, value, op|
-        v = ActiveRecord::Base.connection.quote(value)[1..-2]
-        rel.where("#{a}::text like '%#{v}%'")
-      end
-    end
+    json_column(a)
   end
 end

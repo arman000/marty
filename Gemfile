@@ -12,6 +12,8 @@ gem 'pg'
 gem 'sqlite3'
 # for signing of aws ec2 requests
 gem 'aws-sigv4', '~> 1.0', '>= 1.0.2'
+gem 'parse-cron'
+gem 'cronex'
 
 
 group :development, :test do

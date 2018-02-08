@@ -83,6 +83,17 @@ module Dummy
                          ]
     #config.marty.default_posting_type = 'BASE'
     config.secret_key_base = "SECRET_KEY_BASE"
+
+    config.after_initialize do
+      # FIXME: there doesn't seem to be a great way to avoid this
+      # The scheduler gets deployed after initialization, but
+      # rails gets initialized during migrations
+      # if table exists then we are good to go
+      if ActiveRecord::Base.connection.table_exists? 'marty_scheduler_lives'
+        Marty::Delayed::Scheduler.deploy if
+          Marty::Config['SCHEDULER_DEPLOY_ON_INITIALIZATION'] == true
+      end
+    end
   end
 end
 require "marty/permissions"

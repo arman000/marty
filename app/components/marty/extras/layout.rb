@@ -56,18 +56,47 @@ module Layout
 
   def jsonb_field(name, options={})
     {
-        name:        name,
-        width:       "100%",
-        height:      150,
-        xtype:       :textareafield,
-        auto_scroll: true,
-        spellcheck:  false,
-        allow_blank: false,
-        field_style: {
-          font_family: 'courier new',
-          font_size:   '12px'
-        },
+      name:        name,
+      setter: jsonb_simple_setter(name),
+      getter: jsonb_simple_getter(name),
+      width:       "100%",
+      height:      150,
+      xtype:       :textareafield,
+      auto_scroll: true,
+      spellcheck:  false,
+      allow_blank: false,
+      field_style: {
+        font_family: 'courier new',
+        font_size:   '12px'
+      },
     }.merge(options)
+  end
+
+  def hash_to_simple(h)
+    return unless h && h.present?
+    fmt = '%-' +  h.keys.map(&:length).max.to_s + 's = %s'
+    h.map do |k, vstr|
+      fmt % [k, vstr]
+    end.join("\n") || ''
+  end
+
+  def jsonb_simple_getter(c)
+    lambda {|r| hash_to_simple(r.send(c)) }
+  end
+
+  def jsonb_simple_setter(c)
+    msg = "#{c}="
+    lambda { |r, v|
+      return r.send(msg, nil) if v.blank?
+
+      begin
+        v = ActiveSupport::JSON.decode(
+          Marty::BaseRuleView.simple_to_hashstr(v))
+      rescue => e
+        v = { "~~ERROR~~": e.message }
+      end
+      r.send(msg, v)
+    }
   end
 
   ######################################################################
@@ -197,4 +226,19 @@ module Layout
     c.align  = 'right'
   end
 
+end;
+module Columns
+  def json_column a, opts={}
+    column a do |c|
+      c.flex = 1
+      c.getter = lambda { |r| md = r.send(a); md.present? && md.to_json || '' }
+      c.sorting_scope = lambda { |r, dir| r.order("#{a}::text " + dir.to_s) }
+      c.filter_with = lambda do |rel, value, op|
+        v = ActiveRecord::Base.connection.quote(value)[1..-2]
+        rel.where("#{a}::text like '%#{v}%'") end
+
+      # apply additional config options or overrides
+      opts.each{|k,v| c.send("#{k}=", v)}
+    end
+  end
 end; end; end

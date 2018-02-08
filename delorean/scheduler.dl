@@ -1,0 +1,12 @@
+Restart:
+    scheduled_job_descriptor =? "Marty Restart Scheduler"
+    perform = Marty::Helper.restart_scheduler
+
+Clean:
+    period  =? 60
+    scheduled_job_descriptor =? "Marty Clean Scheduled Jobs"
+    perform = Marty::Helper.clean_scheduled_jobs(period)
+
+Ping:
+    scheduled_job_descriptor =? 'Ping'
+    perform = {'Ping': 'Pong'}

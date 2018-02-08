@@ -51,6 +51,7 @@ class Marty::PromiseView < Netzke::Tree::Base
       :status,
       :cformat,
       :error,
+      :queue,
     ]
     config.root_visible = false
     config.paging = :none
@@ -174,6 +175,11 @@ class Marty::PromiseView < Netzke::Tree::Base
   attribute :error do |config|
     config.getter = ->(record) { record.result.to_s if record.status == false }
     config.flex = 1
+  end
+
+  attribute :queue do |config|
+    config.text = 'Queue'
+    config.width = 90
   end
 end
 
