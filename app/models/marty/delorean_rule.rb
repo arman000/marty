@@ -11,13 +11,16 @@ class Marty::DeloreanRule < Marty::BaseRule
     if computed_guards.present? || results.present?
       begin
         eclass = engine && engine.constantize || Marty::RuleScriptSet
-        eng = eclass.new('infinity').get_engine(self)
+        eng = eclass.new('infinity').get_engine(self_as_hash)
       rescue => e
         return errors[:computed] = "- " + e.message
       end
     end
   end
 
+  def self_as_hash
+    self.as_json + {"classname"=>self.class.name}
+  end
   def self.find_fixed(results)
     results.each_with_object({}) do |(k, v), h|
       v_wo_comment = /\A([^#]+)/.match(v)[1] if v.include?("#")
@@ -41,36 +44,40 @@ class Marty::DeloreanRule < Marty::BaseRule
     "NOT DEFINED"
   end
 
-  def compg_keys
+  def self.compg_keys(computed_guards)
     computed_guards.keys
   end
 
-  def comp_res_keys(ecl)
-    defkeys = (Marty::Config[self.class.results_cfg_var] || {}).keys
+  def self.comp_res_keys(results, grids, ecl)
+    defkeys = (Marty::Config[results_cfg_var] || {}).keys
     results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
-       select{|k| defkeys.include?(k)} + grid_keys(ecl)
+       select{|k| defkeys.include?(k)} + grid_keys(grids, ecl)
   end
-  def grid_keys(eclass)
+  def self.grid_keys(grids, eclass)
       grids.keys.map{|k| eclass.grid_final_name(k) }
   end
-  def base_compute(params, dgparams=params)
+  def self.base_compute(ruleh, params, dgparams=params)
+    id, name, engine, computed_guards, grids, results, fixed_results =
+        ruleh.values_at("id", "name", "engine", "computed_guards", "grids",
+                        "results", "fixed_results")
     eclass = engine && engine.constantize || Marty::RuleScriptSet
-    engine = eclass.new(params["pt"]).get_engine(self) if
+    engine = eclass.new(params["pt"]).get_engine(ruleh) if
       computed_guards.present? || results.present?
 
     if computed_guards.present?
       begin
         res = engine.evaluate(eclass.node_name,
-                              compg_keys,
+                              compg_keys(computed_guards),
                               params.clone)
       rescue => e
         raise e, "Error (guard) in rule '#{id}:#{name}': #{e}", e.backtrace
       end
-      return Hash[compg_keys.zip(res).select{|k,v| !v}] unless res.all?
+      return Hash[compg_keys(computed_guards).zip(res).select{|k,v| !v}] unless
+        res.all?
     end
     grids_computed = false
     grid_results = {}
-    crkeys = comp_res_keys(eclass)
+    crkeys = comp_res_keys(results, grids, eclass)
     if (results.keys - fixed_results.keys).present?
         begin
           eval_result = engine.evaluate(
@@ -99,6 +106,9 @@ class Marty::DeloreanRule < Marty::BaseRule
       end
     end
     result + grid_results
+  end
+  def base_compute(params, dgparams=params)
+    self.class.base_compute(self_as_hash, params, dgparams)
   end
 
   def self.get_matches_(pt, attrs, params)

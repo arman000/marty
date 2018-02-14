@@ -5,6 +5,7 @@ module Marty::RuleSpec
     before(:all) do
       @save_file = "/tmp/save_#{Process.pid}.psql"
       save_clean_db(@save_file)
+      marty_whodunnit
       Marty::Script.load_scripts
       Marty::Config['RULEOPTS_MYRULE']={'simple_result'=>{},
                                         'computed_value'=>{},
@@ -19,7 +20,6 @@ module Marty::RuleSpec
       restore_clean_db(@save_file)
     end
     before(:each) do
-      marty_whodunnit
       dt = DateTime.parse('2017-1-1')
       p = File.expand_path('../../fixtures/csv/rule', __FILE__)
       [Marty::DataGrid, Gemini::XyzRule, Gemini::MyRule].each do |klass|

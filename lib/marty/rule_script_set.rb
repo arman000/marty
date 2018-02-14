@@ -72,25 +72,27 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     newh.map { |k, v| write_attr(k, v) }.join("\n") + "\n"
   end
 
-  def grid_code(rule)
+  def grid_code(ruleh)
     dgcache = {}
     h = {}
-    rule.grids.each do |k, v|
-      expand_grid_code(h, k.ends_with?('_grid')?k:k+'_grid', %Q("#{v}"), dgcache, {})
+    ruleh["grids"].each do |k, v|
+      expand_grid_code(h, k.ends_with?('_grid')?k:k+'_grid', %Q("#{v}"),
+                                                dgcache, {})
     end
     h.map { |k, v| write_attr(k, v) }.join("\n") + "\n"
   end
 
-  def guard_code(rule)
-    write_code(rule.computed_guards)
+  def guard_code(ruleh)
+    write_code(ruleh["computed_guards"])
   end
 
-  def result_code(rule)
-    write_code(rule.results)
+  def result_code(ruleh)
+    write_code(ruleh["results"])
   end
 
-  def grid_init(rule)
-    if rule.grids.present? || rule.results.keys.any?{|k|k.ends_with?("_grid")}
+  def grid_init(ruleh)
+    if ruleh["grids"].present? ||
+       ruleh["results"].keys.any?{|k|k.ends_with?("_grid")}
       write_code({ "pt" => :parameter,
                    "dgparams__" => :parameter,
                  })
@@ -98,18 +100,18 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
       ''
     end
   end
-  def get_code(rule)
-    grid_i = grid_init(rule)
-    grid_c = grid_code(rule)
-    result_c = result_code(rule)
-    guard_c = guard_code(rule)
+  def get_code(ruleh)
+    grid_i = grid_init(ruleh)
+    grid_c = grid_code(ruleh)
+    result_c = result_code(ruleh)
+    guard_c = guard_code(ruleh)
 
     code = self.class.body_start + self.class.indent(grid_i +
                                                      guard_c +
                                                      grid_c +
                                                      result_c)
     #puts '='*40
-    #puts rule.name
+    #puts ruleh["name"]
     #puts '-'
     #puts code
     #puts '-'*10
@@ -117,17 +119,17 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     code
   end
 
-  def code_section_counts(rule)
+  def code_section_counts(ruleh)
     errs = {}
-    errs[:grid_params] = grid_init(rule).count("\n")
-    errs[:computed_guards] = guard_code(rule).count("\n")
-    errs[:grids] = grid_code(rule).count("\n")
-    errs[:results] = result_code(rule).count("\n")
+    errs[:grid_params] = grid_init(ruleh).count("\n")
+    errs[:computed_guards] = guard_code(ruleh).count("\n")
+    errs[:grids] = grid_code(ruleh).count("\n")
+    errs[:results] = result_code(ruleh).count("\n")
     errs
   end
-  def get_parse_error_field(rule, exc)
+  def get_parse_error_field(ruleh, exc)
     line = exc.line ? exc.line - self.class.body_lines : 0
-    errs = code_section_counts(rule)
+    errs = code_section_counts(ruleh)
     line_count = 0
     errs.each do |k,v|
       line_count += v
@@ -136,24 +138,24 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     errs.keys.last
   end
 
-  def get_engine(rule)
+  def get_engine(ruleh)
     begin
       # if rule is a str => importing a regular Script (i.e. not rule)
-      return sset.get_engine(rule) if rule.is_a? String
+      return sset.get_engine(ruleh) if ruleh.is_a? String
 
       # on create rule doesn't have an id => don't cache
-      return sset.parse_check("New RULE #{rule.name}", get_code(rule)) unless
-        rule.id
+      return sset.parse_check("New RULE #{ruleh['name']}", get_code(ruleh)) unless
+        ruleh["id"]
 
-      rule_pfx = rule.class.name.demodulize
+      rule_pfx = ruleh["classname"].demodulize
 
       # unique name for specific version of rule
-      sname = "#{rule_pfx}_#{rule.group_id}_#{rule.created_dt.to_f}"
+      sname = "#{rule_pfx}_#{ruleh['group_id']}_#{ruleh['created_dt'].to_f}"
 
       # is it a dev posting?
       if Mcfly.is_infinity(pt)
-        max_dt = rule.class.
-                 order("created_dt DESC").limit(1).pluck(:created_dt).first
+        max_dt = ruleh["classname"].constantize.order("created_dt DESC").
+                 limit(1).pluck(:created_dt).first
 
         @@dengines_dt ||= max_dt
 
@@ -164,17 +166,17 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
         return engine if engine
 
-        @@dengines[sname] = sset.parse_check(sname, get_code(rule))
+        @@dengines[sname] = sset.parse_check(sname, get_code(ruleh))
       else
         engine = @@engines[[pt, sname]]
 
         return engine if engine
 
-        @@engines[[pt, sname]] = sset.parse_check(sname, get_code(rule))
+        @@engines[[pt, sname]] = sset.parse_check(sname, get_code(ruleh))
       end
     rescue Delorean::ParseError => e
-      f = get_parse_error_field(rule, e)
-      raise "Error in rule '#{rule.name}' field '#{f}': #{e}"
+      f = get_parse_error_field(ruleh, e)
+      raise "Error in rule '#{ruleh['name']}' field '#{f}': #{e}"
     end
   end
 
