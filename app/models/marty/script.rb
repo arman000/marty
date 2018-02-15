@@ -141,8 +141,10 @@ class Marty::Script < Marty::Base
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
-    # params. So, need to clone it.
-    engine.evaluate(node, attr, params.clone)
+    # params, but it is possible that we may be passing in
+    # a frozen hash. To avoid performance impacts, we should first check if
+    # params is frozen to decide whether to dup (frozen) or clone (not frozen).
+    engine.evaluate(node, attr, params.frozen? ? params.dup : params.clone)
   end
 
   delorean_fn :pretty_print, sig: 1 do
