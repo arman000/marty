@@ -53,7 +53,7 @@ class Gemini::XyzRule < Marty::DeloreanRule
     return {} unless xyz_keys.present?
 
     eclass = engine && engine.constantize || Marty::RuleScriptSet
-    engine = eclass.new(pt).get_engine(self)
+    engine = eclass.new(pt).get_engine(self_as_hash)
     res = engine.evaluate("XyzNode", xyz_keys, {"xyz_param"=>xyz_param})
 
     res.all?
