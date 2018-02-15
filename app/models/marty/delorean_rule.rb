@@ -107,6 +107,11 @@ class Marty::DeloreanRule < Marty::BaseRule
     end
     result + grid_results
   end
+  delorean_fn :route_compute, sig: 4 do
+    |ruleh, pt, params, grid_names_p|
+    kl = ruleh["classname"].constantize
+    kl.compute(ruleh, pt, params, grid_names_p)
+  end
   def base_compute(params, dgparams=params)
     self.class.base_compute(self_as_hash, params, dgparams)
   end
