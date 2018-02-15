@@ -72,7 +72,7 @@ class Marty::DataExporter
         csv << x.map { |v|
           case v
           when Array, Hash
-            readable ? v.to_s : encode_json(v.to_json)
+            readable ? v.to_json : encode_json(v.to_json)
           when nil
             nil
           else
