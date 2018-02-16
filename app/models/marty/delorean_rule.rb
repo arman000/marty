@@ -5,7 +5,7 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   def validate
     super
-    return errors[:base] = "Start date must be before end date" if
+    return errors[:base] << "Start date must be before end date" if
       start_dt && end_dt && start_dt >= end_dt
 
     if computed_guards.present? || results.present?
@@ -13,7 +13,7 @@ class Marty::DeloreanRule < Marty::BaseRule
         eclass = engine && engine.constantize || Marty::RuleScriptSet
         eng = eclass.new('infinity').get_engine(self_as_hash)
       rescue => e
-        return errors[:computed] = "- " + e.message
+        return errors[:computed] << "- " + e.message
       end
     end
   end
