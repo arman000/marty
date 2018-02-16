@@ -20,7 +20,6 @@ class Marty::Diagnostic::Aws::Ec2Instance
     @nodes   = get_private_ips
   end
 
-  private
   def self.get url
     uri = URI.parse(url)
     request = Net::HTTP.new(uri.host, uri.port)
@@ -90,11 +89,21 @@ class Marty::Diagnostic::Aws::Ec2Instance
   end
 
   def get_private_ips
-    get_instances['reservationSet']['item'].map{
-      |i|
-      item = i['instancesSet']['item']
-      item.is_a?(Array) ? item.map{|i| i['privateIpAddress']} :
-        item['privateIpAddress']
-    }.flatten
+    begin
+      reservation_set_item = get_instances['reservationSet']['item']
+      reservation_set_item = [reservation_set_item] unless
+        reservation_set_item.is_a?(Array)
+
+      reservation_set_item.map{
+        |i|
+        instances_set_item = i['instancesSet']['item']
+        instances_set_item = [instances_set_item] unless
+          instances_set_item.is_a?(Array)
+
+        instances_set_item.map{|j| j['privateIpAddress']}
+      }.flatten
+    rescue => e
+      raise "Unexpected result came back from AWS. Error: (#{e.message})"
+    end
   end
 end
