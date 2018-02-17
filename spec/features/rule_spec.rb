@@ -36,7 +36,7 @@ feature 'rule view', js: true do
   # click_checkbox in marty_rspec not working here for some reason
   def click_checkbox(name)
     q = %Q(checkbox[fieldLabel="#{name}"])
-    id = run_js "return  Ext.ComponentQuery.query('#{q}')[0].inputId"
+    id = run_js "return  Ext.ComponentQuery.query('#{q}')[0].getItemId();"
     find_by_id(id).click
   end
   # click_col in marty_rspec is not reliable
@@ -75,17 +75,18 @@ feature 'rule view', js: true do
   end
   it "rule workflow" do
     log_in_as('marty')
-    page.driver.browser.manage.window.maximize
     go_to_my_rules
     mrv = netzke_find("my_rule_view")
     # test required field
     press('Add')
     wait_for_ajax
     fill_in('name', with: 'abc')
+
     press('OK')
     wait_for_ajax
     expect(page).to have_content("Rule type can't be blank")
     expect(page).to have_content("Start dt can't be blank")
+
     # create and verify rule
     fill_in('rule_type', with: 'SimpleRule')
     date_fill_in(0, '2013-01-01')
@@ -94,22 +95,9 @@ feature 'rule view', js: true do
     time_fill_in(1, '08:03:01')
     press("OK")
     wait_for_ajax
-    expect(mrv.row_count()).to eq(8)
-    expect(mrv.get_row_vals(1)).to include({"name"=>"abc",
-                                            "rule_type"=>"SimpleRule",
-                                            "start_dt"=>"2013-01-01T19:03:01.000Z",
-                                            "end_dt"=>"2030-01-01T16:03:01.000Z",
-                                            "other_flag"=>false,
-                                            "g_array"=>"",
-                                            "g_single"=>"",
-                                            "g_string"=>"",
-                                            "g_bool"=>nil,
-                                            "g_range"=>nil,
-                                            "g_integer"=>nil,
-                                            "computed_guards"=>"",
-                                            "grids"=>"",
-                                            "results"=>"",
-                                            })
+
+    expect(mrv.row_count()).to eq(9)
+)
     r = Gemini::MyRule.lookup('infinity','abc')
     expect(r.as_json).to include({"user_id"=>1,
                                   "o_user_id"=>nil,
@@ -121,7 +109,8 @@ feature 'rule view', js: true do
                                   "computed_guards"=>{},
                                   "grids"=>{},
                                   "results"=>{},
-                                  })
+                                 })
+
     # type validation (string with values list)
     mrv.select_row(1)
     press("Edit")
@@ -146,31 +135,51 @@ feature 'rule view', js: true do
     netzke_find('Grid2', 'combobox').select_values("DataGrid2")
     press("OK")
     wait_for_ajax
+
     exp = {"name"=>"abc",
            "rule_type"=>"SimpleRule",
-           "start_dt"=>"2013-01-01T19:03:01.000Z",
-           "end_dt"=>"2030-01-01T16:03:01.000Z",
-           "other_flag"=>true,
-           "g_array"=>"G1V1,G1V3",
-           "g_single"=>"G2V2",
-           "g_string"=>"Hi Mom",
-           "g_bool"=>true,
-           "g_range"=>"<=100",
-           "g_integer"=>123,
-           "computed_guards"=>"",
-           "grids"=>"{\"grid1\":\"DataGrid1\",\"grid2\":\"DataGrid2\"}",
-           "results"=>"",
+           "start_dt"=>"2013-01-01T19:03:01.000Z".to_time,
+           "end_dt"=>"2030-01-01T16:03:01.000Z".to_time,
+           "other_flag"=>false,
+           "simple_guards"=>{
+             "g_bool"=>false,
+             "g_array"=>["G1V1", "G1V3"],
+             "g_range"=>"[,100]",
+             "g_single"=>"G2V2",
+             "g_string"=>"Hi Mom",
+             "g_integer"=>"123",
+             "g_bool_def"=>false,
+             "g_nullbool"=>false,
+             "g_nbool_def"=>false,
+             "g_has_default"=>"12345",
+           },
+           "computed_guards"=>{},
+           "grids"=>{"grid1"=>"DataGrid1","grid2"=>"DataGrid2"},
+           "results"=>{},
           }
-    expect(mrv.get_row_vals(1)).to include(exp)
+
+    expect(r.reload.as_json).to include(exp)
+
     # grid edits
     press("Edit")
     netzke_find('Grid2', 'combobox').select_values("---")
     press("OK")
     wait_for_ajax
-    expect(mrv.get_row_vals(1)).to include(exp+{"grids"=>
-                                                "{\"grid1\":\"DataGrid1\"}"})
-    # computed fields
+
+    expect(r.reload.as_json).to include(exp+{"grids"=>
+                                             {"grid1" => "DataGrid1"}})
     press("Edit")
+
+    netzke_find("NullBool Guard", 'combobox').select_values("---")
+    press("OK")
+    wait_for_ajax
+
+    r = Gemini::MyRule.lookup('infinity','abc')
+    expect(r.as_json["simple_guards"]).not_to include('g_nullbool')
+    # computed fields
+
+    press("Edit")
+
     fill_in(:computed_guards, with: 'sadf asdf ljsf')
     press("OK")
     wait_for_ajax
