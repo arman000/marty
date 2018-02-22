@@ -89,7 +89,7 @@ class Marty::DataGrid < Marty::Base
   gen_mcfly_lookup :lookup, [:name], cache: true
   gen_mcfly_lookup :get_all, [], mode: nil
 
-  delorean_fn :lookup_h, sig: [2,3] do
+  cached_delorean_fn :lookup_h, sig: [2,3] do
     |pt, name, fields = %w(id group_id created_dt metadata data_type)|
 
     dga = get_all(pt).where(name: name).pluck(*fields).first
@@ -166,12 +166,13 @@ class Marty::DataGrid < Marty::Base
 
   def self.plv_lookup_grid_distinct(h_passed, dgh, ret_grid_data=false,
                                     distinct=true)
+    cd = dgh["created_dt"]
+    @@dtcache ||= {}
+    @@dtcache[cd] ||= cd.strftime(PLV_DT_FMT)
     row_info = {
       "id"         => dgh["id"],
       "group_id"   => dgh["group_id"],
-      "created_dt" => (
-        @@dtcache ||= {})[dgh["created_dt"]] ||=
-                      dgh["created_dt"].strftime(PLV_DT_FMT)
+      "created_dt" => @@dtcache[cd]
     }
 
     h = dgh["metadata"].each_with_object({}) do |m, h|
@@ -222,8 +223,7 @@ class Marty::DataGrid < Marty::Base
     raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
     raise "non-hash arg #{h}" unless Hash === h
 
-    warn "DEPRECATED: lookup_grid. Use lookup_grid_h instead" unless
-      Rails.env.test?
+    warn "DEPRECATED: lookup_grid. Use lookup_grid_h instead"
 
     dgh = dg.attributes.slice("id","group_id","created_dt",
                               "metadata", "data_type")
@@ -303,8 +303,7 @@ class Marty::DataGrid < Marty::Base
   def lookup_grid_distinct_entry(pt, h, visited=nil, follow=true,
                                  return_grid_data=false)
     warn "DEPRECATED: instance method lookup_grid_distinct_entry. "\
-         "Use class method lookup_grid_distinct_entry_h instead" unless
-      Rails.env.test?
+         "Use class method lookup_grid_distinct_entry_h instead"
     dgh = self.attributes.slice("id","group_id","created_dt",
                               "metadata", "data_type")
     self.class.lookup_grid_distinct_entry_h(pt, h, dgh, visited, follow,
