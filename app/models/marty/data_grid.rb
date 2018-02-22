@@ -216,10 +216,14 @@ class Marty::DataGrid < Marty::Base
   # FIXME: added for Apollo -- not sure where this belongs given that
   # DGs were moved to marty.  Should add documentation about callers
   # keeping the hash small.
+  # DEPRECATED: should use lookup_grid_h instead
   cached_delorean_fn :lookup_grid, sig: 4 do
     |pt, dg, h, distinct|
     raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
     raise "non-hash arg #{h}" unless Hash === h
+
+    warn "DEPRECATED: lookup_grid. Use lookup_grid_h instead" unless
+      Rails.env.test?
 
     dgh = dg.attributes.slice("id","group_id","created_dt",
                               "metadata", "data_type")
@@ -295,9 +299,12 @@ class Marty::DataGrid < Marty::Base
     lookup_grid_distinct_entry_h(pt, h, v, visited, follow, return_grid_data)
   end
 
+  # DEPRECATED: use lookup_grid_distinct_entry_h instead
   def lookup_grid_distinct_entry(pt, h, visited=nil, follow=true,
                                  return_grid_data=false)
-
+    warn "DEPRECATED: instance method lookup_grid_distinct_entry. "\
+         "Use class method lookup_grid_distinct_entry_h instead" unless
+      Rails.env.test?
     dgh = self.attributes.slice("id","group_id","created_dt",
                               "metadata", "data_type")
     self.class.lookup_grid_distinct_entry_h(pt, h, dgh, visited, follow,
