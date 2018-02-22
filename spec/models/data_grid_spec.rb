@@ -182,6 +182,12 @@ EOS
       [res["result"], res["name"]]
     end
 
+    def lookup_grid_helper_h(pt, gridname, params, follow=false)
+      dgh=Marty::DataGrid.lookup_h(pt, gridname)
+      res=Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh, nil, follow)
+      [res["result"], res["name"]]
+    end
+
     describe "imports" do
       it "should not allow imports with trailing blank columns" do
         expect {
@@ -387,242 +393,243 @@ EOS
         }.to raise_error(RuntimeError)
       end
 
-      it "should handle boolean lookups" do
-        res = [true, false].map { |hb_indicator|
-          lookup_grid_helper('infinity',
-                             "Gd",
-                             {"hb_indicator" => hb_indicator,
-                             },
-                            )
-        }
-        expect(res).to eq [[456.0, "Gd"], [123.0, "Gd"]]
-      end
+      [:lookup_grid_helper, :lookup_grid_helper_h].each do |lhg|
+        it "should handle boolean lookups (#{lhg})" do
+          res = [true, false].map { |hb_indicator|
+            method(lhg).call('infinity',
+                                             "Gd",
+                                             {"hb_indicator" => hb_indicator,
+                                             },
+                                            )
+          }
+          expect(res).to eq [[456.0, "Gd"], [123.0, "Gd"]]
+        end
 
-      it "should handle basic lookups" do
-        res = lookup_grid_helper('infinity',
-                                 "G3",
-                                 {"amount" => 160300,
-                                  "state" => "HI",
-                                 },
-                                )
-        expect(res).to eq [1.655,"G3"]
-
-        [3,4].each {
-          |units|
-          res = lookup_grid_helper('infinity',
-                                   "G2",
-                                   {"fico" => 720,
-                                    "units" => units,
-                                    "ltv" => 100,
-                                    "cltv" => 110.1,
+        it "should handle basic lookups (#{lhg})" do
+          res = method(lhg).call('infinity',
+                                   "G3",
+                                   {"amount" => 160300,
+                                    "state" => "HI",
                                    },
                                   )
-          expect(res).to eq [5.6,"G2"]
-        }
+          expect(res).to eq [1.655,"G3"]
 
-        dg = Marty::DataGrid.lookup('infinity', "G1")
+          [3,4].each {
+            |units|
+            res = method(lhg).call('infinity',
+                                     "G2",
+                                     {"fico" => 720,
+                                      "units" => units,
+                                      "ltv" => 100,
+                                      "cltv" => 110.1,
+                                     },
+                                    )
+            expect(res).to eq [5.6,"G2"]
+          }
 
-        h = {
-          "fico" => 600,
-          "state" => "RI",
-          "ltv" => 10,
-        }
+          dg = Marty::DataGrid.lookup('infinity', "G1")
 
-        res = lookup_grid_helper('infinity', "G1", h)
-        expect(res).to eq [11,"G1"]
+          h = {
+            "fico" => 600,
+            "state" => "RI",
+            "ltv" => 10,
+          }
 
-        dg.update_from_import("G1", G1.sub(/11/, "111"))
+          res = method(lhg).call('infinity', "G1", h)
+          expect(res).to eq [11,"G1"]
 
-        res = lookup_grid_helper('infinity', "G1", h)
-        expect(res).to eq [111,"G1"]
-      end
+          dg.update_from_import("G1", G1.sub(/11/, "111"))
 
-      it "should result in error when there are multiple cell hits" do
-        expect {
-          lookup_grid_helper('infinity',
-                             "G2",
-                             {"fico" => 720,
-                              "ltv" => 100,
-                              "cltv" => 110.1,
-                             },
-                            )
-        }.to raise_error(RuntimeError)
-      end
+          res = method(lhg).call('infinity', "G1", h)
+          expect(res).to eq [111,"G1"]
+        end
 
-      it "should return nil when matching data grid cell is nil" do
-        res = lookup_grid_helper('infinity',
-                                 "G1",
-                                 {"fico" => 800,
-                                  "state" => "MA",
-                                  "ltv" => 81,
-                                 },
-                                )
-        expect(res).to eq [nil,"G1"]
-      end
+        it "should result in error when there are multiple cell hits (#{lhg})" do
+          expect {
+            method(lhg).call('infinity',
+                               "G2",
+                               {"fico" => 720,
+                                "ltv" => 100,
+                                "cltv" => 110.1,
+                               },
+                              )
+          }.to raise_error(RuntimeError)
+        end
 
-      it "should handle string wildcards" do
-        res = lookup_grid_helper('infinity',
-                                 "G1",
-                                 {"fico" => 720,
-                                  "state" => "GU",
-                                  "ltv" => 80,
-                                 },
-                                )
-        expect(res).to eq [22,"G1"]
-      end
-
-      it "should handle matches which also have a wildcard match" do
-        dg_from_import("G9", G9)
-
-        expect {
-          res = lookup_grid_helper('infinity',
-                                   "G9",
-                                   {"state" => "CA", "ltv" => 81},
+        it "should return nil when matching data grid cell is nil (#{lhg})" do
+          res = method(lhg).call('infinity',
+                                   "G1",
+                                   {"fico" => 800,
+                                    "state" => "MA",
+                                    "ltv" => 81,
+                                   },
                                   )
-        }.to raise_error(RuntimeError)
+          expect(res).to eq [nil,"G1"]
+        end
 
-        res = lookup_grid_helper('infinity',
-                                 "G9",
-                                 {"state" => "GU", "ltv" => 81},
-                                )
-        expect(res).to eq [456,"G9"]
-      end
+        it "should handle string wildcards (#{lhg})" do
+          res = method(lhg).call('infinity',
+                                   "G1",
+                                   {"fico" => 720,
+                                    "state" => "GU",
+                                    "ltv" => 80,
+                                   },
+                                  )
+          expect(res).to eq [22,"G1"]
+        end
 
-      it "should handle nil attr values to match wildcard" do
-        dg_from_import("G9", G9)
+        it "should handle matches which also have a wildcard match (#{lhg})" do
+          dg_from_import("G9", G9)
 
-        res = lookup_grid_helper('infinity',
-                               "G9",
-                               {"state" => nil, "ltv" => 81},
-                               )
-        expect(res).to eq [456,"G9"]
+          expect {
+            res = method(lhg).call('infinity',
+                                     "G9",
+                                     {"state" => "CA", "ltv" => 81},
+                                    )
+          }.to raise_error(RuntimeError)
 
-        expect {
-          res = lookup_grid_helper('infinity',
+          res = method(lhg).call('infinity',
+                                   "G9",
+                                   {"state" => "GU", "ltv" => 81},
+                                  )
+          expect(res).to eq [456,"G9"]
+        end
+
+        it "should handle nil attr values to match wildcard (#{lhg})" do
+          dg_from_import("G9", G9)
+
+          res = method(lhg).call('infinity',
+                                   "G9",
+                                   {"state" => nil, "ltv" => 81},
+                                  )
+          expect(res).to eq [456,"G9"]
+
+          expect {
+            res = method(lhg).call('infinity',
                                      "G9",
                                      {"state" => "CA", "ltv" => nil},
                                     )
-        }.to raise_error(RuntimeError)
+          }.to raise_error(RuntimeError)
+        end
+
+        it "should handle boolean keys (#{lhg})" do
+          res = method(lhg).call('infinity',
+                                   "G4",
+                                   {"hb_indicator" => true,
+                                    "cltv" => 80,
+                                   },
+                                  )
+          expect(res).to eq [-1.5,"G4"]
+
+          res = method(lhg).call('infinity',
+                                   "G4",
+                                   {"hb_indicator" => false,
+                                    "cltv" => 80,
+                                   },
+                                  )
+          expect(res).to eq [nil,"G4"]
+        end
+
+        it "should handle vertical-only grids (#{lhg})" do
+          res = method(lhg).call('infinity',
+                                   "G5",
+                                   {"ltv" => 80},
+                                  )
+          expect(res).to eq [-0.375,"G5"]
+        end
+
+        it "should handle horiz-only grids (#{lhg})" do
+          res = method(lhg).call('infinity',
+                                   "G6",
+                                   {"ltv" => 80, "conforming" => true},
+                                  )
+          expect(res).to eq [-0.375,"G6"]
+        end
+
+        it "should handle string typed data grids (#{lhg})" do
+          expect(Marty::DataGrid.lookup('infinity', "G7").data_type).to eq "string"
+
+          res = method(lhg).call('infinity',
+                                   "G7",
+                                   {"hb_indicator" => true,
+                                    "cltv" => 80,
+                                   },
+                                  )
+          expect(res).to eq ["test","G7"]
+        end
+
+        it "should handle DataGrid typed data grids (#{lhg})" do
+          expect(Marty::DataGrid.lookup('infinity', "G8").data_type).
+            to eq "Marty::DataGrid"
+          g1 = Marty::DataGrid.lookup('infinity', "G1")
+
+          res = method(lhg).call('infinity',
+                                   "G8",
+                                   {"ltv" => 80,
+                                   },
+                                  )
+          expect(res).to eq [g1,"G8"]
+        end
+
+        it "should handle multi DataGrid lookups (#{lhg})" do
+          expect(Marty::DataGrid.lookup('infinity', "G8").data_type).
+            to eq "Marty::DataGrid"
+          g1 = Marty::DataGrid.lookup('infinity', "G1")
+
+          h = {
+            "fico" => 600,
+            "state" => "RI",
+            "ltv" => 10,
+          }
+
+          g1_res = method(lhg).call('infinity', "G1", h)
+          expect(g1_res).to eq [11,"G1"]
+
+          res = method(lhg).call('infinity',
+                                   "G8",
+                                   h,true
+                                  )
+          expect(g1_res).to eq res
+        end
+
+        it "should handle DataGrid typed data grids (#{lhg})" do
+          g1 = Marty::DataGrid.lookup('infinity', "G1")
+
+          res = method(lhg).call('infinity',
+                                   "Ga",
+                                   {"dg" => g1,
+                                   },
+                                  )
+          expect(res).to eq [7,"Ga"]
+
+          # should be able to lookup bu name as well
+          res = method(lhg).call('infinity',
+                                   "Ga",
+                                   {"dg" => "G2",
+                                   },
+                                  )
+          expect(res).to eq [7,"Ga"]
+        end
+
+        it "should handle DataGrid typed data grids -- non mcfly (#{lhg})" do
+          ca = Gemini::State.find_by_name("CA")
+
+          res = method(lhg).call('infinity',
+                                   "Gb",
+                                   {"property_state" => ca,
+                                   },
+                                  )
+          expect(res).to eq [70,"Gb"]
+
+          # should be able to lookup bu name as well
+          res = method(lhg).call('infinity',
+                                   "Gb",
+                                   {"property_state" => "CA",
+                                   },
+                                  )
+          expect(res).to eq [70,"Gb"]
+        end
       end
-
-      it "should handle boolean keys" do
-        res = lookup_grid_helper('infinity',
-                                 "G4",
-                                 {"hb_indicator" => true,
-                                  "cltv" => 80,
-                                 },
-                                )
-        expect(res).to eq [-1.5,"G4"]
-
-        res = lookup_grid_helper('infinity',
-                                 "G4",
-                                 {"hb_indicator" => false,
-                                  "cltv" => 80,
-                                 },
-                                )
-        expect(res).to eq [nil,"G4"]
-      end
-
-      it "should handle vertical-only grids" do
-        res = lookup_grid_helper('infinity',
-                                 "G5",
-                                 {"ltv" => 80},
-                                )
-        expect(res).to eq [-0.375,"G5"]
-      end
-
-      it "should handle horiz-only grids" do
-        res = lookup_grid_helper('infinity',
-                                 "G6",
-                                 {"ltv" => 80, "conforming" => true},
-                                )
-        expect(res).to eq [-0.375,"G6"]
-      end
-
-      it "should handle string typed data grids" do
-        expect(Marty::DataGrid.lookup('infinity', "G7").data_type).to eq "string"
-
-        res = lookup_grid_helper('infinity',
-                                 "G7",
-                                 {"hb_indicator" => true,
-                                  "cltv" => 80,
-                                 },
-                                )
-        expect(res).to eq ["test","G7"]
-      end
-
-      it "should handle DataGrid typed data grids" do
-        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).
-          to eq "Marty::DataGrid"
-        g1 = Marty::DataGrid.lookup('infinity', "G1")
-
-        res = lookup_grid_helper('infinity',
-                                 "G8",
-                                 {"ltv" => 80,
-                                 },
-                                )
-        expect(res).to eq [g1,"G8"]
-      end
-
-      it "should handle multi DataGrid lookups" do
-        expect(Marty::DataGrid.lookup('infinity', "G8").data_type).
-          to eq "Marty::DataGrid"
-        g1 = Marty::DataGrid.lookup('infinity', "G1")
-
-        h = {
-          "fico" => 600,
-          "state" => "RI",
-          "ltv" => 10,
-        }
-
-        g1_res = lookup_grid_helper('infinity', "G1", h)
-        expect(g1_res).to eq [11,"G1"]
-
-        res = lookup_grid_helper('infinity',
-                                       "G8",
-                                       h,true
-                                      )
-        expect(g1_res).to eq res
-      end
-
-      it "should handle DataGrid typed data grids" do
-        g1 = Marty::DataGrid.lookup('infinity', "G1")
-
-        res = lookup_grid_helper('infinity',
-                                 "Ga",
-                                 {"dg" => g1,
-                                 },
-                                )
-        expect(res).to eq [7,"Ga"]
-
-        # should be able to lookup bu name as well
-        res = lookup_grid_helper('infinity',
-                                 "Ga",
-                                 {"dg" => "G2",
-                                 },
-                                )
-        expect(res).to eq [7,"Ga"]
-      end
-
-      it "should handle DataGrid typed data grids -- non mcfly" do
-        ca = Gemini::State.find_by_name("CA")
-
-        res = lookup_grid_helper('infinity',
-                                 "Gb",
-                                 {"property_state" => ca,
-                                 },
-                                )
-        expect(res).to eq [70,"Gb"]
-
-        # should be able to lookup bu name as well
-        res = lookup_grid_helper('infinity',
-                                 "Gb",
-                                 {"property_state" => "CA",
-                                 },
-                                )
-        expect(res).to eq [70,"Gb"]
-      end
-
       it "should handle typed (enum) data lookup_grid" do
         pt = 'infinity'
         ca = Gemini::State.find_by_name("CA")

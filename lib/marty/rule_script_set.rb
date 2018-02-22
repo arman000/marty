@@ -49,12 +49,12 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     else
       h[dgid] = dgname
       h["#{dgid}_dg__"] = <<~EOS
-      Marty::DataGrid.lookup(pt,#{dgid}) ||
+      Marty::DataGrid.lookup_h(pt,#{dgid}) ||
         ERR("grid '#{dgid}' ('%s') not found" % #{dgid})
       EOS
       h["#{dgid}_dgp__"] = "dgparams__ + \n" + self.class.indent(paramify_h(h))
-      lgde = "lookup_grid_distinct_entry"
-      h["#{dgid}_h__"] = "#{dgid}_dg__.#{lgde}(pt,#{dgid}_dgp__)"
+      lgde = "lookup_grid_distinct_entry_h"
+      h["#{dgid}_h__"] = "Marty::DataGrid.#{lgde}(pt,#{dgid}_dgp__,#{dgid}_dg__)"
       h[final_name] = "#{dgid}_h__ && #{dgid}_h__.result"
       cache[dgname] = final_name
     end
