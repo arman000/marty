@@ -89,6 +89,13 @@ class Marty::DataGrid < Marty::Base
   gen_mcfly_lookup :lookup, [:name], cache: true
   gen_mcfly_lookup :get_all, [], mode: nil
 
+  cached_delorean_fn :lookup_h, sig: [2,3] do
+    |pt, name, fields = %w(id group_id created_dt metadata data_type)|
+
+    dga = get_all(pt).where(name: name).pluck(*fields).first
+    dga && Hash[fields.zip(dga)]
+  end
+
   cached_mcfly_lookup :lookup_id, sig: 2 do
     |pt, group_id|
     find_by_group_id group_id
@@ -157,15 +164,18 @@ class Marty::DataGrid < Marty::Base
 
   PLV_DT_FMT = "%Y-%m-%d %H:%M:%S.%N6"
 
-  def plv_lookup_grid_distinct(h_passed, ret_grid_data=false, distinct=true)
+  def self.plv_lookup_grid_distinct(h_passed, dgh, ret_grid_data=false,
+                                    distinct=true)
+    cd = dgh["created_dt"]
+    @@dtcache ||= {}
+    @@dtcache[cd] ||= cd.strftime(PLV_DT_FMT)
     row_info = {
-      "id"         => id,
-      "group_id"   => group_id,
-      "created_dt" => (
-        @@dtcache ||= {})[created_dt] ||= created_dt.strftime(PLV_DT_FMT)
+      "id"         => dgh["id"],
+      "group_id"   => dgh["group_id"],
+      "created_dt" => @@dtcache[cd]
     }
 
-    h = metadata.each_with_object({}) do |m, h|
+    h = dgh["metadata"].each_with_object({}) do |m, h|
       attr = m["attr"]
       inc = h_passed.fetch(attr, :__nf__)
       next if inc == :__nf__
@@ -196,7 +206,8 @@ class Marty::DataGrid < Marty::Base
     end
 
     if ret_grid_data
-      md, mmd = modify_grid(h_passed)
+      dg = find(dgh["id"])
+      md, mmd = modify_grid(h_passed, dg.metadata, dg.data)
       res["data"] = md
       res["metadata"] = mmd
     end
@@ -206,12 +217,26 @@ class Marty::DataGrid < Marty::Base
   # FIXME: added for Apollo -- not sure where this belongs given that
   # DGs were moved to marty.  Should add documentation about callers
   # keeping the hash small.
+  # DEPRECATED: should use lookup_grid_h instead
   cached_delorean_fn :lookup_grid, sig: 4 do
     |pt, dg, h, distinct|
     raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
     raise "non-hash arg #{h}" unless Hash === h
 
-    res = dg.plv_lookup_grid_distinct(h, false, distinct)
+    warn "DEPRECATED: lookup_grid. Use lookup_grid_h instead"
+
+    dgh = dg.attributes.slice("id","group_id","created_dt",
+                              "metadata", "data_type")
+    res = plv_lookup_grid_distinct(h, dgh, false, distinct)
+    res["result"]
+  end
+
+  cached_delorean_fn :lookup_grid_h, sig: 4 do
+    |pt, dgh, h, distinct|
+    raise "bad DataGrid #{dgh}" unless Hash === dgh
+    raise "non-hash arg #{h}" unless Hash === h
+
+    res = plv_lookup_grid_distinct(h, dgh, false, distinct)
     res["result"]
   end
 
@@ -227,8 +252,8 @@ class Marty::DataGrid < Marty::Base
     end
   end
 
-  def lookup_grid_distinct_entry(pt, h, visited=nil, follow=true,
-                                 return_grid_data=false)
+  delorean_fn :lookup_grid_distinct_entry_h, sig: [3,6] do
+    |pt, h, dgh, visited=nil, follow=true, return_grid_data=false|
 
     # Perform grid lookup, if result is another data_grid, and follow is true,
     # then perform lookup on the resulting grid.  Allows grids to be nested
@@ -240,33 +265,50 @@ class Marty::DataGrid < Marty::Base
     #   "name"     => <grid name>
     #   "data"     => <grid's data array>
     #   "metadata" => <grid's metadata (array of hashes)>
+    vhash = plv_lookup_grid_distinct(h, dgh, return_grid_data)
 
-    vhash = plv_lookup_grid_distinct(h, return_grid_data)
+    next vhash if vhash["result"].nil? || !dgh['data_type']
 
-    return vhash if vhash["result"].nil? || !data_type
+    c_data_type = Marty::DataGrid.convert_data_type(dgh['data_type'])
 
-    c_data_type = Marty::DataGrid.convert_data_type(data_type)
-
-    return vhash if String === c_data_type
+    next vhash if String === c_data_type
 
     res = vhash["result"]
 
-    v =  Marty::PgEnum === res ?
-      c_data_type.find_by_name(res) :
-      Marty::DataConversion.find_row(c_data_type, {"name" => res}, pt)
+    v =  case
+             when Marty::PgEnum === res
+               c_data_type.find_by_name(res)
+             when Marty::DataGrid == c_data_type
+               follow ?
+                 Marty::DataGrid.lookup_h(pt, res) :
+                 Marty::DataGrid.lookup(pt, res)
+             else
+               Marty::DataConversion.find_row(c_data_type, {"name" => res}, pt)
+         end
 
-    return vhash.merge({"result" => v}) unless (Marty::DataGrid === v && follow)
+    next vhash.merge({"result" => v}) unless (Marty::DataGrid == c_data_type &&
+                                              follow)
 
     visited ||= []
 
-    visited << self.group_id
+    visited << dgh['group_id']
 
     raise "#{self.class} recursion loop detected -- #{visited}" if
-      visited.member?(v.group_id)
+      visited.member?(v['group_id'])
 
-    v.lookup_grid_distinct_entry(pt, h, visited, follow, return_grid_data)
+    lookup_grid_distinct_entry_h(pt, h, v, visited, follow, return_grid_data)
   end
 
+  # DEPRECATED: use lookup_grid_distinct_entry_h instead
+  def lookup_grid_distinct_entry(pt, h, visited=nil, follow=true,
+                                 return_grid_data=false)
+    warn "DEPRECATED: instance method lookup_grid_distinct_entry. "\
+         "Use class method lookup_grid_distinct_entry_h instead"
+    dgh = self.attributes.slice("id","group_id","created_dt",
+                              "metadata", "data_type")
+    self.class.lookup_grid_distinct_entry_h(pt, h, dgh, visited, follow,
+                                            return_grid_data)
+  end
   delorean_instance_method :lookup_grid_distinct_entry,
                            [[Date, Time, ActiveSupport::TimeWithZone], Hash]
 
@@ -580,7 +622,7 @@ class Marty::DataGrid < Marty::Base
     end
   end
 
-  def modify_grid(params)
+  def self.modify_grid(params, metadata, data)
     removes = ["h", "v"].each_with_object({}) {|dir, hash| hash[dir] = Set.new}
 
     metadata_copy, data_copy = metadata.deep_dup, data.deep_dup
@@ -627,13 +669,13 @@ class Marty::DataGrid < Marty::Base
   end
 
   private
-  def remove_indices(orig_array, inds)
+  def self.remove_indices(orig_array, inds)
     orig_array.each_with_object([]).with_index do |(item, new_array), index|
       new_array.push(item) unless inds.include?(index)
     end
   end
 
-  def opposite_sign(op)  # toggle sign and inclusivity
+  def self.opposite_sign(op)  # toggle sign and inclusivity
     {
       :<  => :>=,
       :<= => :>,
@@ -642,7 +684,7 @@ class Marty::DataGrid < Marty::Base
     }[op]
   end
 
-  def compute_numeric_mods(keys, op, val)
+  def self.compute_numeric_mods(keys, op, val)
     @keyhash ||= {}
     prune_a, rewrite_a = [], []
 
@@ -695,7 +737,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   # value is a list of what to keep
-  def compute_set_mods(keys, val)
+  def self.compute_set_mods(keys, val)
     prune_a, rewrite_a, value = [], [], Array(val)
 
     keys.each_with_index do |key, index|
@@ -718,7 +760,7 @@ class Marty::DataGrid < Marty::Base
     [prune_a, rewrite_a]
   end
 
-  def parse_range(key)
+  def self.parse_range(key)
     match = key.match(/\A(\[|\()([0-9\.-]*),([0-9\.-]*)(\]|\))\z/)
     raise "unrecognized pattern #{key}" unless match
 
@@ -730,7 +772,7 @@ class Marty::DataGrid < Marty::Base
     [lboundary == '(' ? :> : :>=, lhv, rhv, rboundary == ')' ? :< : :<=]
   end
 
-  def rewrite_range(lb, lhv, rhv, rb)
+  def self.rewrite_range(lb, lhv, rhv, rb)
     lboundary = lb == :> ? '(' : '['
 
     # even though numranges are float type, we don't want to output ".0"
@@ -742,7 +784,7 @@ class Marty::DataGrid < Marty::Base
     lboundary + lvalue + ',' + rvalue + rboundary
   end
 
-  def parse_bounds(key)
+  def self.parse_bounds(key)
     match = key.match(/\A *(<|>|<=|>=)? *([a-z_]+) *\z/)
     raise "unrecognized pattern #{key}" unless match
 

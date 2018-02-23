@@ -177,8 +177,8 @@ EOS
     end
 
     def lookup_grid_helper(pt, gridname, params, follow=false)
-      dg=Marty::DataGrid.lookup(pt, gridname)
-      res=dg.lookup_grid_distinct_entry(pt, params, nil, follow)
+      dgh=Marty::DataGrid.lookup_h(pt, gridname)
+      res=Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh, nil, follow)
       [res["result"], res["name"]]
     end
 
@@ -294,80 +294,80 @@ EOS
       end
 
       context "should handle NULL key values" do
-        let(:dg) { Marty::DataGrid.lookup(pt, "Gf") }
+        let(:dgh) { Marty::DataGrid.lookup_h(pt, "Gf") }
 
         it 'true returns Y' do
-          res = Marty::DataGrid.lookup_grid(pt, dg, {"b"=>true}, false)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"b"=>true}, false)
           expect(res).to eq('Y')
         end
 
         it '13 returns N' do
-          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13}, true)
           expect(res).to eq('N')
         end
 
         it '13 & numrange 0 returns nil' do
-          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13, "n"=>0}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13, "n"=>0}, true)
           expect(res).to eq('N')
         end
 
         it '13 & int4range 15 returns N' do
-          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13, "i4"=>15}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13, "i4"=>15}, true)
           expect(res).to eq('N')
         end
 
         it '13 & int4range 1 returns nil' do
-          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13, "i4"=>1}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13, "i4"=>1}, true)
           expect(res).to be_nil
         end
 
         it 'false, 3, numrange 15 returns N' do
           res = Marty::DataGrid.
-                lookup_grid(pt, dg, {"b"=>false, "i"=>3, "n"=>15}, true)
+                lookup_grid_h(pt, dgh, {"b"=>false, "i"=>3, "n"=>15}, true)
           expect(res).to eq('N')
         end
 
         it '13, numrange 15 returns N' do
-          res = Marty::DataGrid.lookup_grid(pt, dg, {"i"=>13, "n"=>15}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13, "n"=>15}, true)
           expect(res).to eq('N')
         end
       end
 
       it "should handle ambiguous lookups" do
-        dg = Marty::DataGrid.lookup(pt, "Gh")
+        dgh = Marty::DataGrid.lookup_h(pt, "Gh")
 
         h1 = {
           "property_state" => "NY",
           "county_name"    => "R",
         }
 
-        res = Marty::DataGrid.lookup_grid(pt, dg, h1, false)
+        res = Marty::DataGrid.lookup_grid_h(pt, dgh, h1, false)
         expect(res).to eq(10)
       end
 
       it "should handle ambiguous lookups (2)" do
-        dg = Marty::DataGrid.lookup(pt, "Gg")
+        dgh = Marty::DataGrid.lookup_h(pt, "Gg")
         res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"i1"=>2, "i2"=>1}, false)
+              lookup_grid_h(pt, dgh, {"i1"=>2, "i2"=>1}, false)
         expect(res).to eq(1)
 
         res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"i1"=>3, "i2"=>1}, false)
+              lookup_grid_h(pt, dgh, {"i1"=>3, "i2"=>1}, false)
         expect(res).to eq(1)
 
         res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"i1"=>2, "i2"=>3}, false)
+              lookup_grid_h(pt, dgh, {"i1"=>2, "i2"=>3}, false)
         expect(res).to eq(20)
       end
 
       it "should handle non-distinct lookups" do
-        dg = Marty::DataGrid.lookup(pt, "Ge")
-        res = Marty::DataGrid.lookup_grid(pt, dg, {"ltv"=>500}, false)
+        dgh = Marty::DataGrid.lookup_h(pt, "Ge")
+        res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"ltv"=>500}, false)
 
         expect(res).to eq(1.1)
 
         expect {
-          Marty::DataGrid.lookup_grid(pt, dg, {"ltv"=>500}, true)
+          Marty::DataGrid.lookup_grid_h(pt, dgh, {"ltv"=>500}, true)
         }.to raise_error(RuntimeError)
       end
 
@@ -376,14 +376,14 @@ EOS
           "client_id" => 700127,
           "property_state" => "CA",
         }
-        dg = Marty::DataGrid.lookup(pt, "Gj")
-        res = Marty::DataGrid.lookup_grid(pt, dg, params, false)
+        dgh = Marty::DataGrid.lookup_h(pt, "Gj")
+        res = Marty::DataGrid.lookup_grid_h(pt, dgh, params, false)
 
         # should return the upper left corner match
         expect(res).to eq(0.25)
 
         expect {
-          Marty::DataGrid.lookup_grid(pt, dg, params, true)
+          Marty::DataGrid.lookup_grid_h(pt, dgh, params, true)
         }.to raise_error(RuntimeError)
       end
 
@@ -626,10 +626,10 @@ EOS
       it "should handle typed (enum) data lookup_grid" do
         pt = 'infinity'
         ca = Gemini::State.find_by_name("CA")
-        dg = Marty::DataGrid.lookup(pt, "Gb")
+        dgh = Marty::DataGrid.lookup_h(pt, "Gb")
 
         res = Marty::DataGrid.
-              lookup_grid(pt, dg, {"property_state" => ca}, false)
+              lookup_grid_h(pt, dgh, {"property_state" => ca}, false)
 
         expect(res).to eq 70
       end
@@ -654,8 +654,9 @@ EOS
                               "keys"=>["[600,700)", "[700,750)", "[750,]"],
                               "type"=>"numrange"}]
 
-        dg = Marty::DataGrid.lookup(pt, 'G2')
-        res = dg.lookup_grid_distinct_entry(pt, {}, nil, true, true)
+        dgh = Marty::DataGrid.lookup_h(pt, 'G2')
+        res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt, {}, dgh,
+                                                           nil, true, true)
         expect(res["data"]).to eq (expected_data)
         expect(res["metadata"]).to eq (expected_metadata)
       end
@@ -676,9 +677,11 @@ EOS
                               "attr"=>"fico",
                               "keys"=>["[600,700)", "[700,750)", "[750,]"],
                               "type"=>"numrange"}]
-        dg = Marty::DataGrid.lookup(pt, 'G8')
-        res = dg.lookup_grid_distinct_entry(pt, { "ltv" => 10,
-                                                  "state" => "RI" }, nil, true,
+        dgh = Marty::DataGrid.lookup_h(pt, 'G8')
+        res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
+                                                           { "ltv" => 10,
+                                                             "state" => "RI" },
+                                                           dgh, nil, true,
                                             true)
         expect(res["data"]).to eq (expected_data)
         expect(res["metadata"]).to eq (expected_metadata)
@@ -690,44 +693,47 @@ EOS
                               "attr"=>"ltv",
                               "keys"=>["[,115]", "(115,135]", "(135,140]"],
                               "type"=>"numrange"}]
-        dg = Marty::DataGrid.lookup(pt, 'G8')
-        res = dg.lookup_grid_distinct_entry(pt, { "ltv" => 10,
-                                                  "state" => "RI" }, nil, false,
+        dgh = Marty::DataGrid.lookup_h(pt, 'G8')
+        res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
+                                                           { "ltv" => 10,
+                                                             "state" => "RI" },
+                                                           dgh, nil, false,
                                             true)
         expect(res["data"]).to eq (expected_data)
         expect(res["metadata"]).to eq (expected_metadata)
       end
 
       it "should handle all characters in grid inputs" do
-        dg = Marty::DataGrid.lookup(pt, 'G1')
+        dgh = Marty::DataGrid.lookup_h(pt, 'G1')
         5000.times do
           st = 30.times.map{rand(224)+32}.pack('U*')
-          res = dg.lookup_grid_distinct_entry(pt, { "ltv" => 10,
-                                                    "fico" => 690,
-                                                    "state" => st }, nil,
-                                              false, true)
+          res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
+                                                             { "ltv" => 10,
+                                                               "fico" => 690,
+                                                               "state" => st },
+                                                             dgh, nil, false, true)
         end
       end
       it "should handle all quote chars in grid inputs" do
-        dg = Marty::DataGrid.lookup(pt, 'G1')
+        dgh = Marty::DataGrid.lookup_h(pt, 'G1')
         # single, double, backslash, grave, acute, unicode quotes: left single,
         # right single, left double, right double
         quotes = ["'", '"', '\\', '`', "\u00b4", "\u2018", "\u2019",
                   "\u201C", "\u201D"]
         100.times do
           st = 30.times.map{quotes[rand(9)]}.join
-          res = dg.lookup_grid_distinct_entry(pt, { "ltv" => 10,
+          res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt, { "ltv" => 10,
                                                     "fico" => 690,
-                                                    "state" => st }, nil,
+                                                    "state" => st }, dgh, nil,
                                               false, true)
         end
       end
       it "should handle quote chars in object name" do
-        dg = Marty::DataGrid.lookup(pt, 'G1')
+        dgh = Marty::DataGrid.lookup_h(pt, 'G1')
         st = Gemini::State.new(name: "'\\")
-        res = dg.lookup_grid_distinct_entry(pt, { "ltv" => 10,
+        res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt, { "ltv" => 10,
                                                   "fico" => 690,
-                                                  "state" => st }, nil,
+                                                  "state" => st }, dgh, nil,
                                             false, true)
       end
     end
@@ -749,17 +755,19 @@ EOS
         dgb.update_from_import("Gb", Gb.sub(/70/, "333"), '1/1/2015')
         dgb.update_from_import("Gb", Gb.sub(/70/, "444"), '1/1/2016')
 
-        res = dgc.lookup_grid_distinct_entry('2/2/2014',
-                                             {"property_state" => "CA"})
+        dgch = dgc.attributes.
+               slice("id","group_id","created_dt",  "metadata", "data_type")
+        res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2014',
+                                             {"property_state" => "CA"}, dgch)
         expect(res["result"]).to eq(70)
 
-        res = dgc.lookup_grid_distinct_entry('2/2/2015',
-                                             {"property_state" => "CA"})
+        res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2015',
+                                             {"property_state" => "CA"}, dgch)
 
         expect(res["result"]).to eq(333)
 
-        res = dgc.lookup_grid_distinct_entry('2/2/2016',
-                                             {"property_state" => "CA"})
+        res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2016',
+                                             {"property_state" => "CA"}, dgch)
 
         expect(res["result"]).to eq(444)
       end
