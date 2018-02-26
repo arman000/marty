@@ -40,57 +40,69 @@ class Marty::Posting < Marty::Base
     o
   end
 
+  def self.get_struct_attrs
+    self.struct_attrs ||= super + ["created_dt", "name"]
+  end
+
   # Not using mcfly_lookup since we don't want these time-warp markers
   # time-warped. FIXME: perhaps this should use mcfly_lookup since we
   # may allow deletion of postings.  i.e. a new one with same name
   # might be created.  Or, use regular validates_uniqueness_of instead
   # of mcfly_validates_uniqueness_of.
-  delorean_fn :lookup, sig: 1 do
-    |name|
-    self.find_by_name(name)
+  delorean_fn :lookup, sig: [1, 2] do
+    |name, opts={}|
+    make_openstruct(self.find_by_name(name), opts)
+  end
+
+
+  delorean_fn :lookup_id, sig: [1, 2] do
+    |id, opts={}|
+    make_openstruct(self.find(id), opts)
   end
 
   delorean_fn :lookup_dt, sig: 1 do
     |name|
-    lookup(name).try(:created_dt)
+    lookup(name, {"no_convert"=>true}).try(:created_dt)
   end
 
-  delorean_fn :first_match, sig: [1, 2] do
-    |dt, posting_type=nil|
+  delorean_fn :first_match, sig: [1, 3] do
+    |dt, posting_type=nil, opts={}|
     raise "bad posting type" if
       posting_type && !posting_type.is_a?(Marty::PostingType)
 
     q = where("created_dt <= ?", dt)
     q = q.where(posting_type_id: posting_type.id) if posting_type
-    q.order("created_dt DESC").first
+    make_openstruct(q.order("created_dt DESC").first, opts)
   end
 
-  delorean_fn :get_latest, sig: [1, 2] do
-    |limit, is_test=nil|
+  delorean_fn :get_latest, sig: [1, 3] do
+    |limit, is_test=nil, opts={}|
     # IMPORTANT: is_test arg is ignored (KEEP for backward compat.)
 
-    where("created_dt <> 'infinity'").
-      order("created_dt DESC").limit(limit).to_a
+    q=where("created_dt <> 'infinity'").
+       order("created_dt DESC").limit(limit)
+    opts['no_convert'] ? q : q.map{|ar|make_openstruct(ar, opts)}
   end
 
-  delorean_fn :get_latest_by_type, sig: [2, 2] do
-    |limit, posting_types=[]|
+  delorean_fn :get_latest_by_type, sig: [2, 3] do
+    |limit, posting_types=[], opts={}|
     raise "missing posting types list" unless posting_types
     raise "bad posting types list" unless posting_types.is_a?(Array)
 
-    joins(:posting_type).where("created_dt <> 'infinity'").
+    q=joins(:posting_type).where("created_dt <> 'infinity'").
       where(marty_posting_types: { name: posting_types } ).
-      order("created_dt DESC").limit(limit || 1).to_a
+      order("created_dt DESC").limit(limit || 1)
+    opts['no_convert'] ? q : q.map{|ar|make_openstruct(ar, opts)}
   end
 
-  delorean_fn :get_last, sig: [0, 1] do
-    |posting_type=nil|
+  delorean_fn :get_last, sig: [0, 2] do
+    |posting_type=nil, opts={}|
 
     raise "bad posting type" if
       posting_type && !posting_type.is_a?(Marty::PostingType)
 
     q = where("created_dt <> 'infinity'")
     q = q.where(posting_type_id: posting_type.id) if posting_type
-    q.order("created_dt DESC").first
+    make_openstruct(q.order("created_dt DESC").first, opts)
   end
 end

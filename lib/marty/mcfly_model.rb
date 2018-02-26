@@ -27,7 +27,6 @@ module Mcfly::Model
         cache_key = [name, ts] + args.map{ |a|
           a.is_a?(ActiveRecord::Base) ? a.id : a
         } unless Mcfly.is_infinity(ts)
-
         next @LOOKUP_CACHE[cache_key] if
           cache_key && @LOOKUP_CACHE.has_key?(cache_key)
 
@@ -53,17 +52,51 @@ module Mcfly::Model
       end
     end
 
-    # FIXME: duplicate code from Mcfly's mcfly_lookup.
-    def cached_mcfly_lookup(name, options = {}, &block)
-      cached_delorean_fn(name, options) do |ts, *args|
-        raise "nil timestamp" if ts.nil?
+    def base_mcfly_lookup(meth, name, options = {}, &block)
+
+      sig = options[:sig]
+      newsig = sig.is_a?(Array) ? [sig[0], sig[1]+1] : [sig, sig+1]
+      options[:sig] = newsig
+      sigmax = newsig.last - 1 # ts is separated inside dl fn
+
+      send(meth, name, options) do |ts, *pargs|
+        raise "time cannot be nil" if ts.nil?
+
+        args, opts = pargs.last.is_a?(Hash) && pargs.length == sigmax ?
+                       [pargs[0..-2], pargs.last] :
+                       [pargs, {}]
 
         ts = Mcfly.normalize_infinity(ts)
 
-        self.mcfly_pt(ts).scoping do
+        q = self.where("#{table_name}.obsoleted_dt >= ? AND " +
+                   "#{table_name}.created_dt < ?", ts, ts).scoping do
           block.call(ts, *args)
         end
+        fa = get_final_attrs(opts)
+        opts += {"fa"=>fa}
+
+        q = q.select(*fa) if fa.present? &&
+                             q.respond_to?(:select) && !q.is_a?(Array) &&
+                             !q.is_a?(Hash)
+
+        case
+        when opts["no_convert"] == true
+          q
+        when q.is_a?(ActiveRecord::Relation)
+          q.map{|ar| make_openstruct(ar, opts)}
+        when q.is_a?(ActiveRecord::Base)
+          make_openstruct(q, opts)
+        else
+          q
+        end
       end
+    end
+
+    def cached_mcfly_lookup(name, options = {}, &block)
+      base_mcfly_lookup(:cached_delorean_fn, name, options, &block)
+    end
+    def mcfly_lookup(name, options = {}, &block)
+      base_mcfly_lookup(:delorean_fn, name, options, &block)
     end
 
     # FIXME: add private mode.  This should make the function
@@ -99,14 +132,9 @@ module Mcfly::Model
         raise "bad attrs" unless Array === attrs
       end
 
-      fn = cache ? :cached_mcfly_lookup : :mcfly_lookup
+      fn = cache ? :cached_delorean_fn : :delorean_fn
 
-      # hacky: if private, set sig to bad value -- i.e. can't be
-      # called from delorean.  Ideally, we should have a 'private'
-      # option for delorean_fn.
-      sig = options[:private] ? -1 : attrs.length+1
-
-      send(fn, name, sig: sig) do
+      base_mcfly_lookup(fn, name, {sig: attrs.length+1}) do
         |t, *attr_list|
 
         attr_list_ids = attr_list.each_with_index.map {|x, i|

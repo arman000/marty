@@ -26,9 +26,10 @@ class Gemini::Helper
     col_sep ||= "\t"
 
     raise "Insufficient permissions to run the data import" unless
-      import_type.allow_import?
+      Marty::ImportType.allow_import?(import_type)
 
-    Marty::DataImporter.do_import_summary(import_type.get_model_class,
+    Marty::DataImporter.do_import_summary(Marty::ImportType.
+                                           get_model_class(import_type),
                                           data,
                                           'infinity',
                                           import_type.cleaner_function,

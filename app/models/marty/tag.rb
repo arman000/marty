@@ -6,6 +6,10 @@ class Marty::Tag < Marty::Base
 
   belongs_to :user, class_name: "Marty::User"
 
+  def self.get_struct_attrs
+    super + ["created_dt"]
+  end
+
   def self.make_name(dt)
     return 'DEV' if Mcfly.is_infinity(dt)
 
@@ -38,7 +42,7 @@ class Marty::Tag < Marty::Base
   def self.map_to_tag(tag_id)
     # FIXME: this is really hacky. This function should not take so
     # many different types of arguments.
-
+    nc = {"no_convert"=>true}
     case tag_id
     when Integer, /\A[0-9]+\z/
       tag = find_by_id(tag_id)
@@ -47,29 +51,29 @@ class Marty::Tag < Marty::Base
       # if tag name wasn't found, look for a matching
       # posting, then find the tag whose created_dt <= posting dt.
       if !tag
-        posting = Marty::Posting.lookup(tag_id)
-        tag = find_match(Mcfly.normalize_infinity(posting.created_dt)) if
+        posting = Marty::Posting.lookup(tag_id, nc)
+        tag = find_match(Mcfly.normalize_infinity(posting.created_dt), nc) if
           posting
       end
     when nil
-      tag = get_latest1
+      tag = get_latest1(nc)
     else
       tag = tag_id
     end
-
-    raise "bad tag identifier #{tag_id.inspect}" unless tag.is_a? Marty::Tag
+    binding.pry unless tag.nil? || tag.is_a?(Marty::Tag)
+    raise "bad tag identifier #{tag_id.inspect}" unless tag.is_a?(Marty::Tag)
     tag
   end
 
-  cached_delorean_fn :lookup, sig: 1 do
-    |name|
-    self.find_by_name(name)
+  cached_delorean_fn :lookup, sig: [1, 2] do
+    |name, opts={}|
+    make_openstruct(self.find_by_name(name), opts)
   end
 
   # Performance hack to cache AR object
-  cached_delorean_fn :lookup_id, sig: 1 do
-    |id|
-    find_by_id(id)
+  cached_delorean_fn :lookup_id, sig: [1, 2] do
+    |id, opts={}|
+    make_openstruct(find_by_id(id), opts)
   end
 
   delorean_fn :lookup_dt, sig: 1 do
@@ -77,23 +81,25 @@ class Marty::Tag < Marty::Base
     lookup(name).try(:created_dt)
   end
 
-  delorean_fn :get_latest1, sig: 0 do
-    where("created_dt <> 'infinity'").order("created_dt DESC").first
+  delorean_fn :get_latest1, sig: 1 do
+    |opts={}|
+    make_openstruct(where("created_dt <> 'infinity'").
+                     order("created_dt DESC").first, opts)
   end
 
-  delorean_fn :find_match, sig: 1 do
-    |dt|
+  delorean_fn :find_match, sig: [1, 2] do
+    |dt, opts={}|
     id = select(:id).where("created_dt <= ?", dt).order("created_dt DESC").first.id
 
     # performance hack to use cached version
-    id && lookup_id(id)
+    id && lookup_id(id, opts)
   end
 
   # Performance hack for script sets -- FIXME: making find_mtach
   # cached breaks Gemini tests.  Need to look into it.
-  cached_delorean_fn :cached_find_match, sig: 1 do
-    |dt|
+  cached_delorean_fn :cached_find_match, sig: [1, 2] do
+    |dt, opts={}|
 
-    find_match dt
+    find_match(dt, opts)
   end
 end

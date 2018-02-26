@@ -89,7 +89,7 @@ class Marty::DataGrid < Marty::Base
 
   def self.lookup_h(pt, name, fields = nil)
     fields ||= %w(id group_id created_dt metadata data_type)
-    dga = get_all(pt).where(name: name).pluck(*fields).first
+    dga = mcfly_pt(pt).where(name: name).pluck(*fields).first
     dga && Hash[fields.zip(dga)]
   end
 
@@ -311,6 +311,9 @@ class Marty::DataGrid < Marty::Base
 
   def dir_infos(dir)
     metadata.select {|inf| inf["dir"] == dir}
+  end
+  def self.dir_infos(os)
+    os.metadata.select {|inf| inf["dir"] == dir}
   end
 
   def self.export_keys(inf)

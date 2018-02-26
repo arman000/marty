@@ -286,3 +286,24 @@ module Mcfly::Controller
     find_current_user rescue nil
   end
 end
+
+######################################################################
+
+class OpenStruct
+  def save
+    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
+    raise "save called from #{loc} on #{self}"
+  end
+  def save!
+    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
+    raise "save! called from #{loc} on #{self}"
+  end
+  def reload
+    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
+    raise "reload called from #{loc} on #{self}"
+  end
+  #def method_missing(meth, *args)
+  #  puts caller[0..8]
+  #  super
+  #end
+end

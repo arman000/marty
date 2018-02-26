@@ -16,7 +16,7 @@ class Marty::Script < Marty::Base
   # find script by name/tag
   def self.find_script(sname, tag=nil)
     tag = Marty::Tag.map_to_tag(tag)
-    Marty::Script.lookup(tag.created_dt, sname)
+    Marty::Script.lookup(tag.created_dt, sname, {"no_convert"=>true})
   end
 
   def find_tag
@@ -33,7 +33,7 @@ class Marty::Script < Marty::Base
   end
 
   def self.load_a_script(sname, body, dt=nil)
-    s = Marty::Script.lookup('infinity', sname)
+    s = Marty::Script.lookup('infinity', sname, {"no_convert"=>true})
 
     if !s
       s = Marty::Script.new
@@ -55,7 +55,7 @@ class Marty::Script < Marty::Base
     }
 
     # Create a new tag if scripts were modified after the last tag
-    tag = Marty::Tag.get_latest1
+    tag = Marty::Tag.get_latest1({"no_convert"=>true})
     latest = Marty::Script.order("created_dt DESC").first
 
     tag_time = (dt || [latest.try(:created_dt), Time.now].compact.max) +
@@ -123,7 +123,8 @@ class Marty::Script < Marty::Base
 
   delorean_fn :eval_to_hash, sig: 5 do
     |dt, script, node, attrs, params|
-    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
+    tag = Marty::Tag.find_match(dt, {"no_convert"=>true}) ||
+          raise("no tag found for #{dt}")
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
@@ -137,7 +138,8 @@ class Marty::Script < Marty::Base
 
   delorean_fn :evaluate, sig: 5 do
     |dt, script, node, attr, params|
-    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
+    tag = Marty::Tag.find_match(dt, {"no_convert"=>true}) ||
+                                    raise("no tag found for #{dt}")
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the

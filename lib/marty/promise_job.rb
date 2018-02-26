@@ -23,7 +23,6 @@ class Delorean::BaseModule::NodeCall
     end
     script, tag = engine.module_name, engine.sset.tag
     nn = node.is_a?(Class) ? node.name : node.to_s
-
     begin
       # make sure params is serialzable before starting a Job
       Marshal.dump(params)

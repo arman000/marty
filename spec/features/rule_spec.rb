@@ -117,8 +117,8 @@ feature 'rule view', js: true do
                                             "results"=>"",
                                            })
 
-    r = Gemini::MyRule.lookup('infinity','abc')
-    expect(r.as_json).to include({"user_id"=>1,
+    r = Gemini::MyRule.lookup('infinity','abc', {"no_convert"=>true})
+    expect(r.attributes).to include({"user_id"=>1,
                                   "o_user_id"=>nil,
                                   "name"=>"abc",
                                   "engine"=>"Gemini::MyRuleScriptSet",
@@ -172,7 +172,7 @@ feature 'rule view', js: true do
            "results"=>"",
           }
     r = Gemini::MyRule.lookup('infinity','abc')
-    expect(r.as_json["simple_guards"]["g_nullbool"]).to eq(false)
+    expect(r["simple_guards"]["g_nullbool"]).to eq(false)
     expect(mrv.get_row_vals(1)).to include(exp)
     # grid edits
     press("Edit")
@@ -189,7 +189,7 @@ feature 'rule view', js: true do
                                                 "grids"=>
                                                 "{\"grid1\":\"DataGrid1\"}"})
     r = Gemini::MyRule.lookup('infinity','abc')
-    expect(r.as_json["simple_guards"]).not_to include('g_nullbool')
+    expect(r["simple_guards"]).not_to include('g_nullbool')
     # computed fields
     press("Edit")
     fill_in(:computed_guards, with: 'sadf asdf ljsf')
@@ -240,8 +240,8 @@ feature 'rule view', js: true do
     fill_in("Range Guard 2", with: "[30,40)")
     press("OK")
     r = Gemini::XyzRule.get_matches('infinity', {}, {"g_range1"=> 150,
-                                                     "g_range2"=> 35})
-
+                                                     "g_range2"=> 35},
+                                    {"no_convert"=>true})
     expect(r.to_a.count).to eq(1)
     exp = {"user_id"=>1,
            "o_user_id"=>nil,
