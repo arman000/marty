@@ -112,13 +112,13 @@ module Marty::RuleSpec
           |r|
           [r.name, r.simple_guards["g_has_default"]]
         end
-        expect(vals).to eq([["Rule1", "different"],
+        expect(vals.sort).to eq([["Rule1", "different"],
                             ["Rule2", "string default"],
                             ["Rule2a", "string default"],
                             ["Rule2b", "string default"],
                             ["Rule3", "string default"],
                             ["Rule4", "string default"],
-                            ["Rule5", "foo"]])
+                            ["Rule5", "foo"]].sort)
       end
     end
     context "validation (xyz type)" do
@@ -319,7 +319,7 @@ module Marty::RuleSpec
       end
       it "reports bad grid name" do
         exp = Regexp.new("Error .results. in rule '\\d+:Rule4': "\
-                         "grid 'computed_name_grid' .'DataGridX'. not found")
+                         "DataGridX grid not found")
         expect{gridcomputedname.compute({"pt"=>Time.zone.now,
                              'param1'=> 66,
                              'param2'=>'abc',

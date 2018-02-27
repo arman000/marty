@@ -89,9 +89,8 @@ class Marty::DataGrid < Marty::Base
   gen_mcfly_lookup :lookup, [:name], cache: true
   gen_mcfly_lookup :get_all, [], mode: nil
 
-  cached_delorean_fn :lookup_h, sig: [2,3] do
-    |pt, name, fields = %w(id group_id created_dt metadata data_type)|
-
+  def self.lookup_h(pt, name, fields = nil)
+    fields ||= %w(id group_id created_dt metadata data_type)
     dga = get_all(pt).where(name: name).pluck(*fields).first
     dga && Hash[fields.zip(dga)]
   end
@@ -99,6 +98,20 @@ class Marty::DataGrid < Marty::Base
   cached_mcfly_lookup :lookup_id, sig: 2 do
     |pt, group_id|
     find_by_group_id group_id
+  end
+
+  cached_delorean_fn :exists, sig: 2 do
+    |pt, name|
+    qpt = ActiveRecord::Base.connection.quote(pt)
+    qname = ActiveRecord::Base.connection.quote(name)
+
+    res=ActiveRecord::Base.connection.execute(<<-EOS)
+          SELECT id
+          FROM marty_data_grids
+          WHERE obsoleted_dt >= #{qpt} AND created_dt < #{qpt}
+            AND name = #{qname}
+    EOS
+    res.count == 1
   end
 
   def to_s
@@ -214,29 +227,14 @@ class Marty::DataGrid < Marty::Base
     res
   end
 
-  # FIXME: added for Apollo -- not sure where this belongs given that
-  # DGs were moved to marty.  Should add documentation about callers
-  # keeping the hash small.
-  # DEPRECATED: should use lookup_grid_h instead
-  cached_delorean_fn :lookup_grid, sig: 4 do
-    |pt, dg, h, distinct|
-    raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
-    raise "non-hash arg #{h}" unless Hash === h
-
-    warn "DEPRECATED: lookup_grid. Use lookup_grid_h instead"
-
-    dgh = dg.attributes.slice("id","group_id","created_dt",
-                              "metadata", "data_type")
-    res = plv_lookup_grid_distinct(h, dgh, false, distinct)
-    res["result"]
-  end
-
   cached_delorean_fn :lookup_grid_h, sig: 4 do
-    |pt, dgh, h, distinct|
-    raise "bad DataGrid #{dgh}" unless Hash === dgh
+    |pt, dgn, h, distinct|
+
+    dgh = lookup_h(pt, dgn)
+    raise "#{dgn} grid not found" unless dgh
     raise "non-hash arg #{h}" unless Hash === h
 
-    res = plv_lookup_grid_distinct(h, dgh, false, distinct)
+    res = lookup_grid_distinct_entry_h(pt, h, dgh, nil, true, false, distinct)
     res["result"]
   end
 
@@ -253,7 +251,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   delorean_fn :lookup_grid_distinct_entry_h, sig: [3,6] do
-    |pt, h, dgh, visited=nil, follow=true, return_grid_data=false|
+    |pt, h, dgh, visited=nil, follow=true, return_grid_data=false, distinct=true|
 
     # Perform grid lookup, if result is another data_grid, and follow is true,
     # then perform lookup on the resulting grid.  Allows grids to be nested
@@ -265,7 +263,7 @@ class Marty::DataGrid < Marty::Base
     #   "name"     => <grid name>
     #   "data"     => <grid's data array>
     #   "metadata" => <grid's metadata (array of hashes)>
-    vhash = plv_lookup_grid_distinct(h, dgh, return_grid_data)
+    vhash = plv_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
 
     next vhash if vhash["result"].nil? || !dgh['data_type']
 
@@ -296,7 +294,8 @@ class Marty::DataGrid < Marty::Base
     raise "#{self.class} recursion loop detected -- #{visited}" if
       visited.member?(v['group_id'])
 
-    lookup_grid_distinct_entry_h(pt, h, v, visited, follow, return_grid_data)
+    lookup_grid_distinct_entry_h(pt, h, v, visited, follow, return_grid_data,
+                                 distinct)
   end
 
   # DEPRECATED: use lookup_grid_distinct_entry_h instead

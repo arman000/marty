@@ -294,7 +294,7 @@ EOS
       end
 
       context "should handle NULL key values" do
-        let(:dgh) { Marty::DataGrid.lookup_h(pt, "Gf") }
+        let(:dgh) { "Gf" }
 
         it 'true returns Y' do
           res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"b"=>true}, false)
@@ -334,40 +334,36 @@ EOS
       end
 
       it "should handle ambiguous lookups" do
-        dgh = Marty::DataGrid.lookup_h(pt, "Gh")
-
         h1 = {
           "property_state" => "NY",
           "county_name"    => "R",
         }
 
-        res = Marty::DataGrid.lookup_grid_h(pt, dgh, h1, false)
+        res = Marty::DataGrid.lookup_grid_h(pt, "Gh", h1, false)
         expect(res).to eq(10)
       end
 
       it "should handle ambiguous lookups (2)" do
-        dgh = Marty::DataGrid.lookup_h(pt, "Gg")
         res = Marty::DataGrid.
-              lookup_grid_h(pt, dgh, {"i1"=>2, "i2"=>1}, false)
+              lookup_grid_h(pt, "Gg", {"i1"=>2, "i2"=>1}, false)
         expect(res).to eq(1)
 
         res = Marty::DataGrid.
-              lookup_grid_h(pt, dgh, {"i1"=>3, "i2"=>1}, false)
+              lookup_grid_h(pt, "Gg", {"i1"=>3, "i2"=>1}, false)
         expect(res).to eq(1)
 
         res = Marty::DataGrid.
-              lookup_grid_h(pt, dgh, {"i1"=>2, "i2"=>3}, false)
+              lookup_grid_h(pt, "Gg", {"i1"=>2, "i2"=>3}, false)
         expect(res).to eq(20)
       end
 
       it "should handle non-distinct lookups" do
-        dgh = Marty::DataGrid.lookup_h(pt, "Ge")
-        res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"ltv"=>500}, false)
+        res = Marty::DataGrid.lookup_grid_h(pt, "Ge", {"ltv"=>500}, false)
 
         expect(res).to eq(1.1)
 
         expect {
-          Marty::DataGrid.lookup_grid_h(pt, dgh, {"ltv"=>500}, true)
+          Marty::DataGrid.lookup_grid_h(pt, "Ge", {"ltv"=>500}, true)
         }.to raise_error(RuntimeError)
       end
 
@@ -376,14 +372,13 @@ EOS
           "client_id" => 700127,
           "property_state" => "CA",
         }
-        dgh = Marty::DataGrid.lookup_h(pt, "Gj")
-        res = Marty::DataGrid.lookup_grid_h(pt, dgh, params, false)
+        res = Marty::DataGrid.lookup_grid_h(pt, "Gj", params, false)
 
         # should return the upper left corner match
         expect(res).to eq(0.25)
 
         expect {
-          Marty::DataGrid.lookup_grid_h(pt, dgh, params, true)
+          Marty::DataGrid.lookup_grid_h(pt, "Gj", params, true)
         }.to raise_error(RuntimeError)
       end
 
@@ -626,10 +621,9 @@ EOS
       it "should handle typed (enum) data lookup_grid" do
         pt = 'infinity'
         ca = Gemini::State.find_by_name("CA")
-        dgh = Marty::DataGrid.lookup_h(pt, "Gb")
 
         res = Marty::DataGrid.
-              lookup_grid_h(pt, dgh, {"property_state" => ca}, false)
+              lookup_grid_h(pt, "Gb", {"property_state" => ca}, false)
 
         expect(res).to eq 70
       end
