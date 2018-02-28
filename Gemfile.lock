@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    marty (1.2.5)
+    marty (1.2.6)
       axlsx (= 2.1.0pre)
       coderay
       delorean_lang (~> 0.3.33)

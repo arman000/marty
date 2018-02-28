@@ -102,16 +102,7 @@ class Marty::DataGrid < Marty::Base
 
   cached_delorean_fn :exists, sig: 2 do
     |pt, name|
-    qpt = ActiveRecord::Base.connection.quote(pt)
-    qname = ActiveRecord::Base.connection.quote(name)
-
-    res=ActiveRecord::Base.connection.execute(<<-EOS)
-          SELECT id
-          FROM marty_data_grids
-          WHERE obsoleted_dt >= #{qpt} AND created_dt < #{qpt}
-            AND name = #{qname}
-    EOS
-    res.count == 1
+    Marty::DataGrid.mcfly_pt(pt).where(name: name).exists?
   end
 
   def to_s
