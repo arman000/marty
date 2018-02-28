@@ -78,8 +78,6 @@ class Marty::DataGrid < Marty::Base
 
   has_mcfly
 
-  lazy_load :data
-
   validates_presence_of :name, :data, :metadata
 
   mcfly_validates_uniqueness_of :name
@@ -216,6 +214,15 @@ class Marty::DataGrid < Marty::Base
       res["metadata"] = mmd
     end
     res
+  end
+
+  cached_delorean_fn :lookup_grid, sig: 4 do
+    |pt, dg, h, distinct|
+    raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
+    raise "non-hash arg #{h}" unless Hash === h
+    dgh = dg.attributes.slice('id', 'group_id', 'created_dt', 'metadata')
+    res = plv_lookup_grid_distinct(h, dgh, false, distinct)
+    res["result"]
   end
 
   cached_delorean_fn :lookup_grid_h, sig: 4 do
