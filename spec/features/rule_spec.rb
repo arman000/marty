@@ -94,7 +94,7 @@ feature 'rule view', js: true do
     time_fill_in(1, '08:03:01')
     press("OK")
     wait_for_ajax
-    expect(mrv.row_count()).to eq(8)
+    expect(mrv.row_count()).to eq(9)
     expect(mrv.get_row_vals(1)).to include({"name"=>"abc",
                                             "rule_type"=>"SimpleRule",
                                             "start_dt"=>"2013-01-01T19:03:01.000Z",
@@ -104,8 +104,12 @@ feature 'rule view', js: true do
                                             "g_single"=>"",
                                             "g_string"=>"",
                                             "g_bool"=>nil,
+                                            "g_nullbool"=>"",
+                                            "g_bool_def"=>nil,
+                                            "g_nbool_def"=>"False",
                                             "g_range"=>nil,
                                             "g_integer"=>nil,
+                                            "g_has_default"=>"string default",
                                             "computed_guards"=>"",
                                             "grids"=>"",
                                             "results"=>"",
@@ -116,7 +120,10 @@ feature 'rule view', js: true do
                                   "name"=>"abc",
                                   "engine"=>"Gemini::MyRuleScriptSet",
                                   "rule_type"=>"SimpleRule",
-                                  "simple_guards"=>{"g_has_default"=>
+                                  "simple_guards"=>{"g_bool"=>false,
+                                                    "g_bool_def"=>false,
+                                                    "g_nbool_def"=>false,
+                                                    "g_has_default"=>
                                                     "string default"},
                                   "computed_guards"=>{},
                                   "grids"=>{},
@@ -125,14 +132,11 @@ feature 'rule view', js: true do
     # type validation (string with values list)
     mrv.select_row(1)
     press("Edit")
-    fill_in(:g_string, with: "12345")
-    press("OK")
-    wait_for_ajax
-    expect(page).to have_content("Bad value '12345' for 'g_string'")
     # type validation (range)
-    fill_in(:g_string, with: "Hi Mom")
+    netzke_find("String list Guard", 'combobox').select_values("Hi Mom")
     click_checkbox("Bool Guard")
     click_checkbox("Other")
+    netzke_find("NullBool Guard", 'combobox').select_values("False")
     netzke_find('Array Guard', 'combobox').select_values("G1V1,G1V3")
     netzke_find('Single Guard', 'combobox').select_values("G2V2")
     fill_in(:g_integer, with: 123)
@@ -144,6 +148,7 @@ feature 'rule view', js: true do
     fill_in(:g_range, with: "<=100")
     netzke_find('Grid1', 'combobox').select_values("DataGrid1")
     netzke_find('Grid2', 'combobox').select_values("DataGrid2")
+    fill_in("Defaulted String", with: "12345")
     press("OK")
     wait_for_ajax
     exp = {"name"=>"abc",
@@ -155,12 +160,16 @@ feature 'rule view', js: true do
            "g_single"=>"G2V2",
            "g_string"=>"Hi Mom",
            "g_bool"=>true,
+           "g_nullbool"=>"False",
            "g_range"=>"<=100",
            "g_integer"=>123,
+           "g_has_default"=>"12345",
            "computed_guards"=>"",
            "grids"=>"{\"grid1\":\"DataGrid1\",\"grid2\":\"DataGrid2\"}",
            "results"=>"",
           }
+    r = Gemini::MyRule.lookup('infinity','abc')
+    expect(r.as_json["simple_guards"]["g_nullbool"]).to eq(false)
     expect(mrv.get_row_vals(1)).to include(exp)
     # grid edits
     press("Edit")
@@ -169,6 +178,15 @@ feature 'rule view', js: true do
     wait_for_ajax
     expect(mrv.get_row_vals(1)).to include(exp+{"grids"=>
                                                 "{\"grid1\":\"DataGrid1\"}"})
+    press("Edit")
+    netzke_find("NullBool Guard", 'combobox').select_values("---")
+    press("OK")
+    wait_for_ajax
+    expect(mrv.get_row_vals(1)).to include(exp+{"g_nullbool"=>"",
+                                                "grids"=>
+                                                "{\"grid1\":\"DataGrid1\"}"})
+    r = Gemini::MyRule.lookup('infinity','abc')
+    expect(r.as_json["simple_guards"]).not_to include('g_nullbool')
     # computed fields
     press("Edit")
     fill_in(:computed_guards, with: 'sadf asdf ljsf')
@@ -220,6 +238,7 @@ feature 'rule view', js: true do
     press("OK")
     r = Gemini::XyzRule.get_matches('infinity', {}, {"g_range1"=> 150,
                                                      "g_range2"=> 35})
+
     expect(r.to_a.count).to eq(1)
     exp = {"user_id"=>1,
            "o_user_id"=>nil,
@@ -227,7 +246,8 @@ feature 'rule view', js: true do
            "engine"=>"Gemini::XyzRuleScriptSet",
            "rule_type"=>"ZRule",
            "start_dt"=>DateTime.parse("2017-1-1 08:01:00"),
-           "simple_guards"=>{"g_date"=>"2017-1-1",
+           "simple_guards"=>{"g_bool"=>false,
+                             "g_date"=>"2017-1-1",
                              "g_range1"=>"[100,200)",
                              "g_range2"=>"[30,40)",
                              "g_string"=>"aaa",
@@ -242,13 +262,13 @@ feature 'rule view', js: true do
     expect(r.first.as_json).to include(exp)
     expect(xrv.col_values(:g_string, 5, 0)).to eq(["aaa", "bbb", "ccc",
                                                    "ddd", "eee"])
-    click_column(xrv, "G string")
+    click_column(xrv, "String list Guard")
     expect(xrv.col_values(:g_string, 5, 0)).to eq(["eee", "ddd", "ccc",
                                                    "bbb", "aaa"])
-    column_filter(xrv, "G string", "eee")
+    column_filter(xrv, "String list Guard", "eee")
     rc = xrv.row_count
     expect(xrv.col_values(:g_string,rc,0)).to eq(["eee"])
-    column_filter_toggle(xrv, "G string")
+    column_filter_toggle(xrv, "String list Guard")
     rc = xrv.row_count
     expect(xrv.col_values(:g_string,rc,0)).to eq(["eee", "ddd", "ccc",
                                                    "bbb", "aaa"])
@@ -293,9 +313,9 @@ feature 'rule view', js: true do
     go_to_my_rules
     wait_for_ajax
 
-    names = mrv.col_values(:name, 8, 0)
-    gvs = mrv.col_values(:grids, 8, 0)
-    rvs = mrv.col_values(:results, 8, 0)
+    names = mrv.col_values(:name, 9, 0)
+    gvs = mrv.col_values(:grids, 9, 0)
+    rvs = mrv.col_values(:results, 9, 0)
     expect(JSON.parse(gvs[names.index('abc')])).to eq(g1h)
     expect(JSON.parse(gvs[names.index('Rule2b')])).to eq(g1h +
                                                          {"grid2"=>"DataGrid2"})

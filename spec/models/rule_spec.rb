@@ -33,7 +33,8 @@ module Marty::RuleSpec
         guards = (@g_array   ? {"g_array"   =>@g_array}   : {}) +
                  (@g_single  ? {"g_single"  =>@g_single}  : {}) +
                  (@g_string  ? {"g_string"  =>@g_string}  : {}) +
-                 (@g_bool    ? {"g_bool"    =>@g_bool}    : {}) +
+                 (@g_bool.nil?     ? {} : {"g_bool"     => @g_bool})     +
+                 (@g_nullbool.nil? ? {} : {"g_nullbool" => @g_nullbool}) +
                  (@g_range   ? {"g_range"   =>@g_range}   : {}) +
                  (@g_integer ? {"g_integer" =>@g_integer} : {})
         Gemini::MyRule.create!(name: "testrule",
@@ -116,6 +117,7 @@ module Marty::RuleSpec
                             ["Rule2", "string default"],
                             ["Rule2a", "string default"],
                             ["Rule2b", "string default"],
+                            ["Rule2c", "string default"],
                             ["Rule3", "string default"],
                             ["Rule4", "string default"],
                             ["Rule5", "foo"]].sort)
@@ -177,12 +179,20 @@ module Marty::RuleSpec
                                             {'rule_type'=>'SimpleRule',
                                             'other_flag'=>true},
                                             {})
-        expect(lookup.to_a.count).to eq(3)
-        expect(lookup.map{|l|l.name}.to_set).to eq(Set["Rule2","Rule2a","Rule2b"])
+        expect(lookup.to_a.count).to eq(4)
+        expect(lookup.map{|l|l.name}.to_set).to eq(Set["Rule2","Rule2a",
+                                                       "Rule2b", "Rule2c"])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'ComplexRule',
                                             'other_flag'=>false},
                                             {})
+        expect(lookup.to_a.count).to eq(1)
+        expect(lookup.first.name).to eq("Rule3")
+        # bool false matches bool nil
+        lookup = Gemini::MyRule.get_matches('infinity',
+                                            {'rule_type'=>'ComplexRule',
+                                            'other_flag'=>false},
+                                            {'g_bool'=>false})
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.first.name).to eq("Rule3")
         lookup = Gemini::MyRule.get_matches('infinity',
@@ -218,18 +228,19 @@ module Marty::RuleSpec
         expect(lookup.first.name).to eq("Rule1")
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'SimpleRule'},
-                                            {'g_bool'=>false, "g_range"=>75,
+                                            {'g_bool'=>false, "g_range"=>25,
                                              'g_integer'=>10})
-        expect(lookup).to eq([])
+        expect(lookup.to_a.count).to eq(1)
+        expect(lookup.first.name).to eq("Rule2c")
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'SimpleRule'}, {})
-        expect(lookup.to_a.count).to eq(4)
+        expect(lookup.to_a.count).to eq(5)
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_dt'=>"2017-3-1 02:00:00"},
                                             {})
-        expect(lookup.to_a.count).to eq(5)
+        expect(lookup.to_a.count).to eq(6)
         expect(lookup.pluck(:name).to_set).to eq(Set["Rule1", "Rule2", "Rule2a",
-                                                     "Rule2b", "Rule3"])
+                                                   "Rule2b", "Rule2c", "Rule3"])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_dt'=>"2017-4-1 16:00:00"},
                                             {})
@@ -241,6 +252,11 @@ module Marty::RuleSpec
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_dt'=>"2017-5-1 00:00:01"}, {})
         expect(lookup.to_a).to eq([])
+        lookup = Gemini::MyRule.get_matches('infinity', {},
+                                            {"g_bool_def"=>false,
+                                             "g_nbool_def"=>true})
+        expect(lookup.to_a.count).to eq(1)
+        expect(lookup.pluck(:name).first).to eq("Rule1")
       end
     end
     context "rule compute" do
