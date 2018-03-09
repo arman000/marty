@@ -103,13 +103,19 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     }
   end
 
-  def self.jsonb_field_getter(j, c)
-    lambda { |r| r.send(j)[c]||"" }
+  def self.jsonb_field_getter(j, c, nullbool=nil)
+    lambda do |r|
+      rv = r.send(j)[c]
+      v = nullbool ? (rv == true ? 'True' :
+                        rv == false ? 'False' : rv) : rv
+      v || ""
+    end
   end
 
-  def self.jsonb_field_setter(j, c)
-    lambda do |r, v|
-      v.blank? ||  v == '---' ? r.send(j).delete(c) : r.send(j)[c] = v
+  def self.jsonb_field_setter(j, c, bool=nil)
+    lambda do |r, rv|
+      v = bool ? rv.to_s.downcase == 'true' : rv
+      rv == '' || rv == '---' ? r.send(j).delete(c) : r.send(j)[c] = v
     end
   end
 
@@ -212,26 +218,35 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
 
   def self.field_maker(namestr, h, meth)
     name = namestr.to_sym
+    nullbool = h[:type] == :boolean && (h[:null] == true || !h.include?(:null))
     attribute name do |c|
       c.width = h[:width] || 150
-      case h[:type]
-      when :datetime; c.format = 'Y-m-d H:i'
-      when :date; c.format = 'Y-m-d'
-      else c.type = h[:type] || :string
+      case
+      when h[:type] == :datetime
+        c.format = 'Y-m-d H:i'
+      when h[:type] == :date
+        c.format = 'Y-m-d'
+      when nullbool
+          c.type = :string
+          enum_column(c, ['True', 'False'])
+      else
+        c.type = h[:type] || :string
       end
       c.label = h[:label] if h[:label]
-      if h[:enum]
+      if h[:enum] || (h[:type] == :string && h[:values].present?)
+        vals = h[:enum] || h[:values]
         if h[:multi]
-          enum_array(c, h[:enum])
+          enum_array(c, vals)
         else
-          enum_column(c, h[:enum])
+          enum_column(c, vals)
         end
       end
       # for some unexplained reason the getter/setter need the full
       # class qualification
       if h[:type] != :range
-        c.getter = Marty::DeloreanRuleView.jsonb_field_getter(meth, namestr)
-        c.setter = Marty::DeloreanRuleView.jsonb_field_setter(meth, namestr)
+        c.getter = Marty::BaseRuleView.jsonb_field_getter(meth, namestr, nullbool)
+        c.setter = Marty::BaseRuleView.jsonb_field_setter(meth, namestr,
+                                                          h[:type]==:boolean)
         c.filter_with = lambda do |rel, value, op|
           v = ActiveRecord::Base.connection.quote(value)[1..-2]
           rel.where("#{meth}->>'#{namestr}' like '%#{v}%'")

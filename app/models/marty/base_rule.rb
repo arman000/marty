@@ -17,7 +17,7 @@ class Marty::BaseRule < Marty::Base
     types << :date if Date.parse(v) rescue nil
     types << :datetime if DateTime.parse(v) rescue nil
     types << :range if chkrange(v) rescue nil
-    types << :boolean if [true, false].include?(v)
+    types << :boolean if [true, false, 'True', 'False'].include?(v)
     types
   end
   def check(name, h)
@@ -72,7 +72,7 @@ class Marty::BaseRule < Marty::Base
 
   before_create do
     self.class.guard_info.each do |k,v|
-      next if v[:default].blank? || self.simple_guards.include?(k)
+      next if !v.include?(:default) || self.simple_guards.include?(k)
       self.simple_guards[k] = v[:default]
     end
   end
@@ -108,7 +108,7 @@ class Marty::BaseRule < Marty::Base
 
       q = q.where("(#{isn} #{filts})")
     end
-   # print q.to_sql
+    #print q.to_sql
     q.order(:name)
   end
 
