@@ -7,14 +7,23 @@ module Marty::Diagnostic; class Base < Request
   # should be aggregated  as these types of diagnostics are
   # aggregated differently (or not at all).
   class_attribute :aggregatable, :status_only
-  self.aggregatable = true
-  self.status_only = false
 
   @@read_only = Marty::Util.db_in_recovery?
   @@template  = ActionController::Base.new.lookup_context.
-                    find_template("marty/diagnostic/diag").identifier
+                  find_template("marty/diagnostic/diag").identifier
 
-  def self.generate
+  def self.diagnostic_fn opts={}
+    opts.each do |k,v|
+      send("#{k}=", v)
+    end
+    class << self
+      define_method :generate do
+        pack{yield}
+      end
+    end
+  end
+
+  diagnostic_fn aggregatable: true, status_only: false do
     raise "generate has not been defined for #{name}"
   end
 
@@ -52,7 +61,7 @@ module Marty::Diagnostic; class Base < Request
 
   def self.display data
     consistent = consistent?(data)
-    success = consistent && !fatal?
+    success    = consistent && !fatal?
     ERB.new(File.open(@@template).read).result(binding)
   end
 

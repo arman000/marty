@@ -5,7 +5,7 @@
 # `DELAYED_VER` environment variable should be set in the
 # delayed jobs initializer.
 #
-module Marty::Diagnostic; class DelayedJob < Base
+module Marty::Diagnostic; class DelayedJobVersion < Base
   self.aggregatable = false
 
   def self.generate
@@ -14,7 +14,7 @@ module Marty::Diagnostic; class DelayedJob < Base
     raise 'DELAYED_VER environment variable has not been initialized.' if
       ENV['DELAYED_VER'].nil?
 
-    total_workers = delayed_worker_count
+    total_workers = Node.get_target_connections('delayed').count
 
     raise 'No delayed jobs are running.' if total_workers.zero?
 
@@ -39,12 +39,6 @@ module Marty::Diagnostic; class DelayedJob < Base
 
       {node => {'Version' => create_info(versions.join("\n"), status)}}
     }.reduce(:deep_merge)
-  end
-
-  def self.delayed_worker_count
-    db = Database.db_name
-    Node.get_postgres_connections[db].
-      count{|conn| conn['application_name'].include?('delayed_job')}
   end
 end
 end

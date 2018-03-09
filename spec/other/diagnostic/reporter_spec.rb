@@ -111,15 +111,15 @@ describe Marty::Diagnostic::Reporter do
 
   describe 'display mechanism for version diagnostic' do
     before(:all) do
-      Marty::Diagnostic::Reporter.diagnostics = [Marty::Diagnostic::Version]
+      described_class.diagnostics = [Marty::Diagnostic::Version]
     end
 
     before(:each) do
-      Marty::Diagnostic::Reporter.request = DummyRequest.new
+      described_class.request = DummyRequest.new
     end
 
     it 'masks consistent nodes for display (version)' do
-      Marty::Diagnostic::Reporter.request.params = params(scope='local')
+      described_class.request.params = params(scope='local')
       data = {
         'Version' => {
           'NodeA' => version_data,
@@ -209,27 +209,27 @@ describe Marty::Diagnostic::Reporter do
       </div>
       ERB
 
-      test = Marty::Diagnostic::Reporter.displays(data)
+      test = described_class.displays(data)
       expect(minimize(test)).to eq(minimize(expected))
     end
 
     it 'can detect errors in diagnostic for display and api' do
-      Marty::Diagnostic::Reporter.request.params = params
+      described_class.request.params = params
       n  = aggregate_data
       e  = aggregate_data(status: false)
       c  = aggregate_data(consistent: false)
       ce = aggregate_data(status: false, consistent: false)
 
       aggregate_failures do
-        expect(Marty::Diagnostic::Reporter.errors(n)).to eq({})
-        expect(Marty::Diagnostic::Reporter.errors(e)).not_to eq({})
-        expect(Marty::Diagnostic::Reporter.errors(c)).not_to eq({})
-        expect(Marty::Diagnostic::Reporter.errors(ce)).not_to eq({})
+        expect(described_class.errors(n)).to eq({})
+        expect(described_class.errors(e)).not_to eq({})
+        expect(described_class.errors(c)).not_to eq({})
+        expect(described_class.errors(ce)).not_to eq({})
       end
     end
 
     it 'can survive and display fatal errors' do
-      Marty::Diagnostic::Reporter.request.params = params
+      described_class.request.params = params
 
       a_err_a = Marty::Diagnostic::Fatal.message('A',
                                                  node: 'NodeA')
@@ -293,13 +293,9 @@ describe Marty::Diagnostic::Reporter do
           </tr>
         </table>
       </div>
-      <h3 class="error">
-         Something went wrong.</br>
-         Consistency is checked between remaining nodes if applicable.
-      </h3>
       ERB
 
-      result = Marty::Diagnostic::Reporter.displays(data)
+      result = described_class.displays(data)
       expect(minimize(result)).to eq(minimize(expected))
     end
   end
@@ -307,12 +303,12 @@ describe Marty::Diagnostic::Reporter do
   describe 'aggregation consistency functionality' do
     it 'env diagnostic' do
       test, expected = aggregate_consistency_data('EnvironmentVariables')
-      expect(Marty::Diagnostic::Reporter.consistency(test)).to eq(expected)
+      expect(described_class.consistency(test)).to eq(expected)
     end
 
     it 'marks data as consistent/inconsistent' do
       test, expected = aggregate_consistency_data
-      expect(Marty::Diagnostic::Reporter.consistency(test)).to eq(expected)
+      expect(described_class.consistency(test)).to eq(expected)
     end
   end
 end
