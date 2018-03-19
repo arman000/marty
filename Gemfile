@@ -27,6 +27,6 @@ group :development, :test do
   gem 'netzke-testing'
   gem 'rspec-instafail', require: false
 
-# gem 'marty_rspec', path: File.expand_path('../../marty_rspec', __FILE__) 
+# gem 'marty_rspec', path: File.expand_path('../../marty_rspec', __FILE__)
 gem 'marty_rspec'
 end
