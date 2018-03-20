@@ -49,7 +49,9 @@ end
 
 register_chrome_driver
 register_chrome_driver(:headless,
-                       chromeOptions: {args: %w[headless disable-gpu]})
+                       chromeOptions: {
+                         args: %w[headless disable-gpu window-size=3840,2160]
+                       })
 
 Capybara.javascript_driver = ENV['HEADLESS'] == 'true' ? :headless : :chrome
 
