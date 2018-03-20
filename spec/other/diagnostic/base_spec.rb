@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe Marty::Diagnostic::Base do
   def sample_data consistent=true
-    node_data_a = Marty::Diagnostic::Base.pack(include_ip=false){'A'}
-    node_data_b = Marty::Diagnostic::Base.pack(include_ip=false){'B'}
+    node_data_a = described_class.pack(include_ip=false){'A'}
+    node_data_b = described_class.pack(include_ip=false){'B'}
 
     data = {
       'NodeA' => node_data_a,
@@ -18,8 +18,8 @@ describe Marty::Diagnostic::Base do
     a = sample_data
     b = sample_data(consistent=false)
 
-    expect(Marty::Diagnostic::Base.consistent?(a)).to eq(true)
-    expect(Marty::Diagnostic::Base.consistent?(b)).to eq(false)
+    expect(described_class.consistent?(a)).to eq(true)
+    expect(described_class.consistent?(b)).to eq(false)
   end
 
   it 'can produce a valid diagnostic hash from a String' do
@@ -31,7 +31,7 @@ describe Marty::Diagnostic::Base do
       }
     }
 
-    expect(Marty::Diagnostic::Base.pack(include_ip=false){'A'}).to eq(expected)
+    expect(described_class.pack(include_ip=false){'A'}).to eq(expected)
   end
 
   it 'can produce a valid diagnostic hash from a Hash' do
@@ -58,15 +58,15 @@ describe Marty::Diagnostic::Base do
       },
     }
 
-    expect(Marty::Diagnostic::Base.
+    expect(described_class.
              pack(include_ip=false){test_a}).to eq(expected)
-    expect(Marty::Diagnostic::Base.
+    expect(described_class.
              pack(include_ip=false){test_a}).to eq(expected)
   end
 
   it 'can produce a valid diagnostic hash from an error Hash' do
-    test = Marty::Diagnostic::Base.pack(include_ip=false){
-      Marty::Diagnostic::Base.error('E')
+    test = described_class.pack(include_ip=false){
+      described_class.error('E')
     }
 
     expected = {
@@ -83,7 +83,7 @@ describe Marty::Diagnostic::Base do
     test_a = {
       'ImportantA' => 'A',
       'ImportantB' => 'B',
-      'ImportantC' => Marty::Diagnostic::Base.create_info('C') + {
+      'ImportantC' => described_class.create_info('C') + {
         'extra' => 'D'
       }
     }
@@ -96,7 +96,7 @@ describe Marty::Diagnostic::Base do
       }
     }
 
-    expect{Marty::Diagnostic::Base.pack{test_a}}.to raise_error(RuntimeError)
-    expect{Marty::Diagnostic::Base.pack{test_b}}.to raise_error(RuntimeError)
+    expect{described_class.pack{test_a}}.to raise_error(RuntimeError)
+    expect{described_class.pack{test_b}}.to raise_error(RuntimeError)
   end
 end

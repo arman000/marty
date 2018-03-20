@@ -24,12 +24,13 @@ module Marty::Diagnostic::Node
     get_postgres_connections[Marty::Diagnostic::Database.db_name].select{|conn|
       conn['application_name'].include?(target)
     }.map{|conn|
-      conn['client_addr'] == '127.0.0.1' ? my_ip : conn['client_addr']
-    }.uniq.compact
+      conn['client_addr'] == '127.0.0.1' ? my_ip :
+        conn['client_addr'] || '127.0.0.1'
+    }
   end
 
   def self.get_nodes
-    nodes = get_target_connections('Passenger')
+    nodes = get_target_connections('Passenger').uniq.compact
     nodes.empty? ? [my_ip] : nodes
   end
 end

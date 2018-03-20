@@ -1,4 +1,8 @@
 module Marty::Diagnostic; class EnvironmentVariables < Base
+  diagnostic_fn do
+    env
+  end
+
   def self.env filter=''
     env = ENV.clone
 
@@ -12,12 +16,6 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
     to_block = ['PASSWORD', 'DEBUG']
     env.sort.each_with_object({}){|(k,v),h|
       h[k] = v if to_block.all?{|b| !k.include?(b)} && k.include?(filter)}
-  end
-
-  def self.generate
-    pack do
-      env
-    end
   end
 
   # overwritten to only return inconsitent data
