@@ -25,9 +25,10 @@ group :development, :test do
   gem 'rails-controller-testing'
   gem 'connection_pool'
 
+  # gem 'mcfly', path: File.expand_path('../../mcfly', __FILE__)
   gem 'mcfly'
   gem 'netzke', '6.5.0.0'
 
-# gem 'marty_rspec', path: File.expand_path('../../marty_rspec', __FILE__) 
-gem 'marty_rspec'
+  # gem 'marty_rspec', path: File.expand_path('../../marty_rspec', __FILE__)
+  gem 'marty_rspec'
 end
