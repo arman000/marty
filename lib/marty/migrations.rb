@@ -65,13 +65,12 @@ module Marty::Migrations
       to_table.to_s.start_with?(tb_prefix) ||
       to_table.to_s.start_with?("marty_")
 
-    opts = fk_opts(from_table,
-                   to_table,
-                   options[:column]).update(options)
-
-    add_foreign_key(from_table, to_table, opts) unless
-      foreign_key_exists?(from_table, to_table)
-
+    add_foreign_key(from_table,
+                    to_table,
+                    fk_opts(from_table,
+                            to_table,
+                            options[:column]).update(options),
+                   )
   end
 
   # created_dt/obsoleted_dt need to be indexed since they appear in
@@ -98,16 +97,14 @@ module Marty::Migrations
 
     attrs = get_attrs(klass)
 
-    opts = {unique: true,
-            name: unique_index_name(klass)}
-
     add_index(klass.table_name.to_sym,
               attrs,
-              opts
+              unique: true,
+              name: unique_index_name(klass)
              ) unless index_exists?(klass.table_name.to_sym,
                                     attrs,
-                                    opts)
-
+                                    name: unique_index_name(klass),
+                                    unique: true)
   end
 
   def remove_mcfly_unique_index(klass)
@@ -284,8 +281,7 @@ OUT
     attrs.each { |a|
       options = index_opts(tb, a)
       options[:order] = {a.to_sym => "NULLS LAST"}
-      add_index tb.to_sym, a, options unless
-        index_exists?(tb.to_sym, a, options)
+      add_index tb.to_sym, a, options
     }
   end
 
