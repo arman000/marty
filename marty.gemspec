@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'netzke', '6.5.0.0'
 
-  s.add_dependency 'axlsx', '2.1.0pre'
+  s.add_dependency 'axlsx', '3.0.0pre'
 
 
   s.add_dependency 'delorean_lang', '~> 0.3.33'

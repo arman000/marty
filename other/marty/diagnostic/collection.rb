@@ -1,5 +1,6 @@
 module Marty::Diagnostic; class Collection < Base
   class_attribute :diagnostics
+
   self.diagnostics = []
   self.status_only = true
 

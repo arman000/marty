@@ -22,13 +22,24 @@ class Gemini::MyRule < Marty::DeloreanRule
                              values: ["Hi Mom", "abc", "def", "zzz"],
                              width: 100},
              "g_bool" => { type: :boolean,
+                           width: 100,
+                           null: false},
+             "g_nullbool" => { type: :boolean,
                            width: 100},
              "g_range" => { type: :range,
                             width: 100},
              "g_integer" => { type: :integer,
                               width: 100},
              "g_has_default" => { type:  :string,
-                                  default: "string default"}}
+                                  default: "string default"},
+             "g_bool_def" => { type: :boolean,
+                               width: 100,
+                               default: true,
+                               null: false},
+             "g_nbool_def" => { type: :boolean,
+                                default: false,
+                               width: 100},
+    }
   end
   def self.results_cfg_var
     'RULEOPTS_MYRULE'

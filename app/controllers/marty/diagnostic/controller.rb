@@ -1,10 +1,6 @@
 module Marty::Diagnostic; class Controller < ActionController::Base
   def self.inherited(klass)
-    namespace = begin
-                  klass.name.deconstantize.split('::')[0]
-                rescue
-                  ''
-                end
+    namespace = klass.name.deconstantize.split('::')[0] rescue ''
     Reporter.namespaces.unshift(namespace)
     super
   end

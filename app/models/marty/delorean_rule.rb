@@ -100,8 +100,9 @@ class Marty::DeloreanRule < Marty::BaseRule
       grid_results = grids.each_with_object({}) do |(gvar, gname), h|
         usename = eclass.grid_final_name(gvar)
         next h[usename] = gres[gname] if gres[gname]
-        dg = Marty::DataGrid.lookup(pt,gname)
-        dgr = dg && dg.lookup_grid_distinct_entry(pt, dgparams)
+        dg = Marty::DataGrid.lookup_h(pt,gname)
+        dgr = dg && Marty::DataGrid.lookup_grid_distinct_entry_h(pt, dgparams,
+                                                                 dg)
         h[usename] = gres[gname] = dgr["result"] if dgr
       end
     end
