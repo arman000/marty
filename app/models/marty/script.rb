@@ -123,8 +123,7 @@ class Marty::Script < Marty::Base
 
   delorean_fn :eval_to_hash, sig: 5 do
     |dt, script, node, attrs, params|
-    tag = Marty::Tag.find_match(dt, {"no_convert"=>true}) ||
-          raise("no tag found for #{dt}")
+    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
@@ -138,8 +137,7 @@ class Marty::Script < Marty::Base
 
   delorean_fn :evaluate, sig: 5 do
     |dt, script, node, attr, params|
-    tag = Marty::Tag.find_match(dt, {"no_convert"=>true}) ||
-                                    raise("no tag found for #{dt}")
+    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the

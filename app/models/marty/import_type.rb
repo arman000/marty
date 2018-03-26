@@ -36,22 +36,9 @@ class Marty::ImportType < Marty::Base
   def get_model_class
     db_model_name.constantize if db_model_name
   end
-  def self.get_model_class(os)
-    os.db_model_name.constantize if os.db_model_name
-  end
 
   def allow_import?
     Mcfly.whodunnit && Mcfly.whodunnit.roles.pluck(:id).include?(role_id)
-  end
-
-  def self.allow_import?(os)
-    Mcfly.whodunnit && Mcfly.whodunnit.roles.pluck(:id).include?(os.role_id)
-  end
-
-  delorean_fn :lookup, sig: [1, 2] do
-    |name, opts={}|
-    ar=self.find_by_name(name)
-    make_openstruct(ar, opts)
   end
 
   delorean_fn :get_all, sig: 0 do

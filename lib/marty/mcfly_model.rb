@@ -55,14 +55,15 @@ module Mcfly::Model
     def base_mcfly_lookup(meth, name, options = {}, &block)
 
       sig = options[:sig]
-      newsig = sig.is_a?(Array) ? [sig[0], sig[1]+1] : [sig, sig+1]
+      newsig = sig.is_a?(Array) ? [sig[0], sig[1]+1] :
+                 sig == -1 ? sig : [sig, sig+1]
       options[:sig] = newsig
-      sigmax = newsig.last - 1 # ts is separated inside dl fn
+      asig = options[:asig] || newsig[1]-1
 
       send(meth, name, options) do |ts, *pargs|
         raise "time cannot be nil" if ts.nil?
 
-        args, opts = pargs.last.is_a?(Hash) && pargs.length == sigmax ?
+        args, opts = pargs.last.is_a?(Hash) && pargs.length == asig ?
                        [pargs[0..-2], pargs.last] :
                        [pargs, {}]
 
@@ -132,9 +133,11 @@ module Mcfly::Model
         raise "bad attrs" unless Array === attrs
       end
 
+      actual_sig = attrs.length + 1
       fn = cache ? :cached_delorean_fn : :delorean_fn
+      sig = options[:private] ? -1 : actual_sig
 
-      base_mcfly_lookup(fn, name, {sig: attrs.length+1}) do
+      base_mcfly_lookup(fn, name, {sig: sig, asig: actual_sig}) do
         |t, *attr_list|
 
         attr_list_ids = attr_list.each_with_index.map {|x, i|
@@ -142,7 +145,7 @@ module Mcfly::Model
             (attr_list[i] && attr_list[i].id) : attr_list[i]
         }
 
-        q = self.where(qstr, *attr_list_ids)
+        q = self.where(qstr, *attr_list_ids) rescue binding.pry
         q = q.order(order) if order
         mode ? q.send(mode) : q
       end

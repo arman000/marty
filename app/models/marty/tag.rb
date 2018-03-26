@@ -52,7 +52,7 @@ class Marty::Tag < Marty::Base
       # posting, then find the tag whose created_dt <= posting dt.
       if !tag
         posting = Marty::Posting.lookup(tag_id, nc)
-        tag = find_match(Mcfly.normalize_infinity(posting.created_dt), nc) if
+        tag = find_match(Mcfly.normalize_infinity(posting.created_dt)) if
           posting
       end
     when nil
@@ -60,7 +60,6 @@ class Marty::Tag < Marty::Base
     else
       tag = tag_id
     end
-    binding.pry unless tag.nil? || tag.is_a?(Marty::Tag)
     raise "bad tag identifier #{tag_id.inspect}" unless tag.is_a?(Marty::Tag)
     tag
   end
@@ -87,19 +86,19 @@ class Marty::Tag < Marty::Base
                      order("created_dt DESC").first, opts)
   end
 
-  delorean_fn :find_match, sig: [1, 2] do
-    |dt, opts={}|
-    id = select(:id).where("created_dt <= ?", dt).order("created_dt DESC").first.id
+  def self.find_match(dt)
+    id = select(:id).where("created_dt <= ?", dt).order("created_dt DESC").
+         first.id
 
     # performance hack to use cached version
-    id && lookup_id(id, opts)
+    id && lookup_id(id, {"no_convert"=>true})
   end
 
   # Performance hack for script sets -- FIXME: making find_mtach
   # cached breaks Gemini tests.  Need to look into it.
-  cached_delorean_fn :cached_find_match, sig: [1, 2] do
-    |dt, opts={}|
+  cached_delorean_fn :cached_find_match, sig: 1 do
+    |dt|
 
-    find_match(dt, opts)
+    find_match(dt)
   end
 end

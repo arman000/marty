@@ -21,7 +21,7 @@ class Marty::DataChange
 
     changes.each_with_object({}) do |(group_id, ol), h|
       h[group_id] = ol.each_with_index.map do |o, i|
-        profile = {"obj" => OpenStruct.new(o.attributes)}
+        profile = {"obj" => o.attributes}
 
         # Create a profile hash for each object in the group.
         # "status" tells us if the object is old/new/mod.  If

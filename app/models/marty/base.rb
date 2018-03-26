@@ -40,19 +40,22 @@ class Marty::Base < ActiveRecord::Base
     return final_attrs if final_attrs.present?
 
     # otherwise raise with error line
-    st = caller.detect{|s|s.starts_with?('DELOREAN__')}
-    re = /DELOREAN__([A-Z][a-zA-Z0-9]*)[:]([0-9]+)[:]in `([a-z_0-9]+)__D'/
-    m = re.match(st)
-    if !m
-      st = "No attributes #{st} #{self}"
-      puts st unless File.readlines(Rails.root.join('tmp','dlchk')).
-                      map(&:chop).detect{|l|l==st}
-    else
-      loc = "#{m[1]}::#{self}::#{m[2]}"
-      str = "*** No attributes %-40s %-20s   %s" % [loc, m[3], attr]
-      puts str unless File.readlines(Rails.root.join('tmp','dlchk')).
-                       map(&:chop).detect{|l|l==str}
-    end
+    raise "Marty::Base: no attributes for #{self}"
+
+    # for more detailed debugging use this code instead
+    # st = caller.detect{|s|s.starts_with?('DELOREAN__')}
+    # re = /DELOREAN__([A-Z][a-zA-Z0-9]*)[:]([0-9]+)[:]in `([a-z_0-9]+)__D'/
+    # m = re.match(st)
+    # if !m
+    #   st = "No attributes #{st} #{self}"
+    #   puts st unless File.readlines(Rails.root.join('tmp','dlchk')).
+    #                   map(&:chop).detect{|l|l==st}
+    # else
+    #   loc = "#{m[1]}::#{self}::#{m[2]}"
+    #   str = "*** No attributes %-40s %-20s   %s" % [loc, m[3], attr]
+    #   puts str unless File.readlines(Rails.root.join('tmp','dlchk')).
+    #                    map(&:chop).detect{|l|l==str}
+    # end
   end
 
   def self.make_openstruct(inst, opts={})
