@@ -7,7 +7,7 @@ class Marty::Tag < Marty::Base
   belongs_to :user, class_name: "Marty::User"
 
   def self.get_struct_attrs
-    super + ["created_dt"]
+    self.struct_attrs ||= super + ["id", "created_dt"]
   end
 
   def self.make_name(dt)
@@ -52,11 +52,11 @@ class Marty::Tag < Marty::Base
       # posting, then find the tag whose created_dt <= posting dt.
       if !tag
         posting = Marty::Posting.lookup(tag_id, nc)
-        tag = find_match(Mcfly.normalize_infinity(posting.created_dt)) if
+        tag = find_match(Mcfly.normalize_infinity(posting['created_dt'])) if
           posting
       end
     when nil
-      tag = get_latest1(nc)
+      tag = get_latest1
     else
       tag = tag_id
     end
@@ -64,15 +64,18 @@ class Marty::Tag < Marty::Base
     tag
   end
 
-  cached_delorean_fn :lookup, sig: [1, 2] do
-    |name, opts={}|
-    make_openstruct(self.find_by_name(name), opts)
+  cached_delorean_fn :lookup, sig: 1 do
+    |name|
+    t = self.find_by_name(name).select(get_struct_attrs)
+    t && t.attributes
   end
 
+  # delete?  does not appear to be used
   # Performance hack to cache AR object
-  cached_delorean_fn :lookup_id, sig: [1, 2] do
-    |id, opts={}|
-    make_openstruct(find_by_id(id), opts)
+  cached_delorean_fn :lookup_id, sig: 1 do
+    |id|
+    t = find_by_id(id).select(get_struct_attrs)
+    t && t.attributes
   end
 
   delorean_fn :lookup_dt, sig: 1 do
@@ -80,25 +83,18 @@ class Marty::Tag < Marty::Base
     lookup(name).try(:created_dt)
   end
 
-  delorean_fn :get_latest1, sig: 1 do
-    |opts={}|
-    make_openstruct(where("created_dt <> 'infinity'").
-                     order("created_dt DESC").first, opts)
+  def self.get_latest1
+    where("created_dt <> 'infinity'").order("created_dt DESC").first
   end
 
   def self.find_match(dt)
-    id = select(:id).where("created_dt <= ?", dt).order("created_dt DESC").
-         first.id
-
-    # performance hack to use cached version
-    id && lookup_id(id, {"no_convert"=>true})
+    where("created_dt <= ?", dt).order("created_dt DESC").first
   end
 
   # Performance hack for script sets -- FIXME: making find_mtach
   # cached breaks Gemini tests.  Need to look into it.
-  cached_delorean_fn :cached_find_match, sig: 1 do
-    |dt|
-
-    find_match(dt)
+  def self.cached_find_match(dt)
+    @@CACHE_FIND_BY_DT ||= {}
+    @@CACHE_FIND_BY_DT[dt] ||= find_match(dt)
   end
 end

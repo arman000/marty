@@ -83,7 +83,9 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
           import_type_combo = netzke_find('Import Type', 'combobox')
           import_type_combo.select_values('FB')
           bud_id = Gemini::BudCategory.first.id
-          paste("bud_category_id\tnote_rate\tsettlement_mm\tsettlement_yy\tbuy_up\tbuy_down\n#{bud_id}\t9.500\t9\t2014\t0\t0\n#{bud_id}\t9.750\t9\t2014\t0\t0\n",
+          paste("bud_category_id\tnote_rate\tsettlement_mm\tsettlement_yy\t"\
+                "buy_up\tbuy_down\n#{bud_id}\t9.500\t9\t2014\t0\t0\n"\
+                "#{bud_id}\t9.750\t9\t2014\t0\t0\n",
                 'data_import_field')
         end
       end

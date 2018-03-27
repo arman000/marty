@@ -51,13 +51,8 @@ class Marty::Posting < Marty::Base
   # of mcfly_validates_uniqueness_of.
   delorean_fn :lookup, sig: [1, 2] do
     |name, opts={}|
-    make_openstruct(self.find_by_name(name), opts)
-  end
-
-
-  delorean_fn :lookup_id, sig: [1, 2] do
-    |id, opts={}|
-    make_openstruct(self.find(id), opts)
+    p = select(get_struct_attrs).find_by_name(name)
+    make_openstruct(p, opts)
   end
 
   delorean_fn :lookup_dt, sig: 1 do
@@ -65,33 +60,32 @@ class Marty::Posting < Marty::Base
     find_by_name(name).try(:created_dt)
   end
 
-  delorean_fn :first_match, sig: [1, 3] do
-    |dt, posting_type=nil, opts={}|
+  delorean_fn :first_match, sig: [1, 2] do
+    |dt, posting_type=nil|
     raise "bad posting type" if
       posting_type && !posting_type.is_a?(Marty::PostingType)
 
     q = where("created_dt <= ?", dt)
     q = q.where(posting_type_id: posting_type.id) if posting_type
-    make_openstruct(q.order("created_dt DESC").first, opts)
+    q.order("created_dt DESC").first.attributes
   end
 
-  delorean_fn :get_latest, sig: [1, 3] do
-    |limit, is_test=nil, opts={}|
+  def self.get_latest(limit, is_test=nil)
     # IMPORTANT: is_test arg is ignored (KEEP for backward compat.)
 
     q=where("created_dt <> 'infinity'").
        order("created_dt DESC").limit(limit)
-    opts['no_convert'] ? q : q.map{|ar|make_openstruct(ar, opts)}
   end
 
-  delorean_fn :get_latest_by_type, sig: [2, 3] do
-    |limit, posting_types=[], opts={}|
+  delorean_fn :get_latest_by_type, sig: [1, 2] do
+    |limit, posting_types=[]|
     raise "missing posting types list" unless posting_types
     raise "bad posting types list" unless posting_types.is_a?(Array)
 
     q=joins(:posting_type).where("created_dt <> 'infinity'").
-      where(marty_posting_types: { name: posting_types } ).
-      order("created_dt DESC").limit(limit || 1)
-    opts['no_convert'] ? q : q.map{|ar|make_openstruct(ar, opts)}
+       where(marty_posting_types: { name: posting_types } ).
+       select(get_struct_attrs).
+       order("created_dt DESC").limit(limit || 1)
+    q.map{|ar| ar.attributes}
   end
 end

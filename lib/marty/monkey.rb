@@ -276,6 +276,9 @@ Delorean::RUBY_WHITELIST.merge!(
   mcfly_pt: [ActiveRecord::Relation,
              [Date, Time, ActiveSupport::TimeWithZone, String],
              [nil, Class]],
+  lookup_grid_distinct_entry: [OpenStruct,
+                               [Date, Time, ActiveSupport::TimeWithZone, String],
+                               Hash],
 )
 
 ######################################################################

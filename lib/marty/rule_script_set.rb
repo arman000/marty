@@ -21,7 +21,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     @pt = Mcfly.normalize_infinity(pt)
 
     # if pt is Infinity, we get a DEV Tag
-    tag = Marty::Tag.cached_find_match(pt, {"no_convert"=>true})
+    tag = Marty::Tag.cached_find_match(pt)
     @sset = Marty::ScriptSet.new(tag)
     super()
   end

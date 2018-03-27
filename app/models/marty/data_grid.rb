@@ -103,6 +103,10 @@ class Marty::DataGrid < Marty::Base
     Marty::DataGrid.mcfly_pt(pt).where(name: name).exists?
   end
 
+  def self.get_struct_attrs
+    self.struct_attrs ||= super + ["id", "group_id", "created_dt"]
+  end
+
   def to_s
     name
   end
@@ -218,9 +222,12 @@ class Marty::DataGrid < Marty::Base
 
   cached_delorean_fn :lookup_grid, sig: 4 do
     |pt, dg, h, distinct|
-    raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
+    dg_is_grid = Marty::DataGrid === dg
+    dg_is_os   =  dg.is_a?(OpenStruct)
+    raise "bad DataGrid #{dg}" unless dg_is_grid || dg_is_os
     raise "non-hash arg #{h}" unless Hash === h
-    dgh = dg.attributes.slice('id', 'group_id', 'created_dt', 'metadata')
+    dgh = dg_is_os ? dg.to_h.stringify_keys :
+            dg.attributes.slice('id', 'group_id', 'created_dt', 'metadata')
     res = plv_lookup_grid_distinct(h, dgh, false, distinct)
     res["result"]
   end

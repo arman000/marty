@@ -2,7 +2,9 @@ import Fields
 import Styles
 
 PostingField2: Fields::PostingField2
-    store = ["NOW"] + [lp.name for lp in Marty::Posting.get_latest(10, nil)]
+    store = ["NOW"] + Marty::Posting.
+                   where("created_dt <> 'infinity'").
+                   order("created_dt DESC").limit(10).pluck("name")
 
 StyleRow:
     profile     =?

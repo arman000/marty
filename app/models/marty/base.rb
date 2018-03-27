@@ -68,6 +68,13 @@ class Marty::Base < ActiveRecord::Base
       attrs = [attr].flatten
       attrs.map { |attr| os[col][attr] = inst.send(col).try(attr) }
     end
+    if self == Marty::DataGrid
+      def os.lookup_grid_distinct_entry(pt, params)
+        dgh = self.to_h.stringify_keys.slice("id","group_id","created_dt",
+                                             "metadata", "data_type")
+        Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh)
+      end
+    end
     os
   end
 end

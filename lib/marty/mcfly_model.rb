@@ -145,7 +145,7 @@ module Mcfly::Model
             (attr_list[i] && attr_list[i].id) : attr_list[i]
         }
 
-        q = self.where(qstr, *attr_list_ids) rescue binding.pry
+        q = self.where(qstr, *attr_list_ids)
         q = q.order(order) if order
         mode ? q.send(mode) : q
       end

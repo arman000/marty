@@ -55,7 +55,7 @@ class Marty::Script < Marty::Base
     }
 
     # Create a new tag if scripts were modified after the last tag
-    tag = Marty::Tag.get_latest1({"no_convert"=>true})
+    tag = Marty::Tag.get_latest1
     latest = Marty::Script.order("created_dt DESC").first
 
     tag_time = (dt || [latest.try(:created_dt), Time.now].compact.max) +
