@@ -10,7 +10,9 @@ module Marty::RuleSpec
       Marty::Config['RULEOPTS_MYRULE']={'simple_result'=>{},
                                         'computed_value'=>{},
                                         'final_value'=>{},
-                                        'grid_sum'=>{}
+                                        'grid_sum'=>{},
+                                        'c1'=>{},
+                                        'sr2'=>{},
                                        }
       Marty::Config['RULEOPTS_XYZ']={'bvlength'=>{},
                                      'bv'=>{},
@@ -311,7 +313,7 @@ module Marty::RuleSpec
         expect(simple2a.compute({"pt"=>Time.zone.now})).to eq(
                                        {"simple_result"=>"b value",
                                         "sr2"=>true,
-                                        "sr3"=>123})
+                                       })
         # simple2b should return grid results without evaluation
         expect(simple2b.compute({"pt"=>Time.zone.now,
                                  'param1'=> 66,
