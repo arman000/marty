@@ -1,4 +1,4 @@
-class CreateMartyEvents < ActiveRecord::Migration
+class CreateMartyEvents < ActiveRecord::Migration[4.2]
   def change(*args)
     # Giant hack to monkey patch connection so that we can create an
     # UNLOGGED table in PostgreSQL.

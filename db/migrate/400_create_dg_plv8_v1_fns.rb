@@ -1,4 +1,4 @@
-class CreateDgPlv8V1Fns < ActiveRecord::Migration
+class CreateDgPlv8V1Fns < ActiveRecord::Migration[4.2]
   def change
     connection.execute <<-SQL
       -- required to utilize plv8 extension

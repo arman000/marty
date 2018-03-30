@@ -12,6 +12,17 @@ ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__
 
 Dir[Rails.root.join("../support/**/*.rb")].each { |f| require f }
 
+def register_chrome_driver driver = :chrome, options={}
+  Capybara.register_driver driver do |app|
+    caps = Selenium::WebDriver::Remote::Capabilities.
+             chrome(options + {pageLoadStrategy: 'none'})
+
+    Capybara::Selenium::Driver.new(app,
+                                   browser: :chrome,
+                                   desired_capabilities: caps)
+  end
+end
+
 CLASSES_TO_EXCLUDE_FROM_SHARED = ["Marty::Log"]
 class ActiveRecord::Base
   mattr_accessor :shared_connection
@@ -26,27 +37,23 @@ class ActiveRecord::Base
 
   def self.connection
     CLASSES_TO_EXCLUDE_FROM_SHARED.include?(model_name) ? orig_connection :
-      @@shared_connection || retrieve_connection
+      @@shared_connection ||
+      ConnectionPool::Wrapper.new(:size => 1) {retrieve_connection}
   end
 
   def self.reset_shared_connection
-    @@shared_connection = retrieve_connection
+    @@shared_connection = ConnectionPool::Wrapper.
+                            new(:size => 1) {retrieve_connection}
   end
 end
 
-Capybara.register_driver :selenium do |app|
-  # use personal firefox if it exists
-  personal_firefox = File.expand_path('~/firefox/firefox')
-  Selenium::WebDriver::Firefox::Binary.path = personal_firefox if
-    File.exists?(personal_firefox)
+register_chrome_driver
+register_chrome_driver(:headless,
+                       chromeOptions: {
+                         args: %w[headless disable-gpu window-size=3840,2160]
+                       })
 
-  client = Selenium::WebDriver::Remote::Http::Default.new
-  profile = Selenium::WebDriver::Firefox::Profile.new
-  profile.load_no_focus_lib = true
-  Capybara::Selenium::Driver.new(app, :profile => profile,
-                                 :http_client => client)
-end
-
+Capybara.javascript_driver = ENV['HEADLESS'] == 'true' ? :headless : :chrome
 
 ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection
 
@@ -95,4 +102,19 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
 
   Netzke::Testing.rspec_init(config)
+
+  # FIXME: temporary monkey patch to fix marty_rspec for new extjs/rails
+  module MartyRSpec
+    module Components
+      class NetzkeGrid
+        def get_row_vals row
+          res = run_js <<-JS
+          #{ext_var(grid, 'grid')}
+          return Ext.encode(#{ext_row(row.to_i - 1, 'grid')}.data);
+          JS
+          JSON.parse(res)
+        end
+      end
+    end
+  end
 end

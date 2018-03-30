@@ -12,7 +12,7 @@ module Marty; class DataGridView < McflyGridPanel
 
     javascript = l(<<-JS)
     function() {
-       var sel = this.getSelectionModel().selected.first();
+       var sel = this.getSelectionModel().getSelection()[0];
        var record_id = sel && sel.getId();
        this.server.showGrid({record_id: record_id,
                             data_grid: "#{dg}",

@@ -11,7 +11,7 @@ class Marty::ApplicationController < ActionController::Base
     cookies.delete(:autologin)
   end
 
-  before_filter :session_expiration,
+  before_action :session_expiration,
   :user_setup
 
   def get_conf
@@ -99,7 +99,7 @@ class Marty::ApplicationController < ActionController::Base
   def logout_user
     if Marty::User.current
       cookies.delete :autologin
-      Marty::Token.delete_all(["user_id = ?", Marty::User.current.id]) unless
+      Marty::Token.where(user_id: Marty::User.current.id).delete_all unless
         Marty::Util.db_in_recovery?
       self.set_user(nil)
     end

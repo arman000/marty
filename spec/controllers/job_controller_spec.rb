@@ -11,7 +11,7 @@ describe Marty::JobController, slow: true do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
     # transactional fixtures interfere with queueing jobs
-    self.use_transactional_fixtures = false
+    self.use_transactional_tests = false
 
     # Needed here because shutting transactional fixtures off
     # means we lose the globally set uesr
@@ -103,7 +103,7 @@ describe Marty::JobController, slow: true do
 
     promise = Marty::Promise.find_by_title(NAME_C)
 
-    get 'download', {
+    get 'download', params: {
       job_id: promise.id,
     }
 
@@ -158,7 +158,7 @@ describe Marty::JobController, slow: true do
 
     expect(promise.result).to eq res
 
-    get 'download', {
+    get 'download', params: {
       format: :json,
       job_id: promise.id,
     }
@@ -182,7 +182,7 @@ describe Marty::JobController, slow: true do
       "title"=>"PromiseB",
     })
 
-    get 'download', {
+    get 'download', params: {
       job_id: promise.id,
     }
 
@@ -190,7 +190,7 @@ describe Marty::JobController, slow: true do
     expect(response.body).to eq expect_csv
     expect(response.content_type).to eq "text/csv"
 
-    get 'download', {
+    get 'download', params: {
       job_id: promise.parent_id,
     }
 

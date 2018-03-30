@@ -70,7 +70,7 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
         #hacky: assumes only 1 combobox without label
         within(:gridpanel, 'report_select', match: :first, wait: 5) do
           # hacky, hardcoding netzkecombobox dropdown arrow name
-          arrow = find(:input, 'nodename')['componentid'] + '-trigger-picker'
+          arrow = find(:input, 'nodename')['data-componentid'] + '-trigger-picker'
           find(:xpath, ".//div[@id='#{arrow}']").click
           find(:xpath, "//li[text()='Data Import Job (csv)']").click
         end
@@ -137,7 +137,7 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
         #hacky: assumes only 1 combobox without label
         within(:gridpanel, 'report_select', match: :first) do
           # hacky, hardcoding netzkecombobox dropdown arrow name
-          arrow = find(:input, 'nodename')['componentid'] + '-trigger-picker'
+          arrow = find(:input, 'nodename')['data-componentid'] + '-trigger-picker'
           find(:xpath, ".//div[@id='#{arrow}']").click
           find(:xpath, "//li[text()='Data Import Job (csv)']").click
         end

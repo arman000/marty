@@ -384,7 +384,7 @@ describe Marty::RpcController do
   let(:p2) { @p2 }
 
   it "should be able to post" do
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "B",
@@ -397,7 +397,7 @@ describe Marty::RpcController do
 
   it "should be able to post background job" do
     Delayed::Worker.delay_jobs = false
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "B",
@@ -419,7 +419,7 @@ describe Marty::RpcController do
 
   it "should be able to post background job with non-array attr" do
     Delayed::Worker.delay_jobs = false
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "B",
@@ -440,7 +440,7 @@ describe Marty::RpcController do
   end
 
   it "should be able to post with complex data" do
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "D",
@@ -456,7 +456,7 @@ describe Marty::RpcController do
   it "should be able to post (JSON) with complex data" do
     @request.env['CONTENT_TYPE'] = 'application/json'
     @request.env['ACCEPT'] = 'application/json'
-    post 'evaluate', {
+    post 'evaluate', params: {
            format: :json,
            script: "M1",
            node: "D",
@@ -468,7 +468,7 @@ describe Marty::RpcController do
   end
 
   it "should be able to run scripts" do
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           node: "A",
@@ -478,7 +478,7 @@ describe Marty::RpcController do
     # puts 'Z'*40, request.inspect
     expect(response.body).to eq(123.0.to_json)
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           node: "A",
@@ -488,7 +488,7 @@ describe Marty::RpcController do
         }
     expect(response.body).to eq(4.5.to_json)
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           node: "B",
@@ -498,7 +498,7 @@ describe Marty::RpcController do
         }
     expect(response.body).to eq(4.5.to_json)
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           tag: "DEV",
@@ -510,7 +510,7 @@ describe Marty::RpcController do
   end
 
   it "should be able to use posting name for tags" do
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           node: "A",
@@ -519,7 +519,7 @@ describe Marty::RpcController do
         }
     expect(response.body["error"]).to_not be_nil
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           node: "A",
@@ -529,7 +529,7 @@ describe Marty::RpcController do
         }
     expect(response.body).to eq(4.5.to_json)
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           node: "B",
@@ -539,7 +539,7 @@ describe Marty::RpcController do
         }
     expect(response.body).to eq(4.5.to_json)
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           tag: "NOW",
@@ -551,7 +551,7 @@ describe Marty::RpcController do
   end
 
   it "should be able to run scripts 2" do
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M3",
           node: "C",
@@ -560,7 +560,7 @@ describe Marty::RpcController do
     # puts 'Z'*40, request.inspect
     expect(response.body).to eq(7.to_json)
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M3",
           node: "B",
@@ -569,7 +569,7 @@ describe Marty::RpcController do
     # puts 'Z'*40, request.inspect
     expect(response.body).to eq(9.to_json)
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M3",
           node: "A",
@@ -580,7 +580,7 @@ describe Marty::RpcController do
   end
 
   it "should be able to handle imports" do
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M4",
           node: "A",
@@ -591,7 +591,7 @@ describe Marty::RpcController do
   end
 
   it "should support CSV" do
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M4",
           node: "A",
@@ -602,7 +602,7 @@ describe Marty::RpcController do
   end
 
   it "should support CSV (2)" do
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M4",
           node: "A",
@@ -620,7 +620,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "b"
     params = {"a" => 5}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M1",
           node: "A",
@@ -639,7 +639,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "b"
     params = {"a" => 5}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           node: "A",
@@ -661,7 +661,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "h"
     params = {"f" => 5}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M4",
           node: "A",
@@ -680,7 +680,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "pc"
     params = {"p" => 5}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M3",
           node: "A",
@@ -700,7 +700,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "d"
     params = {"p" => "132"}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M4",
           node: "A",
@@ -723,7 +723,7 @@ describe Marty::RpcController do
                                strict_validate: true)
       attr = "ii"
       params = {"p" => 132, "e" => 55, "f"=>16, "i"=>"string"}.to_json
-      get 'evaluate', {
+      get 'evaluate', params: {
             format: :json,
             script: "M4",
             node: "A",
@@ -749,7 +749,7 @@ describe Marty::RpcController do
 
       attr = "result"
       params = {"f" => "Banana"}.to_json
-      get 'evaluate', {
+      get 'evaluate', params: {
             format: :json,
             script: "M5",
             node: "A",
@@ -784,7 +784,7 @@ describe Marty::RpcController do
                                strict_validate: false)
       attr = "result2"
       params = {"f" => "Banana"}.to_json
-      get 'evaluate', {
+      get 'evaluate', params: {
             format: :json,
             script: "M5",
             node: "A",
@@ -814,7 +814,7 @@ describe Marty::RpcController do
                                strict_validate: true)
       attr = "result"
       params = {"b" => 122}.to_json
-      get 'evaluate', {
+      get 'evaluate', params: {
             format: :json,
             script: "M9",
             node: "A",
@@ -847,7 +847,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "lc"
     params = {"p" => 5}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M4",
           node: "A",
@@ -865,7 +865,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "res"
     params = {"b" => 5.22}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M6",
           node: "A",
@@ -896,7 +896,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "res"
     params = {"f" => "Banana"}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M5",
           node: "A",
@@ -914,7 +914,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "res"
     params = {"f" => "Beans"}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M5",
           node: "A",
@@ -933,7 +933,7 @@ describe Marty::RpcController do
                              input_validated: true)
     attr = "res"
     params = {"b" => "MemberOfANonExistantEnum"}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M7",
           node: "A",
@@ -957,7 +957,7 @@ describe Marty::RpcController do
          "autoload issues involving constantize"
     attr = "res"
     params = {"b" => "Annual"}.to_json
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M8",
           node: "A",
@@ -973,7 +973,7 @@ describe Marty::RpcController do
                              logged: true)
     attr = "lc"
     params = {"p" => 5}
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M3",
           node: "A",
@@ -1000,7 +1000,7 @@ describe Marty::RpcController do
                              logged: true)
     attr = "lc"
     params = {"p" => 5}
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M3",
           node: "A",
@@ -1014,7 +1014,7 @@ describe Marty::RpcController do
   end
 
   it "should not log if it should not log" do
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M1",
           node: "A",
@@ -1030,7 +1030,7 @@ describe Marty::RpcController do
                              attr: nil,
                              logged: true)
     params = {"p" => 5}
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :csv,
           script: "M3",
           node: "A",
@@ -1056,7 +1056,7 @@ describe Marty::RpcController do
     api.script_name = 'M2'
     api.save!
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M3",
           node: "C",
@@ -1071,7 +1071,7 @@ describe Marty::RpcController do
     api.script_name = 'M3'
     api.save!
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M3",
           node: "C",
@@ -1090,7 +1090,7 @@ describe Marty::RpcController do
                                     logged: true)
 
     attr = "pc"
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M3",
           node: "C",
@@ -1114,7 +1114,7 @@ describe Marty::RpcController do
     api.script_name = 'M3'
     api.save!
 
-    get 'evaluate', {
+    get 'evaluate', params: {
           format: :json,
           script: "M3",
           node: "C",
@@ -1145,7 +1145,7 @@ describe Marty::RpcController do
       # x=engine.evaluate("A", "v1",  {})
       # binding.pry
 
-      get 'evaluate', {
+      get 'evaluate', params: {
             format: :json,
             script: "M10",
             node: "A",
@@ -1200,47 +1200,42 @@ describe Marty::RpcController do
 
   context "error handling" do
     it 'returns bad attrs if attr is not a string' do
-      get :evaluate, format: :json, attrs: 0
+      get :evaluate, params: {format: :json, attrs: 0}
       expect(response.body).to match(/"error":"Malformed attrs"/)
     end
 
     it 'returns malformed attrs for improperly formatted json' do
-      get :evaluate, format: :json, attrs: "{"
+      get :evaluate, params: { format: :json, attrs: "{" }
       expect(response.body).to match(/"error":"Malformed attrs"/)
     end
 
     it 'returns malformed attrs if attr is not an array of strings' do
-      get :evaluate, format: :json, attrs: "{}"
+      get :evaluate, params: {format: :json, attrs: "{}"}
       expect(response.body).to match(/"error":"Malformed attrs"/)
 
-      get :evaluate, format: :json, attrs: "[0]"
+      get :evaluate, params: { format: :json, attrs: "[0]" }
       expect(response.body).to match(/"error":"Malformed attrs"/)
-    end
-
-    it 'returns bad params if params is not a string' do
-      get :evaluate, format: :json,  attrs: "e", params: 0
-      expect(response.body).to match(/"error":"Bad params"/)
     end
 
     it 'returns malformed params for improperly formatted json' do
-      get :evaluate, format: :json, attrs: "e", params: "{"
+      get :evaluate, params: {format: :json, attrs: "e", params: "{"}
       expect(response.body).to match(/"error":"Malformed params"/)
     end
 
     it 'returns malformed params if params is not a hash' do
-      get :evaluate, format: :json, attrs: "e", params: "[0]"
+      get :evaluate, params: {format: :json, attrs: "e", params: "[0]"}
       expect(response.body).to match(/"error":"Malformed params"/)
     end
 
     it 'returns engine/tag lookup error if script not found' do
-      get :evaluate, format: :json, script: 'M1', attrs: "e", tag: 'invalid'
+      get :evaluate, params: {format: :json, script: 'M1', attrs: "e", tag: 'invalid'}
       expect(response.body).to match(/"error":"Can't get engine:/)
-      get :evaluate, format: :json, script: 'Invalid', attrs: "e", tag: t1.name
+      get :evaluate, params: {format: :json, script: 'Invalid', attrs: "e", tag: t1.name}
       expect(response.body).to match(/"error":"Can't get engine:/)
     end
 
     it 'returns the script runtime error (no node specified)' do
-      get :evaluate, format: :json, script: 'M1', attrs: "e", tag: t1.name
+      get :evaluate, params: {format: :json, script: 'M1', attrs: "e", tag: t1.name}
       expect(response.body).to match(/"error":"bad node/)
     end
   end

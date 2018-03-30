@@ -1,4 +1,4 @@
-class CreateMartyImportTypes < ActiveRecord::Migration
+class CreateMartyImportTypes < ActiveRecord::Migration[4.2]
   def change
     create_table :marty_import_types do |t|
       t.timestamps null: false

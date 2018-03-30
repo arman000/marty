@@ -3,7 +3,7 @@ require 'spec_helper'
 feature 'logger view', js: true, capybara: true do
 
   before(:all) do
-    self.use_transactional_fixtures = false
+    self.use_transactional_tests = false
     Marty::Log.delete_all
 
     info_s = { info: 'message' }
@@ -36,7 +36,7 @@ feature 'logger view', js: true, capybara: true do
   after(:all) do
     restore_clean_db(@clean_file)
     Marty::Log.delete_all
-    self.use_transactional_fixtures = true
+    self.use_transactional_tests = true
   end
 
   let(:logview) { netzke_find('log_view') }
@@ -66,10 +66,10 @@ feature 'logger view', js: true, capybara: true do
         find(:xpath, "//input[contains(@id, 'textfield')]", wait: 5).set(days)
         press('OK')
         wait_for_ready
-        find(:refresh).click
+        find('.x-tool-refresh').click
         wait_for_ready
       end
-
+      wait_for_ajax
       cnt = logview.row_count()
       expect(cnt).to eq(exp_count)
       types = logview.col_values('message_type', cnt, 0)

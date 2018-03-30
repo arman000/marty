@@ -94,7 +94,7 @@ DELOREAN
     #hacky: assumes only 1 combobox without label
     within(:gridpanel, 'report_select', match: :first) do
       # hacky, hardcoding netzkecombobox dropdown arrow name
-      arrow = find(:input, 'nodename')['componentid'] + '-trigger-picker'
+      arrow = find(:input, 'nodename')['data-componentid'] + '-trigger-picker'
       find(:xpath, ".//div[@id='#{arrow}']").click
       find(:xpath, "//li[text()='#{node_name}']").click
     end
@@ -121,7 +121,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -187,7 +186,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -219,7 +217,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -245,7 +242,6 @@ DELOREAN
 
     by 'select 2nd tag' do
       wait_for_ajax
-      zoom_out
       tag_grid.select_row(2)
     end
 
@@ -255,8 +251,17 @@ DELOREAN
 
     and_by 'no DD [role: dev] (csv)' do
       expect(script_combo.get_values).to include('AA (csv)',
-                                             'CC (csv)',
-                                             '---')
+                                                 'CC (csv)',
+                                                 '---')
+    end
+  end
+
+  it 'can generate report through generated url' do
+    url = generate_rep_url(format: 'txt') + URI.encode('&disposition=inline')
+    visit url
+    wait_for_element do
+      expect(page).to have_content('XYZ1,XYZ2,XYZ3,XYZ4 1,2,3,4 2,4,6,8 ' +
+                                   '3,6,9,12 4,8,12,16')
     end
   end
 
@@ -276,21 +281,13 @@ DELOREAN
       wait_for_ajax
       set_field_value('XYZ', '', 'pt_name')
       set_field_value('true', 'textfield', 'selected_testing')
-      new_window = window_opened_by {press("Generate URL")}
-      within_window new_window do
+      press("Generate URL")
+      wait_for_ajax
+
+      within_window(switch_to_window(windows.last)) do
         url = generate_rep_url
         expect(page).to have_content(url)
       end
-      new_window.close
-    end
-  end
-
-  it 'can generate report through generated url' do
-    url = generate_rep_url(format: 'txt') + URI.encode('&disposition=inline')
-    visit url
-    wait_for_element do
-      expect(page).to have_content('XYZ1,XYZ2,XYZ3,XYZ4 1,2,3,4 2,4,6,8 ' +
-                                   '3,6,9,12 4,8,12,16')
     end
   end
 end

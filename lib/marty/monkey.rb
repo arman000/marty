@@ -67,37 +67,9 @@ module ActiveRecord
             super
           end
 
-          def type_cast_for_database(value)
+          def deserialize(value)
             super
           end
-        end
-      end
-    end
-  end
-end
-
-
-module ActiveRecord
-  module ConnectionAdapters
-    module PostgreSQL
-      module OID # :nodoc:
-        class Array
-
-          # In the 4.2.1 version of this code, under Mutable, the code
-          # checks for raw_old_value != type_cast_for_database(new_value)
-          #
-          # Since this is comparing db (string) version, we end up
-          # comparing "{1}"!="{1.0}" for float arrays. The following
-          # is a hack to check the new_value which is the ruby array.
-          # This could be problematic in other ways.  But, works for
-          # our purposes.  FIXME: In Rails 5.0 all this code has been
-          # changed and this should no longer be an issue.
-
-
-          def changed_in_place?(raw_old_value, new_value)
-            new_value != type_cast_from_database(raw_old_value)
-          end
-
         end
       end
     end
@@ -249,7 +221,7 @@ module ActiveRecord
     module PostgreSQL
       module OID
         class Enum < Type::Value
-          def type_cast_from_database(value)
+          def cast(value)
             value && StringEnum.new(value)
           end
         end

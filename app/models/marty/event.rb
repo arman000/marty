@@ -2,7 +2,7 @@ class Marty::Event < Marty::Base
 
   class EventValidator < ActiveModel::Validator
     def validate(event)
-      event.errors[:base] = "Must have promise_id or start_dt" unless
+      event.errors[:base] << "Must have promise_id or start_dt" unless
         event.promise_id || event.start_dt
     end
   end

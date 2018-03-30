@@ -8,7 +8,7 @@ describe Marty::Event do
     save_clean_db(@clean_file)
 
     # transactional fixtures interfere with queueing jobs
-    self.use_transactional_fixtures = false
+    self.use_transactional_tests = false
 
     # Needed here because shutting transactional fixtures off
     # means we lose the globally set user
@@ -65,7 +65,7 @@ describe Marty::Event do
   end
 
   after(:all) do
-    self.use_transactional_fixtures = true
+    self.use_transactional_tests = true
     restore_clean_db(@clean_file)
     stop_delayed_job
   end
@@ -172,7 +172,7 @@ describe Marty::Event do
                                  "enum_event_operation"=>"AVM",
                                  "comment"=>"wassup",
                                  "expire_secs"=>nil,
-                                 "error"=>'f'})
+                                 "error"=> false})
     Marty::Event.update_comment(ev.first, "updated")
     ev = Marty::Event.lookup_event('testcl1', 123, 'AVM')
     expect(ev.first).to include({"comment"=>"updated"})
@@ -192,7 +192,7 @@ describe Marty::Event do
                                  "enum_event_operation"=>"PRICING",
                                  "comment"=>"c comment",
                                  "expire_secs"=>nil,
-                                 "error"=>"f"})
+                                 "error"=>false})
 
     af = Marty::Event.all_finished
     expect(af.count).to eq(4)

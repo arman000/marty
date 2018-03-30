@@ -4,14 +4,14 @@ require 'job_helper'
 module Marty
   describe Logger do
     before(:all) do
-      self.use_transactional_fixtures = false
+      self.use_transactional_tests = false
     end
     before(:each) do
       Marty::Log.delete_all
     end
     after(:all) do
       Marty::Log.delete_all
-      self.use_transactional_fixtures = true
+      self.use_transactional_tests = true
     end
 
     it "log has its own connection" do
@@ -63,7 +63,7 @@ module Marty
       @clean_file = "/tmp/clean_#{Process.pid}.psql"
       save_clean_db(@clean_file)
       # transactional fixtures interfere with queueing jobs
-      self.use_transactional_fixtures = false
+      self.use_transactional_tests = false
       Marty::Log.cleanup(0)
 
       # Needed here because shutting transactional fixtures off
@@ -78,7 +78,7 @@ module Marty
       stop_delayed_job
       File.unlink("/tmp/logaction.txt")
       Marty::Log.cleanup(0)
-      self.use_transactional_fixtures = true
+      self.use_transactional_tests = true
     end
 
     it "handles heavy load" do

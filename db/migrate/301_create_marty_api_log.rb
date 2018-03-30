@@ -1,4 +1,4 @@
-class CreateMartyApiLog < ActiveRecord::Migration
+class CreateMartyApiLog < ActiveRecord::Migration[4.2]
   def change
     create_table :marty_api_logs do |t|
       t.string :script, null: false
