@@ -102,4 +102,19 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
 
   Netzke::Testing.rspec_init(config)
+
+  # FIXME: temporary monkey patch to fix marty_rspec for new extjs/rails
+  module MartyRSpec
+    module Components
+      class NetzkeGrid
+        def get_row_vals row
+          res = run_js <<-JS
+          #{ext_var(grid, 'grid')}
+          return Ext.encode(#{ext_row(row.to_i - 1, 'grid')}.data);
+          JS
+          JSON.parse(res)
+        end
+      end
+    end
+  end
 end
