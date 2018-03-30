@@ -36,9 +36,12 @@ feature 'rule view', js: true do
   # click_checkbox in marty_rspec not working here for some reason
   def click_checkbox(name)
     q = %Q(checkbox[fieldLabel="#{name}"])
-    id = run_js "return  Ext.ComponentQuery.query('#{q}')[0].inputId"
-    find_by_id(id).click
+    page.execute_script <<-JS
+    var checkbox = Ext.ComponentQuery.query('#{q}')[0];
+    checkbox.setValue(!checkbox.value);
+    JS
   end
+
   # click_col in marty_rspec is not reliable
   def click_column(rv,name)
     cid = col_id(rv, name)
@@ -75,7 +78,6 @@ feature 'rule view', js: true do
   end
   it "rule workflow" do
     log_in_as('marty')
-    page.driver.browser.manage.window.maximize
     go_to_my_rules
     mrv = netzke_find("my_rule_view")
     # test required field
@@ -97,8 +99,8 @@ feature 'rule view', js: true do
     expect(mrv.row_count()).to eq(9)
     expect(mrv.get_row_vals(1)).to include({"name"=>"abc",
                                             "rule_type"=>"SimpleRule",
-                                            "start_dt"=>"2013-01-01T19:03:01.000Z",
-                                            "end_dt"=>"2030-01-01T16:03:01.000Z",
+                                            "start_dt"=>"2013-01-01T11:03:01",
+                                            "end_dt"=>"2030-01-01T08:03:01",
                                             "other_flag"=>false,
                                             "g_array"=>"",
                                             "g_single"=>"",
@@ -113,7 +115,8 @@ feature 'rule view', js: true do
                                             "computed_guards"=>"",
                                             "grids"=>"",
                                             "results"=>"",
-                                            })
+                                           })
+
     r = Gemini::MyRule.lookup('infinity','abc')
     expect(r.as_json).to include({"user_id"=>1,
                                   "o_user_id"=>nil,
@@ -153,8 +156,8 @@ feature 'rule view', js: true do
     wait_for_ajax
     exp = {"name"=>"abc",
            "rule_type"=>"SimpleRule",
-           "start_dt"=>"2013-01-01T19:03:01.000Z",
-           "end_dt"=>"2030-01-01T16:03:01.000Z",
+           "start_dt"=>"2013-01-01T11:03:01",
+           "end_dt"=>"2030-01-01T08:03:01",
            "other_flag"=>true,
            "g_array"=>"G1V1,G1V3",
            "g_single"=>"G2V2",

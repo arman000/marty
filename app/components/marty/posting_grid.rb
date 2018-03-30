@@ -35,7 +35,7 @@ class Marty::PostingGrid < Marty::Grid
 
     c.detail = l(<<-JS)
     function() {
-       record_id = this.getSelectionModel().selected.first().getId();
+       record_id = this.getSelectionModel().getSelection()[0].getId();
        this.server.detail({record_id: record_id});
     }
     JS

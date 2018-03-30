@@ -2,7 +2,7 @@
     // copied from basepack grid's onEditInForm
     netzkeOnDupInForm: function(){
         var selModel = this.getSelectionModel();
-        var recordId = selModel.selected.first().getId();
+        var recordId = selModel.getSelection()[0].getId();
         this.netzkeLoadComponent("edit_window", {
             title: "Duplicate in Form",
             serverConfig: {record_id: recordId},

@@ -70,7 +70,7 @@ module Marty::Migrations
                     fk_opts(from_table,
                             to_table,
                             options[:column]).update(options),
-                    )
+                   )
   end
 
   # created_dt/obsoleted_dt need to be indexed since they appear in
@@ -101,11 +101,10 @@ module Marty::Migrations
               attrs,
               unique: true,
               name: unique_index_name(klass)
-              ) unless index_exists?(klass.table_name.to_sym,
-                                     attrs,
-                                     name: unique_index_name(klass),
-                                     unique: true)
-
+             ) unless index_exists?(klass.table_name.to_sym,
+                                    attrs,
+                                    name: unique_index_name(klass),
+                                    unique: true)
   end
 
   def remove_mcfly_unique_index(klass)
@@ -231,7 +230,7 @@ EOSQL
       # before EOL.  GO in comments could trigger this and will cause an error
       File.open(mig_name, "w") do |f|
         f.print <<OUT
-class #{klass.camelcase} < ActiveRecord::Migration
+class #{klass.camelcase} < ActiveRecord::Migration[4.2]
 
   def up
     path = #{sql_snap_call}
@@ -257,7 +256,7 @@ OUT
     ActiveRecord::Base.
                connection.execute(<<-SQL).to_a.first.try{|v| v['id']}
       select id from #{klass.table_name} where name =
-         #{ActiveRecord::Base.sanitize(name)}
+         #{ActiveRecord::Base.connection.quote(name)}
     SQL
   end
 

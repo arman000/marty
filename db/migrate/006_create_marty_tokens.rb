@@ -1,4 +1,4 @@
-class CreateMartyTokens < ActiveRecord::Migration
+class CreateMartyTokens < ActiveRecord::Migration[4.2]
   include Marty::Migrations
 
   def change

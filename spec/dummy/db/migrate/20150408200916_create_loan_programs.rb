@@ -1,4 +1,4 @@
-class CreateLoanPrograms < ActiveRecord::Migration
+class CreateLoanPrograms < ActiveRecord::Migration[4.2]
   def up
     McflyMigration.new.create_table 'gemini_loan_programs' do |t|
       t.string   "name",                                                                   null: false

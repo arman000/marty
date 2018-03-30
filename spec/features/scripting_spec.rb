@@ -3,7 +3,7 @@ require 'spec_helper'
 feature 'under Applications menu, Scripting workflows', js: true do
 
   before(:all) do
-    self.use_transactional_fixtures = false
+    self.use_transactional_tests = false
 
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
@@ -20,7 +20,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
   after(:all) do
     restore_clean_db(@clean_file)
-    self.use_transactional_fixtures = true
+    self.use_transactional_tests = true
   end
 
   def go_to_scripting

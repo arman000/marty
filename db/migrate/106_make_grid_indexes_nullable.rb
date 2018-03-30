@@ -1,4 +1,4 @@
-class MakeGridIndexesNullable < ActiveRecord::Migration
+class MakeGridIndexesNullable < ActiveRecord::Migration[4.2]
   include Marty::Migrations
 
   def change
