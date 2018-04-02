@@ -264,6 +264,7 @@ args_hack = [[ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]] +
 Delorean::RUBY_WHITELIST.merge!(
   count:    [ActiveRecord::Relation],
   distinct: args_hack,
+  find_by:  args_hack,
   group:    args_hack,
   joins:    args_hack,
   limit:    [ActiveRecord::Relation, Integer],
