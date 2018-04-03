@@ -37,6 +37,12 @@ A:
       select("note_rate").
       first.note_rate
 
+    oo = Gemini::FannieBup.
+      order("note_rate", "buy_down ASC").
+      select("note_rate").
+      find_by("obsoleted_dt = 'infinity'").
+      note_rate
+
     g = Gemini::FannieBup.
       select("settlement_yy*settlement_mm AS x, count(*) AS c").
       group("settlement_mm", "settlement_yy").
@@ -122,6 +128,16 @@ EOF
                           order("note_rate DESC", "buy_down ASC").
                           select("note_rate").
                           first.note_rate
+    end
+
+    it "perfroms order+find_by" do
+      res = @engine.evaluate("A", "oo", {})
+
+      expect(res).to eq Gemini::FannieBup.
+                          order("note_rate", "buy_down ASC").
+                          select("note_rate").
+                          find_by("obsoleted_dt = 'infinity'").
+                          note_rate
     end
 
     it "perfroms group+count" do
