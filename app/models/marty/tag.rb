@@ -70,25 +70,17 @@ class Marty::Tag < Marty::Base
     t && t.attributes
   end
 
-  # delete?  does not appear to be used
-  # Performance hack to cache AR object
-  cached_delorean_fn :lookup_id, sig: 1 do
-    |id|
-    t = find_by_id(id).select(get_struct_attrs)
-    t && t.attributes
-  end
-
   delorean_fn :lookup_dt, sig: 1 do
     |name|
     lookup(name).try(:created_dt)
   end
 
   def self.get_latest1
-    where("created_dt <> 'infinity'").order("created_dt DESC").first
+    order("created_dt DESC").find_by("created_dt <> 'infinity'")
   end
 
   def self.find_match(dt)
-    where("created_dt <= ?", dt).order("created_dt DESC").first
+    order("created_dt DESC").find_by("created_dt <= ?", dt)
   end
 
   # Performance hack for script sets -- FIXME: making find_mtach
