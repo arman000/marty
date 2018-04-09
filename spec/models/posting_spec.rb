@@ -69,31 +69,38 @@ module Marty
             # First param is just the limit (max) to return
             res = Posting.get_latest_by_type(10, ['BASE'])
             expect(res.count).to eq 1
-            expect(res[0].comment).to eq 'base posting'
+            r0 = Posting.find_by_name(res[0]['name'])
+            expect(r0.comment).to eq 'base posting'
           end
 
           it "filters on multiple posting types" do
             res = Posting.get_latest_by_type(10, ['BASE', 'SNAPSHOT'])
             expect(res.count).to eq 4
             # snapshot3 is most recent with this filter
-            expect(res[0].comment).to eq 'snapshot3 posting'
-            expect(res[3].comment).to eq 'base posting'
+            r0 = Posting.find_by_name(res[0]['name'])
+            r3 = Posting.find_by_name(res[3]['name'])
+            expect(r0.comment).to eq 'snapshot3 posting'
+            expect(r3.comment).to eq 'base posting'
           end
 
           it "filters on posting types that are single or double quoted" do
             res = Posting.get_latest_by_type(10, ['SNAPSHOT', "OTHER"])
             expect(res.count).to eq 5
             # other2 is most recent with this filter
-            expect(res[0].comment).to eq 'other2 posting'
-            expect(res[4].comment).to eq 'snapshot1 posting'
+            r0 = Posting.find_by_name(res[0]['name'])
+            r4 = Posting.find_by_name(res[4]['name'])
+            expect(r0.comment).to eq 'other2 posting'
+            expect(r4.comment).to eq 'snapshot1 posting'
           end
 
           it "filters and limits on multiple posting types" do
             res = Posting.get_latest_by_type(3, ['SNAPSHOT', 'OTHER'])
             expect(res.count).to eq 3
             # other2 is most recent with this filter
-            expect(res[0].comment).to eq 'other2 posting'
-            expect(res[2].comment).to eq 'other1 posting'
+            r0 = Posting.find_by_name(res[0]['name'])
+            r2 = Posting.find_by_name(res[2]['name'])
+            expect(r0.comment).to eq 'other2 posting'
+            expect(r2.comment).to eq 'other1 posting'
           end
 
           it "returns nothing with an empty posting type list" do

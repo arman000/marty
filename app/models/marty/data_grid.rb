@@ -89,10 +89,11 @@ class Marty::DataGrid < Marty::Base
 
   def self.lookup_h(pt, name, fields = nil)
     fields ||= %w(id group_id created_dt metadata data_type)
-    dga = get_all(pt).where(name: name).pluck(*fields).first
+    dga = mcfly_pt(pt).where(name: name).pluck(*fields).first
     dga && Hash[fields.zip(dga)]
   end
 
+  # deprecated - remove 2018-Oct
   cached_mcfly_lookup :lookup_id, sig: 2 do
     |pt, group_id|
     find_by_group_id group_id
@@ -101,6 +102,10 @@ class Marty::DataGrid < Marty::Base
   cached_delorean_fn :exists, sig: 2 do
     |pt, name|
     Marty::DataGrid.mcfly_pt(pt).where(name: name).exists?
+  end
+
+  def self.get_struct_attrs
+    self.struct_attrs ||= super + ["id", "group_id", "created_dt"]
   end
 
   def to_s
@@ -216,11 +221,15 @@ class Marty::DataGrid < Marty::Base
     res
   end
 
+  # deprecated - remove 2018-Oct
   cached_delorean_fn :lookup_grid, sig: 4 do
     |pt, dg, h, distinct|
-    raise "bad DataGrid #{dg}" unless Marty::DataGrid === dg
+    dg_is_grid = Marty::DataGrid === dg
+    dg_is_os   =  dg.is_a?(OpenStruct)
+    raise "bad DataGrid #{dg}" unless dg_is_grid || dg_is_os
     raise "non-hash arg #{h}" unless Hash === h
-    dgh = dg.attributes.slice('id', 'group_id', 'created_dt', 'metadata')
+    dgh = dg_is_os ? dg.to_h.stringify_keys :
+            dg.attributes.slice('id', 'group_id', 'created_dt', 'metadata')
     res = plv_lookup_grid_distinct(h, dgh, false, distinct)
     res["result"]
   end
@@ -248,8 +257,8 @@ class Marty::DataGrid < Marty::Base
     end
   end
 
-  delorean_fn :lookup_grid_distinct_entry_h, sig: [3,6] do
-    |pt, h, dgh, visited=nil, follow=true, return_grid_data=false, distinct=true|
+  def self.lookup_grid_distinct_entry_h(pt, h, dgh, visited=nil, follow=true,
+                                        return_grid_data=false, distinct=true)
 
     # Perform grid lookup, if result is another data_grid, and follow is true,
     # then perform lookup on the resulting grid.  Allows grids to be nested
@@ -263,11 +272,11 @@ class Marty::DataGrid < Marty::Base
     #   "metadata" => <grid's metadata (array of hashes)>
     vhash = plv_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
 
-    next vhash if vhash["result"].nil? || !dgh['data_type']
+    return vhash if vhash["result"].nil? || !dgh['data_type']
 
     c_data_type = Marty::DataGrid.convert_data_type(dgh['data_type'])
 
-    next vhash if String === c_data_type
+    return vhash if String === c_data_type
 
     res = vhash["result"]
 
@@ -282,7 +291,7 @@ class Marty::DataGrid < Marty::Base
                Marty::DataConversion.find_row(c_data_type, {"name" => res}, pt)
          end
 
-    next vhash.merge({"result" => v}) unless (Marty::DataGrid == c_data_type &&
+    return vhash.merge({"result" => v}) unless (Marty::DataGrid == c_data_type &&
                                               follow)
 
     visited ||= []
@@ -378,7 +387,7 @@ class Marty::DataGrid < Marty::Base
 
   def export
     # return null string when called from Netzke on add_in_form
-    return "" if metadata.nil? && data.nil?
+     return "" if metadata.nil? && data.nil?
 
     meta_rows, h_key_rows, data_rows = export_array
 
@@ -389,7 +398,11 @@ class Marty::DataGrid < Marty::Base
       gsub(/\"\"/, '') # remove "" to beautify output
   end
 
-  delorean_instance_method :export, []
+  delorean_fn :export, sig: 1 do
+    |os|
+    dg = find(os.id)
+    dg.export
+  end
 
   def self.parse_fvalue(pt, v, type, klass)
     return unless v

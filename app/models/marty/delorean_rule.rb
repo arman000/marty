@@ -19,7 +19,7 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def self_as_hash
-    self.as_json + {"classname"=>self.class.name}
+    self.attributes + {"classname"=>self.class.name}
   end
   def self.find_fixed(results)
     results.each_with_object({}) do |(k, v), h|
@@ -75,6 +75,7 @@ class Marty::DeloreanRule < Marty::BaseRule
       return Hash[compg_keys(computed_guards).zip(res).select{|k,v| !v}] unless
         res.all?
     end
+
     grids_computed = false
     grid_results = {}
     crkeys = comp_res_keys(results, grids, eclass)
@@ -94,6 +95,7 @@ class Marty::DeloreanRule < Marty::BaseRule
     elsif fixed_results.keys.sort == results.keys.sort
       result = fixed_results
     end
+
     if grids.present? && !grids_computed
       pt = params['pt']
       gres = {}
@@ -113,6 +115,22 @@ class Marty::DeloreanRule < Marty::BaseRule
     kl = ruleh["classname"].constantize
     kl.compute(ruleh, pt, params, grid_names_p)
   end
+  delorean_fn :route_compute_rs, sig: 3 do
+    |ruleh, pt, features|
+    kl = ruleh["classname"].constantize
+    kl.compute_rs(ruleh, pt, features)
+  end
+  delorean_fn :route_validate_results, sig: [1, 2] do
+    |ruleh, reqchk=false|
+    kl = ruleh["classname"].constantize
+    kl.validate_results(ruleh, reqchk)
+  end
+  delorean_fn :route_validate_grid_attrs, sig: [2, 3] do
+    |ruleh, gridname, addl_attrs=nil|
+    kl = ruleh["classname"].constantize
+    kl.validate_grid_attrs(ruleh, gridname, addl_attrs)
+  end
+
   def base_compute(params, dgparams=params)
     self.class.base_compute(self_as_hash, params, dgparams)
   end
@@ -140,5 +158,4 @@ class Marty::DeloreanRule < Marty::BaseRule
   def self.init_dg_handler
     Marty::DataGrid.register_rule_handler(get_grid_rename_handler(self))
   end
-
 end

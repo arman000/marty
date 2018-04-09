@@ -6,6 +6,10 @@ class Marty::Tag < Marty::Base
 
   belongs_to :user, class_name: "Marty::User"
 
+  def self.get_struct_attrs
+    self.struct_attrs ||= super + ["id", "created_dt"]
+  end
+
   def self.make_name(dt)
     return 'DEV' if Mcfly.is_infinity(dt)
 
@@ -38,7 +42,7 @@ class Marty::Tag < Marty::Base
   def self.map_to_tag(tag_id)
     # FIXME: this is really hacky. This function should not take so
     # many different types of arguments.
-
+    nc = {"no_convert"=>true}
     case tag_id
     when Integer, /\A[0-9]+\z/
       tag = find_by_id(tag_id)
@@ -47,8 +51,8 @@ class Marty::Tag < Marty::Base
       # if tag name wasn't found, look for a matching
       # posting, then find the tag whose created_dt <= posting dt.
       if !tag
-        posting = Marty::Posting.lookup(tag_id)
-        tag = find_match(Mcfly.normalize_infinity(posting.created_dt)) if
+        posting = Marty::Posting.lookup(tag_id, nc)
+        tag = find_match(Mcfly.normalize_infinity(posting['created_dt'])) if
           posting
       end
     when nil
@@ -56,44 +60,28 @@ class Marty::Tag < Marty::Base
     else
       tag = tag_id
     end
-
-    raise "bad tag identifier #{tag_id.inspect}" unless tag.is_a? Marty::Tag
+    raise "bad tag identifier #{tag_id.inspect}" unless tag.is_a?(Marty::Tag)
     tag
   end
 
   cached_delorean_fn :lookup, sig: 1 do
     |name|
-    self.find_by_name(name)
+    t = self.find_by_name(name).select(get_struct_attrs)
+    t && t.attributes
   end
 
-  # Performance hack to cache AR object
-  cached_delorean_fn :lookup_id, sig: 1 do
-    |id|
-    find_by_id(id)
+  def self.get_latest1
+    order("created_dt DESC").find_by("created_dt <> 'infinity'")
   end
 
-  delorean_fn :lookup_dt, sig: 1 do
-    |name|
-    lookup(name).try(:created_dt)
-  end
-
-  delorean_fn :get_latest1, sig: 0 do
-    where("created_dt <> 'infinity'").order("created_dt DESC").first
-  end
-
-  delorean_fn :find_match, sig: 1 do
-    |dt|
-    id = select(:id).where("created_dt <= ?", dt).order("created_dt DESC").first.id
-
-    # performance hack to use cached version
-    id && lookup_id(id)
+  def self.find_match(dt)
+    order("created_dt DESC").find_by("created_dt <= ?", dt)
   end
 
   # Performance hack for script sets -- FIXME: making find_mtach
   # cached breaks Gemini tests.  Need to look into it.
-  cached_delorean_fn :cached_find_match, sig: 1 do
-    |dt|
-
-    find_match dt
+  def self.cached_find_match(dt)
+    @@CACHE_FIND_BY_DT ||= {}
+    @@CACHE_FIND_BY_DT[dt] ||= find_match(dt)
   end
 end

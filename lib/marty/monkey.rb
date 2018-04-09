@@ -276,6 +276,9 @@ Delorean::RUBY_WHITELIST.merge!(
   mcfly_pt: [ActiveRecord::Relation,
              [Date, Time, ActiveSupport::TimeWithZone, String],
              [nil, Class]],
+  lookup_grid_distinct_entry: [OpenStruct,
+                               [Date, Time, ActiveSupport::TimeWithZone, String],
+                               Hash],
 )
 
 ######################################################################
@@ -285,4 +288,25 @@ module Mcfly::Controller
   def user_for_mcfly
     find_current_user rescue nil
   end
+end
+
+######################################################################
+
+class OpenStruct
+  def save
+    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
+    raise "save called from #{loc} on #{self}"
+  end
+  def save!
+    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
+    raise "save! called from #{loc} on #{self}"
+  end
+  def reload
+    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
+    raise "reload called from #{loc} on #{self}"
+  end
+  #def method_missing(meth, *args)
+  #  puts caller[0..8]
+  #  super
+  #end
 end

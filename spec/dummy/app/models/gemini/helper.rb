@@ -21,18 +21,20 @@ class Gemini::Helper
 
   # Just for testing
   delorean_fn :import_data, sig: [2, 3] do
-    |import_type, data, col_sep|
+    |import_type_name, data, col_sep|
 
     col_sep ||= "\t"
 
-    raise "Insufficient permissions to run the data import" unless
-      import_type.allow_import?
+    imp_t = Marty::ImportType.find_by_name(import_type_name)
 
-    Marty::DataImporter.do_import_summary(import_type.get_model_class,
+    raise "Insufficient permissions to run the data import" unless
+      imp_t.allow_import?
+
+    Marty::DataImporter.do_import_summary(imp_t.get_model_class,
                                           data,
                                           'infinity',
-                                          import_type.cleaner_function,
-                                          import_type.validation_function,
+                                          imp_t.cleaner_function,
+                                          imp_t.validation_function,
                                           col_sep,
                                           false)
   end

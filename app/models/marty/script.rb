@@ -11,12 +11,11 @@ class Marty::Script < Marty::Base
   belongs_to :user, class_name: "Marty::User"
 
   gen_mcfly_lookup :lookup, [:name], cache: true
-  gen_mcfly_lookup :get_all, {}, mode: nil
 
   # find script by name/tag
   def self.find_script(sname, tag=nil)
     tag = Marty::Tag.map_to_tag(tag)
-    Marty::Script.lookup(tag.created_dt, sname)
+    Marty::Script.lookup(tag.created_dt, sname, {"no_convert"=>true})
   end
 
   def find_tag
@@ -33,7 +32,7 @@ class Marty::Script < Marty::Base
   end
 
   def self.load_a_script(sname, body, dt=nil)
-    s = Marty::Script.lookup('infinity', sname)
+    s = Marty::Script.lookup('infinity', sname, {"no_convert"=>true})
 
     if !s
       s = Marty::Script.new

@@ -204,9 +204,10 @@ EOS
         dg_from_import("G8", G8)
         dg_from_import("Ga", Ga)
 
-        expect(Marty::DataGrid.lookup('infinity', "G1").name).to eq "G1"
-        expect(Marty::DataGrid.lookup('infinity', "G2").name).to eq "G2"
-        expect(Marty::DataGrid.lookup('infinity', "G3").name).to eq "G3"
+        inc = {"include_attrs"=>"name"}
+        expect(Marty::DataGrid.lookup('infinity', "G1", inc).name).to eq "G1"
+        expect(Marty::DataGrid.lookup('infinity', "G2", inc).name).to eq "G2"
+        expect(Marty::DataGrid.lookup('infinity', "G3", inc).name).to eq "G3"
       end
 
       it "should not allow bad axis types" do
@@ -415,7 +416,7 @@ EOS
           expect(res).to eq [5.6,"G2"]
         }
 
-        dg = Marty::DataGrid.lookup('infinity', "G1")
+        dg = Marty::DataGrid.lookup('infinity', "G1", {"no_convert"=>true})
 
         h = {
           "fico" => 600,
@@ -562,7 +563,6 @@ EOS
       it "should handle multi DataGrid lookups" do
         expect(Marty::DataGrid.lookup('infinity', "G8").data_type).
           to eq "Marty::DataGrid"
-        g1 = Marty::DataGrid.lookup('infinity', "G1")
 
         h = {
           "fico" => 600,
@@ -581,7 +581,7 @@ EOS
       end
 
       it "should handle DataGrid typed data grids" do
-        g1 = Marty::DataGrid.lookup('infinity', "G1")
+        g1 = Marty::DataGrid.lookup('infinity', "G1", {"no_convert"=>true})
 
         res = lookup_grid_helper('infinity',
                                  "Ga",
@@ -824,8 +824,9 @@ EOS
 
         expect(sum).to eq({create: 1})
 
-        g1 = Marty::DataGrid.lookup('infinity', "G1")
-        g11 = Marty::DataGrid.lookup('infinity', "G11")
+        nc = {"no_convert"=>true}
+        g1 = Marty::DataGrid.lookup('infinity', "G1", nc)
+        g11 = Marty::DataGrid.lookup('infinity', "G11", nc)
 
         expect(g1.export).to eq g11.export
       end

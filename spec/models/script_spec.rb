@@ -17,7 +17,8 @@ describe Marty::Script do
     it "creates a new script if it doesn't already exist" do
       expect { Marty::Script.load_a_script('TestNew', s1, now) }.
         to change(Marty::Script, :count).by(1)
-      expect(Marty::Script.lookup('infinity', 'TestNew').created_dt.to_s).
+      expect(Marty::Script.lookup('infinity', 'TestNew', {"no_convert"=>true}).
+              created_dt.to_s).
         to eq(now.to_s)
     end
 
@@ -39,8 +40,8 @@ describe Marty::Script do
                                            s2, now) }.
         to change { Marty::Script.where(name: 'TestExistsAndDifferent2',
                                         obsoleted_dt: 'infinity').count }.by(0)
-      expect(Marty::Script.lookup('infinity', 'TestExistsAndDifferent2').
-             created_dt.to_s).to eq(now.to_s)
+      expect(Marty::Script.lookup('infinity', 'TestExistsAndDifferent2',
+                         {"no_convert"=>true}).created_dt.to_s).to eq(now.to_s)
     end
   end
 

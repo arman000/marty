@@ -37,7 +37,9 @@ PostingField:
     field_label = "Posting"
     xtype       = ":combo"
     name        = "pt_name"
-    store       = [lp.name for lp in Marty::Posting.get_latest(10)]
+    store       =  Marty::Posting.
+                   where("created_dt <> 'infinity'").
+                   order("created_dt DESC").limit(10).pluck("name")
 
 RateField:
     field_label = "Note Rate"

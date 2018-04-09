@@ -70,7 +70,7 @@ ImportTypeField:
     field_label = "Import Type"
     name        = "import_type"
     xtype       = ":combo"
-    store       = [imp.name for imp in Marty::ImportType.get_all].sort
+    store       = Marty::ImportType.pluck("name").sort
     value       = store[0]
 
 CommaSepField:
@@ -92,11 +92,8 @@ DataImportReport:
 
     data_import_field =?
 
-    import_type_rec = Marty::ImportType.lookup(import_type) ||
-        ERR("NULL ImportType", import_type)
-
     result = Gemini::Helper.import_data(
-        import_type_rec,
+        import_type,
         data_import_field,
         if comma_sep then "," else nil
         )

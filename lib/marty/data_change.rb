@@ -21,7 +21,7 @@ class Marty::DataChange
 
     changes.each_with_object({}) do |(group_id, ol), h|
       h[group_id] = ol.each_with_index.map do |o, i|
-        profile = {"obj" => o}
+        profile = {"obj" => o.attributes}
 
         # Create a profile hash for each object in the group.
         # "status" tells us if the object is old/new/mod.  If
@@ -128,7 +128,7 @@ class Marty::DataChange
     klass = k.constantize
     next (klass.is_a? Marty::PgEnum) ? klass.get_all : []
   end
-  
+
   delorean_fn :export_changes, sig: 3 do
     |t0, t1, class_name|
 
