@@ -42,6 +42,6 @@ class Marty::ImportType < Marty::Base
   end
 
   delorean_fn :get_all, sig: 0 do
-    self.all
+    self.all.pluck(:name)
   end
 end

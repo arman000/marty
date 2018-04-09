@@ -93,6 +93,7 @@ class Marty::DataGrid < Marty::Base
     dga && Hash[fields.zip(dga)]
   end
 
+  # deprecated - remove 2018-Oct
   cached_mcfly_lookup :lookup_id, sig: 2 do
     |pt, group_id|
     find_by_group_id group_id
@@ -220,6 +221,7 @@ class Marty::DataGrid < Marty::Base
     res
   end
 
+  # deprecated - remove 2018-Oct
   cached_delorean_fn :lookup_grid, sig: 4 do
     |pt, dg, h, distinct|
     dg_is_grid = Marty::DataGrid === dg
@@ -255,8 +257,8 @@ class Marty::DataGrid < Marty::Base
     end
   end
 
-  delorean_fn :lookup_grid_distinct_entry_h, sig: [3,6] do
-    |pt, h, dgh, visited=nil, follow=true, return_grid_data=false, distinct=true|
+  def self.lookup_grid_distinct_entry_h(pt, h, dgh, visited=nil, follow=true,
+                                        return_grid_data=false, distinct=true)
 
     # Perform grid lookup, if result is another data_grid, and follow is true,
     # then perform lookup on the resulting grid.  Allows grids to be nested
@@ -270,11 +272,11 @@ class Marty::DataGrid < Marty::Base
     #   "metadata" => <grid's metadata (array of hashes)>
     vhash = plv_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
 
-    next vhash if vhash["result"].nil? || !dgh['data_type']
+    return vhash if vhash["result"].nil? || !dgh['data_type']
 
     c_data_type = Marty::DataGrid.convert_data_type(dgh['data_type'])
 
-    next vhash if String === c_data_type
+    return vhash if String === c_data_type
 
     res = vhash["result"]
 
@@ -289,7 +291,7 @@ class Marty::DataGrid < Marty::Base
                Marty::DataConversion.find_row(c_data_type, {"name" => res}, pt)
          end
 
-    next vhash.merge({"result" => v}) unless (Marty::DataGrid == c_data_type &&
+    return vhash.merge({"result" => v}) unless (Marty::DataGrid == c_data_type &&
                                               follow)
 
     visited ||= []
@@ -385,7 +387,7 @@ class Marty::DataGrid < Marty::Base
 
   def export
     # return null string when called from Netzke on add_in_form
-    return "" if metadata.nil? && data.nil?
+     return "" if metadata.nil? && data.nil?
 
     meta_rows, h_key_rows, data_rows = export_array
 
@@ -396,7 +398,11 @@ class Marty::DataGrid < Marty::Base
       gsub(/\"\"/, '') # remove "" to beautify output
   end
 
-  delorean_instance_method :export, []
+  delorean_fn :export, sig: 1 do
+    |os|
+    dg = find(os.id)
+    dg.export
+  end
 
   def self.parse_fvalue(pt, v, type, klass)
     return unless v

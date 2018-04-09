@@ -70,11 +70,6 @@ class Marty::Tag < Marty::Base
     t && t.attributes
   end
 
-  delorean_fn :lookup_dt, sig: 1 do
-    |name|
-    lookup(name).try(:created_dt)
-  end
-
   def self.get_latest1
     order("created_dt DESC").find_by("created_dt <> 'infinity'")
   end
