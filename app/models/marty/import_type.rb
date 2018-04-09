@@ -40,8 +40,4 @@ class Marty::ImportType < Marty::Base
   def allow_import?
     Mcfly.whodunnit && Mcfly.whodunnit.roles.pluck(:id).include?(role_id)
   end
-
-  delorean_fn :get_all, sig: 0 do
-    self.all.pluck(:name)
-  end
 end

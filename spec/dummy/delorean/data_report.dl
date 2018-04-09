@@ -70,7 +70,7 @@ ImportTypeField:
     field_label = "Import Type"
     name        = "import_type"
     xtype       = ":combo"
-    store       = Marty::ImportType.get_all.sort
+    store       = Marty::ImportType.pluck("name").sort
     value       = store[0]
 
 CommaSepField:
