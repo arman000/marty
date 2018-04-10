@@ -130,7 +130,7 @@ module Netzke::Basepack::DataAdapters
       return nil if conditions.empty?
 
       predicates = conditions.map do |q|
-        q = HashWithIndifferentAccess.new(q)
+        q = HashWithIndifferentAccess.new(Netzke::Support.permit_hash_params(q))
 
         attr = q[:attr]
         method, assoc = method_and_assoc(attr)
@@ -309,4 +309,31 @@ class OpenStruct
   #  puts caller[0..8]
   #  super
   #end
+end
+
+######################################################################
+
+module Netzke
+  module Core
+    module DynamicAssets
+      class << self
+        def ext_js(form_authenticity_token)
+          res = initial_dynamic_javascript(form_authenticity_token) << "\n"
+
+          include_core_js(res)
+
+          # load javascript overrides
+          Netzke::Core.ext_javascripts << "#{File.dirname(__FILE__)}/"\
+                                          "javascript/overrides.js"
+
+          Netzke::Core.ext_javascripts.each do |path|
+            f = File.new(path)
+            res << f.read
+          end
+
+          minify_js(res)
+        end
+      end
+    end
+  end
 end

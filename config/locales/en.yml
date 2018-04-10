@@ -166,3 +166,8 @@ en:
     data_grid__name: Data Grid
     breakeven_data_grid__name: Breakeven Data Grid
     data_grid_view: Data Grids
+
+  netzke:
+    grid:
+      base:
+        view_record: "%{model} (Locked)"
