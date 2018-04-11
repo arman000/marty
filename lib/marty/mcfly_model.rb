@@ -54,17 +54,22 @@ module Mcfly::Model
 
     def base_mcfly_lookup(meth, name, options = {}, &block)
 
-      sig = options[:sig]
+      priv = options[:private]
+      sig = priv ? -1 : options[:sig]
+
+      # add an extra argument to the sig to receive the openstruct conversion
+      # options hash (unless private)
       newsig = sig.is_a?(Array) ? [sig[0], sig[1]+1] :
                  sig == -1 ? sig : [sig, sig+1]
       options[:sig] = newsig
-      asig = options[:asig] || newsig[1]-1
 
       send(meth, name, options) do |ts, *pargs|
         raise "time cannot be nil" if ts.nil?
 
-        args, opts = pargs.last.is_a?(Hash) && pargs.length == asig ?
-                       [pargs[0..-2], pargs.last] :
+        # get the options hash if method is not private and last arg is a hash
+        # and pargs len = max sig (-1 because ts is separated in the arg list)
+        args, opts = !priv && pargs.last.is_a?(Hash) &&
+                     pargs.length == newsig[1]-1 ? [pargs[0..-2], pargs.last] :
                        [pargs, {}]
 
         ts = Mcfly.normalize_infinity(ts)
@@ -73,18 +78,19 @@ module Mcfly::Model
                    "#{table_name}.created_dt < ?", ts, ts).scoping do
           block.call(ts, *args)
         end
+        next q if priv
+
         fa = get_final_attrs(opts)
         opts += {"fa"=>fa}
-
-        q = q.select(*fa) if fa.present? &&
-                             q.respond_to?(:select) && !q.is_a?(Array) &&
-                             !q.is_a?(Hash)
+        q = q.select(*fa) if fa.present? && q.is_a?(ActiveRecord::Relation)
 
         case
         when opts["no_convert"] == true
           q
         when q.is_a?(ActiveRecord::Relation)
-          q.map{|ar| make_openstruct(ar, opts)}
+          # shouldn't happen - lookups that are mode nil should be private
+          # raise "#{self}.#{name} can't convert ActiveRecord::Relation to OpenStruct"
+          q
         when q.is_a?(ActiveRecord::Base)
           make_openstruct(q, opts)
         else
@@ -133,11 +139,8 @@ module Mcfly::Model
         raise "bad attrs" unless Array === attrs
       end
 
-      actual_sig = attrs.length + 1
       fn = cache ? :cached_delorean_fn : :delorean_fn
-      sig = options[:private] ? -1 : actual_sig
-
-      base_mcfly_lookup(fn, name, {sig: sig, asig: actual_sig}) do
+      base_mcfly_lookup(fn, name, options + {sig: attrs.length+1}) do
         |t, *attr_list|
 
         attr_list_ids = attr_list.each_with_index.map {|x, i|

@@ -74,6 +74,10 @@ A:
 EOF
 
   describe 'DeloreanQuery' do
+    before(:all) do
+      @clean_file = "/tmp/clean_#{Process.pid}.psql"
+      save_clean_db(@clean_file)
+    end
     before(:each) do
       marty_whodunnit
       Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
@@ -86,7 +90,10 @@ EOF
 
       @engine = Marty::ScriptSet.new.get_engine("A")
     end
-
+    after(:all) do
+      restore_clean_db(@clean_file)
+      Marty::ScriptSet.clear_cache
+    end
     it "perfroms join+count" do
       res = @engine.evaluate("A", "c", {})
 
