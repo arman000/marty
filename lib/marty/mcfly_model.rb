@@ -57,16 +57,19 @@ module Mcfly::Model
       priv = options[:private]
       sig = priv ? -1 : options[:sig]
 
+      # add an extra argument to the sig to receive the openstruct conversion
+      # options hash (unless private)
       newsig = sig.is_a?(Array) ? [sig[0], sig[1]+1] :
                  sig == -1 ? sig : [sig, sig+1]
       options[:sig] = newsig
-      asig = newsig[1]-1
 
       send(meth, name, options) do |ts, *pargs|
         raise "time cannot be nil" if ts.nil?
 
-        args, opts = !priv && pargs.last.is_a?(Hash) && pargs.length == asig ?
-                       [pargs[0..-2], pargs.last] :
+        # get the options hash if method is not private and last arg is a hash
+        # and pargs len = max sig (-1 because ts is separated in the arg list)
+        args, opts = !priv && pargs.last.is_a?(Hash) &&
+                     pargs.length == newsig[1]-1 ? [pargs[0..-2], pargs.last] :
                        [pargs, {}]
 
         ts = Mcfly.normalize_infinity(ts)
