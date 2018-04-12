@@ -35,6 +35,8 @@ A:
     pt        =?
     entity    =?
     note_rate =?
+    e_id      =?
+    bc_id     =?
 
     extra = {"include_attrs": ["settlement_mm", "settlement_yy"],
              "link_attrs": {"entity": "name",
@@ -52,11 +54,11 @@ A:
 
     clookupn    = Gemini::FannieBup.clookupn(pt, entity, note_rate)
 
-    a_func = Gemini::FannieBup.a_func('infinity', 1, 2)
-    a_func_extra = Gemini::FannieBup.a_func('infinity', 1, 2, ex2)
-    b_func = Gemini::FannieBup.b_func('infinity',1, 2, 12)
-    b_func_extra = Gemini::FannieBup.b_func('infinity',1, 2, 12, extra)
-    ca_func = Gemini::FannieBup.ca_func('infinity',1, 2, ex2)
+    a_func = Gemini::FannieBup.a_func('infinity', e_id, bc_id)
+    a_func_extra = Gemini::FannieBup.a_func('infinity', e_id, bc_id, ex2)
+    b_func = Gemini::FannieBup.b_func('infinity', e_id, bc_id, 12)
+    b_func_extra = Gemini::FannieBup.b_func('infinity', e_id, bc_id, 12, extra)
+    ca_func = Gemini::FannieBup.ca_func('infinity', e_id, bc_id, ex2)
 
 EOF
 errscript =<<EOF
@@ -133,11 +135,14 @@ EOF
     it "lookup non generated" do
       # a1-a3 will be AR Relations
       # b1-b2 will be OpenStructs because the b fns return #first
-      a1 = @engine.evaluate("A", "a_func", {})
-      a2 = @engine.evaluate("A", "ca_func", {})
-      a3 = @engine.evaluate("A", "a_func_extra", {})
-      b1 = @engine.evaluate("A", "b_func", {})
-      b2 = @engine.evaluate("A", "b_func_extra", {})
+      e_id = Gemini::Entity.where(name: "PLS").first.id
+      bc_id = Gemini::BudCategory.where(name: "Conv Fixed 20").first.id
+      p = {"e_id"=>e_id, "bc_id"=>bc_id}
+      a1 = @engine.evaluate("A", "a_func", p)
+      a2 = @engine.evaluate("A", "ca_func", p)
+      a3 = @engine.evaluate("A", "a_func_extra", p)
+      b1 = @engine.evaluate("A", "b_func", p)
+      b2 = @engine.evaluate("A", "b_func_extra", p)
 
       # all return relations
       expect(ActiveRecord::Relation === a1).to be_truthy
