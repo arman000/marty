@@ -38,42 +38,29 @@ A:
     e_id      =?
     bc_id     =?
 
-    extra = {"include_attrs": ["settlement_mm", "settlement_yy"],
-             "link_attrs": {"entity": "name",
-                            "bud_category": "name"}}
-    ex2 = {"include_attrs": ["settlement_mm", "settlement_yy", "entity_id",
-                             "bud_category_id"]}
+    lookup   = Gemini::FannieBup.lookup(  pt, entity, note_rate)
+    clookup  = Gemini::FannieBup.clookup( pt, entity, note_rate)
 
-    lookup            = Gemini::FannieBup.lookup(  pt, entity, note_rate)
-    lookup_extra      = Gemini::FannieBup.lookup(  pt, entity, note_rate, extra)
+    lookupn  = Gemini::FannieBup.lookupn( pt, entity, note_rate)
 
-    clookup     = Gemini::FannieBup.clookup( pt, entity, note_rate)
-
-    lookupn            = Gemini::FannieBup.lookupn( pt, entity, note_rate)
-    lookupn_extra      = Gemini::FannieBup.lookupn(  pt, entity, note_rate, ex2)
-
-    clookupn    = Gemini::FannieBup.clookupn(pt, entity, note_rate)
+    clookupn = Gemini::FannieBup.clookupn(pt, entity, note_rate)
 
     a_func = Gemini::FannieBup.a_func('infinity', e_id, bc_id)
-    a_func_extra = Gemini::FannieBup.a_func('infinity', e_id, bc_id, ex2)
     b_func = Gemini::FannieBup.b_func('infinity', e_id, bc_id, 12)
-    b_func_extra = Gemini::FannieBup.b_func('infinity', e_id, bc_id, 12, extra)
-    ca_func = Gemini::FannieBup.ca_func('infinity', e_id, bc_id, ex2)
-
 EOF
 errscript =<<EOF
 Err:
     pt        =?
     entity    =?
     note_rate =?
-    result = Gemini::FannieBup.%s(pt, entity, note_rate)
+    result = Gemini::FannieBup.%s(pt, entity, note_rate, 1)
 EOF
 errscript2 =<<EOF
 Err:
     pt    =?
     e_id  =?
     bc_id =?
-    result = Gemini::FannieBup.%s(pt, e_id, bc_id)
+    result = Gemini::FannieBup.%s(pt, e_id, bc_id, nil)
 EOF
 errscript3 =<<EOF
 Err:
@@ -81,7 +68,7 @@ Err:
     e_id  =?
     bc_id =?
     mm    =?
-    result = Gemini::FannieBup.%s(pt, e_id, bc_id, mm)
+    result = Gemini::FannieBup.%s(pt, e_id, bc_id, mm, {})
 EOF
 
   describe 'McflyModel' do
@@ -133,87 +120,32 @@ EOF
     end
 
     it "lookup non generated" do
-      # a1-a3 will be AR Relations
-      # b1-b2 will be OpenStructs because the b fns return #first
+      # a1 will be AR Relations
+      # b1 will be OpenStructs because the b fns return #first
       e_id = Gemini::Entity.where(name: "PLS").first.id
       bc_id = Gemini::BudCategory.where(name: "Conv Fixed 20").first.id
       p = {"e_id"=>e_id, "bc_id"=>bc_id}
       a1 = @engine.evaluate("A", "a_func", p)
-      a2 = @engine.evaluate("A", "ca_func", p)
-      a3 = @engine.evaluate("A", "a_func_extra", p)
       b1 = @engine.evaluate("A", "b_func", p)
-      b2 = @engine.evaluate("A", "b_func_extra", p)
 
       # all return relations
       expect(ActiveRecord::Relation === a1).to be_truthy
-      expect(ActiveRecord::Relation === a2).to be_truthy
-      expect(ActiveRecord::Relation === a3).to be_truthy
       expect(ActiveRecord::Base === a1.first).to be_truthy
-      expect(ActiveRecord::Base === a2.first).to be_truthy
-      expect(ActiveRecord::Base === a3.first).to be_truthy
 
       expect(a1.to_a.count).to eq(2)
-      expect(a2.to_a.count).to eq(2)
-      expect(a3.to_a.count).to eq(2)
 
       # a1 lookup did not include extra attrs
       expect(a1.first.attributes.keys.to_set).to eq(Set["id", "buy_up", "buy_down"])
 
-      # a2 and a3 did
-      s = Set["id", "entity_id", "bud_category_id",  "buy_up", "buy_down",
-              "settlement_mm", "settlement_yy"]
-      expect(a2.first.attributes.keys.to_set).to eq(s)
-      expect(a3.first.attributes.keys.to_set).to eq(s)
-
       # a1 is AR but still missing the FK entity_id so will raise
       expect{a1.first.entity}.to raise_error(/missing attribute: entity_id/)
 
-      # a3 included those so can access them
-      expect(a3.first.entity.name).to eq('PLS')
-      expect(a3.first.bud_category.name).to eq('Conv Fixed 20')
-
       expect(b1.class).to eq(OpenStruct)
-      expect(b2.class).to eq(OpenStruct)
 
-      # make sure b1-b2 have correct keys and extra stuff
+      # make sure b1 has correct keys
       expect(b1.to_h.keys.to_set).to eq(Set[:buy_up, :buy_down])
-      expect(b2.to_h.keys.to_set).to eq(
-               Set[:buy_up, :buy_down, :settlement_mm, :settlement_yy,
-                :entity, :bud_category])
-      expect(b2.entity.name).to eq('PLS')
-      expect(b2.bud_category.name).to eq('Conv Fixed 20')
     end
-    it "lookup extra values" do
-      a2 = @engine.evaluate("A", "lookup_extra", params)
-      expect(a2.class).to eq(OpenStruct)
 
-      # check that extra values are there
-      expect(a2.to_h.keys.to_set).to eq(Set[:buy_up, :buy_down, :settlement_mm,
-                                            :settlement_yy, :entity,
-                                            :bud_category])
-      # check that linked values are there
-      expect(a2.entity.name).to eq("PLS")
-      expect(a2.bud_category.name).to eq("Conv Fixed 20")
-    end
-    it "lookup mode nil extra values" do
-      all = @engine.evaluate("A", "lookupn_extra", params)
-
-      # mode nil always returns AR
-      expect(ActiveRecord::Relation === all).to be_truthy
-
-      # check keys returned
-      all.each do |a2|
-        expect(a2.attributes.keys.to_set).to eq(
-                       Set["id", "buy_up", "buy_down", "settlement_mm",
-                           "settlement_yy", "entity_id", "bud_category_id"])
-        if a2.entity_id
-          expect(a2.entity.name).to eq("PLS")
-          expect(ActiveRecord::Base === a2.entity).to be_truthy
-          expect(a2.bud_category.name).to eq("Conv Fixed 20")
-          expect(ActiveRecord::Base === a2.bud_category).to be_truthy
-        end
-      end
-    end
     it "lookup mode nil" do
       # make sure ARs are returned
       a1 = @engine.evaluate("A", "lookupn", params)
@@ -222,16 +154,21 @@ EOF
       expect(ActiveRecord::Relation === a1).to be_truthy
       expect(a1.to_a.count).to eq(4)
     end
+
     it "private methods can't be called by delorean" do
       # generated methods
       aggregate_failures "errors" do
         @errs.in_groups_of(2) do |name, fn|
           err = /Too many args to #{fn}/
-          expect{Marty::ScriptSet.new.get_engine(name)}.to raise_error(
-                                                   Delorean::BadCallError, err)
+
+          expect{
+            Marty::ScriptSet.new.get_engine(name)
+          }.to raise_error(Delorean::BadCallError, err)
         end
       end
+    end
 
+    it "private methods can't be called by delorean (2)" do
       # non-generated
       aggregate_failures "errors" do
         ['E5', 'a_func_p', 'E6', 'b_func_p'].in_groups_of(2) do |scr, fn|
@@ -241,6 +178,7 @@ EOF
         end
       end
     end
+
     it "caching times" do
       ts = DateTime.now
       x=Benchmark.measure { 10000.times {
@@ -249,7 +187,7 @@ EOF
                           }
       }
       y=Benchmark.measure { 10000.times {
-                            Gemini::FannieBup.ca_func(ts, 
+                            Gemini::FannieBup.ca_func(ts,
                                                      1, 2)
                           }
       }

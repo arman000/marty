@@ -12,10 +12,10 @@ class Marty::Script < Marty::Base
 
   gen_mcfly_lookup :lookup, [:name], cache: true
 
-  # find script by name/tag
+  # find script by name/tag (not cached)
   def self.find_script(sname, tag=nil)
     tag = Marty::Tag.map_to_tag(tag)
-    Marty::Script.lookup(tag.created_dt, sname, {"no_convert"=>true})
+    Marty::Script.mcfly_pt(tag.created_dt).find_by(name: sname)
   end
 
   def find_tag
@@ -32,7 +32,7 @@ class Marty::Script < Marty::Base
   end
 
   def self.load_a_script(sname, body, dt=nil)
-    s = Marty::Script.lookup('infinity', sname, {"no_convert"=>true})
+    s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: sname)
 
     if !s
       s = Marty::Script.new

@@ -55,22 +55,9 @@ module Mcfly::Model
     def base_mcfly_lookup(meth, name, options = {}, &block)
 
       priv = options[:private]
-      sig = priv ? -1 : options[:sig]
 
-      # add an extra argument to the sig to receive the openstruct conversion
-      # options hash (unless private)
-      newsig = sig.is_a?(Array) ? [sig[0], sig[1]+1] :
-                 sig == -1 ? sig : [sig, sig+1]
-      options[:sig] = newsig
-
-      send(meth, name, options) do |ts, *pargs|
+      send(meth, name, options) do |ts, *args|
         raise "time cannot be nil" if ts.nil?
-
-        # get the options hash if method is not private and last arg is a hash
-        # and pargs len = max sig (-1 because ts is separated in the arg list)
-        args, opts = !priv && pargs.last.is_a?(Hash) &&
-                     pargs.length == newsig[1]-1 ? [pargs[0..-2], pargs.last] :
-                       [pargs, {}]
 
         ts = Mcfly.normalize_infinity(ts)
 
@@ -80,19 +67,17 @@ module Mcfly::Model
         end
         next q if priv
 
-        fa = get_final_attrs(opts)
-        opts += {"fa"=>fa}
+        fa = get_final_attrs
         q = q.select(*fa) if fa.present? && q.is_a?(ActiveRecord::Relation)
 
         case
-        when opts["no_convert"] == true
-          q
         when q.is_a?(ActiveRecord::Relation)
-          # shouldn't happen - lookups that are mode nil should be private
-          # raise "#{self}.#{name} can't convert ActiveRecord::Relation to OpenStruct"
+          # shouldn't happen - lookups that are mode nil should be
+          # private raise "#{self}.#{name} can't convert
+          # ActiveRecord::Relation to OpenStruct"
           q
         when q.is_a?(ActiveRecord::Base)
-          make_openstruct(q, opts)
+          make_openstruct(q)
         else
           q
         end
@@ -102,12 +87,11 @@ module Mcfly::Model
     def cached_mcfly_lookup(name, options = {}, &block)
       base_mcfly_lookup(:cached_delorean_fn, name, options, &block)
     end
+
     def mcfly_lookup(name, options = {}, &block)
       base_mcfly_lookup(:delorean_fn, name, options, &block)
     end
 
-    # FIXME: add private mode.  This should make the function
-    # unavailable to delorean.
     def gen_mcfly_lookup(name, attrs, options={})
       raise "bad options #{options.keys}" unless
         (options.keys - [:mode, :cache, :private]).empty?

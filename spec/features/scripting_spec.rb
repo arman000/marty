@@ -54,7 +54,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
       # create 3 additional tags and modify A5 in the process
       (1..3).each { |i|
-        body = Marty::Script.find_script("A5").body
+        body = Marty::Script.find_by(name: "A5").body
 
         Marty::Script.
           load_script_bodies({
