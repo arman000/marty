@@ -25,18 +25,16 @@ class Marty::Base < ActiveRecord::Base
   class << self
     attr_accessor :struct_attrs
   end
+
   def self.get_struct_attrs
-    self.struct_attrs ||= self.attribute_names -
-                   ["id", "group_id", "created_dt", "obsoleted_dt", "user_id",
-                    "o_user_id"] -
-                   (self.const_defined?('MCFLY_UNIQUENESS') &&
-                    self.const_get('MCFLY_UNIQUENESS') || []).map(&:to_s)
+    self.struct_attrs ||=
+      self.attribute_names - Mcfly::COLUMNS.to_a -
+      (self.const_defined?('MCFLY_UNIQUENESS') &&
+       self.const_get('MCFLY_UNIQUENESS') || []).map(&:to_s)
   end
 
-  def self.get_final_attrs(opts)
-    return [] if opts["no_convert"] == true
-    include_attrs = [opts["include_attrs"] || []].flatten
-    final_attrs = get_struct_attrs + include_attrs
+  def self.get_final_attrs
+    final_attrs = get_struct_attrs
     return final_attrs if final_attrs.present?
 
     # otherwise raise with error line
@@ -58,20 +56,19 @@ class Marty::Base < ActiveRecord::Base
     # end
   end
 
-  def self.make_openstruct(inst, opts={})
+  def self.make_hash(inst)
+    fa = get_final_attrs
+    inst.attributes.slice(*fa)
+  end
+
+  def self.make_openstruct(inst)
     return nil unless inst
-    return inst if opts["no_convert"] == true
-    fa = opts["fa"] || get_final_attrs(opts)
+    fa = get_final_attrs
     os = OpenStruct.new(inst.attributes.slice(*fa))
-    (opts['link_attrs'] || []).each do |col, attr|
-      os[col] ||= OpenStruct.new
-      attrs = [attr].flatten
-      attrs.map { |attr| os[col][attr] = inst.send(col).try(attr) }
-    end
     if self == Marty::DataGrid
       def os.lookup_grid_distinct_entry(pt, params)
-        dgh = self.to_h.stringify_keys.slice("id","group_id","created_dt",
-                                             "metadata", "data_type")
+        dgh = self.to_h.stringify_keys.slice(
+          "id", "group_id", "created_dt", "metadata", "data_type")
         Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh)
       end
     end

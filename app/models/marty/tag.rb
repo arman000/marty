@@ -42,7 +42,6 @@ class Marty::Tag < Marty::Base
   def self.map_to_tag(tag_id)
     # FIXME: this is really hacky. This function should not take so
     # many different types of arguments.
-    nc = {"no_convert"=>true}
     case tag_id
     when Integer, /\A[0-9]+\z/
       tag = find_by_id(tag_id)
@@ -51,9 +50,9 @@ class Marty::Tag < Marty::Base
       # if tag name wasn't found, look for a matching
       # posting, then find the tag whose created_dt <= posting dt.
       if !tag
-        posting = Marty::Posting.lookup(tag_id, nc)
-        tag = find_match(Mcfly.normalize_infinity(posting['created_dt'])) if
-          posting
+        cdt = Marty::Posting.where(name: tag_id).pluck('created_dt').first
+
+        tag = find_match(Mcfly.normalize_infinity(cdt)) if cdt
       end
     when nil
       tag = get_latest1

@@ -50,7 +50,7 @@ module Marty
 
       it "should allow a tagged script version to be associated when a DEV " +
         "version of that script also exists" do
-        s = Marty::Script.lookup('infinity', 'Script1', {"no_convert"=>true})
+        s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: 'Script1')
         s.body = "A:\n    a = 3\n"
         s.save!
 

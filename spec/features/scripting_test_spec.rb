@@ -54,7 +54,7 @@ DELOREAN
                            }, Date.today)
 
       # add a DEV version of M1.
-      s = Marty::Script.lookup('infinity', "M1", {"no_convert"=>true})
+      s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: "M1")
       s.body = sample_script.gsub(/A/, "AA") + '    e =? "hello"'
       s.save!
     }

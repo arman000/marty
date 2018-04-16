@@ -117,21 +117,21 @@ feature 'rule view', js: true do
                                             "results"=>"",
                                            })
 
-    r = Gemini::MyRule.lookup('infinity','abc', {"no_convert"=>true})
+    r = Gemini::MyRule.find_by(obsoleted_dt: 'infinity', name: 'abc')
     expect(r.attributes).to include({"user_id"=>1,
-                                  "o_user_id"=>nil,
-                                  "name"=>"abc",
-                                  "engine"=>"Gemini::MyRuleScriptSet",
-                                  "rule_type"=>"SimpleRule",
-                                  "simple_guards"=>{"g_bool"=>false,
-                                                    "g_bool_def"=>false,
-                                                    "g_nbool_def"=>false,
-                                                    "g_has_default"=>
-                                                    "string default"},
-                                  "computed_guards"=>{},
-                                  "grids"=>{},
-                                  "results"=>{},
-                                  })
+                                     "o_user_id"=>nil,
+                                     "name"=>"abc",
+                                     "engine"=>"Gemini::MyRuleScriptSet",
+                                     "rule_type"=>"SimpleRule",
+                                     "simple_guards"=>{"g_bool"=>false,
+                                                       "g_bool_def"=>false,
+                                                       "g_nbool_def"=>false,
+                                                       "g_has_default"=>
+                                                       "string default"},
+                                     "computed_guards"=>{},
+                                     "grids"=>{},
+                                     "results"=>{},
+                                    })
     # type validation (string with values list)
     mrv.select_row(1)
     press("Edit")
@@ -240,8 +240,8 @@ feature 'rule view', js: true do
     fill_in("Range Guard 2", with: "[30,40)")
     press("OK")
     r = Gemini::XyzRule.get_matches('infinity', {}, {"g_range1"=> 150,
-                                                     "g_range2"=> 35},
-                                    {"no_convert"=>true})
+                                                     "g_range2"=> 35})
+
     expect(r.to_a.count).to eq(1)
     exp = {"user_id"=>1,
            "o_user_id"=>nil,

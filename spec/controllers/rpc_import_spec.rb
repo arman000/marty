@@ -20,7 +20,7 @@ describe Marty::RpcController do
 
 
     # create an untagged version for DEV
-    s = Marty::Script.lookup('infinity', "A", {"no_convert"=>true})
+    s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: "A")
     s.body = "A:\n    a = 3\n"
     s.save!
   }

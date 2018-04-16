@@ -197,19 +197,6 @@ EOS
     end
 
     describe "validations" do
-      it "a basic data grid should load ok" do
-        dg_from_import("G1", G1)
-        dg_from_import("G2", G2)
-        dg_from_import("G3", G3)
-        dg_from_import("G8", G8)
-        dg_from_import("Ga", Ga)
-
-        inc = {"include_attrs"=>"name"}
-        expect(Marty::DataGrid.lookup('infinity', "G1", inc).name).to eq "G1"
-        expect(Marty::DataGrid.lookup('infinity', "G2", inc).name).to eq "G2"
-        expect(Marty::DataGrid.lookup('infinity', "G3", inc).name).to eq "G3"
-      end
-
       it "should not allow bad axis types" do
         expect {
           dg_from_import("Gi", Gi)
@@ -416,7 +403,7 @@ EOS
           expect(res).to eq [5.6,"G2"]
         }
 
-        dg = Marty::DataGrid.lookup('infinity', "G1", {"no_convert"=>true})
+        dg = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G1")
 
         h = {
           "fico" => 600,
@@ -581,7 +568,7 @@ EOS
       end
 
       it "should handle DataGrid typed data grids" do
-        g1 = Marty::DataGrid.lookup('infinity', "G1", {"no_convert"=>true})
+        g1 = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G1")
 
         res = lookup_grid_helper('infinity',
                                  "Ga",
@@ -716,19 +703,15 @@ EOS
                   "\u201C", "\u201D"]
         100.times do
           st = 30.times.map{quotes[rand(9)]}.join
-          res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt, { "ltv" => 10,
-                                                    "fico" => 690,
-                                                    "state" => st }, dgh, nil,
-                                              false, true)
+          res = Marty::DataGrid.lookup_grid_distinct_entry_h(
+            pt, {"ltv" => 10, "fico" => 690, "state" => st}, dgh, nil, false, true)
         end
       end
       it "should handle quote chars in object name" do
         dgh = Marty::DataGrid.lookup_h(pt, 'G1')
         st = Gemini::State.new(name: "'\\")
-        res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt, { "ltv" => 10,
-                                                  "fico" => 690,
-                                                  "state" => st }, dgh, nil,
-                                            false, true)
+        res = Marty::DataGrid.lookup_grid_distinct_entry_h(
+          pt, {"ltv" => 10, "fico" => 690, "state" => st}, dgh, nil, false, true)
       end
     end
 
@@ -814,19 +797,13 @@ EOS
 
         res11 = res.sub(/G1/, "G11")
 
-        sum = do_import_summary(Marty::DataGrid,
-                                res11,
-                                'infinity',
-                                nil,
-                                nil,
-                                ",",
-                               )
+        sum = do_import_summary(
+          Marty::DataGrid, res11, 'infinity', nil, nil, ",")
 
         expect(sum).to eq({create: 1})
 
-        nc = {"no_convert"=>true}
-        g1 = Marty::DataGrid.lookup('infinity', "G1", nc)
-        g11 = Marty::DataGrid.lookup('infinity', "G11", nc)
+        g1  = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G1")
+        g11 = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G11")
 
         expect(g1.export).to eq g11.export
       end

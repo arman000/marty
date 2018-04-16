@@ -9,15 +9,11 @@ class Marty::ApiAuth < Marty::Base
 
   class ApiAuthValidator < ActiveModel::Validator
     def validate(api)
-      api.errors.add(
-        :base,
-        "API Key length must be #{KEY_SIZE*2}") if
+      api.errors.add(:base, "API Key length must be #{KEY_SIZE*2}") if
         api.api_key && api.api_key.length != KEY_SIZE*2
 
-        api.errors.add(
-          :base,
-          "Script Name must reference a valid script") if
-        Marty::Script.find_script(api.script_name, nil).nil?
+      api.errors.add(:base, "Script Name must reference a valid script") unless
+        Marty::Script.find_script(api.script_name, nil)
     end
   end
 
@@ -41,5 +37,4 @@ class Marty::ApiAuth < Marty::Base
                          script_name: script_name,
                          obsoleted_dt: 'infinity').pluck(:app_name).first
   end
-
 end

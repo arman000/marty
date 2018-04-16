@@ -90,7 +90,5 @@ module Gemini
       where(entity_id: e_id, bud_category_id: bc_id).
         order(:settlement_mm)
     end
-
-
   end
 end
