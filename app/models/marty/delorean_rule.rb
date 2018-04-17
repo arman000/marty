@@ -48,19 +48,19 @@ class Marty::DeloreanRule < Marty::BaseRule
     computed_guards.keys
   end
 
-  def self.comp_res_keys(results, grids, ecl)
-    defkeys = (Marty::Config[results_cfg_var] || {}).keys
+  def self.comp_res_keys(results, grids, ecl, pcfg = nil)
+    defkeys = (pcfg || Marty::Config[results_cfg_var] || {}).keys
     results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
        select{|k| defkeys.include?(k)} + grid_keys(grids, ecl)
   end
   def self.grid_keys(grids, eclass)
       grids.keys.map{|k| eclass.grid_final_name(k) }
   end
-  def self.base_compute(ruleh, params, dgparams=params)
-    id, name, engine, computed_guards, grids, results, fixed_results =
+  def self.base_compute2(ruleh, metadata_opts, params, dgparams=params)
+    id, name, eclassname, computed_guards, grids, results, fixed_results =
         ruleh.values_at("id", "name", "engine", "computed_guards", "grids",
                         "results", "fixed_results")
-    eclass = engine && engine.constantize || Marty::RuleScriptSet
+    eclass = eclassname && eclassname.constantize || Marty::RuleScriptSet
     engine = eclass.new(params["pt"]).get_engine(ruleh) if
       computed_guards.present? || results.present?
 
@@ -78,8 +78,9 @@ class Marty::DeloreanRule < Marty::BaseRule
 
     grids_computed = false
     grid_results = {}
-    crkeys = comp_res_keys(results, grids, eclass)
-    if (results.keys - fixed_results.keys).present?
+    grkeys = grid_keys(grids, eclass)
+    crkeys = comp_res_keys(results, grids, eclass, metadata_opts)
+    if (crkeys - grkeys - fixed_results.keys).present?
         begin
           eval_result = engine.evaluate(
             eclass.node_name,
@@ -92,8 +93,8 @@ class Marty::DeloreanRule < Marty::BaseRule
           raise e, "Error (results) in rule '#{id}:#{name}': #{e}", e.backtrace
         end
         result = Hash[crkeys.zip(eval_result)]
-    elsif fixed_results.keys.sort == results.keys.sort
-      result = fixed_results
+    else
+      result = fixed_results.slice(*crkeys)
     end
 
     if grids.present? && !grids_computed
@@ -110,10 +111,26 @@ class Marty::DeloreanRule < Marty::BaseRule
     end
     result + grid_results
   end
+  def self.base_compute(ruleh, params, dgparams=params)
+    base_compute2(ruleh, nil, params, dgparams)
+  end
   delorean_fn :route_compute, sig: 4 do
     |ruleh, pt, params, grid_names_p|
     kl = ruleh["classname"].constantize
-    kl.compute(ruleh, pt, params, grid_names_p)
+    kl.compute(ruleh, nil, pt, params, grid_names_p)
+  end
+  delorean_fn :route_compute2, sig: 5 do
+    |ruleh, metadata_opts, pt, params, grid_names_p|
+    kl = ruleh["classname"].constantize
+    kl.compute(ruleh, metadata_opts, pt, params, grid_names_p)
+  end
+  delorean_fn :reporting_metadata, sig: 2 do
+    |ruleh, metadata_opts|
+    rmdkeys = metadata_opts.select{|_, v| v["reporting_metadata"]}.keys
+    rmdkeys.each_with_object({}) do |k, h|
+      fr = ruleh['fixed_results']
+      h[k] = fr[k] if fr.include?(k)
+    end
   end
   delorean_fn :route_compute_rs, sig: 3 do
     |ruleh, pt, features|
