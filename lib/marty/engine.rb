@@ -2,7 +2,7 @@ module Marty
   class Engine < ::Rails::Engine
     isolate_namespace Marty
 
-    # eager load paths in favor of autoload paths
+    # eager load paths instead of autoload paths
     config.eager_load_paths += ['lib', 'other'].map do
       |dir|
       File.expand_path("../../../#{dir}", __FILE__)
