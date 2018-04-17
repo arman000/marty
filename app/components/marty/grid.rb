@@ -25,6 +25,41 @@ class Marty::Grid < ::Netzke::Grid::Base
     }
     JS
 
+    # add menu overflowHandler to toolbars
+    c.init_component = l(<<-JS)
+    function() {
+      this.dockedItems = this.dockedItems || [];
+      if (this.paging == 'pagination') {
+        this.dockedItems.push({
+          xtype: 'pagingtoolbar',
+          dock: 'bottom',
+          layout: {overflowHandler: 'Menu'},
+          listeners: {
+            'beforechange': this.disableDirtyPageWarning ? {} : {
+              fn: this.netzkeBeforePageChange, scope: this
+            }
+          },
+          store: this.store,
+          items: this.bbar && ["-"].concat(this.bbar)
+        });
+      } else if (this.bbar) {
+        this.dockedItems.push({
+          xtype: 'toolbar',
+          dock: 'bottom',
+          layout: {overflowHandler: 'Menu'},
+          items: this.bbar
+        });
+      }
+
+      // block creation of toolbars in parent
+      delete this.bbar;
+      var paging  = this.paging
+      this.paging = false;
+      this.callParent();
+      this.paging = paging
+    }
+    JS
+
     c.do_view_in_form = l(<<-JS)
     function(record){
       this.netzkeLoadComponent("view_window", {
@@ -70,6 +105,7 @@ class Marty::Grid < ::Netzke::Grid::Base
     }
 
     c.editing      = :both
+    c.plugins      = [{ptype: 'autosizecolumn'}]
     c.store_config = {page_size: 30}
     c.view_config  = {preserve_scroll_on_reload: true}
   end

@@ -322,10 +322,10 @@ module Netzke
 
           include_core_js(res)
 
-          # MONKEY: load javascript overrides
-          overrides = ["#{File.dirname(__FILE__)}/javascript/overrides.js"]
+          # MONKEY: load marty custom javascript
+          marty_javascripts = Dir["#{File.dirname(__FILE__)}/javascript/*.js"]
 
-          (Netzke::Core.ext_javascripts + overrides).each do |path|
+          (Netzke::Core.ext_javascripts + marty_javascripts).each do |path|
             f = File.new(path)
             res << f.read
           end

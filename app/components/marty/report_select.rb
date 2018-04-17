@@ -42,7 +42,7 @@ class Marty::ReportSelect < Marty::Form
                 {},
                 ),
       ]
-    c.bbar = []
+    c.bbar = nil
   end
 
   client_class do |c|

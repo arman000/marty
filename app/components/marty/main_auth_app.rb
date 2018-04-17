@@ -131,7 +131,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def ident_menu
-    "<span style='color:#3333FF;
+    "<span style='color:#157fcc;
         background-color:#{warped ? '#FBDF4F' : ''};
         font-size:120%;
         font-weight:bold;'>#{app_title}</span>"

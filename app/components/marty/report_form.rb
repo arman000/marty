@@ -262,7 +262,7 @@ class Marty::ReportForm < Marty::Form
       }
     }
 
-    c.items              = items
+    c.items              = add_cls_to_fields(items)
     c.repformat          = format
     c.title              = "Generate: #{title}-#{sset.tag.name}"
     c.reptitle           = title

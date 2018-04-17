@@ -66,7 +66,6 @@ class Marty::SimpleApp < Netzke::Base
       :itemId => 'status_bar',
       :xtype => 'statusbar',
       :region => 'south',
-      :height => 22,
       :statusAlign => 'right',
       :busyText => 'Busy...',
       :default_text => "Ready",
@@ -78,9 +77,9 @@ class Marty::SimpleApp < Netzke::Base
   def menu_bar_config(overrides = {})
     {
       :itemId => 'menu_bar',
+      :layout => {overflow_handler: 'Menu'},
       :xtype => 'toolbar',
       :region => 'north',
-      :height => 28,
       :items => menu
     }.merge(overrides)
   end
