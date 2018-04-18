@@ -59,6 +59,4 @@ class Gemini::XyzRule < Marty::DeloreanRule
 
     res.all?
   end
-
-  self.init_dg_handler
 end

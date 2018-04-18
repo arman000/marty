@@ -172,7 +172,8 @@ class Marty::DeloreanRule < Marty::BaseRule
     end
   end
 
-  def self.init_dg_handler
-    Marty::DataGrid.register_rule_handler(get_grid_rename_handler(self))
+  def self.inherited(child_class)
+    super
+    Marty::DataGrid.register_rule_handler(get_grid_rename_handler(child_class))
   end
 end

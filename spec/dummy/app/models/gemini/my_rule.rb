@@ -53,6 +53,4 @@ class Gemini::MyRule < Marty::DeloreanRule
   def compute(*args)
     base_compute(*args)
   end
-
-  self.init_dg_handler
 end
