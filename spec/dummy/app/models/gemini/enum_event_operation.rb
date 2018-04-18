@@ -1,5 +1,3 @@
-class Gemini::EnumEventOperation < Gemini::Base
-  extend Marty::EnumEventOperation
-
-  VALUES = set['PRICING', 'CRA', 'AVM']
+class Gemini::EnumEventOperation < Marty::EnumEventOperation
+  VALUES = Set['PRICING', 'CRA', 'AVM']
 end

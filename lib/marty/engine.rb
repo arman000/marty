@@ -2,9 +2,11 @@ module Marty
   class Engine < ::Rails::Engine
     isolate_namespace Marty
 
-    config.autoload_paths << File.expand_path("../../../lib", __FILE__)
-    config.autoload_paths << File.expand_path("../../../components", __FILE__)
-    config.autoload_paths << File.expand_path("../../../other", __FILE__)
+    # eager load paths instead of autoload paths
+    config.eager_load_paths += ['lib', 'other'].map do
+      |dir|
+      File.expand_path("../../../#{dir}", __FILE__)
+    end
 
     # generators add rspec tests
     config.generators do |g|
