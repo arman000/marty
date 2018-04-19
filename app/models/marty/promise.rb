@@ -16,7 +16,21 @@ class Marty::Promise < Marty::Base
   # default timeout (seconds) to wait for jobs to start
   DEFAULT_JOB_TIMEOUT = Rails.configuration.marty.job_timeout || 10
 
-  lazy_load :result
+  SELECT_COLS = columns.map(&:name)-["result"]
+  default_scope {
+    select(*SELECT_COLS)
+  }
+  def result
+    unless has_attribute?(:result)
+      changes_before_reload = self.changes.clone
+      self.reload
+      changes_before_reload.each{
+        |attribute_name, values|
+        self.send("#{attribute_name}=", values[1])
+      }
+    end
+    read_attribute :result
+  end
 
   serialize :result, MarshalResult.new
 
