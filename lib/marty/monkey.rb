@@ -323,10 +323,9 @@ module Netzke
           include_core_js(res)
 
           # load javascript overrides
-          Netzke::Core.ext_javascripts << "#{File.dirname(__FILE__)}/"\
-                                          "javascript/overrides.js"
+          overrides = ["#{File.dirname(__FILE__)}/javascript/overrides.js"]
 
-          Netzke::Core.ext_javascripts.each do |path|
+          (Netzke::Core.ext_javascripts + overrides).each do |path|
             f = File.new(path)
             res << f.read
           end

@@ -23,7 +23,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
                      sort_by{|_, h| h[:order] || 0}.
                      reject{|_, h| h[:hidden]}.
                      map { |name, _| name.to_sym } + self.class.computed_fields
-    c.store_config.merge!(sorters: [{property: :name, direction: 'ASC'}])
+    #c.store_config.merge!(sorters: [{property: :name, direction: 'ASC'}])
     c.multi_select = false
   end
 

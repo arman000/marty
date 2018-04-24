@@ -78,7 +78,7 @@ module Marty; class DataGridView < McflyGridPanel
        :created_dt,
       ]
 
-    c.store_config.merge!({sorters:  [{property: :name, direction: 'ASC'}]})
+    #c.store_config.merge!({sorters:  [{property: :name, direction: 'ASC'}]})
     c.multi_select = false
   end
 
