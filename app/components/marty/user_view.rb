@@ -21,8 +21,6 @@ module Marty; class UserView < Marty::Grid
     c.attributes   ||= self.class.user_columns
     c.title        ||= I18n.t('users', default: "Users")
     c.model          = "Marty::User"
-    c.editing        = :in_form
-    c.paging         = :pagination
     c.multi_select   = false
     c.store_config.merge!(sorters: [{property: :login,
                                      direction: 'ASC',

@@ -42,15 +42,17 @@ feature 'rule view', js: true do
     JS
   end
 
+  # simulate double click behavior
+  def dbl_click c
+    c.click
+    sleep 1.0
+    c.click
+  end
+
   # click_col in marty_rspec is not reliable
   def click_column(rv,name)
     cid = col_id(rv, name)
-    c = find('#'+cid)
-    c.select_option   #   .click does not work reliably
-    c.send_keys(' ')
-    # wait_for_ajax and wait_for_ready do not work here,
-    # or in the next two methods
-    sleep 1.0
+    dbl_click(find('#'+cid))
   end
 
   def column_filter(rv,name,value)

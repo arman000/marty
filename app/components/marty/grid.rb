@@ -38,7 +38,8 @@ class Marty::Grid < ::Netzke::Grid::Base
       delete: class_can?(:delete)
     }
 
-    c.editing      = :both
+    c.paging       = :buffered
+    c.editing      = :in_form
     c.store_config = {page_size: 30}
   end
 

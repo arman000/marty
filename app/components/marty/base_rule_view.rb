@@ -24,8 +24,6 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
                      reject{|_, h| h[:hidden]}.
                      map { |name, _| name.to_sym } + self.class.computed_fields
     c.store_config.merge!(sorters: [{property: :name, direction: 'ASC'}])
-    c.editing      = :in_form
-    c.paging       = :pagination
     c.multi_select = false
   end
 

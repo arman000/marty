@@ -79,8 +79,6 @@ module Marty; class DataGridView < McflyGridPanel
       ]
 
     c.store_config.merge!({sorters:  [{property: :name, direction: 'ASC'}]})
-    c.editing      = :in_form
-    c.paging       = :pagination
     c.multi_select = false
   end
 

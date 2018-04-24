@@ -24,8 +24,6 @@ class Marty::ApiLogView < Marty::Grid
 
   def configure(c)
     super
-    c.editing = :in_form
-    c.paging = :buffered
     c.title = 'Api Log View'
     c.model = Marty::Log
     c.attributes = @@attrs

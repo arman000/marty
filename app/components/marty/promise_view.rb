@@ -53,7 +53,6 @@ class Marty::PromiseView < Netzke::Tree::Base
       :error,
     ]
     config.root_visible = false
-    config.paging = :none
     config.bbar = bbar
     config.read_only = true
     config.permissions = { update: false,

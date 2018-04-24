@@ -8,8 +8,6 @@ class Marty::LogView < Marty::Grid
 
     c.title    ||= I18n.t('log_viewer', default: "Log Viewer")
     c.model      = "Marty::Log"
-    c.paging     = :buffered
-    c.editing    = :in_form
     c.attributes = [
       :timestamp_custom,
       :message_type,

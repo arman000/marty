@@ -9,8 +9,6 @@ class Marty::EventView < Marty::Grid
 
     c.title ||= I18n.t('events', default: "Events")
     c.model                  = "Marty::Event"
-    c.paging                 = :buffered
-    c.editing                = :in_form
     c.attributes             = [
       :id,
       :klass,
