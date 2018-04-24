@@ -119,7 +119,7 @@ module Netzke::Basepack::DataAdapters
         relation = relation.includes(assoc.to_sym).references(assoc.to_sym) if method
       end
 
-      @model.const_defined?(:LAZY_LOADED) ? relation.count(columns.first.name) :
+      @model.const_defined?(:SELECT_COLS) ? relation.count(columns.first.name) :
         relation.count
     end
 
