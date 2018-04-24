@@ -9,9 +9,6 @@ class Marty::McflyGridPanel < Marty::Grid
     [:update, :delete, :create].each do |perm|
       c.permissions[perm] = false if warped
     end
-
-    # default sort all Mcfly grids with id
-    c.store_config.merge!({sorters: [{property: :id, direction: 'ASC'}]})
   end
 
   def get_records(params)
