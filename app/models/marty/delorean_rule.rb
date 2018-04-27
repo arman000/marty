@@ -124,14 +124,6 @@ class Marty::DeloreanRule < Marty::BaseRule
     kl = ruleh["classname"].constantize
     kl.compute(ruleh, metadata_opts, pt, params, grid_names_p)
   end
-  delorean_fn :reporting_metadata, sig: 2 do
-    |ruleh, metadata_opts|
-    rmdkeys = metadata_opts.select{|_, v| v["reporting_metadata"]}.keys
-    rmdkeys.each_with_object({}) do |k, h|
-      fr = ruleh['fixed_results']
-      h[k] = fr[k] if fr.include?(k)
-    end
-  end
   delorean_fn :route_compute_rs, sig: 3 do
     |ruleh, pt, features|
     kl = ruleh["classname"].constantize
