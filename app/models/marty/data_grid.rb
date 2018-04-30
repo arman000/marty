@@ -87,8 +87,11 @@ class Marty::DataGrid < Marty::Base
   gen_mcfly_lookup :lookup, [:name], cache: true
   gen_mcfly_lookup :get_all, [], mode: nil
 
-  def self.lookup_h(pt, name, fields = nil)
-    fields ||= %w(id group_id created_dt metadata data_type)
+  # FIXME: if the caller requests data as part of fields, there could
+  # be memory concerns with caching since some data_grids have massive data
+  cached_delorean_fn :lookup_h, sig: [2, 3] do
+    |pt, name, fields = nil|
+    fields ||= %w(id group_id created_dt metadata data_type name)
     dga = mcfly_pt(pt).where(name: name).pluck(*fields).first
     dga && Hash[fields.zip(dga)]
   end
