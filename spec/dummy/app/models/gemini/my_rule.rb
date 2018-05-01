@@ -39,6 +39,8 @@ class Gemini::MyRule < Marty::DeloreanRule
              "g_nbool_def" => { type: :boolean,
                                 default: false,
                                width: 100},
+             "g_regex" => { type: :regex,
+                            width: 300 }
     }
   end
   def self.results_cfg_var

@@ -96,7 +96,7 @@ feature 'rule view', js: true do
     time_fill_in(1, '08:03:01')
     press("OK")
     wait_for_ajax
-    expect(mrv.row_count()).to eq(9)
+    expect(mrv.row_count()).to eq(11)
     expect(mrv.get_row_vals(1)).to include({"name"=>"abc",
                                             "rule_type"=>"SimpleRule",
                                             "start_dt"=>"2013-01-01T11:03:01",
@@ -228,6 +228,7 @@ feature 'rule view', js: true do
 
     press("Cancel")
     # column sorting, etc
+
     go_to_xyz_rules
     xrv = netzke_find("xyz_rule_view")
     expect(page).to have_content("Rule type")
@@ -316,9 +317,9 @@ feature 'rule view', js: true do
     go_to_my_rules
     wait_for_ajax
 
-    names = mrv.col_values(:name, 9, 0)
-    gvs = mrv.col_values(:grids, 9, 0)
-    rvs = mrv.col_values(:results, 9, 0)
+    names = mrv.col_values(:name, 11, 0)
+    gvs = mrv.col_values(:grids, 11, 0)
+    rvs = mrv.col_values(:results, 11, 0)
     expect(JSON.parse(gvs[names.index('abc')])).to eq(g1h)
     expect(JSON.parse(gvs[names.index('Rule2b')])).to eq(g1h +
                                                          {"grid2"=>"DataGrid2"})

@@ -11,7 +11,7 @@ class Marty::BaseRule < Marty::Base
   end
   def gettypes(v)
     types = []
-    types << :string if v.is_a?(String)
+    types +=  [:string, :regex] if v.is_a?(String)
     types += [:int, :integer] if Integer(v) rescue nil
     types << :float if Float(v) rescue nil
     types << :date if Date.parse(v) rescue nil
@@ -78,16 +78,23 @@ class Marty::BaseRule < Marty::Base
   end
 
   def self.get_subq(field, subfield, multi, type, vraw)
-    arrow = multi || ![:range, :string, :date, :datetime].include?(type) ?
+    arrow = multi || ![:range, :regex, :string, :date, :datetime].include?(type) ?
               "->" : "->>"
-    op = multi || type == :range ? "@>" : "="
-    value0 = [:string, :date, :datetime].include?(type) ?
+    op = case
+         when multi || type == :range ; "@>"
+         when type == :regex          ; "~"
+         else                           "="
+         end
+    rhs0 = [:regex, :string, :date, :datetime].include?(type) ?
                ActiveRecord::Base.connection.quote(vraw) :
                type == :range ? vraw.to_f :
                  "'#{vraw}'::jsonb"
-    value = multi ? %Q('["%s"]') % value0[1..-2] : value0
-    fieldcast = type == :range ? "::numrange" : ''
-    "(#{field}#{arrow}'#{subfield}')#{fieldcast} #{op} #{value}"
+    rhs = multi ? %Q('["%s"]') % rhs0[1..-2] : rhs0
+    lhs0 = "#{field}#{arrow}'#{subfield}'"
+    lhs = type == :range ? %Q[(#{lhs0})::numrange] :
+            type == :regex ? %Q[(#{lhs0})::text] : lhs0
+    lhs, rhs = [rhs, lhs] if type == :regex
+    "#{lhs} #{op} #{rhs}"
   end
 
   def self.get_matches_(pt, attrs, params)

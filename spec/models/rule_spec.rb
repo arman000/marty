@@ -38,7 +38,8 @@ module Marty::RuleSpec
                  (@g_bool.nil?     ? {} : {"g_bool"     => @g_bool})     +
                  (@g_nullbool.nil? ? {} : {"g_nullbool" => @g_nullbool}) +
                  (@g_range   ? {"g_range"   =>@g_range}   : {}) +
-                 (@g_integer ? {"g_integer" =>@g_integer} : {})
+                 (@g_integer ? {"g_integer" =>@g_integer} : {}) +
+                 (@g_regex ? {"g_regex"=>@g_regex} : {})
         Gemini::MyRule.create!(name: "testrule",
                                rule_type: @rule_type,
                                start_dt: @start_dt || '2013-1-1',
@@ -122,7 +123,9 @@ module Marty::RuleSpec
                             ["Rule2c", "string default"],
                             ["Rule3", "string default"],
                             ["Rule4", "string default"],
-                            ["Rule5", "foo"]].sort)
+                            ["Rule5", "foo"],
+                            ["Rule6", "baz"],
+                            ["Rule7", "baz"]].sort)
       end
     end
     context "validation (xyz type)" do
@@ -260,6 +263,48 @@ module Marty::RuleSpec
                                              "g_nbool_def"=>true})
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.pluck(:name).first).to eq("Rule1")
+        lookup = Gemini::MyRule.get_matches('infinity' ,{},{
+                                              "g_integer"=>"12345678",
+                                              "g_regex"=> "12A"})
+        expect(lookup.to_a.count).to eq(1)
+        expect(lookup.pluck(:name).first).to eq("Rule6")
+        lookup = Gemini::MyRule.get_matches('infinity' ,{},{
+                                              "g_integer"=>"12345678",
+                                              "g_regex"=> "1222A"})
+        expect(lookup.to_a.count).to eq(0)
+        lookup = Gemini::MyRule.get_matches('infinity' ,{},{
+                                              "g_integer"=>"12345678",
+                                              "g_regex"=> "92A"})
+        expect(lookup.to_a.count).to eq(0)
+        lookup = Gemini::MyRule.get_matches('infinity' ,{},{
+                                              "g_integer"=>"12345678",
+                                              "g_regex"=> "12Z"})
+        expect(lookup.to_a.count).to eq(0)
+        lookup = Gemini::MyRule.get_matches('infinity' ,{},{
+                                              "g_integer"=>"12345678",
+                                              "g_regex"=> "123"})
+        expect(lookup.to_a.count).to eq(1)
+        expect(lookup.pluck(:name).first).to eq("Rule6")
+
+        lookup = Gemini::MyRule.get_matches('infinity' ,{},{
+                                              "g_integer"=>"12345678",
+                                              "g_regex"=> "9"})
+        expect(lookup.to_a.count).to eq(1)
+        expect(lookup.pluck(:name).first).to eq("Rule7")
+        lookup = Gemini::MyRule.get_matches('infinity' ,{},{
+                                              "g_integer"=>"12345678",
+                                              "g_regex"=> "9991foofoo"})
+        expect(lookup.to_a.count).to eq(1)
+        expect(lookup.pluck(:name).first).to eq("Rule7")
+        lookup = Gemini::MyRule.get_matches('infinity' ,{},{
+                                              "g_integer"=>"12345678",
+                                              "g_regex"=> %Q(9991b"arb"ar) })
+        expect(lookup.to_a.count).to eq(1)
+        expect(lookup.pluck(:name).first).to eq("Rule7")
+        lookup = Gemini::MyRule.get_matches('infinity' ,{},{
+                                              "g_integer"=>"12345678",
+                                              "g_regex"=> "9991foobar"})
+        expect(lookup.to_a.count).to eq(0)
       end
     end
     context "rule compute" do
