@@ -310,3 +310,29 @@ class OpenStruct
   #  super
   #end
 end
+
+######################################################################
+
+module Netzke
+  module Core
+    module DynamicAssets
+      class << self
+        def ext_js(form_authenticity_token)
+          res = initial_dynamic_javascript(form_authenticity_token) << "\n"
+
+          include_core_js(res)
+
+          # load javascript overrides
+          overrides = ["#{File.dirname(__FILE__)}/javascript/overrides.js"]
+
+          (Netzke::Core.ext_javascripts + overrides).each do |path|
+            f = File.new(path)
+            res << f.read
+          end
+
+          minify_js(res)
+        end
+      end
+    end
+  end
+end

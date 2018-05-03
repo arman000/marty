@@ -6,6 +6,9 @@ class Marty::Grid < ::Netzke::Grid::Base
 
   def configure_form_window(c)
     super
+
+    c.klass = Marty::RecordFormWindow
+
     # Fix Add in form/Edit in form modal popup width
     # Netzke 0.10.1 defaults width to 80% of screen which is too wide
     # for a form where the fields are stacked top to bottom
@@ -22,6 +25,28 @@ class Marty::Grid < ::Netzke::Grid::Base
     }
     JS
 
+    c.do_view_in_form = l(<<-JS)
+    function(record){
+      this.netzkeLoadComponent("view_window", {
+        serverConfig: {record_id: record.id},
+        callback: function(w){
+          w.show();
+          w.on('close', function(){
+            if (w.closeRes === "ok") {
+              this.netzkeReloadStore();
+            }
+          }, this);
+        }});
+    }
+    JS
+  end
+
+  component :view_window do |c|
+    configure_form_window(c)
+    c.excluded = !allowed_to?(:read)
+    c.items    = [:view_form]
+    c.title    = I18n.t('netzke.grid.base.view_record',
+                        model: model.model_name.human)
   end
 
   def class_can?(op)

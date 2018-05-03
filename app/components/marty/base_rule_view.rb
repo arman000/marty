@@ -135,6 +135,12 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     c.height = 740
   end
 
+  component :view_window do |c|
+    super(c)
+    c.width = 1500
+    c.height = 740
+  end
+
   attribute :name do |c|
     c.width = 150
   end
