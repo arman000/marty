@@ -17,6 +17,7 @@ gem 'aws-sigv4', '~> 1.0', '>= 1.0.2'
 group :development, :test do
   gem 'pry-rails'
   gem 'rspec-rails'
+  gem 'rspec-instafail', require: false
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'chromedriver-helper'

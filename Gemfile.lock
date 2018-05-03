@@ -177,6 +177,10 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (12.3.1)
+    rspec (3.7.0)
+      rspec-core (~> 3.7.0)
+      rspec-expectations (~> 3.7.0)
+      rspec-mocks (~> 3.7.0)
     rspec-by (0.0.7)
       rspec-core (>= 3)
     rspec-core (3.7.1)
@@ -184,6 +188,8 @@ GEM
     rspec-expectations (3.7.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
+    rspec-instafail (1.0.0)
+      rspec
     rspec-mocks (3.7.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
@@ -242,6 +248,7 @@ DEPENDENCIES
   pry-rails
   rails (~> 5.1.4)
   rails-controller-testing
+  rspec-instafail
   rspec-rails
   selenium-webdriver
   sqlite3
