@@ -60,15 +60,17 @@ module Mcfly::Model
         raise "time cannot be nil" if ts.nil?
 
         ts = Mcfly.normalize_infinity(ts)
-
         q = self.where("#{table_name}.obsoleted_dt >= ? AND " +
                    "#{table_name}.created_dt < ?", ts, ts).scoping do
           block.call(ts, *args)
         end
-        next q if priv
 
         fa = get_final_attrs
         q = q.select(*fa) if fa.present? && q.is_a?(ActiveRecord::Relation)
+
+        q = q.first if q.respond_to?(:first) && options[:mode] == :first
+
+        next q if priv
 
         case
         when q.is_a?(ActiveRecord::Relation)
@@ -124,7 +126,8 @@ module Mcfly::Model
       end
 
       fn = cache ? :cached_delorean_fn : :delorean_fn
-      base_mcfly_lookup(fn, name, options + {sig: attrs.length+1}) do
+      base_mcfly_lookup(fn, name, options + {sig:  attrs.length+1,
+                                             mode: mode}) do
         |t, *attr_list|
 
         attr_list_ids = attr_list.each_with_index.map {|x, i|
@@ -134,7 +137,7 @@ module Mcfly::Model
 
         q = self.where(qstr, *attr_list_ids)
         q = q.order(order) if order
-        mode ? q.send(mode) : q
+        q
       end
     end
 
