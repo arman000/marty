@@ -171,6 +171,15 @@ property_state\tstring\tv
 700127\tCA\t0.35
 EOS
 
+Gk =<<EOS
+fha_203k_option\tstring\tv\tfha_203k_option
+
+Investor Services\t-0.625
+Admin Services\t-1.0
+Admin Services Plus\t-1.625
+Investor Services Acadamy\t-0.5
+EOS
+
     before(:each) do
       #Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
@@ -268,6 +277,15 @@ EOS
         expect {
           dg_from_import("Ga", g_bad)
         }.to raise_error(RuntimeError)
+      end
+
+      it "validates grid modifier" do
+        bad = ': abc def'
+        g_bad = Gk.sub(/fha_203k_option$/, bad)
+        expect { dg_from_import( "Gk", g_bad)
+        }.to raise_error(/invalid grid modifier expression: #{bad}/)
+        expect { dg_from_import( "Gk", Gk)
+        }.not_to raise_error
       end
     end
 

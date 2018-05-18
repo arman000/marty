@@ -37,7 +37,7 @@ class Marty::DataGrid < Marty::Base
           inf["attr"], inf["type"], inf["keys"], inf["rs_keep"]
 
         unless rs_keep.nil? || rs_keep.empty?
-          m = /\A *(<|<=|>|>=)? *([a-z_]+) *\z/.match(rs_keep)
+          m = /\A *(<|<=|>|>=)? *([a-z][a-z_0-9]+) *\z/.match(rs_keep)
           unless m
             dg.errors.add(:base, "invalid grid modifier expression: #{rs_keep}")
             next
