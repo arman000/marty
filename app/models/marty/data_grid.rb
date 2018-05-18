@@ -193,6 +193,9 @@ class Marty::DataGrid < Marty::Base
       h[attr] = val.is_a?(String) ?
                   ActiveRecord::Base.connection.quote(val)[1..-2] : val
     end
+    nilparams =  h.select{|k, v| v==nil}
+    raise "Data Grid #{dgh['name']} lookup with nil attrs #{nilparams}" if
+      nilparams.present?
 
     fn     = "lookup_grid_distinct"
     hjson  = "'#{h.to_json}'::JSONB"
