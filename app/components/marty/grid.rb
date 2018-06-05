@@ -39,6 +39,12 @@ class Marty::Grid < ::Netzke::Grid::Base
         }});
     }
     JS
+
+    c.clear_filters = l(<<-JS)
+    function() {
+      this.filters.clearFilters();
+    }
+    JS
   end
 
   component :view_window do |c|
@@ -69,6 +75,17 @@ class Marty::Grid < ::Netzke::Grid::Base
 
   def has_search_action?
     false
+  end
+
+  # To add :clear_filters to your app's bbar, add the following lines:
+# def default_bbar
+#   [:clear_filters] + super
+# end
+
+  action :clear_filters do |a|
+    a.text    = "X"
+    a.tooltip = "Clear filters"
+    a.handler = :clear_filters
   end
 
   def get_json_sorter(json_col, field)
