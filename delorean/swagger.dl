@@ -1,0 +1,146 @@
+Base:
+    json            = "application/json"
+    swagger_version = "2.0"
+
+Response:
+    code        =?
+    description =?
+    schema_name =? 'Empty'
+
+    result = {
+        code.to_s : {
+            "description" : description,
+            "schema"      : {
+                "$ref" : "#/definitions/" + schema_name
+                }
+            }
+        }
+
+Parameter:
+    model =?
+    result = {
+        "in"       : "body",
+        "name"     : model,
+        "required" : true,
+        "schema"   : {"$ref":"#/definitions/" + model}
+        }
+
+Integration: Base
+    responses   = {"default": {"statusCode": "200"}}
+
+    uri                    =?
+    passthrough            =? "when_no_templates"
+    vpc_link_connection_id =?
+    http_method            =?
+    mapping_template       =?
+
+    result = {
+        "uri"                 : uri,
+        "responses"           : responses,
+        "passthroughBehavior" : passthrough,
+        "connectionType"      : "VPC_LINK",
+        "connectionId"        : vpc_link_connection_id,
+        "httpMethod"          : Marty::Helper.upcase(http_method),
+        "requestTemplates"    : {json : mapping_template},
+        "type"                : "http",
+        }
+
+Endpoint: Base
+    path                   =?
+    http_method            =?
+    consumes               =? [json]
+    produces               =? [json]
+    security               =? []
+    parameters             =? [Parameter(model='Empty').result]
+    vpc_link_connection_id =?
+    uri                    =?
+
+    # AWS mapping template annoyingly uses Velocity Template Language (VTL)
+    mapping_template       =? "{\"params\":$input.json('$')," +
+        "\"api_key\":\"$context.identity.apiKey\"," +
+        "\"cognito_authentication_provider\":" +
+        "\"$context.identity.cognitoAuthenticationProvider\"," +
+        "\"cognito_authentication_type\":" +
+        "\"$context.identity.cognitoAuthenticationType\"," +
+        "\"cognito_identity_id\":\"$context.identity.cognitoIdentityId\"," +
+        "\"cognito_identity-pool_id\":" +
+        "\"$context.identity.cognitoIdentityPoolId\"," +
+        "\"stage\":\"$context.stage\"," +
+        "\"source_ip\":\"$context.identity.sourceIp\",}"
+
+    result = {
+        path : {
+            http_method : {
+                "consumes": [json],
+                "produces": [json],
+                "responses": Response(
+                    code=200,
+                    description='200 response').result,
+                "parameters": parameters,
+                "security": security + [{"api_key" : []}],
+                "x-amazon-apigateway-request-validator": "Validate body",
+                "x-amazon-apigateway-integration": (Integration(
+                    vpc_link_connection_id=vpc_link_connection_id,
+                    mapping_template=mapping_template,) + _).result,
+            }
+          }
+        }
+
+ApiDefinition: Base
+    ### API Definition Template / Assumes Cognito Integration ###
+
+    api_name              =?
+    api_version           =?
+    api_host              =?
+    api_base_path         =?
+    api_auth_provider_arn =?
+
+    info    = {"version": api_version, "title": api_name,}
+    schemes = ["https"]
+
+    security_definitions = {
+        api_name : {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in"  : "header",
+            "x-amazon-apigateway-authtype"   : "cognito_user_pools",
+            "x-amazon-apigateway-authorizer" : {
+                "providerARNs" : [api_auth_provider_arn],
+                "type": "cognito_user_pools",
+                }
+            },
+        "api_key" : {
+            "type" : "apiKey",
+            "name" : "x-api-key",
+            "in"   : "header",
+            }
+        }
+
+    empty_schema =  {
+        "Empty" : {
+            "type"  : "object",
+            "title" : "Empty Schema",
+            }
+        }
+
+    aws_request_validators =  {
+        "Validate body" : {
+            "validateRequestParameters" : false,
+            "validateRequestBody"       : true,
+            }
+        }
+
+    paths   = {}
+    schemas = empty_schema
+
+    result = {
+        "swagger"                                : swagger_version,
+        "info"                                   : info,
+        "host"                                   : api_host,
+        "basePath"                               : api_base_path,
+        "schemes"                                : schemes,
+        "paths"                                  : paths,
+        "securityDefinitions"                    : security_definitions,
+        "definitions"                            : schemas,
+        "x-amazon-apigateway-request-validators" : aws_request_validators,
+        }

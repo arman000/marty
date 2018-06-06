@@ -3,9 +3,7 @@ class Marty::ApiAuth < Marty::Base
 
   KEY_SIZE = 19
 
-  def self.generate_key
-    SecureRandom.hex(KEY_SIZE)
-  end
+  validates_presence_of :app_name, :api_key, :script_name
 
   class ApiAuthValidator < ActiveModel::Validator
     def validate(api)
@@ -17,24 +15,87 @@ class Marty::ApiAuth < Marty::Base
     end
   end
 
-  before_validation do
-    self.api_key = Marty::ApiAuth.generate_key if
-      self.api_key.nil? || self.api_key.length == 0
-  end
-
-  validates_presence_of :app_name, :api_key, :script_name
-
   validates_with ApiAuthValidator
 
   mcfly_validates_uniqueness_of :api_key, scope: [:script_name]
   validates_uniqueness_of :app_name, scope: [:script_name,
                                              :obsoleted_dt]
 
-  def self.authorized?(script_name, api_key)
-    is_secured = where(script_name: script_name,
-                       obsoleted_dt: 'infinity').exists?
-    !is_secured || where(api_key: api_key,
-                         script_name: script_name,
-                         obsoleted_dt: 'infinity').pluck(:app_name).first
+
+  before_validation do
+    self.api_key = Marty::ApiAuth.generate_key if
+      self.api_key.nil? || self.api_key.length == 0
+  end
+
+  before_destroy do
+    next unless aws = parameters['aws_api_key']
+    begin
+      client = Marty::Aws::Apigateway.new
+      resp   = client.delete_usage_plan_key(aws['api_usage_plan_id'],
+                                            aws['aid'])
+      client.delete_api_key(aws['aid']) if resp
+    rescue => e
+      Marty::Logger.log('api_test', 'error', e.message)
+      throw :abort unless e.message.include?('Invalid API Key')
+    end
+  end
+
+  def self.generate_key
+    SecureRandom.hex(KEY_SIZE)
+  end
+
+  def create_aws_api_key api_id, api_usage_plan_id
+    client = Marty::Aws::Apigateway.new
+    app_id = Marty::Config['AWS_APP_IDENTIFIER'] || 'marty'
+    name   = "#{app_id}-#{api_id}-#{api_key[0..3]}"
+
+    key = nil
+    begin
+      key = client.create_api_key(name, 'marty_api_key', api_key)
+    rescue => e
+      #Marty::Logger.log('api_test', 'error', e.message)
+    end
+
+    upkey = nil
+    begin
+    upkey = key &&
+            client.create_usage_plan_key(api_usage_plan_id, key.id)
+    rescue => e
+      #Marty::Logger.log('api_test', 'error', e.message)
+      # remove api key we created
+      client.delete_api_key(key.id)
+    end
+
+    raise "Unable to create AWS API Key" unless key && upkey
+
+    parameters['aws_api_key'] = {
+      'aid'               => key.id,
+      'api_usage_plan_id' => api_usage_plan_id,
+      'api_id'            => api_id,
+    }
+
+    save!
+  end
+
+  def move_aws_key usage_plan_id
+    return unless aws = parameters['aws_api_key']
+    return if aws['api_usage_plan_id'] == usage_plan_id
+
+    begin
+      client = Marty::Aws::Apigateway.new
+      resp   = client.delete_usage_plan_key(aws['api_usage_plan_id'],
+                                            aws['aid'])
+    rescue => e
+      # on fail recreate usage plan key
+      Marty::Logger.log('api', 'api_test', aws)
+      client.create_usage_plan_key(aws['api_usage_plan_id'], aws['aid']) if
+        client
+      return
+    else
+      client.create_usage_plan_key(usage_plan_id, aws['aid']) if resp
+    end
+
+    parameters['aws_api_key'] += {'api_usage_plan_id' => usage_plan_id}
+    save!
   end
 end

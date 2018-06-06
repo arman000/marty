@@ -1,13 +1,8 @@
-class Marty::Diagnostic::Aws::Ec2Instance
+class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Base
   # aws reserved host used to get instance meta-data
   META_DATA_HOST = '169.254.169.254'
 
-  attr_reader :id,
-              :doc,
-              :role,
-              :creds,
-              :version,
-              :host,
+  attr_reader :host,
               :tag,
               :nodes,
               :instances
@@ -33,76 +28,18 @@ class Marty::Diagnostic::Aws::Ec2Instance
     end
   end
 
-  def self.is_aws?
-    response = get("http://#{META_DATA_HOST}") rescue nil
-    response.present?
-  end
-
   def initialize
-    @id            = get_instance_id
-    @doc           = get_document
-    @role          = get_role
-    @creds         = get_credentials
-    @host          = "ec2.#{@doc['region']}.amazonaws.com"
-    @version       = '2016-11-15'
-    @tag           = get_tag
-    @instances     = InstancesSet.new(get_instances)
-    @nodes         = get_private_ips
-  end
-
-  def self.get url
-    uri = URI.parse(url)
-    request = Net::HTTP.new(uri.host, uri.port)
-    request.read_timeout = request.open_timeout = ENV['DIAG_TIMEOUT'] || 0.25
-    request.start {|http|
-      http.get(uri.to_s)
-    }.body
-  end
-
-  def query_meta_data query
-    self.class.get("http://#{META_DATA_HOST}/latest/meta-data/#{query}/")
-  end
-
-  def query_dynamic query
-    self.class.get("http://#{META_DATA_HOST}/latest/dynamic/#{query}/")
+    @service   = 'ec2'
+    super
+    @tag       = get_tag
+    @instances = InstancesSet.new(get_instances)
+    @nodes     = get_private_ips
   end
 
   private
-  def get_instance_id
-    query_meta_data('instance-id').to_s
-  end
-
-  def get_role
-    query_meta_data('iam/security-credentials').to_s
-  end
-
-  def get_credentials
-    JSON.parse(query_meta_data("iam/security-credentials/#{@role}"))
-  end
-
-  def get_document
-    JSON.parse(query_dynamic('instance-identity/document'))
-  end
-
   def ec2_request action, params = {}
-    default = {
-      'Action' => action,
-      'Version' => @version
-    }
-
-    url = "https://#{@host}/?" +
-          (default + params).map{|a, v| "#{a}=#{v}"}.join('&')
-
-    sig = Aws::Sigv4::Signer.new(service:           'ec2',
-                                 region:            @doc['region'],
-                                 access_key_id:     @creds['AccessKeyId'],
-                                 secret_access_key: @creds['SecretAccessKey'],
-                                 session_token:     @creds['Token'])
-    signed_url = sig.presign_url(http_method:'GET', url: url)
-
-    http = Net::HTTP.new(@host, 443)
-    http.use_ssl = true
-    Hash.from_xml(Net::HTTP.get(signed_url))["#{action}Response"]
+    resp = request({action: action}, params)
+    Hash.from_xml(resp)["#{action}Response"]
   end
 
   def get_tag
@@ -131,19 +68,5 @@ class Marty::Diagnostic::Aws::Ec2Instance
 
   def get_private_ips
     @instances.running.map{|i| i['ip']}.compact
-  end
-
-  def ensure_resp path, obj
-    if path == []
-      obj.is_a?(Array) ? obj : [obj]
-    elsif obj.is_a?(Hash)
-      key = path.shift
-      raise "Unexpected AWS Response: #{key} missing" unless
-        (obj.is_a?(Hash) && obj[key])
-
-      ensure_resp(path, obj[key])
-    else
-      obj.map{|s| ensure_resp(path.clone, s)}.flatten(1)
-    end
   end
 end

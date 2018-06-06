@@ -76,4 +76,61 @@ namespace :marty do
       puts
     end
   end
+
+  desc 'Deploy API to AWS API Gateway using Swagger Template'
+  task deploy_api: :environment do
+    script, node = ARGV.drop(1)
+
+    puts "Creating AWS APIGateway client..."
+    begin
+      client  = Marty::Aws::Apigateway.new
+    rescue => e
+      puts "Error: #{e.message}"
+      return
+    end
+
+    puts "Generating Swagger body from #{script}::#{node}..."
+
+    api_name = (Marty::Config['AWS_APP_IDENTIFIER'] || 'marty') +
+               "-#{node.underscore.gsub('_', '-')}"
+
+    begin
+      swagger = Marty::Script.evaluate('infinity',
+                                       script,
+                                       node,
+                                       'result',
+                                       {'api_name' => api_name})
+
+    rescue => e
+      puts "Error: #{e.message}"
+      return
+    end
+
+    payload     = swagger.to_json
+    api_version = swagger['info']['version']
+    api_title   = swagger['info']['title']
+
+    puts "Looking for target API #{api_name}..."
+    target_api = client.get_apis_by_name(api_name).sort_by(&:created_date).last
+
+    puts target_api ? "Updating existing API..." :
+           "API not found. Creating new API..."
+
+    resp = target_api ? client.swagger_update(target_api.id, payload) :
+             client.swagger_import(payload)
+
+    puts "Deploying API to #{Rails.env} stage..."
+
+    begin
+    client.create_deployment(
+      resp.id,
+      'Generated from Marty Application',
+    )
+    rescue => e
+      puts "Error: #{e.message}"
+      return
+    end
+
+    puts "Success."
+  end
 end

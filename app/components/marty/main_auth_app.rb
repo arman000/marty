@@ -11,6 +11,16 @@ require 'marty/api_config_view'
 require 'marty/api_log_view'
 require 'marty/config_view'
 require 'marty/data_grid_view'
+require 'marty/aws/cognito/pool_view'
+require 'marty/aws/apigateway/api_view'
+require 'marty/aws/apigateway/api_view'
+require 'marty/aws/apigateway/authorizer_view'
+require 'marty/aws/apigateway/api_usage_plan_view'
+require 'marty/aws/apigateway/api_usage_plan_key_view'
+require 'marty/aws/apigateway/api_user_view'
+require 'marty/aws/apigateway/api_key_view'
+require 'marty/aws/apigateway/api_manager'
+require 'marty/aws/apigateway/api_key_tabbed_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
@@ -58,10 +68,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     [
       {
         text: 'API Management',
-        icon_cls: "fa fa-wrench glyph",
+        icon_cls: "fa fa-fighter-jet glyph",
         disabled: !self.class.has_admin_perm?,
         menu: [
           :api_auth_view,
+          :aws_apigateway_api_manager,
+          :aws_api_deploy,
+          :aws_apigateway_api_user_view,
           :api_config_view,
           :api_log_view,
         ]
@@ -215,17 +228,19 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   action :api_config_view do |a|
-    a.text      = 'API Config Management'
-    a.handler   = :netzke_load_component_by_action
-    a.icon_cls   = "fa fa-cogs glyph"
-    a.disabled  = !self.class.has_admin_perm?
+    a.text     = 'API Config Management'
+    a.tooltip  = 'Manage API behavior and settings'
+    a.handler  = :netzke_load_component_by_action
+    a.icon_cls = "fa fa-sliders-h glyph"
+    a.disabled = !self.class.has_admin_perm?
   end
 
   action :api_log_view do |a|
-    a.text      = 'API Log View'
-    a.handler   = :netzke_load_component_by_action
-    a.icon_cls   = "fa fa-cogs glyph"
-    a.disabled  = !self.class.has_admin_perm?
+    a.text     = 'API Log View'
+    a.tooltip  = 'View API logs'
+    a.handler  = :netzke_load_component_by_action
+    a.icon_cls = "fa fa-pencil-alt glyph"
+    a.disabled = !self.class.has_admin_perm?
   end
 
   action :data_grid_view do |a|
@@ -285,7 +300,30 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_admin_perm?
   end
 
-   ######################################################################
+  action :aws_apigateway_api_manager do |a|
+    a.text     = 'API Gateway'
+    a.tooltip  = 'Manage External APIs'
+    a.handler   = :netzke_load_component_by_action
+    a.icon_cls  = "fa fa-paper-plane glyph"
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+  action :aws_apigateway_api_user_view do |a|
+    a.text     = 'Cognito'
+    a.tooltip  = 'Manage External API Users'
+    a.handler   = :netzke_load_component_by_action
+    a.icon_cls   = "fa fa-user glyph"
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+  action :aws_api_deploy do |a|
+    a.text     = 'Deploy AWS API'
+    a.tooltip  = 'Deploy AWS API'
+    a.icon_cls   = "fa fa-bomb glyph"
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+  ######################################################################
 
   def bg_command(param)
     e, root, p = ENV['RAILS_ENV'], Rails.root, Marty::Config["RUBY_PATH"]
@@ -325,6 +363,16 @@ class Marty::MainAuthApp < Marty::AuthApp
       res = e.message
       client.show_detail res.html_safe.gsub("\n","<br/>"), 'Log Cleanup'
     end
+  end
+
+  endpoint :aws_api_deploy do |params|
+    e, root, p = ENV['RAILS_ENV'], Rails.root, Marty::Config["RUBY_PATH"]
+    cmd = "export RAILS_ENV=#{e};"
+    # FIXME: Environment looks to be setup incorrectly - this is a hack
+    cmd += "export PATH=#{p}:$PATH;" if p
+    cmd += "rake marty:deploy_api"
+    res = `#{cmd + " " + params}`
+    client.show_detail res.html_safe.gsub("\n","<br/>"), 'AWS API Deploy'
   end
 
   ######################################################################
@@ -458,6 +506,25 @@ class Marty::MainAuthApp < Marty::AuthApp
     }
     JS
 
+    c.netzke_on_aws_api_deploy = l(<<-JS)
+    function(params) {
+       var me = this;
+       Ext.Msg.show({
+         title: 'Deploy AWS API',
+         msg: 'Enter Script, Node (space delimited)',
+         width: 375,
+         buttons: Ext.Msg.OKCANCEL,
+         prompt: true,
+         fn: function (btn, value) {
+           if (btn == "ok") {
+             me.showLoadmask('Deploying...');
+             me.server.awsApiDeploy(value);
+           }
+         }
+       });
+    }
+    JS
+
     c.netzke_on_bg_status = l(<<-JS)
     function() {
       this.showLoadmask('Checking delayed job status...');
@@ -480,7 +547,6 @@ class Marty::MainAuthApp < Marty::AuthApp
        });
     }
     JS
-
   end
 
   action :select_posting do |a|
@@ -529,6 +595,15 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :log_view do |c|
     c.klass = Marty::LogView
   end
+
+  component :aws_cognito_pool_view
+  component :aws_apigateway_api_view
+  component :aws_apigateway_authorizer_view
+  component :aws_apigateway_usage_plan_view
+  component :aws_apigateway_usage_plan_key_view
+  component :aws_apigateway_api_user_view
+  component :aws_apigateway_api_key_view
+  component :aws_apigateway_api_manager
 
   endpoint :reload_scripts do |params|
     Marty::Script.load_scripts

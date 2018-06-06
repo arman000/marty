@@ -13,6 +13,16 @@ class Marty::Grid < ::Netzke::Grid::Base
   end
 
   client_class do |c|
+    c.toggle_component_actions = l(<<-JS)
+    function(prefix, flag) {
+      for (var key in this.actions) {
+        if (key.substring(0, prefix.length) == prefix) {
+          this.actions[key].setDisabled(flag);
+        }
+      }
+    }
+    JS
+
     c.init_component = l(<<-JS)
     function() {
       this.dockedItems = this.dockedItems || [];
@@ -48,8 +58,7 @@ class Marty::Grid < ::Netzke::Grid::Base
       var me = this;
 
       var children = me.serverConfig.child_components || [];
-      me.getSelectionModel().on(
-      'selectionchange',
+      me.onSelectionChange(
       function(m) {
         var has_sel = m.hasSelection();
 
@@ -66,18 +75,24 @@ class Marty::Grid < ::Netzke::Grid::Base
         }
 
         me.serverConfig.selected = rid;
-
-        for (var key in me.actions) {
-          // hacky -- assumes our functions start with "do"
-          if (key.substring(0, 2) == "do") {
-            me.actions[key].setDisabled(!has_sel);
-          }
-        }
+        me.toggleComponentActions('do', !has_sel);
 
         for (var child of children) {
           var comp = me.netzkeGetComponentFromParent(child);
+
+          // check grandparent if parent does not have component
+          if (!comp) {
+            var parent      = me.netzkeGetParentComponent();
+            var grandparent = parent.netzkeGetParentComponent();
+
+            comp = grandparent && grandparent.netzkeGetComponent(child);
+          }
+
           if (comp) {
             comp.serverConfig.parent_id = rid;
+            if (comp.toggleComponentActions) {
+              comp.toggleComponentActions('parent', !has_sel);
+            }
             if (comp.reload) { comp.reload() }
           }
         }
@@ -89,10 +104,28 @@ class Marty::Grid < ::Netzke::Grid::Base
         store.on(event, function() {
         for (var link of linked) {
             var comp = me.netzkeGetComponentFromParent(link);
+
+            // check grandparent if parent does not have component
+            if (!comp) {
+              var parent      = me.netzkeGetParentComponent();
+              var grandparent = parent.netzkeGetParentComponent();
+
+              comp = grandparent && grandparent.netzkeGetComponent(child);
+            }
+
             if (comp && comp.reload) { comp.reload() }
           }
         }, this);
       }
+    }
+    JS
+
+    c.on_selection_change = l(<<-JS)
+    function(f) {
+      var me = this;
+      me.getSelectionModel().on('selectionchange', function(m) {
+        f(m);
+      });
     }
     JS
 
@@ -166,6 +199,12 @@ class Marty::Grid < ::Netzke::Grid::Base
 
   def has_search_action?
     false
+  end
+
+  action :clear_filters do |a|
+    a.text    = "X"
+    a.tooltip = "Clear filters"
+    a.handler = :clear_filters
   end
 
   def get_json_sorter(json_col, field)

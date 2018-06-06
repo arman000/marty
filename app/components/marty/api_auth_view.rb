@@ -7,10 +7,27 @@ class Marty::ApiAuthView < Marty::McflyGridPanel
   def configure(c)
     super
 
-    c.title   = I18n.t('api_auth', default: "API Authorization")
-    c.model   = "Marty::ApiAuth"
-    c.attributes = [:app_name, :api_key, :script_name]
+    c.title      = I18n.t('api_auth', default: "API Authorization")
+    c.editing    = :in_form
+    c.pagination = :pagination
+    c.model      = "Marty::ApiAuth"
+    c.attributes = [:aws, :app_name, :api_key, :script_name]
     c.store_config.merge!({sorters: [{property: :app_name, direction: 'ASC'}]})
+  end
+
+  attribute :aws do |c|
+    c.width     = 60
+    c.read_only = true
+    c.text      = "AWS"
+    c.type      = :boolean
+    c.getter = lambda do |r|
+      !!r.parameters['aws_api_key']
+    end
+    c.sorting_scope = get_json_sorter('parameters', 'aws_api_key')
+    c.filterable = true
+    c.filter_with = lambda do |rel, value, op|
+      rel.where("parameters->>'aws_api_key' IS #{value ? 'NOT' : ''} NULL")
+    end
   end
 
   attribute :app_name do |c|

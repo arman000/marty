@@ -3,6 +3,7 @@ class Gemini::XyzRuleView < Marty::DeloreanRuleView
                         read: :admin,
                         update: :admin,
                         delete: :admin
+
   def self.klass
     Gemini::XyzRule
   end
