@@ -46,6 +46,7 @@ class Marty::Grid < ::Netzke::Grid::Base
       this.paging = paging
 
       var me = this;
+      me.callParent();
 
       var children = me.serverConfig.child_components || [];
       me.getSelectionModel().on(
@@ -163,6 +164,12 @@ class Marty::Grid < ::Netzke::Grid::Base
 
   def has_search_action?
     false
+  end
+
+  action :clear_filters do |a|
+    a.text    = "X"
+    a.tooltip = "Clear filters"
+    a.handler = :clear_filters
   end
 
   def get_json_sorter(json_col, field)

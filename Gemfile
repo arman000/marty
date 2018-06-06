@@ -11,7 +11,6 @@ gem 'rails', '~> 5.1.4'
 gem 'pg'
 gem 'sqlite3'
 
-
 group :development, :test do
   gem 'pry-rails'
   gem 'rspec-rails'

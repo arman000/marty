@@ -1,8 +1,5 @@
 class Gemini::XyzRuleView < Marty::DeloreanRuleView
-  has_marty_permissions create: :admin,
-                        read: :admin,
-                        update: :admin,
-                        delete: :admin
+
   def self.klass
     Gemini::XyzRule
   end

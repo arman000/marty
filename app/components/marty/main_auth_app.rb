@@ -11,6 +11,17 @@ require 'marty/api_config_view'
 require 'marty/api_log_view'
 require 'marty/config_view'
 require 'marty/data_grid_view'
+require 'marty/aws_cognito_view'
+require 'marty/aws_api_view'
+require 'marty/aws_apigateway_api_view'
+require 'marty/aws_apigateway_key_view'
+require 'marty/aws_apigateway_authorizer_view'
+require 'marty/aws_apigateway_api_stage_view'
+require 'marty/aws_apigateway_api_usage_plan_view'
+require 'marty/aws_apigateway_api_usage_plan_key_view'
+require 'marty/aws_apigateway_api_authorizer_stage_view'
+require 'marty/aws_api_user_view'
+require 'marty/aws_api_key_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
@@ -69,6 +80,20 @@ class Marty::MainAuthApp < Marty::AuthApp
     ]
   end
 
+  def aws_menu
+    [
+      {
+        text: 'AWS Management',
+        icon:  icon_hack(:wrench),
+        disabled: !self.class.has_admin_perm?,
+        menu: [
+          :aws_api_view,
+          :aws_api_user_view,
+        ]
+      }
+    ]
+  end
+
   def system_menu
     {
       text:  I18n.t("system"),
@@ -81,7 +106,7 @@ class Marty::MainAuthApp < Marty::AuthApp
         :event_view,
         :reload_scripts,
         :load_seed,
-      ] + background_jobs_menu + log_menu + api_menu
+      ] + background_jobs_menu + log_menu + api_menu + aws_menu
     }
   end
 
@@ -282,6 +307,22 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text     = 'Cleanup Log Table'
     a.tooltip  = 'Delete old log records'
     a.icon_cls   = "fa fa-cog glyph"
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+  action :aws_api_view do |a|
+    a.text     = 'API Gateway Management'
+    a.tooltip  = 'Manage External APIs'
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :cog
+    a.disabled = !self.class.has_admin_perm?
+  end
+
+  action :aws_api_user_view do |a|
+    a.text     = 'API Gateway/Cognito Management'
+    a.tooltip  = 'Manage External API Users'
+    a.handler   = :netzke_load_component_by_action
+    a.icon      = :cog
     a.disabled = !self.class.has_admin_perm?
   end
 
@@ -529,6 +570,18 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :log_view do |c|
     c.klass = Marty::LogView
   end
+
+  component :aws_cognito_view
+  component :aws_api_view
+  component :aws_apigateway_api_view
+  component :aws_apigateway_key_view
+  component :aws_apigateway_authorizer_view
+  component :aws_apigateway_stage_view
+  component :aws_apigateway_usage_plan_view
+  component :aws_apigateway_usage_plan_key_view
+  component :aws_apigateway_authorizer_stage_view
+  component :aws_api_user_view
+  component :aws_api_key_view
 
   endpoint :reload_scripts do |params|
     Marty::Script.load_scripts

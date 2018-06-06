@@ -38,12 +38,12 @@ class Marty::Diagnostic::Aws::Ec2Instance
     response.present?
   end
 
-  def initialize
+  def initialize service
     @id            = get_instance_id
     @doc           = get_document
     @role          = get_role
     @creds         = get_credentials
-    @host          = "ec2.#{@doc['region']}.amazonaws.com"
+    @host          = "#{service.downcase}.#{@doc['region']}.amazonaws.com"
     @version       = '2016-11-15'
     @tag           = get_tag
     @instances     = InstancesSet.new(get_instances)
