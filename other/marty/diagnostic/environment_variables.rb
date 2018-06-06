@@ -13,7 +13,7 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
       'SECRET_KEY_BASE']
 
     to_block = (Marty::Config['DIAG_ENV_BLOCK_IF_INCL'] || []).map(&:upcase) + [
-      'PASSWORD', 'DEBUG']
+      'ACCESS', 'SECRET', 'PASSWORD', 'DEBUG']
 
     to_delete.each{|k| env.delete(k)}
 

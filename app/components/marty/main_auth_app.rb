@@ -58,7 +58,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     [
       {
         text: 'API Management',
-        icon_cls: "fa fa-wrench glyph",
+        icon_cls: "fa fa-fighter-jet glyph",
         disabled: !self.class.has_admin_perm?,
         menu: [
           :api_auth_view,
@@ -215,17 +215,19 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   action :api_config_view do |a|
-    a.text      = 'API Config Management'
-    a.handler   = :netzke_load_component_by_action
-    a.icon_cls   = "fa fa-cogs glyph"
-    a.disabled  = !self.class.has_admin_perm?
+    a.text     = 'API Config Management'
+    a.tooltip  = 'Manage API behavior and settings'
+    a.handler  = :netzke_load_component_by_action
+    a.icon_cls = "fa fa-sliders-h glyph"
+    a.disabled = !self.class.has_admin_perm?
   end
 
   action :api_log_view do |a|
-    a.text      = 'API Log View'
-    a.handler   = :netzke_load_component_by_action
-    a.icon_cls   = "fa fa-cogs glyph"
-    a.disabled  = !self.class.has_admin_perm?
+    a.text     = 'API Log View'
+    a.tooltip  = 'View API logs'
+    a.handler  = :netzke_load_component_by_action
+    a.icon_cls = "fa fa-pencil-alt glyph"
+    a.disabled = !self.class.has_admin_perm?
   end
 
   action :data_grid_view do |a|
@@ -285,7 +287,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_admin_perm?
   end
 
-   ######################################################################
+  ######################################################################
 
   def bg_command(param)
     e, root, p = ENV['RAILS_ENV'], Rails.root, Marty::Config["RUBY_PATH"]
@@ -480,7 +482,6 @@ class Marty::MainAuthApp < Marty::AuthApp
        });
     }
     JS
-
   end
 
   action :select_posting do |a|

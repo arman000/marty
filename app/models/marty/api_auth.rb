@@ -3,9 +3,7 @@ class Marty::ApiAuth < Marty::Base
 
   KEY_SIZE = 19
 
-  def self.generate_key
-    SecureRandom.hex(KEY_SIZE)
-  end
+  validates_presence_of :app_name, :api_key, :script_name
 
   class ApiAuthValidator < ActiveModel::Validator
     def validate(api)
@@ -17,24 +15,19 @@ class Marty::ApiAuth < Marty::Base
     end
   end
 
-  before_validation do
-    self.api_key = Marty::ApiAuth.generate_key if
-      self.api_key.nil? || self.api_key.length == 0
-  end
-
-  validates_presence_of :app_name, :api_key, :script_name
-
   validates_with ApiAuthValidator
 
   mcfly_validates_uniqueness_of :api_key, scope: [:script_name]
   validates_uniqueness_of :app_name, scope: [:script_name,
                                              :obsoleted_dt]
 
-  def self.authorized?(script_name, api_key)
-    is_secured = where(script_name: script_name,
-                       obsoleted_dt: 'infinity').exists?
-    !is_secured || where(api_key: api_key,
-                         script_name: script_name,
-                         obsoleted_dt: 'infinity').pluck(:app_name).first
+
+  before_validation do
+    self.api_key = Marty::ApiAuth.generate_key if
+      self.api_key.nil? || self.api_key.length == 0
+  end
+
+  def self.generate_key
+    SecureRandom.hex(KEY_SIZE)
   end
 end
