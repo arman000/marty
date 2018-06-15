@@ -489,14 +489,15 @@ EOS
         expect(res).to eq [456,"G9"]
       end
 
-      it "should handle nil attr values to match wildcard" do
+      it "should raise on nil attr values" do
         dg_from_import("G9", G9)
 
-        res = lookup_grid_helper('infinity',
+        expect {
+          res = lookup_grid_helper('infinity',
                                "G9",
                                {"state" => nil, "ltv" => 81},
                                )
-        expect(res).to eq [456,"G9"]
+        }.to raise_error(RuntimeError)
 
         expect {
           res = lookup_grid_helper('infinity',
