@@ -53,7 +53,7 @@ class Marty::Diagnostic::Aws::Ec2Instance
   def self.get url
     uri = URI.parse(url)
     request = Net::HTTP.new(uri.host, uri.port)
-    request.read_timeout = request.open_timeout = ENV['DIAG_TIMEOUT'] || 5
+    request.read_timeout = request.open_timeout = ENV['DIAG_TIMEOUT'] || 0.25
     request.start {|http|
       http.get(uri.to_s)
     }.body

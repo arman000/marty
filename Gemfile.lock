@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     marty (2.1.0)
+      aws-sigv4 (~> 1.0, >= 1.0.2)
       axlsx (= 3.0.0pre)
       coderay
       delorean_lang (~> 0.3.37)
@@ -233,7 +234,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aws-sigv4 (~> 1.0, >= 1.0.2)
   capybara
   chromedriver-helper
   connection_pool

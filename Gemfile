@@ -10,8 +10,6 @@ gem 'daemons', '~> 1.1.9'
 gem 'rails', '~> 5.1.4'
 gem 'pg'
 gem 'sqlite3'
-# for signing of aws ec2 requests
-gem 'aws-sigv4', '~> 1.0', '>= 1.0.2'
 
 
 group :development, :test do
