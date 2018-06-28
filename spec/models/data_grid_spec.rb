@@ -185,9 +185,10 @@ EOS
       marty_whodunnit
     end
 
-    def lookup_grid_helper(pt, gridname, params, follow=false)
+    def lookup_grid_helper(pt, gridname, params, follow=false, distinct=true)
       dgh=Marty::DataGrid.lookup_h(pt, gridname)
-      res=Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh, nil, follow)
+      res=Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh, nil, follow,
+                                                       false, distinct)
       [res["result"], res["name"]]
     end
 
@@ -492,19 +493,17 @@ EOS
       it "should raise on nil attr values" do
         dg_from_import("G9", G9)
 
-        expect {
-          res = lookup_grid_helper('infinity',
+        expect{lookup_grid_helper('infinity',
                                "G9",
                                {"state" => nil, "ltv" => 81},
-                               )
-        }.to raise_error(RuntimeError)
+                               )}.to raise_error(/matches > 1/)
 
-        expect {
-          res = lookup_grid_helper('infinity',
-                                     "G9",
-                                     {"state" => "CA", "ltv" => nil},
-                                    )
-        }.to raise_error(RuntimeError)
+        res = lookup_grid_helper('infinity',
+                                 "G9",
+                                 {"state" => "CA", "ltv" => nil},
+                                 false, false)
+        expect(res).to eq [123,"G9"]
+
       end
 
       it "should handle boolean keys" do
