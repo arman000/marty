@@ -108,7 +108,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.get_struct_attrs
-    self.struct_attrs ||= super + ["id", "group_id", "created_dt"]
+    self.struct_attrs ||= super + ["id", "group_id", "created_dt", "name"]
   end
 
   def to_s
