@@ -28,4 +28,14 @@ module Marty::Extras::Misc
                       mouse_wheel_enabled: false }
     }
   end
+
+  def sep
+    { xtype: 'tbseparator' }
+  end
+
+  def icon_hack(name)
+    # There's a Netzke bug whereby, using an icon name in a hash
+    # doesn't generate a proper URL.
+    "#{Netzke::Core.ext_uri}/../icons/#{name}.png"
+  end
 end
