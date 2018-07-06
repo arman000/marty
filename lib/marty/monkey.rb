@@ -322,7 +322,7 @@ module Netzke
 
           include_core_js(res)
 
-          # load javascript overrides
+          # MONKEY: load javascript overrides
           overrides = ["#{File.dirname(__FILE__)}/javascript/overrides.js"]
 
           (Netzke::Core.ext_javascripts + overrides).each do |path|
@@ -331,6 +331,15 @@ module Netzke
           end
 
           minify_js(res)
+        end
+
+        def minify_js(js_string)
+          if ::Rails.env.test? || ::Rails.env.development?
+            js_string.gsub(/\/\*\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//, '') # strip docs
+          else
+            # MONKEY: enable es6 by passing in harmony argument
+            Uglifier.compile(js_string, harmony: true)
+          end
         end
       end
     end
