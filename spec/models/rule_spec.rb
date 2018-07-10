@@ -80,28 +80,28 @@ module Marty::RuleSpec
       it "detects errors in computed guards" do
         @rule_type = "SimpleRule"
         @computed_guards = {"guard1"=> "zvjsdf12.z8*"}
-        exp = /Computed - Error in rule 'testrule' field 'computed_guards': syntax error/
+        exp = /Computed - Error in rule 'testrule' field 'computed_guards': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "detects errors in computed results" do
         @rule_type = "SimpleRule"
         @results = {"does_not_compute"=> "zvjsdf12.z8*"}
         @grids = {"grid1"=>"DataGrid1","grid2"=>"DataGrid2"}
-        exp = /Computed - Error in rule 'testrule' field 'results': syntax error/
+        exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "detects errors in computed results 2" do
         @rule_type = "SimpleRule"
         @results = {"does_not_compute"=> "zvjsdf12.z8*"}
         @grids = {"grid1"=>"DataGrid1","grid2"=>"DataGrid1","grid3"=>"DataGrid3"}
-        exp = /Computed - Error in rule 'testrule' field 'results': syntax error/
+        exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "detects errors in computed results 3" do
         @rule_type = "SimpleRule"
         @results = {"does_not_compute"=> "zvjsdf12.z8*"}
         @grids = {"grid1"=>"DataGrid1","grid2"=>"DataGrid1","grid3"=>"DataGrid1"}
-        exp = /Computed - Error in rule 'testrule' field 'results': syntax error/
+        exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "reports bad grid names" do
@@ -141,19 +141,19 @@ module Marty::RuleSpec
       it "detects script errors" do
         @rule_type = 'XRule'
         @results = {"x"=>"zx sdf wer"}
-        exp = /Computed - Error in rule 'testrule' field 'results': syntax error/
+        exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "rule script stuff overrides 1" do
         @rule_type = 'XRule'
         @computed_guards = {"abc"=>"true", "xyz_guard"=> "err err err"}
-        exp = /Computed - Error in rule 'testrule' field 'xyz': syntax error/
+        exp = /Computed - Error in rule 'testrule' field 'xyz': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "rule script stuff overrides 2" do
         @rule_type = 'XRule'
         @computed_guards = {"abc"=>"err err err", "xyz_guard"=> "xyz_param"}
-        exp = /Computed - Error in rule 'testrule' field 'computed_guards': syntax error/
+        exp = /Computed - Error in rule 'testrule' field 'computed_guards': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "rule script stuff overrides 3" do
