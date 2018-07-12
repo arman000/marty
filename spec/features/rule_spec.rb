@@ -193,7 +193,7 @@ feature 'rule view', js: true do
     # computed fields
     press("Edit")
 
-    # bad form - BaseRuleView#simple_to_hashstr will raise
+    # bad form - BaseRuleView#simple_to_hash will raise
     fill_in(:computed_guards, with: 'sadf asdf ljsf')
     press("OK")
     wait_for_ajax
@@ -202,7 +202,7 @@ feature 'rule view', js: true do
     sleep 2  # sleep needed for message to clear, otherwise failing tests could
              # pass due to prior messages
 
-    # lhs is not identifier - BaseRuleView#simple_to_hashstr will raise
+    # lhs is not identifier - BaseRuleView#simple_to_has will raise
     fill_in(:computed_guards, with: '0sadf = 123j')
     press("OK")
     wait_for_ajax
@@ -299,6 +299,7 @@ EOL
     val = find_field(:results).value+"\n"
     expect(val).to eq(newval)
     press("OK")
+    wait_for_ajax
 
     exp =<<EOL
 simple_result  = "c value"

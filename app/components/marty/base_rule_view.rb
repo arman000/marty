@@ -47,7 +47,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     end
   end
 
-  def self.simple_to_hashstr(s)
+  def self.simple_to_hash(s)
     result = {}
     save_linenos = {}
     last_key = nil
@@ -57,7 +57,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       begin
         m = /\A\s*([a-z][a-z0-9_]*)\s*=\s*(.*)\s*\z/.match(line)
         if m
-          k, v = [m[1], m[2]]
+          k, v = m[1], m[2]
           raise DupKeyError.new(k, idx) if result.keys.include?(k)
           save_linenos[k] = idx
           result[k] = v
@@ -72,16 +72,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
         raise "syntax error on line #{idx}"
       end
     end
-    cooked = result.keys.each_with_object({}) do |k, h|
-      begin
-        h[k] = [result[k]].to_json[1..-2]
-        raise unless /\A['"].*['"]\z/.match(h[k])
-      rescue => e
-        raise "syntax error on line #{save_linenos[k]}"
-      end
-    end
-    kvs = cooked.map { |k, v| %Q("#{k}":#{v}) }.join(",")
-    "{#{kvs}}"
+    result
   end
 
   def self.hash_to_simple(h)
@@ -112,16 +103,15 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       return r.send(msg, nil) if v.blank?
 
       begin
-        v = ActiveSupport::JSON.decode(
-          Marty::BaseRuleView.simple_to_hashstr(v))
+        final = Marty::BaseRuleView.simple_to_hash(v)
       rescue => e
-        v = { "~~ERROR~~": e.message }
+        final = { "~~ERROR~~": e.message }
       end
 
       # ActiveRecord ignores change in json key order
-      r.send("#{c}_will_change!") if r[c.to_s].to_a != v.to_a
+      r.send("#{c}_will_change!") if r[c.to_s].to_a != final.to_a
 
-      r.send(msg, v)
+      r.send(msg, final)
     }
   end
 
