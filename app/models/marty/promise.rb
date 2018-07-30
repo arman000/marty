@@ -6,6 +6,7 @@ class Marty::Promise < Marty::Base
   # default timeout (seconds) to wait for jobs to start
   DEFAULT_JOB_TIMEOUT = Rails.configuration.marty.job_timeout || 10
 
+=begin
   SELECT_COLS = columns.map(&:name)-["result"]
   default_scope {
     select(*SELECT_COLS)
@@ -23,8 +24,9 @@ class Marty::Promise < Marty::Base
         self.send("#{attribute_name}=", values[1])
       }
     end
-    read_attribute(:result) || {}
+    read_attribute :result
   end
+=end
 
   validates_presence_of :title
 
@@ -102,7 +104,7 @@ class Marty::Promise < Marty::Base
   end
 
   def set_result(res)
-    log "SETRES #{Process.pid} #{self}"
+    # log "SETRES #{Process.pid} #{self}"
 
     # promise must have been started and not yet ended
     if !self.start_dt || self.end_dt || self.result != {}
@@ -124,7 +126,7 @@ class Marty::Promise < Marty::Base
     self.end_dt = DateTime.now
     self.save!
 
-    log "NOTIFY #{Process.pid}"
+    # log "NOTIFY #{Process.pid}"
     pg_notify
   end
 
@@ -132,9 +134,9 @@ class Marty::Promise < Marty::Base
     inspect
   end
 
-  def log(msg)
-    open('/tmp/dj.out', 'a') { |f| f.puts msg }
-  end
+  # def log(msg)
+  #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
+  # end
 
   def wait_for_my_notify(timeout)
     while true do
