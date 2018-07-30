@@ -4,6 +4,6 @@ class JsonbPromiseResult < ActiveRecord::Migration[5.1]
 
     execute "delete from #{table}"
 
-    change_column table, :result, :jsonb, using: 'result::text::jsonb'
+    change_column table, :result, :jsonb, default: {}, using: 'result::text::jsonb'
   end
 end
