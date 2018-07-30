@@ -76,8 +76,7 @@ describe Marty::JobController, slow: true do
     # If "f" is evaluated in serial fashion, then the process would
     # take slp*3+ seconds.  Make sure that we had some parallel
     # behavior.
-    expect(bench.real).to be >= slp
-    expect(bench.real).to be < slp*2
+    expect(bench.real).to be_between(slp, slp*2)
   end
 
   it "should be able to run long-running tasks in separate jobs (2)" do
@@ -92,8 +91,7 @@ describe Marty::JobController, slow: true do
       expect(res).to eq exp_res
     }
 
-    expect(bench.real).to be >= slp
-    expect(bench.real).to be < slp*2
+    expect(bench.real).to be_between(slp, slp*2)
   end
 
   it "should be to handle non-serializable errors" do
@@ -162,7 +160,7 @@ describe Marty::JobController, slow: true do
       format: :json,
       job_id: promise.id,
     }
-    expect(response.body).to eq res.to_json
+    expect(JSON.parse response.body).to eq res
   end
 
   it "should be able to get zip results" do

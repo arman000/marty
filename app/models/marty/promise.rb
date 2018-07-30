@@ -1,14 +1,4 @@
 class Marty::Promise < Marty::Base
-  class MarshalResult
-    def dump(v)
-      Marshal.dump(v)
-    end
-
-    def load(v)
-      # Marshal.load can't handle nil
-      v ? Marshal.load(v) : {}
-    end
-  end
 
   # default timeout (seconds) to wait for promise values
   DEFAULT_PROMISE_TIMEOUT = Rails.configuration.marty.promise_timeout || 30
@@ -20,6 +10,10 @@ class Marty::Promise < Marty::Base
   default_scope {
     select(*SELECT_COLS)
   }
+
+  # implements laziness for the result column -- FIXME: are we just
+  # doing this for the jobs dashboard?  If so, why don't we create a
+  # database view which excludes result? That seems a lot safer.
   def result
     unless has_attribute?(:result)
       changes_before_reload = self.changes.clone
@@ -29,17 +23,15 @@ class Marty::Promise < Marty::Base
         self.send("#{attribute_name}=", values[1])
       }
     end
-    read_attribute :result
+    read_attribute(:result) || {}
   end
-
-  serialize :result, MarshalResult.new
 
   validates_presence_of :title
 
   has_many :children,
-  foreign_key: 'parent_id',
-  class_name: "Marty::Promise",
-  dependent: :destroy
+           foreign_key: 'parent_id',
+           class_name: "Marty::Promise",
+           dependent: :destroy
 
   belongs_to :parent, class_name: "Marty::Promise"
   belongs_to :user, class_name: "Marty::User"
@@ -110,7 +102,7 @@ class Marty::Promise < Marty::Base
   end
 
   def set_result(res)
-    # log "SETRES #{Process.pid} #{self}"
+    log "SETRES #{Process.pid} #{self}"
 
     # promise must have been started and not yet ended
     if !self.start_dt || self.end_dt || self.result != {}
@@ -132,7 +124,7 @@ class Marty::Promise < Marty::Base
     self.end_dt = DateTime.now
     self.save!
 
-    # log "NOTIFY #{Process.pid}"
+    log "NOTIFY #{Process.pid}"
     pg_notify
   end
 
@@ -140,9 +132,9 @@ class Marty::Promise < Marty::Base
     inspect
   end
 
-  # def log(msg)
-  #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
-  # end
+  def log(msg)
+    open('/tmp/dj.out', 'a') { |f| f.puts msg }
+  end
 
   def wait_for_my_notify(timeout)
     while true do
