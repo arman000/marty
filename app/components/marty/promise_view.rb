@@ -4,6 +4,7 @@ class Marty::PromiseView < Netzke::Tree::Base
   client_styles do |config|
     config.require :promise_view
   end
+
   client_class do |config|
     config.default_get_row_class = l(<<-JS)
     function(record, index, rowParams, ds) {
@@ -41,7 +42,7 @@ class Marty::PromiseView < Netzke::Tree::Base
   def configure(config)
     super
     config.title = I18n.t("jobs.promise_view")
-    config.model = "Marty::Promise"
+    config.model = "Marty::VwPromise"
     config.attributes = [
       {name: :title, xtype: :treecolumn},
       :user__login,
@@ -137,7 +138,7 @@ class Marty::PromiseView < Netzke::Tree::Base
 
   def get_records params
     search_scope = config[:live_search_scope] || :live_search
-    Marty::Promise.children_for_id(params[:id], params[search_scope])
+    Marty::VwPromise.children_for_id(params[:id], params[search_scope])
   end
 
   attribute :title do |config|
@@ -172,7 +173,11 @@ class Marty::PromiseView < Netzke::Tree::Base
   end
 
   attribute :error do |config|
-    config.getter = ->(record) { record.result.to_s if record.status == false }
+    config.getter = ->(record) {
+      if !record.status
+        Marty::Promise.find_by(id: record.id).try(:result).to_s
+      end
+    }
     config.flex = 1
   end
 end

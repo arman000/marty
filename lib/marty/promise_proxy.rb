@@ -4,8 +4,6 @@
 class Marty::PromiseProxy < BasicObject
   NOT_SET = ::Object.new.freeze
   METH_SET = ::Set[
-                   :marshal_load,
-                   :marshal_dump,
                    :force,
                    :__force__,
                    # Added for Rails 4 -- were causing forced eval.
@@ -13,23 +11,20 @@ class Marty::PromiseProxy < BasicObject
                    # ActiveRecord treats assignment to proxy objs.
                    :is_a?,
                    :nested_under_indifferent_access,
+                   :as_json,
                   ]
 
   instance_methods.each {|m| undef_method m unless m =~ /^(__.*|object_id)$/}
 
   def initialize(promise_id, timeout, attr=nil)
-    marshal_load([promise_id, timeout, attr])
-  end
-
-  def marshal_dump
-    [@promise.id, @timeout, @attr]
-  end
-
-  def marshal_load(args)
-    promise_id, @timeout, @attr = args
+    promise_id, @timeout, @attr = promise_id, timeout, attr
     @promise = ::Marty::Promise.find(promise_id)
     @mutex   = ::Mutex.new
     @result  = NOT_SET
+  end
+
+  def as_json(*)
+    {'__promise__' => [@promise.id, @timeout, @attr]}
   end
 
   def __promise__

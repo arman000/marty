@@ -6,34 +6,38 @@ class Marty::Promise < Marty::Base
   # default timeout (seconds) to wait for jobs to start
   DEFAULT_JOB_TIMEOUT = Rails.configuration.marty.job_timeout || 10
 
-=begin
-  SELECT_COLS = columns.map(&:name)-["result"]
-  default_scope {
-    select(*SELECT_COLS)
-  }
-
-  # implements laziness for the result column -- FIXME: are we just
-  # doing this for the jobs dashboard?  If so, why don't we create a
-  # database view which excludes result? That seems a lot safer.
-  def result
-    unless has_attribute?(:result)
-      changes_before_reload = self.changes.clone
-      self.reload
-      changes_before_reload.each{
-        |attribute_name, values|
-        self.send("#{attribute_name}=", values[1])
-      }
-    end
-    read_attribute :result
+  def result(force=false)
+    res = super()
+    Marty::Promise.load_result(res, force)
   end
-=end
 
-  validates_presence_of :title
+  def self.load_result(obj, force=false)
+    if force && obj.respond_to?(:__force__)
+      obj = obj.__force__
+    end
+
+    case obj
+    when Array
+      obj.map {|x| load_result(x, force)}
+    when Hash
+      p = obj['__promise__']
+
+      if p && obj.length==1
+        load_result(Marty::PromiseProxy.new(*p), force)
+      else
+        obj.each_with_object({}) { |(k, v), h| h[k] = load_result(v, force) }
+      end
+    else
+      obj
+    end
+  end
 
   has_many :children,
            foreign_key: 'parent_id',
            class_name: "Marty::Promise",
            dependent: :destroy
+
+  validates_presence_of :title
 
   belongs_to :parent, class_name: "Marty::Promise"
   belongs_to :user, class_name: "Marty::User"
@@ -45,43 +49,6 @@ class Marty::Promise < Marty::Base
     rescue => exc
       Marty::Util.logger.error("promise GC error: #{exc}")
     end
-  end
-
-  class VirtualRoot
-    def self.primary_key
-      'id'
-    end
-
-    def id
-      'root'
-    end
-
-    def user_id
-      0
-    end
-    alias_method :job_id, :user_id
-
-    def result
-      nil
-    end
-    [:start_dt, :end_dt].each { |m| alias_method m, :result }
-
-    def status
-      true
-    end
-  end
-
-  def self.root
-    VirtualRoot.new
-  end
-
-  def self.children_for_id(id, search_order)
-    q = id == 'root' ? where(parent_id: nil) : find(id).children
-    q.live_search(search_order).order(id: :desc).includes(:children, :user)
-  end
-
-  def leaf
-    children.empty?
   end
 
   def raw_conn
@@ -236,22 +203,4 @@ class Marty::Promise < Marty::Base
       raw_conn.exec("UNLISTEN promise_#{id}")
     end
   end
-
-  # Support UI live search -- FIXME: hacky to have UI scoping here
-  scope :live_search, lambda { |search_text|
-    return if !search_text || search_text.strip.length < 1
-
-    # Searches user login/firstname/lastname
-    query = [
-             "marty_users.login ILIKE ?",
-             "marty_users.firstname ILIKE ?",
-             "marty_users.lastname ILIKE ?",
-             "marty_roles.name ILIKE ?",
-            ].join(' OR ')
-
-    st = "%#{search_text}%"
-    # Convert "Role Name" or "Role name" to "role_name" (underscore is key)
-    st2 = "%#{search_text.titleize.gsub(/\s/, '').underscore}%"
-    joins({:user => :roles}).where(query, st, st, st, st2).distinct
-  }
 end

@@ -770,7 +770,7 @@ EOS
       it "should not create a new version if no change has been made" do
         dg = dg_from_import("G4", G1)
         dg.update_from_import("G4", G1)
-        expect(Marty::DataGrid.unscoped.where(group_id: dg.group_id).count).to eq 1
+        expect(Marty::DataGrid.where(group_id: dg.group_id).count).to eq 1
       end
 
       it "should be able to export and import back grids" do
