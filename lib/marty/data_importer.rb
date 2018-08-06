@@ -1,17 +1,16 @@
 module Marty
-  class DataImporterError < StandardError
-    attr_reader :lines
-
-    def initialize(message, lines)
-      msg = lines && lines.respond_to?(:join) ?
-      "#{message} - lines: #{lines.join(',')}" : message
-
-      super(msg)
-      @lines = lines
-    end
-  end
-
   class DataImporter
+    class Error < StandardError
+      attr_reader :lines
+
+      def initialize(message, lines)
+        msg = lines && lines.respond_to?(:join) ?
+                "#{message} - lines: #{lines.join(',')}" : message
+
+        super(msg)
+        @lines = lines
+      end
+    end
     # perform cleaning and do_import and summarize its results
     def self.do_import_summary(klass,
                                data,
@@ -81,14 +80,14 @@ module Marty
           end
         rescue => exc
           # to find problems with the importer, comment out the rescue block
-          raise Marty::DataImporterError.new(exc.to_s, [eline])
+          raise Error.new(exc.to_s, [eline])
         end
 
         ids = {}
         # raise an error if record referenced more than once.
         res.each_with_index do
           |(op, id), line|
-          raise Marty::DataImporterError.
+          raise Error.
             new("record referenced more than once", [ids[id], line]) if
             op != :blank && ids.member?(id) && !allow_dups
 
@@ -100,12 +99,12 @@ module Marty
           klass.send(validation_function.to_sym, ids.keys) if
             validation_function
         rescue => exc
-          raise Marty::DataImporterError.new(exc.to_s, [])
+          raise Error.new(exc.to_s, [])
         end
 
         remainder_ids = cleaner_ids - ids.keys
 
-        raise Marty::DataImporterError.
+        raise Error.
           new("Missing import data. " +
               "Please provide header line and at least one data line.", [1]) if
           ids.keys.compact.count == 0

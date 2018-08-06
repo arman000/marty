@@ -1,23 +1,18 @@
 class Marty::Grid < ::Netzke::Grid::Base
-
   extend ::Marty::Permissions
 
   has_marty_permissions read: :any
 
-  def configure_form_window(c)
-    super
-
-    c.klass = Marty::RecordFormWindow
-
-    # Fix Add in form/Edit in form modal popup width
-    # Netzke 0.10.1 defaults width to 80% of screen which is too wide
-    # for a form where the fields are stacked top to bottom
-    # Netzke 0.8.4 defaulted width to 400px - let's make it a bit wider
-    c.width = 475
+  # parent grid is the grid in which child/linked_components is defined
+  # child  components are components dependent on the selected parent row
+  # linked components will update whenever the parent is updated
+  def initialize args, kwargs
+    super(args, kwargs)
+    client_config[:child_components]  = child_components  || []
+    client_config[:linked_components] = linked_components || []
   end
 
   client_class do |c|
-    # add menu overflowHandler to toolbars
     c.init_component = l(<<-JS)
     function() {
       this.dockedItems = this.dockedItems || [];
@@ -49,49 +44,45 @@ class Marty::Grid < ::Netzke::Grid::Base
       this.paging = false;
       this.callParent();
       this.paging = paging
-    }
-    JS
 
-    # For some reason the grid update function was removed in Netzke
-    # 0.10.1.  So, add it here.
-    c.cm_update = l(<<-JS)
-    function() {
-      this.store.load();
-    }
-    JS
+      var me = this;
 
-    # add menu overflowHandler to toolbars
-    c.init_component = l(<<-JS)
-    function() {
-      this.dockedItems = this.dockedItems || [];
-      if (this.paging == 'pagination') {
-        this.dockedItems.push({
-          xtype: 'pagingtoolbar',
-          dock: 'bottom',
-          layout: {overflowHandler: 'Menu'},
-          listeners: {
-            'beforechange': this.disableDirtyPageWarning ? {} : {
-              fn: this.netzkeBeforePageChange, scope: this
-            }
-          },
-          store: this.store,
-          items: this.bbar && ["-"].concat(this.bbar)
-        });
-      } else if (this.bbar) {
-        this.dockedItems.push({
-          xtype: 'toolbar',
-          dock: 'bottom',
-          layout: {overflowHandler: 'Menu'},
-          items: this.bbar
-        });
+      var children = me.serverConfig.child_components || [];
+      me.getSelectionModel().on(
+      'selectionchange',
+      function(m) {
+        var has_sel = m.hasSelection();
+        var rid = has_sel ?
+                  me.getSelectionModel().getSelection()[0].getId() : null
+
+        me.serverConfig.selected = rid;
+
+        for (var key in me.actions) {
+          // hacky -- assumes our functions start with "do"
+          if (key.substring(0, 2) == "do") {
+            me.actions[key].setDisabled(!has_sel);
+          }
+        }
+
+        for (var child of children) {
+          var comp = me.netzkeGetComponentFromParent(child);
+          if (comp) {
+            comp.serverConfig.parent_id = rid;
+            if (comp.reload) { comp.reload() }
+          }
+        }
+      });
+
+      var store  = me.getStore();
+      var linked = me.serverConfig.linked_components || [];
+      for (var event of ['update', 'netzkerefresh']) {
+        store.on(event, function() {
+        for (var link of linked) {
+            var comp = me.netzkeGetComponentFromParent(link);
+            if (comp && comp.reload) { comp.reload() }
+          }
+        }, this);
       }
-
-      // block creation of toolbars in parent
-      delete this.bbar;
-      var paging  = this.paging
-      this.paging = false;
-      this.callParent();
-      this.paging = paging
     }
     JS
 
@@ -110,20 +101,39 @@ class Marty::Grid < ::Netzke::Grid::Base
     }
     JS
 
+    c.reload = l(<<-JS)
+    function(opts={}) {
+      this.netzkeReloadStore(opts);
+    }
+    JS
+
+    c.reload_all = l(<<-JS)
+    function() {
+      var me = this;
+      var children = me.serverConfig.child_components || [];
+      this.store.reload();
+      for (child of children) {
+        var comp = me.netzkeGetComponentFromParent(child);
+        if (comp && comp.reload) { comp.reload() }
+      }
+    }
+    JS
+
     c.clear_filters = l(<<-JS)
     function() {
       this.filters.clearFilters();
     }
     JS
+
+    c.netzkeGetComponentFromParent = l(<<-JS)
+    function(component_path) {
+      return this.netzkeGetParentComponent().netzkeGetComponent(component_path);
+    }
+    JS
+
   end
 
-  component :view_window do |c|
-    configure_form_window(c)
-    c.excluded = !allowed_to?(:read)
-    c.items    = [:view_form]
-    c.title    = I18n.t('netzke.grid.base.view_record',
-                        model: model.model_name.human)
-  end
+  ######################################################################
 
   def class_can?(op)
     self.class.can_perform_action?(op)
@@ -147,11 +157,6 @@ class Marty::Grid < ::Netzke::Grid::Base
   def has_search_action?
     false
   end
-
-  # To add :clear_filters to your app's bbar, add the following lines:
-  # def default_bbar
-  #   [:clear_filters] + super
-  # end
 
   def get_json_sorter(json_col, field)
     lambda do |r, dir|
@@ -201,5 +206,33 @@ class Marty::Grid < ::Netzke::Grid::Base
     super(a)
     a.icon     = nil
     a.icon_cls = "fa fa-check glyph"
+  end
+
+  def child_components
+    []
+  end
+
+  def linked_components
+    []
+  end
+
+  def configure_form_window(c)
+    super
+
+    c.klass = Marty::RecordFormWindow
+
+    # Fix Add in form/Edit in form modal popup width
+    # Netzke 0.10.1 defaults width to 80% of screen which is too wide
+    # for a form where the fields are stacked top to bottom
+    # Netzke 0.8.4 defaulted width to 400px - let's make it a bit wider
+    c.width = 475
+  end
+
+  component :view_window do |c|
+    configure_form_window(c)
+    c.excluded = !allowed_to?(:read)
+    c.items    = [:view_form]
+    c.title    = I18n.t('netzke.grid.base.view_record',
+                        model: model.model_name.human)
   end
 end

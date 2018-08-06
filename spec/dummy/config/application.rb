@@ -82,6 +82,7 @@ module Dummy
                          ]
     #config.marty.default_posting_type = 'BASE'
     config.secret_key_base = "SECRET_KEY_BASE"
+    config.marty.extjs_theme = 'crisp'
   end
 end
 require "marty/permissions"
