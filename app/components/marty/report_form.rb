@@ -4,19 +4,19 @@ class Marty::ReportForm < Marty::Form
   action :apply do |a|
     a.text     = a.tooltip = I18n.t("reporting.background")
     a.handler  = :netzke_on_apply
-    a.icon     = :report_disk
+    a.icon_cls = "fa fa-cloud glyph"
     a.disabled = false
   end
 
   action :foreground do |a|
     a.text     = a.tooltip = I18n.t("reporting.generate")
-    a.icon     = :report_go
+    a.icon_cls = "fa fa-download glyph"
     a.disabled = false
   end
 
   action :link do |a|
     a.text     = a.tooltip = I18n.t("reporting.link")
-    a.icon     = :link_go
+    a.icon_cls = "fa fa-link glyph"
     a.disabled = false
   end
 

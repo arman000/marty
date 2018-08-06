@@ -115,19 +115,57 @@ class Marty::Grid < ::Netzke::Grid::Base
   end
 
   # To add :clear_filters to your app's bbar, add the following lines:
-# def default_bbar
-#   [:clear_filters] + super
-# end
-
-  action :clear_filters do |a|
-    a.text    = "X"
-    a.tooltip = "Clear filters"
-    a.handler = :clear_filters
-  end
+  # def default_bbar
+  #   [:clear_filters] + super
+  # end
 
   def get_json_sorter(json_col, field)
     lambda do |r, dir|
       r.order("#{json_col} ->> '#{field}' " + dir.to_s)
     end
+  end
+
+  action :clear_filters do |a|
+    a.tooltip  = "Clear filters"
+    a.handler  = :clear_filters
+    a.icon_cls = "fa fa-minus glyph"
+  end
+
+  # cosmetic changes
+
+  action :add do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-plus glyph"
+  end
+
+  action :add_in_form do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-plus-square glyph"
+  end
+
+  action :edit do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-edit glyph"
+  end
+
+  action :edit_in_form do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-pen-square glyph"
+  end
+
+  action :delete do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-trash glyph"
+  end
+
+  action :apply do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-check glyph"
   end
 end

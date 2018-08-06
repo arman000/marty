@@ -114,9 +114,9 @@ module Marty; class DataGridView < McflyGridPanel
   end
 
   action :show_grid do |a|
-    a.text    = "Show Grid"
-    a.icon    = :application_view_detail
-    a.handler = :netzke_show_grid
+    a.text     = "Show Grid"
+    a.icon_cls = "fa fa-th-large glyph"
+    a.handler  = :netzke_show_grid
   end
 
   endpoint :show_grid do |params|

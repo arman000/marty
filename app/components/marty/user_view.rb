@@ -100,19 +100,19 @@ module Marty; class UserView < Marty::Grid
 
   action :add do |a|
     super(a)
-    a.text    = I18n.t("user_grid.new")
-    a.tooltip = I18n.t("user_grid.new")
-    a.icon    = :user_add
+    a.text     = I18n.t("user_grid.new")
+    a.tooltip  = I18n.t("user_grid.new")
+    a.icon_cls = "fa fa-user-plus glyph"
   end
 
   action :edit do |a|
     super(a)
-    a.icon    = :user_edit
+    a.icon_cls = "fa fa-user-cog glyph"
   end
 
   action :delete do |a|
     super(a)
-    a.icon    = :user_delete
+    a.icon_cls = "fa fa-user-minus glyph"
   end
 
   def default_context_menu

@@ -17,7 +17,7 @@ class Marty::PostingGrid < Marty::Grid
   action :delete do |a|
     a.text      = "Select"
     a.tooltip   = "Select"
-    a.icon      = :time_go
+    a.icon_cls  = "fa fa-clock glyph"
     a.disabled  = true
   end
 
@@ -82,7 +82,7 @@ class Marty::PostingGrid < Marty::Grid
 
   action :detail do |a|
     a.text      = "Detail"
-    a.icon      = :application_view_detail
+    a.icon_cls  = "fa fa-th-large glyph"
     a.handler   = :detail
     a.disabled  = true
   end
