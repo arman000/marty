@@ -26,6 +26,12 @@ class Gemini::MyRuleView < Marty::DeloreanRuleView
       self.class.grid_column(:grid2),
     ]
   end
+  def form_items_computed_guards
+    [jsonb_field(:computed_guards,
+                 getter: jsonb_simple_getter(:computed_guards),
+                 setter: jsonb_simple_setter(:computed_guards),
+                 height: 50)]
+  end
   def default_form_items
     [
       hbox(
