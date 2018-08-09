@@ -192,22 +192,54 @@ feature 'rule view', js: true do
     expect(r["simple_guards"]).not_to include('g_nullbool')
     # computed fields
     press("Edit")
+
+    # bad form - BaseRuleView#simple_to_hash will raise
     fill_in(:computed_guards, with: 'sadf asdf ljsf')
     press("OK")
     wait_for_ajax
     exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error on line 1"
     expect(page).to have_content(exp)
-    fill_in(:computed_guards, with: 'sadf = 123j s /*fdjOIb')
+    sleep 2  # sleep needed for message to clear, otherwise failing tests could
+             # pass due to prior messages
+
+    # lhs is not identifier - BaseRuleView#simple_to_has will raise
+    fill_in(:computed_guards, with: '0sadf = 123j')
     press("OK")
     wait_for_ajax
-    exp = "Computed - Error in rule 'abc' field 'computed_guards': syntax error"
+    exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error on line 1"
     expect(page).to have_content(exp)
+    sleep 2
+
+    # bad rhs - delorean compile will raise
+    fill_in(:computed_guards, with: 'var = 123j')
+    press("OK")
+    wait_for_ajax
+    exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error"
+    expect(page).to have_content(exp)
+    sleep 2
+
+    fill_in(:computed_guards, with: %Q(var1 = "good"\nvar2 = 123\nvar3 = 123j))
+    press("OK")
+    wait_for_ajax
+    exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error"
+    expect(page).to have_content(exp)
+    sleep 2
+
     fill_in(:computed_guards, with: '')
+    fill_in(:results, with: %Q(var1 = "good"\nvar2 = 123\nvar3 = 123j))
+    press("OK")
+    wait_for_ajax
+    exp = "Computed - Error in rule 'abc' field 'results': Syntax error"
+    expect(page).to have_content(exp)
+    sleep 2
+
     fill_in(:results, with: %Q(abc = "def"\ndef = 5\nxyz=def+10\nsadf asdf lsf))
     press("OK")
     wait_for_ajax
-    exp = "Computed - Error in rule 'abc' field 'results': Syntax error on line 4"
+    exp = "Computed - Error in rule 'abc' field 'results': Syntax error"
     expect(page).to have_content(exp)
+    sleep 2
+
     fill_in(:results,
             with: %Q(abc = "def"\ndef = "abc"\nklm = "3"\nabc = "xyz"))
     exp = "Computed - Error in rule 'abc' field 'results': Keyword 'abc' specified more"\
@@ -215,8 +247,71 @@ feature 'rule view', js: true do
     press("OK")
     wait_for_ajax
     expect(page).to have_content(exp)
-    fill_in(:results,
-            with: %Q(abc = "def"\ndef = "abc"\nklm = "3"))
+    sleep 2
+
+    multi_line = <<-EOL
+abc = "def"
+def = "abc"
+klm = 3 +
+     4 +
+if true then 5 else 0
+EOL
+    multi_line_fixed = <<-EOL
+abc = "def"
+def = "abc"
+klm = 3 +
+      4 +
+      if true then 5 else 0
+EOL
+
+    fill_in(:results, with: multi_line)
+    press("OK")
+    wait_for_ajax
+
+    # re-edit twice to make sure re-indentation and stripping are correct
+    press("Edit")
+    wait_for_ajax
+    expect(find_field(:results).value).to eq(multi_line_fixed.chomp)
+    press("OK")
+    wait_for_ajax
+
+    press("Edit")
+    wait_for_ajax
+    expect(find_field(:results).value).to eq(multi_line_fixed.chomp)
+    press("OK")
+    wait_for_ajax
+
+    # when stored in rule, all lines of a multi line value s/b stripped
+    r = Gemini::MyRule.where(name: 'abc', obsoleted_dt: 'infinity').first
+    expect(r.results['klm']).to eq("3 +\n4 +\nif true then 5 else 0")
+
+    # make sure change of key/value order is recognized as a change
+    press("Edit")
+    wait_for_ajax
+    val = find_field(:results).value.lines
+    val[-1] += "\n"
+    newval = (val[1..-1] + val[0..0]).join
+    fill_in(:results, with: newval)
+    press("OK")
+    wait_for_ajax
+    press("Edit")
+    wait_for_ajax
+    val = find_field(:results).value+"\n"
+    expect(val).to eq(newval)
+    press("OK")
+    wait_for_ajax
+
+    exp =<<EOL
+simple_result  = "c value"
+computed_value = if paramb
+                 then param1 / (grid1_grid_result||1)
+                 else (grid2_grid_result||1) / param1
+EOL
+    names = mrv.col_values(:name, 9, 0)
+    idx = names.index{|n|n=='Rule3'}+1
+    mrv.select_row(idx)
+    press("Edit")
+    expect(find_field(:results).value).to eq(exp.chomp)
     press("OK")
     wait_for_ajax
 

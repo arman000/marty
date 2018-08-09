@@ -47,7 +47,7 @@ class ActiveRecord::Base
   end
 end
 
-register_chrome_driver
+register_chrome_driver(:chrome, chromeOptions: { args: %w[start-maximized]})
 register_chrome_driver(:headless,
                        chromeOptions: {
                          args: %w[headless disable-gpu window-size=3840,2160]

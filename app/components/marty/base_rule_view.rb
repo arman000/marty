@@ -47,37 +47,46 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     end
   end
 
-  def self.simple_to_hashstr(s)
-    pairs = []
-    keys = Set.new
+  def self.simple_to_hash(s)
+    result = {}
+    save_linenos = {}
+    last_key = nil
     s.lines.each.with_index(1) do |line, idx|
       next if /\A\s*\z/.match(line)
       line.chomp!
       begin
-        m = /\A\s*([a-z0-9][a-z0-9_]*)\s*=\s*(.*)\s*\z/.match(line)
-        k, v = m[1], m[2]
-        v = [v].to_json[1..-2]
-        raise DupKeyError.new(k, idx) if keys.include?(k)
-        raise unless /\A['"].*['"]\z/.match(v)
-        keys << k
+        m = /\A\s*([a-z][a-z0-9_]*)\s*=\s*(.*)\s*\z/.match(line)
+        if m
+          k, v = m[1], m[2]
+          raise DupKeyError.new(k, idx) if result.keys.include?(k)
+          save_linenos[k] = idx
+          result[k] = v
+          last_key = k
+        else
+          raise unless last_key
+          result[last_key] += "\n" + line.strip
+        end
       rescue DupKeyError => e
         raise
       rescue => e
         raise "syntax error on line #{idx}"
       end
-      pairs << [k, v]
     end
-
-    kvs = pairs.map { |k, v| %Q("#{k}":#{v}) }.join(",")
-    "{#{kvs}}"
+    result
   end
 
   def self.hash_to_simple(h)
     return unless h && h.present?
-    fmt = '%-' +  h.keys.map(&:length).max.to_s + 's = %s'
+    lhs_wid = h.keys.map(&:length).max
+    fmt = "%-#{lhs_wid}s = %s"
+    result = []
     h.map do |k, vstr|
-      fmt % [k, vstr]
-    end.join("\n") || ''
+      vlines = vstr.lines.map(&:chomp)
+      fst = vlines.shift
+      result << fmt % [k, fst]
+      vlines.each {|l| result << " "*(lhs_wid+3) + l}
+    end
+    result.join("\n")
   end
 
   def jsonb_getter(c)
@@ -94,12 +103,15 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       return r.send(msg, nil) if v.blank?
 
       begin
-        v = ActiveSupport::JSON.decode(
-          Marty::BaseRuleView.simple_to_hashstr(v))
+        final = Marty::BaseRuleView.simple_to_hash(v)
       rescue => e
-        v = { "~~ERROR~~": e.message }
+        final = { "~~ERROR~~": e.message }
       end
-      r.send(msg, v)
+
+      # ActiveRecord ignores change in json key order
+      r.send("#{c}_will_change!") if r[c.to_s].to_a != final.to_a
+
+      r.send(msg, final)
     }
   end
 
