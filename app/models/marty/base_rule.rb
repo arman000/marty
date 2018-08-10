@@ -74,6 +74,7 @@ class Marty::BaseRule < Marty::Base
     self.class.guard_info.each do |k,v|
       next if !v.include?(:default) || self.simple_guards.include?(k)
       self.simple_guards[k] = v[:default]
+      binding.pry
     end
   end
 
