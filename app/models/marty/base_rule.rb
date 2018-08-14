@@ -60,7 +60,6 @@ class Marty::BaseRule < Marty::Base
       "- Error in rule '#{name}' field 'results': #{res_err.capitalize}" if res_err
   end
 
-  validates_presence_of :name
   validate :validate
 
   before_validation(on: [:create, :update]) do
