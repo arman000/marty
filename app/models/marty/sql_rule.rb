@@ -1,8 +1,6 @@
 class Marty::SqlRule < Marty::BaseRule
   self.abstract_class = true
 
-  validates_presence_of :name, :rule_type, :expression
-
   def validate
     super
     return errors[:base] << "Start date must be before end date" if
