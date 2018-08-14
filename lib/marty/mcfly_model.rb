@@ -52,6 +52,10 @@ module Mcfly::Model
       end
     end
 
+    def hash_if_necessary(q, private)
+      !private && q.is_a?(ActiveRecord::Base) ? make_openstruct(q) : q
+    end
+
     def base_mcfly_lookup(meth, name, options = {}, &block)
 
       priv = options[:private]
@@ -70,19 +74,7 @@ module Mcfly::Model
 
         q = q.first if q.respond_to?(:first) && options[:mode] == :first
 
-        next q if priv
-
-        case
-        when q.is_a?(ActiveRecord::Relation)
-          # shouldn't happen - lookups that are mode nil should be
-          # private raise "#{self}.#{name} can't convert
-          # ActiveRecord::Relation to OpenStruct"
-          q
-        when q.is_a?(ActiveRecord::Base)
-          make_openstruct(q)
-        else
-          q
-        end
+        hash_if_necessary(q, priv)
       end
     end
 
@@ -169,10 +161,11 @@ module Mcfly::Model
       raise "#{rel_attr} should be mapped in attrs" if attrs[rel_attr].nil?
 
       cat_assoc_klass = cat_assoc_name.constantize
+      cat_attr_id = "#{cat_attr}_id"
 
       # replace rel_attr with cat_attr in attrs
       pc_attrs = attrs.each_with_object({}) {|(k, v), h|
-        h[k == rel_attr ? "#{cat_attr}_id" : k] = v
+        h[k == rel_attr ? cat_attr_id : k] = v
       }
 
       pc_name = "pc_#{name}".to_sym
@@ -186,6 +179,7 @@ module Mcfly::Model
 
       # cache if mode is not nil
       fn = options.fetch(:mode, :first) ? :cached_delorean_fn : :delorean_fn
+      priv = options[:private]
 
       send(fn, name, sig: attrs.length+1) do
         |ts, *args|
@@ -196,13 +190,12 @@ module Mcfly::Model
 
         args[lpi] = cat_assoc_klass.
                       mcfly_pt(ts).
-                      # FIXME: XXXX why is this join needed???
-                      # joins(cat_attr).
-                      where(rel_attr => rel).
-                      pluck("#{cat_attr}_id").
-                      first
+                      select(cat_attr_id).
+                      find_by(rel_attr => rel).
+                      send(cat_attr_id)
 
-        self.send(pc_name, ts, *args)
+        q = self.send(pc_name, ts, *args)
+        hash_if_necessary(q, priv)
       end
     end
   end

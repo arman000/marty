@@ -31,9 +31,9 @@ describe Marty::JobController, slow: true do
     stop_delayed_job
   end
 
-  def wait_for_job(title)
+  def wait_for_jobs
     60.times do
-      break unless Marty::Promise.where(result: {}, title: title).exists?
+      break unless Marty::Promise.where(result: {}).exists?
       sleep 1
     end
   end
@@ -56,7 +56,7 @@ describe Marty::JobController, slow: true do
       res.to_s
     }.to raise_error(RuntimeError)
 
-    wait_for_job NAME_A
+    wait_for_jobs
 
     expect(Marty::Promise.where(start_dt: nil).count).to eq 0
   end
@@ -108,7 +108,7 @@ describe Marty::JobController, slow: true do
 
     engine = Marty::ScriptSet.new.get_engine(NAME_C)
     res = engine.background_eval("Z", {"p_title" => NAME_C}, ["result"])
-    wait_for_job NAME_C
+    wait_for_jobs
 
     promise = Marty::Promise.find_by_title(NAME_C)
 
@@ -123,7 +123,7 @@ describe Marty::JobController, slow: true do
   it "promise proxies should be stored lazily (not expanded)" do
     engine = Marty::ScriptSet.new.get_engine(NAME_E)
     engine.background_eval("Z", {"p_title" => NAME_E}, ["result"])
-    wait_for_job NAME_E
+    wait_for_jobs
 
     promise = Marty::Promise.find_by_title(NAME_E)
 
@@ -139,9 +139,9 @@ describe Marty::JobController, slow: true do
   it "should not leave zombie promises when we have exceptions" do
     engine = Marty::ScriptSet.new.get_engine(NAME_D)
     engine.background_eval("Z", {"p_title" => NAME_D}, ["result"])
-    wait_for_job NAME_D
+    wait_for_jobs
 
-    pl = Marty::Promise.where(title: NAME_D)
+    pl = Marty::Promise.all
 
     expect(pl.count).to eq 2
 
@@ -149,6 +149,15 @@ describe Marty::JobController, slow: true do
       expect(p.result["error"]).not_to eq nil
       expect(p.end_dt).not_to eq nil
     }
+  end
+
+  it "should pass p_title to promise create()" do
+    engine = Marty::ScriptSet.new.get_engine(NAME_A)
+    res = engine.evaluate("Y", "a", {"q" => 1})
+    wait_for_jobs
+
+    expect(res).to eq({"b"=>{"e"=>0.125}})
+    expect(Marty::Promise.all.map(&:title).sort).to eq(["aaa", "bbb"])
   end
 
   it "should be able to ask controller for job result" do

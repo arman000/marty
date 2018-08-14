@@ -221,11 +221,32 @@ class ActiveRecord::Relation
     tb = cls.table_name
     self.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
   end
+
+  def attributes
+    to_a.map(&:attributes)
+  end
 end
 
 ######################################################################
 
 class ActiveRecord::Base
+  MCFLY_PT_SIG = [1, 1]
+
+  # FIXME: hacky signatures for AR queries on classes
+  COUNT_SIG    = [0, 0]
+  DISTINCT_SIG = [0, 100]
+  FIND_BY_SIG  = [0, 100]
+  FIRST_SIG    = [0, 1]
+  GROUP_SIG    = [1, 100]
+  JOINS_SIG    = [1, 100]
+  LAST_SIG     = [0, 1]
+  LIMIT_SIG    = [1, 1]
+  NOT_SIG      = [1, 100]
+  ORDER_SIG    = [1, 100]
+  PLUCK_SIG    = [1, 100]
+  SELECT_SIG   = [1, 100]
+  WHERE_SIG    = [0, 100]
+
   class << self
     alias_method :old_joins, :joins
 
@@ -241,22 +262,23 @@ class ActiveRecord::Base
   end
 end
 
-args_hack = [[ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]] +
-            [[Object, nil]]*10
+ar_instances = [ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]
+
+args_hack = [ar_instances] + [[Object, nil]]*10
 
 Delorean::RUBY_WHITELIST.merge!(
-  count:    [ActiveRecord::Relation],
+  count:    [ar_instances],
   distinct: args_hack,
   find_by:  args_hack,
   group:    args_hack,
   joins:    args_hack,
-  limit:    [ActiveRecord::Relation, Integer],
+  limit:    [ar_instances, Integer],
   not:      args_hack,
   order:    args_hack,
   pluck:    args_hack,
   select:   args_hack,
   where:    args_hack,
-  mcfly_pt: [ActiveRecord::Relation,
+  mcfly_pt: [ar_instances,
              [Date, Time, ActiveSupport::TimeWithZone, String],
              [nil, Class]],
   lookup_grid_distinct_entry: [OpenStruct,
