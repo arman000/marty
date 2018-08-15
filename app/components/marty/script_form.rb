@@ -109,7 +109,7 @@ class Marty::ScriptForm < Marty::Form
   action :apply do |a|
     a.text     = I18n.t("script_form.save")
     a.tooltip  = I18n.t("script_form.save")
-    a.icon     = :database_save
+    a.icon_cls = "fa fa-save glyph"
     a.disabled = true
   end
 
@@ -191,9 +191,9 @@ class Marty::ScriptForm < Marty::Form
   ######################################################################
 
   action :do_print do |a|
-    a.text    = I18n.t("script_form.print")
-    a.tooltip = I18n.t("script_form.print")
-    a.icon    = :printer
+    a.text     = I18n.t("script_form.print")
+    a.tooltip  = I18n.t("script_form.print")
+    a.icon_cls = "fa fa-print glyph"
   end
 
   ######################################################################

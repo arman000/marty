@@ -115,20 +115,20 @@ class Marty::PromiseView < Netzke::Tree::Base
   action :clear do |a|
     a.text     = a.tooltip = 'Clear'
     a.disabled = false
-    a.icon     = :application_delete
+    a.icon_cls = "fa fa-minus glyph"
     a.hidden   = !self.class.has_admin_perm?
   end
 
   action :download do |a|
     a.text     = a.tooltip = 'Download'
     a.disabled = true
-    a.icon     = :application_put
+    a.icon_cls = "fa fa-download glyph"
   end
 
   action :refresh do |a|
     a.text     = a.tooltip = 'Refresh'
     a.disabled = false
-    a.icon     = :arrow_refresh
+    a.icon_cls = "fa fa-sync-alt glyph"
   end
 
   endpoint :clear do |params|

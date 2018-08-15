@@ -65,7 +65,7 @@ class Marty::McflyGridPanel < Marty::Grid
 
   action :dup_in_form do |a|
     a.hidden   = !config[:permissions][:create]
-    a.icon     = :page_copy
+    a.icon_cls = "fa fa-copy glyph"
     a.disabled = true
   end
 

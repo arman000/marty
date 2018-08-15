@@ -25,6 +25,41 @@ class Marty::Grid < ::Netzke::Grid::Base
     }
     JS
 
+    # add menu overflowHandler to toolbars
+    c.init_component = l(<<-JS)
+    function() {
+      this.dockedItems = this.dockedItems || [];
+      if (this.paging == 'pagination') {
+        this.dockedItems.push({
+          xtype: 'pagingtoolbar',
+          dock: 'bottom',
+          layout: {overflowHandler: 'Menu'},
+          listeners: {
+            'beforechange': this.disableDirtyPageWarning ? {} : {
+              fn: this.netzkeBeforePageChange, scope: this
+            }
+          },
+          store: this.store,
+          items: this.bbar && ["-"].concat(this.bbar)
+        });
+      } else if (this.bbar) {
+        this.dockedItems.push({
+          xtype: 'toolbar',
+          dock: 'bottom',
+          layout: {overflowHandler: 'Menu'},
+          items: this.bbar
+        });
+      }
+
+      // block creation of toolbars in parent
+      delete this.bbar;
+      var paging  = this.paging
+      this.paging = false;
+      this.callParent();
+      this.paging = paging
+    }
+    JS
+
     c.do_view_in_form = l(<<-JS)
     function(record){
       this.netzkeLoadComponent("view_window", {
@@ -79,19 +114,57 @@ class Marty::Grid < ::Netzke::Grid::Base
   end
 
   # To add :clear_filters to your app's bbar, add the following lines:
-# def default_bbar
-#   [:clear_filters] + super
-# end
-
-  action :clear_filters do |a|
-    a.text    = "X"
-    a.tooltip = "Clear filters"
-    a.handler = :clear_filters
-  end
+  # def default_bbar
+  #   [:clear_filters] + super
+  # end
 
   def get_json_sorter(json_col, field)
     lambda do |r, dir|
       r.order("#{json_col} ->> '#{field}' " + dir.to_s)
     end
+  end
+
+  action :clear_filters do |a|
+    a.tooltip  = "Clear filters"
+    a.handler  = :clear_filters
+    a.icon_cls = "fa fa-minus glyph"
+  end
+
+  # cosmetic changes
+
+  action :add do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-plus glyph"
+  end
+
+  action :add_in_form do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-plus-square glyph"
+  end
+
+  action :edit do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-edit glyph"
+  end
+
+  action :edit_in_form do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-pen-square glyph"
+  end
+
+  action :delete do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-trash glyph"
+  end
+
+  action :apply do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-check glyph"
   end
 end
