@@ -28,6 +28,8 @@ group :development, :test do
   gem 'mcfly'
   gem 'netzke', '6.5.0.0'
 
+  # gem 'delorean_lang', path: File.expand_path('../../delorean', __FILE__)
+
   # gem 'marty_rspec', path: File.expand_path('../../marty_rspec', __FILE__)
   gem 'marty_rspec'
 end

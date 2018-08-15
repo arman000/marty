@@ -10,6 +10,10 @@ class Delorean::BaseModule::NodeCall
     params[:_user_id]   = _e[:_user_id]    || Mcfly.whodunnit.try(:id)
   end
 
+  # def log(msg)
+  #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
+  # end
+
   # Monkey-patch '|' method for Delorean NodeCall to create promise
   # jobs and return promise proxy objects.
   def |(args)
@@ -29,6 +33,8 @@ class Delorean::BaseModule::NodeCall
     rescue => exc
       raise "non-serializable parameters: #{params} #{exc}"
     end
+
+    # log "||||| #{args.inspect} #{params.inspect}"
 
     title   = params["p_title"]   || "#{script}::#{nn.demodulize}"
     timeout = params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
