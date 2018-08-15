@@ -105,7 +105,6 @@ class Marty::Grid < ::Netzke::Grid::Base
     }
 
     c.editing      = :both
-    c.plugins      = [{ptype: 'autosizecolumn'}]
     c.store_config = {page_size: 30}
     c.view_config  = {preserve_scroll_on_reload: true}
   end
