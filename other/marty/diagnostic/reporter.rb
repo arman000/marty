@@ -1,9 +1,9 @@
 module Marty::Diagnostic; class Reporter < Request
   class_attribute :reports, :diagnostics, :namespaces
 
-  self.reports = {}
+  self.reports     = {}
   self.diagnostics = []
-  self.namespaces = ['Marty']
+  self.namespaces  = ['Marty']
 
   def self.run request
     self.request = request
