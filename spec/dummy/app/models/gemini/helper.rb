@@ -49,12 +49,12 @@ class Gemini::Helper
     10.times { Marty::Logger.info(str, data) }
     true
   end
+
   delorean_fn :testaction, sig: 2 do
     |str, id|
     File.open("/tmp/logaction.txt", "a") do |f|
       f.puts str % [id]
     end
+    true
   end
-
-
 end

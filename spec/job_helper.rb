@@ -34,8 +34,7 @@ NAME_C   = "PromiseC"
 SCRIPT_C = <<EOS
 Y:
     node =?
-    x = 123
-    res = node() | "x"
+    res = node() | "node"
 Z:
     result = Y(node=Y) | "res"
     title  = "#{NAME_C}"
@@ -108,8 +107,7 @@ LOGGER:
     msgid =? nil
 
     result = Gemini::Helper.testlog('message', [msgid]) &&
-             Gemini::Helper.testaction('message %d', msgid)
-
+             Gemini::Helper.testaction('message %d', msgid) && msgid
 EOS
 
 def promise_bodies

@@ -106,23 +106,6 @@ end
 require 'netzke/basepack/data_adapters/active_record_adapter'
 module Netzke::Basepack::DataAdapters
   class ActiveRecordAdapter < AbstractAdapter
-    # FIXME: another giant hack to handle lazy_load columns.
-    # Modified original count_records to call count on first passed column.name
-    # when lazy-loaded.  Otherwise, we run into issues with
-    # counting records in the default_scope placed by the lazy_load
-    # module.
-    def count_records(params, columns=[])
-
-      relation = @relation || get_relation(params)
-      columns.each do |c|
-        assoc, method = c[:name].split('__')
-        relation = relation.includes(assoc.to_sym).references(assoc.to_sym) if method
-      end
-
-      @model.const_defined?(:SELECT_COLS) ? relation.count(columns.first.name) :
-        relation.count
-    end
-
     ######################################################################
     # The following is a hack to get around Netzke's broken handling
     # of filtering on PostgreSQL enums columns.
@@ -293,22 +276,10 @@ end
 ######################################################################
 
 class OpenStruct
-  def save
-    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
-    raise "save called from #{loc} on #{self}"
+  # the default as_json produces {"table"=>h} which is quite goofy
+  def as_json(*)
+    self.to_h
   end
-  def save!
-    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
-    raise "save! called from #{loc} on #{self}"
-  end
-  def reload
-    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
-    raise "reload called from #{loc} on #{self}"
-  end
-  #def method_missing(meth, *args)
-  #  puts caller[0..8]
-  #  super
-  #end
 end
 
 ######################################################################

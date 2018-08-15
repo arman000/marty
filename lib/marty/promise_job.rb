@@ -25,9 +25,9 @@ class Delorean::BaseModule::NodeCall
     nn = node.is_a?(Class) ? node.name : node.to_s
     begin
       # make sure params is serialzable before starting a Job
-      Marshal.dump(params)
+      JSON.dump(params)
     rescue => exc
-      raise "non-serializable parameters"
+      raise "non-serializable parameters: #{params} #{exc}"
     end
 
     title   = params["p_title"]   || "#{script}::#{nn.demodulize}"

@@ -157,8 +157,7 @@ class Marty::DataConversion
 
     raise "no keys for #{klass} -- #{options}" if find_options.empty?
 
-    # unscope klass since we're sometimes sent lazy column classes
-    q = klass.unscoped.where(find_options)
+    q = klass.where(find_options)
     q = q.where("obsoleted_dt >= ? AND created_dt < ?", dt, dt) if
        dt && Mcfly.has_mcfly?(klass)
 

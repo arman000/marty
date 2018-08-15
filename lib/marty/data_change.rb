@@ -141,9 +141,8 @@ class Marty::DataChange
       ' OR (created_dt >= ? AND created_dt < ?)'
 
     # find all changes from t0 to t1 -- orders by id to get the lower
-    # ones since those are the original version in Mcfly.  Using
-    # unscoped to get around lazy loaded column scopes.
-    changes = klass.unscoped.select("DISTINCT ON (group_id) *").
+    # ones since those are the original version in Mcfly.
+    changes = klass.select("DISTINCT ON (group_id) *").
       where(change_q, t0, t1, t0, t1).
       order("group_id, id").
       to_a
@@ -174,7 +173,7 @@ class Marty::DataChange
     change_q = '(obsoleted_dt >= ? AND obsoleted_dt < ?)' +
                ' OR (created_dt >= ? AND created_dt < ?)'
 
-    countq = klass.unscoped.where(change_q, t0, t1, t0, t1)
+    countq = klass.where(change_q, t0, t1, t0, t1)
     dataq = klass.where(change_q, t0, t1, t0, t1)
 
     if ids

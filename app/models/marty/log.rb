@@ -12,6 +12,7 @@ class Marty::Log < Marty::Base
     rescue => e
       Marty::Util.logger.error("Marty::Logger failure: #{e.message}")
     end
+    true
   end
 
   def self.cleanup(days_to_keep)

@@ -6,9 +6,13 @@ class Marty::JobController < ActionController::Base
 
     if promise
       format = promise.cformat
+
+      # Force result so finalized object is built
+      data = promise.result(true)
+
       # somewhat hacky: if result has "result" key, it's used as the
       # content.
-      data = promise.result["result"] || promise.result
+      data = data["result"] || data
       title = promise.title
     else
       format = "json"
