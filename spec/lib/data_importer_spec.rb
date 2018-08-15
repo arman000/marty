@@ -142,7 +142,7 @@ EOF
       dup = fannie_bup1.split("\n")[-1]
       lambda {
         Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1+dup)
-      }.should raise_error(Marty::DataImporterError)
+      }.should raise_error(Marty::DataImporter::Error)
     end
 
     it "should be able to use comma separated files" do
@@ -164,7 +164,7 @@ EOF
         Marty::DataImporter.
         do_import_summary(Gemini::BudCategory,
                           bud_cats+bud_cats.sub(/name\n/, ""))
-      }.should raise_error(Marty::DataImporterError)
+      }.should raise_error(Marty::DataImporter::Error)
       Gemini::BudCategory.count.should == 0
     end
 
@@ -233,7 +233,7 @@ EOF
                           nil,
                           'import_validation',
                           )
-      }.should raise_error(Marty::DataImporterError)
+      }.should raise_error(Marty::DataImporter::Error)
 
       res = Marty::DataImporter.
         do_import_summary(Gemini::FannieBup,
@@ -253,7 +253,7 @@ EOF
                           'import_cleaner',
                           'import_validation',
                           )
-      }.should raise_error(Marty::DataImporterError)
+      }.should raise_error(Marty::DataImporter::Error)
 
       res = Marty::DataImporter.
         do_import_summary(Gemini::FannieBup,
@@ -314,7 +314,7 @@ EOF
                           nil,
                           'import_validation',
                           )
-      }.should raise_error(Marty::DataImporterError)
+      }.should raise_error(Marty::DataImporter::Error)
 
       # Load data into prior mm/yy - should not fail since
       # import_validation_allow_prior_month is specified
@@ -338,7 +338,7 @@ EOF
                           nil,
                           'import_validation_allow_prior_month',
                           )
-      }.should raise_error(Marty::DataImporterError)
+      }.should raise_error(Marty::DataImporter::Error)
     end
 
     it "should properly handle validation errors" do
@@ -349,7 +349,7 @@ EOF
 
       begin
         Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup4)
-      rescue Marty::DataImporterError => exc
+      rescue Marty::DataImporter::Error => exc
         exc.lines.should == [0]
       else
         raise "should have had an exception"
@@ -392,7 +392,7 @@ EOF
 
       begin
         Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup5)
-      rescue Marty::DataImporterError => exc
+      rescue Marty::DataImporter::Error => exc
         exc.lines.should == [1]
         exc.message.should =~ /Conv Fixed XX/
       else
@@ -403,7 +403,7 @@ EOF
     it "should check for bad header" do
       lambda {
         Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats2)
-      }.should raise_error(Marty::DataImporterError, /namex/)
+      }.should raise_error(Marty::DataImporter::Error, /namex/)
     end
 
     it "should handle bad data" do
@@ -411,7 +411,7 @@ EOF
       begin
         res = Marty::DataImporter.
           do_import_summary(Gemini::FannieBup, fannie_bup6)
-      rescue Marty::DataImporterError => exc
+      rescue Marty::DataImporter::Error => exc
         exc.lines.should == [1]
         exc.message.should =~ /bad float/
       else
