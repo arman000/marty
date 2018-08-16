@@ -5,7 +5,7 @@ describe Marty::Diagnostic::DelayedJobWorkers do
   def sample_data ip=nil, error=false
     {
       ip || Marty::Helper.my_ip => {
-        'DelayedJobWorkers' => {
+        'Delayed Workers / Node' => {
           'description' => error ? "3" : "4",
           'status'      => true,
           'consistent'  => nil
@@ -39,6 +39,6 @@ describe Marty::Diagnostic::DelayedJobWorkers do
 
   it 'recognizes zero workers as an error' do
     data = described_class.generate.values[0]
-    expect(data['DelayedJobWorkers']['status']).to eq(false)
+    expect(data['Delayed Workers / Node']['status']).to eq(false)
   end
 end
