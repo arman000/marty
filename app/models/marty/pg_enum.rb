@@ -7,11 +7,11 @@ module Marty::PgEnum
     raise "no such #{self.name}: '#{index}'" unless
       self::VALUES.include?(index)
 
-    StringEnum.new(index)
+    index
   end
 
   def get_all(pt=nil)
-    self::VALUES.map { |v| StringEnum.new(v) }
+    self::VALUES.map(&:to_s)
   end
 
   def self.extended(base)
