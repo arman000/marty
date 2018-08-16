@@ -4,7 +4,7 @@ class Marty::ImportView < Marty::Form
   action :apply do |a|
     a.text    = I18n.t("data_import_view.import")
     a.tooltip = I18n.t("data_import_view.import")
-    a.icon    = :database_go
+    a.icon_cls = 'fa fa-database glyph'
   end
 
   def parent_model; end
