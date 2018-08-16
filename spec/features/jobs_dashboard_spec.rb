@@ -27,6 +27,9 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
     find(ext_menuitem_id('Jobs Dashboard')).click
     page_title = I18n.t("jobs.promise_view")
     expect(page).to have_content(page_title)
+
+    sleep 1
+
     expect(tree_row_count(page_title)).to eq(2)
 
     fill_in "live_search_text", with: 'marty'

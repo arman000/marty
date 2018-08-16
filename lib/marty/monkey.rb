@@ -154,37 +154,6 @@ module Netzke::Basepack::DataAdapters
   end
 end
 
-class StringEnum < String
-  include Delorean::Model
-  def name
-    self.to_s
-  end
-  def id
-    self
-  end
-  delorean_instance_method :name
-  delorean_instance_method :id
-
-  def to_yaml(opts = {})
-    YAML::quick_emit(nil, opts) do |out|
-      out.scalar('stringEnum', self.to_s, :plain)
-    end
-  end
-
-  def _dump _
-    self.to_s
-  end
-
-  def self._load(v)
-    new(v)
-  end
-end
-
-YAML::add_domain_type("pennymac.com,2017-06-02", "stringEnum") do
-  |type, val|
-  StringEnum.new(val)
-end
-
 ######################################################################
 
 # Add pg_enum migration support -- FIXME: this doesn't belong here
@@ -199,15 +168,6 @@ module ActiveRecord
 
         column_names.each { |name|
           column(name, enum || name.to_s.pluralize, options) }
-      end
-    end
-    module PostgreSQL
-      module OID
-        class Enum < Type::Value
-          def cast(value)
-            value && StringEnum.new(value)
-          end
-        end
       end
     end
   end

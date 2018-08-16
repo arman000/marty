@@ -103,15 +103,13 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     result_c = result_code(ruleh)
     guard_c = guard_code(ruleh)
 
-    code = self.class.body_start + self.class.indent(grid_i +
-                                                     guard_c +
-                                                     grid_c +
-                                                     result_c)
-    #puts '='*40
-    #puts ruleh["name"]
-    #puts '-'
-    #puts code
-    #puts '-'*10
+    code = self.class.body_start +
+           self.class.indent(grid_i + guard_c + grid_c + result_c)
+    # puts '='*40
+    # puts ruleh["name"]
+    # puts '-'
+    # puts code
+    # puts '-'*10
 
     code
   end
