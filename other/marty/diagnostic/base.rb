@@ -18,7 +18,9 @@ module Marty::Diagnostic; class Base < Request
     end
     class << self
       define_method :generate do
-        pack{yield}
+        pack do
+          yield
+        end
       end
     end
   end
