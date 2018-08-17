@@ -308,19 +308,6 @@ class Marty::DataGrid < Marty::Base
                                  distinct)
   end
 
-  # DEPRECATED: use lookup_grid_distinct_entry_h instead
-  def lookup_grid_distinct_entry(pt, h, visited=nil, follow=true,
-                                 return_grid_data=false)
-    warn "DEPRECATED: instance method lookup_grid_distinct_entry. "\
-         "Use class method lookup_grid_distinct_entry_h instead"
-    dgh = self.attributes.slice("id","group_id","created_dt",
-                              "metadata", "data_type")
-    self.class.lookup_grid_distinct_entry_h(pt, h, dgh, visited, follow,
-                                            return_grid_data)
-  end
-  delorean_instance_method :lookup_grid_distinct_entry,
-                           [[Date, Time, ActiveSupport::TimeWithZone], Hash]
-
   def dir_infos(dir)
     metadata.select {|inf| inf["dir"] == dir}
   end
