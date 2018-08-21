@@ -188,7 +188,7 @@ class Marty::DataGrid < Marty::Base
     h = dgh["metadata"].each_with_object({}) do |m, h|
       attr = m["attr"]
       inc = h_passed.fetch(attr, :__nf__)
-      next if inc == :__nf__ || inc.nil?
+      next if inc == :__nf__
       val = (defined? inc.name) ? inc.name : inc
       h[attr] = val.is_a?(String) ?
                   ActiveRecord::Base.connection.quote(val)[1..-2] : val
