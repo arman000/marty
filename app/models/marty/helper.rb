@@ -18,4 +18,9 @@ class Marty::Helper
   delorean_fn :git, sig:0 do
     [my_ip, ENV['DELAYED_VER']]
   end
+
+  delorean_fn :upcase, sig:1 do
+    |str|
+    str.upcase
+  end
 end

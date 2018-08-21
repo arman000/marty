@@ -4,10 +4,14 @@ class Marty::AwsApiKeyView < Marty::Grid
                         read:   :admin,
                         delete: :admin
 
+  def child_components
+    [:aws_apigateway_api_key_move_window]
+  end
+
   def configure(c)
     super
 
-    c.paging = :pagination
+    c.paging = :buffered
     c.editing = :in_form
     c.title   = 'Marty AWS API KEYS (local)'
     c.model   = 'Marty::AwsApiKey'
@@ -68,19 +72,34 @@ class Marty::AwsApiKeyView < Marty::Grid
       if (c) { c.reload() }
     }
     JS
+
+    c.netzke_on_do_move = l(<<-JS)
+    function() {
+      this.netzkeLoadComponent("aws_apigateway_api_key_move_window",
+        { callback: function(w) {w.show(); },
+      });
+    }
+    JS
   end
 
   action :generate do |a|
     a.text     = 'Generate'
     a.handler  = :generate_api_key
-    a.icon     = :add
+    a.icon_cls = "fa fa-plus glyph"
+  end
+
+  action :do_move do |a|
+    a.text     = 'Move'
+    a.icon_cls = "fa fa-truck glyph"
+    a.disabled = true
   end
 
   endpoint :generate_api_key do
     api_id            = client_config['api_id']
     api_usage_plan_id = client_config['parent_id']
 
-    return unless api_id && api_usage_plan_id
+    return client.netzke_notify "Usage plan not selected" unless api_id &&
+                                                                 api_usage_plan_id
 
     begin
       api_aid            = Marty::AwsObject.find(api_id).value['aid']
@@ -104,6 +123,10 @@ class Marty::AwsApiKeyView < Marty::Grid
   end
 
   def default_bbar
-    [:generate, :delete]
+    [:generate, :do_move, :delete]
+  end
+
+  component :aws_apigateway_api_key_move_window do |c|
+    c.klass = Marty::AwsApigatewayApiKeyMoveWindow
   end
 end

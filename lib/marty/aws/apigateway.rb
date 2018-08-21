@@ -127,6 +127,18 @@ class Marty::Aws::Apigateway
     resp
   end
 
+  def create_usage_plan name, description, api_id, stages, throttle, quota
+    client.create_usage_plan(
+      name: name,
+      description: description,
+      api_stages: stages.map{ |s|
+        {'api_id' => api_id, 'stage' => s}
+      },
+      throttle: throttle,
+      quota: quota,
+    )
+  end
+
   def delete_usage_plan_key uid, kid
     client.delete_usage_plan_key(
       usage_plan_id: uid,
@@ -136,5 +148,15 @@ class Marty::Aws::Apigateway
 
   def delete_usage_plan usage_plan_id
     client.delete_usage_plan(usage_plan_id: usage_plan_id)
+  end
+
+  def swagger_export api_id, stage_name
+    client.get_export(
+      rest_api_id: api_id,
+      stage_name:  stage_name,
+      export_type: 'swagger',
+      parameters: {'extensions' => 'apigateway'},
+      accepts: 'application/json',
+    )
   end
 end

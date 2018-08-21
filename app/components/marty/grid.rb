@@ -46,7 +46,6 @@ class Marty::Grid < ::Netzke::Grid::Base
       this.paging = paging
 
       var me = this;
-      me.callParent();
 
       var children = me.serverConfig.child_components || [];
       me.getSelectionModel().on(

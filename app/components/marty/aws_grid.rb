@@ -71,12 +71,11 @@ class Marty::AwsGrid < Marty::Grid
 
   endpoint :get_objects do
     begin
-      ActiveRecord::Base.transaction do
-        Marty::AwsObject.where(
-          client:      @aws_client,
-          object_type: @aws_object_type,
-        ).delete_all
+      user = Marty::User.current
 
+      return client.netzke_notify "No current user" unless user
+
+      ActiveRecord::Base.transaction do
         pid        = client_config['parent_id']
         aws_client = @aws_client_class.new
         fn         = "get_#{@aws_object_type.pluralize}"
@@ -89,8 +88,15 @@ class Marty::AwsGrid < Marty::Grid
           s.except(:id)
         end
 
+        Marty::AwsObject.where(
+          marty_user_id:     user.id,
+          client:      @aws_client,
+          object_type: @aws_object_type,
+        ).delete_all
+
         processed.each do |j|
           Marty::AwsObject.create!(
+            marty_user_id:      user.id,
             client:       @aws_client,
             object_type:  @aws_object_type,
             value:       j,
@@ -133,7 +139,9 @@ class Marty::AwsGrid < Marty::Grid
   end
 
   def get_records params
-    model.where(client: @aws_client, object_type: @aws_object_type).scoping do
+    model.where(marty_user_id: Marty::User.current.id,
+                client: @aws_client,
+                object_type: @aws_object_type).scoping do
       super
     end
   end

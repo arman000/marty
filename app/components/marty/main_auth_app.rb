@@ -83,8 +83,8 @@ class Marty::MainAuthApp < Marty::AuthApp
   def aws_menu
     [
       {
-        text: 'AWS Management',
-        icon:  icon_hack(:wrench),
+        text: 'AWS API Management',
+        icon_cls:  "fa fa-cloud glyph",
         disabled: !self.class.has_admin_perm?,
         menu: [
           :aws_api_view,
@@ -311,18 +311,18 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   action :aws_api_view do |a|
-    a.text     = 'API Gateway Management'
+    a.text     = 'API Gateway'
     a.tooltip  = 'Manage External APIs'
     a.handler   = :netzke_load_component_by_action
-    a.icon      = :cog
+    a.icon_cls  = "fa fa-paper-plane glyph"
     a.disabled = !self.class.has_admin_perm?
   end
 
   action :aws_api_user_view do |a|
-    a.text     = 'API Gateway/Cognito Management'
+    a.text     = 'Cognito'
     a.tooltip  = 'Manage External API Users'
     a.handler   = :netzke_load_component_by_action
-    a.icon      = :cog
+    a.icon_cls   = "fa fa-user glyph"
     a.disabled = !self.class.has_admin_perm?
   end
 

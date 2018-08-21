@@ -42,6 +42,35 @@ class Marty::AwsApigatewayApiUsagePlanView < Marty::AwsGrid
                    NESTED_THROTTLE_ATTRIBUTES.keys +
                    NESTED_QUOTA_ATTRIBUTES.keys
   end
+
+  client_class do |c|
+    c.netzke_on_do_delete_usage_plan = l(<<-JS)
+    function() {
+      this.server.destroyUsagePlan();
+    }
+    JS
+  end
+
+  def default_bbar
+    [:do_delete_usage_plan]
+  end
+
+  action :do_delete_usage_plan do |a|
+    a.text     = "Delete"
+    a.icon_cls = "fa fa-trash glyph"
+    a.disabled = true
+  end
+
+  endpoint :destroy_usage_plan do
+    begin
+      usage_plan = Marty::AwsObject.find(client_config['selected'])
+      Marty::Aws::Apigateway.new.delete_usage_plan(usage_plan.value['aid'])
+      usage_plan.delete
+      client.reload
+    rescue => e
+      client.netzke_notify e.message
+    end
+  end
 end
 
 AwsApigatewayApiUsagePlanView = Marty::AwsApigatewayApiUsagePlanView

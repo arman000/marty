@@ -18,6 +18,88 @@ class Marty::AwsApigatewayApiStageView < Marty::AwsGrid
     c.title      = "AWS API Stages"
     c.attributes = ATTRIBUTES.keys
   end
+
+  def default_bbar
+    [:create, :deploy]
+  end
+
+  action :create do |c|
+    c.icon_cls = "fa fa-plus glyph"
+  end
+
+  action :deploy do |c|
+    c.icon_cls = "fa fa-upload glyph"
+  end
+
+  client_class do |c|
+    c.netzke_on_do_export_swagger = l(<<-JS)
+    function() {
+      var stage_rec_id = this.serverConfig.selected;
+      var api_rec_id   = this.netzkeGetComponentFromParent(
+                         'aws_apigateway_api_view').getSelection()[0].getId();
+
+      this.server.exportSwagger({
+        'api_rec_id'   : api_rec_id,
+        'stage_rec_id' : stage_rec_id
+        });
+    }
+    JS
+
+    c.netzke_on_do_create_usage_plan = l(<<-JS)
+    function() {
+      this.netzkeLoadComponent("aws_apigateway_usage_plan_window",
+        { callback: function(w) {w.show(); },
+      });
+    }
+    JS
+
+    c.show_json = l(<<-JS)
+    function(json) {
+       Ext.create('Ext.Window', {
+         layout:        "fit",
+         height:        400,
+         autoWidth:     true,
+         modal:         true,
+         autoScroll:    true,
+         html:          json,
+         title:         "Swagger Export Response"
+      }).show();
+    }
+    JS
+  end
+
+  action :do_export_swagger do |a|
+    a.text     = "Export Swagger"
+    a.icon_cls = "fa fa-file-export glyph"
+    a.disabled = true
+  end
+
+  action :do_create_usage_plan do |a|
+    a.text     = "Create Usage Plan"
+    a.icon_cls = "fa fa-plus glyph"
+    a.disabled = true
+  end
+
+  def default_bbar
+    [:do_export_swagger, :do_create_usage_plan]
+  end
+
+  endpoint :export_swagger do |params|
+    begin
+      api_aid    = Marty::AwsObject.find(params['api_rec_id']).value['aid']
+      stage_name = Marty::AwsObject.find(params['stage_rec_id']).
+                     value['stage_name']
+
+      resp = Marty::Aws::Apigateway.new.swagger_export(api_aid, stage_name)
+      client.show_json(resp.body)
+    rescue => e
+      client.netzke_notify e.message
+    end
+  end
+
+  component :aws_apigateway_usage_plan_window do |c|
+    c.klass = Marty::AwsApigatewayUsagePlanWindow
+  end
 end
 
 AwsApigatewayApiStageView = Marty::AwsApigatewayApiStageView

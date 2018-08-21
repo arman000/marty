@@ -33,4 +33,19 @@ class Marty::AwsApiKey < ActiveRecord::Base
     resp   = client.delete_usage_plan_key(api_usage_plan_id, aid)
     client.delete_api_key(aid) if resp
   end
+
+  def move_key usage_plan_id
+    begin
+      client = Marty::Aws::Apigateway.new
+      resp   = client.delete_usage_plan_key(api_usage_plan_id, aid)
+      client.create_usage_plan_key(usage_plan_id, aid) if resp
+    rescue
+      # on fail recreate usage plan key
+      client.create_usage_plan_key(api_usage_plan_id, aid) if client
+      return
+    end
+
+    self.api_usage_plan_id = usage_plan_id
+    self.save!
+  end
 end

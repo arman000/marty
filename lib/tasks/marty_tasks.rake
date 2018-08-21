@@ -76,4 +76,22 @@ namespace :marty do
       puts
     end
   end
+
+  desc 'Deploy API to AWS API Gateway using Swagger Template'
+  task deploy_api: :environment do |script, node|
+    swagger = Marty::Script.evaluate('infinity',
+                                     script.camelize,
+                                     api.camelize,
+                                     'result',
+                                     {}).to_json
+
+    client = Marty::Aws::Apigateway.new
+    swagger_old = client.export_swagger(api_id)
+
+    begin
+      resp = client.import_or_update_api(swagger)
+    rescue => e
+      client.force_import(swagger_old)
+    end
+  end
 end

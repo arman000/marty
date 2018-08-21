@@ -16,6 +16,10 @@ class Marty::AwsApigatewayApiUsagePlanKeyView < Marty::AwsGrid
     c.title      = "AWS API Usage Plan Keys"
     c.attributes = ATTRIBUTES.keys
   end
+
+  def default_bbar
+    ["FOR REFERENCE"]
+  end
 end
 
 AwsApigatewayApiUsagePlanKeyView = Marty::AwsApigatewayApiUsagePlanKeyView

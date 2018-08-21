@@ -31,49 +31,35 @@ class Marty::AwsCognitoView < Marty::AwsGrid
   end
 
   client_class do |c|
-    c.toggle_user_access = l(<<-JS)
+    c.netzke_on_do_toggle_user_access = l(<<-JS)
     function(params) {
-      var selection = this.ownerGrid.getSelectionModel().getSelection()[0];
-      this.server.toggleUserAccess(selection.id);
+      this.server.toggleUserAccess();
     }
     JS
 
-    c.delete_user = l(<<-JS)
+    c.netzke_on_do_reset_user_password = l(<<-JS)
     function(params) {
-      var selection = this.ownerGrid.getSelectionModel().getSelection()[0];
-      this.server.deleteUser(selection.id);
-    }
-    JS
-
-    c.reset_user_password = l(<<-JS)
-    function(params) {
-      var selection = this.ownerGrid.getSelectionModel().getSelection()[0];
-      this.server.resetUserPassword(selection.id);
+      this.server.resetUserPassword();
     }
     JS
   end
 
-  action :toggle_user_access do |a|
+  action :do_toggle_user_access do |a|
     a.text     = 'Toggle Access'
-    a.handler  = :toggle_user_access
-    a.icon     = :wrench
+    a.icon_cls = "fa fa-wrench glyph"
+    a.disabled = true
   end
 
-  action :reset_user_password do |a|
+  action :do_reset_user_password do |a|
     a.text     = 'Reset Password'
-    a.handler  = :reset_user_password
-    a.icon     = :key
+    a.icon_cls = "fa fa-key glyph"
+    a.disabled = true
   end
 
-  action :delete_user do |a|
-    a.text     = 'Delete'
-    a.handler  = :delete_user
-    a.icon     = :delete
-  end
 
-  endpoint :toggle_user_access do |id|
+  endpoint :toggle_user_access do
     aws_async_wait :reload do
-      record   = Marty::AwsObject.find(id)
+      record   = Marty::AwsObject.find(client_config['selected'])
       username = record.value['username']
       cog      = Marty::Aws::Cognito.new
       if record.value['enabled']
@@ -84,24 +70,11 @@ class Marty::AwsCognitoView < Marty::AwsGrid
     end
   end
 
-  endpoint :delete_user do |id|
+  endpoint :reset_user_password do
     aws_async_wait :reload do
-      user =  Marty::AwsObject.find(id)
+      username = Marty::AwsObject.find(client_config['selected']).
+                   value['username']
 
-      begin
-        value  = user.value['api_key']
-        Marty::AwsApiKey.where(value: value).destroy_all
-      rescue => e
-        raise e unless e.message.include?('Invalid API Key')
-      end
-
-      Marty::Aws::Cognito.new.admin_delete_user(user.value['username'])
-    end
-  end
-
-  endpoint :reset_user_password do |id|
-    aws_async_wait :reload do
-      username = Marty::AwsObject.find(id).value['username']
       Marty::Aws::Cognito.new.admin_reset_password(username)
     end
   end
@@ -120,7 +93,7 @@ class Marty::AwsCognitoView < Marty::AwsGrid
   end
 
   def default_bbar
-    [:toggle_user_access, :delete_user, :reset_user_password]
+    [:do_toggle_user_access, :do_reset_user_password]
   end
 end
 

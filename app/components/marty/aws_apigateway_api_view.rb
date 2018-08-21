@@ -24,6 +24,7 @@ class Marty::AwsApigatewayApiView < Marty::AwsGrid
     super
     c.title      = "AWS REST APIs"
     c.attributes = ATTRIBUTES.keys
+    c.flex = 2
   end
 end
 
