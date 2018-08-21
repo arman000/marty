@@ -23,6 +23,22 @@ class Marty::SqlRule < Marty::BaseRule
     exclusions
   end
 
+  def self.apply_exclusions(exclusion_hash, execution_mdl)
+    exclusion_hash.each do |key,arr|
+      exp = self.where(id: key).pluck(:expression).join()
+      arr.each do |exec_id|
+        current_exec = execution_mdl.where(id: exec_id)
+        params = self.create_params(current_exec)
+        affected_tbl = Apollo::Loan
+          .where(id: current_exec.pluck(:loan_id).join())
+        found_match = affected_tbl.where(exp, params) == [] ? false : true
+        if found_match
+          current_exec.delete(exec_id)
+        end
+      end
+    end
+  end
+
   ########################### DELOREAN METHODS ################################
 
 
