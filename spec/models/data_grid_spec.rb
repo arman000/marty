@@ -495,15 +495,21 @@ EOS
 
         expect{lookup_grid_helper('infinity',
                                "G9",
-                               {"state" => nil, "ltv" => 81},
+                               {"ltv" => 81},
                                )}.to raise_error(/matches > 1/)
+
+        err = /Data Grid lookup failed/
+        expect{lookup_grid_helper('infinity',
+                                 "G9",
+                                 {"state" => "CA", "ltv" => nil},
+                                 false, false)}.to raise_error(err)
 
         res = lookup_grid_helper('infinity',
                                  "G9",
-                                 {"state" => "CA", "ltv" => nil},
+                                 {"state" => nil, "ltv" => 81},
                                  false, false)
-        expect(res).to eq [123,"G9"]
 
+        expect(res).to eq [456,"G9"]
       end
 
       it "should handle boolean keys" do
