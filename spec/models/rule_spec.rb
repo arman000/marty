@@ -266,7 +266,7 @@ module Marty::RuleSpec
       let(:complex) { Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'ComplexRule'},
                                             {'g_string'=>'def'}).first }
-      let(:xyz) { Gemini::XyzRule.get_matches('infinity',
+          let(:xyz) { Gemini::XyzRule.get_matches('infinity',
                                               {'rule_type'=>'ZRule'},
                                               {'g_integer'=> 2}).first }
       let(:simple) {
@@ -351,6 +351,103 @@ module Marty::RuleSpec
                                    'param1'=> 45,
                                    'param2' => 1})
         expect(v["final_value"]).to eq(15)
+      end
+      it "exceptions/logging" do
+        r6, r7, r8 = [6, 7, 8].map do |i|
+          Gemini::XyzRule.get_matches('infinity',
+                                      {'rule_type'=>'ZRule'},
+                                      {'g_integer'=>i}).first
+        end
+        pt = Time.zone.now+1
+        input = {"pt"=>pt,
+                 "p1"=>12,
+                 "p2"=>3,
+                 "flavor"=>"cherry"}
+        v1 = r6.compute(input)
+        begin
+          v2 = r7.compute(input)
+        rescue Marty::DeloreanRule::ComputeError => e
+          exp = 'no implicit conversion of Fixnum into String'
+          expect(e.message).to include(exp)
+          expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
+                 /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
+                 /DELOREAN__XyzRule_\d+_1483228800.0:27:in .bv__D'/]
+          expres.each_with_index do |expre, i|
+            expect(e.backtrace[i]).to match(expre)
+          end
+          expect(e.input).to eq(input + {'dgparams__'=>input})
+          expect(e.section).to eq('results')
+        end
+        begin
+          v2 = r8.compute(input)
+        rescue Marty::DeloreanRule::ComputeError => e
+          exp = 'divided by 0'
+          expect(e.message).to include(exp)
+          expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:5:in ./'),
+                 /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]
+          expres.each_with_index do |expre, i|
+            expect(e.backtrace[i]).to match(expre)
+          end
+          expect(e.input).to eq(input)
+          expect(e.section).to eq('computed_guards')
+        end
+        log_ents = Marty::Log.all
+        expect(log_ents.map{|le|le.message}).to eq(['Rule Log ZRule6',
+                                                   'Rule Log ZRule7',
+                                                   'Rule Log ZRule8'])
+        ptjson = pt.as_json
+        exp = {"input"=>{"p1"=>12, "p2"=>3,
+                         "pt"=>ptjson,
+                         "flavor"=>"cherry"},
+               "cg_keys"=>[],
+               "gr_keys"=>["grid1_grid_result"],
+               "dgparams"=>{"p1"=>12, "p2"=>3,
+                            "pt"=>ptjson,
+                            "flavor"=>"cherry"},
+               "res_keys"=>["bv", "grid1_grid_result"],
+               "gr_result"=>{},
+               "res_result"=>
+               ["a stringa stringa stringa stringa stringa stringa stringa "\
+                "stringa stringa stringa stringa stringa stringa stringa "\
+                "stringa stringa stringa stringa stringa stringa stringa "\
+                "stringa stringa stringa stringa string",
+                19]}
+        expect(log_ents[0].details).to eq(exp)
+        exp = {"input"=>{"p1"=>12, "p2"=>3,
+                         "pt"=>ptjson,
+                         "flavor"=>"cherry"},
+               "cg_keys"=>["some_guard"],
+               "gr_keys"=>["grid1_grid_result"],
+               "dgparams"=>{"p1"=>12, "p2"=>3,
+                            "pt"=>ptjson,
+                            "flavor"=>"cherry"},
+               "res_keys"=>["bv", "grid1_grid_result"],
+               "cg_result"=>[true],
+               "gr_result"=>{},
+               "error_section"=>"results",
+               "error_message"=>"no implicit conversion of Fixnum into String"}
+        expect(log_ents[1].details.except('error_stack')).to eq(exp)
+        expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
+               /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
+               /DELOREAN__XyzRule_\d+_1483228800.0:27:in .bv__D'/]
+        expres.each_with_index do |expre, i|
+          expect(log_ents[1].details['error_stack'][i]).to match(expre)
+        end
+        exp = {"input"=>{"p1"=>12, "p2"=>3,
+                         "pt"=>ptjson,
+                         "flavor"=>"cherry"},
+               "cg_keys"=>["cg1"],
+               "dgparams"=>{"p1"=>12, "p2"=>3,
+                            "pt"=>ptjson,
+                            "flavor"=>"cherry"},
+               "error_section"=>"computed_guards",
+               "error_message"=>"divided by 0"}
+        expect(log_ents[2].details.except('error_stack')).to eq(exp)
+        expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:5:in ./'),
+               /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]
+        expres.each_with_index do |expre, i|
+          expect(log_ents[2].details['error_stack'][i]).to match(expre)
+        end
       end
     end
   end
