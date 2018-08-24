@@ -41,7 +41,7 @@ class Marty::Grid < ::Netzke::Grid::Base
       // block creation of toolbars in parent
       delete this.bbar;
       var paging  = this.paging
-      this.paging = false;
+      if (paging != 'buffered') { this.paging = false; }
       this.callParent();
       this.paging = paging
 
