@@ -1,42 +1,23 @@
 class Marty::SqlRule < Marty::BaseRule
   self.abstract_class = true
 
-  def self.generate_exclusion_rules_hash(attr_mdl, rule_type)
-    exclusions = Hash.new
-    executions_affected = []
-    rec_hash_arr = self.generate_rec_hash_arr
+  def self.generate_exclusions(attr_mdl, rule_type)
+    exclusions = []
 
     self.where(rule_type: rule_type).each do |rule|
       executions_affected = []
       rule_attrs = attr_mdl.where(rule_id: rule.id)
       rule_attrs.each do |attr|
-        executions_affected.append(self.generate_executions_affected(
-          rec_hash_arr, attr))
+        executions_affected.append(self.generate_executions_affected(attr))
       end
 
       executions_empty = executions_affected.all? {|x| x == []}
       if !executions_empty
-        exclusions[rule.id] = executions_affected.flatten
+        exclusions.append({rule.id => executions_affected.flatten})
       end
     end
 
-    exclusions
-  end
-
-  def self.apply_exclusions(exclusion_hash, execution_mdl)
-    exclusion_hash.each do |key,arr|
-      exp = self.where(id: key).pluck(:expression).join()
-      arr.each do |exec_id|
-        current_exec = execution_mdl.where(id: exec_id)
-        params = self.create_params(current_exec)
-        affected_tbl = Apollo::Loan
-          .where(id: current_exec.pluck(:loan_id).join())
-        found_match = affected_tbl.where(exp, params) == [] ? false : true
-        if found_match
-          current_exec.delete(exec_id)
-        end
-      end
-    end
+    Marty::Exclusion.new(exclusions)
   end
 
   ########################### DELOREAN METHODS ################################
