@@ -52,8 +52,15 @@ class Marty::Grid < ::Netzke::Grid::Base
       'selectionchange',
       function(m) {
         var has_sel = m.hasSelection();
-        var rid = has_sel ?
-                  me.getSelectionModel().getSelection()[0].getId() : null
+
+        var rid = null;
+        if (has_sel) {
+          if (m.type == 'spreadsheet') {
+            rid = m.getSelected().startCell.record.getId()
+          } else {
+            rid = m.getSelection()[0].getId()
+          }
+        }
 
         me.serverConfig.selected = rid;
 
