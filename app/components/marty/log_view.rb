@@ -6,9 +6,9 @@ class Marty::LogView < Marty::Grid
   def configure(c)
     super
 
-    c.title    ||= I18n.t('log_viewer', default: "Log Viewer")
+    c.title ||= I18n.t('log_viewer', default: "Log Viewer")
     c.model      = "Marty::Log"
-    c.paging     = :buffered
+    c.paging     = :pagination
     c.editing    = :in_form
     c.attributes = [
       :timestamp_custom,

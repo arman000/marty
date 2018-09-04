@@ -24,12 +24,12 @@ class Marty::ApiLogView < Marty::Grid
 
   def configure(c)
     super
-    c.editing = :in_form
-    c.paging = :buffered
-    c.title = 'Api Log View'
-    c.model = Marty::Log
+    c.editing    = :in_form
+    c.paging     = :pagination
+    c.title      = 'Api Log View'
+    c.model      = Marty::Log
     c.attributes = @@attrs
-    c.scope = {message_type: 'api'}
+    c.scope      = {message_type: 'api'}
     c.store_config.merge!(sorters: [{property: :timestamp, direction: 'DESC'}])
   end
 
