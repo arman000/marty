@@ -75,6 +75,8 @@ class Marty::LogView < Marty::Grid
 
   column :details do |c|
     c.getter = lambda { |r| CGI.escapeHTML(r.details.pretty_inspect) }
+    c.filter_with = lambda {|r, v, op|
+      r.where("details::text  #{op} '%#{v}%'")}
   end
 
   attribute :details do |c|
