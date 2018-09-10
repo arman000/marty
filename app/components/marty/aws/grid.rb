@@ -79,7 +79,7 @@ class Marty::Aws::Grid < Marty::Grid
         pid        = client_config['parent_id']
         aws_client = @aws_client_class.new
         fn         = "get_#{@aws_object_type.pluralize}"
-        aid        = Marty::AwsObject.find(pid).value['aid'] if pid
+        aid        = Marty::Aws::Object.find(pid).value['aid'] if pid
         res        = aid ? aws_client.send(fn, aid) : aws_client.send(fn)
 
         processed = res.map do |s|

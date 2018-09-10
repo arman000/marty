@@ -3,7 +3,6 @@ class Marty::Aws::ApigatewayApiKeyMoveView < Marty::Aws::ApigatewayApiUsagePlanV
 
   def configure(c)
     super
-    c.model = "Marty::AwsObject"
     c.prevent_header = true
   end
 
