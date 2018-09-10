@@ -65,11 +65,13 @@ class Marty::Api::Controller < ActionController::Base
   end
 
   def validate_and_register_invite_token token, username, email
-    key = Marty::Aws::ApiKey.where(value: token,
-                                   username: nil,
-                                   email: nil).first
+    api_auth = Marty::ApiAuth.where(api_key: token).first
 
-    raise 'Invalid invite token' unless key
+    raise 'Invalid invite token' unless api_auth
+
+    key = api_auth.aws_api_key
+
+    raise 'Token has expired' unless key.username.nil? && key.email.nil?
 
     key.username = username
     key.email    = email
@@ -137,10 +139,10 @@ class Marty::Api::Controller < ActionController::Base
     begin
       api_key   = oauth_params['api-key']
       username  = params[:username]
-      local_key = Marty::Aws::ApiKey.where(value: api_key).first
+      api_auth = Marty::ApiAuth.where(api_key: api_key).first
 
       result = {'error' => 'invalid api key association'} unless
-        local_key.username == username
+        api_auth.aws_api_key.try(:username) == username
 
       if !result
         c = Client.new
