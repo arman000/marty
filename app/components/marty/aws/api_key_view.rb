@@ -46,7 +46,7 @@ class Marty::Aws::ApiKeyView < Marty::Grid
   end
 
   client_class do |c|
-    c.generate_api_key = l(<<-JS)
+    c.netzke_do_generate_api_key = l(<<-JS)
     function(params) {
       this.server.generateApiKey();
     }
@@ -82,10 +82,10 @@ class Marty::Aws::ApiKeyView < Marty::Grid
     JS
   end
 
-  action :generate do |a|
+  action :do_generate do |a|
     a.text     = 'Generate'
-    a.handler  = :generate_api_key
-    a.icon_cls = "fa fa-plus glyph"
+    a.icon_cls = "fa fa-key glyph"
+    a.disabled = true
   end
 
   action :do_move do |a|
@@ -122,7 +122,7 @@ class Marty::Aws::ApiKeyView < Marty::Grid
   end
 
   def default_bbar
-    [:generate, :do_move, :delete]
+    [:do_generate, :do_move, :delete]
   end
 
   component :aws_apigateway_api_key_move_window do |c|

@@ -1,6 +1,6 @@
 class Marty::ApiAuth < Marty::Base
   has_mcfly
-  has_one :aws_api_key
+  has_one :aws_api_key, class_name: 'Marty::Aws::ApiKey'
 
   KEY_SIZE = 19
 
