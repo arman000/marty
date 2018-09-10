@@ -108,7 +108,6 @@ class Marty::AwsApiKeyView < Marty::Grid
       Marty::AwsApiKey.create!(
         api_id: api_aid,
         api_usage_plan_id: api_usage_plan_aid,
-        value: SecureRandom.hex,
       )
     rescue => e
       client.netzke_notify e.message

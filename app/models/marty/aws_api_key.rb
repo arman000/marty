@@ -1,5 +1,9 @@
 class Marty::AwsApiKey < ActiveRecord::Base
+
+  belongs_to :api_auth
+
   before_save do
+    next
     client       = Marty::Aws::Apigateway.new
     identifier   = Marty::Config['AWS_API_IDENTIFIER'] || 'marty_api'
     default_name = "#{identifier}_#{value[0..3]}"
@@ -9,7 +13,7 @@ class Marty::AwsApiKey < ActiveRecord::Base
         write_attribute(:name, name)
       end
       name  = default_name unless name
-      key   = client.create_api_key(name, 'marty_api_key', value)
+      key   = client.create_api_key(name, 'marty_api_key', api_key)
       upkey = client.create_usage_plan_key(api_usage_plan_id, key.id)
 
       write_attribute(:aid, key.id)
@@ -47,5 +51,9 @@ class Marty::AwsApiKey < ActiveRecord::Base
 
     self.api_usage_plan_id = usage_plan_id
     self.save!
+  end
+
+  def api_key
+    api_auth.try(:api_key)
   end
 end
