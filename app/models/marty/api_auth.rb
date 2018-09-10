@@ -8,21 +8,6 @@ class Marty::ApiAuth < Marty::Base
     SecureRandom.hex(KEY_SIZE)
   end
 
-  def initialize *args, **kwargs
-    Mcfly.whodunnit = Marty::User.first
-    auth_kwargs = self.class.column_names.map(&:to_sym).
-                    each_with_object({}){|k, h| h[k] = kwargs[k] if kwargs[k]}
-    super(auth_kwargs)
-
-    aws_kwargs = (Marty::Aws::ApiKey.column_names).map(&:to_sym).
-                   each_with_object({}){|k, h| h[k] = kwargs[k] if kwargs[k]}
-
-    return if aws_kwargs.empty?
-    seq = ActiveRecord::Base.connection.execute(
-      "SELECT last_value FROM marty_api_auths_id_seq").first['last_value']
-     Marty::Aws::ApiKey.create(**({api_auth_id: seq + 1} + aws_kwargs))
-  end
-
   class ApiAuthValidator < ActiveModel::Validator
     def validate(api)
       api.errors.add(:base, "API Key length must be #{KEY_SIZE*2}") if

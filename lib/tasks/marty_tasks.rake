@@ -81,7 +81,7 @@ namespace :marty do
   task deploy_api: :environment do |script, node|
     swagger = Marty::Script.evaluate('infinity',
                                      script.camelize,
-                                     api.camelize,
+                                     node.camelize,
                                      'result',
                                      {}).to_json
 

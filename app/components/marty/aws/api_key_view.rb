@@ -46,7 +46,7 @@ class Marty::Aws::ApiKeyView < Marty::Grid
   end
 
   client_class do |c|
-    c.netzke_do_generate_api_key = l(<<-JS)
+    c.netzke_on_do_generate = l(<<-JS)
     function(params) {
       this.server.generateApiKey();
     }
@@ -85,7 +85,6 @@ class Marty::Aws::ApiKeyView < Marty::Grid
   action :do_generate do |a|
     a.text     = 'Generate'
     a.icon_cls = "fa fa-key glyph"
-    a.disabled = true
   end
 
   action :do_move do |a|
@@ -102,13 +101,22 @@ class Marty::Aws::ApiKeyView < Marty::Grid
                                                                  api_usage_plan_id
 
     begin
-      api_aid            = Marty::Aws::Object.find(api_id).value['aid']
+      api                = Marty::Aws::Object.find(api_id)
       api_usage_plan_aid = Marty::Aws::Object.find(api_usage_plan_id).value['aid']
 
-      Marty::Aws::ApiKey.create!(
-        api_id: api_aid,
-        api_usage_plan_id: api_usage_plan_aid,
-      )
+      seq = ActiveRecord::Base.connection.execute(
+        "SELECT last_value FROM marty_aws_api_keys_id_seq").first['last_value']
+
+        api_auth = Marty::ApiAuth.create(
+          app_name:    "External Client #{seq}",
+          script_name: api.value['name']
+        )
+
+        Marty::Aws::ApiKey.create(
+          api_auth_id:       api_auth.id,
+          api_id:            api.value['aid'],
+          api_usage_plan_id: api_usage_plan_aid,
+        )
     rescue => e
       client.netzke_notify e.message
     end

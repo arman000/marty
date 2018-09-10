@@ -4,10 +4,9 @@ class Marty::Aws::ApiKey < ActiveRecord::Base
   belongs_to :api_auth
 
   before_save do
-    next
     client       = Marty::Aws::Apigateway.new
     identifier   = Marty::Config['AWS_API_IDENTIFIER'] || 'marty_api'
-    default_name = "#{identifier}_#{value[0..3]}"
+    default_name = "#{identifier}_#{api_key[0..3]}"
     begin
       if !name
         name = default_name
