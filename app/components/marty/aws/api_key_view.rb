@@ -21,7 +21,7 @@ class Marty::Aws::ApiKeyView < Marty::Grid
       :api_id,
       :api_usage_plan_id,
       :name,
-      :value,
+      :api_key,
       :username,
       :email,
     ]
