@@ -14,7 +14,7 @@ class Marty::Aws::ApiKeyView < Marty::Grid
     c.paging = :buffered
     c.editing = :in_form
     c.title   = 'Marty AWS API KEYS (local)'
-    c.model   = 'Marty::AwsApiKey'
+    c.model   = 'Marty::Aws::ApiKey'
     c.attributes = [
       :id,
       :aid,

@@ -66,6 +66,16 @@ class Marty::Aws::ApigatewayApiStageView < Marty::Aws::Grid
       }).show();
     }
     JS
+
+    c.reload = l (<<-JS)
+    function() {
+      this.callParent();
+
+      // reload api key usage plans on api stage view actions
+      var usage_plan_view = this.netzkeGetComponentFromParent(
+                            'aws_api_gateway_api_usage_plan_view').reload();
+    }
+    JS
   end
 
   action :do_export_swagger do |a|
