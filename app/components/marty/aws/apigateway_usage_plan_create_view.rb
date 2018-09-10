@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayUsagePlanCreateView < Marty::Form
+class Marty::Aws::ApigatewayUsagePlanCreateView < Marty::Form
   include Marty::Extras::Layout
 
   action :apply do |a|
@@ -71,10 +71,10 @@ class Marty::AwsApigatewayUsagePlanCreateView < Marty::Form
       period: form_data['period'],
     }
 
-    api_id     = Marty::AwsObject.find(client_config['api_rec_id']).
+    api_id     = Marty::Aws::Object.find(client_config['api_rec_id']).
                    value['aid']
 
-    stage_name = Marty::AwsObject.find(client_config['stage_rec_id']).
+    stage_name = Marty::Aws::Object.find(client_config['stage_rec_id']).
                    value['stage_name']
 
     Marty::Aws::Apigateway.new.create_usage_plan(form_data['name'],

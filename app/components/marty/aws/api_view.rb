@@ -1,4 +1,4 @@
-class Marty::AwsApiView < Netzke::Base
+class Marty::Aws::ApiView < Netzke::Base
   include Marty::Extras::Layout
 
   def configure(c)
@@ -17,7 +17,7 @@ class Marty::AwsApiView < Netzke::Base
   end
 
   component :aws_apigateway_api_view do |c|
-    c.klass       = Marty::AwsApigatewayApiView
+    c.klass       = Marty::Aws::ApigatewayApiView
     c.split       = true
     c.region      = :center
     c.width       = '20%'
@@ -25,7 +25,7 @@ class Marty::AwsApiView < Netzke::Base
   end
 
   component :aws_apigateway_api_stage_view do |c|
-    c.klass       = Marty::AwsApigatewayApiStageView
+    c.klass       = Marty::Aws::ApigatewayApiStageView
     c.collapsible = true
     c.split       = true
     c.region      = :east
@@ -33,7 +33,7 @@ class Marty::AwsApiView < Netzke::Base
   end
 
   component :aws_apigateway_api_usage_plan_view do |c|
-    c.klass       = Marty::AwsApigatewayApiUsagePlanView
+    c.klass       = Marty::Aws::ApigatewayApiUsagePlanView
     c.collapsible = true
     c.split       = true
     c.region      = :east
@@ -41,7 +41,7 @@ class Marty::AwsApiView < Netzke::Base
   end
 
   component :aws_apigateway_api_usage_plan_key_view do |c|
-    c.klass       = Marty::AwsApigatewayApiUsagePlanKeyView
+    c.klass       = Marty::Aws::ApigatewayApiUsagePlanKeyView
     c.collapsible = true
     c.split       = true
     c.region      = :east
@@ -50,7 +50,7 @@ class Marty::AwsApiView < Netzke::Base
   end
 
   component :aws_api_key_view do |c|
-    c.klass       = Marty::AwsApiKeyView
+    c.klass       = Marty::Aws::ApiKeyView
     c.collapsible = true
     c.split       = true
     c.region      = :east
@@ -58,4 +58,4 @@ class Marty::AwsApiView < Netzke::Base
   end
 end
 
-AwsApiView = Marty::AwsApiView
+AwsApiView = Marty::Aws::ApiView

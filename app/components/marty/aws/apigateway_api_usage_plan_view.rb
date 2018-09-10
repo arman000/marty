@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayApiUsagePlanView < Marty::AwsGrid
+class Marty::Aws::ApigatewayApiUsagePlanView < Marty::Aws::Grid
   aws_model('apigateway', 'usage_plan')
 
   def child_components
@@ -63,7 +63,7 @@ class Marty::AwsApigatewayApiUsagePlanView < Marty::AwsGrid
 
   endpoint :destroy_usage_plan do
     begin
-      usage_plan = Marty::AwsObject.find(client_config['selected'])
+      usage_plan = Marty::Aws::Object.find(client_config['selected'])
       Marty::Aws::Apigateway.new.delete_usage_plan(usage_plan.value['aid'])
       usage_plan.delete
       client.reload
@@ -73,4 +73,4 @@ class Marty::AwsApigatewayApiUsagePlanView < Marty::AwsGrid
   end
 end
 
-AwsApigatewayApiUsagePlanView = Marty::AwsApigatewayApiUsagePlanView
+AwsApigatewayApiUsagePlanView = Marty::Aws::ApigatewayApiUsagePlanView

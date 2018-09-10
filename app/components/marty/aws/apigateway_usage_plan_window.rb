@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayUsagePlanWindow < Netzke::Window::Base
+class Marty::Aws::ApigatewayUsagePlanWindow < Netzke::Window::Base
   def configure(c)
     super
 
@@ -11,6 +11,6 @@ class Marty::AwsApigatewayUsagePlanWindow < Netzke::Window::Base
   end
 
   component :aws_apigateway_usage_plan_create_view do |c|
-    c.klass = Marty::AwsApigatewayUsagePlanCreateView
+    c.klass = Marty::Aws::ApigatewayUsagePlanCreateView
   end
 end

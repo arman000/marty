@@ -14,13 +14,13 @@ class Marty::ApiAuth < Marty::Base
                     each_with_object({}){|k, h| h[k] = kwargs[k] if kwargs[k]}
     super(auth_kwargs)
 
-    aws_kwargs = (Marty::AwsApiKey.column_names).map(&:to_sym).
+    aws_kwargs = (Marty::Aws::ApiKey.column_names).map(&:to_sym).
                    each_with_object({}){|k, h| h[k] = kwargs[k] if kwargs[k]}
 
     return if aws_kwargs.empty?
     seq = ActiveRecord::Base.connection.execute(
       "SELECT last_value FROM marty_api_auths_id_seq").first['last_value']
-     Marty::AwsApiKey.create(**({api_auth_id: seq + 1} + aws_kwargs))
+     Marty::Aws::ApiKey.create(**({api_auth_id: seq + 1} + aws_kwargs))
   end
 
   class ApiAuthValidator < ActiveModel::Validator

@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayApiKeyMoveWindow < Netzke::Window::Base
+class Marty::Aws::ApigatewayApiKeyMoveWindow < Netzke::Window::Base
   def configure(c)
     super
 
@@ -11,6 +11,6 @@ class Marty::AwsApigatewayApiKeyMoveWindow < Netzke::Window::Base
   end
 
   component :aws_apigateway_api_key_move_view do |c|
-    c.klass = Marty::AwsApigatewayApiKeyMoveView
+    c.klass = Marty::Aws::ApigatewayApiKeyMoveView
   end
 end

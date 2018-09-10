@@ -1,4 +1,4 @@
-class Marty::AwsCognitoView < Marty::AwsGrid
+class Marty::Aws::CognitoView < Marty::Aws::Grid
   aws_model('cognito', 'user')
 
   ATTRIBUTES = {
@@ -59,7 +59,7 @@ class Marty::AwsCognitoView < Marty::AwsGrid
 
   endpoint :toggle_user_access do
     aws_async_wait :reload do
-      record   = Marty::AwsObject.find(client_config['selected'])
+      record   = Marty::Aws::Object.find(client_config['selected'])
       username = record.value['username']
       cog      = Marty::Aws::Cognito.new
       if record.value['enabled']
@@ -72,7 +72,7 @@ class Marty::AwsCognitoView < Marty::AwsGrid
 
   endpoint :reset_user_password do
     aws_async_wait :reload do
-      username = Marty::AwsObject.find(client_config['selected']).
+      username = Marty::Aws::Object.find(client_config['selected']).
                    value['username']
 
       Marty::Aws::Cognito.new.admin_reset_password(username)
@@ -83,7 +83,7 @@ class Marty::AwsCognitoView < Marty::AwsGrid
     v = r.value
     username = v['username']
     email    = v['attributes'].select{|h| h['name'] == 'email'}.first['value']
-    api_key  = Marty::AwsApiKey.where(username: username, email: email).first
+    api_key  = Marty::Aws::ApiKey.where(username: username, email: email).first
     r.value['api_key'] = api_key.try(:value)
     r.save!
   end
@@ -97,4 +97,4 @@ class Marty::AwsCognitoView < Marty::AwsGrid
   end
 end
 
-AwsCognitoView = Marty::AwsCognitoView
+AwsCognitoView = Marty::Aws::CognitoView

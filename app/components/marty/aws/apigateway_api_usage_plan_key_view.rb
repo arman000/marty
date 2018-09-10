@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayApiUsagePlanKeyView < Marty::AwsGrid
+class Marty::Aws::ApigatewayApiUsagePlanKeyView < Marty::Aws::Grid
   aws_model('apigateway', 'usage_plan_key')
 
   ATTRIBUTES = {
@@ -22,4 +22,4 @@ class Marty::AwsApigatewayApiUsagePlanKeyView < Marty::AwsGrid
   end
 end
 
-AwsApigatewayApiUsagePlanKeyView = Marty::AwsApigatewayApiUsagePlanKeyView
+AwsApigatewayApiUsagePlanView = Marty::Aws::ApigatewayApiUsagePlanKeyView

@@ -1,4 +1,5 @@
-class Marty::AwsApiKey < ActiveRecord::Base
+class Marty::Aws::ApiKey < ActiveRecord::Base
+  self.table_name = "marty_aws_api_keys"
 
   belongs_to :api_auth
 

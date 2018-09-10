@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayAuthorizerView < Marty::AwsGrid
+class Marty::Aws::ApigatewayAuthorizerView < Marty::Aws::Grid
   aws_model('apigateway', 'authorizer')
 
   def child_components
@@ -22,4 +22,4 @@ class Marty::AwsApigatewayAuthorizerView < Marty::AwsGrid
   end
 end
 
-AwsApigatewayAuthorizerView = Marty::AwsApigatewayAuthorizerView
+AwsApigatewayAuthorizerView = Marty::Aws::ApigatewayAuthorizerView

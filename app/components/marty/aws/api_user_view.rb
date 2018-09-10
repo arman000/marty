@@ -1,4 +1,4 @@
-class Marty::AwsApiUserView < Netzke::Base
+class Marty::Aws::ApiUserView < Netzke::Base
   include Marty::Extras::Layout
 
   def configure(c)
@@ -15,7 +15,7 @@ class Marty::AwsApiUserView < Netzke::Base
   end
 
   component :aws_apigateway_api_view do |c|
-    c.klass      = Marty::AwsApigatewayApiView
+    c.klass      = Marty::Aws::ApigatewayApiView
     c.split      = true
     c.region     = :west
     c.width      = '30%'
@@ -24,7 +24,7 @@ class Marty::AwsApiUserView < Netzke::Base
   end
 
   component :aws_apigateway_authorizer_view do |c|
-    c.klass      = Marty::AwsApigatewayAuthorizerView
+    c.klass      = Marty::Aws::ApigatewayAuthorizerView
     c.split      = true
     c.region     = :center
     c.width      = '20%'
@@ -32,7 +32,7 @@ class Marty::AwsApiUserView < Netzke::Base
   end
 
   component :aws_cognito_view do |c|
-    c.klass      = Marty::AwsCognitoView
+    c.klass      = Marty::Aws::CognitoView
     c.split      = true
     c.region     = :east
     c.width      = '50%'
@@ -40,4 +40,4 @@ class Marty::AwsApiUserView < Netzke::Base
   end
 end
 
-AwsApiUserView = Marty::AwsApiUserView
+AwsApiUserView = Marty::Aws::ApiUserView

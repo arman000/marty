@@ -1,4 +1,4 @@
-class Marty::AwsGrid < Marty::Grid
+class Marty::Aws::Grid < Marty::Grid
   include Marty::Extras::Layout
   has_marty_permissions create: :admin,
                         read:   :admin,
@@ -88,14 +88,14 @@ class Marty::AwsGrid < Marty::Grid
           s.except(:id)
         end
 
-        Marty::AwsObject.where(
+        Marty::Aws::Object.where(
           marty_user_id:     user.id,
           client:      @aws_client,
           object_type: @aws_object_type,
         ).delete_all
 
         processed.each do |j|
-          Marty::AwsObject.create!(
+          Marty::Aws::Object.create!(
             marty_user_id:      user.id,
             client:       @aws_client,
             object_type:  @aws_object_type,
@@ -124,7 +124,7 @@ class Marty::AwsGrid < Marty::Grid
     c.paging  = :pagination
     c.editing = :in_form
     c.title   = "AWS Base"
-    c.model   = "Marty::AwsObject"
+    c.model   = "Marty::Aws::Object"
   end
 
   client_class do |c|

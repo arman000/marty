@@ -1,4 +1,4 @@
-class Marty::AwsApiKeyView < Marty::Grid
+class Marty::Aws::ApiKeyView < Marty::Grid
   include Marty::Extras::Layout
   has_marty_permissions create: :admin,
                         read:   :admin,
@@ -37,8 +37,8 @@ class Marty::AwsApiKeyView < Marty::Grid
     api_id            = client_config['api_id']
     api_usage_plan_id = client_config['parent_id']
 
-    a_aid  = Marty::AwsObject.find(api_id).value['aid'] rescue nil
-    up_aid = Marty::AwsObject.find(api_usage_plan_id).value['aid'] rescue nil
+    a_aid  = Marty::Aws::Object.find(api_id).value['aid'] rescue nil
+    up_aid = Marty::Aws::Object.find(api_usage_plan_id).value['aid'] rescue nil
 
     model.where(api_id: a_aid, api_usage_plan_id: up_aid).scoping do
       super
@@ -102,10 +102,10 @@ class Marty::AwsApiKeyView < Marty::Grid
                                                                  api_usage_plan_id
 
     begin
-      api_aid            = Marty::AwsObject.find(api_id).value['aid']
-      api_usage_plan_aid = Marty::AwsObject.find(api_usage_plan_id).value['aid']
+      api_aid            = Marty::Aws::Object.find(api_id).value['aid']
+      api_usage_plan_aid = Marty::Aws::Object.find(api_usage_plan_id).value['aid']
 
-      Marty::AwsApiKey.create!(
+      Marty::Aws::ApiKey.create!(
         api_id: api_aid,
         api_usage_plan_id: api_usage_plan_aid,
       )
@@ -126,6 +126,8 @@ class Marty::AwsApiKeyView < Marty::Grid
   end
 
   component :aws_apigateway_api_key_move_window do |c|
-    c.klass = Marty::AwsApigatewayApiKeyMoveWindow
+    c.klass = Marty::Aws::ApigatewayApiKeyMoveWindow
   end
 end
+
+AwsApiKeyView = Marty::Aws::ApiKeyView

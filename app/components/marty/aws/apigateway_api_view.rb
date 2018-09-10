@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayApiView < Marty::AwsGrid
+class Marty::Aws::ApigatewayApiView < Marty::Aws::Grid
   aws_model('apigateway', 'api')
 
   def child_components
@@ -28,4 +28,4 @@ class Marty::AwsApigatewayApiView < Marty::AwsGrid
   end
 end
 
-AwsApigatewayApiView = Marty::AwsApigatewayApiView
+AwsApigatewayApiView = Marty::Aws::ApigatewayApiView

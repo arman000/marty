@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayApiKeyMoveView < Marty::AwsApigatewayApiUsagePlanView
+class Marty::Aws::ApigatewayApiKeyMoveView < Marty::Aws::ApigatewayApiUsagePlanView
   include Marty::Extras::Layout
 
   def configure(c)
@@ -46,8 +46,8 @@ class Marty::AwsApigatewayApiKeyMoveView < Marty::AwsApigatewayApiUsagePlanView
   end
 
   endpoint :move_key do
-    usage_plan = Marty::AwsObject.find(client_config['selected'])
-    api_key    = Marty::AwsApiKey.find(client_config['parent_id'])
+    usage_plan = Marty::Aws::Object.find(client_config['selected'])
+    api_key    = Marty::Aws::ApiKey.find(client_config['parent_id'])
     api_key.move_key(usage_plan.value['aid'])
     client.reload_parent
     client.close_window

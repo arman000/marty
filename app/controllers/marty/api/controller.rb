@@ -65,7 +65,10 @@ class Marty::Api::Controller < ActionController::Base
   end
 
   def validate_and_register_invite_token token, username, email
-    key = Marty::AwsApiKey.where(value: token, username: nil, email: nil).first
+    key = Marty::Aws::ApiKey.where(value: token,
+                                   username: nil,
+                                   email: nil).first
+
     raise 'Invalid invite token' unless key
 
     key.username = username
@@ -134,7 +137,7 @@ class Marty::Api::Controller < ActionController::Base
     begin
       api_key   = oauth_params['api-key']
       username  = params[:username]
-      local_key = Marty::AwsApiKey.where(value: api_key).first
+      local_key = Marty::Aws::ApiKey.where(value: api_key).first
 
       result = {'error' => 'invalid api key association'} unless
         local_key.username == username

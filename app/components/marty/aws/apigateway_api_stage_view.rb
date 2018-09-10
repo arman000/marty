@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayApiStageView < Marty::AwsGrid
+class Marty::Aws::ApigatewayApiStageView < Marty::Aws::Grid
   aws_model('apigateway', 'stage')
 
   ATTRIBUTES = {
@@ -86,8 +86,8 @@ class Marty::AwsApigatewayApiStageView < Marty::AwsGrid
 
   endpoint :export_swagger do |params|
     begin
-      api_aid    = Marty::AwsObject.find(params['api_rec_id']).value['aid']
-      stage_name = Marty::AwsObject.find(params['stage_rec_id']).
+      api_aid    = Marty::Aws::Object.find(params['api_rec_id']).value['aid']
+      stage_name = Marty::Aws::Object.find(params['stage_rec_id']).
                      value['stage_name']
 
       resp = Marty::Aws::Apigateway.new.swagger_export(api_aid, stage_name)
@@ -98,8 +98,8 @@ class Marty::AwsApigatewayApiStageView < Marty::AwsGrid
   end
 
   component :aws_apigateway_usage_plan_window do |c|
-    c.klass = Marty::AwsApigatewayUsagePlanWindow
+    c.klass = Marty::Aws::ApigatewayUsagePlanWindow
   end
 end
 
-AwsApigatewayApiStageView = Marty::AwsApigatewayApiStageView
+AwsApigatewayApiStageView = Marty::Aws::ApigatewayApiStageView

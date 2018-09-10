@@ -1,4 +1,4 @@
-class Marty::AwsApigatewayKeyView < Marty::AwsGrid
+class Marty::Aws::ApigatewayKeyView < Marty::Aws::Grid
   aws_model('apigateway', 'api_key')
 
   ATTRIBUTES = {
@@ -23,4 +23,4 @@ class Marty::AwsApigatewayKeyView < Marty::AwsGrid
   end
 end
 
-AwsApigatewayKeyView = Marty::AwsApigatewayKeyView
+AwsApigatewayKeyView = Marty::Aws::ApigatewayKeyView
