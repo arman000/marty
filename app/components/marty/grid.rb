@@ -56,9 +56,11 @@ class Marty::Grid < ::Netzke::Grid::Base
         var rid = null;
         if (has_sel) {
           if (m.type == 'spreadsheet') {
-            rid = m.getSelected().startCell.record.getId()
-          } else {
-            rid = m.getSelection()[0].getId()
+            var cell = m.getSelected().startCell;
+            rid = cell && cell.record.getId();
+          }
+          if (!rid) {
+            rid = m.getSelection()[0].getId();
           }
         }
 
