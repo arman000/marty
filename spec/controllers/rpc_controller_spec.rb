@@ -101,6 +101,8 @@ A:
     req1 =?
     req2 =?
     req3 =?
+    newtf =?
+    newfield =?
 
     optif = if opttf == true
                then opttrue
@@ -271,7 +273,9 @@ A:
               "optfalse" :    { "type" : "string" },
               "optdisallow" : { "type" : "string" },
               "req1" :        { "pg_enum" : "CondEnum" },
-              "req2" :        { "pg_enum" : "CondEnum" }
+              "req2" :        { "pg_enum" : "CondEnum" },
+              "newtf" :       { "type" : "boolean" },
+              "newfield":     { "type" : "string" }
          }
 
     req1_is_opt1 = Marty::SchemaHelper.enum_is('req1', ['opt1'])
@@ -280,6 +284,9 @@ A:
     req3_is_opttf = Marty::SchemaHelper.enum_is('req3', ['opttf'])
     opttf_is_true = Marty::SchemaHelper.bool_is('opttf', true)
     opttf_is_false = Marty::SchemaHelper.bool_is('opttf', false)
+    newtf_is_true = Marty::SchemaHelper.bool_is('newtf', true)
+    new_check = Marty::SchemaHelper.required_if(['newfield'],
+                   Marty::SchemaHelper.and(req3_is_opttf, newtf_is_true))
 
     # opt1 is required if req1 == 'opt1'
     opt1_check = Marty::SchemaHelper.required_if(['opt1'], req1_is_opt1)
@@ -322,7 +329,8 @@ A:
                      opttf_check,
                      opttruefalse_check,
                      dip_check,
-                     dinp_check
+                     dinp_check,
+                     new_check
              ] }
 eof
 

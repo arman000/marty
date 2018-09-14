@@ -1,12 +1,15 @@
 class Marty::SchemaHelper
   include Delorean::Model
+
   delorean_fn :enum_is, sig: 2 do
     |var, value|
     {"properties"=> {var => { "enum"=> value}}}
   end
+
   delorean_fn :bool_is, sig: 2 do
     |var, value|
-    {"properties"=> {var => { "type"=> "boolean", "enum"=> [value]}}}
+    {"allOf"=>[{"required"=>[var]},
+               {"properties"=> {var => { "type"=> "boolean", "enum"=> [value]}}}]}
   end
 
   delorean_fn :or, sig: [1, 20] do
