@@ -61,6 +61,7 @@ class Marty::BaseRule < Marty::Base
   end
 
   validates_presence_of :name
+  validate :validate
 
   before_validation(on: [:create, :update]) do
     self.simple_guards     ||= {}
