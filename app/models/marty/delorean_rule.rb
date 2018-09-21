@@ -77,65 +77,59 @@ class Marty::DeloreanRule < Marty::BaseRule
       engine = eclass.new(params["pt"]).get_engine(ruleh) if
         computed_guards.present? || results.present?
 
-      cgres = nil
-      resres = nil
-      cg_keys = compg_keys(computed_guards)
-      emsg = nil
-      estack = nil
-      esec = nil
+      result = OpenStruct.new(cg_keys: compg_keys(computed_guards))
 
       if computed_guards.present?
         begin
-          cgres = engine.evaluate(eclass.node_name, cg_keys,
-                                  params.clone)
+          result.cg_vals = engine.evaluate(eclass.node_name, result.cg_keys,
+                                           params.clone)
         rescue => e
-          emsg = e.message
-          estack = e.backtrace
-          esec = 'computed_guards'
+          result.err_message = e.message
+          result.err_stack   = e.backtrace
+          result.err_section = 'computed_guards'
           raise ComputeError.new(
-                  "Error (guard) in rule '#{id}:#{name}': #{emsg}",
-                  estack,
+                  "Error (guard) in rule '#{id}:#{name}': #{result.err_message}",
+                  result.err_stack,
                   params.clone,
-                  esec)
+                  result.err_section)
         end
-        return Hash[compg_keys(computed_guards).zip(cgres).select{|k,v| !v}] unless
-          cgres.all?
+        result.cg_hash = Hash[result.cg_keys.zip(result.cg_vals)]
+        return result.cg_hash.select{|k,v| !v} unless result.cg_vals.all?
       end
 
       grids_computed = false
-      grid_results = {}
-      grkeys = grid_keys(grids, eclass)
-      crkeys = comp_res_keys(results, grids, eclass, metadata_opts)
-      if (crkeys - grkeys - fixed_results.keys).present?
+      result.gr_keys = grid_keys(grids, eclass)
+      result.res_keys = comp_res_keys(results, grids, eclass, metadata_opts)
+      if (result.res_keys - result.gr_keys - fixed_results.keys).present?
         begin
-          resres = engine.evaluate(
+          result.res_vals = engine.evaluate(
             eclass.node_name,
-            crkeys,
+            result.res_keys,
             params + {
               "dgparams__" => dgparams,
             })
           grids_computed = true
         rescue => e
-          emsg = e.message
-          estack = e.backtrace
-          esec = 'results'
+          result.err_message = e.message
+          result.err_stack   = e.backtrace
+          result.err_section = 'results'
           raise ComputeError.new(
-                  "Error (results) in rule '#{id}:#{name}': #{emsg}",
-                  estack,
+                  "Error (results) in rule '#{id}:#{name}': #{result.err_message}",
+                  result.err_stack,
                   params + {
                     "dgparams__" => dgparams,
                   },
-                  esec)
+                  result.err_section)
         end
-        result = Hash[crkeys.zip(resres)]
+        result.res_hash = Hash[result.res_keys.zip(result.res_vals)]
       else
-        result = fixed_results.slice(*crkeys)
+        result.res_hash = fixed_results.slice(*result.res_keys)
       end
 
       if grids.present? && !grids_computed
         pt = params['pt']
         gres = {}
-        grid_results = grids.each_with_object({}) do |(gvar, gname), h|
+        result.gr_hash = grids.each_with_object({}) do |(gvar, gname), h|
           usename = eclass.grid_final_name(gvar)
           next h[usename] = gres[gname] if gres[gname]
           dg = Marty::DataGrid.lookup_h(pt,gname)
@@ -144,23 +138,21 @@ class Marty::DeloreanRule < Marty::BaseRule
           h[usename] = gres[gname] = dgr["result"] if dgr
         end
       end
-      result + grid_results
+      (result.res_hash||{}) + (result.gr_hash||{})
     ensure
+      resh = result.to_h
+      [:res_keys, :res_vals].each {|k|resh.delete(k)} if
+        result.res_hash.present? || result.res_keys.blank?
+      [:cg_keys, :cg_vals].each {|k|resh.delete(k)} if
+        result.cg_hash.present? ||  result.cg_keys.blank?
+      resh.delete(:gr_keys) if result.gr_hash.present? || result.gr_keys.blank?
+      estack_full = resh.delete(:err_stack)
+      estack = estack_full && {
+        err_stack: estack_full.select{ |l| l.starts_with?('DELOREAN')}} || {}
       Marty::Logger.info("Rule Log #{ruleh['name']}",
                          { input: params,
-                           dgparams: dgparams,
-                           gr_keys: grkeys,
-                           gr_result: grid_results,
-                           cg_keys: cg_keys,
-                           cg_result: cgres,
-                           res_keys: crkeys,
-                           res_result: resres,
-                           error_section: esec,
-                           error_message: emsg,
-                           error_stack: estack && estack.select{
-                             |l|
-                             l.starts_with?('DELOREAN')}
-                         }.compact) if ruleh['fixed_results']['log__']
+                           dgparams: dgparams } + resh + estack
+                        ) if ruleh['fixed_results']['log__']
     end
   end
   def self.base_compute(ruleh, params, dgparams=params)

@@ -399,39 +399,34 @@ module Marty::RuleSpec
         exp = {"input"=>{"p1"=>12, "p2"=>3,
                          "pt"=>ptjson,
                          "flavor"=>"cherry"},
-               "cg_keys"=>[],
-               "gr_keys"=>["grid1_grid_result"],
                "dgparams"=>{"p1"=>12, "p2"=>3,
                             "pt"=>ptjson,
                             "flavor"=>"cherry"},
-               "res_keys"=>["bv", "grid1_grid_result"],
-               "gr_result"=>{},
-               "res_result"=>
-               ["a stringa stringa stringa stringa stringa stringa stringa "\
+               "gr_keys"=>["grid1_grid_result"],
+               "res_hash"=>
+               {"bv"=>"a stringa stringa stringa stringa stringa stringa stringa "\
                 "stringa stringa stringa stringa stringa stringa stringa "\
                 "stringa stringa stringa stringa stringa stringa stringa "\
                 "stringa stringa stringa stringa string",
-                19]}
+                "grid1_grid_result"=>19}}
         expect(log_ents[0].details).to eq(exp)
         exp = {"input"=>{"p1"=>12, "p2"=>3,
                          "pt"=>ptjson,
                          "flavor"=>"cherry"},
-               "cg_keys"=>["some_guard"],
+               "cg_hash"=>{"some_guard"=>true},
                "gr_keys"=>["grid1_grid_result"],
                "dgparams"=>{"p1"=>12, "p2"=>3,
                             "pt"=>ptjson,
                             "flavor"=>"cherry"},
                "res_keys"=>["bv", "grid1_grid_result"],
-               "cg_result"=>[true],
-               "gr_result"=>{},
-               "error_section"=>"results",
-               "error_message"=>"no implicit conversion of Fixnum into String"}
-        expect(log_ents[1].details.except('error_stack')).to eq(exp)
+               "err_section"=>"results",
+               "err_message"=>"no implicit conversion of Fixnum into String"}
+        expect(log_ents[1].details.except('err_stack')).to eq(exp)
         expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
                /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
                /DELOREAN__XyzRule_\d+_1483228800.0:27:in .bv__D'/]
         expres.each_with_index do |expre, i|
-          expect(log_ents[1].details['error_stack'][i]).to match(expre)
+          expect(log_ents[1].details['err_stack'][i]).to match(expre)
         end
         exp = {"input"=>{"p1"=>12, "p2"=>3,
                          "pt"=>ptjson,
@@ -440,13 +435,13 @@ module Marty::RuleSpec
                "dgparams"=>{"p1"=>12, "p2"=>3,
                             "pt"=>ptjson,
                             "flavor"=>"cherry"},
-               "error_section"=>"computed_guards",
-               "error_message"=>"divided by 0"}
-        expect(log_ents[2].details.except('error_stack')).to eq(exp)
+               "err_section"=>"computed_guards",
+               "err_message"=>"divided by 0"}
+        expect(log_ents[2].details.except('err_stack')).to eq(exp)
         expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:5:in ./'),
                /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]
         expres.each_with_index do |expre, i|
-          expect(log_ents[2].details['error_stack'][i]).to match(expre)
+          expect(log_ents[2].details['err_stack'][i]).to match(expre)
         end
       end
     end
