@@ -174,9 +174,9 @@ class Marty::Grid < ::Netzke::Grid::Base
   end
 
   action :clear_filters do |a|
+    a.text     = "X"
     a.tooltip  = "Clear filters"
     a.handler  = :clear_filters
-    a.icon_cls = "fa fa-minus glyph"
   end
 
   # cosmetic changes
