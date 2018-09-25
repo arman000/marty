@@ -1,4 +1,5 @@
 class Marty::Logger
+  include Delorean::Model
 
   def self.method_missing(m, *args, &block)
     return super unless
@@ -19,5 +20,11 @@ class Marty::Logger
                              "data" => error_data})
       raise "#{error_message}: #{e.message}"
     end
+  end
+
+  delorean_fn :dllog, sig: [2, 20] do
+     |*args|
+
+     info args[0], args[1..-1]
   end
 end

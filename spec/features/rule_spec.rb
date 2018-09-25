@@ -358,18 +358,18 @@ EOL
             "bv"=>"base_value"}}
 
     expect(r.first.as_json).to include(exp)
-    expect(xrv.col_values(:g_string, 5, 0)).to eq(["aaa", "bbb", "ccc",
-                                                   "ddd", "eee"])
+    expect(xrv.col_values(:g_string, 8, 0)).to eq(["aaa", "bbb", "ccc", "ddd",
+                                                   "eee", "eee", "eee", "eee"])
     click_column(xrv, "String list Guard")
-    expect(xrv.col_values(:g_string, 5, 0)).to eq(["eee", "ddd", "ccc",
-                                                   "bbb", "aaa"])
+    expect(xrv.col_values(:g_string, 8, 0)).to eq(["eee", "eee", "eee", "eee",
+                                                   "ddd", "ccc", "bbb", "aaa"])
     column_filter(xrv, "String list Guard", "eee")
     rc = xrv.row_count
-    expect(xrv.col_values(:g_string,rc,0)).to eq(["eee"])
+    expect(xrv.col_values(:g_string,rc,0)).to eq(["eee", "eee", "eee", "eee"])
     column_filter_toggle(xrv, "String list Guard")
     rc = xrv.row_count
-    expect(xrv.col_values(:g_string,rc,0)).to eq(["eee", "ddd", "ccc",
-                                                   "bbb", "aaa"])
+    expect(xrv.col_values(:g_string,rc,0)).to eq(["eee", "eee", "eee", "eee",
+                                                  "ddd", "ccc", "bbb", "aaa"])
     column_filter(xrv, "Grids", "Grid1")
     rc = xrv.row_count
                                          # netzke reports jsonb as string
@@ -378,6 +378,9 @@ EOL
     column_filter_toggle(xrv, "Grids")
     rc = xrv.row_count
     expect(xrv.col_values(:grids,rc,0)).to eq([%Q({"grid1":"DataGrid3"}),
+                                               %Q({"grid1":"DataGrid3"}),
+                                               %Q({"grid1":"DataGrid3"}),
+                                               %Q({"grid1":"DataGrid3"}),
                                                %Q({"grid1":"DataGrid3"}),
                                                %Q({"grid1":"DataGrid2"}),
                                                %Q({"grid1":"DataGrid1"}),
