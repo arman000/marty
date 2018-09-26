@@ -149,7 +149,7 @@ class Marty::Api::Controller < ActionController::Base
 
   def token
     request_params = oauth_params
-    params = oauth_params[:body]
+    params = oauth_params[:params]
 
     result = {'error' => 'invalid_grant'} unless
       ['password', 'refresh_token'].include?(params[:grant_type])
@@ -157,10 +157,14 @@ class Marty::Api::Controller < ActionController::Base
     begin
       api_key   = oauth_params['api_key']
       username  = params[:username]
-      api_auth = Marty::ApiAuth.where(api_key: api_key).first
+
+      api_auth = Marty::ApiAuth.where(api_key: api_key,
+                                      obsoleted_dt: 'infinity').first
+
+      key = api_auth.parameters['aws_api_key']
 
       result = {'error' => 'invalid api key association'} unless
-        api_auth.try(:aws_api_key).try(:username) == username
+        key && key['username'] == username
 
       if !result
         c = Client.new

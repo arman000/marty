@@ -122,7 +122,6 @@ class Marty::Aws::Apigateway::ApiKeyView < Marty::ApiAuthView
     api_id            = client_config['api_id']
     api_usage_plan_id = client_config['parent_id']
 
-    Marty::Logger.log('api', 'test', [api_id, api_usage_plan_id, client_config])
     return client.netzke_notify "Usage plan not selected" unless api_id &&
                                                                  api_usage_plan_id
 
@@ -133,7 +132,6 @@ class Marty::Aws::Apigateway::ApiKeyView < Marty::ApiAuthView
       # derive script from api name by convention
       script = api.name.split('-').drop(1).map{|s| s.capitalize}.join
 
-      Marty::Logger.log('api', 'fatal', script)
       api_auth = Marty::ApiAuth.create!(
         app_name:    app_name,
         script_name: script,

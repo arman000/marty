@@ -66,7 +66,7 @@ Endpoint: Base
         "\"cognito_identity-pool_id\":" +
         "\"$context.identity.cognitoIdentityPoolId\"," +
         "\"stage\":\"$context.stage\"," +
-        "\"source_ip\":\"$context.identity.sourceIp\",}"
+        "\"source_ip\":\"$context.identity.sourceIp\"}"
 
     result = {
         path : {
