@@ -11,15 +11,15 @@ class Marty::RpcController < ActionController::Base
             Marty::Api::Base
 
     api.respond_to(self) do
-      api_params = api.process_params(massaged_params)
-      api.before_evaluate(api_params)
-      next api_params if api_params.include?(:error)
+      next massaged_params if massaged_params.include?(:error)
 
-      auth = api.is_authorized?(api_params)
+      auth = api.is_authorized?(massaged_params)
       next {error: "Permission denied"} unless auth
 
       start_time = Time.zone.now
 
+      api_params = api.process_params(massaged_params)
+      api.before_evaluate(api_params)
       result = api.evaluate(api_params.deep_dup, request, api_config.deep_dup)
       api.after_evaluate(api_params.deep_dup, result)
 
