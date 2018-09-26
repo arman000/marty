@@ -32,6 +32,7 @@ class Marty::Aws::Apigateway::ApiUserView < Netzke::Base
 
   component :aws_apigateway_api_view do |c|
     c.klass = Marty::Aws::Apigateway::ApiView
+    c.bbar  = []
   end
 
   component :aws_apigateway_authorizer_view do |c|
