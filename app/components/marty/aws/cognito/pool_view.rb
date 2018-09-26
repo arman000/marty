@@ -69,21 +69,29 @@ class Marty::Aws::Cognito::PoolView < Marty::Aws::Grid
   end
 
   endpoint :toggle_user_access do
-    aws_async_wait :reload do
+    begin
       user   = Marty::Aws::Object.find(client_config['selected'])
       username = user.username
 
       cog = Marty::Aws::Cognito.new
       user.enabled ? cog.admin_disable_user(username) :
         cog.admin_enable_user(username)
+      client.reload
+    rescue => e
+      client.netzke_notify(e.message)
     end
+    return
   end
 
   endpoint :reset_user_password do
-    aws_async_wait :reload do
+    begin
       username = Marty::Aws::Object.find(client_config['selected']).username
       Marty::Aws::Cognito.new.admin_reset_password(username)
+      client.reload
+    rescue => e
+      client.netzke_notify(e.message)
     end
+    return
   end
 
   def get_api_key r
