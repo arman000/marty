@@ -2,8 +2,6 @@ class Marty::Aws::Base
   # aws reserved host used to get instance meta-data
   META_DATA_HOST = '169.254.169.254'
 
-  SERVICES = ['apigateway', 'ec2'].to_set.freeze
-
   attr_reader :id,
               :doc,
               :role,
@@ -62,19 +60,16 @@ class Marty::Aws::Base
     symbolize(res)
   end
 
-  def request service, info, params = {}
-    raise "#{service} is not a supported AWS service" unless
-      SERVICES.member?(service)
-
+  def request info, params = {}
     action   = info[:action]
     endpoint = info[:endpoint]
     method   = info[:method] || :get
 
     default = action ? {'Action' => action, 'Version' => @version} : {}
 
-    host = "#{service}.#{@doc['region']}.amazonaws.com"
+    host = "#{@service}.#{@doc[:region]}.amazonaws.com"
 
-    url = "https://#{@host}/"
+    url = "https://#{host}/"
     url += endpoint if endpoint
     url += '?' + (default + params).map{|a, v| "#{a}=#{v}"}.join('&') unless
       params.empty?
@@ -86,7 +81,7 @@ class Marty::Aws::Base
                                  session_token:     @creds[:token])
     signed_url = sig.presign_url(http_method:'GET', url: url)
 
-    http = Net::HTTP.new(@host, 443)
+    http = Net::HTTP.new(host, 443)
     http.use_ssl = true
     Net::HTTP.send(method, signed_url)
   end

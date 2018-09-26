@@ -29,8 +29,8 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Base
   end
 
   def initialize
-    @service   = 'ec2'
     super
+    @service   = 'ec2'
     @tag       = get_tag
     @instances = InstancesSet.new(get_instances)
     @nodes     = get_private_ips
@@ -54,9 +54,11 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Base
     params = {'Filter.1.Name'    => 'tag-value',
               'Filter.1.Value.1' => @tag}
 
+    resp = ec2_request('DescribeInstances', params)
+
     instances = ensure_resp(
       ['reservationSet', 'item', 'instancesSet', 'item'],
-      ec2_request('DescribeInstances', params)
+      resp
     ).map do |i|
       {
         'id'    => i['instanceId'],
