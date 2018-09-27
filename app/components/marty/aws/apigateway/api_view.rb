@@ -51,11 +51,7 @@ class Marty::Aws::Apigateway::ApiView < Marty::Aws::Grid
     c.reload = l (<<-JS)
     function() {
       this.callParent();
-
-      // reload api key usage plans on api stage view actions
-      var usage_plan_view = this.netzkeGetComponentFromParent(
-                            'aws_apigateway_api_usage_plan_view');
-      if (usage_plan_view) { usage_plan_view.reload()}
+      this.findComponent('aws_apigateway_api_usage_plan_view').reload();
     }
     JS
   end

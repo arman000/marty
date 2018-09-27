@@ -13,18 +13,12 @@ class Marty::Aws::Apigateway::ApiKeyMoveView <
     function() {
       var me = this;
       me.callParent();
-      //this.getStore().suspendEvents();
 
-      var w   = this.netzkeGetParentComponent();
-      var p   = w.netzkeGetParentComponent();
-      var gp  = p.netzkeGetParentComponent();
-      var mgr = gp.netzkeGetParentComponent();
+      var a = this.findComponent('aws_apigateway_api_key_view');
+      var u = this.findComponent('aws_apigateway_api_usage_plan_view');
 
-      var up = mgr.netzkeGetComponent(
-               'aws_apigateway_api_plan_view__aws_apigateway_api_usage_plan_view');
-
-      this.serverConfig = up.serverConfig;
-      this.serverConfig['parent_id'] = p.serverConfig.selected;
+      this.serverConfig              = u.serverConfig;
+      this.serverConfig['parent_id'] = a.serverConfig.selected;
     }
     JS
 
@@ -36,9 +30,9 @@ class Marty::Aws::Apigateway::ApiKeyMoveView <
 
     c.reload_parent = l (<<-JS)
     function() {
-      var window      = this.netzkeGetParentComponent();
-      var parent_view = window.netzkeGetParentComponent();
-      parent_view.reload();
+      var comp = this.findComponent('aws_apigateway_api_key_view');
+      console.log(comp);
+      comp.reload();
     }
     JS
 

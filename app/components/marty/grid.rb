@@ -13,6 +13,18 @@ class Marty::Grid < ::Netzke::Grid::Base
   end
 
   client_class do |c|
+    c.get_component = l(<<-JS)
+    function(name) {
+      return Ext.getCmp(name);
+    }
+    JS
+
+    c.find_component = l(<<-JS)
+    function(name) {
+      return Ext.ComponentQuery.query(`[name=${name}]`)[0];
+    }
+    JS
+
     c.toggle_component_actions = l(<<-JS)
     function(prefix, flag) {
       for (var key in this.actions) {
@@ -78,16 +90,7 @@ class Marty::Grid < ::Netzke::Grid::Base
         me.toggleComponentActions('do', !has_sel);
 
         for (var child of children) {
-          var comp = me.netzkeGetComponentFromParent(child);
-
-          // check grandparent if parent does not have component
-          if (!comp) {
-            var parent      = me.netzkeGetParentComponent();
-            var grandparent = parent.netzkeGetParentComponent();
-
-            comp = grandparent && grandparent.netzkeGetComponent(child);
-          }
-
+          var comp = me.findComponent(child)
           if (comp) {
             comp.serverConfig.parent_id = rid;
             if (comp.toggleComponentActions) {
@@ -103,16 +106,7 @@ class Marty::Grid < ::Netzke::Grid::Base
       for (var event of ['update', 'netzkerefresh']) {
         store.on(event, function() {
         for (var link of linked) {
-            var comp = me.netzkeGetComponentFromParent(link);
-
-            // check grandparent if parent does not have component
-            if (!comp) {
-              var parent      = me.netzkeGetParentComponent();
-              var grandparent = parent.netzkeGetParentComponent();
-
-              comp = grandparent && grandparent.netzkeGetComponent(child);
-            }
-
+            var comp = me.findComponent(link);
             if (comp && comp.reload) { comp.reload() }
           }
         }, this);
@@ -156,7 +150,7 @@ class Marty::Grid < ::Netzke::Grid::Base
       var children = me.serverConfig.child_components || [];
       this.store.reload();
       for (child of children) {
-        var comp = me.netzkeGetComponentFromParent(child);
+        var comp = me.findComponent(child);
         if (comp && comp.reload) { comp.reload() }
       }
     }
@@ -167,13 +161,6 @@ class Marty::Grid < ::Netzke::Grid::Base
       this.filters.clearFilters();
     }
     JS
-
-    c.netzkeGetComponentFromParent = l(<<-JS)
-    function(component_path) {
-      return this.netzkeGetParentComponent().netzkeGetComponent(component_path);
-    }
-    JS
-
   end
 
   ######################################################################

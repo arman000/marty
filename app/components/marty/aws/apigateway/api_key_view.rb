@@ -73,24 +73,15 @@ class Marty::Aws::Apigateway::ApiKeyView < Marty::ApiAuthView
 
     c.reload = l(<<-JS)
     function(opts={}) {
-      var p  = this.netzkeGetParentComponent();
-      var gp = p.netzkeGetParentComponent();
-
-      var api = gp.netzkeGetComponent(
-                'aws_apigateway_api_plan_view__aws_apigateway_api_view');
-
+      var api = this.findComponent('aws_apigateway_api_view');
       this.serverConfig['api_id'] = api.serverConfig['selected'];
-
       this.callParent();
     }
     JS
 
     c.reload_linked = l(<<-JS)
     function() {
-      var p = this.netzkeGetParentComponent();
-      var c = p &&
-              p.netzkeGetComponent('aws_apigateway_api_usage_plan_key_view')
-
+      var c = this.findComponent('aws_apigateway_api_usage_plan_key_view')
       if (c) { c.reload() }
     }
     JS

@@ -3,8 +3,8 @@ class Marty::Aws::Apigateway::ApiUsagePlanView < Marty::Aws::Grid
 
   def child_components
     [
-      :aws_apigateway_api_key_tabbed_view__aws_apigateway_api_usage_plan_key_view,
-      :aws_apigateway_api_key_tabbed_view__aws_apigateway_api_key_view,
+      :aws_apigateway_api_usage_plan_key_view,
+      :aws_apigateway_api_key_view,
     ]
   end
 

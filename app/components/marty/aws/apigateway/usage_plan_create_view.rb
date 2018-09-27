@@ -13,10 +13,8 @@ class Marty::Aws::Apigateway::UsagePlanCreateView < Marty::Form
       var me = this;
       me.callParent();
 
-      var window      = this.netzkeGetParentComponent();
-      var parent_view = window.netzkeGetParentComponent();
-
-      this.serverConfig.selected = parent_view.serverConfig.selected;
+      var comp = me.findComponent('aws_apigateway_api_view');
+      this.serverConfig.selected = comp.serverConfig.selected;
     }
     JS
 
@@ -28,11 +26,7 @@ class Marty::Aws::Apigateway::UsagePlanCreateView < Marty::Form
 
     c.reload = l (<<-JS)
     function() {
-      var w = this.netzkeGetParentComponent();
-      var p = w.netzkeGetParentComponent();
-      var m = p.netzkeGetParentComponent();
-      var u = m.netzkeGetComponent('aws_apigateway_api_usage_plan_view');
-      u.reload();
+      this.findComponent('aws_apigateway_api_usage_plan_view').reload();
     }
     JS
   end
