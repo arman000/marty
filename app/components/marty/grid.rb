@@ -60,7 +60,8 @@ class Marty::Grid < ::Netzke::Grid::Base
             rid = cell && cell.record.getId();
           }
           if (!rid) {
-            rid = m.getSelection()[0].getId();
+            selected = m.getSelection()[0];
+            rid = selected && selected.getId();
           }
         }
 
