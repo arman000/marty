@@ -140,19 +140,21 @@ class Marty::DeloreanRule < Marty::BaseRule
       end
       (result.res_hash||{}) + (result.gr_hash||{})
     ensure
-      resh = result.to_h
-      [:res_keys, :res_vals].each {|k|resh.delete(k)} if
-        result.res_hash.present? || result.res_keys.blank?
-      [:cg_keys, :cg_vals].each {|k|resh.delete(k)} if
-        result.cg_hash.present? ||  result.cg_keys.blank?
-      resh.delete(:gr_keys) if result.gr_hash.present? || result.gr_keys.blank?
-      estack_full = resh.delete(:err_stack)
-      estack = estack_full && {
-        err_stack: estack_full.select{ |l| l.starts_with?('DELOREAN')}} || {}
-      Marty::Logger.info("Rule Log #{ruleh['name']}",
-                         { input: params,
-                           dgparams: dgparams } + resh + estack
-                        ) if ruleh['fixed_results']['log__']
+      if ruleh['fixed_results']['log__']
+        resh = result.to_h
+        [:res_keys, :res_vals].each {|k|resh.delete(k)} if
+          result.res_hash.present? || result.res_keys.blank?
+        [:cg_keys, :cg_vals].each {|k|resh.delete(k)} if
+          result.cg_hash.present? ||  result.cg_keys.blank?
+        resh.delete(:gr_keys) if result.gr_hash.present? || result.gr_keys.blank?
+        estack_full = resh.delete(:err_stack)
+        estack = estack_full && {
+          err_stack: estack_full.select{ |l| l.starts_with?('DELOREAN')}} || {}
+        Marty::Logger.info("Rule Log #{ruleh['name']}",
+                           { input: params,
+                             dgparams: dgparams } + resh + estack
+                          )
+      end
     end
   end
   def self.base_compute(ruleh, params, dgparams=params)
