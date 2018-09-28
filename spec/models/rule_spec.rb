@@ -367,7 +367,7 @@ module Marty::RuleSpec
         begin
           v2 = r7.compute(input)
         rescue Marty::DeloreanRule::ComputeError => e
-          exp = 'no implicit conversion of Fixnum into String'
+          exp = 'no implicit conversion of Integer into String'
           expect(e.message).to include(exp)
           expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
                  /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
@@ -420,7 +420,7 @@ module Marty::RuleSpec
                             "flavor"=>"cherry"},
                "res_keys"=>["bv", "grid1_grid_result"],
                "err_section"=>"results",
-               "err_message"=>"no implicit conversion of Fixnum into String"}
+               "err_message"=>"no implicit conversion of Integer into String"}
         expect(log_ents[1].details.except('err_stack')).to eq(exp)
         expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
                /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
