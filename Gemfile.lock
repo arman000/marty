@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    marty (2.3.13)
+    marty (2.4.0)
       aws-sdk-apigateway (~> 1.0.0.rc7)
       aws-sdk-cognitoidentityprovider (~> 1.3)
       aws-sigv4 (~> 1.0, >= 1.0.2)
