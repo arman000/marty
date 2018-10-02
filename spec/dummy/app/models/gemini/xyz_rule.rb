@@ -44,7 +44,7 @@ class Gemini::XyzRule < Marty::DeloreanRule
   end
 
   def compute(*args)
-    base_compute(*args)
+    base_compute2(*args)
   end
   def compute_xyz(pt, xyz_param)
     # Given a set of parameters, compute the RULE adjustment.  Returns

@@ -48,8 +48,9 @@ class Marty::DeloreanRule < Marty::BaseRule
     computed_guards.keys
   end
 
-  def self.comp_res_keys(results, grids, ecl, pcfg = nil)
-    defkeys = (pcfg || Marty::Config[results_cfg_var] || {}).keys
+  def self.comp_res_keys(results, grids, ecl, pcfg)
+    # FIXME in May 2019: remove this check (use as passed)
+    defkeys = pcfg.is_a?(Hash) ? pcfg.keys : pcfg
     results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
        select{|k| defkeys.include?(k)} + grid_keys(grids, ecl)
   end
@@ -73,6 +74,7 @@ class Marty::DeloreanRule < Marty::BaseRule
       id, name, eclassname, computed_guards, grids, results, fixed_results =
           ruleh.values_at("id", "name", "engine", "computed_guards", "grids",
                           "results", "fixed_results")
+      raise "Error in rule '#{id}:#{name}': bad metadata_opts" if !metadata_opts
       eclass = eclassname && eclassname.constantize || Marty::RuleScriptSet
       engine = eclass.new(params["pt"]).get_engine(ruleh) if
         computed_guards.present? || results.present?
@@ -157,9 +159,7 @@ class Marty::DeloreanRule < Marty::BaseRule
       end
     end
   end
-  def self.base_compute(ruleh, params, dgparams=params)
-    base_compute2(ruleh, nil, params, dgparams)
-  end
+
   delorean_fn :route_compute, sig: 4 do
     |ruleh, pt, params, grid_names_p|
     kl = ruleh["classname"].constantize
@@ -186,8 +186,8 @@ class Marty::DeloreanRule < Marty::BaseRule
     kl.validate_grid_attrs(ruleh, gridname, addl_attrs)
   end
 
-  def base_compute(params, dgparams=params)
-    self.class.base_compute(self_as_hash, params, dgparams)
+  def base_compute2(metadata_opts, params, dgparams=params)
+    self.class.base_compute2(self_as_hash, metadata_opts, params, dgparams)
   end
 
   def self.get_matches_(pt, attrs, params)
