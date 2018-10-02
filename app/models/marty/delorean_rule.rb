@@ -49,7 +49,11 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def self.comp_res_keys(results, grids, ecl, pcfg = nil)
-    defkeys = (pcfg || Marty::Config[results_cfg_var] || {}).keys
+    # FIXME in May 2019: remove this check and default of pcfg to nil
+    # (use as passed)
+    defkeys = pcfg.is_a?(Array) ? pcfg :
+                pcfg.is_a?(Hash) ? pcfg.keys :
+                  (Marty::Config[results_cfg_var] || {}).keys
     results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
        select{|k| defkeys.include?(k)} + grid_keys(grids, ecl)
   end

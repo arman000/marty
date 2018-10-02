@@ -334,6 +334,7 @@ EOL
     fill_in("Range Guard 1", with: "[100,200)")
     fill_in("Range Guard 2", with: "[30,40)")
     press("OK")
+    wait_for_ajax
     r = Gemini::XyzRule.get_matches('infinity', {}, {"g_range1"=> 150,
                                                      "g_range2"=> 35})
 
