@@ -7,16 +7,9 @@ module Marty::RuleSpec
       save_clean_db(@save_file)
       marty_whodunnit
       Marty::Script.load_scripts
-      Marty::Config['RULEOPTS_MYRULE']={'simple_result'=>{},
-                                        'computed_value'=>{},
-                                        'final_value'=>{},
-                                        'grid_sum'=>{},
-                                        'c1'=>{},
-                                        'sr2'=>{},
-                                       }
-      Marty::Config['RULEOPTS_XYZ']={'bvlength'=>{},
-                                     'bv'=>{},
-                                    }
+      @ruleopts_myrule=['simple_result', 'computed_value', 'final_value',
+                        'grid_sum', 'c1', 'sr2']
+      @ruleopts_xyz=['bvlength', 'bv']
     end
     after(:all) do
       restore_clean_db(@save_file)
@@ -266,7 +259,7 @@ module Marty::RuleSpec
       let(:complex) { Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'ComplexRule'},
                                             {'g_string'=>'def'}).first }
-          let(:xyz) { Gemini::XyzRule.get_matches('infinity',
+      let(:xyz) { Gemini::XyzRule.get_matches('infinity',
                                               {'rule_type'=>'ZRule'},
                                               {'g_integer'=> 2}).first }
       let(:simple) {
@@ -291,8 +284,8 @@ module Marty::RuleSpec
                                    {"g_string"=>"Hi Mom",
                                     "g_integer"=>11}).first }
       it "computed guards work" do
-        c = complex.compute({"pt"=>Time.zone.now,
-                             'param2'=>'def'})
+        c = complex.compute(@ruleopts_myrule, {"pt"=>Time.zone.now,
+                                               'param2'=>'def'})
         expect(c).to eq({"cguard2"=>false})
       end
       it "returns simple results via #fixed_results" do
@@ -306,50 +299,53 @@ module Marty::RuleSpec
         expect(simple.fixed_results.count).to eq(5)
         allow_any_instance_of(Delorean::Engine).
           to receive(:evaluate).and_raise('hi mom')
-        expect{simple.compute({"pt"=>Time.now})}.to raise_error(/hi mom/)
+        expect{simple.compute(@ruleopts_myrule,
+                              {"pt"=>Time.now})}.to raise_error(/hi mom/)
         # simple2a should return results without evaluation (they are all fixed)
-        expect(simple2a.compute({"pt"=>Time.zone.now})).to eq(
+        expect(simple2a.compute(@ruleopts_myrule, {"pt"=>Time.zone.now})).to eq(
                                        {"simple_result"=>"b value",
                                         "sr2"=>true,
                                        })
         # simple2b should return grid results without evaluation
-        expect(simple2b.
-                 compute({"pt"=>Time.zone.now,
-                          'param1'=> 66,
-                          'param2'=>'abc',
-                          'paramb'=>false})).to eq({"grid1_grid_result"=>3,
-                                                    "grid2_grid_result"=>1300})
+        expect(simple2b.compute(@ruleopts_myrule,
+                                {"pt"=>Time.zone.now,
+                                 'param1'=> 66,
+                                 'param2'=>'abc',
+                                 'paramb'=>false})).
+          to eq({"grid1_grid_result"=>3,
+                 "grid2_grid_result"=>1300})
 
       end
       it "returns computed results" do
-        c = complex.compute({"pt"=>Time.zone.now,
-                             'param1'=> 66,
-                             'param2'=>'abc',
-                             'paramb'=>false})
+        c = complex.compute(@ruleopts_myrule, {"pt"=>Time.zone.now,
+                                               'param1'=> 66,
+                                               'param2'=>'abc',
+                                               'paramb'=>false})
         expect(c).to eq({"simple_result"=>"c value",
                          "computed_value"=>19, "grid1_grid_result"=>3,
                          "grid2_grid_result"=>1300})
       end
       it "returns computed results (with delorean import)" do
-        c = xyz.compute({"pt"=>Time.zone.now+1,
-                         "p1"=>12,
-                         "p2"=>3,
-                         "flavor"=>"cherry"})
+        c = xyz.compute(@ruleopts_xyz, {"pt"=>Time.zone.now+1,
+                                        "p1"=>12,
+                                        "p2"=>3,
+                                        "flavor"=>"cherry"})
         expect(c).to eq({"bvlength"=>13,"bv"=>"cherry --> 36",
                          "grid1_grid_result"=>19})
       end
       it "reports bad grid name" do
         exp = Regexp.new("Error .results. in rule '\\d+:Rule4': "\
                          "DataGridX grid not found")
-        expect{gridcomputedname.compute({"pt"=>Time.zone.now,
-                             'param1'=> 66,
-                             'param2'=>'abc',
-                             'paramb'=>false})}.to raise_error(exp)
+        expect{gridcomputedname.compute(@ruleopts_myrule,
+                                        {"pt"=>Time.zone.now,
+                                         'param1'=> 66,
+                                         'param2'=>'abc',
+                                         'paramb'=>false})}.to raise_error(exp)
       end
       it "grids embedded in result work properly and receive prior attrs" do
-        v = altgridmethod.compute({"pt"=>Time.zone.now,
-                                   'param1'=> 45,
-                                   'param2' => 1})
+        v = altgridmethod.compute(@ruleopts_myrule, {"pt"=>Time.zone.now,
+                                                     'param1'=> 45,
+                                                     'param2' => 1})
         expect(v["final_value"]).to eq(15)
       end
       it "exceptions/logging" do
@@ -363,9 +359,9 @@ module Marty::RuleSpec
                  "p1"=>12,
                  "p2"=>3,
                  "flavor"=>"cherry"}
-        v1 = r6.compute(input)
+        v1 = r6.compute(@ruleopts_xyz, input)
         begin
-          v2 = r7.compute(input)
+          v2 = r7.compute(@ruleopts_xyz, input)
         rescue Marty::DeloreanRule::ComputeError => e
           exp = 'no implicit conversion of Integer into String'
           expect(e.message).to include(exp)
@@ -379,7 +375,7 @@ module Marty::RuleSpec
           expect(e.section).to eq('results')
         end
         begin
-          v2 = r8.compute(input)
+          v2 = r8.compute(@ruleopts_xyz, input)
         rescue Marty::DeloreanRule::ComputeError => e
           exp = 'divided by 0'
           expect(e.message).to include(exp)
