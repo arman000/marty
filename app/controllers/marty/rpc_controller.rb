@@ -18,19 +18,6 @@ class Marty::RpcController < ActionController::Base
     end
   end
 
-  private
-  # FIXME: move to (probably) agrim's schema code in lib
-  def get_schema(tag, sname, node, attr)
-    begin
-      Marty::ScriptSet.new(tag).get_engine(sname+'Schemas').
-        evaluate(node, attr, {})
-    rescue => e
-      use_message = e.message == 'No such script' ?
-                      'Schema not defined' : 'Problem with schema: ' + e.message
-      raise "Schema error for #{sname}/#{node} attrs=#{attr}: #{use_message}"
-    end
-  end
-
   def massage_message(msg)
     m = %r|'#/([^']+)' of type ([^ ]+) matched the disallowed schema|.match(msg)
     return msg unless m
@@ -92,15 +79,28 @@ class Marty::RpcController < ActionController::Base
     to_append            = {"\$schema" => Marty::JsonSchema::RAW_URI}
     validation_error     = nil
 
+    auth = Marty::ApiAuth.authorized?(sname, api_key)
+    return {error: "Permission denied" } unless auth
+
+    schema_key = [tag, sname, node, attr]
+    @@schemas ||= {}
+    input_schema = nil
+    begin
+      # get_schema will either return a hash with the schema,
+      # or a string with the error
+      input_schema = @@schemas[schema_key] ||=
+                     Marty::JsonSchema.get_schema(*schema_key)
+    rescue => e
+      return {error: e.message}
+    end
+
     if need_input_validate
-      begin
-        schema = get_schema(tag, sname, node, attr)
-      rescue => e
-        return {error: e.message}
-      end
+
+      # must fail if schema not found or some other error
+      return {"error": input_schema} if input_schema.is_a?(String)
       begin
         er = JSON::Validator.
-               fully_validate(schema.merge(to_append), params, opt)
+               fully_validate(input_schema.merge(to_append), params, opt)
       rescue NameError
         return {error: "Unrecognized PgEnum for attribute #{attr}"}
       rescue => ex
@@ -111,8 +111,18 @@ class Marty::RpcController < ActionController::Base
     return {error: "Error(s) validating: #{validation_error}"} if
       validation_error
 
-    auth = Marty::ApiAuth.authorized?(sname, api_key)
-    return {error: "Permission denied" } unless auth
+    # if schema was found
+    if input_schema.is_a?(Hash)
+      # fix numbers types
+      @@numbers ||= {}
+      numbers = @@numbers[schema_key] ||=
+                Marty::JsonSchema.get_numbers(input_schema)
+
+      Marty::JsonSchema.fix_numbers(params, numbers) # modify params in place
+    elsif !input_schema.include?("Schema not defined")
+      # else if some error besides schema not defined, fail
+      return {error: input_schema}
+    end
 
     begin
       engine = Marty::ScriptSet.new(tag).get_engine(sname)
@@ -135,7 +145,7 @@ class Marty::RpcController < ActionController::Base
 
       if need_output_validate && !(res.is_a?(Hash) && res['error'])
         begin
-          schema = get_schema(tag, sname, node, attr + '_')
+          schema = Marty::JsonSchema.get_schema(tag, sname, node, attr + '_')
         rescue => e
           return {error: e.message}
         end
