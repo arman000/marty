@@ -162,6 +162,9 @@ class Marty::Grid < ::Netzke::Grid::Base
     c.editing      = :both
     c.store_config = {page_size: 30}
     c.view_config  = {preserve_scroll_on_reload: true}
+
+    # disable buffered renderer plugin to avoid white space on reload
+    c.buffered_renderer = false
   end
 
   def has_search_action?
