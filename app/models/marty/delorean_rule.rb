@@ -84,7 +84,7 @@ class Marty::DeloreanRule < Marty::BaseRule
       if computed_guards.present?
         begin
           result.cg_vals = engine.evaluate(eclass.node_name, result.cg_keys,
-                                           params.clone)
+                                           Hash[params])
         rescue => e
           result.err_message = e.message
           result.err_stack   = e.backtrace
@@ -92,7 +92,7 @@ class Marty::DeloreanRule < Marty::BaseRule
           raise ComputeError.new(
                   "Error (guard) in rule '#{id}:#{name}': #{result.err_message}",
                   result.err_stack,
-                  params.clone,
+                  Hash[params],
                   result.err_section)
         end
         result.cg_hash = Hash[result.cg_keys.zip(result.cg_vals)]

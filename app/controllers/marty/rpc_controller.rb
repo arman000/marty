@@ -76,7 +76,7 @@ class Marty::RpcController < ActionController::Base
 
     begin
       params = ActiveSupport::JSON.decode(params)
-      orig_params = params.clone
+      orig_params = Hash[params]
     rescue JSON::ParserError => e
       return {error: "Malformed params"}
     end

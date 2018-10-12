@@ -127,7 +127,7 @@ class Marty::Script < Marty::Base
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
     # params. So, need to clone it.
-    engine.eval_to_hash(node, attrs, params.clone)
+    engine.eval_to_hash(node, attrs, Hash[params])
 
     # FIXME: should sanitize res to make sure that no nodes are being
     # passed back.  It's likely that nodes which are not from the
@@ -141,9 +141,8 @@ class Marty::Script < Marty::Base
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
     # params, but it is possible that we may be passing in
-    # a frozen hash. To avoid performance impacts, we should first check if
-    # params is frozen to decide whether to dup (frozen) or clone (not frozen).
-    engine.evaluate(node, attr, params.frozen? ? params.dup : params.clone)
+    # a frozen hash.
+    engine.evaluate(node, attr, Hash[params])
   end
 
   delorean_fn :pretty_print, sig: 1 do
