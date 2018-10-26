@@ -11,7 +11,7 @@ class Marty::ApiAuthView < Marty::McflyGridPanel
     c.editing    = :in_form
     c.pagination = :pagination
     c.model      = "Marty::ApiAuth"
-    c.attributes = [:aws, :app_name, :api_key, :script_name]
+    c.attributes = [:aws, :entity_name, :api_key, :script_name]
     c.store_config.merge!({sorters: [{property: :app_name, direction: 'ASC'}]})
   end
 
@@ -30,8 +30,14 @@ class Marty::ApiAuthView < Marty::McflyGridPanel
     end
   end
 
-  attribute :app_name do |c|
+  attribute :entity_name do |c|
     c.flex = 1
+    c.text = "Entity Name"
+    c.getter = lambda do |r|
+      aws    = !!r.parameters['aws_api_key']
+      entity = r.entity
+      entity ? entity.name : (aws ? nil : r.app_name)
+    end
   end
 
   attribute :api_key do |c|

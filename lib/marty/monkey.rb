@@ -220,6 +220,26 @@ class ActiveRecord::Base
       old_joins(*new_args)
     end
   end
+
+  # allows the polymorphic associations between objects to be revealed
+  def self.all_polymorphic_types(name)
+    @poly_hash ||= {}.tap do |hash|
+      Dir.glob(File.join(Rails.root, "app", "models", "**", "*.rb")).each do |f|
+
+        scope      = File.expand_path("..", f).split("/").last.capitalize
+        klass_name = "#{scope}::#{File.basename(f, '.rb').camelize}"
+        klass      = klass_name.constantize rescue nil
+
+        next if klass.nil? || !klass.ancestors.include?(ActiveRecord::Base)
+        klass.reflect_on_all_associations(:has_one).select do |r|
+          r.options[:as]
+        end.each do |reflection|
+          (hash[reflection.options[:as]] ||= []) << klass
+        end
+      end
+    end
+    @poly_hash[name.to_sym]
+  end
 end
 
 ar_instances = [ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]

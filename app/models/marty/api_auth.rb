@@ -1,6 +1,8 @@
 class Marty::ApiAuth < Marty::Base
   has_mcfly
 
+  belongs_to :entity, polymorphic: true, optional: true
+
   KEY_SIZE = 19
 
   validates_presence_of :app_name, :api_key, :script_name
@@ -25,6 +27,15 @@ class Marty::ApiAuth < Marty::Base
   before_validation do
     self.api_key = Marty::ApiAuth.generate_key if
       self.api_key.nil? || self.api_key.length == 0
+  end
+
+  before_save do
+    return unless changed.include?(:entity_id) && !parameters['aws_api_key']
+
+    msg = 'API Auth must be associated with an AWS API KEY before '\
+          'it can be associated with an entity'
+
+    errors.add(:base, msg)
   end
 
   before_destroy do

@@ -90,7 +90,7 @@ class Marty::Grid < ::Netzke::Grid::Base
         me.toggleComponentActions('do', !has_sel);
 
         for (var child of children) {
-          var comp = me.findComponent(child)
+          var comp = me.getComponent(child)
           if (comp) {
             comp.serverConfig.parent_id = rid;
             if (comp.toggleComponentActions) {
@@ -150,7 +150,7 @@ class Marty::Grid < ::Netzke::Grid::Base
       var children = me.serverConfig.child_components || [];
       this.store.reload();
       for (child of children) {
-        var comp = me.findComponent(child);
+        var comp = me.getComponent(child);
         if (comp && comp.reload) { comp.reload() }
       }
     }
