@@ -23,6 +23,6 @@ class Gemini::LoanProgramView < Marty::GridAppendOnly
   end
 
   attribute :enum_state do |c|
-    enum_column(c, Gemini::EnumState)
+    enum_column(c, Gemini::EnumState, "enum_state")
   end
 end
