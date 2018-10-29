@@ -41,9 +41,4 @@ Gem::Specification.new do |s|
   s.add_dependency 'rubyzip'
   s.add_dependency 'sqlite3'
   s.add_dependency 'json-schema'
-
-  # used for signing aws ec2 requests
-  s.add_dependency 'aws-sigv4', '~> 1.0', '>= 1.0.2'
-  s.add_dependency 'aws-sdk-cognitoidentityprovider', '~> 1.3'
-  s.add_dependency 'aws-sdk-apigateway', '~> 1.0.0.rc7'
 end
