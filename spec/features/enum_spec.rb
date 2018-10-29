@@ -178,18 +178,12 @@ feature 'test netzke + pg_enum compatibility', js: true do
 
     and_by "filter form by state_enum ASCENDING" do
       press("Enum state")
-      expect(lp_grid.get_row_vals(1)).to netzke_include({enum_state: "AS"})
-      expect(lp_grid.get_row_vals(2)).to netzke_include({enum_state: "AZ"})
-      expect(lp_grid.get_row_vals(3)).to netzke_include({enum_state: "DC"})
-      expect(lp_grid.get_row_vals(4)).to netzke_include({enum_state: "WA"})
+      expect(lp_grid.col_values(:enum_state)).to eq(["AS","AZ","DC","WA"])
     end
 
     and_by "filter form by state_enum DESCENDING" do
       press("Enum state")
-      expect(lp_grid.get_row_vals(1)).to netzke_include({enum_state: "WA"})
-      expect(lp_grid.get_row_vals(2)).to netzke_include({enum_state: "DC"})
-      expect(lp_grid.get_row_vals(3)).to netzke_include({enum_state: "AZ"})
-      expect(lp_grid.get_row_vals(4)).to netzke_include({enum_state: "AS"})
+      expect(lp_grid.col_values(:enum_state)).to eq(["WA","DC","AZ","AS"])
     end
 
   end
