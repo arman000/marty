@@ -45,7 +45,7 @@ feature 'logger view', js: true, capybara: true do
     press('System')
     show_submenu('Log Maintenance')
     press('View Log')
-    wait_for_ready
+    wait_for_ajax
 
     exp_types = ["fatal", "error", "info", "debug", "warn"]
     exp_messages = ["fatal message", "error message",
@@ -72,11 +72,11 @@ feature 'logger view', js: true, capybara: true do
       wait_for_ajax
       cnt = logview.row_count()
       expect(cnt).to eq(exp_count)
-      types = logview.col_values('message_type', cnt, 0)
-      messages = logview.col_values('message', cnt, 0)
-      details = logview.col_values('details', cnt, 0).
+      types = logview.get_col_vals('message_type', cnt, 0)
+      messages = logview.get_col_vals('message', cnt, 0)
+      details = logview.get_col_vals('details', cnt, 0).
                   map { |d| CGI.unescapeHTML(d) }
-      ts = logview.col_values('timestamp_custom', cnt, 0)
+      ts = logview.get_col_vals('timestamp_custom', cnt, 0)
       expect(ts).to eq(@ts.slice(0,exp_count))
       expect(types).to eq(exp_types.slice(0,exp_count))
       expect(messages).to eq(exp_messages.slice(0,exp_count))

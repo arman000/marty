@@ -1,4 +1,4 @@
-module CleanDbHelpers
+module Marty; module RSpec; module SharedConnectionDbHelpers
   def current_db
     ActiveRecord::Base.connection_config[:database]
   end
@@ -15,4 +15,4 @@ module CleanDbHelpers
     ActiveRecord::Base.reset_shared_connection
     self.use_transactional_tests = true
   end
-end
+end end end

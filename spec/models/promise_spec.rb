@@ -10,7 +10,7 @@ describe Marty::Promise, slow: true do
 
     # Needed here because shutting transactional fixtures off
     # means we lose the globally set user
-    Mcfly.whodunnit = UserHelpers.system_user
+    Mcfly.whodunnit = system_user
 
     Marty::Script.load_script_bodies(promise_bodies, Date.today)
 

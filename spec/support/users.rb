@@ -1,5 +1,4 @@
-module Marty::IntegrationHelpers
-  # test setup helpers
+module Marty; module RSpec; module Users
   def populate_test_users
     (1..2).each { |i|
       Rails.configuration.marty.roles.each { |role_name|
@@ -30,12 +29,15 @@ module Marty::IntegrationHelpers
     user.save
   end
 
-  def log_in_as(username)
-    Rails.configuration.marty.auth_source = 'local'
-
-    ensure_on("/")
-    log_in(username, Rails.configuration.marty.local_password)
-    ensure_on("/")
+  def system_user
+    Marty::User.find_by_login('marty') # (system_login)
   end
 
-end
+  def create_user(name)
+    Marty::User.find_or_create_by!(login: name,
+                                   firstname: name,
+                                   lastname: 'test',
+                                   active: true)
+
+  end
+end end end
