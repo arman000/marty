@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    marty (2.3.14)
+    marty (2.3.15)
       aws-sigv4 (~> 1.0, >= 1.0.2)
       axlsx (= 3.0.0pre)
       coderay
@@ -106,7 +106,7 @@ GEM
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
     io-like (0.3.0)
-    json-schema (2.8.0)
+    json-schema (2.8.1)
       addressable (>= 2.4)
     loofah (2.2.2)
       crass (~> 1.0.2)
