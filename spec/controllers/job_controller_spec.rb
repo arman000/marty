@@ -15,7 +15,7 @@ describe Marty::JobController, slow: true do
 
     # Needed here because shutting transactional fixtures off
     # means we lose the globally set uesr
-    Mcfly.whodunnit = UserHelpers.system_user
+    Mcfly.whodunnit = system_user
 
     Marty::Script.load_script_bodies(promise_bodies, Date.today)
 

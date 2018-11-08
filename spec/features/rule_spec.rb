@@ -200,7 +200,7 @@ feature 'rule view', js: true do
     exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error on line 1"
     expect(page).to have_content(exp)
     sleep 2  # sleep needed for message to clear, otherwise failing tests could
-             # pass due to prior messages
+    # pass due to prior messages
 
     # lhs is not identifier - BaseRuleView#simple_to_has will raise
     fill_in(:computed_guards, with: '0sadf = 123j')
@@ -307,7 +307,7 @@ computed_value = if paramb
                  then param1 / (grid1_grid_result||1)
                  else (grid2_grid_result||1) / param1
 EOL
-    names = mrv.col_values(:name, 9, 0)
+    names = mrv.get_col_vals(:name, 9, 0)
     idx = names.index{|n|n=='Rule3'}+1
     mrv.select_row(idx)
     press("Edit")
@@ -326,9 +326,9 @@ EOL
     go_to_xyz_rules
     xrv = netzke_find("xyz_rule_view")
     expect(page).to have_content("Rule type")
-    expect(xrv.col_values(:name, 5, 0)).to eq(["ZRule1", "ZRule2",
-                                                    "ZRule3", "ZRule4",
-                                                    "ZRule5"])
+    expect(xrv.get_col_vals(:name, 5, 0)).to eq(["ZRule1", "ZRule2",
+                                                 "ZRule3", "ZRule4",
+                                                 "ZRule5"])
     xrv.select_row(1)
     press("Edit")
     fill_in("Range Guard 1", with: "[100,200)")
@@ -359,37 +359,37 @@ EOL
             "bv"=>"base_value"}}
 
     expect(r.first.as_json).to include(exp)
-    expect(xrv.col_values(:g_string, 8, 0)).to eq(["aaa", "bbb", "ccc", "ddd",
-                                                   "eee", "eee", "eee", "eee"])
+    expect(xrv.get_col_vals(:g_string, 8, 0)).to eq(["aaa", "bbb", "ccc", "ddd",
+                                                     "eee", "eee", "eee", "eee"])
     click_column(xrv, "String list Guard")
-    expect(xrv.col_values(:g_string, 8, 0)).to eq(["eee", "eee", "eee", "eee",
-                                                   "ddd", "ccc", "bbb", "aaa"])
+    expect(xrv.get_col_vals(:g_string, 8, 0)).to eq(["eee", "eee", "eee", "eee",
+                                                     "ddd", "ccc", "bbb", "aaa"])
     column_filter(xrv, "String list Guard", "eee")
     rc = xrv.row_count
-    expect(xrv.col_values(:g_string,rc,0)).to eq(["eee", "eee", "eee", "eee"])
+    expect(xrv.get_col_vals(:g_string,rc,0)).to eq(["eee", "eee", "eee", "eee"])
     column_filter_toggle(xrv, "String list Guard")
     rc = xrv.row_count
-    expect(xrv.col_values(:g_string,rc,0)).to eq(["eee", "eee", "eee", "eee",
-                                                  "ddd", "ccc", "bbb", "aaa"])
+    expect(xrv.get_col_vals(:g_string,rc,0)).to eq(["eee", "eee", "eee", "eee",
+                                                    "ddd", "ccc", "bbb", "aaa"])
     column_filter(xrv, "Grids", "Grid1")
     rc = xrv.row_count
-                                         # netzke reports jsonb as string
-    expect(xrv.col_values(:grids,rc,0)).to eq([%Q({"grid1":"DataGrid1"}),
-                                               %Q({"grid1":"DataGrid1"})])
+    # netzke reports jsonb as string
+    expect(xrv.get_col_vals(:grids,rc,0)).to eq([%Q({"grid1":"DataGrid1"}),
+                                                 %Q({"grid1":"DataGrid1"})])
     column_filter_toggle(xrv, "Grids")
     rc = xrv.row_count
-    expect(xrv.col_values(:grids,rc,0)).to eq([%Q({"grid1":"DataGrid3"}),
-                                               %Q({"grid1":"DataGrid3"}),
-                                               %Q({"grid1":"DataGrid3"}),
-                                               %Q({"grid1":"DataGrid3"}),
-                                               %Q({"grid1":"DataGrid3"}),
-                                               %Q({"grid1":"DataGrid2"}),
-                                               %Q({"grid1":"DataGrid1"}),
-                                               %Q({"grid1":"DataGrid1"})])
+    expect(xrv.get_col_vals(:grids,rc,0)).to eq([%Q({"grid1":"DataGrid3"}),
+                                                 %Q({"grid1":"DataGrid3"}),
+                                                 %Q({"grid1":"DataGrid3"}),
+                                                 %Q({"grid1":"DataGrid3"}),
+                                                 %Q({"grid1":"DataGrid3"}),
+                                                 %Q({"grid1":"DataGrid2"}),
+                                                 %Q({"grid1":"DataGrid1"}),
+                                                 %Q({"grid1":"DataGrid1"})])
     press("Applications")
     press("Data Grids")
     dgv = netzke_find("data_grid_view")
-    cvs = dgv.col_values(:name, 4, 0)
+    cvs = dgv.get_col_vals(:name, 4, 0)
     ind1 = cvs.index("DataGrid1")+1
     ind4 = cvs.index("DataGrid4")+1
     dgv.select_row(ind1)
@@ -406,8 +406,8 @@ EOL
     go_to_xyz_rules
     wait_for_ajax
 
-    names = xrv.col_values(:name, 5, 0)
-    gvs = xrv.col_values(:grids, 5, 0)
+    names = xrv.get_col_vals(:name, 5, 0)
+    gvs = xrv.get_col_vals(:grids, 5, 0)
     g1h = {"grid1"=>"DataGrid1 new"}
     expect(JSON.parse(gvs[names.index("ZRule1")])).to eq(g1h)
     expect(JSON.parse(gvs[names.index("ZRule2")])).to eq(g1h)
@@ -415,14 +415,14 @@ EOL
     go_to_my_rules
     wait_for_ajax
 
-    names = mrv.col_values(:name, 9, 0)
-    gvs = mrv.col_values(:grids, 9, 0)
-    rvs = mrv.col_values(:results, 9, 0)
+    names = mrv.get_col_vals(:name, 9, 0)
+    gvs = mrv.get_col_vals(:grids, 9, 0)
+    rvs = mrv.get_col_vals(:results, 9, 0)
     expect(JSON.parse(gvs[names.index('abc')])).to eq(g1h)
     expect(JSON.parse(gvs[names.index('Rule2b')])).to eq(g1h +
                                                          {"grid2"=>"DataGrid2"})
     expect(JSON.parse(rvs[names.index('Rule5')])["other_grid"]).to eq(
-                                                               '"DataGrid4 new"')
+                                                                     '"DataGrid4 new"')
 
   end
 end

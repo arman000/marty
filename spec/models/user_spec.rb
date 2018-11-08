@@ -4,11 +4,11 @@ module Marty
   describe User do
     before(:each) do
       Rails.configuration.marty.system_account =
-        UserHelpers.system_user.login
+        system_user.login
     end
 
     let (:tuser) {
-      UserHelpers.create_user('other_user')
+      create_user('other_user')
     }
 
     describe "validations" do
@@ -22,7 +22,7 @@ module Marty
 
       it "should require unique login" do
         expect(Mcfly.whodunnit).to_not be_nil
-        user = UserHelpers.system_user.dup
+        user = system_user.dup
         expect(user).to_not be_valid
         expect(user.errors[:login].to_s).to include('already been taken')
         user.login = 'marty2'
@@ -30,7 +30,7 @@ module Marty
       end
 
       it "should not allow Gemini account to be de-activated" do
-        user = UserHelpers.system_user
+        user = system_user
         user.active = false
         expect(user).to_not be_valid
         expect(user.errors[:base].to_s).
@@ -38,14 +38,14 @@ module Marty
       end
 
       it "should not allow accounts to be deleted" do
-        user = UserHelpers.system_user
+        user = system_user
         user.destroy
         expect(user.destroyed?).to be false
       end
 
       it "should not allow user managers to edit the Gemini account" do
         Mcfly.whodunnit = tuser
-        user = UserHelpers.system_user
+        user = system_user
         allow_any_instance_of(Marty::User).to receive(:user_manager_only).
           and_return(true)
         user.firstname = 'Testing'

@@ -1,4 +1,4 @@
-module DelayedJobHelpers
+module Marty::RSpec::DelayedJobHelpers
   def start_delayed_job
     # start delayed job workers and wait a few seconds
     `RAILS_ENV=test spec/dummy/script/delayed_job -n 4 stop | cat`
