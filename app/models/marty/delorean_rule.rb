@@ -152,10 +152,9 @@ class Marty::DeloreanRule < Marty::BaseRule
         estack_full = resh.delete(:err_stack)
         estack = estack_full && {
           err_stack: estack_full.select{ |l| l.starts_with?('DELOREAN')}} || {}
+        detail = { input: params, dgparams: dgparams} + resh + estack
         Marty::Logger.info("Rule Log #{ruleh['name']}",
-                           { input: params,
-                             dgparams: dgparams } + resh + estack
-                          )
+                           Marty::Util.scrub_obj(detail))
       end
     end
   end
