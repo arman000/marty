@@ -117,9 +117,7 @@ class Marty::Grid < ::Netzke::Grid::Base
     c.on_selection_change = l(<<-JS)
     function(f) {
       var me = this;
-      me.getSelectionModel().on('selectionchange', function(m) {
-        f(m);
-      });
+      me.getSelectionModel().on('selectionchange', f);
     }
     JS
 

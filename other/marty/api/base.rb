@@ -44,6 +44,9 @@ class Marty::Api::Base
   end
 
   def self.evaluate params, request, config
+    # prevent script evaluation from modifying passed in params
+    params = params.deep_dup
+
     # validate input schema
     if config[:input_validated]
       begin

@@ -20,8 +20,8 @@ class Marty::RpcController < ActionController::Base
 
       api_params = api.process_params(massaged_params)
       api.before_evaluate(api_params)
-      result = api.evaluate(api_params.deep_dup, request, api_config.deep_dup)
-      api.after_evaluate(api_params.deep_dup, result)
+      result = api.evaluate(api_params, request, api_config)
+      api.after_evaluate(api_params, result)
 
       log_params = {start_time: start_time, auth: auth}
       api.log(result, api_params + log_params, request) if
@@ -67,6 +67,8 @@ class Marty::RpcController < ActionController::Base
       when String
         params = ActiveSupport::JSON.decode(params)
       when ActionController::Parameters
+        # must permit params before conversion to_h
+        # convert hash to json and parse to get expected hash (not indifferent)
         params.permit!
         params = JSON.parse(params.to_h.to_json)
       when nil

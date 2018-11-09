@@ -24,7 +24,7 @@ class Marty::ApiAuth < Marty::Base
 
   before_validation do
     self.api_key = Marty::ApiAuth.generate_key if
-      self.api_key.nil? || self.api_key.length == 0
+      self.api_key.blank?
   end
 
   def self.generate_key
