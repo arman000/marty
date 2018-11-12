@@ -13,6 +13,28 @@ class Marty::Grid < ::Netzke::Grid::Base
   end
 
   client_class do |c|
+    c.get_component = l(<<-JS)
+    function(name) {
+      return Ext.getCmp(name);
+    }
+    JS
+
+    c.find_component = l(<<-JS)
+    function(name) {
+      return Ext.ComponentQuery.query(`[name=${name}]`)[0];
+    }
+    JS
+
+    c.set_disable_component_actions = l(<<-JS)
+    function(prefix, flag) {
+      for (var key in this.actions) {
+        if (key.substring(0, prefix.length) == prefix) {
+          this.actions[key].setDisabled(flag);
+        }
+      }
+    }
+    JS
+
     c.init_component = l(<<-JS)
     function() {
       this.dockedItems = this.dockedItems || [];
@@ -48,8 +70,7 @@ class Marty::Grid < ::Netzke::Grid::Base
       var me = this;
 
       var children = me.serverConfig.child_components || [];
-      me.getSelectionModel().on(
-      'selectionchange',
+      me.onSelectionChange(
       function(m) {
         var has_sel = m.hasSelection();
 
@@ -66,18 +87,15 @@ class Marty::Grid < ::Netzke::Grid::Base
         }
 
         me.serverConfig.selected = rid;
-
-        for (var key in me.actions) {
-          // hacky -- assumes our functions start with "do"
-          if (key.substring(0, 2) == "do") {
-            me.actions[key].setDisabled(!has_sel);
-          }
-        }
+        me.setDisableComponentActions('do', !has_sel);
 
         for (var child of children) {
-          var comp = me.netzkeGetComponentFromParent(child);
+          var comp = me.findComponent(child)
           if (comp) {
             comp.serverConfig.parent_id = rid;
+            if (comp.setDisableComponentActions) {
+              comp.setDisableComponentActions('parent', !has_sel);
+            }
             if (comp.reload) { comp.reload() }
           }
         }
@@ -88,11 +106,18 @@ class Marty::Grid < ::Netzke::Grid::Base
       for (var event of ['update', 'netzkerefresh']) {
         store.on(event, function() {
         for (var link of linked) {
-            var comp = me.netzkeGetComponentFromParent(link);
+            var comp = me.findComponent(link);
             if (comp && comp.reload) { comp.reload() }
           }
         }, this);
       }
+    }
+    JS
+
+    c.on_selection_change = l(<<-JS)
+    function(f) {
+      var me = this;
+      me.getSelectionModel().on('selectionchange', f);
     }
     JS
 
@@ -123,7 +148,7 @@ class Marty::Grid < ::Netzke::Grid::Base
       var children = me.serverConfig.child_components || [];
       this.store.reload();
       for (child of children) {
-        var comp = me.netzkeGetComponentFromParent(child);
+        var comp = me.findComponent(child);
         if (comp && comp.reload) { comp.reload() }
       }
     }
@@ -134,13 +159,6 @@ class Marty::Grid < ::Netzke::Grid::Base
       this.filters.clearFilters();
     }
     JS
-
-    c.netzkeGetComponentFromParent = l(<<-JS)
-    function(component_path) {
-      return this.netzkeGetParentComponent().netzkeGetComponent(component_path);
-    }
-    JS
-
   end
 
   ######################################################################
@@ -169,6 +187,12 @@ class Marty::Grid < ::Netzke::Grid::Base
 
   def has_search_action?
     false
+  end
+
+  action :clear_filters do |a|
+    a.text    = "X"
+    a.tooltip = "Clear filters"
+    a.handler = :clear_filters
   end
 
   def get_json_sorter(json_col, field)

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    marty (2.3.16)
+    marty (2.4.0)
       aws-sigv4 (~> 1.0, >= 1.0.2)
       axlsx (= 3.0.0pre)
       coderay
