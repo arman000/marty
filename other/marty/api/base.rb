@@ -30,6 +30,9 @@ class Marty::Api::Base
   def self.after_evaluate api_params, result
   end
 
+  @@numbers = {}
+  @@schemas = {}
+
   def self.is_authorized? params
     is_secured = Marty::ApiAuth.where(
       script_name: params[:script],
@@ -47,16 +50,25 @@ class Marty::Api::Base
     # prevent script evaluation from modifying passed in params
     params = params.deep_dup
 
+    schema_key = [params[:tag], params[:script], params[:node], params[:attr]]
+    input_schema = nil
+    begin
+      # get_schema will either return a hash with the schema,
+      # or a string with the error
+      input_schema = @@schemas[schema_key] ||=
+                     Marty::JsonSchema.get_schema(*schema_key)
+    rescue => e
+      return {error: e.message}
+    end
+
     # validate input schema
     if config[:input_validated]
-      begin
-        schema = SchemaValidator::get_schema(params)
-      rescue => e
-        return {error: e.message}
-      end
+
+      # must fail if schema not found or some other error
+      return {"error": input_schema} if input_schema.is_a?(String)
 
       begin
-        res = SchemaValidator::validate_schema(schema, params[:params])
+        res = SchemaValidator::validate_schema(input_schema, params[:params])
       rescue NameError
         return {error: "Unrecognized PgEnum for attribute #{params[:attr]}"}
       rescue => e
@@ -66,6 +78,19 @@ class Marty::Api::Base
       schema_errors = SchemaValidator::get_errors(res) unless res.empty?
       return {error: "Error(s) validating: #{schema_errors}"} if
         schema_errors
+    end
+
+    # if schema was found
+    if input_schema.is_a?(Hash)
+      # fix numbers types
+      numbers = @@numbers[schema_key] ||=
+                Marty::JsonSchema.get_numbers(input_schema)
+
+      # modify params in place
+      Marty::JsonSchema.fix_numbers(params[:params], numbers)
+    elsif !input_schema.include?("Schema not defined")
+      # else if some error besides schema not defined, fail
+      return {error: input_schema}
     end
 
     # get script engine

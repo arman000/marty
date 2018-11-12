@@ -36,6 +36,21 @@ B: A
     p =? 5
 eof
 
+sample_script3err = <<eof
+A:
+    a = 2
+    p =?
+    c = a * 2
+    pc = p + c
+    lc = [pc, pc]
+
+C: A
+    p =? 3
+
+B: A
+    p =? 5
+eof
+
 sample_script4 = <<eof
 import M3
 A: M3::A
@@ -121,8 +136,37 @@ A:
                                    else 'req3'
 
 eof
+sample_script11 = <<eof
+A:
+    f1_string  =?
+    f2_bool    =?
+    f3_integer =?
+    f4_number  =?
+    f5_number  =?
+    f6_array   =?
+    f7_array   =?
 
+    v0 = _
+    v1 = {
+           "input": v0,
+           "calc1":  f4_number / 7,
+           "calc1a": f5_number / 7,
+           "calc2":  f3_integer / 7,
+           "calc3": [ f7 / 7 for f7 in f7_array],
+           "calc4": f6_array[0].f14_number / 7,
+           "calc5": f6_array[0].f13_integer / 7,
+           "calc6": [ f7 / 7 for f7 in f6_array[0].f16_array]
+         }
+eof
 script3_schema = <<eof
+A:
+    pc = { "properties" : {
+                  "p" : { "type" : "integer" },
+                }
+            }
+eof
+
+script3err_schema = <<eof
 A:
     pc = { "properties : {
                   "p" : { "type" : "integer" },
@@ -132,6 +176,7 @@ eof
 
 script4_schema = <<eof
 A:
+    a = {}
     d = { "properties" : {
             "p" : { "type" : "integer" },
                 }
@@ -333,7 +378,57 @@ A:
                      new_check
              ] }
 eof
+script11_schema = <<eof
+A:
+    properties = {
+       "f1_string"  : {"type": "string"               },
+       "f2_bool"    : {"type": "boolean"              },
+       "f3_integer" : {"type": "integer"              },
+       "f4_number"  : {"type": "number"               },
+       "f5_number"  : {"type": "number", "minimum": 0 },
+       "f6_array"   : {"type": "array",
+                      "items": {
+                          "type"      : "object",
+                          "properties": {
+                             "f11_string"  : {"type": "string"               },
+                             "f12_bool"    : {"type": "boolean"              },
+                             "f13_integer" : {"type": "integer"              },
+                             "f14_number"  : {"type": "number"               },
+                             "f15_number"  : {"type": "number", "minimum": 0 },
+                             "f16_array": {
+                                  "type"        : "array",
+                                  "uniqueItems" : true,
+                                  "minItems"    : 0,
+                                  "maxItems"    : 1,
+                                  "items": {
+                                      "type"       : "number",
+                                      "minimum"    : 0,
+                                      "multipleOf" : 0.001,
+                                      "not": {
+                                          "type": "integer"
+                                      }}}}}},
+       "f7_array": {
+               "type"        : "array",
+               "uniqueItems" : true,
+               "minItems"    : 0,
+               "maxItems"    : 1,
+               "items": {
+                   "type"       : "number",
+                   "minimum"    : 0,
+                   "multipleOf" : 0.001,
+                   "not": {
+                       "type": "integer"
+                   }}},
+      "f8_object": {
+                "type": "object",
+                "properties": {
+                    "f81_number": {"type": "number"},
+                    "f82_array": {"type" : "array",
+                                  "items": {"type": "number"}}}}}
 
+    v1 = { "properties": properties}
+    v0 = { "properties": properties}
+eof
 describe Marty::RpcController do
   before(:each) {
     @routes = Marty::Engine.routes
@@ -351,6 +446,7 @@ describe Marty::RpcController do
                          "M1" => sample_script,
                          "M2" => sample_script.gsub(/a/, "aa").gsub(/b/, "bb"),
                          "M3" => sample_script3,
+                         "M3err" => sample_script3err,
                          "M4" => sample_script4,
                          "M5" => sample_script5,
                          "M6" => sample_script6,
@@ -358,7 +454,9 @@ describe Marty::RpcController do
                          "M8" => sample_script8,
                          "M9" => sample_script9,
                          "M10" => sample_script10,
+                         "M11" => sample_script11,
                          "M3Schemas" => script3_schema,
+                         "M3errSchemas" => script3err_schema,
                          "M4Schemas" => script4_schema,
                          "M5Schemas" => script5_schema,
                          "M6Schemas" => script6_schema,
@@ -366,6 +464,7 @@ describe Marty::RpcController do
                          "M8Schemas" => script8_schema,
                          "M9Schemas" => script9_schema,
                          "M10Schemas" => script10_schema,
+                         "M11Schemas" => script11_schema,
                        }, Date.today + 1.minute)
 
     @p1 = Marty::Posting.do_create("BASE", Date.today + 2.minute, 'a comment')
@@ -676,12 +775,12 @@ describe Marty::RpcController do
           attrs: attr,
           params: params
         }
-    expect = "Schema error for M4/A attrs=h: Problem with schema"
-    expect(response.body).to include("error,#{expect}")
+    expect = "error,Schema error for M4/A attrs=h: Schema not defined"
+    expect(response.body).to include(expect)
   end
 
   it "returns an error message on invalid schema" do
-    Marty::ApiConfig.create!(script: "M3",
+    Marty::ApiConfig.create!(script: "M3err",
                              node: "A",
                              attr: nil,
                              logged: false,
@@ -690,13 +789,13 @@ describe Marty::RpcController do
     params = {"p" => 5}.to_json
     get 'evaluate', params: {
           format: :csv,
-          script: "M3",
+          script: "M3err",
           node: "A",
           attrs: attr,
           params: params
         }
-    expect = "Schema error for M3/A attrs=pc: Problem with schema: "\
-             "syntax error M3Schemas:2\r\n"
+    expect = "Schema error for M3err/A attrs=pc: Problem with schema: "\
+             "syntax error M3errSchemas:2\r\n"
     expect(response.body).to eq("error,#{expect}")
   end
 
@@ -1132,6 +1231,39 @@ describe Marty::RpcController do
     expect(response.body).to match(/"error":"Permission denied"/)
   end
 
+  it "should convert incoming ints in number fields to float" do
+    api = Marty::ApiAuth.new
+    api.app_name = 'TestApp'
+    api.script_name = 'M11'
+    api.save!
+    p = File.expand_path('../../fixtures/json', __FILE__)
+    f = "%s/%s" % [p, "rpc_controller.json"]
+    begin
+      tests = JSON.parse(File.read(f))
+    rescue => e
+      puts "Error parsing #{f}: #{e.message}"
+      raise
+    end
+    aggregate_failures "input coercing" do
+      tests.each_with_index do |t, idx|
+        get 'evaluate', params: {
+              format: :json,
+              script: "M11",
+              node: "A",
+              attrs: t['attr'],
+              api_key: api.api_key,
+              params: t['request'].to_json
+            }
+        resp = JSON.parse(response.body)
+        comp = struct_compare(resp, t['result'], {"float_int_nomatch"=>true})
+        (puts "TEST=#{idx}\n#{comp}"; binding.pry) if comp &&
+                                                      ENV['PRY'] == 'true'
+
+        expect(comp).to be_nil, "input conversion test #{idx}:\n#{comp}"
+      end
+    end
+  end
+
   context "conditional validation" do
     before(:all) do
       Marty::ApiConfig.create!(script: "M10",
@@ -1237,7 +1369,7 @@ describe Marty::RpcController do
 
     it 'returns engine/tag lookup error if script not found' do
       get :evaluate, params: {format: :json, script: 'M1', attrs: "e", tag: 'invalid'}
-      expect(response.body).to match(/"error":"Can't get engine:/)
+      expect(response.body).to match(/bad tag identifier.*invalid/)
       get :evaluate, params: {format: :json, script: 'Invalid', attrs: "e", tag: t1.name}
       expect(response.body).to match(/"error":"Can't get engine:/)
     end
