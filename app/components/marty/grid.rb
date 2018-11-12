@@ -25,7 +25,7 @@ class Marty::Grid < ::Netzke::Grid::Base
     }
     JS
 
-    c.toggle_component_actions = l(<<-JS)
+    c.set_disable_component_actions = l(<<-JS)
     function(prefix, flag) {
       for (var key in this.actions) {
         if (key.substring(0, prefix.length) == prefix) {
@@ -87,14 +87,14 @@ class Marty::Grid < ::Netzke::Grid::Base
         }
 
         me.serverConfig.selected = rid;
-        me.toggleComponentActions('do', !has_sel);
+        me.setDisableComponentActions('do', !has_sel);
 
         for (var child of children) {
           var comp = me.findComponent(child)
           if (comp) {
             comp.serverConfig.parent_id = rid;
-            if (comp.toggleComponentActions) {
-              comp.toggleComponentActions('parent', !has_sel);
+            if (comp.setDisableComponentActions) {
+              comp.setDisableComponentActions('parent', !has_sel);
             }
             if (comp.reload) { comp.reload() }
           }
