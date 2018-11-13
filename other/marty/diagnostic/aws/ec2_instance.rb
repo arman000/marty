@@ -1,9 +1,5 @@
-class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Base
-  # aws reserved host used to get instance meta-data
-  META_DATA_HOST = '169.254.169.254'
-
-  attr_reader :host,
-              :tag,
+class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
+  attr_reader :tag,
               :nodes,
               :instances
 
