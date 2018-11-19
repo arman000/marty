@@ -1,4 +1,6 @@
 class Marty::Aws::Base
+  # this base class is used for instance information/credential acquisition
+
   # aws reserved host used to get instance meta-data
   META_DATA_HOST = '169.254.169.254'
 
@@ -46,53 +48,15 @@ class Marty::Aws::Base
     query_meta_data('iam/security-credentials').to_s
   end
 
+  def sym obj
+    obj.each_with_object({}){|(k,v),h| h[k.underscore.to_sym] = v}
+  end
+
   def get_credentials
-    res = JSON.parse(query_meta_data("iam/security-credentials/#{@role}"))
-    res.symbolize_keys
+    sym(JSON.parse(query_meta_data("iam/security-credentials/#{@role}")))
   end
 
   def get_document
-    res = JSON.parse(query_dynamic('instance-identity/document'))
-    res.symbolize_keys
-  end
-
-  def request info, params = {}
-    action   = info[:action]
-    endpoint = info[:endpoint]
-    method   = info[:method] || :get
-
-    default = action ? {'Action' => action, 'Version' => @version} : {}
-
-    host = "#{@service}.#{@doc[:region]}.amazonaws.com"
-
-    url = "https://#{host}/"
-    url += endpoint if endpoint
-    url += '?' + (default + params).map{|a, v| "#{a}=#{v}"}.join('&') unless
-      params.empty?
-
-    sig = Aws::Sigv4::Signer.new(service:           @service,
-                                 region:            @doc[:region],
-                                 access_key_id:     @creds[:access_key_id],
-                                 secret_access_key: @creds[:secret_access_key],
-                                 session_token:     @creds[:token])
-    signed_url = sig.presign_url(http_method:'GET', url: url)
-
-    http = Net::HTTP.new(host, 443)
-    http.use_ssl = true
-    Net::HTTP.send(method, signed_url)
-  end
-
-  def ensure_resp path, obj
-    if path == []
-      obj.is_a?(Array) ? obj : [obj]
-    elsif obj.is_a?(Hash)
-      key = path.shift
-      raise "Unexpected AWS Response: #{key} missing" unless
-        (obj.is_a?(Hash) && obj[key])
-
-      ensure_resp(path, obj[key])
-    else
-      obj.map{|s| ensure_resp(path.clone, s)}.flatten(1)
-    end
+    sym(JSON.parse(query_dynamic('instance-identity/document')))
   end
 end
