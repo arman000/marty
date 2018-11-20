@@ -38,7 +38,7 @@ class Marty::TagGrid < Marty::Grid
   action :add_in_form do |a|
     a.text     = I18n.t("tag_grid.new")
     a.tooltip  = I18n.t("tag_grid.new")
-    a.icon     = :time_add
+    a.icon_cls = "fa fa-clock glyph"
     a.disabled = !config[:permissions][:create]
   end
 

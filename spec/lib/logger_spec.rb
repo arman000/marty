@@ -68,11 +68,12 @@ module Marty
 
       # Needed here because shutting transactional fixtures off
       # means we lose the globally set user
-      Mcfly.whodunnit = UserHelpers.system_user
+      Mcfly.whodunnit = system_user
 
       Marty::Script.load_script_bodies(promise_bodies, Date.today)
       start_delayed_job
     end
+
     after(:all) do
       restore_clean_db(@clean_file)
       stop_delayed_job
@@ -85,30 +86,31 @@ module Marty
       File.open(Rails.root.join("log/test.log")) do |f|
         f.seek(0, IO::SEEK_END)
         engine = Marty::ScriptSet.new.get_engine(NAME_K)
-        (1..1000).each do |i|
+
+        res = (1..1000).map do |i|
           engine.background_eval("LOGGER", {"msgid" => i}, ["result"])
         end
 
-        60.times do
-          running = Marty::Promise.uncached {
-            Marty::Promise.unscoped.where(result: nil)
-          }.count
-          break if running == 0
-          sleep 1
-        end
+        # wait for all the jobs to finish; collect/check their result
+        expect(res.map {|x| x["result"]}.sort).to eq (1..1000).to_a
 
-        # each background_eval writes one line to /tmp/logaction.txt
-        # these must happen no matter what happens in Marty::Logger
-        expect(File.readlines("/tmp/logaction.txt").count).to eq(1000)
+        line_count = File.readlines("/tmp/logaction.txt").count
 
-        # each background_eval does 10 calls to Marty::Logger.
-        # failures (after 3 retries at 0.1 sec each) are logged to rails log
-        # the total count should be 10000
         log_count = Marty::Log.all.count
         failed_count = f.readlines.select do
           |l|
           l == "Marty::Logger failure: database is locked\n"
         end.count
+
+        expect(Marty::Promise.where.not(result: {}).count).to eq 1000
+
+        # each background_eval writes one line to /tmp/logaction.txt
+        # these must happen no matter what happens in Marty::Logger
+        expect(line_count).to eq(1000)
+
+        # each background_eval does 10 calls to Marty::Logger.
+        # failures (after 3 retries at 0.1 sec each) are logged to rails log
+        # the total count should be 10000
         expect(log_count + failed_count).to eq(10000)
       end
     end

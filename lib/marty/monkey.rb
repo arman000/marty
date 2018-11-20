@@ -106,23 +106,6 @@ end
 require 'netzke/basepack/data_adapters/active_record_adapter'
 module Netzke::Basepack::DataAdapters
   class ActiveRecordAdapter < AbstractAdapter
-    # FIXME: another giant hack to handle lazy_load columns.
-    # Modified original count_records to call count on first passed column.name
-    # when lazy-loaded.  Otherwise, we run into issues with
-    # counting records in the default_scope placed by the lazy_load
-    # module.
-    def count_records(params, columns=[])
-
-      relation = @relation || get_relation(params)
-      columns.each do |c|
-        assoc, method = c[:name].split('__')
-        relation = relation.includes(assoc.to_sym).references(assoc.to_sym) if method
-      end
-
-      @model.const_defined?(:SELECT_COLS) ? relation.count(columns.first.name) :
-        relation.count
-    end
-
     ######################################################################
     # The following is a hack to get around Netzke's broken handling
     # of filtering on PostgreSQL enums columns.
@@ -171,37 +154,6 @@ module Netzke::Basepack::DataAdapters
   end
 end
 
-class StringEnum < String
-  include Delorean::Model
-  def name
-    self.to_s
-  end
-  def id
-    self
-  end
-  delorean_instance_method :name
-  delorean_instance_method :id
-
-  def to_yaml(opts = {})
-    YAML::quick_emit(nil, opts) do |out|
-      out.scalar('stringEnum', self.to_s, :plain)
-    end
-  end
-
-  def _dump _
-    self.to_s
-  end
-
-  def self._load(v)
-    new(v)
-  end
-end
-
-YAML::add_domain_type("pennymac.com,2017-06-02", "stringEnum") do
-  |type, val|
-  StringEnum.new(val)
-end
-
 ######################################################################
 
 # Add pg_enum migration support -- FIXME: this doesn't belong here
@@ -218,15 +170,6 @@ module ActiveRecord
           column(name, enum || name.to_s.pluralize, options) }
       end
     end
-    module PostgreSQL
-      module OID
-        class Enum < Type::Value
-          def cast(value)
-            value && StringEnum.new(value)
-          end
-        end
-      end
-    end
   end
 end
 
@@ -238,11 +181,32 @@ class ActiveRecord::Relation
     tb = cls.table_name
     self.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
   end
+
+  def attributes
+    to_a.map(&:attributes)
+  end
 end
 
 ######################################################################
 
 class ActiveRecord::Base
+  MCFLY_PT_SIG = [1, 1]
+
+  # FIXME: hacky signatures for AR queries on classes
+  COUNT_SIG    = [0, 0]
+  DISTINCT_SIG = [0, 100]
+  FIND_BY_SIG  = [0, 100]
+  FIRST_SIG    = [0, 1]
+  GROUP_SIG    = [1, 100]
+  JOINS_SIG    = [1, 100]
+  LAST_SIG     = [0, 1]
+  LIMIT_SIG    = [1, 1]
+  NOT_SIG      = [1, 100]
+  ORDER_SIG    = [1, 100]
+  PLUCK_SIG    = [1, 100]
+  SELECT_SIG   = [1, 100]
+  WHERE_SIG    = [0, 100]
+
   class << self
     alias_method :old_joins, :joins
 
@@ -258,22 +222,23 @@ class ActiveRecord::Base
   end
 end
 
-args_hack = [[ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]] +
-            [[Object, nil]]*10
+ar_instances = [ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]
+
+args_hack = [ar_instances] + [[Object, nil]]*10
 
 Delorean::RUBY_WHITELIST.merge!(
-  count:    [ActiveRecord::Relation],
+  count:    [ar_instances],
   distinct: args_hack,
   find_by:  args_hack,
   group:    args_hack,
   joins:    args_hack,
-  limit:    [ActiveRecord::Relation, Integer],
+  limit:    [ar_instances, Integer],
   not:      args_hack,
   order:    args_hack,
   pluck:    args_hack,
   select:   args_hack,
   where:    args_hack,
-  mcfly_pt: [ActiveRecord::Relation,
+  mcfly_pt: [ar_instances,
              [Date, Time, ActiveSupport::TimeWithZone, String],
              [nil, Class]],
   lookup_grid_distinct_entry: [OpenStruct,
@@ -293,22 +258,10 @@ end
 ######################################################################
 
 class OpenStruct
-  def save
-    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
-    raise "save called from #{loc} on #{self}"
+  # the default as_json produces {"table"=>h} which is quite goofy
+  def as_json(*)
+    self.to_h
   end
-  def save!
-    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
-    raise "save! called from #{loc} on #{self}"
-  end
-  def reload
-    loc = %r([^/]+:[0-9]+).match(caller.first)[0]
-    raise "reload called from #{loc} on #{self}"
-  end
-  #def method_missing(meth, *args)
-  #  puts caller[0..8]
-  #  super
-  #end
 end
 
 ######################################################################
@@ -322,15 +275,24 @@ module Netzke
 
           include_core_js(res)
 
-          # load javascript overrides
-          overrides = ["#{File.dirname(__FILE__)}/javascript/overrides.js"]
+          # MONKEY: load marty custom javascript
+          marty_javascripts = Dir["#{File.dirname(__FILE__)}/javascript/*.js"]
 
-          (Netzke::Core.ext_javascripts + overrides).each do |path|
+          (Netzke::Core.ext_javascripts + marty_javascripts).each do |path|
             f = File.new(path)
             res << f.read
           end
 
           minify_js(res)
+        end
+
+        def minify_js(js_string)
+          if ::Rails.env.test? || ::Rails.env.development?
+            js_string.gsub(/\/\*\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//, '') # strip docs
+          else
+            # MONKEY: enable es6 by passing in harmony argument
+            Uglifier.compile(js_string, harmony: true)
+          end
         end
       end
     end

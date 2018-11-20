@@ -1,7 +1,7 @@
 class Marty::RecordFormWindow < Netzke::Basepack::RecordFormWindow
   def configure(c)
     super c
-    c.fbar = [] if c.item_id == 'view_window'
+    c.fbar = nil if c.item_id == 'view_window'
   end
 
   component :view_form do |c|

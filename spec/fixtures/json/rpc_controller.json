@@ -1,0 +1,175 @@
+[
+    {"attr": "v1",
+     "request": {
+        "f1_string"        : "hi",
+        "f2_bool"          : false,
+        "f3_integer"       : 24,
+        "f4_number"        : 24,
+        "f5_number"        : 24.0,
+        "f6_array"         : [
+            {"f11_string"  : "bye",
+             "f12_bool"    : true,
+             "f13_integer" : 24,
+             "f14_number"  : 24,
+             "f15_number"  : 24.0,
+             "f16_array"   : [24,24,24.0]},
+            {"f11_string"  : "yes",
+             "f12_bool"    : true,
+             "f13_integer" : 24,
+             "f14_number"  : 24,
+             "f15_number"  : 24.0,
+             "f16_array"   : [24]}],
+         "f7_array"         : [24,24,24.0],
+         "f8_object": {"f81_number": 5}
+    },
+     "result": {
+         "input": {
+             "f1_string" : "hi",
+             "f2_bool"   : false,
+             "f3_integer": 24,
+             "f4_number" : 24.0,
+             "f5_number" : 24.0,
+             "f6_array": [
+                 {
+                     "f11_string": "bye",
+                     "f12_bool": true,
+                     "f13_integer": 24,
+                     "f14_number": 24.0,
+                     "f15_number": 24.0,
+                     "f16_array": [
+                         24.0,
+                         24.0,
+                         24.0
+                     ]
+                 },
+                 {
+                     "f11_string": "yes",
+                     "f12_bool": true,
+                     "f13_integer": 24,
+                     "f14_number": 24.0,
+                     "f15_number": 24.0,
+                     "f16_array": [
+                         24.0
+                     ]
+                 }
+             ],
+             "f7_array": [
+                 24.0,
+                 24.0,
+                 24.0
+             ],
+             "f8_object": {"f81_number": 5.0}
+         },
+         "calc1": 3.428571,
+         "calc1a": 3.428571,
+         "calc2": 3,
+         "calc3": [
+             3.428571,
+             3.428571,
+             3.428571
+         ],
+         "calc4": 3.428571,
+         "calc5": 3,
+         "calc6": [
+             3.428571,
+             3.428571,
+             3.428571
+         ]
+     }},
+    {"attr": "v1",
+       "request": {
+        "f1_string"        : "hi",
+        "f2_bool"          : false,
+        "f3_integer"       : 1,
+        "f4_number"        : 1,
+        "f5_number"        : 1,
+        "f6_array"         : [
+            {"f11_string"  : "bye",
+             "f12_bool"    : true,
+             "f13_integer" : 1,
+             "f14_number"  : 1,
+             "f15_number"  : 1,
+             "f16_array"   : [1]}
+            ],
+           "f7_array"         : [1],
+           "f8_object": {"f82_array": [1]}
+
+       },
+     "result": {
+         "input": {
+             "f1_string": "hi",
+             "f2_bool": false,
+             "f3_integer": 1,
+             "f4_number": 1.0,
+             "f5_number": 1.0,
+             "f6_array": [
+                 {
+                     "f11_string": "bye",
+                     "f12_bool": true,
+                     "f13_integer": 1,
+                     "f14_number": 1.0,
+                     "f15_number": 1.0,
+                     "f16_array": [
+                         1.0
+                     ]
+                 }],
+             "f7_array": [
+                 1.0
+             ],
+           "f8_object": {"f82_array": [1.0]}
+         },
+         "calc1": 0.142857,
+         "calc1a": 0.142857,
+         "calc2": 0,
+         "calc3": [
+             0.142857
+         ],
+         "calc4": 0.142857,
+         "calc5": 0,
+         "calc6": [
+             0.142857
+         ]
+     }},
+     {"attr": "v0",
+      "request": {"f4_number": 123},
+      "result": {"f4_number": 123.0}
+     },
+    {"attr": "v0",
+     "request": {"f7_array": [1,2.0,3]},
+      "result": {"f7_array": [1.0,2.0,3.0]}
+    },
+    {"attr": "v0",
+     "request": {"f6_array": [{"f16_array": [1]}]},
+      "result": {"f6_array": [{"f16_array": [1.0]}]}
+    },
+    {"attr": "v0",
+     "request": {"f6_array": [{"f16_array": []}],
+                 "f7_array": []},
+     "result": {"f6_array": [{"f16_array": []}],
+                "f7_array": []}
+    },
+    {"attr": "v0",
+     "request": {},
+     "result": {}
+    },
+    {"attr": "v0",
+     "request": {"f_bool":true},
+     "result": {"f_bool":true}
+    },
+     {"attr": "v0",
+      "request": {"f4_number": "bad"},
+      "result": {"f4_number": "bad"}
+     },
+    {"attr": "v0",
+     "request": {"f7_array": [1,"bad",3]},
+      "result": {"f7_array": [1.0,"bad",3.0]}
+    },
+     {"attr": "v0",
+      "request": {"f4_number": true},
+      "result": {"f4_number": true}
+     },
+    {"attr": "v0",
+     "request": {"f7_array": [1,true,3]},
+      "result": {"f7_array": [1.0,true,3.0]}
+    }
+]

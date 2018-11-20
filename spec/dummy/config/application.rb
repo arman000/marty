@@ -71,7 +71,6 @@ module Dummy
     config.paths["config/database"] = "#{APP_ROOT}/database.yml"
 
     config.marty.auth_source = 'local'
-
     config.marty.system_account = 'marty'
     config.marty.local_password = 'marty'
     require 'class_list'
@@ -94,6 +93,7 @@ module Dummy
           Marty::Config['SCHEDULER_DEPLOY_ON_INITIALIZATION'] == true
       end
     end
+    config.marty.extjs_theme = 'crisp'
   end
 end
 require "marty/permissions"

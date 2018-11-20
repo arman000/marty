@@ -2,8 +2,6 @@
     netzkeOnSignIn: function() {
         var me = this;
         this.signinWin = this.signinWin || Ext.create('Ext.Window', {
-            width:      300,
-            height:     150,
             modal:      true,
             layout:     'fit',
 
@@ -47,7 +45,7 @@
             items: {
                 xtype:          'form',
                 defaultType:    'textfield',
-                bodyPadding:    '15px 0px 0px 10px',
+                bodyPadding:    '15px 15px 0px 10px',
                 defaults: {
                     listeners: {
                         specialkey: function (field, event) {

@@ -132,4 +132,19 @@ module Marty::Util
     URI.encode("#{Marty::Util.marty_path}/report?data=#{data}"\
                "&reptitle=#{title}&format=#{format}")
   end
+
+  def self.scrub_obj(obj)
+    trav = lambda {|o|
+           if o.is_a?(Hash)
+             return o.each_with_object({}) {|(k, v), h| h[k] = trav.call(v)}
+           elsif o.is_a?(Array)
+             return o.map {|v| trav.call(v)}
+           elsif o.to_s.length > 10000
+             o.class.to_s
+           else
+             o
+           end
+    }
+    trav.call(obj)
+  end
 end

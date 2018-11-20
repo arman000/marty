@@ -6,7 +6,7 @@ class Marty::PostingWindow < Netzke::Window::Base
     c.modal 		= true
     c.items 		= [:posting_grid]
     c.lazy_loading 	= true
-    c.width 		= 400
+    c.width 		= 600
     c.height 		= 350
   end
 
@@ -20,7 +20,6 @@ class Marty::PostingWindow < Netzke::Window::Base
     }
     # c.bbar	= []
   end
-
 end
 
 PostingWindow = Marty::PostingWindow

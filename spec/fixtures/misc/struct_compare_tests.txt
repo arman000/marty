@@ -1,0 +1,170 @@
+[
+{ "example_number": "0",
+  "v1" : [1],
+  "v2" : [1],
+  "res" : false
+},
+{ "example_number": "1",
+  "v1": [1],
+  "v2": [2],
+  "res": "path=[0] 1 != 2"
+},
+{ "example_number": "2",
+  "v1" : [1,2],
+  "v2" : [1,3],
+  "res" : "path=[1] 2 != 3"
+},
+{ "example_number": "3",
+  "v1": [1,[1,2]],
+  "v2": [1,[1]],
+  "res" : "path=[1] array size mismatch 2 != 1"
+},
+{ "example_number": "4",
+  "v1": [[1,2], "foo", { "abc" : [1,2] }],
+  "v2": [[1,2], "foo", { "abc" : [1,2] }],
+  "res" : false
+},
+{ "example_number": "5",
+  "v1": [[1,2], "foo", { "abc" : [1,2.0] }],
+  "v2": [[1,2], "foo", { "abc" : [1.000,2] }],
+  "res" : false
+},
+{ "example_number": "6",
+  "v1": [[1,2], "foo", { "abc" : [1,{"a": 2}] }],
+  "v2": [[1,2], "foo", { "abc" : [1,{"a": 2}] }],
+  "res" : false
+},
+{ "example_number": "7",
+  "v1": [[1,2], "foo", { "abc" : [1,{"a": 2}] }],
+  "v2": [[1,2], "foo", { "abc" : [1,{"a": 2, "b":3}] }],
+  "res" : "path=[2][\"abc\"][1] hash extra keys [\"b\"]"
+},
+{ "example_number": "8",
+  "v1": [[1,2], "foo", { "abc" : [1,{"a": 2}] }],
+  "v2": [[1,2], "foo", { "abc" : [1,{"b": 2}] }],
+  "res" : "path=[2][\"abc\"][1] hash extra keys [\"a\"]"
+},
+{ "example_number": "9",
+  "v1": [[[1,2,3], {"foo": "bar", "baz": true, "plugh": 2.434, "hash": { "value": [1,2] }}], 7, "value"],
+  "v2": [[[1,2,3], {"foo": "barz", "baz": true, "plugh": 2.434, "hash": { "value": [1,2] }}], 7, "value"],
+  "res": "path=[0][1][\"foo\"] bar != barz"
+},
+{ "example_number": "10",
+  "v1": [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],
+  "v2": [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],
+  "res": false
+},
+{ "example_number": "11",
+  "v1": [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],
+  "v2": [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["one"]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],
+  "res": "path=[0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0] class mismatch Integer String"
+},
+{ "example_number": "12",
+  "v1": [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],
+  "v2": [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],
+  "res": "path=[0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0] class mismatch Array Integer"
+},
+{ "example_number": "13",
+  "v1": [{"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4}],
+  "v2": [{"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4}],
+  "res": "path= array size mismatch 4 != 3"
+},
+{ "example_number": "14",
+  "v1": [{"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4}],
+  "v2": [{"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4},
+         {"a": 1, "b": 2,         "d": 4},
+         {"a": 1, "b": 2, "c": 3, "d": 4}],
+  "res": "path=[2] hash extra keys [\"c\"]"
+},
+{ "example_number": "15",
+  "v1": [{"a": [{"b": [{"c": [{"d": [1,2.00,3,4]}]}]}]}],
+  "v2": [{"a": [{"b": [{"c": [{"d": [1.00,2,3.00,4.00]}]}]}]}],
+  "res": false
+},
+{ "example_number": "16",
+  "v1": [{"a": [{"b": [{"c": [{"d": [1,2,3,4]}]}]}]}],
+  "v2": [{"a": [{"b": [{"c": [{"d": [1.00,2.10,3.00,4.00]}]}]}]}],
+  "res": "path=[0][\"a\"][0][\"b\"][0][\"c\"][0][\"d\"][1] 2 != 2.1"
+},
+{ "example_number": "17",
+  "v1": [{"a": [{"b": [{"c": [{"d": [1,2.10,3,4]}]}]}]}],
+  "v2": [{"a": [{"b": [{"c": [{"d": [1.00,2,3.00,4.00]}]}]}]}],
+  "res": "path=[0][\"a\"][0][\"b\"][0][\"c\"][0][\"d\"][1] 2.1 != 2"
+},
+{ "example_number": "18",
+  "v1": {"pi": 3.1415926, "e": 2.718281828459, "phi": 1.618034},
+  "v2": {"pi": 3.1415926, "e": 2.718281811111, "phi": 1.618034},
+  "res": false
+},
+{ "example_number": "19",
+  "v1": [[[1,2,3], {"foo": "bar", "baz": false, "plugh": 2.434, "hash": { "value": [1,2] }}], 7, "value"],
+  "v2": [[[1,2,3], {"foo": "bar", "baz": false, "plugh": 2.434, "hash": { "value": [1,2] }}], 7, "value"],
+  "res": false
+},
+{ "example_number": "20",
+  "v1": [[[1,2,3], {"foo": "bar", "baz": null, "plugh": 2.434, "hash": { "value": [1,2] }}], 7, "value"],
+  "v2": [[[1,2,3], {"foo": "bar", "baz": null, "plugh": 2.434, "hash": { "value": [1,2] }}], 7, "value"],
+  "res": false
+},
+{ "example_number": "21",
+  "v1": [[[1,2,3], {"foo": "bar", "baz": null, "plugh": 2.434, "hash": { "value": [1,2] }}], 7, "value"],
+  "v2": [[[1,2,3], {"foo": "bar", "baz": false, "plugh": 2.434, "hash": { "value": [1,2] }}], 7, "value"],
+  "res": "path=[0][1][\"baz\"] class mismatch NilClass FalseClass"
+},
+{ "example_number": "22",
+  "v1": [[[1,2,3], {"foo": "bar", "baz": true, "plugh": 2.434, "hash": { "value": [1,false] }}], 7, "value"],
+  "v2": [[[1,2,3], {"foo": "bar", "baz": true, "plugh": 2.434, "hash": { "value": [1,null] }}], 7, "value"],
+  "res": "path=[0][1][\"hash\"][\"value\"][1] class mismatch FalseClass NilClass"
+},
+{ "example_number": "23",
+  "v1": {"pi": 3.1415926, "e": 2.7182818, "phi": 1.618034},
+  "v2": {"pi": 3.1415926, "e": 2.7282818, "phi": 1.618034},
+  "res": "path=[\"e\"] 2.7182818 != 2.7282818"
+},
+{ "example_number": "24",
+  "v1": {"error": "Some error message returned"},
+  "v2": {"pi": 3.1415926, "e": 2.7282818, "phi": 1.618034},
+  "res": "path= hash extra keys [\"error\"]"
+},
+{ "example_number": "25",
+  "v1": {"pi": 3.1415926, "e": 2.7282818, "phi": 1.618034},
+  "v2": {"error": "Some error message returned"},
+  "res": "path= hash extra keys [\"pi\", \"e\", \"phi\"]"
+},
+{ "example_number": "26",
+  "v1": {"error": "Another error message returned"},
+  "v2": [{"pi": 3.1415926, "e": 2.7282818, "phi": 1.618034}],
+  "res": "Another error message returned"
+},
+{ "example_number": "27",
+  "v1": [{"pi": 3.1415926, "e": 2.7282818, "phi": 1.618034}],
+  "v2": {"error": "Yet another error message returned"},
+  "res": "Yet another error message returned"
+},
+{ "example_number": "28",
+  "v1": {"three": 3},
+  "v2": {"three": 3.0},
+  "res": false
+},
+{ "example_number": "29",
+  "v1": {"three": 3},
+  "v2": {"three": 3.0},
+  "res": "path=[\"three\"] class mismatch Integer Float",
+  "cmp_opts": {"float_int_nomatch": true}
+},
+{ "example_number": "30",
+  "v1": {"three": 3, "dummy": "hi", "dummy2": 1},
+  "v2": {"three": 3.0, "dummy": "bye", "dummy2": 2},
+  "res": false,
+  "cmp_opts": {"float_int_nomatch": false, "ignore": ["dummy", "dummy2"]}
+}
+]

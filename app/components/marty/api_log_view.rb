@@ -10,6 +10,7 @@ class Marty::ApiLogView < Marty::Grid
   }
 
   @@attrs = [
+    :timestamp_custom,
     :script,
     :node,
     :attrs,
@@ -24,12 +25,12 @@ class Marty::ApiLogView < Marty::Grid
 
   def configure(c)
     super
-    c.editing = :in_form
-    c.paging = :buffered
-    c.title = 'Api Log View'
-    c.model = Marty::Log
+    c.editing    = :in_form
+    c.paging     = :pagination
+    c.title      = 'Api Log View'
+    c.model      = Marty::Log
     c.attributes = @@attrs
-    c.scope = {message_type: 'api'}
+    c.scope      = {message_type: 'api'}
     c.store_config.merge!(sorters: [{property: :timestamp, direction: 'DESC'}])
   end
 
@@ -80,6 +81,10 @@ class Marty::ApiLogView < Marty::Grid
         c.getter    = lambda { |r| r.details[a.to_s].pretty_inspect }
         c.width     = 900
         c.read_only = true
+        c.filter_with = lambda {
+          |r, v, op|
+          r.where("(details->>'#{a.to_s}')::text #{op} '%#{v}%'")
+        }
       end
     end
   end
@@ -90,5 +95,27 @@ class Marty::ApiLogView < Marty::Grid
       c.getter = lambda { |r| r.details[a.to_s].to_json }
     end
   end
+
+  #copied from log_view.rb
+  attribute :timestamp_custom do |c|
+    c.text         = I18n.t("log_grid.timestamp")
+    c.width        = 200
+    c.read_only    = true
+    c.filterable = true
+    c.xtype        = :datecolumn
+    c.format       = 'Y-m-d h:i:s.u'
+    c.field_config = {
+      xtype: :displayfield,
+    }
+    c.getter = lambda { |r| Time.at(r.timestamp) }
+    c.sorting_scope = lambda {|r, dir| r.order("timestamp " + dir.to_s)}
+
+    # FIXME?: The UI AR/PG DateTime workaround requires the timestamp to be cast
+    # to text in order to compare filter input using the LIKE operator.
+    # Otherwise it will fail. '<' and '>' functionality is missing.
+    c.filter_with = lambda {|r, v, op|
+      r.where("timestamp::text  #{op} '#{v}%'")}
+  end
+
 end
 ApiLogView = Marty::ApiLogView

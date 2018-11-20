@@ -108,7 +108,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.get_struct_attrs
-    self.struct_attrs ||= super + ["id", "group_id", "created_dt"]
+    self.struct_attrs ||= super + ["id", "group_id", "created_dt", "name"]
   end
 
   def to_s
@@ -193,9 +193,6 @@ class Marty::DataGrid < Marty::Base
       h[attr] = val.is_a?(String) ?
                   ActiveRecord::Base.connection.quote(val)[1..-2] : val
     end
-    nilparams =  h.select{|k, v| v==nil}
-    raise "Data Grid #{dgh['name']} lookup with nil attrs #{nilparams}" if
-      nilparams.present?
 
     fn     = "lookup_grid_distinct"
     hjson  = "'#{h.to_json}'::JSONB"
@@ -310,19 +307,6 @@ class Marty::DataGrid < Marty::Base
     lookup_grid_distinct_entry_h(pt, h, v, visited, follow, return_grid_data,
                                  distinct)
   end
-
-  # DEPRECATED: use lookup_grid_distinct_entry_h instead
-  def lookup_grid_distinct_entry(pt, h, visited=nil, follow=true,
-                                 return_grid_data=false)
-    warn "DEPRECATED: instance method lookup_grid_distinct_entry. "\
-         "Use class method lookup_grid_distinct_entry_h instead"
-    dgh = self.attributes.slice("id","group_id","created_dt",
-                              "metadata", "data_type")
-    self.class.lookup_grid_distinct_entry_h(pt, h, dgh, visited, follow,
-                                            return_grid_data)
-  end
-  delorean_instance_method :lookup_grid_distinct_entry,
-                           [[Date, Time, ActiveSupport::TimeWithZone], Hash]
 
   def dir_infos(dir)
     metadata.select {|inf| inf["dir"] == dir}

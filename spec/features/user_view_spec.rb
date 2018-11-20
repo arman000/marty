@@ -33,6 +33,8 @@ feature 'under Sytem menu, User Management worflows', js: true do
 
   it 'marty user can add/edit but not delete users' do
     log_in_as('marty')
+    wait_for_ajax
+
     go_to_user_view
 
     user_view = netzke_find('user_view')

@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'axlsx', '3.0.0pre'
 
-  s.add_dependency 'delorean_lang', '~> 0.3.37'
+  s.add_dependency 'delorean_lang', '~> 0.4.2'
   s.add_dependency 'mcfly', '0.0.20'
 
   s.add_dependency 'coderay'
@@ -43,4 +43,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'json-schema'
   s.add_dependency 'parse-cron'
   s.add_dependency 'cronex'
+
+  # used for signing aws ec2 requests
+  s.add_dependency 'aws-sigv4', '~> 1.0', '>= 1.0.2'
 end

@@ -96,7 +96,7 @@ class Marty::ScriptTester < Marty::Form
   action :apply do |a|
     a.text     = I18n.t("script_tester.compute")
     a.tooltip  = I18n.t("script_tester.compute")
-    a.icon     = :script_go
+    a.icon_cls = "fa fa-bug glyph"
     a.disabled = false
   end
 

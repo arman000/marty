@@ -34,7 +34,7 @@ class Marty::ScriptGrid < Marty::Grid
   action :delete do |a|
     a.text     = I18n.t("script_grid.delete")
     a.tooltip  = I18n.t("script_grid.delete")
-    a.icon     = :script_delete
+    a.icon_cls = "fa fa-trash glyph"
     a.disabled = config[:prohibit_delete]
   end
 
@@ -77,7 +77,7 @@ class Marty::ScriptGrid < Marty::Grid
   action :add_in_form do |a|
     a.text     = I18n.t("script_grid.new")
     a.tooltip  = I18n.t("script_grid.new")
-    a.icon     = :script_add
+    a.icon_cls = "fa fa-plus glyph"
     a.disabled = !config[:permissions][:create]
   end
 

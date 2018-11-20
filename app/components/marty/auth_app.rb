@@ -29,12 +29,12 @@ class Marty::AuthApp < Marty::SimpleApp
   end
 
   action :sign_in do |c|
-    c.icon = :door_in
+    c.icon_cls = "fa fa-sign-in-alt gylph"
   end
 
   action :sign_out do |c|
-    c.icon = :door_out
-    c.text = "Sign out #{Mcfly.whodunnit.name}" if Mcfly.whodunnit
+    c.icon_cls = "fa fa-sign-out-alt gylph"
+    c.text     = "Sign out #{Mcfly.whodunnit.name}" if Mcfly.whodunnit
   end
 
   endpoint :sign_in do |params|

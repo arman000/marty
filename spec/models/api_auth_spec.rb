@@ -15,6 +15,10 @@ module Marty
       @api.reload
     end
 
+    def create_params script, key
+      {script: script, api_key: key}
+    end
+
     describe "validations" do
       it "should require app name, api key and script name" do
         api = ApiAuth.new
@@ -126,12 +130,15 @@ module Marty
     describe "authorization" do
       it "should pass when script is not secured" do
         # Script is not secured by any entries
-        expect(ApiAuth.authorized?('SomeScript','SomeKey')).to be_truthy
+        params = create_params('SomeScript','SomeKey')
+        expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
       end
 
       it "should pass when script is secured and key is valid" do
         expect(@api.script_name).to include('Script1')
-        expect(ApiAuth.authorized?(@api.script_name,@api.api_key)).to be_truthy
+
+        params = create_params(@api.script_name, @api.api_key)
+        expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
       end
 
       it "should pass when script is secured and key is valid 2" do
@@ -139,7 +146,9 @@ module Marty
         a.app_name = @api.app_name + 'x'
         a.script_name = 'NewScript1'
         a.save!
-        expect(ApiAuth.authorized?('NewScript1',a.api_key)).to be_truthy
+
+        params = create_params('NewScript1', a.api_key)
+        expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
       end
 
       it "should match on exact script name" do
@@ -147,11 +156,14 @@ module Marty
         a.app_name = @api.app_name + 'x'
         a.script_name = 'NewScript1'
         a.save!
-        expect(ApiAuth.authorized?('Script1',a.api_key)).to be_falsey
+
+        params = create_params('Script1', a.api_key)
+        expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
       end
 
       it "should fail when script is secured and key is invalid" do
-        expect(ApiAuth.authorized?('Script1','SomeKey')).to be_falsey
+        params = create_params('Script1', 'SomeKey')
+        expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
       end
 
       it "should fail when script is secured and key is invalid (2)" do
@@ -159,18 +171,25 @@ module Marty
         a.app_name = @api.app_name + 'x'
         a.script_name = 'NewScript1'
         a.save!
-        expect(ApiAuth.authorized?('NewScript1',@api.api_key)).to be_falsey
+
+        params = create_params('NewScript1', @api.api_key)
+        expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
       end
 
       it "should fail when script is secured and key is not specified" do
-        expect(ApiAuth.authorized?('Script1',nil)).to be_falsey
-        expect(ApiAuth.authorized?('Script1','')).to be_falsey
+        params = create_params('Script1', nil)
+        expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
+
+        params = create_params('Script1', '')
+        expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
       end
 
       it "should pass when api_auth is deleted and no other auths exist" do
-        expect(ApiAuth.authorized?(@api.script_name,@api.api_key)).to be_truthy
+        params = create_params(@api.script_name, @api.api_key)
+        expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
         @api.delete
-        expect(ApiAuth.authorized?(@api.script_name,@api.api_key)).to be_truthy
+
+        expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
       end
 
       it "should fail when api_auth is deleted and another auth exists" do
@@ -178,9 +197,11 @@ module Marty
         api.app_name += 'x'
         api.api_key = nil
         api.save!
-        expect(ApiAuth.authorized?(@api.script_name,@api.api_key)).to be_truthy
+
+        params = create_params(@api.script_name, @api.api_key)
+        expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
         @api.delete
-        expect(ApiAuth.authorized?(@api.script_name,@api.api_key)).to be_falsey
+        expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
       end
     end
   end

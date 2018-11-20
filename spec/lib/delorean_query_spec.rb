@@ -35,13 +35,15 @@ A:
     o = Gemini::FannieBup.
       order("note_rate DESC", "buy_down ASC").
       select("note_rate").
-      first.note_rate
+      first.attributes.note_rate
 
     oo = Gemini::FannieBup.
       order("note_rate", "buy_down ASC").
       select("note_rate").
-      find_by("obsoleted_dt = 'infinity'").
+      find_by("obsoleted_dt = 'infinity'").attributes.
       note_rate
+
+    ooo = Gemini::FannieBup.find_by({'id' : -1})
 
     g = Gemini::FannieBup.
       select("settlement_yy*settlement_mm AS x, count(*) AS c").
@@ -78,6 +80,7 @@ EOF
       @clean_file = "/tmp/clean_#{Process.pid}.psql"
       save_clean_db(@clean_file)
     end
+
     before(:each) do
       marty_whodunnit
       Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
@@ -90,10 +93,12 @@ EOF
 
       @engine = Marty::ScriptSet.new.get_engine("A")
     end
+
     after(:all) do
       restore_clean_db(@clean_file)
       Marty::ScriptSet.clear_cache
     end
+
     it "perfroms join+count" do
       res = @engine.evaluate("A", "c", {})
 
@@ -145,6 +150,12 @@ EOF
                           select("note_rate").
                           find_by("obsoleted_dt = 'infinity'").
                           note_rate
+    end
+
+    it "perfroms find_by on class" do
+      res = @engine.evaluate("A", "ooo", {})
+
+      expect(res).to eq Gemini::FannieBup.find_by(id: -1)
     end
 
     it "perfroms group+count" do

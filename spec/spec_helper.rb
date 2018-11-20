@@ -3,67 +3,22 @@ ENV["RAILS_ENV"] ||= "test"
 require 'dummy/config/application'
 require 'rspec/rails'
 require 'database_cleaner'
-require 'marty_rspec'
+
+support = Pathname.new(__FILE__).parent.to_s + '/support'
+require "#{support}/suite"
+require "#{support}/shared_connection"
 
 Dummy::Application.initialize! unless Dummy::Application.initialized?
 
 ActiveRecord::Migrator.migrate File.expand_path("../../db/migrate/", __FILE__)
 ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
 
-Dir[Rails.root.join("../support/**/*.rb")].each { |f| require f }
-
-def register_chrome_driver driver = :chrome, options={}
-  Capybara.register_driver driver do |app|
-    caps = Selenium::WebDriver::Remote::Capabilities.
-             chrome(options + {pageLoadStrategy: 'none'})
-
-    Capybara::Selenium::Driver.new(app,
-                                   browser: :chrome,
-                                   desired_capabilities: caps)
-  end
-end
-
-CLASSES_TO_EXCLUDE_FROM_SHARED = ["Marty::Log"]
-class ActiveRecord::Base
-  mattr_accessor :shared_connection
-  class << self
-    alias_method :orig_connection, :connection
-  end
-  def self.clear_connection
-    @@shared_connection = nil
-  end
-
-  clear_connection
-
-  def self.connection
-    CLASSES_TO_EXCLUDE_FROM_SHARED.include?(model_name) ? orig_connection :
-      @@shared_connection ||
-      ConnectionPool::Wrapper.new(:size => 1) {retrieve_connection}
-  end
-
-  def self.reset_shared_connection
-    @@shared_connection = ConnectionPool::Wrapper.
-                            new(:size => 1) {retrieve_connection}
-  end
-end
-
-register_chrome_driver
-register_chrome_driver(:headless,
-                       chromeOptions: {
-                         args: %w[headless disable-gpu window-size=3840,2160]
-                       })
-
-Capybara.javascript_driver = ENV['HEADLESS'] == 'true' ? :headless : :chrome
-
-ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection
-
 RSpec.configure do |config|
-  config.include DelayedJobHelpers
-  config.include CleanDbHelpers
-  config.include SpecSetup
-  config.include Marty::IntegrationHelpers
-  config.include MartyRSpec::Util
+  config.include Marty::RSpec::Suite
+  config.include Marty::RSpec::SharedConnection
+  config.include Marty::RSpec::SharedConnectionDbHelpers
 
+  #RspecMarty::SharedConnection.classes_to_exclude_shared = ['Marty::Log']
   Capybara.default_max_wait_time = 3
 
   # TODO: Continue to remove should syntax from specs - remove this line to see
@@ -83,7 +38,7 @@ RSpec.configure do |config|
   end
 
   config.before(:each) do
-    Mcfly.whodunnit = UserHelpers.system_user
+    marty_whodunnit
   end
 
   config.after(:each, :js => true) do |example|
@@ -102,19 +57,4 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
 
   Netzke::Testing.rspec_init(config)
-
-  # FIXME: temporary monkey patch to fix marty_rspec for new extjs/rails
-  module MartyRSpec
-    module Components
-      class NetzkeGrid
-        def get_row_vals row
-          res = run_js <<-JS
-          #{ext_var(grid, 'grid')}
-          return Ext.encode(#{ext_row(row.to_i - 1, 'grid')}.data);
-          JS
-          JSON.parse(res)
-        end
-      end
-    end
-  end
 end

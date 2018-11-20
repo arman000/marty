@@ -20,6 +20,10 @@ en:
   data_grid_view: Data Grids
   data_grid: Data Grids
 
+  data_import_view:
+    import: Import
+    results: Results
+
   roles:
     viewer: Viewer
     admin: Admin

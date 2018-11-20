@@ -51,6 +51,6 @@ class Gemini::MyRule < Marty::DeloreanRule
   end
 
   def compute(*args)
-    base_compute(*args)
+    base_compute2(*args)
   end
 end

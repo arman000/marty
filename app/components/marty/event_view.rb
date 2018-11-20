@@ -33,11 +33,6 @@ class Marty::EventView < Marty::Grid
     Marty::Event.cleanup
   end
 
-  action :delete do |a|
-    super(a)
-    a.icon     = :user_delete
-  end
-
   def default_context_menu
     []
   end

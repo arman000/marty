@@ -1,27 +1,123 @@
 class Marty::Grid < ::Netzke::Grid::Base
-
   extend ::Marty::Permissions
 
   has_marty_permissions read: :any
 
-  def configure_form_window(c)
-    super
-
-    c.klass = Marty::RecordFormWindow
-
-    # Fix Add in form/Edit in form modal popup width
-    # Netzke 0.10.1 defaults width to 80% of screen which is too wide
-    # for a form where the fields are stacked top to bottom
-    # Netzke 0.8.4 defaulted width to 400px - let's make it a bit wider
-    c.width = 475
+  # parent grid is the grid in which child/linked_components is defined
+  # child  components are components dependent on the selected parent row
+  # linked components will update whenever the parent is updated
+  def initialize args, kwargs=nil
+    super(args, kwargs)
+    client_config[:child_components]  = child_components  || []
+    client_config[:linked_components] = linked_components || []
   end
 
   client_class do |c|
-    # For some reason the grid update function was removed in Netzke
-    # 0.10.1.  So, add it here.
-    c.cm_update = l(<<-JS)
+    c.get_component = l(<<-JS)
+    function(name) {
+      return Ext.getCmp(name);
+    }
+    JS
+
+    c.find_component = l(<<-JS)
+    function(name) {
+      return Ext.ComponentQuery.query(`[name=${name}]`)[0];
+    }
+    JS
+
+    c.set_disable_component_actions = l(<<-JS)
+    function(prefix, flag) {
+      for (var key in this.actions) {
+        if (key.substring(0, prefix.length) == prefix) {
+          this.actions[key].setDisabled(flag);
+        }
+      }
+    }
+    JS
+
+    c.init_component = l(<<-JS)
     function() {
-      this.store.load();
+      this.dockedItems = this.dockedItems || [];
+      if (this.paging == 'pagination') {
+        this.dockedItems.push({
+          xtype: 'pagingtoolbar',
+          dock: 'bottom',
+          layout: {overflowHandler: 'Menu'},
+          listeners: {
+            'beforechange': this.disableDirtyPageWarning ? {} : {
+              fn: this.netzkeBeforePageChange, scope: this
+            }
+          },
+          store: this.store,
+          items: this.bbar && ["-"].concat(this.bbar)
+        });
+      } else if (this.bbar) {
+        this.dockedItems.push({
+          xtype: 'toolbar',
+          dock: 'bottom',
+          layout: {overflowHandler: 'Menu'},
+          items: this.bbar
+        });
+      }
+
+      // block creation of toolbars in parent
+      delete this.bbar;
+      var paging  = this.paging
+      if (paging != 'buffered') { this.paging = false; }
+      this.callParent();
+      this.paging = paging
+
+      var me = this;
+
+      var children = me.serverConfig.child_components || [];
+      me.onSelectionChange(
+      function(m) {
+        var has_sel = m.hasSelection();
+
+        var rid = null;
+        if (has_sel) {
+          if (m.type == 'spreadsheet') {
+            var cell = m.getSelected().startCell;
+            rid = cell && cell.record.getId();
+          }
+          if (!rid) {
+            selected = m.getSelection()[0];
+            rid = selected && selected.getId();
+          }
+        }
+
+        me.serverConfig.selected = rid;
+        me.setDisableComponentActions('do', !has_sel);
+
+        for (var child of children) {
+          var comp = me.findComponent(child)
+          if (comp) {
+            comp.serverConfig.parent_id = rid;
+            if (comp.setDisableComponentActions) {
+              comp.setDisableComponentActions('parent', !has_sel);
+            }
+            if (comp.reload) { comp.reload() }
+          }
+        }
+      });
+
+      var store  = me.getStore();
+      var linked = me.serverConfig.linked_components || [];
+      for (var event of ['update', 'netzkerefresh']) {
+        store.on(event, function() {
+        for (var link of linked) {
+            var comp = me.findComponent(link);
+            if (comp && comp.reload) { comp.reload() }
+          }
+        }, this);
+      }
+    }
+    JS
+
+    c.on_selection_change = l(<<-JS)
+    function(f) {
+      var me = this;
+      me.getSelectionModel().on('selectionchange', f);
     }
     JS
 
@@ -39,15 +135,33 @@ class Marty::Grid < ::Netzke::Grid::Base
         }});
     }
     JS
+
+    c.reload = l(<<-JS)
+    function(opts={}) {
+      this.netzkeReloadStore(opts);
+    }
+    JS
+
+    c.reload_all = l(<<-JS)
+    function() {
+      var me = this;
+      var children = me.serverConfig.child_components || [];
+      this.store.reload();
+      for (child of children) {
+        var comp = me.findComponent(child);
+        if (comp && comp.reload) { comp.reload() }
+      }
+    }
+    JS
+
+    c.clear_filters = l(<<-JS)
+    function() {
+      this.filters.clearFilters();
+    }
+    JS
   end
 
-  component :view_window do |c|
-    configure_form_window(c)
-    c.excluded = !allowed_to?(:read)
-    c.items    = [:view_form]
-    c.title    = I18n.t('netzke.grid.base.view_record',
-                        model: model.model_name.human)
-  end
+  ######################################################################
 
   def class_can?(op)
     self.class.can_perform_action?(op)
@@ -65,15 +179,97 @@ class Marty::Grid < ::Netzke::Grid::Base
 
     c.editing      = :both
     c.store_config = {page_size: 30}
+    c.view_config  = {preserve_scroll_on_reload: true}
+
+    # disable buffered renderer plugin to avoid white space on reload
+    c.buffered_renderer = false
   end
 
   def has_search_action?
     false
   end
 
+  action :clear_filters do |a|
+    a.text    = "X"
+    a.tooltip = "Clear filters"
+    a.handler = :clear_filters
+  end
+
   def get_json_sorter(json_col, field)
     lambda do |r, dir|
       r.order("#{json_col} ->> '#{field}' " + dir.to_s)
     end
+  end
+
+  action :clear_filters do |a|
+    a.text     = "X"
+    a.tooltip  = "Clear filters"
+    a.handler  = :clear_filters
+  end
+
+  # cosmetic changes
+
+  action :add do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-plus glyph"
+  end
+
+  action :add_in_form do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-plus-square glyph"
+  end
+
+  action :edit do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-edit glyph"
+  end
+
+  action :edit_in_form do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-pen-square glyph"
+  end
+
+  action :delete do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-trash glyph"
+  end
+
+  action :apply do |a|
+    super(a)
+    a.icon     = nil
+    a.icon_cls = "fa fa-check glyph"
+  end
+
+  def child_components
+    []
+  end
+
+  def linked_components
+    []
+  end
+
+  def configure_form_window(c)
+    super
+
+    c.klass = Marty::RecordFormWindow
+
+    # Fix Add in form/Edit in form modal popup width
+    # Netzke 0.10.1 defaults width to 80% of screen which is too wide
+    # for a form where the fields are stacked top to bottom
+    # Netzke 0.8.4 defaulted width to 400px - let's make it a bit wider
+    c.width = 475
+  end
+
+  component :view_window do |c|
+    configure_form_window(c)
+    c.excluded = !allowed_to?(:read)
+    c.items    = [:view_form]
+    c.title    = I18n.t('netzke.grid.base.view_record',
+                        model: model.model_name.human)
   end
 end

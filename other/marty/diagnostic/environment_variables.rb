@@ -6,14 +6,19 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
   def self.env filter=''
     env = ENV.clone
 
-    # obfuscate SECRET_KEY_BASE for comparison
-    env['SECRET_KEY_BASE'] = env['SECRET_KEY_BASE'][0,4] if
-      env['SECRET_KEY_BASE']
+    to_delete = (Marty::Config['DIAG_ENV_BLOCK'] || []).map(&:upcase) + [
+      'SCRIPT_URI', 'SCRIPT_URL']
 
-    # remove SCRIPT_URI, SCRIPT_URL as calling node differs
-    ['SCRIPT_URI', 'SCRIPT_URL'].each{|k| env.delete(k)}
+    to_obfus = (Marty::Config['DIAG_ENV_OBFUSCATE'] || []).map(&:upcase) + [
+      'SECRET_KEY_BASE']
 
-    to_block = ['PASSWORD', 'DEBUG']
+    to_block = (Marty::Config['DIAG_ENV_BLOCK_IF_INCL'] || []).map(&:upcase) + [
+      'ACCESS', 'SECRET', 'PASSWORD', 'DEBUG']
+
+    to_delete.each{|k| env.delete(k)}
+
+    to_obfus.each{|k| env[k] = env[k][0,4] if env[k]}
+
     env.sort.each_with_object({}){|(k,v),h|
       h[k] = v if to_block.all?{|b| !k.include?(b)} && k.include?(filter)}
   end

@@ -25,4 +25,21 @@ module Marty::Diagnostic::Database
       ActiveRecord::Migrator.needs_migration?
     current.to_s
   end
+
+  def self.get_postgres_connections
+    conn = ActiveRecord::Base.connection.execute('SELECT datname,'\
+                                                 'application_name,'\
+                                                 'state,'\
+                                                 'pid,'\
+                                                 'client_addr '\
+                                                 'FROM pg_stat_activity')
+    conn.each_with_object({}) do |conn, h|
+      h[conn['datname']] ||= []
+      h[conn['datname']] << conn.except('datname')
+    end
+  end
+
+  def self.current_connections
+    get_postgres_connections[db_name]
+  end
 end

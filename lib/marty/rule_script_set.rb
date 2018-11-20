@@ -31,7 +31,9 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def write_attr(k, v)
-    k + (v == :parameter ? " =?" : " = #{v}")
+    equals, rhs = v == :parameter ? [" =?", ""] :
+                    [" =", "\n" + v.lines.map{|l| " "*8 + l}.join("\n")]
+    k + equals + rhs
   end
 
   def paramify_h(h)
@@ -101,15 +103,13 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     result_c = result_code(ruleh)
     guard_c = guard_code(ruleh)
 
-    code = self.class.body_start + self.class.indent(grid_i +
-                                                     guard_c +
-                                                     grid_c +
-                                                     result_c)
-    #puts '='*40
-    #puts ruleh["name"]
-    #puts '-'
-    #puts code
-    #puts '-'*10
+    code = self.class.body_start +
+           self.class.indent(grid_i + guard_c + grid_c + result_c)
+    # puts '='*40
+    # puts ruleh["name"]
+    # puts '-'
+    # puts code
+    # puts '-'*10
 
     code
   end
@@ -171,7 +171,8 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
       end
     rescue Delorean::ParseError => e
       f = get_parse_error_field(ruleh, e)
-      raise "Error in rule '#{ruleh['name']}' field '#{f}': #{e}"
+      msg = e.message.capitalize
+      raise "Error in rule '#{ruleh['name']}' field '#{f}': #{msg}"
     end
   end
 

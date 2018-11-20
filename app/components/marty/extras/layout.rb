@@ -102,7 +102,8 @@ module Layout
   ######################################################################
   # PG ENUM field handling
 
-  def enum_column(c, class_or_array)
+  def enum_column(c, class_or_array, col=nil)
+    col ||= c.name.demodulize.tableize.singularize
     vals = class_or_array.is_a?(Array) ? class_or_array : class_or_array::VALUES
     editor_config = {
       trigger_action: :all,
@@ -120,6 +121,7 @@ module Layout
       field_config:  editor_config,
       type:          :string,
       setter:        enum_setter(c.name),
+      sorting_scope: get_sorter(col)
     )
   end
 
@@ -139,6 +141,10 @@ module Layout
 
   def enum_setter(name)
     lambda {|r, v| r.send("#{name}=", v.blank? || v == '---' ? nil : v)}
+  end
+
+  def get_sorter(col)
+    lambda {|rel, dir| rel.order("#{col}::text #{dir.to_s}")}
   end
 
   ######################################################################
@@ -240,5 +246,8 @@ module Columns
       # apply additional config options or overrides
       opts.each{|k,v| c.send("#{k}=", v)}
     end
+
+  def tooltip s1, s2
+    "<span data-qtip=\"#{s2}\">#{s1}</span>"
   end
 end; end; end
