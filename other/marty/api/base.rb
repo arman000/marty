@@ -20,6 +20,10 @@ class Marty::Api::Base
   end
 
   # api handles
+  def self.engine_params_filter
+    ['password']
+  end
+
   def self.process_params params
     params
   end
@@ -161,14 +165,21 @@ class Marty::Api::Base
     end
   end
 
+  def self.filter_hash hash, filter_params
+    pf = ActionDispatch::Http::ParameterFilter.new(filter_params)
+    pf.filter(hash)
+  end
+
   def self.log result, params, request
     ret_arr = params[:return_array]
+    input   = filter_hash(params[:params], engine_params_filter)
+
     Marty::Log.write_log('api',
                          params.values_at(:script, :node, :attr).join(' - '),
                          {script:     params[:script],
                           node:       params[:node],
                           attrs:      ret_arr ? [params[:attr]] : params[:attr],
-                          input:      params[:params],
+                          input:      input,
                           output:     (result.is_a?(Hash) &&
                                        result.include?('error')) ? nil : result,
                           start_time: params[:start_time],
