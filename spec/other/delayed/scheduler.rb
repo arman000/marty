@@ -44,7 +44,7 @@ describe Marty::Delayed::Scheduler do
   def with_delayed_job n=1, sleep_time=0
     config = Marty::Config['SCHEDULER_DEPLOY_ON_INITIALIZATION']
     Marty::Config['SCHEDULER_DEPLOY_ON_INITIALIZATION'] = true
-    start_delayed_job(n=n, sleep_time=sleep_time)
+    start_delayed_job
     yield if block_given?
     stop_delayed_job
     Marty::Config['SCHEDULER_DEPLOY_ON_INITIALIZATION'] = config

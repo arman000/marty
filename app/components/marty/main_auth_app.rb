@@ -32,7 +32,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       name:  "posting",
       tooltip: "Postings",
       icon_cls: "fa fa-clock glyph",
-      style: (warped ? "background-color: lightGrey;" : ""),
+      style: (warped ? "backgWround-color: lightGrey;" : ""),
       menu:  [
         :new_posting,
         :select_posting,
@@ -191,7 +191,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   action :scheduled_job_view do |a|
     a.text      = "Scheduled Jobs"
     a.handler   = :netzke_load_component_by_action
-    a.icon      = :report_magnify
+    a.icon_cls  = "fa fa-calendar glyph"
     a.disabled  = !self.class.has_any_perm?
   end
 
@@ -285,15 +285,15 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   action :bg_scheduler_stop do |a|
     a.text     = 'Stop Scheduler'
-    a.tooltip  = 'Delete scheduler life row entry.'
-    a.icon     = :clock_stop
+    a.tooltip  = 'Delete scheduler life row entry'
+    a.icon_cls = "fa fa-ban glyph"
     a.disabled = !self.class.has_admin_perm?
   end
 
   action :bg_scheduler_restart do |a|
     a.text     = 'Restart Scheduler'
-    a.tooltip  = 'Recreate scheduler life row entry.'
-    a.icon     = :clock_red
+    a.tooltip  = 'Recreate scheduler life row entry'
+    a.icon_cls = "fa fa-play glyph"
     a.disabled = !self.class.has_admin_perm?
   end
 

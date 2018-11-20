@@ -232,7 +232,7 @@ module Layout
     c.align  = 'right'
   end
 
-end;
+  end;
 module Columns
   def json_column a, opts={}
     column a do |c|
@@ -250,4 +250,5 @@ module Columns
   def tooltip s1, s2
     "<span data-qtip=\"#{s2}\">#{s1}</span>"
   end
+end
 end; end; end

@@ -130,6 +130,7 @@ class Marty::ScheduledJobView < Marty::Grid
         Cronex::ExpressionDescriptor.new(r.get_cron).description
       },
       xtype: :textfield},
+     :max_attempts,
      :processed,
      :last_completed_dt,
      :scheduled_run_dt,
@@ -163,13 +164,21 @@ class Marty::ScheduledJobView < Marty::Grid
     end
   end
 
+  attribute :halt do |c|
+    c.text = "Halted"
+  end
+
+  attribute :updated_at do |c|
+    c.flex = 1
+  end
+
   Marty::ScheduledJob::CRON_ATTRS.each do |a|
     attribute a do |c|
       c.text = a.to_s.split('_').map do
         |s|
         char = s[0] == 't' ? '' : (s[0] == 'o' ? s[0] : s[0].capitalize)
       end.compact.join
-      c.width = 40
+      c.width = 80
     end
   end
 end
