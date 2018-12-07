@@ -166,6 +166,7 @@ class Marty::Api::Base
   end
 
   def self.filter_hash hash, filter_params
+    return unless hash
     pf = ActionDispatch::Http::ParameterFilter.new(filter_params)
     pf.filter(hash)
   end
