@@ -170,25 +170,27 @@ class Marty::Api::Base
     pf.filter(hash)
   end
 
-  def self.log result, params, request
+  def self.log_hash result, params, request
     ret_arr = params[:return_array]
     input   = filter_hash(params[:params], engine_params_filter)
+    {script:     params[:script],
+     node:       params[:node],
+     attrs:      ret_arr ? [params[:attr]] : params[:attr],
+     input:      input,
+     output:     (result.is_a?(Hash) &&
+                  result.include?('error')) ? nil : result,
+     start_time: params[:start_time],
+     end_time:   Time.zone.now,
+     error:      (result.is_a?(Hash) &&
+                  result.include?('error')) ? result : nil,
+     remote_ip:  request.remote_ip,
+     auth_name:  params[:auth]
+    }
+  end
 
-    Marty::Log.write_log('api',
-                         params.values_at(:script, :node, :attr).join(' - '),
-                         {script:     params[:script],
-                          node:       params[:node],
-                          attrs:      ret_arr ? [params[:attr]] : params[:attr],
-                          input:      input,
-                          output:     (result.is_a?(Hash) &&
-                                       result.include?('error')) ? nil : result,
-                          start_time: params[:start_time],
-                          end_time:   Time.zone.now,
-                          error:      (result.is_a?(Hash) &&
-                                       result.include?('error')) ? result : nil,
-                          remote_ip:  request.remote_ip,
-                          auth_name:  params[:auth]
-                         })
+  def self.log result, params, request
+    desc = params.values_at(:script, :node, :attr).join(' - ')
+    Marty::Log.write_log('api', desc, log_hash(result, params, request))
   end
 
   class SchemaValidator
