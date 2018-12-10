@@ -166,23 +166,25 @@ class Marty::Api::Base
   end
 
   def self.filter_hash hash, filter_params
+    return unless hash
     pf = ActionDispatch::Http::ParameterFilter.new(filter_params)
     pf.filter(hash)
   end
 
   def self.log_hash result, params, request
+    res     = result.is_a?(Hash) ? result.stringify_keys : result
     ret_arr = params[:return_array]
     input   = filter_hash(params[:params], engine_params_filter)
     {script:     params[:script],
      node:       params[:node],
      attrs:      ret_arr ? [params[:attr]] : params[:attr],
      input:      input,
-     output:     (result.is_a?(Hash) &&
-                  result.include?('error')) ? nil : result,
+     output:     (res.is_a?(Hash) &&
+                  res.include?('error')) ? nil : res,
      start_time: params[:start_time],
      end_time:   Time.zone.now,
-     error:      (result.is_a?(Hash) &&
-                  result.include?('error')) ? result : nil,
+     error:      (res.is_a?(Hash) &&
+                  res.include?('error')) ? res['error'] : nil,
      remote_ip:  request.remote_ip,
      auth_name:  params[:auth]
     }
