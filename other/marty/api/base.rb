@@ -24,8 +24,22 @@ class Marty::Api::Base
     ['password']
   end
 
+  def self.sanitize params
+    params.each_with_object({}) do |(k,v), h|
+      if  v.is_a?(String)
+        h[k] = v.gsub(/<[^>]*>/, '').strip
+      elsif v.is_a?(Hash)
+        h[k] = sanitize(v)
+      elsif v.is_a?(Array)
+        h[k] = v.map{|x| sanitize(x)}
+      else
+        h[k] = v
+      end
+    end
+  end
+
   def self.process_params params
-    params
+    sanitize(params)
   end
 
   def self.before_evaluate api_params
