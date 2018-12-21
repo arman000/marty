@@ -26,7 +26,7 @@ class Marty::Api::Base
 
   def self.sanitize params
     params.each_with_object({}) do |(k,v), h|
-      if  v.is_a?(String)
+      if v.is_a?(String)
         h[k] = v.gsub(/<[^>]*>/, '').strip
       elsif v.is_a?(Hash)
         h[k] = sanitize(v)
