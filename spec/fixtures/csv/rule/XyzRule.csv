@@ -25,3 +25,8 @@ ZRule8,ZRule,2017-3-1 11:00:01,"{""g_string"":""eee"",""g_range1"":""[50,60)"","
 }","{""grid1"":""DataGrid3""}","{
 ""log__"":""true"",
 ""bvlen"": ""1"", ""bv"":""2""}"
+ZRule9,ZRule,2017-3-1 11:00:01,"{""g_string"":""eee"",""g_range1"":""[50,60)"",""g_integer"":9,""g_date"":""2017-1-5"",""g_datetime"":""2017-1-1 12:00:05""}","{
+""cg1"":""p1 == 5""
+}","{""grid1"":""DataGrid3""}","{
+""log__"":""true"",
+""bvlen"": ""grid1_grid_result"", ""bv"":""base_value""}"

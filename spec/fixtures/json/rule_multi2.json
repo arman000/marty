@@ -1,0 +1,211 @@
+[
+  {
+    "id": 5,
+    "group_id": 5,
+    "created_dt": "2016-12-31 16:00:00 -0800",
+    "obsoleted_dt": "Infinity",
+    "user_id": 1,
+    "o_user_id": null,
+    "name": "ZRule5",
+    "rule_type": "ZRule",
+    "start_dt": "2017-03-01 03:00:01 -0800",
+    "end_dt": "",
+    "engine": "Gemini::XyzRuleScriptSet",
+    "simple_guards": {
+      "g_date": "2017-1-5",
+      "g_range1": "[50,60)",
+      "g_string": "eee",
+      "g_integer": 1,
+      "g_datetime": "2017-1-1 12:00:05"
+    },
+    "computed_guards": {
+    },
+    "grids": {
+      "grid1": "DataGrid3"
+    },
+    "results": {
+      "bvlen": "base_value.length",
+      "bv": "base_value"
+    },
+    "fixed_results": {
+    },
+    "classname": "Gemini::XyzRule",
+    "value": {
+      "bvlen": 14,
+      "bv": "cherry --> 180",
+      "grid1_grid_result": 18
+    }
+  },
+  {
+    "id": 6,
+    "group_id": 6,
+    "created_dt": "2016-12-31 16:00:00 -0800",
+    "obsoleted_dt": "Infinity",
+    "user_id": 1,
+    "o_user_id": null,
+    "name": "ZRule6",
+    "rule_type": "ZRule",
+    "start_dt": "2017-03-01 03:00:01 -0800",
+    "end_dt": "",
+    "engine": "Gemini::XyzRuleScriptSet",
+    "simple_guards": {
+      "g_date": "2017-1-5",
+      "g_range1": "[50,60)",
+      "g_string": "eee",
+      "g_integer": 6,
+      "g_datetime": "2017-1-1 12:00:05"
+    },
+    "computed_guards": {
+    },
+    "grids": {
+      "grid1": "DataGrid3"
+    },
+    "results": {
+      "log__": "true",
+      "tmp_var1": "base_value.length*2",
+      "tmp_var2": "tmp_var1*2",
+      "tmp_var3": "tmp_var2*2",
+      "tmp_var4": "\"a string\" * tmp_var1",
+      "bvlen": "base_value.length",
+      "bv": "tmp_var4"
+    },
+    "fixed_results": {
+      "log__": true
+    },
+    "classname": "Gemini::XyzRule",
+    "value": {
+      "bvlen": 14,
+      "bv": "a stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa stringa string",
+      "grid1_grid_result": 18
+    }
+  },
+  {
+    "id": 7,
+    "group_id": 7,
+    "created_dt": "2016-12-31 16:00:00 -0800",
+    "obsoleted_dt": "Infinity",
+    "user_id": 1,
+    "o_user_id": null,
+    "name": "ZRule7",
+    "rule_type": "ZRule",
+    "start_dt": "2017-03-01 03:00:01 -0800",
+    "end_dt": "",
+    "engine": "Gemini::XyzRuleScriptSet",
+    "simple_guards": {
+      "g_date": "2017-1-5",
+      "g_range1": "[50,60)",
+      "g_string": "eee",
+      "g_integer": 7,
+      "g_datetime": "2017-1-1 12:00:05"
+    },
+    "computed_guards": {
+      "some_guard": "true"
+    },
+    "grids": {
+      "grid1": "DataGrid3"
+    },
+    "results": {
+      "log__": "true",
+      "tmp_var1": "base_value.length*2",
+      "tmp_var2": "tmp_var1*2",
+      "tmp_var3": "tmp_var2*2",
+      "tmp_var4": "\"a string\" + tmp_var1",
+      "bvlen": "tmp_var4",
+      "bv": "tmp_var4"
+    },
+    "fixed_results": {
+      "log__": true
+    },
+    "classname": "Gemini::XyzRule",
+    "value": {
+      "runtime error": "no implicit conversion of Integer into String",
+      "res": {
+        "error": "no implicit conversion of Integer into String",
+        "backtrace": [
+          [
+            "xyz_multi",
+            178,
+            "+"
+          ],
+          [
+            "xyz_multi",
+            178,
+            "tmp_var4"
+          ],
+          [
+            "xyz_multi",
+            180,
+            "bvlen"
+          ],
+          [
+            "xyz_multi",
+            187,
+            "resval"
+          ],
+          [
+            "xyz_multi",
+            266,
+            "block in result0"
+          ],
+          [
+            "xyz_multi",
+            266,
+            "map"
+          ],
+          [
+            "xyz_multi",
+            266,
+            "result0"
+          ],
+          [
+            "xyz_multi",
+            273,
+            "result"
+          ]
+        ]
+      },
+      "section": "results"
+    }
+  },
+  {
+    "id": 8,
+    "group_id": 8,
+    "created_dt": "2016-12-31 16:00:00 -0800",
+    "obsoleted_dt": "Infinity",
+    "user_id": 1,
+    "o_user_id": null,
+    "name": "ZRule8",
+    "rule_type": "ZRule",
+    "start_dt": "2017-03-01 03:00:01 -0800",
+    "end_dt": "",
+    "engine": "Gemini::XyzRuleScriptSet",
+    "simple_guards": {
+      "g_date": "2017-1-5",
+      "g_range1": "[50,60)",
+      "g_string": "eee",
+      "g_integer": 8,
+      "g_datetime": "2017-1-1 12:00:05"
+    },
+    "computed_guards": {
+      "cg1": "1/0"
+    },
+    "grids": {
+      "grid1": "DataGrid3"
+    },
+    "results": {
+      "log__": "true",
+      "bvlen": "1",
+      "bv": "2"
+    },
+    "fixed_results": {
+      "bv": 2,
+      "bvlen": 1,
+      "log__": true
+    },
+    "classname": "Gemini::XyzRule",
+    "value": {
+      "runtime error": "divided by 0",
+      "section": "guard"
+    }
+  }
+]

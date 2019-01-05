@@ -20,8 +20,8 @@ module Marty::RSpec::StructureCompare
     when String
       return errs + ["path=#{pathstr} #{v1} != #{v2}"] unless
         v1 == v2 ||
-        Regexp.new('\A'+v1+'\z').match(v2) ||
-        Regexp.new('\A'+v2+'\z').match(v1) ||
+        (r=Regexp.new('\A'+v1+'\z') rescue nil; r && r.match(v2)) ||
+        (r=Regexp.new('\A'+v2+'\z') rescue nil; r && r.match(v1)) ||
         override
     when Integer, DateTime, TrueClass, FalseClass, NilClass
       return errs + ["path=#{pathstr} #{v1} != #{v2}"] if v1 != v2 && !override

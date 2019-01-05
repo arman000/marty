@@ -13,6 +13,8 @@ class Marty::DeloreanRule < Marty::BaseRule
         eclass = engine && engine.constantize || Marty::RuleScriptSet
         eng = eclass.new('infinity').get_engine(self_as_hash)
       rescue => e
+        # uncomment to find errors in rule_script_set during validation
+        # puts e.backtrace
         return errors[:computed] << "- " + e.message
       end
     end
@@ -54,6 +56,7 @@ class Marty::DeloreanRule < Marty::BaseRule
     results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
        select{|k| defkeys.include?(k)} + grid_keys(grids, ecl)
   end
+
   def self.grid_keys(grids, eclass)
       grids.keys.map{|k| eclass.grid_final_name(k) }
   end
@@ -66,6 +69,39 @@ class Marty::DeloreanRule < Marty::BaseRule
       @section = section
       super(msg)
       set_backtrace stack
+    end
+  end
+
+  delorean_fn :multi_compute, sig: [6, 7] do
+    |model, eval_rules, metadata_opts, pt, params, sname, dgparams=params|
+    begin
+      return [] if eval_rules.blank?
+      eclassname = model.first.engine
+      eclass = eclassname && eclassname.constantize || Marty::RuleScriptSet
+      rss = eclass.new(pt)
+      get_rules = lambda {
+        ruleh_a = model.mcfly_pt(pt).map(&:self_as_hash)
+        ruleh_a.each do |rh|
+          rh['result_keys'] = comp_res_keys(rh['results'], rh['grids'], eclass,
+                                            metadata_opts)
+        end
+      }
+      engine =rss.get_multi_engine(model, get_rules, sname)
+      dgp = pcopy = params.clone
+      pcopy += {
+        'pt'=>pt,
+        'eval_rule_gids' => eval_rules.map{|r|r['group_id']},
+        'dgparams__' => dgp
+      }
+      results = engine.evaluate(eclass.final_node, 'result', pcopy)
+      rhh = eval_rules.each_with_object({}) {|rh, h| h[rh['group_id']] = rh}
+      results.map do |id, value|
+        rhh[id] + {"value"=>value}
+      end
+      #FIXME remove rescue
+    rescue => e
+     # binding.pry
+      raise
     end
   end
 
@@ -83,8 +119,8 @@ class Marty::DeloreanRule < Marty::BaseRule
 
       if computed_guards.present?
         begin
-          result.cg_vals = engine.evaluate(eclass.node_name, result.cg_keys,
-                                           params.clone)
+          result.cg_vals = engine.evaluate(eclass.node_name(ruleh),
+                                           result.cg_keys,  params.clone)
         rescue => e
           result.err_message = e.message
           result.err_stack   = e.backtrace
@@ -105,7 +141,7 @@ class Marty::DeloreanRule < Marty::BaseRule
       if (result.res_keys - result.gr_keys - fixed_results.keys).present?
         begin
           result.res_vals = engine.evaluate(
-            eclass.node_name,
+            eclass.node_name(ruleh),
             result.res_keys,
             params + {
               "dgparams__" => dgparams,

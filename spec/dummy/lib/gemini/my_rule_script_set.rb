@@ -1,13 +1,9 @@
 class Gemini::MyRuleScriptSet < Marty::RuleScriptSet
-  def self.node_name
-    "Node2"
-  end
-  def self.body_start
+  def self.params_extra_code(ruleh)
     params = <<~END
     param1 =?
     param2 =?
     paramb =? false
     END
-    super + indent(params)
   end
 end
