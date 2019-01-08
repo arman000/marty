@@ -3,8 +3,10 @@ common: &common
 
 development:
   <<: *common
+  url: <%= ENV['DEVELOPMENT_DATABASE_URL'] %>
   database: marty_dev
 
 test:
   <<: *common
   database: marty_test
+  url: <%= ENV['TEST_DATABASE_URL'] %>
