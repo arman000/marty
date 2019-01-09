@@ -1,0 +1,40 @@
+# ONLY FOR DEVELOPMENT PURPOSES
+# dockerfile is not suitable to produce a production-grade docker image
+FROM ruby:2.5.1
+
+WORKDIR /opt/app
+
+ADD https://dl.yarnpkg.com/debian/pubkey.gpg /tmp/yarn-pubkey.gpg
+RUN apt-key add /tmp/yarn-pubkey.gpg && rm /tmp/yarn-pubkey.gpg
+RUN echo 'deb http://dl.yarnpkg.com/debian/ stable main' > /etc/apt/sources.list.d/yarn.list
+
+RUN apt-get update && apt-get install -qq -y --no-install-recommends \
+      build-essential libpq-dev curl
+
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
+RUN apt-get update && apt-get install -qq -y --no-install-recommends nodejs yarn
+
+# Install chrome for integration tests
+# RUN curl -L -o google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+#     && dpkg -i google-chrome.deb || true \
+#     && apt-get install -f -y \
+#     && sed -i 's|HERE/chrome\"|HERE/chrome\" --disable-setuid-sandbox|g' /opt/google/chrome/google-chrome \
+#     && rm google-chrome.deb
+
+ENV BUNDLE_PATH /bundle_box/bundle
+ENV GEM_HOME /bundle_box/bundle
+ENV PATH /bundle_box/bundle/bin:$PATH
+# ENV NODE_PATH /bundle_box/node
+
+COPY . .
+
+# RUN bundle install
+# RUN yarn install
+
+# RUN mv .rbenv-vars.example .rbenv-vars
+# RUN chmod +x entrypoint.sh
+
+# ENV RAILS_ENV=development
+# ENV PORT=3001
+# EXPOSE 3001
+

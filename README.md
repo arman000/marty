@@ -56,6 +56,22 @@ $ rake marty:delete_scripts
 Make sure that extjs is installed (or symbolically linked) in the
 dummy app at spec/dummy/public.
 
+Docker doesn't support symlinks, so in order to run it in Docker you will have to copy extjs files.
+
+```bash
+$ cp -r PATH/TO/YOUR/EXTJS/FILES spec/dummy/public/extjs
+```
+
+You can run it with docker:
+
+```bash
+$ make dummy-app-initialise-docker
+
+$ make dummy-app-start
+```
+
+To run without docker:
+
 Marty currently only runs with postgresql. To be able to run the tests
 you will first need to create a `database.yml` file in `spec/dummy/config`.
 You can use the example file by doing:

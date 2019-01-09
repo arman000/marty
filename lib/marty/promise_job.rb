@@ -107,6 +107,17 @@ class Marty::PromiseJob < Struct.new(:promise,
   # def log(msg)
   #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
   # end
+  #
+  def enqueue(job)
+    config = Rails.configuration.marty
+    hooks = config.promise_job_enqueue_hooks
+
+    return if hooks.blank?
+
+    hooks.each do |hook|
+      hook.call(job)
+    end
+  end
 
   def perform
     # log "PERF #{Process.pid} #{title}"
