@@ -201,6 +201,7 @@ DELOREAN
       set_field_value('XYZ', '', 'pt_name')
       # hidden field that causes results to be inlined
       set_field_value('true', 'textfield', 'selected_testing')
+
       press("Generate Report")
     end
 

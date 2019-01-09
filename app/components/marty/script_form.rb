@@ -1,69 +1,8 @@
 class Marty::ScriptForm < Marty::Form
   DASH = 0x2012.chr('utf-8')
 
-  client_styles do |c|
-    c.require :codemirror
-    c.require :delorean
-  end
-
   client_class do |c|
-    c.require :"Ext.ux.form.field.CodeMirror"
-    c.require :codemirror
-    c.require File.dirname(__FILE__) +
-      "/script_form/client/mode/delorean/delorean.js"
-
-    c.set_action_modes = l(<<-JS)
-    function(a) {
-       this.actions.apply.setDisabled(!a["save"]);
-       // style input field text based on whether it is editable
-       this.getForm().findField('body').editor.setOption(
-          "readOnly", !a["save"]);
-    }
-    JS
-
-    c.get_script_id = l(<<-JS)
-    function() {
-       return this.getForm().findField('id').getValue();
-    }
-    JS
-
-    # Sets an editor line class (unset any previous line class).  For
-    # now, only one line is classed at a time.
-    c.set_line_error = l(<<-JS)
-    function(line) {
-       line -= 1;
-       var editor = this.getForm().findField('body').editor;
-       if (editor.oldline) {
-          editor.oldline.className = null;
-       }
-       if (line > -1) {
-          editor.oldline = editor.setLineClass(line, "errorline");
-       }
-       editor.refresh();
-    }
-    JS
-
-    ######################################################################
-
-    c.refresh_parent = l(<<-JS)
-    function(script_name) {
-       this.netzkeGetParentComponent().scriptRefresh(script_name);
-    }
-    JS
-
-    ######################################################################
-
-    c.netzke_on_do_print = l(<<-JS)
-    function(params) {
-      this.server.doPrint(this.getScriptId());
-    }
-    JS
-
-    c.get_report = l(<<-JS)
-    function(report_path) {
-      window.location = report_path;
-    }
-    JS
+    c.include :script_form
   end
 
   ######################################################################
@@ -215,13 +154,13 @@ class Marty::ScriptForm < Marty::Form
     c.items =
       [
        {
-         mode:           "text/x-delorean",
          line_numbers:   true,
          indent_unit:    4,
          tab_mode:       "shift",
          match_brackets: true,
          hide_label:     true,
          xtype:          :codemirror,
+         mode:           "text/x-delorean",
          name:           :body,
          empty_text:     "No script selected.",
          getter:         lambda { |r| r.body },
