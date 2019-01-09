@@ -15,8 +15,12 @@ module Marty
     end
 
     it "log has its own connection" do
-      expect(Marty::Log.connection).not_to equal(Marty::Posting.connection)
-      expect(Marty::Posting.connection).to equal(Marty::Script.connection)
+      log_conn     = Marty::Log.connection.raw_connection
+      posting_conn = Marty::Posting.connection.raw_connection
+      script_conn  = Marty::Script.connection.raw_connection
+
+      expect(log_conn).not_to equal(posting_conn)
+      expect(posting_conn).to equal(script_conn)
     end
 
     it "logs" do
