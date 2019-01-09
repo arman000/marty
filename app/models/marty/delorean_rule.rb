@@ -96,7 +96,8 @@ class Marty::DeloreanRule < Marty::BaseRule
                   result.err_section)
         end
         result.cg_hash = Hash[result.cg_keys.zip(result.cg_vals)]
-        return result.cg_hash.select{|k,v| !v} unless result.cg_vals.all?
+        fails = result.cg_hash.select{|k,v| ![v].flatten.first}
+        return fails if fails.present?
       end
 
       grids_computed = false

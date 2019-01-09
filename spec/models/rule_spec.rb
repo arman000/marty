@@ -286,7 +286,7 @@ module Marty::RuleSpec
       it "computed guards work" do
         c = complex.compute(@ruleopts_myrule, {"pt"=>Time.zone.now,
                                                'param2'=>'def'})
-        expect(c).to eq({"cguard2"=>false})
+        expect(c).to eq({"cguard2"=>[false, "a string"]})
       end
       it "returns simple results via #fixed_results" do
         expect(simple.fixed_results["simple_result"]).to eq("b value")
