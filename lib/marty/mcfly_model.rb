@@ -6,52 +6,6 @@ module Mcfly::Model
   end
 
   module ClassMethods
-    def clear_lookup_cache!
-      @LOOKUP_CACHE.clear if @LOOKUP_CACHE
-    end
-
-    # FIXME IDEA: we just make :cache an argument to delorean_fn.
-    # That way, we don't need the cached_ flavors.  It'll make all
-    # this code a lot simpler.  We should also just add the :private
-    # mechanism here.
-
-    # Implements a VERY HACKY class-based (per process) caching
-    # mechanism for database lookup results.  Issues include: cached
-    # values are ActiveRecord objects.  Query results can be very
-    # large lists which we count as one item in the cache.  Caching
-    # mechanism will result in large processes.
-    def cached_delorean_fn(name, options = {}, &block)
-      @LOOKUP_CACHE ||= {}
-
-      delorean_fn(name, options) do |ts, *args|
-        cache_key = [name, ts] + args.map{ |a|
-          a.is_a?(ActiveRecord::Base) ? a.id : a
-        } unless Mcfly.is_infinity(ts)
-        next @LOOKUP_CACHE[cache_key] if
-          cache_key && @LOOKUP_CACHE.has_key?(cache_key)
-
-        res = block.call(ts, *args)
-
-        if cache_key
-          # Cache has >1000 items, clear out the oldest 200.  FIXME:
-          # hard-coded, should be configurable.  Cache
-          # size/invalidation should be per lookup and not class.
-          # We're invalidating cache items simply based on age and
-          # not usage.  This is faster but not as fair.
-          if @LOOKUP_CACHE.count > 1000
-            @LOOKUP_CACHE.keys[0..200].each{|k| @LOOKUP_CACHE.delete(k)}
-          end
-          @LOOKUP_CACHE[cache_key] = res
-
-          # Since we're caching this object and don't want anyone
-          # changing it.  FIXME: ideally should freeze this object
-          # recursively.
-          res.freeze unless res.is_a?(ActiveRecord::Relation)
-        end
-        res
-      end
-    end
-
     def hash_if_necessary(q, private)
       !private && q.is_a?(ActiveRecord::Base) ? make_openstruct(q) : q
     end

@@ -246,6 +246,13 @@ Delorean::RUBY_WHITELIST.merge!(
                                Hash],
 )
 
+
+mcfly_cache_adapter = ::Marty::Delorean::CacheAdapters::McflyRubyCache.new(
+  size_per_class: 1000
+)
+
+::Delorean::Cache.adapter = mcfly_cache_adapter
+
 ######################################################################
 
 module Mcfly::Controller

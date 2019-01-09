@@ -14,6 +14,7 @@ require 'marty/mcfly_model'
 require 'marty/monkey'
 require 'marty/promise_job'
 require 'marty/json_schema'
+require 'marty/delorean'
 
 # This does not get loaded in via bundler unless it is included in the
 # application's Gemfile. Requiring it here removes the need to add it
