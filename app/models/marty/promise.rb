@@ -136,6 +136,8 @@ class Marty::Promise < Marty::Base
   end
 
   def wait_for_result(timeout)
+    # FIXME: Not sure that comparing result with empty hash if a good idea
+    # perhaps it's better to use .present? or .blank?
     return self.result if self.result != {}
 
     begin
@@ -148,25 +150,7 @@ class Marty::Promise < Marty::Base
       if !last.start_dt
         job = Marty::Promise.job_by_id(last.job_id)
 
-        # log "AAAA #{Process.pid} #{last} #{job}"
-
-        if !job || job.locked_at
-          # job has been locked, so it looks like it started already
-          # and we need to wait for it.
-          wait_for_my_notify(Marty::Promise::DEFAULT_JOB_TIMEOUT)
-        else
-          # work off the job instead of waiting for a real worker to
-          # pick it up.
-          # log "OFF0 #{Process.pid} #{last}"
-          begin
-            work_off_job(job)
-          rescue => exc
-            # log "OFFERR #{exc}"
-            res = Delorean::Engine.grok_runtime_exception(exc)
-            last.set_result(res)
-          end
-          # log "OFF1 #{Process.pid} #{last}"
-        end
+        wait_for_my_notify(Marty::Promise::DEFAULT_JOB_TIMEOUT)
 
         last = latest
 
@@ -184,18 +168,12 @@ class Marty::Promise < Marty::Base
       # at this point, we know the promise has already started
       if !last.end_dt
         wait_for_my_notify(timeout)
-        # log "UUUU #{Process.pid} #{id} #{Time.now.to_f}"
         last = latest
 
-        # log "XXXX #{Process.pid} #{Time.now.to_f} #{last}"
-
         if !last.end_dt
-          # log "TO22 #{Process.pid} #{last}"
           return {"error" => "promise #{last.id} timed out (didn't end)"}
         end
       end
-
-      # log "RRRR #{Process.pid} #{last} #{Time.now.to_f}"
 
       last.result
     ensure
