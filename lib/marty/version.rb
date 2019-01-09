@@ -1,3 +1,3 @@
 module Marty
-  VERSION = "2.4.7"
+  VERSION = "2.4.6"
 end

@@ -25,7 +25,7 @@ class Marty::RpcController < ActionController::Base
       return result = massaged_params if massaged_params.include?(:error)
 
       api_params = api.process_params(massaged_params)
-      auth       = api.is_authorized?(massaged_params)
+      auth       = api.is_authorized?(api_params)
       return result = {error: "Permission denied"} unless auth
 
       start_time = Time.zone.now
