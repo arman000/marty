@@ -393,7 +393,6 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
             }
         }
 
-	console.log(me.rawValue)
         me.editor = CodeMirror(me.editorEl, {
             matchBrackets:      me.enableMatchBrackets,
             electricChars:      me.enableElectricChars,

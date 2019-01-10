@@ -11,7 +11,6 @@
   },
 
   setLineError: function (line) {
-    console.log(this);
     line -= 1;
     var editor = this.getForm().findField('body').editor;
     if (editor.oldline) {
