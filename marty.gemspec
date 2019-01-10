@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'axlsx', '3.0.0pre'
 
-  s.add_dependency 'delorean_lang', '~> 0.4.2'
+  s.add_dependency 'delorean_lang', '~> 0.4.8'
   s.add_dependency 'mcfly', '0.0.20'
 
   s.add_dependency 'coderay'

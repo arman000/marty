@@ -226,27 +226,36 @@ end
 
 ar_instances = [ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]
 
-args_hack = [ar_instances] + [[Object, nil]]*10
+args_hack = [[Object, nil]]*10
 
-Delorean::RUBY_WHITELIST.merge!(
-  count:    [ar_instances],
-  distinct: args_hack,
-  find_by:  args_hack,
-  group:    args_hack,
-  joins:    args_hack,
-  limit:    [ar_instances, Integer],
-  not:      args_hack,
-  order:    args_hack,
-  pluck:    args_hack,
-  select:   args_hack,
-  where:    args_hack,
-  mcfly_pt: [ar_instances,
-             [Date, Time, ActiveSupport::TimeWithZone, String],
-             [nil, Class]],
-  lookup_grid_distinct_entry: [OpenStruct,
-                               [Date, Time, ActiveSupport::TimeWithZone, String],
-                               Hash],
-)
+[[:distinct, args_hack],
+ [:find_by,  args_hack],
+ [:group,    args_hack],
+ [:joins,    args_hack],
+ [:limit,    [Integer]],
+ [:not,      args_hack],
+ [:order,     args_hack],
+ [:pluck,     args_hack],
+ [:select,    args_hack],
+ [:where,     args_hack],
+ [:mcfly_pt, [[Date, Time, ActiveSupport::TimeWithZone, String], [nil, Class]]]
+].each do |meth, args|
+  ::Delorean::Ruby.whitelist.add_method meth do |method|
+    ar_instances.each do |ar|
+      method.called_on ar, with: args
+    end
+  end
+end
+::Delorean::Ruby.whitelist.add_method :count do |method|
+    ar_instances.each do |ar|
+      method.called_on ar
+    end
+end
+::Delorean::Ruby.whitelist.add_method :lookup_grid_distinct_entry do |method|
+  method.called_on OpenStruct, with: [[Date, Time,
+                                       ActiveSupport::TimeWithZone, String],
+                                        Hash]
+end
 
 
 mcfly_cache_adapter = ::Marty::CacheAdapters::McflyRubyCache.new(

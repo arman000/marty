@@ -1,11 +1,11 @@
 PATH
   remote: .
   specs:
-    marty (2.4.6)
+    marty (2.4.7)
       aws-sigv4 (~> 1.0, >= 1.0.2)
       axlsx (= 3.0.0pre)
       coderay
-      delorean_lang (~> 0.4.2)
+      delorean_lang (~> 0.4.8)
       json-schema
       mcfly (= 0.0.20)
       net-ldap (= 0.12.1)
