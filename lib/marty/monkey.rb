@@ -189,6 +189,8 @@ end
 
 ######################################################################
 
+require 'marty/cache_adapters'
+
 class ActiveRecord::Base
   MCFLY_PT_SIG = [1, 1]
 
@@ -247,7 +249,7 @@ Delorean::RUBY_WHITELIST.merge!(
 )
 
 
-mcfly_cache_adapter = ::Marty::Delorean::CacheAdapters::McflyRubyCache.new(
+mcfly_cache_adapter = ::Marty::CacheAdapters::McflyRubyCache.new(
   size_per_class: 1000
 )
 
