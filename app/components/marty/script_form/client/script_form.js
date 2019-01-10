@@ -10,15 +10,22 @@
     return this.getForm().findField('id').getValue();
   },
 
-  setLineError: function (line) {
-    line -= 1;
-    var editor = this.getForm().findField('body').editor;
-    if (editor.oldline) {
-      editor.removeLineClass(line, "background", "errorline")
-    }
+  setLineError: function (idx) {
 
-    if (line > -1) {
-      editor.addLineClass(line, "background", "errorline");
+    idx -= 1;
+    var editor = this.getForm().findField('body').editor;
+
+    if (idx > -1) {
+      var line = editor.getLine(idx)
+      editor.markText({
+        line: idx,
+        ch: 0
+      }, {
+        line: idx,
+        ch: line.length
+      }, {
+        className: "errorline"
+      });
     }
     editor.refresh();
   },
