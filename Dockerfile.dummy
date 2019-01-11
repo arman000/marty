@@ -14,12 +14,15 @@ RUN apt-get update && apt-get install -qq -y --no-install-recommends \
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get update && apt-get install -qq -y --no-install-recommends nodejs yarn
 
+# Install psql client for tests
+RUN apt-get install -qq -y --no-install-recommends postgresql-client
+
 # Install chrome for integration tests
-# RUN curl -L -o google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-#     && dpkg -i google-chrome.deb || true \
-#     && apt-get install -f -y \
-#     && sed -i 's|HERE/chrome\"|HERE/chrome\" --disable-setuid-sandbox|g' /opt/google/chrome/google-chrome \
-#     && rm google-chrome.deb
+RUN curl -L -o google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && dpkg -i google-chrome.deb || true \
+    && apt-get install -f -y \
+    && sed -i 's|HERE/chrome\"|HERE/chrome\" --disable-setuid-sandbox|g' /opt/google/chrome/google-chrome \
+    && rm google-chrome.deb
 
 ENV BUNDLE_PATH /bundle_box/bundle
 ENV GEM_HOME /bundle_box/bundle
