@@ -70,6 +70,14 @@ $ make dummy-app-initialise-docker
 $ make dummy-app-start
 ```
 
+To run tests:
+
+```bash
+$ make dummy-app-bash
+
+$ HEADLESS=true rspec
+```
+
 To run without docker:
 
 Marty currently only runs with postgresql. To be able to run the tests
