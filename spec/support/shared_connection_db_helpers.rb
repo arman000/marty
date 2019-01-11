@@ -33,7 +33,7 @@ module Marty; module RSpec; module SharedConnectionDbHelpers
   end
 
   def db_host
-    ActiveRecord::Base.connection_config[:host]
+    ActiveRecord::Base.connection_config[:host] || 'localhost'
   end
 
   def db_user

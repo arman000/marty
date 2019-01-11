@@ -22,7 +22,8 @@ module Marty; module RSpec; module Chromedriver
 
   register_chrome_driver
 
-  headless_args= %w[no-sandbox headless disable-gpu window-size=1400,1400]
+  window_size = ENV.fetch('HEADLESS_WINDOW_SIZE', '3840,2160')
+  headless_args = ['no-sandbox', 'headless', 'disable-gpu', "window-size=#{window_size}"]
 
   register_chrome_driver(:headless_chrome, args: headless_args) do |driver|
 
