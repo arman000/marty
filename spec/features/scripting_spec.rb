@@ -224,7 +224,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
     and_by 'form displays correct body' do
       wait_for_ajax
-      expect(page).to have_content "#5\n#1\n#2\n#3\n"
+      expect(page).to have_content "1 #5 2 #1 3 #2 4 #3"
     end
 
     and_by 'select different tag' do
@@ -238,7 +238,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
     and_by 'form displays updated body' do
       wait_for_ajax
-      expect(page).to have_content "#5\n#1\n"
+      expect(page).to have_content "1 #5 2 #1"
     end
   end
 
@@ -274,7 +274,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
       script_grid.select_row(1)
       script_grid.select_row(5)
       wait_for_ajax
-      expect(page).not_to have_content "#123\n#456\n"
+      expect(page).not_to have_content "1 #123 2 #456"
       script_grid.select_row(1)
     end
 
@@ -291,7 +291,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
       tag_grid.select_row(2)
       wait_for_ajax
       script_grid.select_row(5)
-      expect(page).to have_content "#123\n#456\n"
+      expect(page).to have_content "1 #123 2 #456"
       expect(tag_grid.get_row_vals(2)).to netzke_include({:comment=>"ABCD"})
     end
   end

@@ -5,12 +5,7 @@ class Marty::NewPostingForm < Marty::Form
   has_marty_permissions read: :any
 
   client_class do |c|
-    c.close_me = l(<<-JS)
-    function() {
-      // assume we're embedded in a window
-      this.netzkeGetParentComponent().close();
-    }
-    JS
+    c.include :new_posting_form
   end
 
   action :apply do |a|

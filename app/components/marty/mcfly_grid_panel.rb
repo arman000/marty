@@ -44,23 +44,7 @@ class Marty::McflyGridPanel < Marty::Grid
   end
 
   client_class do |c|
-    c.init_component = l(<<-JS)
-      function() {
-         this.callParent();
-
-         // dup is a non standard button, so we have to explicitly manage
-         // its clickability
-         this.getSelectionModel().on('selectionchange', function(selModel) {
-            this.actions.dupInForm &&
-                this.actions.dupInForm.setDisabled(!selModel.hasSelection() ||
-                                                   !this.permissions.create);
-         }, this);
-      }
-   JS
-  end
-
-  client_class do |c|
-    c.include :dup_in_form
+    c.include :mcfly_grid_panel
   end
 
   action :dup_in_form do |a|

@@ -6,10 +6,12 @@
 	  integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
 	  crossorigin="anonymous">
     <title><%= Rails.application.class.parent %></title>
-  <%= load_netzke theme: Rails.configuration.marty.extjs_theme %>
-  <%= csrf_meta_tag %>
-</head>
-<body>
-<%= yield %>
-</body>
+    <%= load_netzke theme: Rails.configuration.marty.extjs_theme %>
+    <%= csrf_meta_tag %>
+    <%= javascript_include_tag 'marty/application' %>
+    <%= stylesheet_link_tag 'marty/application' %>
+  </head>
+  <body>
+    <%= yield %>
+  </body>
 </html>

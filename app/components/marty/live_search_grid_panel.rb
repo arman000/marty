@@ -14,27 +14,7 @@
 
 class Marty::LiveSearchGridPanel < Marty::McflyGridPanel
   client_class do |c|
-    c.listen_fn = l(<<-JS)
-    function(obj, search_text) {
-        var lg = this.ownerCt.ownerCt;
-        lg.getStore().getProxy().extraParams.live_search = search_text;
-        lg.getStore().load();
-    }
-    JS
-
-    c.tbar = ['->', {
-                name:  'live_search_text',
-                xtype: 'textfield',
-                enable_key_events: true,
-                ref: '../live_search_field',
-                empty_text: 'Search',
-                listeners: {
-                  change: {
-                    fn: c.listen_fn,
-                    buffer: 100,
-                  }
-                }
-              }]
+    c.include :live_search_grid_panel
   end
 
   def get_records(params)

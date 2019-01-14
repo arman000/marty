@@ -16,6 +16,10 @@ class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
   include Marty::Extras::Misc
 
+  client_class do |c|
+    c.include :main_auth_app
+  end
+
   # set of posting types user is allowed to post with
   def self.has_posting_perm?
     Marty::NewPostingForm.has_any_perm?
@@ -337,151 +341,6 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.tooltip   = I18n.t('new_posting')
     a.icon_cls   = "fa fa-plus glyph"
     a.disabled  = Marty::Util.warped? || !self.class.has_posting_perm?
-  end
-
-  client_class do |c|
-    c.show_detail = l(<<-JS)
-    function(details, title) {
-       this.hideLoadmask();
-       Ext.create('Ext.Window', {
-          height:        400,
-          minWidth:      400,
-          maxWidth:      1200,
-          autoWidth:     true,
-          modal:         true,
-          autoScroll:    true,
-          html:          details,
-          title:         title || "Details"
-      }).show();
-    }
-    JS
-
-    c.show_loadmask = l(<<-JS)
-    function(msg) {
-      this.maskCmp = new Ext.LoadMask( {
-        msg: msg || 'Loading...',
-        target: this,
-      });
-      this.maskCmp.show();
-    }
-    JS
-
-    c.hide_loadmask = l(<<-JS)
-    function() {
-      if (this.maskCmp) { this.maskCmp.hide(); };
-    }
-    JS
-
-    c.netzke_on_new_posting = l(<<-JS)
-    function(params) {
-      this.netzkeLoadComponent("new_posting_window",
-            { callback: function(w) { w.show(); },
-      });
-    }
-    JS
-
-    c.netzke_on_select_posting = l(<<-JS)
-    function(params) {
-      this.netzkeLoadComponent("posting_window",
-            { callback: function(w) { w.show(); },
-      });
-    }
-    JS
-
-    c.netzke_on_reload = l(<<-JS)
-    function(params) {
-      window.location.reload();
-    }
-    JS
-
-    c.netzke_on_load_seed = l(<<-JS)
-    function(params) {
-      this.server.loadSeed({});
-    }
-    JS
-
-    c.netzke_on_select_now = l(<<-JS)
-    function(params) {
-      this.server.selectPosting({});
-    }
-    JS
-
-    c.netzke_on_reload_scripts = l(<<-JS)
-    function(params) {
-       var me = this;
-       Ext.Msg.show({
-         title: 'Reload Scripts',
-         msg: 'Enter RELOAD and press OK to force a reload of all scripts',
-         width: 375,
-         buttons: Ext.Msg.OKCANCEL,
-         prompt: true,
-         fn: function (btn, value) {
-           btn == "ok" && value == "RELOAD" && me.server.reloadScripts({});
-         }
-       });
-    }
-    JS
-
-    c.netzke_on_bg_stop = l(<<-JS)
-    function(params) {
-       var me = this;
-       Ext.Msg.show({
-         title: 'Stop Delayed Jobs',
-         msg: 'Enter STOP and press OK to force a stop of delayed_job',
-         width: 375,
-         buttons: Ext.Msg.OKCANCEL,
-         prompt: true,
-         fn: function (btn, value) {
-           if (btn == "ok" && value == "STOP") {
-             me.showLoadmask('Stopping delayed job...');
-             me.server.bgStop({});
-           }
-         }
-       });
-    }
-    JS
-
-    c.netzke_on_bg_restart = l(<<-JS)
-    function(params) {
-       var me = this;
-       Ext.Msg.show({
-         title: 'Restart Delayed Jobs',
-         msg: 'Enter RESTART and press OK to force a restart of delayed_job',
-         width: 375,
-         buttons: Ext.Msg.OKCANCEL,
-         prompt: true,
-         fn: function (btn, value) {
-           if (btn == "ok" && value == "RESTART") {
-             me.showLoadmask('Restarting delayed job...');
-             me.server.bgRestart({});
-           }
-         }
-       });
-    }
-    JS
-
-    c.netzke_on_bg_status = l(<<-JS)
-    function() {
-      this.showLoadmask('Checking delayed job status...');
-      this.server.bgStatus({});
-    }
-    JS
-
-    c.netzke_on_log_cleanup = l(<<-JS)
-    function(params) {
-       var me = this;
-       Ext.Msg.show({
-         title: 'Log Cleanup',
-         msg: 'Enter number of days to keep',
-         width: 375,
-         buttons: Ext.Msg.OKCANCEL,
-         prompt: true,
-         fn: function (btn, value) {
-           btn == "ok" && me.server.logCleanup(value);
-         }
-       });
-    }
-    JS
   end
 
   action :select_posting do |a|

@@ -31,13 +31,7 @@ class Marty::ScriptTester < Marty::Form
   end
 
   client_class do |c|
-    c.set_result = l(<<-JS)
-    function(html) {
-       var result = this.netzkeGetComponent('result');
-       result.updateBodyHtml(html);
-    }
-    JS
-
+    c.include :script_tester
   end
 
   def new_engine

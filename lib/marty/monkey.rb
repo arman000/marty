@@ -288,22 +288,6 @@ module Netzke
   module Core
     module DynamicAssets
       class << self
-        def ext_js(form_authenticity_token)
-          res = initial_dynamic_javascript(form_authenticity_token) << "\n"
-
-          include_core_js(res)
-
-          # MONKEY: load marty custom javascript
-          marty_javascripts = Dir["#{File.dirname(__FILE__)}/javascript/*.js"]
-
-          (Netzke::Core.ext_javascripts + marty_javascripts).each do |path|
-            f = File.new(path)
-            res << f.read
-          end
-
-          minify_js(res)
-        end
-
         def minify_js(js_string)
           if ::Rails.env.test? || ::Rails.env.development?
             js_string.gsub(/\/\*\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//, '') # strip docs
