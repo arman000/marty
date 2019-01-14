@@ -1,4 +1,5 @@
 ENV["RAILS_ENV"] ||= "test"
+ENV["TZ"] ||= "America/Los_Angeles"
 
 require 'dummy/config/application'
 require 'rspec/rails'

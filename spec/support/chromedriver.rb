@@ -10,6 +10,7 @@ module Marty; module RSpec; module Chromedriver
                   Marty::RSpec::DownloadHelper::PATH.to_s}),
         pageLoadStrategy: 'none',
       }
+
       caps = Selenium::WebDriver::Remote::Capabilities.chrome(copts)
       driver = Capybara::Selenium::Driver.new(app,
                                               browser: :chrome,
@@ -21,7 +22,9 @@ module Marty; module RSpec; module Chromedriver
 
   register_chrome_driver
 
-  headless_args =  %w[headless disable-gpu window-size=3840,2160]
+  window_size = ENV.fetch('HEADLESS_WINDOW_SIZE', '3840,2160')
+  headless_args = ['no-sandbox', 'headless', 'disable-gpu', "window-size=#{window_size}"]
+
   register_chrome_driver(:headless_chrome, args: headless_args) do |driver|
 
     # workaround to enable downloading with headless chrome
@@ -38,4 +41,5 @@ module Marty; module RSpec; module Chromedriver
   Capybara.default_driver    = :chrome
   Capybara.javascript_driver = ENV['HEADLESS'] == 'true' ?
                                  :headless_chrome : :chrome
+
 end end end

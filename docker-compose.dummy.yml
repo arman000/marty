@@ -13,6 +13,8 @@ services:
       - "PATH=/bundle_box/bundle/bin:/usr/local/bundle/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       - "DEVELOPMENT_DATABASE_URL=postgres://postgres@postgres/marty_dev"
       - "TEST_DATABASE_URL=postgres://postgres@postgres/marty_test"
+      - "HEADLESS_WINDOW_SIZE=1400,1400"
+      - "HEADLESS=true"
     # env_file: ".rbenv-vars"
     depends_on:
       - "postgres"
