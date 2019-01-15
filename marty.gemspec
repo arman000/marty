@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'axlsx', '3.0.0pre'
 
-  s.add_dependency 'delorean_lang', '~> 0.4.8'
+  s.add_dependency 'delorean_lang', '~> 0.5.0'
   s.add_dependency 'mcfly', '0.0.20'
 
   s.add_dependency 'coderay'
@@ -44,4 +44,7 @@ Gem::Specification.new do |s|
 
   # used for signing aws ec2 requests
   s.add_dependency 'aws-sigv4', '~> 1.0', '>= 1.0.2'
+
+  s.add_dependency 'delayed_job_active_record'
+  s.add_dependency 'daemons', '~> 1.3.1'
 end
