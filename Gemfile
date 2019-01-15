@@ -6,11 +6,10 @@ source "http://rubygems.org"
 gemspec
 
 gem 'delayed_job_active_record'
-gem 'daemons', '~> 1.1.9'
+gem 'daemons'
 gem 'rails', '~> 5.1.4'
 gem 'pg'
 gem 'sqlite3'
-
 
 group :development, :test do
   gem 'pry-rails'
