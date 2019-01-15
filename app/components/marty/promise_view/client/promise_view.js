@@ -36,7 +36,7 @@
   netzkeOnDownload: function () {
     var jid = this.getSelectionModel().getSelection()[0].getId();
     // FIXME: seems pretty hacky
-    window.location = "#{Marty::Util.marty_path}/job/download?job_id=" + jid;
+    window.location = this.jobPath(jid);
   },
   netzkeOnRefresh: function () {
     this.store.load();

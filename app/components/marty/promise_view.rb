@@ -6,6 +6,12 @@ class Marty::PromiseView < Netzke::Tree::Base
   end
 
   client_class do |c|
+    c.job_path = l(<<-JS)
+    function(jid) {
+      return '#{Marty::Util.marty_path}/job/download?job_id=' + jid;
+    }
+    JS
+
     c.include :promise_view
   end
 
