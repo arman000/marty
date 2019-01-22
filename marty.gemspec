@@ -36,8 +36,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'mcfly', '0.0.20'
 
   s.add_dependency 'coderay'
-  # FIXME: for some reason 0.16.1 doesn't work at PennyMac -- investigate
-  s.add_dependency 'net-ldap', '0.12.1'
+  s.add_dependency 'net-ldap', '~> 0.16.1'
   s.add_dependency 'rubyzip'
   s.add_dependency 'sqlite3'
   s.add_dependency 'json-schema'
