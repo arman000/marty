@@ -1,6 +1,6 @@
 {
   showDetail: function (details, title) {
-    this.hideLoadmask();
+    this.hideLoadMask();
     Ext.create('Ext.Window', {
       height: 400,
       minWidth: 400,
