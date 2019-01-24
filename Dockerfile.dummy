@@ -24,6 +24,8 @@ RUN curl -L -o google-chrome.deb https://dl.google.com/linux/direct/google-chrom
     && sed -i 's|HERE/chrome\"|HERE/chrome\" --disable-setuid-sandbox|g' /opt/google/chrome/google-chrome \
     && rm google-chrome.deb
 
+RUN gem install bundler
+
 ENV BUNDLE_PATH /bundle_box/bundle
 ENV GEM_HOME /bundle_box/bundle
 ENV PATH /bundle_box/bundle/bin:$PATH

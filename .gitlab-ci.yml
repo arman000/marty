@@ -1,0 +1,48 @@
+image: thepry/docker-ruby-ci:2.4.2-latest
+
+services:
+  - "clkao/postgres-plv8:9.6-2.0"
+
+before_script:
+  - bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
+  - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
+  - RAILS_ENV=test bundle exec rails db:create db:migrate
+
+rubocop:
+  stage: test
+  script:
+    - bundle exec rubocop
+
+rspec-without-features:
+  stage: test
+  script:
+    - bundle exec rspec --exclude-pattern "spec/features/**/*_spec.rb"
+
+rspec-features:
+  stage: test
+  script:
+    - |
+      cd spec/dummy/public && \
+      git clone --single-branch --branch version_6_5_3 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.pnmac.com/cm_tech/extjs.git  && \
+      cd -
+    # - bundle exec rspec --pattern "spec/features/**/*_spec.rb"
+    # FIXME: rule_spec is excluded, because chrome doesn't work with big window size in docker
+    # And test fails with 1400/1400 resolution
+    - bundle exec rspec --pattern "spec/features/**/*_spec.rb" --exclude-pattern "spec/features/rule_spec.rb"
+
+cache:
+  key: 'marty_bundler_cache'
+  paths:
+    - vendor/ruby
+
+variables:
+  GIT_SSL_NO_VERIFY: "true"
+  BUNDLER_VERSION: "2.0.1"
+  POSTGRES_USER: "runner"
+  POSTGRES_PASSWORD: ""
+  RAILS_ENV: "test"
+  RAILS_DUMP_SCHEMA: "false"
+  PGTZ: "America/Los_Angeles"
+  HEADLESS: "true"
+  HEADLESS_WINDOW_SIZE: "1400,1400"
+
