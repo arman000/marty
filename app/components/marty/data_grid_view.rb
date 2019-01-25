@@ -6,8 +6,65 @@ module Marty; class DataGridView < McflyGridPanel
 
   include Extras::Layout
 
+  # show_grid_js and client_show_grid_js have specific
+  # handles so they can be used by various other components
+  # FIXME: add the ability to pull specific functions
+  # from other component javascripts or add a base to pull from
+  def self.show_grid_js(options={})
+    dg        = options[:data_grid] || 'data_grid'
+    title_str = options[:title_str] || 'Data Grid'
+
+    javascript = l(<<-JS)
+    function() {
+       var sel = this.getSelectionModel().getSelection()[0];
+       var record_id = sel && sel.getId();
+       this.server.showGrid({record_id: record_id,
+                            data_grid: "#{dg}",
+                            title_str: "#{title_str}"});
+    }
+    JS
+    javascript
+  end
+
+  def self.client_show_grid_js
+    javascript = l(<<-JS)
+    function(count, data, title_str) {
+       var columns = [];
+       var fields  = [];
+
+       for (var i=0; i<count; i++) {
+          fields.push("a" + i);
+          columns.push({dataIndex: "a" + i, text: i, flex: 1});
+       }
+
+       Ext.create('Ext.Window', {
+         height:        "80%",
+         width:         "80%",
+         x:             0,
+         y:             0,
+         autoWidth:     true,
+         modal:         true,
+         autoScroll:    true,
+         title:         title_str,
+         items: {
+           xtype:       'grid',
+           border:      false,
+           hideHeaders: false,
+           columns:     columns,
+           store:       Ext.create('Ext.data.ArrayStore', {
+             fields: fields,
+             data: data,
+             })
+         },
+      }).show();
+    }
+    JS
+    javascript
+  end
+
   client_class do |c|
-    c.include :data_grid_view
+    c.netzke_show_grid        = DataGridView.show_grid_js
+    c.netzke_client_show_grid = DataGridView.client_show_grid_js
   end
 
   def configure(c)

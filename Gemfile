@@ -15,6 +15,7 @@ group :development, :test do
   gem 'pry-rails'
   gem 'rspec-rails'
   gem 'rspec-instafail', require: false
+  gem 'rubocop', require: false
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'chromedriver-helper'

@@ -777,3 +777,123 @@ Ext.define('Ext.ux.form.field.CodeMirror', {
         me.callParent();
     },
 });
+
+// There is an error with code tester. Sometimes the Ext app craches when you click test again after some time passed
+// The bug is present in Ext 6.5.3.57
+// HACK FIX. This error happens when OuterCt/InnerCt dom was removed, but components thinks that it's still there
+// Uncaught TypeError: Cannot read property 'style' of null
+//    at constructor.setStyle (ext-all-debug.js:42950)
+//    at constructor.beginLayoutCycle (ext-all-debug.js:150619)
+//
+//    check for outerCt.destroyed value. If it's destroyed then it's dom is gone and
+//    and it's style and dimentions are not available
+//    If it's not destroyed go with regular way
+Ext.define('Marty.layout.container.Auto', {
+    override: 'Ext.layout.container.Auto',
+
+    // Sometimes outerCt is already destroyed. in that case it's DOM is null and all methods
+    // that call DOM should not be called
+    beginLayoutCycle: function(ownerContext) {
+        var me = this,
+            outerCt = me.outerCt,
+            lastOuterCtWidth = me.lastOuterCtWidth || '',
+            lastOuterCtHeight = me.lastOuterCtHeight || '',
+            lastOuterCtTableLayout = me.lastOuterCtTableLayout || '',
+            state = ownerContext.state,
+            overflowXStyle, outerCtWidth, outerCtHeight, outerCtTableLayout, inheritedStateInner;
+
+        // FIX
+        //- me.callParent(arguments);
+        // If callParent would call overriden method, which leads to and exception
+        // when outerCt is destroyed. In that case we use callSuper, which ignores overriden method.
+        // If outerCt is not destroyed, then we call overriden method and exit the function. Fixes bellow are not needed
+        if (outerCt.destroyed) {
+          me.callSuper(arguments);
+        } else {
+          return me.callParent(arguments);
+        }
+
+        // Default to "shrink wrap styles".
+        outerCtWidth = outerCtHeight = outerCtTableLayout = '';
+        if (!ownerContext.widthModel.shrinkWrap) {
+            // if we're not shrink wrapping width, we need to get the innerCt out of the
+            // way to avoid any shrink wrapping effect on child items
+            // fill the available width within the container
+            outerCtWidth = '100%';
+            inheritedStateInner = me.owner.inheritedStateInner;
+            // expand no further than the available width, even if contents are wider
+            // unless there is a potential for horizontal overflow, then allow
+            // the outerCt to expand to the width of the contents
+            overflowXStyle = me.getOverflowXStyle(ownerContext);
+            outerCtTableLayout = (inheritedStateInner.inShrinkWrapTable || overflowXStyle === 'auto' || overflowXStyle === 'scroll') ? '' : 'fixed';
+        }
+        if (!ownerContext.heightModel.shrinkWrap && !Ext.supports.PercentageHeightOverflowBug) {
+            // if we're not shrink wrapping height, we need to get the outerCt out of the
+            // way so that percentage height children will be sized correctly.  We do this
+            // by giving the outerCt a height of '100%' unless the browser is affected by
+            // the "percentage height overflow bug", in which case the outerCt will get a
+            // pixel height set during the calculate phase after we know the targetEl size.
+            outerCtHeight = '100%';
+        }
+        // if the outerCt width changed since last time (becuase of a widthModel change)
+        // or if we set a pixel width on the outerCt last time to work around a browser-
+        // specific bug, we need to set the width of the outerCt
+        if ((outerCtWidth !== lastOuterCtWidth) || me.hasOuterCtPxWidth) {
+            // FIX: Added check for !outerCt.destroyed
+            if (!outerCt.destroyed) {
+                outerCt.setStyle('width', outerCtWidth);
+            }
+            me.lastOuterCtWidth = outerCtWidth;
+            me.hasOuterCtPxWidth = false;
+        }
+        // Set the outerCt table-layout property if different from last time.
+        if (outerCtTableLayout !== lastOuterCtTableLayout) {
+            outerCt.setStyle('table-layout', outerCtTableLayout);
+            me.lastOuterCtTableLayout = outerCtTableLayout;
+        }
+        // if the outerCt height changed since last time (becuase of a heightModel change)
+        // or if we set a pixel height on the outerCt last time to work around a browser-
+        // specific bug, we need to set the height of the outerCt
+        if ((outerCtHeight !== lastOuterCtHeight) || me.hasOuterCtPxHeight) {
+            // FIX: Added check for !outerCt.destroyed
+            if (!outerCt.destroyed) {
+                outerCt.setStyle('height', outerCtHeight);
+            }
+            me.lastOuterCtHeight = outerCtHeight;
+            me.hasOuterCtPxHeight = false;
+        }
+        if (me.hasInnerCtPxHeight) {
+            // FIX: Added check for !innerCt.destroyed
+            if (!me.innerCt.destroyed) {
+                me.innerCt.setStyle('height', '');
+            }
+            me.hasInnerCtPxHeight = false;
+        }
+        // Begin with the scrollbar adjustment that we used last time - this is more likely
+        // to be correct than beginning with no adjustment at all, but only if it is not
+        // already defined - it may have already been set by invalidate()
+        state.overflowAdjust = state.overflowAdjust || me.lastOverflowAdjust;
+    },
+
+    // The fix checks whether outerCt is destroyed or not
+    // If it's destroyed, then the dom is gone and calling getHeight() would lead to exception
+    // set contentHeight to 0 if outerCt is destroyed
+    measureContentHeight: function(ownerContext) {
+      // contentHeight includes padding, but not border, framing or margins
+      // FIX
+      // var contentHeight = this.outerCt.getHeight();
+      var contentHeight = this.outerCt.destroyed ? 0 : this.outerCt.getHeight();
+      // END FIX
+      var target = ownerContext.target;
+
+      if (this.managePadding && (target[target.contentPaddingProperty] === undefined)) {
+          // if padding was not configured using the appropriate contentPaddingProperty
+          // then the padding will not be on the paddingContext, and therfore not included
+          // in the outerCt measurement, so we need to read the padding from the
+          // targetContext
+          contentHeight += ownerContext.targetContext.getPaddingInfo().height;
+      }
+      return contentHeight;
+    },
+
+});
