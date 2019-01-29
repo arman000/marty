@@ -23,10 +23,10 @@ class Marty::ApiConfigView < Marty::Grid
     c.paging = :pagination
     c.editing = :in_form
     c.store_config.merge!(
-      sorters: [{ property: :script, direction: :ASC},
-                { property: :node,      direction: :ASC},
-                { property: :attr,      direction: :ASC},
-                { property: :api_class, direction: :ASC},
+      sorters: [{ property: :script, direction: :ASC },
+                { property: :node,      direction: :ASC },
+                { property: :attr,      direction: :ASC },
+                { property: :api_class, direction: :ASC },
                ])
     @model = c.model
   end

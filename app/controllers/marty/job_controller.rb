@@ -16,7 +16,7 @@ class Marty::JobController < ActionController::Base
       title = promise.title
     else
       format = "json"
-      data = {error: "Job not found: #{job_id}"}
+      data = { error: "Job not found: #{job_id}" }
       title = "error"
     end
 

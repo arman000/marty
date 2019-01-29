@@ -8,7 +8,7 @@ class Marty::Logger
     log(m, *args)
   end
 
-  def self.log(type, message, details=nil)
+  def self.log(type, message, details = nil)
     Marty::Log.write_log(type, message, details)
   end
 
@@ -17,7 +17,7 @@ class Marty::Logger
       yield
     rescue => e
       error(error_message, { "message" => e.message,
-                             "data" => error_data})
+                             "data" => error_data })
       raise "#{error_message}: #{e.message}"
     end
   end

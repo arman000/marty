@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Marty::DataGridSpec
   describe DataGrid do
-G1 =<<EOS
+G1 = <<EOS
 state\tstring\tv\t\t
 ltv\tnumrange\tv\t\t
 fico\tnumrange\th\t\t
@@ -15,7 +15,7 @@ MA\t>80<=105\t4.5\t5.6\t
 \t<=80\t11\t22\t33
 EOS
 
-G2 =<<EOS
+G2 = <<EOS
 units\tinteger\tv\t\t
 ltv\tnumrange\tv\t\t
 cltv\tnumrange\th\t\t
@@ -31,7 +31,7 @@ EOS
 
 G3 = File.open(File.expand_path("../srp_data.csv", __FILE__)).read
 
-G4 =<<EOS
+G4 = <<EOS
 lenient
 hb_indicator\tboolean\tv
 cltv\tnumrange\th
@@ -40,21 +40,21 @@ cltv\tnumrange\th
 true\t-0.750\t-0.750\t-0.750\t-1.500\t-1.500\t-1.500\t\t
 EOS
 
-G5 =<<EOS
+G5 = <<EOS
 ltv\tnumrange\tv\t\t
 
 <=115\t-0.375
 >115<=135\t-0.750
 EOS
 
-G6 =<<EOS
+G6 = <<EOS
 ltv\tnumrange\th
 
 <=115\t>115<=135
 -0.375\t-0.750
 EOS
 
-G7 =<<EOS
+G7 = <<EOS
 string
 hb_indicator\tboolean\tv
 cltv\tnumrange\th
@@ -63,7 +63,7 @@ cltv\tnumrange\th
 true\tThis\tis\ta\ttest\tof\tstring type\t\t
 EOS
 
-G8 =<<EOS
+G8 = <<EOS
 Marty::DataGrid
 ltv\tnumrange\tv\t\t
 
@@ -72,7 +72,7 @@ ltv\tnumrange\tv\t\t
 >135<=140\tG3
 EOS
 
-G9 =<<EOS
+G9 = <<EOS
 state\tstring\tv
 ltv\tnumrange\tv
 
@@ -80,14 +80,14 @@ CA|TX\t>80\t123
 \t>80\t456
 EOS
 
-Ga =<<EOS
+Ga = <<EOS
 dg\tMarty::DataGrid\tv\t\t
 
 G1|G2\t7
 G3\t8
 EOS
 
-Gb =<<EOS
+Gb = <<EOS
 property_state\tGemini::State\tv\t\t
 
 CA|TX\t70
@@ -95,21 +95,21 @@ GA\t80
 MN\t90
 EOS
 
-Gc =<<EOS
+Gc = <<EOS
 Marty::DataGrid
 property_state\tGemini::State\tv\t\t
 
 CA|TX\tGb
 EOS
 
-Gd =<<EOS
+Gd = <<EOS
 hb_indicator\tboolean\tv
 
 true\t456
 false\t123
 EOS
 
-Ge =<<EOS
+Ge = <<EOS
 ltv\tnumrange\th
 
 >110\t>120
@@ -147,7 +147,7 @@ NY\t\t10
 \tR\t8
 EOS
 
-Gi =<<EOS
+Gi = <<EOS
 units\tinteger\tv\t\t
 ltv\tfloat\tv\t\t
 cltv\tfloat\th\t\t
@@ -161,7 +161,7 @@ fico\tnumrange\th\t\t
 3|4\t105.5\t4.5\t5.6\t6.7
 EOS
 
-Gj =<<EOS
+Gj = <<EOS
 lenient
 client_id\tinteger\tv
 property_state\tstring\tv
@@ -170,7 +170,7 @@ property_state\tstring\tv
 700127\tCA\t0.35
 EOS
 
-Gk =<<EOS
+Gk = <<EOS
 fha_203k_option\tstring\tv\tfha_203k_option
 
 Investor Services\t-0.625
@@ -184,9 +184,9 @@ EOS
       marty_whodunnit
     end
 
-    def lookup_grid_helper(pt, gridname, params, follow=false, distinct=true)
-      dgh=Marty::DataGrid.lookup_h(pt, gridname)
-      res=Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh, nil, follow,
+    def lookup_grid_helper(pt, gridname, params, follow = false, distinct = true)
+      dgh = Marty::DataGrid.lookup_h(pt, gridname)
+      res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh, nil, follow,
                                                        false, distinct)
       [res["result"], res["name"]]
     end
@@ -200,7 +200,7 @@ EOS
 
       it "should not allow imports with last blank row" do
         expect do
-          dg_from_import("Gh", Gh+"\t\t\n")
+          dg_from_import("Gh", Gh + "\t\t\n")
         end.to raise_error(RuntimeError)
       end
     end
@@ -283,16 +283,16 @@ EOS
         bad = ': abc def'
         g_bad = Gk.sub(/fha_203k_option$/, bad)
         expect do
-          dg_from_import( "Gk", g_bad)
+          dg_from_import("Gk", g_bad)
         end.to raise_error(/invalid grid modifier expression: #{bad}/)
         expect do
-          dg_from_import( "Gk", Gk)
+          dg_from_import("Gk", Gk)
         end.not_to raise_error
       end
     end
 
     describe "lookups for infinity" do
-      let(:pt) { 'infinity'}
+      let(:pt) { 'infinity' }
 
       before(:each) do
         ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "Ga", "Gb",
@@ -305,38 +305,38 @@ EOS
         let(:dgh) { "Gf" }
 
         it 'true returns Y' do
-          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"b"=>true}, false)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, { "b" => true }, false)
           expect(res).to eq('Y')
         end
 
         it '13 returns N' do
-          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, { "i" => 13 }, true)
           expect(res).to eq('N')
         end
 
         it '13 & numrange 0 returns nil' do
-          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13, "n"=>0}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, { "i" => 13, "n" => 0 }, true)
           expect(res).to eq('N')
         end
 
         it '13 & int4range 15 returns N' do
-          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13, "i4"=>15}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, { "i" => 13, "i4" => 15 }, true)
           expect(res).to eq('N')
         end
 
         it '13 & int4range 1 returns nil' do
-          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13, "i4"=>1}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, { "i" => 13, "i4" => 1 }, true)
           expect(res).to be_nil
         end
 
         it 'false, 3, numrange 15 returns N' do
           res = Marty::DataGrid.
-                lookup_grid_h(pt, dgh, {"b"=>false, "i"=>3, "n"=>15}, true)
+                lookup_grid_h(pt, dgh, { "b" => false, "i" => 3, "n" => 15 }, true)
           expect(res).to eq('N')
         end
 
         it '13, numrange 15 returns N' do
-          res = Marty::DataGrid.lookup_grid_h(pt, dgh, {"i"=>13, "n"=>15}, true)
+          res = Marty::DataGrid.lookup_grid_h(pt, dgh, { "i" => 13, "n" => 15 }, true)
           expect(res).to eq('N')
         end
       end
@@ -353,25 +353,25 @@ EOS
 
       it "should handle ambiguous lookups (2)" do
         res = Marty::DataGrid.
-              lookup_grid_h(pt, "Gg", {"i1"=>2, "i2"=>1}, false)
+              lookup_grid_h(pt, "Gg", { "i1" => 2, "i2" => 1 }, false)
         expect(res).to eq(1)
 
         res = Marty::DataGrid.
-              lookup_grid_h(pt, "Gg", {"i1"=>3, "i2"=>1}, false)
+              lookup_grid_h(pt, "Gg", { "i1" => 3, "i2" => 1 }, false)
         expect(res).to eq(1)
 
         res = Marty::DataGrid.
-              lookup_grid_h(pt, "Gg", {"i1"=>2, "i2"=>3}, false)
+              lookup_grid_h(pt, "Gg", { "i1" => 2, "i2" => 3 }, false)
         expect(res).to eq(20)
       end
 
       it "should handle non-distinct lookups" do
-        res = Marty::DataGrid.lookup_grid_h(pt, "Ge", {"ltv"=>500}, false)
+        res = Marty::DataGrid.lookup_grid_h(pt, "Ge", { "ltv" => 500 }, false)
 
         expect(res).to eq(1.1)
 
         expect do
-          Marty::DataGrid.lookup_grid_h(pt, "Ge", {"ltv"=>500}, true)
+          Marty::DataGrid.lookup_grid_h(pt, "Ge", { "ltv" => 500 }, true)
         end.to raise_error(RuntimeError)
       end
 
@@ -394,7 +394,7 @@ EOS
         res = [true, false].map do |hb_indicator|
           lookup_grid_helper('infinity',
                              "Gd",
-                             {"hb_indicator" => hb_indicator,
+                             { "hb_indicator" => hb_indicator,
                              },
                             )
         end
@@ -404,22 +404,22 @@ EOS
       it "should handle basic lookups" do
         res = lookup_grid_helper('infinity',
                                  "G3",
-                                 {"amount" => 160300,
+                                 { "amount" => 160300,
                                   "state" => "HI",
                                  },
                                 )
-        expect(res).to eq [1.655,"G3"]
+        expect(res).to eq [1.655, "G3"]
 
-        [3,4].each do |units|
+        [3, 4].each do |units|
           res = lookup_grid_helper('infinity',
                                    "G2",
-                                   {"fico" => 720,
+                                   { "fico" => 720,
                                     "units" => units,
                                     "ltv" => 100,
                                     "cltv" => 110.1,
                                    },
                                   )
-          expect(res).to eq [5.6,"G2"]
+          expect(res).to eq [5.6, "G2"]
         end
 
         dg = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G1")
@@ -431,19 +431,19 @@ EOS
         }
 
         res = lookup_grid_helper('infinity', "G1", h)
-        expect(res).to eq [11,"G1"]
+        expect(res).to eq [11, "G1"]
 
         dg.update_from_import("G1", G1.sub(/11/, "111"))
 
         res = lookup_grid_helper('infinity', "G1", h)
-        expect(res).to eq [111,"G1"]
+        expect(res).to eq [111, "G1"]
       end
 
       it "should result in error when there are multiple cell hits" do
         expect do
           lookup_grid_helper('infinity',
                              "G2",
-                             {"fico" => 720,
+                             { "fico" => 720,
                               "ltv" => 100,
                               "cltv" => 110.1,
                              },
@@ -454,23 +454,23 @@ EOS
       it "should return nil when matching data grid cell is nil" do
         res = lookup_grid_helper('infinity',
                                  "G1",
-                                 {"fico" => 800,
+                                 { "fico" => 800,
                                   "state" => "MA",
                                   "ltv" => 81,
                                  },
                                 )
-        expect(res).to eq [nil,"G1"]
+        expect(res).to eq [nil, "G1"]
       end
 
       it "should handle string wildcards" do
         res = lookup_grid_helper('infinity',
                                  "G1",
-                                 {"fico" => 720,
+                                 { "fico" => 720,
                                   "state" => "GU",
                                   "ltv" => 80,
                                  },
                                 )
-        expect(res).to eq [22,"G1"]
+        expect(res).to eq [22, "G1"]
       end
 
       it "should handle matches which also have a wildcard match" do
@@ -479,15 +479,15 @@ EOS
         expect do
           res = lookup_grid_helper('infinity',
                                    "G9",
-                                   {"state" => "CA", "ltv" => 81},
+                                   { "state" => "CA", "ltv" => 81 },
                                   )
         end.to raise_error(RuntimeError)
 
         res = lookup_grid_helper('infinity',
                                  "G9",
-                                 {"state" => "GU", "ltv" => 81},
+                                 { "state" => "GU", "ltv" => 81 },
                                 )
-        expect(res).to eq [456,"G9"]
+        expect(res).to eq [456, "G9"]
       end
 
       it "should raise on nil attr values" do
@@ -496,7 +496,7 @@ EOS
         expect do
           lookup_grid_helper('infinity',
                                "G9",
-                               {"ltv" => 81},
+                               { "ltv" => 81 },
                                )
         end        .to raise_error(/matches > 1/)
 
@@ -504,50 +504,50 @@ EOS
         expect do
           lookup_grid_helper('infinity',
                                  "G9",
-                                 {"state" => "CA", "ltv" => nil},
+                                 { "state" => "CA", "ltv" => nil },
                                  false, false)
         end        .to raise_error(err)
 
         res = lookup_grid_helper('infinity',
                                  "G9",
-                                 {"state" => nil, "ltv" => 81},
+                                 { "state" => nil, "ltv" => 81 },
                                  false, false)
 
-        expect(res).to eq [456,"G9"]
+        expect(res).to eq [456, "G9"]
       end
 
       it "should handle boolean keys" do
         res = lookup_grid_helper('infinity',
                                  "G4",
-                                 {"hb_indicator" => true,
+                                 { "hb_indicator" => true,
                                   "cltv" => 80,
                                  },
                                 )
-        expect(res).to eq [-1.5,"G4"]
+        expect(res).to eq [-1.5, "G4"]
 
         res = lookup_grid_helper('infinity',
                                  "G4",
-                                 {"hb_indicator" => false,
+                                 { "hb_indicator" => false,
                                   "cltv" => 80,
                                  },
                                 )
-        expect(res).to eq [nil,"G4"]
+        expect(res).to eq [nil, "G4"]
       end
 
       it "should handle vertical-only grids" do
         res = lookup_grid_helper('infinity',
                                  "G5",
-                                 {"ltv" => 80},
+                                 { "ltv" => 80 },
                                 )
-        expect(res).to eq [-0.375,"G5"]
+        expect(res).to eq [-0.375, "G5"]
       end
 
       it "should handle horiz-only grids" do
         res = lookup_grid_helper('infinity',
                                  "G6",
-                                 {"ltv" => 80, "conforming" => true},
+                                 { "ltv" => 80, "conforming" => true },
                                 )
-        expect(res).to eq [-0.375,"G6"]
+        expect(res).to eq [-0.375, "G6"]
       end
 
       it "should handle string typed data grids" do
@@ -555,11 +555,11 @@ EOS
 
         res = lookup_grid_helper('infinity',
                                  "G7",
-                                 {"hb_indicator" => true,
+                                 { "hb_indicator" => true,
                                   "cltv" => 80,
                                  },
                                 )
-        expect(res).to eq ["test","G7"]
+        expect(res).to eq ["test", "G7"]
       end
 
       it "should handle DataGrid typed data grids" do
@@ -569,10 +569,10 @@ EOS
 
         res = lookup_grid_helper('infinity',
                                  "G8",
-                                 {"ltv" => 80,
+                                 { "ltv" => 80,
                                  },
                                 )
-        expect(res).to eq [g1,"G8"]
+        expect(res).to eq [g1, "G8"]
       end
 
       it "should handle multi DataGrid lookups" do
@@ -586,11 +586,11 @@ EOS
         }
 
         g1_res = lookup_grid_helper('infinity', "G1", h)
-        expect(g1_res).to eq [11,"G1"]
+        expect(g1_res).to eq [11, "G1"]
 
         res = lookup_grid_helper('infinity',
                                        "G8",
-                                       h,true
+                                       h, true
                                       )
         expect(g1_res).to eq res
       end
@@ -600,18 +600,18 @@ EOS
 
         res = lookup_grid_helper('infinity',
                                  "Ga",
-                                 {"dg" => g1,
+                                 { "dg" => g1,
                                  },
                                 )
-        expect(res).to eq [7,"Ga"]
+        expect(res).to eq [7, "Ga"]
 
         # should be able to lookup bu name as well
         res = lookup_grid_helper('infinity',
                                  "Ga",
-                                 {"dg" => "G2",
+                                 { "dg" => "G2",
                                  },
                                 )
-        expect(res).to eq [7,"Ga"]
+        expect(res).to eq [7, "Ga"]
       end
 
       it "should handle DataGrid typed data grids -- non mcfly" do
@@ -619,18 +619,18 @@ EOS
 
         res = lookup_grid_helper('infinity',
                                  "Gb",
-                                 {"property_state" => ca,
+                                 { "property_state" => ca,
                                  },
                                 )
-        expect(res).to eq [70,"Gb"]
+        expect(res).to eq [70, "Gb"]
 
         # should be able to lookup bu name as well
         res = lookup_grid_helper('infinity',
                                  "Gb",
-                                 {"property_state" => "CA",
+                                 { "property_state" => "CA",
                                  },
                                 )
-        expect(res).to eq [70,"Gb"]
+        expect(res).to eq [70, "Gb"]
       end
 
       it "should handle typed (enum) data lookup_grid" do
@@ -638,7 +638,7 @@ EOS
         ca = Gemini::State.find_by_name("CA")
 
         res = Marty::DataGrid.
-              lookup_grid_h(pt, "Gb", {"property_state" => ca}, false)
+              lookup_grid_h(pt, "Gb", { "property_state" => ca }, false)
 
         expect(res).to eq 70
       end
@@ -646,22 +646,22 @@ EOS
       it "should return grid data and metadata simple" do
         expected_data = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], [1.2, 2.3, 3.4],
                          [4.5, 5.6, 6.7]]
-        expected_metadata = [{"dir"=>"v",
-                              "attr"=>"units",
-                              "keys"=>[[1, 2], [1, 2], [3, 4], [3, 4]],
-                              "type"=>"integer"},
-                             {"dir"=>"v",
-                              "attr"=>"ltv",
-                              "keys"=>["[,80]", "(80,105]", "[,80]", "(80,105]"],
-                              "type"=>"numrange"},
-                             {"dir"=>"h",
-                              "attr"=>"cltv",
-                              "keys"=>["[100,110)", "[110,120)", "[120,]"],
-                              "type"=>"numrange"},
-                             {"dir"=>"h",
-                              "attr"=>"fico",
-                              "keys"=>["[600,700)", "[700,750)", "[750,]"],
-                              "type"=>"numrange"}]
+        expected_metadata = [{ "dir" => "v",
+                              "attr" => "units",
+                              "keys" => [[1, 2], [1, 2], [3, 4], [3, 4]],
+                              "type" => "integer" },
+                             { "dir" => "v",
+                              "attr" => "ltv",
+                              "keys" => ["[,80]", "(80,105]", "[,80]", "(80,105]"],
+                              "type" => "numrange" },
+                             { "dir" => "h",
+                              "attr" => "cltv",
+                              "keys" => ["[100,110)", "[110,120)", "[120,]"],
+                              "type" => "numrange" },
+                             { "dir" => "h",
+                              "attr" => "fico",
+                              "keys" => ["[600,700)", "[700,750)", "[750,]"],
+                              "type" => "numrange" }]
 
         dgh = Marty::DataGrid.lookup_h(pt, 'G2')
         res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt, {}, dgh,
@@ -671,21 +671,21 @@ EOS
       end
 
       it "should return grid data and metadata multi (following)" do
-        expected_data =  [[1.1, 2.2, 3.3],[4.4, 5.5, 6.6],[1.2, 2.3, 3.4],
-                          [4.5, 5.6, nil],[11.0, 22.0, 33.0]]
-        expected_metadata = [{"dir"=>"v",
-                              "attr"=>"state",
-                              "keys"=>[["CA"], ["HI", "TX"], ["NM"], ["MA"], nil],
-                              "type"=>"string"},
-                             {"dir"=>"v",
-                              "attr"=>"ltv",
-                              "keys"=>["[,80]", "(80,105]", "[,80]", "(80,105]",
-                                       "[,80]"],
-                              "type"=>"numrange"},
-                             {"dir"=>"h",
-                              "attr"=>"fico",
-                              "keys"=>["[600,700)", "[700,750)", "[750,]"],
-                              "type"=>"numrange"}]
+        expected_data = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], [1.2, 2.3, 3.4],
+                         [4.5, 5.6, nil], [11.0, 22.0, 33.0]]
+        expected_metadata = [{ "dir" => "v",
+                              "attr" => "state",
+                              "keys" => [["CA"], ["HI", "TX"], ["NM"], ["MA"], nil],
+                              "type" => "string" },
+                             { "dir" => "v",
+                              "attr" => "ltv",
+                              "keys" => ["[,80]", "(80,105]", "[,80]", "(80,105]",
+                                         "[,80]"],
+                              "type" => "numrange" },
+                             { "dir" => "h",
+                              "attr" => "fico",
+                              "keys" => ["[600,700)", "[700,750)", "[750,]"],
+                              "type" => "numrange" }]
         dgh = Marty::DataGrid.lookup_h(pt, 'G8')
         res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
                                                            { "ltv" => 10,
@@ -698,10 +698,10 @@ EOS
 
       it "should return grid data and metadata multi (not following)" do
         expected_data = [["G1"], ["G2"], ["G3"]]
-        expected_metadata = [{"dir"=>"v",
-                              "attr"=>"ltv",
-                              "keys"=>["[,115]", "(115,135]", "(135,140]"],
-                              "type"=>"numrange"}]
+        expected_metadata = [{ "dir" => "v",
+                              "attr" => "ltv",
+                              "keys" => ["[,115]", "(115,135]", "(135,140]"],
+                              "type" => "numrange" }]
         dgh = Marty::DataGrid.lookup_h(pt, 'G8')
         res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
                                                            { "ltv" => 10,
@@ -715,7 +715,7 @@ EOS
       it "should handle all characters in grid inputs" do
         dgh = Marty::DataGrid.lookup_h(pt, 'G1')
         5000.times do
-          st = 30.times.map {rand(224)+32}.pack('U*')
+          st = 30.times.map { rand(224) + 32 }.pack('U*')
           res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
                                                              { "ltv" => 10,
                                                                "fico" => 690,
@@ -730,16 +730,16 @@ EOS
         quotes = ["'", '"', '\\', '`', "\u00b4", "\u2018", "\u2019",
                   "\u201C", "\u201D"]
         100.times do
-          st = 30.times.map {quotes[rand(9)]}.join
+          st = 30.times.map { quotes[rand(9)] }.join
           res = Marty::DataGrid.lookup_grid_distinct_entry_h(
-            pt, {"ltv" => 10, "fico" => 690, "state" => st}, dgh, nil, false, true)
+            pt, { "ltv" => 10, "fico" => 690, "state" => st }, dgh, nil, false, true)
         end
       end
       it "should handle quote chars in object name" do
         dgh = Marty::DataGrid.lookup_h(pt, 'G1')
         st = Gemini::State.new(name: "'\\")
         res = Marty::DataGrid.lookup_grid_distinct_entry_h(
-          pt, {"ltv" => 10, "fico" => 690, "state" => st}, dgh, nil, false, true)
+          pt, { "ltv" => 10, "fico" => 690, "state" => st }, dgh, nil, false, true)
       end
     end
 
@@ -761,18 +761,18 @@ EOS
         dgb.update_from_import("Gb", Gb.sub(/70/, "444"), '1/1/2016')
 
         dgch = dgc.attributes.
-               slice("id","group_id","created_dt",  "metadata", "data_type")
+               slice("id", "group_id", "created_dt",  "metadata", "data_type")
         res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2014',
-                                             {"property_state" => "CA"}, dgch)
+                                             { "property_state" => "CA" }, dgch)
         expect(res["result"]).to eq(70)
 
         res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2015',
-                                             {"property_state" => "CA"}, dgch)
+                                             { "property_state" => "CA" }, dgch)
 
         expect(res["result"]).to eq(333)
 
         res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2016',
-                                             {"property_state" => "CA"}, dgch)
+                                             { "property_state" => "CA" }, dgch)
 
         expect(res["result"]).to eq(444)
       end
@@ -820,14 +820,14 @@ EOS
                                 ",",
                                )
 
-        expect(sum).to eq({same: 1})
+        expect(sum).to eq({ same: 1 })
 
         res11 = res.sub(/G1/, "G11")
 
         sum = do_import_summary(
           Marty::DataGrid, res11, 'infinity', nil, nil, ",")
 
-        expect(sum).to eq({create: 1})
+        expect(sum).to eq({ create: 1 })
 
         g1  = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G1")
         g11 = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G11")

@@ -53,7 +53,7 @@ module Marty; module RSpec; module Components
 
     def data_desc row
       res = run_js <<-JS
-          var r = #{grid}.getStore().getAt(#{row.to_i-1});
+          var r = #{grid}.getStore().getAt(#{row.to_i - 1});
           return r.data.desc
         JS
       res.gsub(/<.*?>/, '')
@@ -68,7 +68,7 @@ module Marty; module RSpec; module Components
       find("#" + el).click
     end
 
-    def get_col_vals(col, cnt=row_count, init=0)
+    def get_col_vals(col, cnt = row_count, init = 0)
       # NOTE: does not validate the # of rows
       run_js <<-JS
           var result = [];
@@ -84,7 +84,7 @@ module Marty; module RSpec; module Components
         JS
     end
 
-    def validate_col_vals(col, val, cnt, init=0)
+    def validate_col_vals(col, val, cnt, init = 0)
       run_js <<-JS
           for (var i = #{init}; i < #{init.to_i + cnt.to_i}; i++) {
             #{ext_cell_val('i', col, grid)}
@@ -101,11 +101,11 @@ module Marty; module RSpec; module Components
         JS
     end
 
-    def select_row(row, click_after=true)
+    def select_row(row, click_after = true)
       resid = run_js(<<-JS, 10.0)
           #{ext_var(grid, 'grid')}
-          grid.getSelectionModel().select(#{row.to_i-1});
-          return grid.getView().getNode(#{row.to_i-1}).id;
+          grid.getSelectionModel().select(#{row.to_i - 1});
+          return grid.getView().getNode(#{row.to_i - 1}).id;
         JS
       el = find_by_id(resid)
       el.click if click_after
@@ -114,7 +114,7 @@ module Marty; module RSpec; module Components
     end
 
     def set_row_vals row, fields
-      js_set_fields = fields.each_pair.map do |k,v|
+      js_set_fields = fields.each_pair.map do |k, v|
         "r.set('#{k}', '#{v}');"
       end.join
 
@@ -124,14 +124,14 @@ module Marty; module RSpec; module Components
         JS
     end
 
-    def get_row_vals row, fields=nil
+    def get_row_vals row, fields = nil
       res = run_js <<-JS
           #{ext_var(grid, 'grid')}
           return Ext.encode(#{ext_row(row.to_i - 1, 'grid')}.data);
         JS
       temp = JSON.parse(res)
       parsed = temp.merge(temp.delete('association_values') || {})
-      fields ? fields.each_with_object({}).each {|k,h| h[k] = parsed[k]} :
+      fields ? fields.each_with_object({}).each { |k, h| h[k] = parsed[k] } :
         parsed
     end
 
@@ -201,7 +201,7 @@ module Marty; module RSpec; module Components
           #{ext_var(ext_netzkecombo(field), 'combo')}
           #{ext_var(ext_celleditor, 'editor')}
 
-          editor.startEditByPosition({ row:#{row.to_i-1},
+          editor.startEditByPosition({ row:#{row.to_i - 1},
             column:grid.headerCt.items.findIndex('name', '#{field}') });
 
           var now = new Date().getTime();
@@ -216,7 +216,7 @@ module Marty; module RSpec; module Components
           #{ext_var(grid, 'grid')}
           #{ext_var(ext_celleditor, 'editor')}
 
-          editor.startEditByPosition({ row:#{row.to_i-1},
+          editor.startEditByPosition({ row:#{row.to_i - 1},
             column:grid.headerCt.items.findIndex('name', '#{field}') });
           return editor.activeEditor.field.inputId;
         JS
@@ -237,7 +237,7 @@ module Marty; module RSpec; module Components
           #{ext_var(grid, 'grid')}
           #{ext_var(ext_celleditor, 'editor')}
 
-          editor.startEditByPosition({ row:#{row.to_i-1},
+          editor.startEditByPosition({ row:#{row.to_i - 1},
             column:grid.headerCt.items.findIndex('name', '#{field}') });
           return editor.activeEditor.field.getItemId();
         JS
@@ -323,7 +323,7 @@ module Marty; module RSpec; module Components
           #{ext_var(ext_netzkecombo(field), 'combo')}
           #{ext_var(ext_celleditor, 'editor')}
 
-          editor.startEditByPosition({ row:#{row.to_i-1},
+          editor.startEditByPosition({ row:#{row.to_i - 1},
             column:grid.headerCt.items.findIndex('name', '#{field}') });
 
           var now = new Date().getTime();
@@ -339,7 +339,7 @@ module Marty; module RSpec; module Components
           #{ext_combo(field, 'combo')}
           #{ext_var(ext_celleditor, 'editor')}
 
-          editor.startEditByPosition({ row:#{row.to_i-1},
+          editor.startEditByPosition({ row:#{row.to_i - 1},
             column:grid.headerCt.items.findIndex('name', '#{field}') });
         JS
     end

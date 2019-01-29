@@ -2,18 +2,18 @@ require "spec_helper"
 
 module Marty
 
-bud_cats =<<EOF
+bud_cats = <<EOF
 name
 Conv Fixed 30
 Conv Fixed 20
 EOF
 
-bud_cats2 =<<EOF
+bud_cats2 = <<EOF
 namex
 Conv Fixed 20
 EOF
 
-fannie_bup1 =<<EOF
+fannie_bup1 = <<EOF
 bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
 Conv Fixed 30	2.250	4.42000	7.24000	12	2012
 Conv Fixed 30	2.375	4.42000	7.24000	12	2012
@@ -35,7 +35,7 @@ fannie_bup1_export =
      [nil, "Conv Fixed 20", 2.875, 12, 2012, 4.248, 6.959],
     ]
 
-fannie_bup2 =<<EOF
+fannie_bup2 = <<EOF
 bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
 Conv Fixed 20	2.250	4.42000	7.24000	12	2012
 Conv Fixed 20	2.375	4.42000	7.24000	12	2012
@@ -47,12 +47,12 @@ Conv Fixed 30	2.750	4.32900	7.09300	12	2012
 Conv Fixed 20	2.875	3.333	4.444	12	2012
 EOF
 
-fannie_bup3 =<<EOF
+fannie_bup3 = <<EOF
 bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
 Conv Fixed 30	2.250	1.123	2.345	12	2012
 EOF
 
-loan_programs =<<EOF
+loan_programs = <<EOF
 name	amortization_type	mortgage_type	streamline_type	high_balance_indicator	state_array	test_int_array	test_string_array
 Conv Fixed 30 Year	Fixed	Conventional	Not Streamlined	false		[1]	"[""foo""]"
 Conv Fixed 30 Year HB	Fixed	Conventional	Not Streamlined	true	"[""TN""]"	[1,2]	"[""foo"",""bar""]"
@@ -60,13 +60,13 @@ Conv Fixed 30 Year DURP <=80	Fixed	Conventional	DURP	false	"[""TN"",""CT""]"	[1,
 Conv Fixed 30 Year DURP <=80 HB	Fixed	Conventional	DURP	true	"[""CA"",""NY""]"		"[""foo"",""hi mom""]"
 EOF
 
-loan_programs_comma =<<EOF
+loan_programs_comma = <<EOF
 name,amortization_type,mortgage_type,state_array,test_string_array,streamline_type,high_balance_indicator
 FHA Fixed 15 Year,Fixed,FHA,"[""FL"",""NV"",""ME""]","[""ABC"",""DEF""]",Not Streamlined,false
 FHA Fixed 100 Year,Fixed,FHA,"[""FL"",""NV"",""ME""]","[""XYZ,"",""hi mom""]",Not Streamlined,false
 EOF
 
-loan_programs_encoded =<<EOF
+loan_programs_encoded = <<EOF
 name,amortization_type,mortgage_type,conforming,ltv_ratio_percent_range,high_balance_indicator,loan_amortization_period_count,streamline_type,extra_feature_type_id,arm_initial_reset_period_count,arm_initial_cap_percent,arm_periodic_cap_percent,arm_lifetime_cap_percent,arm_index_type_id,arm_margin_rate_percent,enum_state,state_array,test_int_array,test_string_array
 VA Fixed 30 Year,Fixed,VA,true,,false,360,Not Streamlined,,,,,,,,,,eJyLNowFAAHTAOo=,eJyLVkrLz1eKBQAI+AJB
 VA Fixed 30 Year HB,Fixed,VA,true,,true,360,Not Streamlined,,,,,,,,,eJyLVgrxU4oFAAWtAZ8=,eJyLNtQxigUAA9UBSA==,eJyLVkrLz1fSUUpKLFKKBQAbWAPm
@@ -74,24 +74,24 @@ VA Fixed 30 Year DURP <=80,Fixed,VA,true,,false,360,DURP,,,,,,,,,eJyLVgrxU9JRcg5
 VA Fixed 30 Year DURP <=80 HB,Fixed,VA,true,,true,360,DURP,,,,,,,,,eJyLVnJ2VNJR8otUigUADy8CmA==,,eJyLVkrLz1fSUcrIVMjNz1WKBQApLQTr
 EOF
 
-fannie_bup4 =<<EOF
+fannie_bup4 = <<EOF
 loan_program	bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
 Conv Fixed 30 Year	Conv Fixed 30	2.250	1.123	2.345	12	2012
 EOF
 
-fannie_bup5 =<<EOF
+fannie_bup5 = <<EOF
 bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
 Conv Fixed 20	2.250	1.123	2.345	12	2012
 Conv Fixed XX	2.250	1.123	2.345	12	2012
 EOF
 
-fannie_bup6 =<<EOF
+fannie_bup6 = <<EOF
 bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
 Conv Fixed 30	2.250	4.42000	7.24000	12	2012
 Conv Fixed 30	2.375	a123	7.24000	12	2012
 EOF
 
-fannie_bup7 =<<EOF
+fannie_bup7 = <<EOF
 bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
 Conv Fixed 30	$2.250	4.42%	7.24%	12	2012
 Conv Fixed 30	$2.375	4.42%	7.24%	12	2012
@@ -107,25 +107,25 @@ EOF
 
       res = Marty::DataImporter.
             do_import_summary(Gemini::Simple,
-                              [{"some_name" => "hello"}])
-      res.should == {create: 1}
+                              [{ "some_name" => "hello" }])
+      res.should == { create: 1 }
       res = Marty::DataImporter.
             do_import_summary(Gemini::Simple,
-                              [{"group_id" => Gemini::Simple.first.group_id, "some_name" => "hello"}])
-      res.should == {same: 1}
+                              [{ "group_id" => Gemini::Simple.first.group_id, "some_name" => "hello" }])
+      res.should == { same: 1 }
     end
 
     it "should be able to import fannie buyups" do
       res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
-      res.should == {create: 2}
+      res.should == { create: 2 }
       Gemini::BudCategory.count.should == 2
 
       res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
-      res.should == {same: 2}
+      res.should == { same: 2 }
       Gemini::BudCategory.count.should == 2
 
       res = Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
-      res.should == {create: 6}
+      res.should == { create: 6 }
       Gemini::FannieBup.count.should == 6
 
       # spot-check the import
@@ -135,13 +135,13 @@ EOF
       fb.buy_down.should == 7.22800
 
       res = Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
-      res.should == {same: 6}
+      res.should == { same: 6 }
       Gemini::FannieBup.count.should == 6
 
       # dups should raise an error
       dup = fannie_bup1.split("\n")[-1]
       lambda {
-        Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1+dup)
+        Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1 + dup)
       }.should raise_error(Marty::DataImporter::Error)
     end
 
@@ -155,7 +155,7 @@ EOF
                           nil,
                           ",",
                           )
-      res.should == {create: 6}
+      res.should == { create: 6 }
       Gemini::FannieBup.count.should == 6
     end
 
@@ -163,7 +163,7 @@ EOF
       lambda {
         Marty::DataImporter.
         do_import_summary(Gemini::BudCategory,
-                          bud_cats+bud_cats.sub(/name\n/, ""))
+                          bud_cats + bud_cats.sub(/name\n/, ""))
       }.should raise_error(Marty::DataImporter::Error)
       Gemini::BudCategory.count.should == 0
     end
@@ -173,10 +173,10 @@ EOF
       res = Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
 
       res = Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup3)
-      res.should == {update: 1}
+      res.should == { update: 1 }
 
       res = Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup2)
-      res.should == {same: 2, create: 2, update: 2, blank: 2}
+      res.should == { same: 2, create: 2, update: 2, blank: 2 }
     end
 
     it "should be able to import with cleaner" do
@@ -187,7 +187,7 @@ EOF
                           'infinity',
                           'import_cleaner',
                           )
-      res.should == {create: 6}
+      res.should == { create: 6 }
 
       res = Marty::DataImporter.
         do_import_summary(Gemini::FannieBup,
@@ -195,7 +195,7 @@ EOF
                           'infinity',
                           'import_cleaner',
                           )
-      res.should == {same: 6}
+      res.should == { same: 6 }
 
       res = Marty::DataImporter.
         do_import_summary(Gemini::FannieBup,
@@ -203,7 +203,7 @@ EOF
                           'infinity',
                           'import_cleaner',
                           )
-      res.should == {update: 1, clean: 5}
+      res.should == { update: 1, clean: 5 }
 
       res = Marty::DataImporter.
         do_import_summary(Gemini::FannieBup,
@@ -211,7 +211,7 @@ EOF
                           'infinity',
                           'import_cleaner',
                           )
-      res.should == {create: 6, blank: 2, clean: 1}
+      res.should == { create: 6, blank: 2, clean: 1 }
     end
 
     it "should be able to import with validation" do
@@ -223,7 +223,7 @@ EOF
                           fannie_bup1,
                           'infinity',
                           )
-      res.should == {create: 6}
+      res.should == { create: 6 }
 
       lambda {
         Marty::DataImporter.
@@ -243,7 +243,7 @@ EOF
                           'import_validation',
                           )
 
-      res.should == {create: 6}
+      res.should == { create: 6 }
 
       lambda {
         Marty::DataImporter.
@@ -262,7 +262,7 @@ EOF
                           'import_cleaner',
                           'import_validation',
                           )
-      res.should == {update: 1, clean: 11}
+      res.should == { update: 1, clean: 11 }
     end
 
     it "should be able to import with preprocess" do
@@ -277,7 +277,7 @@ EOF
                           false,
                           'import_preprocess',
                          )
-      res.should == {create: 6}
+      res.should == { create: 6 }
     end
 
     it "should be able to import with validation - allow prior month" do
@@ -286,7 +286,7 @@ EOF
       # first load some data without any validation
       res = Marty::DataImporter.
         do_import_summary(Gemini::FannieBup, fannie_bup1, 'infinity')
-      res.should == {create: 6}
+      res.should == { create: 6 }
 
       now = DateTime.now
       cm, cy = now.month, now.year
@@ -345,7 +345,7 @@ EOF
       res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
       res = Marty::DataImporter.
         do_import_summary(Gemini::LoanProgram, loan_programs)
-      res.should == {create: 4}
+      res.should == { create: 4 }
 
       begin
         Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup4)
@@ -372,9 +372,9 @@ EOF
                             [1, 2, 3], ['foo', 'bar']],
                            ["Conv Fixed 30 Year DURP <=80 HB", ["CA", "NY"],
                             nil, ['foo', 'hi mom']],
-                           ["FHA Fixed 15 Year", ["FL","NV","ME"], nil,
+                           ["FHA Fixed 15 Year", ["FL", "NV", "ME"], nil,
                             ['ABC', 'DEF']],
-                           ["FHA Fixed 100 Year", ["FL","NV","ME"], nil,
+                           ["FHA Fixed 100 Year", ["FL", "NV", "ME"], nil,
                             ['XYZ,', 'hi mom']],
                            ["VA Fixed 30 Year", nil, [1], ['foo']],
                            ["VA Fixed 30 Year HB", ["TN"], [1, 2],

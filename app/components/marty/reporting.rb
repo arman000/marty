@@ -10,7 +10,7 @@ class Marty::Reporting < Netzke::Base
   client_class do |c|
     c.header   = false
     c.layout   = :border
-    c.defaults = {body_style: 'padding:0px'}
+    c.defaults = { body_style: 'padding:0px' }
 
     c.include :reporting
   end

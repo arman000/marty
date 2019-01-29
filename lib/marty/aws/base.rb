@@ -16,7 +16,7 @@ class Marty::Aws::Base
     uri = URI.parse(url)
     req = Net::HTTP.new(uri.host, uri.port)
     req.read_timeout = req.open_timeout = ENV['AWS_REQUEST_TIMEOUT'] || 0.25
-    req.start {|http| http.get(uri.to_s) }.body
+    req.start { |http| http.get(uri.to_s) }.body
   end
 
   def self.is_aws?
@@ -53,7 +53,7 @@ class Marty::Aws::Base
   end
 
   def sym obj
-    obj.each_with_object({}) {|(k,v),h| h[k.underscore.to_sym] = v}
+    obj.each_with_object({}) { |(k, v), h| h[k.underscore.to_sym] = v }
   end
 
   def get_credentials

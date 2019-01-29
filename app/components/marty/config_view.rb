@@ -13,7 +13,7 @@ class Marty::ConfigView < Marty::Grid
     c.model      = "Marty::Config"
     c.attributes = [:key, :value, :description]
     c.editing    = :both
-    c.store_config.merge!(sorters: [{property: :key, direction: 'ASC'}])
+    c.store_config.merge!(sorters: [{ property: :key, direction: 'ASC' }])
   end
 
   def my_jsonb_getter

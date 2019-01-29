@@ -2,17 +2,17 @@ require "spec_helper"
 
 module Marty
 
-entities =<<EOF
+entities = <<EOF
 name
 PLS
 EOF
-bud_cats =<<EOF
+bud_cats = <<EOF
 name
 Conv Fixed 30
 Conv Fixed 20
 EOF
 
-fannie_bup =<<EOF
+fannie_bup = <<EOF
 entity	bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
 	Conv Fixed 30	2.250	4.42000	7.24000	12	2012
 	Conv Fixed 30	2.375	4.42000	7.24000	12	2012
@@ -30,7 +30,7 @@ PLS	Conv Fixed 20	2.875	5.24800	7.95900	12	2012
 PLS	Conv Fixed 20	2.875	5.24800	7.95900	11	2012
 EOF
 
-script =<<EOF
+script = <<EOF
 A:
     pt        =?
     entity    =?
@@ -48,21 +48,21 @@ A:
     a_func = Gemini::FannieBup.a_func('infinity', e_id, bc_id)
     b_func = Gemini::FannieBup.b_func('infinity', e_id, bc_id, 12)
 EOF
-errscript =<<EOF
+errscript = <<EOF
 Err:
     pt        =?
     entity    =?
     note_rate =?
     result = Gemini::FannieBup.%s(pt, entity, note_rate, 1)
 EOF
-errscript2 =<<EOF
+errscript2 = <<EOF
 Err:
     pt    =?
     e_id  =?
     bc_id =?
     result = Gemini::FannieBup.%s(pt, e_id, bc_id, nil)
 EOF
-errscript3 =<<EOF
+errscript3 = <<EOF
 Err:
     pt    =?
     e_id  =?
@@ -96,8 +96,8 @@ EOF
         }, Date.today)
       end
 
-      Marty::Script.load_script_bodies({'E5'=>(errscript2 % 'a_func_p')}, dt)
-      Marty::Script.load_script_bodies({'E6'=>(errscript3 % 'b_func_p')}, dt)
+      Marty::Script.load_script_bodies({ 'E5' => (errscript2 % 'a_func_p') }, dt)
+      Marty::Script.load_script_bodies({ 'E6' => (errscript3 % 'b_func_p') }, dt)
 
       @engine = Marty::ScriptSet.new.get_engine("AA")
     end
@@ -106,9 +106,9 @@ EOF
       Marty::ScriptSet.clear_cache
     end
     let(:params) do
-      {"pt"        =>'infinity',
+      { "pt" => 'infinity',
                    "entity"    => Gemini::Entity.all.first,
-                   "note_rate" => 2.875}
+                   "note_rate" => 2.875 }
     end
     it "lookup mode default" do
       a1 = @engine.evaluate("A", "lookup", params)
@@ -126,7 +126,7 @@ EOF
       # b1 will be OpenStructs because the b fns return #first
       e_id = Gemini::Entity.where(name: "PLS").first.id
       bc_id = Gemini::BudCategory.where(name: "Conv Fixed 20").first.id
-      p = {"e_id"=>e_id, "bc_id"=>bc_id}
+      p = { "e_id" => e_id, "bc_id" => bc_id }
       a1 = @engine.evaluate("A", "a_func", p)
       b1 = @engine.evaluate("A", "b_func", p)
 
@@ -140,7 +140,7 @@ EOF
       expect(a1.first.attributes.keys.to_set).to eq(Set["id", "buy_up", "buy_down"])
 
       # a1 is AR but still missing the FK entity_id so will raise
-      expect {a1.first.entity}.to raise_error(/missing attribute: entity_id/)
+      expect { a1.first.entity }.to raise_error(/missing attribute: entity_id/)
 
       expect(b1.class).to eq(OpenStruct)
 
@@ -175,7 +175,7 @@ EOF
       aggregate_failures "errors" do
         ['E5', 'a_func_p', 'E6', 'b_func_p'].in_groups_of(2) do |scr, fn|
           err = /Too many args to #{fn}/
-          expect {Marty::ScriptSet.new.get_engine(scr)}.to raise_error(
+          expect { Marty::ScriptSet.new.get_engine(scr) }.to raise_error(
                                              Delorean::BadCallError, err)
         end
       end
@@ -183,13 +183,13 @@ EOF
 
     it "caching times" do
       ts = DateTime.now
-      x=Benchmark.measure do
+      x = Benchmark.measure do
           10000.times do
                             Gemini::FannieBup.a_func(ts,
                                                      1, 2)
           end
       end
-      y=Benchmark.measure do
+      y = Benchmark.measure do
           10000.times do
                             Gemini::FannieBup.ca_func(ts,
                                                      1, 2)

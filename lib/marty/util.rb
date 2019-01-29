@@ -97,14 +97,14 @@ module Marty::Util
   def self.deep_round(obj, digits)
     case obj
     when Array
-      obj.map {|o| deep_round(o, digits)}
+      obj.map { |o| deep_round(o, digits) }
     when Hash
       obj.inject({}) do |result, (key, value)|
         result[key] = deep_round(value, digits)
         result
       end
     else
-      obj.is_a?(Float)? obj.round(digits) : obj
+      obj.is_a?(Float) ? obj.round(digits) : obj
     end
   end
 
@@ -127,18 +127,18 @@ module Marty::Util
     engine = Marty::ScriptSet.new.get_engine(script)
     format = engine.evaluate(node, 'format')
     title  = params.delete(:title) || engine.evaluate(node, 'title')
-    data   = ({selected_script_name: script,
-               selected_node: node} + params).to_json
+    data   = ({ selected_script_name: script,
+               selected_node: node } + params).to_json
     URI.encode("#{Marty::Util.marty_path}/report?data=#{data}"\
                "&reptitle=#{title}&format=#{format}")
   end
 
   def self.scrub_obj(obj)
-    trav = lambda {|o|
+    trav = lambda { |o|
            if o.is_a?(Hash)
-             return o.each_with_object({}) {|(k, v), h| h[k] = trav.call(v)}
+             return o.each_with_object({}) { |(k, v), h| h[k] = trav.call(v) }
            elsif o.is_a?(Array)
-             return o.map {|v| trav.call(v)}
+             return o.map { |v| trav.call(v) }
            elsif o.to_s.length > 10000
              o.class.to_s
            else

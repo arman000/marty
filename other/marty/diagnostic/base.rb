@@ -12,8 +12,8 @@ module Marty::Diagnostic; class Base < Request
   @@template  = ActionController::Base.new.lookup_context.
                   find_template("marty/diagnostic/diag").identifier
 
-  def self.diagnostic_fn opts={}
-    opts.each do |k,v|
+  def self.diagnostic_fn opts = {}
+    opts.each do |k, v|
       send("#{k}=", v)
     end
     class << self
@@ -35,7 +35,7 @@ module Marty::Diagnostic; class Base < Request
 
   def self.process_status_only infos
     return infos unless status_only
-    infos.map {|info| info.map {|test, result| [test, result['status']]}.to_h}
+    infos.map { |info| info.map { |test, result| [test, result['status']] }.to_h }
   end
 
   def self.get_difference data
@@ -49,7 +49,7 @@ module Marty::Diagnostic; class Base < Request
     diff = get_difference(data)
     data.each_with_object({}) do |(node, diagnostic), new_data|
       new_data[node] = diagnostic.each_with_object({}) do |(test, info), new_diagnostic|
-        new_diagnostic[test] = info + {'consistent' => !diff.include?(test)}
+        new_diagnostic[test] = info + { 'consistent' => !diff.include?(test) }
       end
     end
   end

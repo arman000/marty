@@ -4,7 +4,7 @@ module Marty
 
   private
   class PgEnumAttribute < JSON::Schema::Attribute
-    def self.validate(curr_schema, data, frag, pro, validator, opt={})
+    def self.validate(curr_schema, data, frag, pro, validator, opt = {})
       values = nil
       path = '#/' + frag.join('/')
       begin
@@ -40,8 +40,8 @@ module Marty
       numbers = []
 
       # traverse the schema, if we find a type: number, add to numbers []
-      trav = lambda { |tree, key, path=[]|
-        return tree.each do|k, v|
+      trav = lambda { |tree, key, path = []|
+        return tree.each do |k, v|
           trav.call(v, k, path + [k])
         end if tree.is_a?(Hash)
         numbers << path[0..-2] if key == 'type' && tree == 'number'
@@ -51,14 +51,14 @@ module Marty
       # convert the array stuff [ie. "items", "properties"] to :array
       numbers.map do |num|
         num.delete("properties")
-        num.map {|n| n=="items" ? :array : n}
+        num.map { |n| n == "items" ? :array : n }
       end
     end
 
     def self.fix_numbers(json, numbers)
 
       # follow path to drill into json
-      drill = lambda {|tree, path|
+      drill = lambda { |tree, path|
         return unless tree
         key = path.first
         val = val = tree.send(:[], key) unless key == :array
@@ -70,7 +70,7 @@ module Marty
             end
           else
             # this is an array of object so continue to drill down
-            tree.each {|sub| drill.call(sub, path[1..-1])}
+            tree.each { |sub| drill.call(sub, path[1..-1]) }
           end
         elsif path.length == 1
           # fix a non array field
@@ -80,12 +80,12 @@ module Marty
           drill.call(val, path[1..-1])
         end
       }
-      numbers.each {|number| drill.call(json, number)}
+      numbers.each { |number| drill.call(json, number) }
     end
 
     def self.get_schema(tag, sname, node, attr)
       begin
-        Marty::ScriptSet.new(tag).get_engine(sname+'Schemas').
+        Marty::ScriptSet.new(tag).get_engine(sname + 'Schemas').
           evaluate(node, attr, {})
       rescue => e
         id = "#{sname}/#{node} attrs=#{attr}"
@@ -94,7 +94,7 @@ module Marty
         # being requested
         sch_not_found = ['No such script', "undefined method `#{attr}__D'",
                          "node #{node} is undefined"]
-        msg = sch_not_found.detect {|msg| e.message.starts_with?(msg)} ?
+        msg = sch_not_found.detect { |msg| e.message.starts_with?(msg) } ?
                 'Schema not defined' : "Problem with schema: #{e.message}"
         return "Schema error for #{id}: #{msg}"
       end

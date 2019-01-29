@@ -32,7 +32,7 @@ feature 'under Applications menu, Reports workflows', js: true do
   end
 
   def populate_sample_reports
-    a_report  = <<DELOREAN
+    a_report = <<DELOREAN
 PostingField:
     field_label = "Posting"
     xtype       = ":combo"

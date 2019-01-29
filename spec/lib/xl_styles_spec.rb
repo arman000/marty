@@ -3,7 +3,7 @@ require 'marty'
 require 'delorean_lang'
 
 
-STYLE_CODE =<<EOS
+STYLE_CODE = <<EOS
 S:
     data =
         [
@@ -42,7 +42,7 @@ describe Marty::Xl do
   before(:each) do
     code = STYLE_CODE.clone
     engine.parse(code)
-    @ws =  engine.evaluate("S", ["result"]).flatten(1)
+    @ws = engine.evaluate("S", ["result"]).flatten(1)
   end
 
   it "should be able to create a spreadsheet with overlapping border styles" do

@@ -32,17 +32,17 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def write_attr(k, v)
     equals, rhs = v == :parameter ? [" =?", ""] :
-                    [" =", "\n" + v.lines.map {|l| " "*8 + l}.join("\n")]
+                    [" =", "\n" + v.lines.map { |l| " " * 8 + l }.join("\n")]
     k + equals + rhs
   end
 
   def paramify_h(h)
-    "{" + h.keys.reject {|k| k.ends_with?("__")}.
-                         map {|k| %Q("#{k}": #{k}) }.join(",\n") + "}"
+    "{" + h.keys.reject { |k| k.ends_with?("__") }.
+                         map { |k| %Q("#{k}": #{k}) }.join(",\n") + "}"
   end
 
   def self.grid_final_name(dgid)
-    dgid.ends_with?("_grid") ?  dgid + "_result" : dgid + "_grid_result"
+    dgid.ends_with?("_grid") ? dgid + "_result" : dgid + "_grid_result"
   end
   def expand_grid_code(h, dgid, dgname, cache, extra_params)
     final_name = self.class.grid_final_name(dgid)
@@ -73,7 +73,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     dgcache = {}
     h = {}
     ruleh["grids"].each do |k, v|
-      expand_grid_code(h, k.ends_with?('_grid')?k:k+'_grid', %Q("#{v}"),
+      expand_grid_code(h, k.ends_with?('_grid') ? k : k + '_grid', %Q("#{v}"),
                                                 dgcache, {})
     end
     h.map { |k, v| write_attr(k, v) }.join("\n") + "\n"
@@ -89,7 +89,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def grid_init(ruleh)
     if ruleh["grids"].present? ||
-       ruleh["results"].keys.any? {|k| k.ends_with?("_grid")}
+       ruleh["results"].keys.any? { |k| k.ends_with?("_grid") }
       write_code({ "pt" => :parameter,
                    "dgparams__" => :parameter,
                  })
@@ -126,7 +126,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     line = exc.line ? exc.line - self.class.body_lines : 0
     errs = code_section_counts(ruleh)
     line_count = 0
-    errs.each do |k,v|
+    errs.each do |k, v|
       line_count += v
       return k if line <= line_count
     end
@@ -177,6 +177,6 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def self.indent(s)
-    s.gsub(/^/, ' '*4)
+    s.gsub(/^/, ' ' * 4)
   end
 end

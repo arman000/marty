@@ -33,21 +33,21 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
 
   private
   def ec2_request action, params = {}
-    resp = request({action: action}, params)
+    resp = request({ action: action }, params)
     Hash.from_xml(resp)["#{action}Response"]
   end
 
   def get_tag
-    params = {'Filter.1.Name'    => 'resource-id',
+    params = { 'Filter.1.Name' => 'resource-id',
               'Filter.1.Value.1' => get_instance_id,
               'Filter.2.Name'    => 'key',
-              'Filter.2.Value.1' => 'Name'}
+              'Filter.2.Value.1' => 'Name' }
     ec2_request('DescribeTags', params)['tagSet']['item']['value']
   end
 
   def get_instances
-    params = {'Filter.1.Name'    => 'tag-value',
-              'Filter.1.Value.1' => @tag}
+    params = { 'Filter.1.Name' => 'tag-value',
+              'Filter.1.Value.1' => @tag }
 
     resp = ec2_request('DescribeInstances', params)
 
@@ -64,6 +64,6 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
   end
 
   def get_private_ips
-    @instances.running.map {|i| i['ip']}.compact
+    @instances.running.map { |i| i['ip'] }.compact
   end
 end

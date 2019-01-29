@@ -14,8 +14,8 @@ module Marty::Diagnostic; class Connections < Base
       c['client_addr'] = 'localhost' unless c['client_addr']
       name = c['application_name']
       counts[name] += 1
-      key = "#{name} #{'*' * (counts[name]-1)}"
-      h[key] = c.except('application_name').map {|k,v| "<li>#{k}: #{v}</li>"}.join
+      key = "#{name} #{'*' * (counts[name] - 1)}"
+      h[key] = c.except('application_name').map { |k, v| "<li>#{k}: #{v}</li>" }.join
     end
   end
 end

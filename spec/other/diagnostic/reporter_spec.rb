@@ -7,8 +7,8 @@ describe Marty::Diagnostic::Reporter do
     attr_accessor :params, :port
   end
 
-  def params diagnostic='base', scope=nil
-    {op: diagnostic, scope: scope}
+  def params diagnostic = 'base', scope = nil
+    { op: diagnostic, scope: scope }
   end
 
   def git
@@ -19,7 +19,7 @@ describe Marty::Diagnostic::Reporter do
     end
   end
 
-  def aggregate_data opts={}
+  def aggregate_data opts = {}
     {
       'Dummy' => {
         'NodeA' => {
@@ -33,7 +33,7 @@ describe Marty::Diagnostic::Reporter do
     }
   end
 
-  def aggregate_consistency_data diagnostic='Base'
+  def aggregate_consistency_data diagnostic = 'Base'
     original_a = Marty::Diagnostic::Base.create_info('A')
     original_b = Marty::Diagnostic::Base.create_info('B')
 
@@ -75,12 +75,12 @@ describe Marty::Diagnostic::Reporter do
       expected = {
         diagnostic => {
           'NodeA' => {
-            'CONSTANTA' => original_a + {'consistent' => true},
+            'CONSTANTA' => original_a + { 'consistent' => true },
             'CONSTANTB' => inconsistent_b,
             'CONSTANTB2' => inconsistent_b,
           },
           'NodeB' => {
-            'CONSTANTA' => original_a + {'consistent' => true},
+            'CONSTANTA' => original_a + { 'consistent' => true },
             'CONSTANTB' => inconsistent_c,
             'CONSTANTB2' => inconsistent_c,
           },
@@ -95,7 +95,7 @@ describe Marty::Diagnostic::Reporter do
   end
 
   def version_data consistent = true
-    Marty::Diagnostic::Base.pack(include_ip=false) do
+    Marty::Diagnostic::Base.pack(include_ip = false) do
       {
         "Marty"    => info(Marty::VERSION, true, consistent),
         "Delorean" => info(Delorean::VERSION, true, true),
@@ -119,7 +119,7 @@ describe Marty::Diagnostic::Reporter do
     end
 
     it 'masks consistent nodes for display (version)' do
-      described_class.request.params = params(scope='local')
+      described_class.request.params = params(scope = 'local')
       data = {
         'Version' => {
           'NodeA' => version_data,
@@ -168,7 +168,7 @@ describe Marty::Diagnostic::Reporter do
 
       data = {
         'Version' => {
-          'NodeA' => version_data(consistent=false),
+          'NodeA' => version_data(consistent = false),
           'NodeB' => version_data + {
             'Marty' => Marty::Diagnostic::Base.create_info(bad_ver, true, false)
           },

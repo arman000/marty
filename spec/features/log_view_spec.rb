@@ -48,13 +48,13 @@ feature 'logger view', js: true, capybara: true do
     exp_types = ["fatal", "error", "info", "debug", "warn"]
     exp_messages = ["fatal message", "error message",
                     "info message", "hi mom", "all your base"]
-    exp_details = [ "[\"string\", 123, {\"fatal\"=>\"message\", "\
+    exp_details = ["[\"string\", 123, {\"fatal\"=>\"message\", "\
                      "\"another_key\"=>\"value\"}]\n",
-                    "[1, 2, 3, {\"error\"=>\"message\"}]\n",
-                    "nil\n",
-                    "[\"one\", \"two\", 3, 4.0]\n",
-                    "[5]\n"
-                  ]
+                   "[1, 2, 3, {\"error\"=>\"message\"}]\n",
+                   "nil\n",
+                   "[\"one\", \"two\", 3, 4.0]\n",
+                   "[5]\n"
+]
    [[nil, 5], [7, 4], [3, 3], [0, 0]].each do |days, exp_count|
       if days
         press('System')
@@ -75,10 +75,10 @@ feature 'logger view', js: true, capybara: true do
       details = logview.get_col_vals('details', cnt, 0).
                   map { |d| CGI.unescapeHTML(d) }
       ts = logview.get_col_vals('timestamp_custom', cnt, 0)
-      expect(ts).to eq(@ts.slice(0,exp_count))
-      expect(types).to eq(exp_types.slice(0,exp_count))
-      expect(messages).to eq(exp_messages.slice(0,exp_count))
-      expect(details).to eq(exp_details.slice(0,exp_count))
+      expect(ts).to eq(@ts.slice(0, exp_count))
+      expect(types).to eq(exp_types.slice(0, exp_count))
+      expect(messages).to eq(exp_messages.slice(0, exp_count))
+      expect(details).to eq(exp_details.slice(0, exp_count))
    end
   end
 end

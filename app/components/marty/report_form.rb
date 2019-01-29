@@ -32,7 +32,7 @@ class Marty::ReportForm < Marty::Form
 
   def self.get_report_engine(params)
     d_params = ActiveSupport::JSON.decode(params[:data] || "{}")
-    d_params.each_pair do |k,v|
+    d_params.each_pair do |k, v|
       d_params[k] = nil if v.blank? || v == "null"
     end
 
@@ -67,7 +67,7 @@ class Marty::ReportForm < Marty::Form
 
       res = Delorean::Engine.grok_runtime_exception(exc)
       res["backtrace"] =
-        res["backtrace"].map {|m, line, fn| "#{m}:#{line} #{fn}"}.join('\n')
+        res["backtrace"].map { |m, line, fn| "#{m}:#{line} #{fn}" }.join('\n')
       res
     end
   end
@@ -113,7 +113,7 @@ class Marty::ReportForm < Marty::Form
   def eval_form_items(engine, items)
     case items
     when Array
-      items.map {|x| eval_form_items(engine, x)}
+      items.map { |x| eval_form_items(engine, x) }
     when Hash
       items.each_with_object({}) do |(key, value), result|
         result[key] = eval_form_items(engine, value)
@@ -178,7 +178,7 @@ class Marty::ReportForm < Marty::Form
 
     items = Marty::Xl.symbolize_keys(eval_form_items(engine, items), ':')
 
-    items = [{html: "<br><b>No input is needed for this report.</b>"}] if
+    items = [{ html: "<br><b>No input is needed for this report.</b>" }] if
       items.empty?
 
     # add hidden fields for selected tag/script/node
@@ -202,7 +202,7 @@ class Marty::ReportForm < Marty::Form
     c.reptitle           = title
     c.authenticity_token = controller.send(:form_authenticity_token)
 
-    [:foreground, :link].each {|a| actions[a].disabled = !!background_only}
+    [:foreground, :link].each { |a| actions[a].disabled = !!background_only }
   end
 end
 

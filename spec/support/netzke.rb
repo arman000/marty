@@ -1,7 +1,7 @@
 module Marty; module RSpec; module Netzke
   MAX_WAIT_TIME = 5.0
 
-  def by message, level=0
+  def by message, level = 0
     wait_for_ready(10)
     pending(message) unless block_given?
     yield
@@ -152,7 +152,7 @@ module Marty; module RSpec; module Netzke
     JS
   end
 
-  def set_field_value value, field_type='textfield', name=''
+  def set_field_value value, field_type = 'textfield', name = ''
     args1 = name.empty? ? "" : "[fieldLabel='#{name}']"
     args2 = name.empty? ? "" : "[name='#{name}']"
     run_js <<-JS
@@ -255,7 +255,7 @@ module Marty; module RSpec; module Netzke
     JS
   end
 
-  def ext_var(ext_find_str, var_name='ext_c')
+  def ext_var(ext_find_str, var_name = 'ext_c')
     <<-JS
       var #{var_name} = #{ext_find_str};
     JS
@@ -267,7 +267,7 @@ module Marty; module RSpec; module Netzke
     JS
   end
 
-  def ext_combo combo_label, c_name='combo'
+  def ext_combo combo_label, c_name = 'combo'
     <<-JS
       #{ext_var(ext_find(ext_arg('combobox', fieldLabel: combo_label)), c_name)}
       #{c_name} = #{c_name} ||
@@ -275,19 +275,19 @@ module Marty; module RSpec; module Netzke
     JS
   end
 
-  def ext_celleditor(grid_name='grid')
+  def ext_celleditor(grid_name = 'grid')
     <<-JS
       #{grid_name}.getPlugin('celleditor')
     JS
   end
 
-  def ext_row(row, grid_name='grid')
+  def ext_row(row, grid_name = 'grid')
     <<-JS
       #{grid_name}.getStore().getAt(#{row})
     JS
   end
 
-  def ext_col(col, grid_name='grid')
+  def ext_col(col, grid_name = 'grid')
     <<-JS
       #{ext_find(ext_arg('gridcolumn', name: "\"#{col}\""), grid_name)}
     JS

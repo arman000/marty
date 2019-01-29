@@ -1,7 +1,7 @@
 module Marty::Diagnostic::Node
   def self.my_ip
     begin
-      Socket.ip_address_list.detect {|intf| intf.ipv4_private?}.ip_address
+      Socket.ip_address_list.detect { |intf| intf.ipv4_private? }.ip_address
     rescue => e
       e.message
     end

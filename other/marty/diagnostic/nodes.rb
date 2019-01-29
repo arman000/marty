@@ -25,7 +25,7 @@ module Marty::Diagnostic; class Nodes < Base
       # generate instance information when there is an issue
       # between aws and postgres
       instances = instance_data.instances
-      {'nodes' => error("There is a discrepancy between nodes connected to "\
+      { 'nodes' => error("There is a discrepancy between nodes connected to "\
                         "Postgres and those discovered through AWS EC2.\n"\
                         "Postgres: \n#{pg_nodes.join("\n")}\n"\
                         "AWS: \n#{a_nodes.join("\n")}"),
@@ -35,7 +35,7 @@ module Marty::Diagnostic; class Nodes < Base
        'terminated'    => error_if(instances.terminated),
        'stopping'      => error_if(instances.stopping),
        'stopped'       => error_if(instances.stopped),
-      }.delete_if {|k,v| v.empty?}
+      }.delete_if { |k, v| v.empty? }
     rescue => e
       error(e.message)
     end

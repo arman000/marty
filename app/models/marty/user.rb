@@ -92,7 +92,7 @@ class Marty::User < Marty::Base
 
  def self.has_role(role)
     mr = Mcfly.whodunnit.roles rescue []
-    mr.any? {|attr| attr.name == role}
+    mr.any? { |attr| attr.name == role }
  end
 
 private
@@ -106,7 +106,7 @@ private
       system_id = system_user.id if system_user
 
       if self.id == Mcfly.whodunnit.id
-        roles.each {|r| roles.delete r unless r.name == "user_manager"}
+        roles.each { |r| roles.delete r unless r.name == "user_manager" }
         errors.add :base, "User Managers cannot edit "\
           "or add additional roles to their own accounts"
       elsif self.id == system_id

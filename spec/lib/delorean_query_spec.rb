@@ -2,13 +2,13 @@ require "spec_helper"
 
 module Marty
 
-bud_cats =<<EOF
+bud_cats = <<EOF
 name
 Conv Fixed 30
 Conv Fixed 20
 EOF
 
-fannie_bup =<<EOF
+fannie_bup = <<EOF
 bud_category	note_rate	buy_up	buy_down	settlement_mm	settlement_yy
 Conv Fixed 30	2.250	4.42000	7.24000	12	2012
 Conv Fixed 30	2.375	4.42000	7.24000	12	2012
@@ -19,7 +19,7 @@ Conv Fixed 20	2.875	4.24800	6.95900	12	2012
 Conv Fixed 20	2.875	4.24800	6.95900	11	2012
 EOF
 
-script =<<EOF
+script = <<EOF
 A:
     c = Gemini::FannieBup.
       joins("bud_category").
@@ -185,7 +185,7 @@ EOF
 
     it "handle query params" do
       res = @engine.evaluate("A", "pq",
-                             {"settlement_mm" => 12, "note_rate" => 2.5})
+                             { "settlement_mm" => 12, "note_rate" => 2.5 })
       expect(res).to eq [2.625, 2.75, 2.875]
     end
   end

@@ -1,5 +1,5 @@
 class Marty::DataConversion
-  EXCEL_START_DATE = Date.parse('1/1/1900')-2
+  EXCEL_START_DATE = Date.parse('1/1/1900') - 2
 
   FLOAT_PAT = /^-?\d+(\.\d+)?$/
 
@@ -85,7 +85,7 @@ class Marty::DataConversion
     # key for regular (non-mcfly) AR models which don't have
     # MARTY_IMPORT_UNIQUENESS.
     klass.const_get(:MARTY_IMPORT_UNIQUENESS) rescue [
-    klass.column_names.reject {|x| x=="id"}.first.to_sym]
+    klass.column_names.reject { |x| x == "id" }.first.to_sym]
   end
 
   @@associations = {}
@@ -150,7 +150,7 @@ class Marty::DataConversion
 
     raise "no key_attrs for #{klass}" unless key_attrs
 
-    find_options = options.select { |k,v| key_attrs.member? k.to_sym }
+    find_options = options.select { |k, v| key_attrs.member? k.to_sym }
 
     raise "no keys for #{klass} -- #{options}" if find_options.empty?
 
@@ -175,7 +175,7 @@ class Marty::DataConversion
 
     raise "bad row (extra columns?) -- #{row}" if row.has_key?(nil)
 
-    key_groups = row.keys.group_by {|x| x.to_s.split('__').first}
+    key_groups = row.keys.group_by { |x| x.to_s.split('__').first }
 
     # FIXME: map all empty string values to nil --- this means that
     # user can't import empty strings -- Perhaps, mapping "" -> nil
@@ -228,7 +228,7 @@ class Marty::DataConversion
 
         # If it's an Enum, use the faster cached looked mechanism
         if Marty::Enum === srch_class
-          h[fk] = srch_class[ v ].id
+          h[fk] = srch_class[v].id
           next
         end
       end

@@ -17,7 +17,7 @@ class Marty::Event < Marty::Base
     self.comment = self.comment.truncate(255) if self.comment
   end
 
-  UPDATE_SQL =<<SQL
+  UPDATE_SQL = <<SQL
   UPDATE marty_events as me
   SET start_dt = p.start_dt,
       end_dt = p.end_dt
@@ -31,7 +31,7 @@ class Marty::Event < Marty::Base
             )
         )
 SQL
-  BASE_QUERY =<<SQL
+  BASE_QUERY = <<SQL
 SELECT id,
             klass,
             subject_id,
@@ -64,7 +64,7 @@ SQL
                         operation,
                         start_dt,
                         expire_secs,
-                        comment=nil)
+                        comment = nil)
 
     # use lookup_event instead of all_running which is throttled
     evs = self.lookup_event(klass, subject_id, operation)
@@ -97,7 +97,7 @@ SQL
     #Marty::Event.find_by_id(hash["id"])
   end
 
-  def self.finish_event(klass, subject_id, operation, error=false, comment=nil)
+  def self.finish_event(klass, subject_id, operation, error = false, comment = nil)
     raise "error must be true or false" unless [true, false].include?(error)
     time_now_s = Time.zone.now.strftime('%Y-%m-%d %H:%M:%S.%6N')
 
@@ -116,7 +116,7 @@ SQL
     ev.save!
   end
 
-  def self.last_event(klass, subject_id, operation=nil)
+  def self.last_event(klass, subject_id, operation = nil)
     hash = all_running.select do |pm|
       pm["klass"] == klass && pm["subject_id"] == subject_id.to_i &&
         (operation.nil? || pm["enum_event_operation"] == operation)
@@ -133,7 +133,7 @@ SQL
               ORDER BY end_dt desc").first
   end
 
-  def self.last_event_multi(klass, subject_ids_arg, operation=nil)
+  def self.last_event_multi(klass, subject_ids_arg, operation = nil)
     subject_ids = subject_ids_arg.map(&:to_i)
     events = all_running.select do |pm|
       pm["klass"] == klass && subject_ids.include?(pm["subject_id"]) &&
@@ -194,7 +194,7 @@ SQL
     all_running.select do |pm|
       pm["klass"] == klass && subject_ids.include?(pm["subject_id"])
     end.each_with_object({}) do |e, h|
-      (h[e["subject_id"]] ||= []) <<  e["enum_event_operation"]
+      (h[e["subject_id"]] ||= []) << e["enum_event_operation"]
     end
   end
 

@@ -13,7 +13,7 @@ class Marty::Script < Marty::Base
   gen_mcfly_lookup :lookup, [:name], cache: true
 
   # find script by name/tag (not cached)
-  def self.find_script(sname, tag=nil)
+  def self.find_script(sname, tag = nil)
     tag = Marty::Tag.map_to_tag(tag)
     Marty::Script.mcfly_pt(tag.created_dt).find_by(name: sname)
   end
@@ -31,7 +31,7 @@ class Marty::Script < Marty::Base
     script
   end
 
-  def self.load_a_script(sname, body, dt=nil)
+  def self.load_a_script(sname, body, dt = nil)
     s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: sname)
 
     if !s
@@ -47,7 +47,7 @@ class Marty::Script < Marty::Base
     end
   end
 
-  def self.load_script_bodies(bodies, dt=nil)
+  def self.load_script_bodies(bodies, dt = nil)
     bodies.each do |sname, body|
       load_a_script(sname, body, dt)
     end
@@ -67,7 +67,7 @@ class Marty::Script < Marty::Base
     tag
   end
 
-  def self.load_scripts(path=nil, dt=nil)
+  def self.load_scripts(path = nil, dt = nil)
     files = get_script_filenames(path)
 
     bodies = read_script_files(files)

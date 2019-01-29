@@ -71,7 +71,7 @@ class Marty::BaseRule < Marty::Base
   end
 
   before_create do
-    self.class.guard_info.each do |k,v|
+    self.class.guard_info.each do |k, v|
       next if !v.include?(:default) || self.simple_guards.include?(k)
       self.simple_guards[k] = v[:default]
     end
@@ -97,8 +97,8 @@ class Marty::BaseRule < Marty::Base
     params.each do |k, vraw|
       h = guard_info
       use_k = (h[k] && k) ||
-              (h[k+"_array"] && k+"_array") ||
-              (h[k+"_range"] && k+"_range")
+              (h[k + "_array"] && k + "_array") ||
+              (h[k + "_range"] && k + "_range")
       next unless use_k
       multi, type = h[use_k].values_at(:multi, :type)
       filts = [vraw].flatten.map do |v|

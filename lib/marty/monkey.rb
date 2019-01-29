@@ -42,7 +42,7 @@ require 'netzke-basepack'
 
 class Netzke::Base
   # get root component session
-  def root_sess(component=nil)
+  def root_sess(component = nil)
     component ||= self
     component.parent ? root_sess(component.parent) : component.component_session
   end
@@ -144,7 +144,7 @@ module Netzke::Basepack::DataAdapters
       end
 
       # join them by AND
-      predicates[1..-1].inject(predicates.first) { |r,p| r.and(p)  }
+      predicates[1..-1].inject(predicates.first) { |r, p| r.and(p)  }
     end
 
     def update_predecate_for_enum(table, op, value)
@@ -177,7 +177,7 @@ end
 ######################################################################
 
 class ActiveRecord::Relation
-  def mcfly_pt(pt, cls=nil)
+  def mcfly_pt(pt, cls = nil)
     cls ||= self.klass
     tb = cls.table_name
     self.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
@@ -227,7 +227,7 @@ end
 
 ar_instances = [ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]
 
-args_hack = [[Object, nil]]*10
+args_hack = [[Object, nil]] * 10
 
 [[:distinct, args_hack],
  [:find_by,  args_hack],

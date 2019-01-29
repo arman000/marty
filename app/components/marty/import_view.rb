@@ -76,7 +76,7 @@ class Marty::ImportView < Marty::Form
     begin
       processed = process_import_data
       res       = import(processed)
-      result    = res.map {|k,v| format_message(k,v)}
+      result    = res.map { |k, v| format_message(k, v) }
 
       messages  = post_import
       result << messages if messages

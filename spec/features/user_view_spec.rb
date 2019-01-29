@@ -78,11 +78,11 @@ feature 'under Sytem menu, User Management worflows', js: true do
     and_by 'check row got edited' do
       wait_for_ajax
       expect(user_view.get_row_vals(2)).to netzke_include({
-        :login=>"new_login",
-        :firstname=>"new_fname",
-        :lastname=>"new_lname",
-        :active=>true,
-        :roles=>"User Manager,Viewer",
+        :login => "new_login",
+        :firstname => "new_fname",
+        :lastname => "new_lname",
+        :active => true,
+        :roles => "User Manager,Viewer",
         })
     end
 

@@ -80,7 +80,7 @@ class Marty::ScriptTester < Marty::Form
       res = Delorean::Engine.grok_runtime_exception(exc)
 
       result = ["Error: #{res['error']}", "Backtrace:"] +
-        res["backtrace"].map {|m, line, fn| "#{m}:#{line} #{fn}"}
+        res["backtrace"].map { |m, line, fn| "#{m}:#{line} #{fn}" }
 
       client.netzke_notify "failed"
       client.set_result '<font color="red">' + result.join("<br/>") + "</font>"

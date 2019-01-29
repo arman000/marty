@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'marty'
 require 'delorean_lang'
 
-CODE =<<EOS
+CODE = <<EOS
 M:
     cfmt = {
         "type": ":cellIs",
@@ -91,8 +91,8 @@ describe Marty::Xl do
 
   def worksheet(ind, c)
     code = CODE.clone
-    map = {'C1' => c[0].to_s, 'C2' => c[1].to_s}
-    map.each { |k,v| code.sub!(k,v)  }
+    map = { 'C1' => c[0].to_s, 'C2' => c[1].to_s }
+    map.each { |k, v| code.sub!(k, v)  }
     engine.parse(code)
     engine.evaluate("M", ["result"]).flatten(1)
   end
@@ -117,7 +117,7 @@ describe Marty::Xl do
       ["", ""]
 
     sp.workbook.worksheets[0].rows[5].cells[0..15].map { |c| c.value }.should == 
-      ["", "", "Sec Inst Name", "Market Change Sec Inst", "", "", "", "", "", "Sec Inst Name", "Market Change Sec Inst", "","", "", ""]
+      ["", "", "Sec Inst Name", "Market Change Sec Inst", "", "", "", "", "", "Sec Inst Name", "Market Change Sec Inst", "", "", "", ""]
 
     sp.workbook.worksheets[0].rows[6].cells[0..15].map { |c| c.value }.should == 
       ["", "", "title", 2, 4, 5, 6, 8, "", "title", 2, 4, 5, 6, 8]

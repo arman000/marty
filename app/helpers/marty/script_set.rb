@@ -10,7 +10,7 @@ class Marty::ScriptSet < Delorean::AbstractContainer
 
   clear_cache
 
-  def initialize(tag=nil)
+  def initialize(tag = nil)
     @tag = Marty::Tag.map_to_tag(tag)
     super()
   end

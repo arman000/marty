@@ -12,8 +12,8 @@ module Marty::Diagnostic; class Controller < ActionController::Base
       render file: 'public/400', formats: [:html], status: 400, layout: false
     else
       respond_to do |format|
-        format.html {@result = display_parameters}
-        format.json {render json: process_result_for_api}
+        format.html { @result = display_parameters }
+        format.json { render json: process_result_for_api }
       end
     end
   end

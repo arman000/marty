@@ -6,7 +6,7 @@ class Marty::ReportSelect < Marty::Form
     c.height           = 200
     c.load_inline_data = false
     c.title            = I18n.t("script.selection_history")
-    c.attributes          = [:name, :created_dt, :comment]
+    c.attributes = [:name, :created_dt, :comment]
     c.bbar             = []
   end
 
@@ -15,8 +15,8 @@ class Marty::ReportSelect < Marty::Form
     c.klass            = Marty::ScriptGrid
     c.title            = I18n.t("script.selection_list")
     c.bbar             = []
-    c.attributes          = [:name, :tag]
-    c.scope            = lambda { |r|
+    c.attributes = [:name, :tag]
+    c.scope = lambda { |r|
       r.where("name like '%Report'")
     }
   end
@@ -74,7 +74,7 @@ class Marty::ReportSelect < Marty::Form
       rescue
         [node, node]
       end
-    end.compact.sort { |a,b| a[1] <=> b[1]}
+    end.compact.sort { |a, b| a[1] <=> b[1] }
   end
 
   endpoint :get_combobox_options do |params|

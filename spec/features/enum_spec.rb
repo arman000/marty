@@ -84,7 +84,7 @@ feature 'test netzke + pg_enum compatibility', js: true do
       wait_for_ajax
       aggregate_failures do
         expect(lp_grid.row_count).to eq(2)
-        expect(lp_grid.get_row_vals(2)).to netzke_include({enum_state: 'CA'})
+        expect(lp_grid.get_row_vals(2)).to netzke_include({ enum_state: 'CA' })
       end
     end
 
@@ -110,7 +110,7 @@ feature 'test netzke + pg_enum compatibility', js: true do
       wait_for_ajax
       aggregate_failures do
         expect(lp_grid.row_count).to eq(2)
-        expect(lp_grid.get_row_vals(1)).to netzke_include({enum_state: nil})
+        expect(lp_grid.get_row_vals(1)).to netzke_include({ enum_state: nil })
       end
     end
 
@@ -176,12 +176,12 @@ feature 'test netzke + pg_enum compatibility', js: true do
 
     and_by "filter form by state_enum ASCENDING" do
       press("Enum state")
-      expect(lp_grid.get_col_vals(:enum_state)).to eq(["AS","AZ","DC","WA"])
+      expect(lp_grid.get_col_vals(:enum_state)).to eq(["AS", "AZ", "DC", "WA"])
     end
 
     and_by "filter form by state_enum DESCENDING" do
       press("Enum state")
-      expect(lp_grid.get_col_vals(:enum_state)).to eq(["WA","DC","AZ","AS"])
+      expect(lp_grid.get_col_vals(:enum_state)).to eq(["WA", "DC", "AZ", "AS"])
     end
   end
 end

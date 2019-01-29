@@ -21,7 +21,7 @@ module Marty::Permissions
 
   def current_user_roles
     roles = Mcfly.whodunnit.roles rescue []
-    roles.map {|r| r.name.to_sym}.to_set
+    roles.map { |r| r.name.to_sym }.to_set
   end
 
   def can_perform_action?(action)
@@ -33,7 +33,7 @@ module Marty::Permissions
     aroles = self.marty_permissions[action.to_sym] || []
     # TODO: Use code below when switching to Ruby 2.1
     # Set[ *aroles].intersect? roles.to_set
-    (Set[ *aroles] & roles.to_set).length > 0
+    (Set[*aroles] & roles.to_set).length > 0
   end
 
   def can_perform_actions
@@ -45,7 +45,7 @@ module Marty::Permissions
     self.marty_permissions.map do |action, aroles|
       # TODO: Use code below when switching to Ruby 2.1
       #action if Set[ *aroles].intersect? roles.to_set
-      action if (Set[ *aroles] & roles.to_set).length > 0
+      action if (Set[*aroles] & roles.to_set).length > 0
     end.compact
   end
 

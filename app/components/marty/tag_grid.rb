@@ -12,8 +12,8 @@ class Marty::TagGrid < Marty::Grid
 
     c.attributes ||= [:name, :created_dt, :user__name, :comment]
 
-    c.store_config.merge!({sorters: [{property: :created_dt,
-                                      direction: 'DESC'}]})
+    c.store_config.merge!({ sorters: [{ property: :created_dt,
+                                      direction: 'DESC' }] })
   end
 
   endpoint :add_window__add_form__submit do |params|

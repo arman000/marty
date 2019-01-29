@@ -23,7 +23,7 @@ module Layout
                 )
   end
 
-  def dispfield(params={})
+  def dispfield(params = {})
     {
       attr_type: :displayfield,
       hide_label: !params[:field_label],
@@ -31,15 +31,15 @@ module Layout
     }.merge(params)
   end
 
-  def vspacer(params={})
-    vbox({flex: 1, border: false}.merge(params))
+  def vspacer(params = {})
+    vbox({ flex: 1, border: false }.merge(params))
   end
 
-  def hspacer(params={})
-    hbox({flex: 1, border: false}.merge(params))
+  def hspacer(params = {})
+    hbox({ flex: 1, border: false }.merge(params))
   end
 
-  def textarea_field(name, options={})
+  def textarea_field(name, options = {})
     {
       name:        name,
       width:       "100%",
@@ -54,7 +54,7 @@ module Layout
     } + options
   end
 
-  def jsonb_field(name, options={})
+  def jsonb_field(name, options = {})
     {
         name:        name,
         width:       "100%",
@@ -73,7 +73,7 @@ module Layout
   ######################################################################
   # PG ENUM field handling
 
-  def enum_column(c, class_or_array, col=nil)
+  def enum_column(c, class_or_array, col = nil)
     col ||= c.name.demodulize.tableize.singularize
     vals = class_or_array.is_a?(Array) ? class_or_array : class_or_array::VALUES
     editor_config = {
@@ -111,11 +111,11 @@ module Layout
   end
 
   def enum_setter(name)
-    lambda {|r, v| r.send("#{name}=", v.blank? || v == '---' ? nil : v)}
+    lambda { |r, v| r.send("#{name}=", v.blank? || v == '---' ? nil : v) }
   end
 
   def get_sorter(col)
-    lambda {|rel, dir| rel.order("#{col}::text #{dir.to_s}")}
+    lambda { |rel, dir| rel.order("#{col}::text #{dir.to_s}") }
   end
 
   ######################################################################
@@ -136,11 +136,11 @@ module Layout
   }
 
   def bool_getter(name)
-    lambda {|r| BOOL_MAP[r.send(name)]}
+    lambda { |r| BOOL_MAP[r.send(name)] }
   end
 
   def bool_setter(name)
-    lambda {|r, v| r.send("#{name}=", MAP_BOOL[v])}
+    lambda { |r, v| r.send("#{name}=", MAP_BOOL[v]) }
   end
 
   def nullable_bool_column(name)
@@ -161,7 +161,7 @@ module Layout
   ######################################################################
   # make sure to validate range vals on the model (e.g. see rule.rb)
 
-  def range_getter(name, json_field=nil)
+  def range_getter(name, json_field = nil)
     if json_field
       lambda { |r| Marty::Util.pg_range_to_human(r.send(json_field)[name]) }
     else
@@ -169,13 +169,13 @@ module Layout
     end
   end
 
-  def range_setter(name, json_field=nil)
+  def range_setter(name, json_field = nil)
     if json_field
       lambda do |r, v|
         cookedv = v && v.present? && (Marty::Util.human_to_pg_range(v) rescue v)
-        h  = r.send(json_field)
+        h = r.send(json_field)
         if cookedv
-          r.send("#{json_field}=", h + {name=>cookedv})
+          r.send("#{json_field}=", h + { name => cookedv })
         else
           h.delete(name)
           r.send("#{json_field}=", h)

@@ -12,10 +12,10 @@ class Marty::Xl
   end
 
   def deep_copy(value)
-    return value.each_with_object({}) {|(k, v), h| h[k] = deep_copy(v)} if
+    return value.each_with_object({}) { |(k, v), h| h[k] = deep_copy(v) } if
       value.is_a?(Hash)
 
-    value.is_a?(Array) ? value.map {|v| deep_copy(v)} : value
+    value.is_a?(Array) ? value.map { |v| deep_copy(v) } : value
   end
 
   def merge_cell_edges(a, b)
@@ -73,12 +73,12 @@ class Marty::Xl
     end
 
     d[1].each_index do |c_index|
-      new_row[c_index+column_offset] = d[1][c_index]
+      new_row[c_index + column_offset] = d[1][c_index]
     end if d[1].kind_of?(Array)
 
     if (d.length > 2) && d[2].kind_of?(Hash) && d[2]["style"].kind_of?(Array)
       d[2]["style"].each_index do |c_index|
-        new_style[c_index+column_offset] = d[2]["style"][c_index]
+        new_style[c_index + column_offset] = d[2]["style"][c_index]
       end
     end
 
@@ -92,7 +92,7 @@ class Marty::Xl
           # handled by the 'apply a style to each cell' section/
           next unless value.kind_of?(Hash)
           d[1].length.times do |t|
-            new_style[t+column_offset] = value
+            new_style[t + column_offset] = value
           end
         end
       end
@@ -141,7 +141,7 @@ class Marty::Xl
   end
 
   def position_borders(borders)
-    b_styles  = []
+    b_styles = []
     borders.each do |b|
       top_row, middle_row, bottom_row, edge_h = [], [], [], {}
       br, range, defaults = b
@@ -154,7 +154,7 @@ class Marty::Xl
 
       boxborders = Hash.new do |hash, key|
         hash[key] = {
-          border: defaults.merge( {edges: key.to_s.split('_').map(&:to_sym)} )
+          border: defaults.merge({ edges: key.to_s.split('_').map(&:to_sym) })
         }
       end
 
@@ -170,7 +170,7 @@ class Marty::Xl
       elsif row0 == rowh
         # horizontal line
         edge_h[tro], edge_h[mro], edge_h[bro] =
-          ["top"]*3, ["top"]*3, ["top"]*3
+          ["top"] * 3, ["top"] * 3, ["top"] * 3
       else
         # box
         edge_h[tro] = ["top_left", "top_right", "top"]
@@ -207,7 +207,7 @@ class Marty::Xl
 
           a = i == 0 ? top_row : []
 
-          a = merge_row_edges(a,bottom_row) if
+          a = merge_row_edges(a, bottom_row) if
             i == (rowh - row0 - 1)
 
           a = middle_row unless
@@ -232,7 +232,7 @@ class Marty::Xl
 
       if rlen < rlenmax
         rows[index] ||= []
-        rows[index] += [""] * (rlenmax-rlen)
+        rows[index] += [""] * (rlenmax - rlen)
       end
 
       row_styles[index] ||= {}
@@ -333,7 +333,7 @@ class Marty::Xl
 
   def intern_range(ws, range)
     return range if range.is_a? String
-    raise "bad range #{range}" unless range.is_a?(Array) && range.length==4
+    raise "bad range #{range}" unless range.is_a?(Array) && range.length == 4
     x1, y1, x2, y2 = range
 
     y1, y2 = [y1, y2].map do |y|
@@ -355,12 +355,12 @@ class Marty::Xl
       new_ops1 += d[2].select do |inner_ops|
         inner_ops if inner_ops[0] == "pos"
       end.map do |inner|
-        [inner[0], d[1].zip(inner[1]).map { |x,y| x+y }, inner[2] ]
+        [inner[0], d[1].zip(inner[1]).map { |x, y| x + y }, inner[2]]
       end
     end
     # keep the offsets of non-pos options embedded in pos opt:
     new_ops2 = ops_pos.map do |d|
-      [ d[0], d[1], d[2].select {|inner| inner if inner[0] != "pos" } ]
+      [d[0], d[1], d[2].select { |inner| inner if inner[0] != "pos" }]
     end
     new_ops = new_ops1 + new_ops2
     count = new_ops.select do |d|
@@ -374,18 +374,18 @@ class Marty::Xl
 
   def apply_relative_worksheet_ops(ws, ops)
 
-    non_pos = ops.select {|opl| opl[0] != "pos" }
-    ops_pos = ops.select {|opl| opl[0] == "pos" }
-    ops_brd = ops.select {|opl| opl[0] == "border" }
+    non_pos = ops.select { |opl| opl[0] != "pos" }
+    ops_pos = ops.select { |opl| opl[0] == "pos" }
+    ops_brd = ops.select { |opl| opl[0] == "border" }
 
     if (ops_pos.count > 0)
       # Wrap all non-pos options in a pos option with offset 0, 0:
-      pos_00_ops = non_pos.count > 0 ? [ ["pos", [0, 0], non_pos] ] : []
+      pos_00_ops = non_pos.count > 0 ? [["pos", [0, 0], non_pos]] : []
       # Recalculate the offsets of embedded pos opts:
-      ops =  pos_00_ops + recalc_offsets(ops_pos)
+      ops = pos_00_ops + recalc_offsets(ops_pos)
     elsif (ops_brd.count > 0)
       # Wrap the non-pos options in a pos opt with offset 0, 0:
-      pos_00_ops = [ ["pos", [0, 0], non_pos] ]
+      pos_00_ops = [["pos", [0, 0], non_pos]]
       ops = pos_00_ops
     end
 
@@ -397,7 +397,7 @@ class Marty::Xl
         op, offset, data = opl
         raise "bad offset #{offset}" unless
           offset.is_a?(Array) && offset.length == 2 &&
-          offset.all? {|x| x.is_a? Integer}
+          offset.all? { |x| x.is_a? Integer }
         # column offset, row offset:
         column_offset, row_offset = offset
         r_number, last_row = row_offset, row_offset
@@ -472,7 +472,7 @@ class Marty::Xl
             color_scale_a.is_a?(Array)
 
           raise "non-hash color_scale element" unless
-            color_scale_a.all? {|x| x.is_a?(Hash)}
+            color_scale_a.all? { |x| x.is_a?(Hash) }
 
           format[:color_scale] = Axlsx::ColorScale.new(*color_scale_a)
         end
@@ -487,7 +487,7 @@ class Marty::Xl
           range.is_a?(Array) && range.length == 6
         x1, y1, x2, y2, w, h = range
         raise "bad image range, width or height #{range}" unless
-          [ x1, y1, w, h ].all? {|x| x.is_a? Integer}
+          [x1, y1, w, h].all? { |x| x.is_a? Integer }
         ws.add_image(image_src: "#{Rails.public_path}/images/#{img}",
                      noSelect: true,
                      noMove: true) do |image|
@@ -500,16 +500,16 @@ class Marty::Xl
         raise "unknown op #{opl[0]}"
       end
     end
-    worksheet_rows(ws,rows,styles,row_styles,format,borders,images) unless
+    worksheet_rows(ws, rows, styles, row_styles, format, borders, images) unless
       [ops_pos.count, ops_brd.count].all? { |a| a == 0 }
   end
 
   # recursive symbolize_keys. FIXME: this belongs in a generic
   # library somewhere.
-  def self.symbolize_keys(obj, sym_str=nil)
+  def self.symbolize_keys(obj, sym_str = nil)
     case obj
     when Array
-      obj.map {|x| symbolize_keys(x, sym_str)}
+      obj.map { |x| symbolize_keys(x, sym_str) }
     when Hash
       obj.inject({}) do |result, (key, value)|
         key = key.to_sym if key.is_a?(String)

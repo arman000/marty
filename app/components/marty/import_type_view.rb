@@ -19,7 +19,7 @@ class Marty::ImportTypeView < Marty::Grid
        :validation_function,
        :preprocess_function,
       ]
-    c.store_config.merge!({sorters: [{property: :name, direction: 'ASC'}]})
+    c.store_config.merge!({ sorters: [{ property: :name, direction: 'ASC' }] })
   end
 
   attribute :name do |c|

@@ -7,10 +7,10 @@ class Marty::PostingGrid < Marty::Grid
 
     c.header             = false
     c.model              = "Marty::Posting"
-    c.attributes            = [:name, :created_dt, :user__name, :comment]
-    c.multi_select       = false
-    c.store_config.merge!({sorters: [{property: :created_dt, direction: 'DESC'}],
-                           page_size: 12})
+    c.attributes = [:name, :created_dt, :user__name, :comment]
+    c.multi_select = false
+    c.store_config.merge!({ sorters: [{ property: :created_dt, direction: 'DESC' }],
+                           page_size: 12 })
   end
 
   client_class do |c|

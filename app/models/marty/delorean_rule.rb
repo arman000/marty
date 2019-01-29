@@ -19,7 +19,7 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def self_as_hash
-    self.attributes + {"classname"=>self.class.name}
+    self.attributes + { "classname" => self.class.name }
   end
   def self.find_fixed(results)
     results.each_with_object({}) do |(k, v), h|
@@ -51,11 +51,11 @@ class Marty::DeloreanRule < Marty::BaseRule
   def self.comp_res_keys(results, grids, ecl, pcfg)
     # FIXME in May 2019: remove this check (use as passed)
     defkeys = pcfg.is_a?(Hash) ? pcfg.keys : pcfg
-    results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
-       select {|k| defkeys.include?(k)} + grid_keys(grids, ecl)
+    results.keys.map { |k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k }.
+       select { |k| defkeys.include?(k) } + grid_keys(grids, ecl)
   end
   def self.grid_keys(grids, eclass)
-      grids.keys.map {|k| eclass.grid_final_name(k) }
+      grids.keys.map { |k| eclass.grid_final_name(k) }
   end
 
   class ComputeError < StandardError
@@ -69,7 +69,7 @@ class Marty::DeloreanRule < Marty::BaseRule
     end
   end
 
-  def self.base_compute2(ruleh, metadata_opts, params, dgparams=params)
+  def self.base_compute2(ruleh, metadata_opts, params, dgparams = params)
     begin
       id, name, eclassname, computed_guards, grids, results, fixed_results =
           ruleh.values_at("id", "name", "engine", "computed_guards", "grids",
@@ -96,7 +96,7 @@ class Marty::DeloreanRule < Marty::BaseRule
                   result.err_section)
         end
         result.cg_hash = Hash[result.cg_keys.zip(result.cg_vals)]
-        fails = result.cg_hash.select {|k,v| ![v].flatten.first}
+        fails = result.cg_hash.select { |k, v| ![v].flatten.first }
         return fails if fails.present?
       end
 
@@ -135,25 +135,25 @@ class Marty::DeloreanRule < Marty::BaseRule
         result.gr_hash = grids.each_with_object({}) do |(gvar, gname), h|
           usename = eclass.grid_final_name(gvar)
           next h[usename] = gres[gname] if gres[gname]
-          dg = Marty::DataGrid.lookup_h(pt,gname)
+          dg = Marty::DataGrid.lookup_h(pt, gname)
           dgr = dg && Marty::DataGrid.lookup_grid_distinct_entry_h(pt, dgparams,
                                                                    dg)
           h[usename] = gres[gname] = dgr["result"] if dgr
         end
       end
-      (result.res_hash||{}) + (result.gr_hash||{})
+      (result.res_hash || {}) + (result.gr_hash || {})
     ensure
       if ruleh['fixed_results']['log__']
         resh = result.to_h
-        [:res_keys, :res_vals].each {|k| resh.delete(k)} if
+        [:res_keys, :res_vals].each { |k| resh.delete(k) } if
           result.res_hash.present? || result.res_keys.blank?
-        [:cg_keys, :cg_vals].each {|k| resh.delete(k)} if
+        [:cg_keys, :cg_vals].each { |k| resh.delete(k) } if
           result.cg_hash.present? ||  result.cg_keys.blank?
         resh.delete(:gr_keys) if result.gr_hash.present? || result.gr_keys.blank?
         estack_full = resh.delete(:err_stack)
         estack = estack_full && {
-          err_stack: estack_full.select { |l| l.starts_with?('DELOREAN')}} || {}
-        detail = { input: params, dgparams: dgparams} + resh + estack
+          err_stack: estack_full.select { |l| l.starts_with?('DELOREAN') } } || {}
+        detail = { input: params, dgparams: dgparams } + resh + estack
         Marty::Logger.info("Rule Log #{ruleh['name']}",
                            Marty::Util.scrub_obj(detail))
       end
@@ -172,23 +172,23 @@ class Marty::DeloreanRule < Marty::BaseRule
     kl = ruleh["classname"].constantize
     kl.compute_rs(ruleh, pt, features)
   end
-  delorean_fn :route_validate_results, sig: [1, 2] do |ruleh, reqchk=false|
+  delorean_fn :route_validate_results, sig: [1, 2] do |ruleh, reqchk = false|
     kl = ruleh["classname"].constantize
     kl.validate_results(ruleh, reqchk)
   end
-  delorean_fn :route_validate_grid_attrs, sig: [2, 3] do |ruleh, gridname, addl_attrs=nil|
+  delorean_fn :route_validate_grid_attrs, sig: [2, 3] do |ruleh, gridname, addl_attrs = nil|
     kl = ruleh["classname"].constantize
     kl.validate_grid_attrs(ruleh, gridname, addl_attrs)
   end
 
-  def base_compute2(metadata_opts, params, dgparams=params)
+  def base_compute2(metadata_opts, params, dgparams = params)
     self.class.base_compute2(self_as_hash, metadata_opts, params, dgparams)
   end
 
   def self.get_matches_(pt, attrs, params)
     q = super(pt, attrs.except("rule_dt"), params)
     rule_dt = attrs["rule_dt"]
-    q=q.where("start_dt <= ?", rule_dt).
+    q = q.where("start_dt <= ?", rule_dt).
        where("end_dt >= ? OR end_dt IS NULL", rule_dt) if rule_dt
     #puts q.to_sql
     q

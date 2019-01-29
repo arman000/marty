@@ -64,7 +64,7 @@ module Marty
           []
 
         raise "bad cleaner function result" unless
-          cleaner_ids.all? {|id| id.is_a?(Integer) }
+          cleaner_ids.all? { |id| id.is_a?(Integer) }
 
         eline = 0
 
@@ -108,7 +108,7 @@ module Marty
           ids.keys.compact.count == 0
 
         klass.delete(remainder_ids)
-        res + remainder_ids.map {|id| [:clean, id]}
+        res + remainder_ids.map { |id| [:clean, id] }
       end
     end
   end

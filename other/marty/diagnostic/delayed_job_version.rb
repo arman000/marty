@@ -20,11 +20,11 @@ module Marty::Diagnostic; class DelayedJobVersion < Base
 
     # we will only iterate by half of the total delayed workers to avoid
     # excess use of delayed job time
-    total_workers = (total_workers/2).zero? ? 1 : total_workers/2
+    total_workers = (total_workers / 2).zero? ? 1 : total_workers / 2
 
     d_engine = Marty::ScriptSet.new.get_engine("Diagnostics")
     res = d_engine.
-            evaluate('VersionDelay', 'result', {'count' => total_workers-1})
+            evaluate('VersionDelay', 'result', { 'count' => total_workers - 1 })
 
     # merge results, remove duplicates, and construct "aggregate" object
     res.each_with_object({}) do |r, hash|
@@ -35,7 +35,7 @@ module Marty::Diagnostic; class DelayedJobVersion < Base
       versions = result.uniq
       status = versions.count == 1 && versions[0] == ENV['DELAYED_VER']
 
-      {node => {'Version' => create_info(versions.join("\n"), status)}}
+      { node => { 'Version' => create_info(versions.join("\n"), status) } }
     end.reduce(:deep_merge)
   end
 end

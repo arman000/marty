@@ -58,7 +58,7 @@ class Marty::Posting < Marty::Base
     find_by_name(name).try(:created_dt)
   end
 
-  delorean_fn :first_match, sig: [1, 2] do |dt, posting_type=nil|
+  delorean_fn :first_match, sig: [1, 2] do |dt, posting_type = nil|
     raise "bad posting type" if
       posting_type && !posting_type.is_a?(Marty::PostingType)
 
@@ -67,21 +67,21 @@ class Marty::Posting < Marty::Base
     q.order("created_dt DESC").first.attributes
   end
 
-  def self.get_latest(limit, is_test=nil)
+  def self.get_latest(limit, is_test = nil)
     # IMPORTANT: is_test arg is ignored (KEEP for backward compat.)
 
-    q=where("created_dt <> 'infinity'").
+    q = where("created_dt <> 'infinity'").
        order("created_dt DESC").limit(limit)
   end
 
-  delorean_fn :get_latest_by_type, sig: [1, 2] do |limit, posting_types=[]|
+  delorean_fn :get_latest_by_type, sig: [1, 2] do |limit, posting_types = []|
     raise "missing posting types list" unless posting_types
     raise "bad posting types list" unless posting_types.is_a?(Array)
 
-    q=joins(:posting_type).where("created_dt <> 'infinity'").
-       where(marty_posting_types: { name: posting_types } ).
+    q = joins(:posting_type).where("created_dt <> 'infinity'").
+       where(marty_posting_types: { name: posting_types }).
        select(get_struct_attrs).
        order("created_dt DESC").limit(limit || 1)
-    q.map {|ar| ar.attributes}
+    q.map { |ar| ar.attributes }
   end
 end

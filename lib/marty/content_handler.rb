@@ -32,11 +32,11 @@ module Marty::ContentHandler
       when "html"
         res = data.to_s
       else
-        res, format = {error: "Unknown format: #{format}"}.to_json, "json"
+        res, format = { error: "Unknown format: #{format}" }.to_json, "json"
       end
     rescue => exc
       res, format =
-        {error: "Failed conversion #{format}: #{exc}"}.to_json, "json"
+        { error: "Failed conversion #{format}: #{exc}" }.to_json, "json"
     end
 
     type, disposition = GEN_FORMATS[format]
@@ -54,7 +54,7 @@ module Marty::ContentHandler
 
   def self.uniq_filename(filename, fset)
     (0..1000).each do |i|
-      post = i==0 ? "" : " (#{i})"
+      post = i == 0 ? "" : " (#{i})"
       fn = filename + post
       return fn unless fset.member? fn
     end

@@ -9,10 +9,10 @@ module Marty::Diagnostic; class Reporter < Request
     self.request = request
 
     ops = op.split(/,\s*/).uniq - [unresolve_diagnostic(self)]
-    reps = ops.select {|o| reports.keys.include?(o)}
+    reps = ops.select { |o| reports.keys.include?(o) }
 
-    self.diagnostics = ((ops - reps) + reps.map {|r| reports[r]}.flatten).uniq.
-                         map {|d| resolve_diagnostic(d)}
+    self.diagnostics = ((ops - reps) + reps.map { |r| reports[r] }.flatten).uniq.
+                         map { |d| resolve_diagnostic(d) }
 
     self.scope == 'local' ? generate : aggregate
   end
@@ -46,7 +46,7 @@ module Marty::Diagnostic; class Reporter < Request
 
   def self.aggregate
     data = consistency([generate, get_remote_diagnostics].reduce(:deep_merge))
-    {'data' => data, 'errors' => errors(data)}
+    { 'data' => data, 'errors' => errors(data) }
   end
 
   def self.consistency data
@@ -69,11 +69,11 @@ module Marty::Diagnostic; class Reporter < Request
   end
 
   def self.displays result
-    result.map {|d, r| resolve_diagnostic(d).display(r)}.sum
+    result.map { |d, r| resolve_diagnostic(d).display(r) }.sum
   end
 
   def self.get_remote_diagnostics
-    ops = diagnostics.map {|d| unresolve_diagnostic(d) if d.aggregatable}.compact
+    ops = diagnostics.map { |d| unresolve_diagnostic(d) if d.aggregatable }.compact
     return {} if ops.empty?
 
     nodes = Node.get_nodes - [Node.my_ip]
@@ -92,7 +92,7 @@ module Marty::Diagnostic; class Reporter < Request
         req.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
         begin
-          response = req.start {|http| http.get(uri.to_s)}
+          response = req.start { |http| http.get(uri.to_s) }
           next JSON.parse(response.body) if response.code == "200"
 
           Fatal.message(response.body, type: response.message, node: uri.host)

@@ -6,7 +6,7 @@ module Marty::Diagnostic; class DelayedJobWorkers < Base
       name = c['application_name']
       name if name.include?('delayed') && (ip == my_ip || ip == '127.0.0.1')
     end.compact.uniq.count
-    {'Delayed Workers / Node' => workers.zero? ? error(workers) : workers}
+    { 'Delayed Workers / Node' => workers.zero? ? error(workers) : workers }
   end
 end
 end

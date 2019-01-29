@@ -22,7 +22,7 @@ class Marty::DataExporter
         rh[k] = hl.map { |h| h[k] }
     end if transpose
 
-    [keys.to_a] + hl.map {|h| keys.map {|k| h[k]}}
+    [keys.to_a] + hl.map { |h| keys.map { |k| h[k] } }
   end
 
   def self.encode_json(s)
@@ -33,17 +33,17 @@ class Marty::DataExporter
     Zlib.inflate Base64.strict_decode64(s)
   end
 
-  def self.to_csv(obj, config=nil)
+  def self.to_csv(obj, config = nil)
     obj = [obj] unless obj.respond_to? :map
 
     config ||= {}
 
     # if all array items are hashes, we merge them
     obj = hash_array_merge(obj, config["transpose"]) if
-      obj.is_a?(Array) && obj.all? {|x| x.is_a? Hash}
+      obj.is_a?(Array) && obj.all? { |x| x.is_a? Hash }
 
     # symbolize config keys as expected by CSV.generate
-    conf = config.each_with_object({}) do |(k,v), h|
+    conf = config.each_with_object({}) do |(k, v), h|
       h[k.to_sym] = v unless k.to_s == "transpose"
     end
 
@@ -88,7 +88,7 @@ class Marty::DataExporter
     klass::EXPORT_ORDER.select { |attr| attrs.include?(attr) }
   end
 
-  def self.export_attrs(klass, obj, attrs=nil, exclude_attrs=[])
+  def self.export_attrs(klass, obj, attrs = nil, exclude_attrs = [])
     col_types = Marty::DataConversion.col_types(klass)
 
     attr_list_raw = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
@@ -102,7 +102,7 @@ class Marty::DataExporter
       next [v] if !type.is_a?(Hash)
 
       # no child row, return nils for each field
-      next [nil]*type[:assoc_keys].count if v.nil?
+      next [nil] * type[:assoc_keys].count if v.nil?
 
       assoc_keys  = type[:assoc_keys]
       assoc_class = type[:assoc_class]
@@ -115,7 +115,7 @@ class Marty::DataExporter
     end
   end
 
-  def self.export_headers(klass, attrs=nil, exclude_attrs=[])
+  def self.export_headers(klass, attrs = nil, exclude_attrs = [])
     col_types = Marty::DataConversion.col_types(klass)
 
     attr_list_raw = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
@@ -135,13 +135,13 @@ class Marty::DataExporter
 
       assoc_class = type[:assoc_class]
 
-      export_headers(assoc_class, assoc_keys).map {|k| "#{c}__#{k}"}
+      export_headers(assoc_class, assoc_keys).map { |k| "#{c}__#{k}" }
     end
   end
 
   # Given a Mcfly klass, generate an export array.  Can potentially
   # use up a lot of memory if the result set is large.
-  def self.do_export(ts, klass, sort_field=nil, exclude_attrs=[])
+  def self.do_export(ts, klass, sort_field = nil, exclude_attrs = [])
     query = klass
 
     if Mcfly.has_mcfly?(klass)
@@ -152,9 +152,9 @@ class Marty::DataExporter
     do_export_query_result(klass, query.order(sort_field || :id), exclude_attrs)
   end
 
-  def self.do_export_query_result(klass, qres, exclude_attrs=[])
+  def self.do_export_query_result(klass, qres, exclude_attrs = [])
     # strip _id from assoc fields
-    header = [ export_headers(klass, nil, exclude_attrs).flatten ]
+    header = [export_headers(klass, nil, exclude_attrs).flatten]
 
     header + qres.map do |obj|
       export_attrs(klass, obj, nil, exclude_attrs).flatten(1)
@@ -167,6 +167,6 @@ class Marty::DataExporter
     klass = obj.class
     headers = export_headers(klass)
     rec = export_attrs(klass, obj).flatten
-    Hash[ headers.zip(rec) ]
+    Hash[headers.zip(rec)]
   end
 end

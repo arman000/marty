@@ -24,7 +24,7 @@ module Marty; class UserView < Marty::Grid
     c.editing        = :in_form
     c.paging         = :pagination
     c.multi_select   = false
-    c.store_config.merge!(sorters: [{property: :login,
+    c.store_config.merge!(sorters: [{ property: :login,
                                      direction: 'ASC',
                                     }]) if c.attributes.include?(:login)
     c.scope = ->(arel) { arel.includes(:roles) }
@@ -152,7 +152,7 @@ module Marty; class UserView < Marty::Grid
     c.editor_config = {
       multi_select: true,
       empty_text:   I18n.t("user_grid.select_roles"),
-      store:        Role.pluck(:name).map {|n| I18n.t("roles.#{n}")}.sort,
+      store:        Role.pluck(:name).map { |n| I18n.t("roles.#{n}") }.sort,
       type:         :string,
       xtype:        :combo,
     }

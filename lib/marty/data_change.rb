@@ -19,7 +19,7 @@ class Marty::DataChange
 
     changes.each_with_object({}) do |(group_id, ol), h|
       h[group_id] = ol.each_with_index.map do |o, i|
-        profile = {"obj" => o.attributes}
+        profile = { "obj" => o.attributes }
 
         # Create a profile hash for each object in the group.
         # "status" tells us if the object is old/new/mod.  If
@@ -34,7 +34,7 @@ class Marty::DataChange
           profile["status"] = o.created_dt < t0 ? "old" : "new"
           prev = nil
         else
-          profile["status"], prev = "mod", prev = ol[i-1]
+          profile["status"], prev = "mod", prev = ol[i - 1]
         end
 
         exp_attrs = Marty::DataExporter.export_attrs(klass, o).flatten(1)
@@ -69,19 +69,19 @@ class Marty::DataChange
 
     changes.each do |group_id, ol|
       ol.each_with_index.map do |o, i|
-        deleted +=1 if (group_id == o.id &&
+        deleted += 1 if (group_id == o.id &&
                         o.obsoleted_dt != Float::INFINITY &&
                         (t1 == 'infinity' || o.obsoleted_dt < t1)
                         )
         if i == 0
-          created +=1 unless o.created_dt < t0
+          created += 1 unless o.created_dt < t0
         else
           updated += 1
         end
       end
     end
 
-    {'created' => created, 'updated' => updated, 'deleted' => deleted}
+    { 'created' => created, 'updated' => updated, 'deleted' => deleted }
   end
 
   delorean_fn :class_list, sig: 0 do
@@ -103,7 +103,7 @@ class Marty::DataChange
     classes.to_set & class_list.to_set
   end
 
-  delorean_fn :do_export, sig: [2, 4] do |pt, klass, sort_field=nil, exclude_attrs=[]|
+  delorean_fn :do_export, sig: [2, 4] do |pt, klass, sort_field = nil, exclude_attrs = []|
     # allow classes on class_list or any Enum to be exported
     raise "'#{klass}' not on class_list" unless
       class_list.member?(klass) || klass.constantize.is_a?(Marty::Enum)
@@ -151,7 +151,7 @@ class Marty::DataChange
     end
   end
 
-  def self.get_changed_data(t0, t1, klass, ids=nil)
+  def self.get_changed_data(t0, t1, klass, ids = nil)
     # The following test fails when t0/t1 are infinity.  ActiveSupport
     # doesn't know about infinity.
     # return unless t0 < t1
@@ -195,7 +195,7 @@ class Marty::DataChange
   # {"source" => {k1=>v1, k2=>v2, ...},
   #  "input"  => {k1=>v1, k2=>v2, ...}}
 
-  delorean_fn :diff, sig: [2, 3] do |klass, input_data, ts='infinity'|
+  delorean_fn :diff, sig: [2, 3] do |klass, input_data, ts = 'infinity'|
     ts = Mcfly.normalize_infinity(ts)
     keys = Marty::DataConversion.assoc_keys(klass).map(&:to_s).to_set
 
@@ -245,8 +245,8 @@ class Marty::DataChange
       source_export = Marty::DataExporter.export_obj(source) % input_keys
 
       different << [
-        {"_origin_" => "source"} + source_export,
-        {"_origin_" => "input"} + input,
+        { "_origin_" => "source" } + source_export,
+        { "_origin_" => "input" } + input,
       ]
     end
 
@@ -302,7 +302,7 @@ class Marty::DataChange
         where("#{rtable}.group_id = #{rtable}.id").
         all
 
-      arr = arr.map {|obj| Marty::DataExporter.export_attrs(klass, obj, [fk])}
+      arr = arr.map { |obj| Marty::DataExporter.export_attrs(klass, obj, [fk]) }
 
       res[fk] = arr unless arr.empty?
     end

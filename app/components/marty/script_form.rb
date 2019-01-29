@@ -57,7 +57,7 @@ class Marty::ScriptForm < Marty::Form
 
     # copied from corresponding method in form_panel.services
     data = ActiveSupport::JSON.decode(params[:data])
-    data.each_pair do |k,v|
+    data.each_pair do |k, v|
       data[k] = nil if v.blank? || v == "null"
     end
 

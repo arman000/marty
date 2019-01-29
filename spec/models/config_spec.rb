@@ -16,17 +16,17 @@ module Marty
       end
 
       def testval_fail(val)
-        expect {testval(val)}.to raise_error(ActiveRecord::RecordInvalid,
+        expect { testval(val) }.to raise_error(ActiveRecord::RecordInvalid,
                                             'Validation failed: bad JSON value')
       end
 
       it "should handle various structures correctly" do
         testval("[1,2,3]")
         testval("[1,\"2,3\"]")
-        testval([1,2,3])
-        testval([1,"2,3"])
+        testval([1, 2, 3])
+        testval([1, "2,3"])
 
-        testval({ "key1" => [1,2,3], "keystr" => { "val" => "val"}})
+        testval({ "key1" => [1, 2, 3], "keystr" => { "val" => "val" } })
         testval(%Q({ "key1" : [1,2,3], "keystr" : { "val" : "val"}}))
 
         testval("123456.1234")
@@ -41,7 +41,7 @@ module Marty
 
       it "should handle del" do
         (0..10).each do |i|
-          v = {"i" => i}
+          v = { "i" => i }
           Marty::Config["k#{i}"] = v
           expect(Marty::Config["k#{i}"]).to eq(v)
         end
@@ -63,7 +63,7 @@ module Marty
 
       it "should allow nil (null) to exist in other structures" do
         testval([nil, 1, 2, nil])
-        testval({"key1"  => nil, "key2" => false, "key3" => 'val'})
+        testval({ "key1" => nil, "key2" => false, "key3" => 'val' })
       end
     end
   end

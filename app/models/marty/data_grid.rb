@@ -19,16 +19,16 @@ class Marty::DataGrid < Marty::Base
         Marty::DataGrid.convert_data_type(dg.data_type)
 
       dg.errors.add(:base, "data must be array of arrays") unless
-        dg.data.is_a?(Array) && dg.data.all? {|a| a.is_a? Array}
+        dg.data.is_a?(Array) && dg.data.all? { |a| a.is_a? Array }
 
       dg.errors.add(:base, "metadata must be an array of hashes") unless
-        dg.metadata.is_a?(Array) && dg.metadata.all? {|a| a.is_a? Hash}
+        dg.metadata.is_a?(Array) && dg.metadata.all? { |a| a.is_a? Hash }
 
       dg.errors.add(:base, "metadata must contain only h/v dirs") unless
-        dg.metadata.all? {|h| ["h", "v"].member? h["dir"]}
+        dg.metadata.all? { |h| ["h", "v"].member? h["dir"] }
 
       dg.errors.add(:base, "metadata item attrs must be unique") unless
-        dg.metadata.map {|h| h["attr"]}.uniq.length == dg.metadata.length
+        dg.metadata.map { |h| h["attr"] }.uniq.length == dg.metadata.length
 
       dg.metadata.each do |inf|
         attr, type, keys, rs_keep =
@@ -53,15 +53,15 @@ class Marty::DataGrid < Marty::Base
           Marty::DataGrid.type_to_index(type)
 
         dg.errors.add(:base, "bad metadata keys") unless
-          keys.is_a?(Array) && keys.length>0
+          keys.is_a?(Array) && keys.length > 0
       end
 
       # Check key uniqueness of vertical/horizontal key
       # combinations. FIXME: ideally, we should also check for
       # array/range key subsumption.  Those will result in runtime
       # errors anyway when multiple hits are produced.
-      v_keys = dg.dir_infos("v").map {|inf| inf["keys"]}
-      h_keys = dg.dir_infos("h").map {|inf| inf["keys"]}
+      v_keys = dg.dir_infos("v").map { |inf| inf["keys"] }
+      h_keys = dg.dir_infos("h").map { |inf| inf["keys"] }
 
       v_zip_keys = v_keys.empty? ? [] : v_keys[0].zip(*v_keys[1..-1])
       h_zip_keys = h_keys.empty? ? [] : h_keys[0].zip(*h_keys[1..-1])
@@ -169,8 +169,8 @@ class Marty::DataGrid < Marty::Base
 
   PLV_DT_FMT = "%Y-%m-%d %H:%M:%S.%N6"
 
-  def self.plv_lookup_grid_distinct(h_passed, dgh, ret_grid_data=false,
-                                    distinct=true)
+  def self.plv_lookup_grid_distinct(h_passed, dgh, ret_grid_data = false,
+                                    distinct = true)
     cd = dgh["created_dt"]
     @@dtcache ||= {}
     @@dtcache[cd] ||= cd.strftime(PLV_DT_FMT)
@@ -222,7 +222,7 @@ class Marty::DataGrid < Marty::Base
   # deprecated - remove 2018-Oct
   cached_delorean_fn :lookup_grid, sig: 4 do |pt, dg, h, distinct|
     dg_is_grid = Marty::DataGrid === dg
-    dg_is_os   =  dg.is_a?(OpenStruct)
+    dg_is_os = dg.is_a?(OpenStruct)
     raise "bad DataGrid #{dg}" unless dg_is_grid || dg_is_os
     raise "non-hash arg #{h}" unless Hash === h
     dgh = dg_is_os ? dg.to_h.stringify_keys :
@@ -247,12 +247,12 @@ class Marty::DataGrid < Marty::Base
       klass.find_by_name(v)
     else
       # FIXME: very hacky -- hard-coded name
-      Marty::DataConversion.find_row(klass, {"name" => v}, pt)
+      Marty::DataConversion.find_row(klass, { "name" => v }, pt)
     end
   end
 
-  def self.lookup_grid_distinct_entry_h(pt, h, dgh, visited=nil, follow=true,
-                                        return_grid_data=false, distinct=true)
+  def self.lookup_grid_distinct_entry_h(pt, h, dgh, visited = nil, follow = true,
+                                        return_grid_data = false, distinct = true)
 
     # Perform grid lookup, if result is another data_grid, and follow is true,
     # then perform lookup on the resulting grid.  Allows grids to be nested
@@ -274,7 +274,7 @@ class Marty::DataGrid < Marty::Base
 
     res = vhash["result"]
 
-    v =  case
+    v = case
              when Marty::PgEnum === res
                c_data_type.find_by_name(res)
              when Marty::DataGrid == c_data_type
@@ -282,10 +282,10 @@ class Marty::DataGrid < Marty::Base
                  Marty::DataGrid.lookup_h(pt, res) :
                  Marty::DataGrid.lookup(pt, res)
              else
-               Marty::DataConversion.find_row(c_data_type, {"name" => res}, pt)
+               Marty::DataConversion.find_row(c_data_type, { "name" => res }, pt)
          end
 
-    return vhash.merge({"result" => v}) unless (Marty::DataGrid == c_data_type &&
+    return vhash.merge({ "result" => v }) unless (Marty::DataGrid == c_data_type &&
                                               follow)
 
     visited ||= []
@@ -300,7 +300,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   def dir_infos(dir)
-    metadata.select {|inf| inf["dir"] == dir}
+    metadata.select { |inf| inf["dir"] == dir }
   end
 
   def self.export_keys(inf)
@@ -351,11 +351,11 @@ class Marty::DataGrid < Marty::Base
     v_infos, h_infos = dir_infos("v"), dir_infos("h")
 
     h_key_rows = h_infos.map do |inf|
-      [nil]*v_infos.count + self.class.export_keys(inf)
+      [nil] * v_infos.count + self.class.export_keys(inf)
     end
 
     transposed_v_keys = v_infos.empty? ? [[]] :
-      v_infos.map {|inf| self.class.export_keys(inf)}.transpose
+      v_infos.map { |inf| self.class.export_keys(inf) }.transpose
 
     data_rows = transposed_v_keys.each_with_index.map do |keys, i|
       keys + (self.data[i] || [])
@@ -399,7 +399,7 @@ class Marty::DataGrid < Marty::Base
     when "string"
       res = v.split(ARRSEP).uniq.sort
       raise "leading/trailing spaces in elements not allowed" if
-        res.any? {|x| x != x.strip}
+        res.any? { |x| x != x.strip }
       raise "0-length string not allowed" if res.any?(&:empty?)
       res
     when "boolean"
@@ -451,7 +451,7 @@ class Marty::DataGrid < Marty::Base
     pt ||= 'infinity'
 
     rows = CSV.new(grid_text, options).to_a
-    blank_index = rows.find_index {|x| x.all?(&:nil?)}
+    blank_index = rows.find_index { |x| x.all?(&:nil?) }
 
     raise "must have a blank row separating metadata" unless
       blank_index
@@ -490,36 +490,36 @@ class Marty::DataGrid < Marty::Base
       res
     end
 
-    v_infos = metadata.select {|inf| inf["dir"] == "v"}
-    h_infos = metadata.select {|inf| inf["dir"] == "h"}
+    v_infos = metadata.select { |inf| inf["dir"] == "v" }
+    h_infos = metadata.select { |inf| inf["dir"] == "h" }
 
     # keys+data start right after blank_index
-    data_index = blank_index+1
+    data_index = blank_index + 1
 
     # process horizontal key rows
     h_infos.each_with_index do |inf, i|
-      row = rows[data_index+i]
+      row = rows[data_index + i]
 
-      raise "horiz. key row #{data_index+i} must include nil starting cells" if
+      raise "horiz. key row #{data_index + i} must include nil starting cells" if
         row[0, v_infos.count].any?
 
       inf["keys"] = parse_keys(pt, row[v_infos.count, row.count], inf["type"])
     end
 
     raise "horiz. info keys length mismatch!" unless
-      h_infos.map {|inf| inf["keys"].length}.uniq.count <= 1
+      h_infos.map { |inf| inf["keys"].length }.uniq.count <= 1
 
-    data_rows = rows[data_index+h_infos.count, rows.count]
+    data_rows = rows[data_index + h_infos.count, rows.count]
 
     # process vertical key columns
-    v_key_cols = data_rows.map {|r| r[0, v_infos.count]}.transpose
+    v_key_cols = data_rows.map { |r| r[0, v_infos.count] }.transpose
 
     v_infos.each_with_index do |inf, i|
       inf["keys"] = parse_keys(pt, v_key_cols[i], inf["type"])
     end
 
     raise "vert. info keys length mismatch!" unless
-      v_infos.map {|inf| inf["keys"].length}.uniq.count <= 1
+      v_infos.map { |inf| inf["keys"].length }.uniq.count <= 1
 
     c_data_type = Marty::DataGrid.convert_data_type(data_type)
 
@@ -549,7 +549,7 @@ class Marty::DataGrid < Marty::Base
     [metadata, data, data_type, lenient]
   end
 
-  def self.create_from_import(name, import_text, created_dt=nil)
+  def self.create_from_import(name, import_text, created_dt = nil)
     metadata, data, data_type, lenient = parse(created_dt, import_text, {})
     dg            = self.new
     dg.name       = name
@@ -562,7 +562,7 @@ class Marty::DataGrid < Marty::Base
     dg
   end
 
-  def update_from_import(name, import_text, created_dt=nil)
+  def update_from_import(name, import_text, created_dt = nil)
     metadata, data, data_type, lenient =
                                self.class.parse(created_dt, import_text, {})
 
@@ -597,7 +597,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.modify_grid(params, metadata, data)
-    removes = ["h", "v"].each_with_object({}) {|dir, hash| hash[dir] = Set.new}
+    removes = ["h", "v"].each_with_object({}) { |dir, hash| hash[dir] = Set.new }
 
     metadata_copy, data_copy = metadata.deep_dup, data.deep_dup
 

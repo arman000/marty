@@ -11,8 +11,8 @@ class Marty::ScriptGrid < Marty::Grid
     c.model                  = "Marty::Script"
     c.multi_select           = false
     c.attributes ||= [:name, :created_dt, :tag]
-    c.title   ||= I18n.t('scripts', default: "Scripts")
-    c.store_config.merge!({sorters: [{property: :name, direction: 'ASC'}]})
+    c.title ||= I18n.t('scripts', default: "Scripts")
+    c.store_config.merge!({ sorters: [{ property: :name, direction: 'ASC' }] })
   end
 
   def get_records(params)
