@@ -95,10 +95,10 @@ class Marty::DeloreanRule < Marty::BaseRule
           result.err_stack   = e.backtrace
           result.err_section = 'computed_guards'
           raise ComputeError.new(
-                  "Error (guard) in rule '#{id}:#{name}': #{result.err_message}",
-                  result.err_stack,
-                  params.clone,
-                  result.err_section)
+            "Error (guard) in rule '#{id}:#{name}': #{result.err_message}",
+            result.err_stack,
+            params.clone,
+            result.err_section)
         end
         result.cg_hash = Hash[result.cg_keys.zip(result.cg_vals)]
         fails = result.cg_hash.select { |k, v| ![v].flatten.first }
@@ -122,12 +122,12 @@ class Marty::DeloreanRule < Marty::BaseRule
           result.err_stack   = e.backtrace
           result.err_section = 'results'
           raise ComputeError.new(
-                  "Error (results) in rule '#{id}:#{name}': #{result.err_message}",
-                  result.err_stack,
-                  params + {
-                    "dgparams__" => dgparams,
-                  },
-                  result.err_section)
+            "Error (results) in rule '#{id}:#{name}': #{result.err_message}",
+            result.err_stack,
+            params + {
+              "dgparams__" => dgparams,
+            },
+            result.err_section)
         end
         result.res_hash = Hash[result.res_keys.zip(result.res_vals)]
       else

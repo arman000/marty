@@ -313,9 +313,9 @@ module Marty::RuleSpec
         end        .to raise_error(/hi mom/)
         # simple2a should return results without evaluation (they are all fixed)
         expect(simple2a.compute(@ruleopts_myrule, { "pt" => Time.zone.now })).to eq(
-                                       { "simple_result" => "b value",
-                                        "sr2" => true,
-                                       })
+          { "simple_result" => "b value",
+           "sr2" => true,
+          })
         # simple2b should return grid results without evaluation
         expect(simple2b.compute(@ruleopts_myrule,
                                 { "pt" => Time.zone.now,

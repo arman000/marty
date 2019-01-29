@@ -1,9 +1,9 @@
 class Marty::ImportTypeView < Marty::Grid
   has_marty_permissions \
-  create: :admin,
-  read: :any,
-  update: :admin,
-  delete: :admin
+    create: :admin,
+    read: :any,
+    update: :admin,
+    delete: :admin
 
   def configure(c)
     super

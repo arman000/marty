@@ -80,23 +80,23 @@ describe Marty::Event do
     expect(Marty::Event.currently_running('testcl3', 987)).to eq([])
     expect(Marty::Event.last_event('testcl1', 123))
       .to include(
-           { "klass" => "testcl1",
-            "subject_id" => 123,
-            "enum_event_operation" => "PRICING",
-            "comment" => "c comment", "expire_secs" => 10000 })
+        { "klass" => "testcl1",
+         "subject_id" => 123,
+         "enum_event_operation" => "PRICING",
+         "comment" => "c comment", "expire_secs" => 10000 })
     expect(Marty::Event.last_event('testcl2', 123))
       .to include(
-           { "klass" => "testcl2",
-            "subject_id" => 123,
-            "enum_event_operation" => "PRICING",
-            "comment" => "old event" })
+        { "klass" => "testcl2",
+         "subject_id" => 123,
+         "enum_event_operation" => "PRICING",
+         "comment" => "old event" })
     expect(Marty::Event.last_event('testcl3', 987))
       .to include(
-           { "klass" => "testcl3",
-            "subject_id" => 987,
-            "enum_event_operation" => "PRICING",
-            "comment" => nil,
-            "expire_secs" => nil })
+        { "klass" => "testcl3",
+         "subject_id" => 987,
+         "enum_event_operation" => "PRICING",
+         "comment" => nil,
+         "expire_secs" => nil })
 
     Timecop.freeze(@time + 1.second)
     Marty::Event.clear_cache

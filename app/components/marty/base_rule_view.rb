@@ -225,7 +225,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
             ),
         vbox(width: '2%', border: false),
         vbox(
-             width: '55%', border: false),
+          width: '55%', border: false),
         height: '40%',
         border: false,
       ),

@@ -1,7 +1,7 @@
 class Marty::TagGrid < Marty::Grid
   has_marty_permissions \
-  read:   :any,
-  create: :dev
+    read:   :any,
+    create: :dev
 
   def configure(c)
     super

@@ -13,9 +13,9 @@ class Marty::RpcController < ActionController::Base
 
       # resolve api config in order to determine api class and settings
       api_config = Marty::ApiConfig.lookup(*massaged_params.values_at(
-                                             :script,
-                                             :node,
-                                             :attr)
+        :script,
+        :node,
+        :attr)
                                           ) || {}
 
       # default to base class if no config is present

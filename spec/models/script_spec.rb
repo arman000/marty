@@ -44,7 +44,7 @@ describe Marty::Script do
                                         obsoleted_dt: 'infinity').count
             }           .by(0)
       expect(Marty::Script.find_by(
-               obsoleted_dt: 'infinity', name: 'TestExistsAndDifferent2')
+        obsoleted_dt: 'infinity', name: 'TestExistsAndDifferent2')
                .created_dt.to_s).to eq(now.to_s)
     end
   end

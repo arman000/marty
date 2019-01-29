@@ -1,9 +1,9 @@
 class Marty::ScriptGrid < Marty::Grid
   has_marty_permissions \
-  create: [:dev],
-  read: :any,
-  update: [:dev],
-  delete: [:dev]
+    create: [:dev],
+    read: :any,
+    update: [:dev],
+    delete: [:dev]
 
   def configure(c)
     super

@@ -1,8 +1,8 @@
 class Marty::EventView < Marty::Grid
   has_marty_permissions \
-  read: :any,
-  update: [:admin],
-  delete: [:admin]
+    read: :any,
+    update: [:admin],
+    delete: [:admin]
 
   def configure(c)
     super

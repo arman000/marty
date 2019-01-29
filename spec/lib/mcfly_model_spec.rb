@@ -90,9 +90,9 @@ EOF
 
       @errs.in_groups_of(2) do |name, fn|
         Marty::Script.load_script_bodies(
-        {
-          name => (errscript % fn),
-        }, Date.today)
+          {
+            name => (errscript % fn),
+          }, Date.today)
       end
 
       Marty::Script.load_script_bodies({ 'E5' => (errscript2 % 'a_func_p') }, dt)
@@ -175,7 +175,7 @@ EOF
         ['E5', 'a_func_p', 'E6', 'b_func_p'].in_groups_of(2) do |scr, fn|
           err = /Too many args to #{fn}/
           expect { Marty::ScriptSet.new.get_engine(scr) }.to raise_error(
-                                             Delorean::BadCallError, err)
+            Delorean::BadCallError, err)
         end
       end
     end

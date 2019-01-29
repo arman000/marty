@@ -202,7 +202,7 @@ class Marty::DataGrid < Marty::Base
     if res["error"]
       msg = res["error"]
       parms, sqls, ress, dg = res["error_extra"].values_at(
-                           "params", "sql", "results", "dg")
+        "params", "sql", "results", "dg")
 
       raise "DG #{name}: Error in PLV8 call: #{msg}\n"\
             "params: #{parms}\n"\
@@ -607,7 +607,7 @@ class Marty::DataGrid < Marty::Base
 
     metadata_copy.each do |meta|
       dir, keys, type, rs_keep = meta.values_at(
-                         "dir", "keys", "type", "rs_keep")
+        "dir", "keys", "type", "rs_keep")
       next unless rs_keep
 
       if type == "numrange" || type == "int4range"
