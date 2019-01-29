@@ -74,12 +74,12 @@ module Marty; class DataGridView < McflyGridPanel
     c.model   = "Marty::DataGrid"
     c.attributes =
       [
-       :name,
-       :vcols,
-       :hcols,
-       :lenient,
-       :data_type,
-       :created_dt,
+        :name,
+        :vcols,
+        :hcols,
+        :lenient,
+        :data_type,
+        :created_dt,
       ]
 
     c.store_config.merge!({ sorters:  [{ property: :name, direction: 'ASC' }] })
@@ -153,8 +153,8 @@ module Marty; class DataGridView < McflyGridPanel
 
   def default_form_items
     [
-     :name,
-     textarea_field(:export, height: 300, hide_label: true),
+      :name,
+      textarea_field(:export, height: 300, hide_label: true),
     ]
   end
 

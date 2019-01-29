@@ -49,11 +49,11 @@ class Marty::SchemaHelper
   #  required field is missing (which is not really a required field)
   delorean_fn :disallow_if_not_present, sig: [2, 20] do |dep_column, *var_array|
     { "anyOf" => [
-        { "required" => [dep_column] },
-        { "properties" => var_array.each_with_object({}) do |v, h|
-           h[v] = { "not" => {} }
-                          end
-        }] }
+      { "required" => [dep_column] },
+      { "properties" => var_array.each_with_object({}) do |v, h|
+         h[v] = { "not" => {} }
+                        end
+      }] }
   end
 
   # if conds is true, var_array columns are not allowed

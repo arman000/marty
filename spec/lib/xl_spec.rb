@@ -98,9 +98,9 @@ describe Marty::Xl do
 
   before(:all) do
     @coords = [
-               [[9, 5], [2, 5]],   # coords for non-overlaping datasets
-               [[5, 8], [2, 5]],   # coords for overlaping datasets
-              ]
+      [[9, 5], [2, 5]],   # coords for non-overlaping datasets
+      [[5, 8], [2, 5]],   # coords for overlaping datasets
+    ]
   end
 
   it "should be able to create a spreadsheet that includes multiple datasets that don't overlap " do

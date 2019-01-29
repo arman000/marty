@@ -264,8 +264,8 @@ class Marty::Xl
         format[index].each do |f|
           raise "wrong number of arguments for #{f[0]}" unless
             [
-             ["conditional_formatting", 3],
-             ["merge", 2]
+              ["conditional_formatting", 3],
+              ["merge", 2]
             ].member?([f[0], f.length])
 
           wsrows << f

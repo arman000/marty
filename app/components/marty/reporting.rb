@@ -2,9 +2,9 @@ class Marty::Reporting < Netzke::Base
   def configure(c)
     super
     c.items = [
-               :report_select,
-               :report_form,
-              ]
+      :report_select,
+      :report_form,
+    ]
   end
 
   client_class do |c|

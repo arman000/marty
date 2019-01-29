@@ -24,14 +24,14 @@ EOF
 
 fannie_bup1_export =
     [
-     ["entity", "bud_category", "note_rate", "settlement_mm",
-      "settlement_yy", "buy_up", "buy_down"],
-     [nil, "Conv Fixed 30", 2.250, 12, 2012, 4.42, 7.24],
-     [nil, "Conv Fixed 30", 2.375, 12, 2012, 4.42, 7.24],
-     [nil, "Conv Fixed 30", 2.500, 12, 2012, 4.413, 7.228],
-     [nil, "Conv Fixed 30", 2.625, 12, 2012, 4.375, 7.162],
-     [nil, "Conv Fixed 30", 2.750, 12, 2012, 4.329, 7.093],
-     [nil, "Conv Fixed 20", 2.875, 12, 2012, 4.248, 6.959],
+      ["entity", "bud_category", "note_rate", "settlement_mm",
+       "settlement_yy", "buy_up", "buy_down"],
+      [nil, "Conv Fixed 30", 2.250, 12, 2012, 4.42, 7.24],
+      [nil, "Conv Fixed 30", 2.375, 12, 2012, 4.42, 7.24],
+      [nil, "Conv Fixed 30", 2.500, 12, 2012, 4.413, 7.228],
+      [nil, "Conv Fixed 30", 2.625, 12, 2012, 4.375, 7.162],
+      [nil, "Conv Fixed 30", 2.750, 12, 2012, 4.329, 7.093],
+      [nil, "Conv Fixed 20", 2.875, 12, 2012, 4.248, 6.959],
     ]
 
 fannie_bup2 = <<EOF

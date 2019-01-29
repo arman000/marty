@@ -160,12 +160,12 @@ class Marty::ReportForm < Marty::Form
       c.title = "ERROR"
       c.items =
         [
-         {
-           field_label: 'Exception',
-           xtype:       :displayfield,
-           name:        'displayfield1',
-           value:       "<span style=\"color:red;\">#{exc}</span>"
-         },
+          {
+            field_label: 'Exception',
+            xtype:       :displayfield,
+            name:        'displayfield1',
+            value:       "<span style=\"color:red;\">#{exc}</span>"
+          },
         ]
       return
     end

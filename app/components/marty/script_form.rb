@@ -151,18 +151,18 @@ class Marty::ScriptForm < Marty::Form
     c.model = "Marty::Script"
     c.items =
       [
-       {
-         line_numbers:   true,
-         indent_unit:    4,
-         tab_mode:       "shift",
-         match_brackets: true,
-         hide_label:     true,
-         xtype:          :codemirror,
-         mode:           "text/x-delorean",
-         name:           :body,
-         empty_text:     "No script selected.",
-         getter:         lambda { |r| r.body },
-       },
+        {
+          line_numbers:   true,
+          indent_unit:    4,
+          tab_mode:       "shift",
+          match_brackets: true,
+          hide_label:     true,
+          xtype:          :codemirror,
+          mode:           "text/x-delorean",
+          name:           :body,
+          empty_text:     "No script selected.",
+          getter:         lambda { |r| r.body },
+        },
       ]
   end
 end

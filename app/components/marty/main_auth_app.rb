@@ -153,8 +153,8 @@ class Marty::MainAuthApp < Marty::AuthApp
        self.class.has_user_manager_perm? ? [system_menu, sep] : []) +
       data_menus +
       [
-       applications_menu, sep,
-       posting_menu, sep,
+        applications_menu, sep,
+        posting_menu, sep,
       ] + super
   end
 

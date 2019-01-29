@@ -28,19 +28,19 @@ class Marty::ReportSelect < Marty::Form
 
     c.items =
       [
-       :tag_grid,
-       :script_grid,
-       fieldset(I18n.t("reporting.report_select"),
-                {
-                  xtype:        :netzkeremotecombo,
-                  name:         "nodename",
-                  attr_type:    :string,
-                  virtual:      true,
-                  hide_label:   true,
-                  width:        200,
-                },
-                {},
-               ),
+        :tag_grid,
+        :script_grid,
+        fieldset(I18n.t("reporting.report_select"),
+                 {
+                   xtype:        :netzkeremotecombo,
+                   name:         "nodename",
+                   attr_type:    :string,
+                   virtual:      true,
+                   hide_label:   true,
+                   width:        200,
+                 },
+                 {},
+                ),
       ]
     c.bbar = nil
   end

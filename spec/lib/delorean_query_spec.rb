@@ -121,14 +121,14 @@ EOF
       res = @engine.evaluate("A", ["m", "mm"], {})
 
       expect(res).to eq [
-                       Gemini::FannieBup
-                         .joins("bud_category")
-                         .mcfly_pt('infinity')
-                         .select("name")
-                         .pluck("name"),
-                       Gemini::FannieBup
-                         .mcfly_pt('01-01-2003').count,
-                     ]
+        Gemini::FannieBup
+          .joins("bud_category")
+          .mcfly_pt('infinity')
+          .select("name")
+          .pluck("name"),
+        Gemini::FannieBup
+          .mcfly_pt('01-01-2003').count,
+      ]
     end
 
     it "perfroms order+first" do
@@ -177,9 +177,9 @@ EOF
       res = @engine.evaluate("A", ["q1", "q2"], {})
 
       expect(res).to eq [
-                       [2.25, 2.375, 2.5, 2.625, 2.75, 2.875],
-                       [2.875, 2.75, 2.625, 2.5, 2.375, 2.25],
-                     ]
+        [2.25, 2.375, 2.5, 2.625, 2.75, 2.875],
+        [2.875, 2.75, 2.625, 2.5, 2.375, 2.25],
+      ]
     end
 
     it "handle query params" do

@@ -6,27 +6,27 @@ class Marty::ScriptTester < Marty::Form
 
     c.items =
       [
-       fieldset(I18n.t("script_tester.attributes"),
-                {
-                  name:         "attrs",
-                  xtype:        :textarea,
-                  value:        "",
-                  hide_label:   true,
-                  min_height:   125,
-                },
-                {},
-               ),
-       fieldset(I18n.t("script_tester.parameters"),
-                {
-                  name:         "params",
-                  xtype:        :textarea,
-                  value:        "",
-                  hide_label:   true,
-                  min_height:   125,
-                },
-                {},
-               ),
-       :result,
+        fieldset(I18n.t("script_tester.attributes"),
+                 {
+                   name:         "attrs",
+                   xtype:        :textarea,
+                   value:        "",
+                   hide_label:   true,
+                   min_height:   125,
+                 },
+                 {},
+                ),
+        fieldset(I18n.t("script_tester.parameters"),
+                 {
+                   name:         "params",
+                   xtype:        :textarea,
+                   value:        "",
+                   hide_label:   true,
+                   min_height:   125,
+                 },
+                 {},
+                ),
+        :result,
       ]
   end
 

@@ -52,12 +52,12 @@ EOF
       res = Marty::DataExporter.do_export('infinity', Gemini::GroupingHeadVersion)
 
       expect(res).to eq [
-                         ["grouping", "head_version__head", "head_version__version"],
-                         ["g1", "h1", "base"],
-                         ["g1", "h1", "600"],
-                         ["g2", "h2", "base"],
-                         ["g3", "h3", "base"]
-                        ]
+        ["grouping", "head_version__head", "head_version__version"],
+        ["g1", "h1", "base"],
+        ["g1", "h1", "600"],
+        ["g2", "h2", "base"],
+        ["g3", "h3", "base"]
+      ]
 
       csv = Marty::DataExporter.to_csv(res, col_sep: "\t")
 

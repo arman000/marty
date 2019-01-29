@@ -86,9 +86,9 @@ class Marty::ImportView < Marty::Form
       client.set_result result.join("<br/>")
     rescue Marty::DataImporter::Error => exc
       result = [
-                "Import failed on line(s): #{exc.lines.join(', ')}",
-                "Error: #{exc.to_s}",
-               ]
+        "Import failed on line(s): #{exc.lines.join(', ')}",
+        "Error: #{exc.to_s}",
+      ]
 
       client.set_result '<font color="red">' + result.join("<br/>") + "</font>"
     rescue => e

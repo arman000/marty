@@ -57,11 +57,11 @@ class Marty::VwPromise < Marty::Base
 
     # Searches user login/firstname/lastname
     query = [
-             "marty_users.login ILIKE ?",
-             "marty_users.firstname ILIKE ?",
-             "marty_users.lastname ILIKE ?",
-             "marty_roles.name ILIKE ?",
-            ].join(' OR ')
+      "marty_users.login ILIKE ?",
+      "marty_users.firstname ILIKE ?",
+      "marty_users.lastname ILIKE ?",
+      "marty_roles.name ILIKE ?",
+    ].join(' OR ')
 
     st = "%#{search_text}%"
     # Convert "Role Name" or "Role name" to "role_name" (underscore is key)

@@ -86,7 +86,7 @@ class Marty::DataConversion
     # key for regular (non-mcfly) AR models which don't have
     # MARTY_IMPORT_UNIQUENESS.
     klass.const_get(:MARTY_IMPORT_UNIQUENESS) rescue [
-    klass.column_names.reject { |x| x == "id" }.first.to_sym]
+      klass.column_names.reject { |x| x == "id" }.first.to_sym]
   end
 
   @@associations = {}

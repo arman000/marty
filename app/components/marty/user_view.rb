@@ -7,11 +7,11 @@ module Marty; class UserView < Marty::Grid
   # list of columns to be displayed in the grid view
   def self.user_columns
     [
-     :login,
-     :firstname,
-     :lastname,
-     :active,
-     :roles,
+      :login,
+      :firstname,
+      :lastname,
+      :active,
+      :roles,
     ]
   end
 

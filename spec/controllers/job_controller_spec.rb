@@ -44,9 +44,9 @@ describe Marty::JobController, slow: true do
 
     res = engine.evaluate("Y", "d")
     expect(res).to eq([
-                       { "z" => 0.875, "a" => { "b" => { "e" => 0.125 } } },
-                       { "z" => 0.875, "a" => { "b" => { "e" => 1.125 } } },
-                       { "z" => 0.875, "a" => { "b" => { "e" => 2.125 } } },
+                        { "z" => 0.875, "a" => { "b" => { "e" => 0.125 } } },
+                        { "z" => 0.875, "a" => { "b" => { "e" => 1.125 } } },
+                        { "z" => 0.875, "a" => { "b" => { "e" => 2.125 } } },
                       ])
 
     expect(Marty::Promise.where(start_dt: nil).count).to eq 0
@@ -71,10 +71,10 @@ describe Marty::JobController, slow: true do
     slp = 5
 
     exp_res = { "d" => [
-                     { "z" => slp, "a" => { "b" => { "e" => 1 - slp } } },
-                     { "z" => slp, "a" => { "b" => { "e" => 2 - slp } } },
-                     { "z" => slp, "a" => { "b" => { "e" => 3 - slp } } },
-                    ] }
+      { "z" => slp, "a" => { "b" => { "e" => 1 - slp } } },
+      { "z" => slp, "a" => { "b" => { "e" => 2 - slp } } },
+      { "z" => slp, "a" => { "b" => { "e" => 3 - slp } } },
+    ] }
 
     bench = Benchmark.measure do
       res = engine.evaluate("Y", "f", { "s" => slp })
@@ -170,10 +170,10 @@ describe Marty::JobController, slow: true do
     promise = Marty::Promise.find_by_title(title)
 
     res = { "d" => [
-                 { "z" => 0.875, "a" => { "b" => { "e" => 0.125 } } },
-                 { "z" => 0.875, "a" => { "b" => { "e" => 1.125 } } },
-                 { "z" => 0.875, "a" => { "b" => { "e" => 2.125 } } },
-                ] }
+      { "z" => 0.875, "a" => { "b" => { "e" => 0.125 } } },
+      { "z" => 0.875, "a" => { "b" => { "e" => 1.125 } } },
+      { "z" => 0.875, "a" => { "b" => { "e" => 2.125 } } },
+    ] }
 
     expect(promise.latest.result).to eq res
 
