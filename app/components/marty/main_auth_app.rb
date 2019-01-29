@@ -31,7 +31,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   def posting_menu
     {
-      text:  warped ? "#{Marty::Util.get_posting.name}" : I18n.t("postings"),
+      text:  warped ? Marty::Util.get_posting.name.to_s : I18n.t("postings"),
       name:  "posting",
       tooltip: "Postings",
       icon_cls: "fa fa-clock glyph",

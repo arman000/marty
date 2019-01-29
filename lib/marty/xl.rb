@@ -86,9 +86,7 @@ class Marty::Xl
     # apply style for the row as a whole:
     if (d.length > 2) && d[2].kind_of?(Hash)
       d[2].each do |key, value|
-        unless key == :style.to_s
-          row_styles[r_number][key] = value
-        else
+        if key == :style.to_s
           # skip if the style is an array: /style as an array is
           # handled by the 'apply a style to each cell' section/
           next unless value.kind_of?(Hash)
@@ -96,6 +94,8 @@ class Marty::Xl
           d[1].length.times do |t|
             new_style[t + column_offset] = value
           end
+        else
+          row_styles[r_number][key] = value
         end
       end
     end

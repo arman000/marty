@@ -50,7 +50,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   def expand_grid_code(h, dgid, dgname, cache, extra_params)
     final_name = self.class.grid_final_name(dgid)
     if cache[dgname]
-      h[final_name] = "#{cache[dgname]}"
+      h[final_name] = (cache[dgname]).to_s
     else
       h[dgid] = dgname
       h["#{dgid}_dgp__"] = "dgparams__ + \n" + self.class.indent(paramify_h(h))

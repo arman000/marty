@@ -237,7 +237,7 @@ describe Marty::JobController, slow: true do
     engine = Marty::ScriptSet.new.get_engine(NAME_G)
     res = engine.evaluate("V", "result", {})
     expect(res).to eq [123]
-    p1 = Marty::Promise.find_by_title("#{NAME_G}")
+    p1 = Marty::Promise.find_by_title(NAME_G.to_s)
     p2 = Marty::Promise.find_by_title("#{NAME_G}2")
     expect(p2.parent_id).to eq p1.id
   end

@@ -53,7 +53,7 @@ module Marty; module RSpec; module Netzke
     wait_for_element do
       begin
         cmp = first("a[data-qtip='#{button_name}']")
-        cmp ||= first(:xpath, ".//a", text: "#{button_name}")
+        cmp ||= first(:xpath, ".//a", text: button_name.to_s)
         cmp ||= find(:btn, button_name, match: :first)
         cmp.click
         true
@@ -209,7 +209,7 @@ module Marty; module RSpec; module Netzke
   def press_key_in(key, el_id)
     kd = key.downcase
     use_key = ['enter', 'return'].include?(kd) ? kd.to_sym : key
-    el = find_by_id("#{el_id}")
+    el = find_by_id(el_id.to_s)
     el.native.send_keys(use_key)
   end
 
@@ -225,7 +225,7 @@ module Marty; module RSpec; module Netzke
   end
 
   def type_in(type_s, el_id)
-    el = find_by_id("#{el_id}")
+    el = find_by_id(el_id.to_s)
     el.native.clear()
     type_s.each_char do |key|
       el.native.send_keys(key)

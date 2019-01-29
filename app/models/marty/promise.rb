@@ -105,7 +105,7 @@ class Marty::Promise < Marty::Base
   # end
 
   def wait_for_my_notify(timeout)
-    while true do
+    while true
       # FIXME: we keep using the same timeout.  The timeout should be
       # reduced by total time spent here.
       n = raw_conn.wait_for_notify(timeout)

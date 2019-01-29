@@ -1268,24 +1268,6 @@ Style/TrailingCommaInArrayLiteral:
 Style/TrailingCommaInHashLiteral:
   Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/UnlessElse:
-  Exclude:
-    - 'lib/marty/xl.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/overrides.rb'
-
-# Offense count: 8
-# Cop supports --auto-correct.
-Style/UnneededInterpolation:
-  Exclude:
-    - 'app/components/marty/main_auth_app.rb'
-    - 'lib/marty/rule_script_set.rb'
-    - 'spec/controllers/job_controller_spec.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
-    - 'spec/dummy/public/extjs/modern/theme-base/sass/utils.rb'
-    - 'spec/support/netzke.rb'
-
 # Offense count: 12
 # Cop supports --auto-correct.
 Style/UnneededPercentQ:
@@ -1293,12 +1275,6 @@ Style/UnneededPercentQ:
     - 'app/components/marty/simple_app.rb'
     - 'spec/features/rule_spec.rb'
     - 'spec/models/config_spec.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/WhileUntilDo:
-  Exclude:
-    - 'app/models/marty/promise.rb'
 
 # Offense count: 133
 # Cop supports --auto-correct.
