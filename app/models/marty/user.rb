@@ -96,6 +96,7 @@ class Marty::User < Marty::Base
  end
 
   private
+
   def verify_changes
     # If current users role is only user_manager, restrict following
     # 1 - Do not allow user to edit own record

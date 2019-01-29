@@ -35,6 +35,7 @@ module Marty::Diagnostic; class Base < Request
 
   def self.process_status_only infos
     return infos unless status_only
+
     infos.map { |info| info.map { |test, result| [test, result['status']] }.to_h }
   end
 
@@ -68,6 +69,7 @@ module Marty::Diagnostic; class Base < Request
     return 'inconsistent' if info.nil? || (info['status'] &&
                                            info['consistent'] == false)
     return 'error' unless info['status']
+
     'passed'
   end
 

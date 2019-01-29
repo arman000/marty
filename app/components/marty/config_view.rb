@@ -30,6 +30,7 @@ class Marty::ConfigView < Marty::Grid
   def my_jsonb_setter
     lambda { |r, v|
       return r.set_value(nil) if v.blank?
+
       decoded = ActiveSupport::JSON.decode(v) rescue nil
       r.set_value(decoded)
     }

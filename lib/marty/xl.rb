@@ -46,6 +46,7 @@ class Marty::Xl
 
   def merge_row_edges(a, b)
     return b unless a.count > 0
+
     a.each_index do |ind|
       b[ind] = merge_cell_edges(a[ind], deep_copy(b[ind]))
     end
@@ -91,6 +92,7 @@ class Marty::Xl
           # skip if the style is an array: /style as an array is
           # handled by the 'apply a style to each cell' section/
           next unless value.kind_of?(Hash)
+
           d[1].length.times do |t|
             new_style[t + column_offset] = value
           end
@@ -122,6 +124,7 @@ class Marty::Xl
     # add the column offset:
     x1, x2 = x_coords.map do |x|
       raise "bad range point #{x}" unless x.is_a? Integer
+
       column_offset + x
     end
 
@@ -334,11 +337,13 @@ class Marty::Xl
   def intern_range(ws, range)
     return range if range.is_a? String
     raise "bad range #{range}" unless range.is_a?(Array) && range.length == 4
+
     x1, y1, x2, y2 = range
 
     y1, y2 = [y1, y2].map do |y|
       next y unless y.is_a?(Hash)
       raise "bad offset #{y}" unless y["off"].is_a?(Integer)
+
       ws.rows.last.row_index + y["off"]
     end
 
@@ -373,7 +378,6 @@ class Marty::Xl
   end
 
   def apply_relative_worksheet_ops(ws, ops)
-
     non_pos = ops.select { |opl| opl[0] != "pos" }
     ops_pos = ops.select { |opl| opl[0] == "pos" }
     ops_brd = ops.select { |opl| opl[0] == "border" }
@@ -392,12 +396,14 @@ class Marty::Xl
     rows, styles, row_styles, format, borders, images = [], [], [], [], [], []
     ops.each do |opl|
       raise "bad op #{opl}" unless opl.length > 1
+
       case opl[0]
       when "pos"
         op, offset, data = opl
         raise "bad offset #{offset}" unless
           offset.is_a?(Array) && offset.length == 2 &&
           offset.all? { |x| x.is_a? Integer }
+
         # column offset, row offset:
         column_offset, row_offset = offset
         r_number, last_row = row_offset, row_offset
@@ -406,6 +412,7 @@ class Marty::Xl
           raise "non array data #{d[1]}" unless d[1].is_a?(Array)
           raise "non hash data options #{d[2]}" unless
             [NilClass, Hash, String, Array].member? d[2].class
+
           case d[0]
           when "row"
             position_row(d, column_offset, r_number, rows, styles, row_styles)
@@ -453,6 +460,7 @@ class Marty::Xl
         op, range = opl
 
         raise "bad merge op #{opl}" unless opl.length == 2
+
         range = intern_range(ws, range)
 
         ws.merge_cells range
@@ -485,9 +493,11 @@ class Marty::Xl
         op, range, img = opl
         raise "bad image params #{range}" unless
           range.is_a?(Array) && range.length == 6
+
         x1, y1, x2, y2, w, h = range
         raise "bad image range, width or height #{range}" unless
           [x1, y1, w, h].all? { |x| x.is_a? Integer }
+
         ws.add_image(image_src: "#{Rails.public_path}/images/#{img}",
                      noSelect: true,
                      noMove: true) do |image|
@@ -522,5 +532,4 @@ class Marty::Xl
       obj
     end
   end
-
 end

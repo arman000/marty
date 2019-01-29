@@ -1,7 +1,6 @@
 require "spec_helper"
 
 module Marty
-
 entities = <<EOF
 name
 PLS

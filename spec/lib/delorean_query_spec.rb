@@ -1,7 +1,6 @@
 require "spec_helper"
 
 module Marty
-
 bud_cats = <<EOF
 name
 Conv Fixed 30

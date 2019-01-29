@@ -234,6 +234,7 @@ module Marty; module RSpec; module Netzke
   end
 
   private
+
   ############################################################################
   # ExtJS/Netzke helper javascripts:
   #   Netzke component lookups, arguments for helper methods

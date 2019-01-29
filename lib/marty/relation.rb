@@ -27,6 +27,7 @@ class Marty::Relation
       h[a] = klass.where(obsoleted_dt: 'infinity').map do |obj|
         ref_key = obj.send(foreign_key)
         next unless ref_key
+
         ref = assoc_class.find(ref_key)
         obj unless Mcfly.is_infinity(ref.obsoleted_dt)
       end.compact

@@ -10,9 +10,11 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   def self.node_name
     "Node"
   end
+
   def self.body_start
     "#{node_name}:\n"
   end
+
   def self.body_lines
     self.body_start.count("\n")
   end
@@ -44,6 +46,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   def self.grid_final_name(dgid)
     dgid.ends_with?("_grid") ? dgid + "_result" : dgid + "_grid_result"
   end
+
   def expand_grid_code(h, dgid, dgname, cache, extra_params)
     final_name = self.class.grid_final_name(dgid)
     if cache[dgname]
@@ -59,6 +62,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def write_code(attrs)
     return '' if attrs.blank?
+
     newh = attrs.each_with_object({}) do |(k, v), h|
       if k.ends_with?("_grid")
         expand_grid_code(h, k, v, {}, h)
@@ -97,6 +101,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
       ''
     end
   end
+
   def get_code(ruleh)
     grid_i = grid_init(ruleh)
     grid_c = grid_code(ruleh)
@@ -122,6 +127,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     errs[:results] = result_code(ruleh).count("\n")
     errs
   end
+
   def get_parse_error_field(ruleh, exc)
     line = exc.line ? exc.line - self.class.body_lines : 0
     errs = code_section_counts(ruleh)

@@ -1,5 +1,4 @@
 class Marty::ReportForm < Marty::Form
-
   # override apply for background generation
   action :apply do |a|
     a.text     = a.tooltip = I18n.t("reporting.background")
@@ -157,7 +156,6 @@ class Marty::ReportForm < Marty::Form
       raise "bad form items" unless items.is_a?(Array)
       raise "bad format" unless
         Marty::ContentHandler::GEN_FORMATS.member?(format)
-
     rescue => exc
       c.title = "ERROR"
       c.items =

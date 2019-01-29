@@ -83,7 +83,6 @@ M:
     format = "xlsx"
 EOS
 
-
 describe Marty::Xl do
   let(:engine) do
     Delorean::Engine.new "YYY"

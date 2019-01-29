@@ -1,5 +1,4 @@
 class Marty::Promise < Marty::Base
-
   # default timeout (seconds) to wait for promise values
   DEFAULT_PROMISE_TIMEOUT = Rails.configuration.marty.promise_timeout || 30
 

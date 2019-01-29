@@ -155,7 +155,6 @@ class Marty::Api::Base
 
       # if attr is an array, return result as an array
       return retval = params[:return_array] ? [res] : res
-
     rescue => e
       msg = Delorean::Engine.grok_runtime_exception(e).symbolize_keys
       Marty::Logger.info "Evaluation error: #{msg}"
@@ -167,6 +166,7 @@ class Marty::Api::Base
 
   def self.filter_hash hash, filter_params
     return unless hash
+
     pf = ActionDispatch::Http::ParameterFilter.new(filter_params)
     pf.filter(hash)
   end
@@ -224,6 +224,7 @@ class Marty::Api::Base
             match(msg)
 
       return msg unless m
+
       "disallowed parameter '#{m[1]}' of type #{m[2]} was received"
     end
 

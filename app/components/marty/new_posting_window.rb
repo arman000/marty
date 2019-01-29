@@ -14,7 +14,6 @@ class Marty::NewPostingWindow < Netzke::Window::Base
   component :new_posting_form do |c|
     c.header = false
   end
-
 end
 
 NewPostingWindow = Marty::NewPostingWindow

@@ -6,5 +6,4 @@ class Marty::GridAppendOnly < Marty::McflyGridPanel
     c.editing                = :in_form
     c.permissions[:update]   = false
   end
-
 end

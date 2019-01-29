@@ -16,6 +16,7 @@ class Marty::Token < Marty::Base
   # end
 
   private
+
   def self.generate_token_value
     SecureRandom.hex(20)
   end
@@ -26,5 +27,4 @@ class Marty::Token < Marty::Base
       Token.delete_all(['user_id = ?', user.id])
     end
   end
-
 end

@@ -23,6 +23,7 @@ module Marty::Diagnostic::Database
     current = ActiveRecord::Migrator.current_version
     raise "Migration is needed.\nCurrent Version: #{current}" if
       ActiveRecord::Migrator.needs_migration?
+
     current.to_s
   end
 

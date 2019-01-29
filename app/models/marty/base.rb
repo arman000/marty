@@ -48,6 +48,7 @@ class Marty::Base < ActiveRecord::Base
 
   def self.make_openstruct(inst)
     return nil unless inst
+
     fa = get_final_attrs
     os = OpenStruct.new(inst.attributes.slice(*fa))
     if self == Marty::DataGrid

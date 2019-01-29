@@ -71,7 +71,6 @@ class Marty::TagGrid < Marty::Grid
     c.width  = 100
     c.flex   = 1
   end
-
 end
 
 TagGrid = Marty::TagGrid

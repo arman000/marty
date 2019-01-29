@@ -21,6 +21,7 @@ class Marty::DeloreanRule < Marty::BaseRule
   def self_as_hash
     self.attributes + { "classname" => self.class.name }
   end
+
   def self.find_fixed(results)
     results.each_with_object({}) do |(k, v), h|
       v_wo_comment = /\A([^#]+)/.match(v)[1] if v.include?("#")
@@ -28,9 +29,11 @@ class Marty::DeloreanRule < Marty::BaseRule
       jp = (v_wo_comment && JSON.parse("[#{v_wo_comment}]") rescue nil) ||
            (JSON.parse("[#{v}]") rescue nil)
       next h[k] = jp[0] if jp
+
       # json doesn't like single quotes, so handle those manually
       m = %r{\A'(.*)'\z}.match(v)
       next unless m
+
       h[k] = m[1]
     end
   end
@@ -54,6 +57,7 @@ class Marty::DeloreanRule < Marty::BaseRule
     results.keys.map { |k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k }.
        select { |k| defkeys.include?(k) } + grid_keys(grids, ecl)
   end
+
   def self.grid_keys(grids, eclass)
       grids.keys.map { |k| eclass.grid_final_name(k) }
   end
@@ -75,6 +79,7 @@ class Marty::DeloreanRule < Marty::BaseRule
           ruleh.values_at("id", "name", "engine", "computed_guards", "grids",
                           "results", "fixed_results")
       raise "Error in rule '#{id}:#{name}': bad metadata_opts" if !metadata_opts
+
       eclass = eclassname && eclassname.constantize || Marty::RuleScriptSet
       engine = eclass.new(params["pt"]).get_engine(ruleh) if
         computed_guards.present? || results.present?
@@ -135,6 +140,7 @@ class Marty::DeloreanRule < Marty::BaseRule
         result.gr_hash = grids.each_with_object({}) do |(gvar, gname), h|
           usename = eclass.grid_final_name(gvar)
           next h[usename] = gres[gname] if gres[gname]
+
           dg = Marty::DataGrid.lookup_h(pt, gname)
           dgr = dg && Marty::DataGrid.lookup_grid_distinct_entry_h(pt, dgparams,
                                                                    dg)

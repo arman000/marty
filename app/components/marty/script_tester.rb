@@ -63,6 +63,7 @@ class Marty::ScriptTester < Marty::Form
       result = attrs.map do |a|
         node, attr = a.split('.')
         raise "bad attribute: '#{a}'" if !attr
+
         # Need to clone phash since it's modified by eval.  It can
         # be reused for a given node but not across nodes.
         res = engine.evaluate(node, attr, phash.clone)
@@ -72,10 +73,8 @@ class Marty::ScriptTester < Marty::Form
 
       client.netzke_notify "done"
       client.set_result result.join("<br/>")
-
     rescue SystemStackError
       return client.netzke_notify "System Stack Error"
-
     rescue => exc
       res = Delorean::Engine.grok_runtime_exception(exc)
 
@@ -102,7 +101,6 @@ class Marty::ScriptTester < Marty::Form
     c.min_height  = 250
     c.auto_scroll = true
   end
-
 end
 
 ScriptTester = Marty::ScriptTester

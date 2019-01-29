@@ -8,6 +8,7 @@ describe Marty::Diagnostic::Collection do
       'NodeB' => node_a_data,
     }
     return data if consistent
+
     data + { 'NodeB' => { 'Base' => described_class.error('B') } }
   end
 

@@ -87,7 +87,6 @@ class String
   def in_time_zone(zone = ::Time.zone)
     self == 'infinity' ? self : old_in_time_zone(zone)
   end
-
 end
 
 ######################################################################
@@ -257,7 +256,6 @@ end
                                        ActiveSupport::TimeWithZone, String],
                                       Hash]
 end
-
 
 mcfly_cache_adapter = ::Marty::CacheAdapters::McflyRubyCache.new(
   size_per_class: 1000

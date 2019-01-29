@@ -18,6 +18,7 @@ module Marty::Diagnostic; class Reporter < Request
   end
 
   private
+
   def self.resolve_diagnostic diag_name
     diag_name = diag_name.camelize
     klass = nil
@@ -27,6 +28,7 @@ module Marty::Diagnostic; class Reporter < Request
     end
     raise NameError.new("#{diag_name} could not be resolved by #{name}") if
       klass.nil?
+
     klass
   end
 

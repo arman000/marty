@@ -20,6 +20,7 @@ class Marty::RpcCall
 
     res = JSON.parse(response.body)
     raise res["error"] if res.is_a?(Hash) && !res["error"].blank?
+
     res
   end
 

@@ -31,7 +31,6 @@ class Marty::SchemaHelper
                   }] }
   end
 
-
   # if param is present, disallow cols
   delorean_fn :disallow_if_present, sig: [2, 20] do |dep_column, *var_array|
     dep_check(dep_column,
@@ -69,5 +68,4 @@ class Marty::SchemaHelper
                        { "type" => "object",
                         "allOf" => checks } } }
   end
-
 end

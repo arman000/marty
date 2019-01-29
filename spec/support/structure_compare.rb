@@ -63,6 +63,7 @@ def struct_compare(v1raw, v2raw, cmp_opts = {})
     e.message
   end
 end
+
 def struct_compare_all(v1raw, v2raw, cmp_opts = {})
   begin
     Marty::RSpec::StructureCompare.struct_compare_all(v1raw, v2raw, nil,

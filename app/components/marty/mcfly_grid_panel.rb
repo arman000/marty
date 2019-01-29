@@ -80,6 +80,7 @@ class Marty::McflyGridPanel < Marty::Grid
   end
 
   private
+
   def self.mcfly_scope(sort_column)
     lambda { |r|
       ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)

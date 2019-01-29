@@ -52,6 +52,7 @@ class Marty::RpcController < ActionController::Base
   end
 
   private
+
   def process_active_params params
     # must permit params before conversion to_h
     # convert hash to json and parse to get expected hash (not indifferent)

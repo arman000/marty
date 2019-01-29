@@ -1,5 +1,4 @@
 class Marty::Event < Marty::Base
-
   class EventValidator < ActiveModel::Validator
     def validate(event)
       event.errors[:base] << "Must have promise_id or start_dt" unless
@@ -71,6 +70,7 @@ SQL
     running = evs.detect do |ev|
       next if ev["end_dt"]
       next true unless ev["expire_secs"]
+
       (Time.zone.now - ev["start_dt"]).truncate < ev["expire_secs"]
     end
 
@@ -99,6 +99,7 @@ SQL
 
   def self.finish_event(klass, subject_id, operation, error = false, comment = nil)
     raise "error must be true or false" unless [true, false].include?(error)
+
     time_now_s = Time.zone.now.strftime('%Y-%m-%d %H:%M:%S.%6N')
 
     event = get_data(running_query(time_now_s)).detect do |ev|
@@ -110,6 +111,7 @@ SQL
 
     ev = Marty::Event.find_by_id(event["id"])
     raise "can't explicitly finish a promise event" if ev.promise_id
+
     ev.end_dt = Time.zone.now
     ev.error = error
     ev.comment = comment if comment
@@ -314,5 +316,4 @@ SQL
       Marty::Util.logger.error("event GC error: #{exc}")
     end
   end
-
 end

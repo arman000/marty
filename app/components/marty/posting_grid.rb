@@ -73,7 +73,6 @@ class Marty::PostingGrid < Marty::Grid
   attribute :comment do |c|
     c.width     = 100
   end
-
 end
 
 PostingGrid = Marty::PostingGrid

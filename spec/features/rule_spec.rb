@@ -22,17 +22,20 @@ feature 'rule view', js: true do
     press("My Rules")
     expect(page).to have_content 'My Rules'
   end
+
   def go_to_xyz_rules
     press("Pricing Config.")
     press("Xyz Rules")
     expect(page).to have_content 'Xyz Rules'
   end
+
   def col_id(v, col)
     run_js <<-JS
            #{ext_var(v.grid, 'grid')}
            return #{ext_find(ext_arg('gridcolumn', text: col), 'grid')}.id
      JS
   end
+
   # click_checkbox in marty_rspec not working here for some reason
   def click_checkbox(name)
     q = %Q(checkbox[fieldLabel="#{name}"])
@@ -59,18 +62,21 @@ feature 'rule view', js: true do
     c.send_keys([:down, :down, :down, :down, :right, value, :return])
     sleep 1.0
   end
+
   def column_filter_toggle(rv, name)
     cid = col_id(rv, name)
     c = find('#' + cid)
     c.send_keys([:down, :down, :down, :down, ' ', :escape])
     sleep 1.0
   end
+
   # idx 0 is the start dt, 1 is the end dt
   def date_fill_in(idx, value)
     dt = all(:xpath, "//input[contains(@name, 'datefield')]")[idx]
     dt.native.clear()
     dt.native.send_keys(value)
   end
+
   def time_fill_in(idx, value)
     tm = all(:xpath, "//input[contains(@name, 'timefield')]")[idx]
     tm.native.clear()

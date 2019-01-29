@@ -5,6 +5,7 @@ module Marty
         ts = args && args.first
 
         return false if Mcfly.is_infinity(ts)
+
         true
       end
     end

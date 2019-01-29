@@ -18,7 +18,6 @@ describe Marty::RpcController do
                          "A" => "A:\n    a = 2\n",
                        }, Date.today + 2.minute)
 
-
     # create an untagged version for DEV
     s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: "A")
     s.body = "A:\n    a = 3\n"

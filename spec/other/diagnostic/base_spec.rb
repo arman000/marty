@@ -11,6 +11,7 @@ describe Marty::Diagnostic::Base do
     }
 
     return data if consistent
+
     data + { 'NodeB' => node_data_b }
   end
 

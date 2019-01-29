@@ -14,7 +14,6 @@ class Marty::DataGrid < Marty::Base
 
   class DataGridValidator < ActiveModel::Validator
     def validate(dg)
-
       dg.errors.add(:base, "'#{dg.data_type}' not a defined type or class") unless
         Marty::DataGrid.convert_data_type(dg.data_type)
 
@@ -120,6 +119,7 @@ class Marty::DataGrid < Marty::Base
   def self.register_rule_handler(handler)
     (@@rule_handlers ||= []) << handler
   end
+
   def update_rules(old, new)
     @@rule_handlers.each { |rh| rh.call(old, new) }
   end
@@ -149,6 +149,7 @@ class Marty::DataGrid < Marty::Base
     # map given header type to an index class -- uses string index
     # for ruby classes.
     return INDEX_MAP[type] if INDEX_MAP[type]
+
     INDEX_MAP["string"] if (type.constantize rescue nil)
   end
 
@@ -184,6 +185,7 @@ class Marty::DataGrid < Marty::Base
       attr = m["attr"]
       inc = h_passed.fetch(attr, :__nf__)
       next if inc == :__nf__
+
       val = (defined? inc.name) ? inc.name : inc
       h[attr] = val.is_a?(String) ?
                   ActiveRecord::Base.connection.quote(val)[1..-2] : val
@@ -225,6 +227,7 @@ class Marty::DataGrid < Marty::Base
     dg_is_os = dg.is_a?(OpenStruct)
     raise "bad DataGrid #{dg}" unless dg_is_grid || dg_is_os
     raise "non-hash arg #{h}" unless Hash === h
+
     dgh = dg_is_os ? dg.to_h.stringify_keys :
             dg.attributes.slice('id', 'group_id', 'created_dt', 'metadata')
     res = plv_lookup_grid_distinct(h, dgh, false, distinct)
@@ -401,6 +404,7 @@ class Marty::DataGrid < Marty::Base
       raise "leading/trailing spaces in elements not allowed" if
         res.any? { |x| x != x.strip }
       raise "0-length string not allowed" if res.any?(&:empty?)
+
       res
     when "boolean"
       case v.downcase
@@ -642,6 +646,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   private
+
   def self.remove_indices(orig_array, inds)
     orig_array.each_with_object([]).with_index do |(item, new_array), index|
       new_array.push(item) unless inds.include?(index)

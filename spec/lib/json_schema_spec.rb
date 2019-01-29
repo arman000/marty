@@ -13,7 +13,6 @@ class NotAnEnum
 end
 
 module Marty
-
   describe JsonSchema do
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     ###                      Generic, simple data               ###
@@ -653,7 +652,6 @@ module Marty
     end
   end
 
-
   describe "how @uri behaves as a key to a set of attributes" do
     class BoundSchema < JSON::Schema::Draft4
       def initialize
@@ -765,5 +763,4 @@ module Marty
       expect(JSON::Validator.validate(bound_ceiling_schema, data)).to be false
     end
   end
-
 end

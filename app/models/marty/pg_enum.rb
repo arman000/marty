@@ -1,5 +1,4 @@
 module Marty::PgEnum
-
   def [](i0, i1 = nil)
     # if i1 is provided, then i0 is a pt and we ignore it.
     index = (i1 || i0).to_s

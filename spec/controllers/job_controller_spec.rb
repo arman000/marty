@@ -34,6 +34,7 @@ describe Marty::JobController, slow: true do
   def wait_for_jobs
     60.times do
       break unless Marty::Promise.where(result: {}).exists?
+
       sleep 1
     end
   end

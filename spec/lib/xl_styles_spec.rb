@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'marty'
 require 'delorean_lang'
 
-
 STYLE_CODE = <<EOS
 S:
     data =

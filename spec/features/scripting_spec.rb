@@ -209,7 +209,6 @@ feature 'under Applications menu, Scripting workflows', js: true do
     script_grid = netzke_find('script_grid')
     tag_grid = netzke_find('tag_grid')
 
-
     by 'select tag row 2' do
       wait_for_ajax
       tag_grid.select_row(2)

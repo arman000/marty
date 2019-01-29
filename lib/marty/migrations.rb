@@ -261,6 +261,7 @@ OUT
   end
 
   private
+
   def fk_opts(from, to, column)
     name = "fk_#{from}_#{to}_#{column}"
     if name.length > 63
@@ -309,6 +310,7 @@ OUT
     parts = lines.map do |line|
       next [:param, $1] if %r(\A// PARAM[:] (.*)$).match(line)
       next [:ret, $1]  if %r(\A// RETURN[:] (.*)$).match(line)
+
       [:body, line]
     end.group_by(&:first)
     args = parts[:param].map { |(_, l)| l }.join(",\n")

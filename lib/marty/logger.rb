@@ -4,6 +4,7 @@ class Marty::Logger
   def self.method_missing(m, *args, &block)
     return super unless
       [:debug, :info, :warn, :error, :fatal, :unknown].include?(m)
+
     Marty::Util.logger.send(m, args[0]) if Marty::Util.logger.respond_to?(m)
     log(m, *args)
   end

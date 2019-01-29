@@ -15,6 +15,7 @@ module Marty::Diagnostic; module Packer
     data.each_with_object({}) do |(k, v), h|
       if v.is_a?(Hash)
         raise "Invalid Diagnostic Info #{v}" unless is_valid_info?(v)
+
         h[k] = v
       else
         h[k] = create_info(v)

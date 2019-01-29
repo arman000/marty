@@ -11,7 +11,6 @@ class Marty::Aws::Base
               :creds,
               :version,
               :host,
-
               def self.get url
                 uri = URI.parse(url)
                 req = Net::HTTP.new(uri.host, uri.port)
@@ -44,6 +43,7 @@ class Marty::Aws::Base
   end
 
   private
+
   def get_instance_id
     query_meta_data('instance-id').to_s
   end

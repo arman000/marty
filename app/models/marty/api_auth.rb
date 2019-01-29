@@ -21,7 +21,6 @@ class Marty::ApiAuth < Marty::Base
   validates_uniqueness_of :app_name, scope: [:script_name,
                                              :obsoleted_dt]
 
-
   before_validation do
     self.api_key = Marty::ApiAuth.generate_key if
       self.api_key.blank?

@@ -95,6 +95,7 @@ class Marty::EventView < Marty::Grid
     lambda { |r|
       return nil unless r.promise_id
       return nil unless p = Marty::Promise.where(id: r.promise_id).first
+
       p.send(field)
     }
   end
@@ -123,7 +124,6 @@ class Marty::EventView < Marty::Grid
     c.getter = promise_getter(:status)
     c.read_only = true
   end
-
 end
 
 EventView = Marty::EventView

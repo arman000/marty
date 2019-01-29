@@ -113,6 +113,5 @@ class Marty::ApiLogView < Marty::Grid
       r.where("timestamp::text  #{op} '#{v}%'")
     }
   end
-
 end
 ApiLogView = Marty::ApiLogView

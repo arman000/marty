@@ -85,6 +85,7 @@ class Marty::DataExporter
 
   def self.get_attrs_in_order(klass, attrs)
     return attrs unless klass.const_defined?(:EXPORT_ORDER)
+
     klass::EXPORT_ORDER.select { |attr| attrs.include?(attr) }
   end
 

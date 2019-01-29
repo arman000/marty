@@ -38,6 +38,5 @@ module Marty; module RSpec; module Users
                                    firstname: name,
                                    lastname: 'test',
                                    active: true)
-
   end
 end end end

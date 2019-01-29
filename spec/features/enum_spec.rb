@@ -40,7 +40,6 @@ feature 'test netzke + pg_enum compatibility', js: true do
       press('Loan Programs')
     end
 
-
     and_by 'bring up new window' do
       press('Add')
     end

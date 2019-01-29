@@ -60,6 +60,7 @@ class Marty::Tag < Marty::Base
       tag = tag_id
     end
     raise "bad tag identifier #{tag_id.inspect}" unless tag.is_a?(Marty::Tag)
+
     tag
   end
 

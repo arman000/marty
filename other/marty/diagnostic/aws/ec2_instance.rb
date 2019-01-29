@@ -32,6 +32,7 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
   end
 
   private
+
   def ec2_request action, params = {}
     resp = request({ action: action }, params)
     Hash.from_xml(resp)["#{action}Response"]

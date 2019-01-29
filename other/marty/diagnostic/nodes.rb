@@ -43,11 +43,13 @@ module Marty::Diagnostic; class Nodes < Base
 
   def self.valid_if arr
     return arr.join("\n") unless arr.empty?
+
     error('---')
   end
 
   def self.error_if arr
     return arr if arr.empty?
+
     error(arr.join("\n"))
   end
 end

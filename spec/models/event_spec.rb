@@ -46,7 +46,6 @@ describe Marty::Event do
                            error: error)
     end
 
-
     engine = Marty::ScriptSet.new.get_engine(NAME_I)
     res = engine.background_eval("SLEEPER", { "secs" => 5 }, ["a"],
                                  { klass: "testcl3",
@@ -73,7 +72,6 @@ describe Marty::Event do
     restore_clean_db(@save_file, false)
     Marty::Event.clear_cache
   end
-
 
   it "reports currently running" do
     expect(Marty::Event.currently_running('testcl1', 123)).

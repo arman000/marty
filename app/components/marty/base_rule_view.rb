@@ -4,6 +4,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   def self.klass
     Marty::BaseRule
   end
+
   def klass
     self.class.klass
   end
@@ -11,9 +12,11 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   def self.base_fields
     [:name]
   end
+
   def self.computed_fields
     [:computed_guards, :grids, :results]
   end
+
   def configure(c)
     super
     c.model = self.class.klass
@@ -42,6 +45,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       @key    = key
       @lineno = lineno
     end
+
     def message
       "keyword '#{@key}' specified more than once (line #{@lineno})"
     end
@@ -53,17 +57,20 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     last_key = nil
     s.lines.each.with_index(1) do |line, idx|
       next if /\A\s*\z/.match(line)
+
       line.chomp!
       begin
         m = /\A\s*([a-z][a-z0-9_]*)\s*=\s*(.*)\s*\z/.match(line)
         if m
           k, v = m[1], m[2]
           raise DupKeyError.new(k, idx) if result.keys.include?(k)
+
           save_linenos[k] = idx
           result[k] = v
           last_key = k
         else
           raise unless last_key
+
           result[last_key] += "\n" + line.strip
         end
       rescue DupKeyError => e
@@ -77,6 +84,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
 
   def self.hash_to_simple(h)
     return unless h && h.present?
+
     lhs_wid = h.keys.map(&:length).max
     fmt = "%-#{lhs_wid}s = %s"
     result = []

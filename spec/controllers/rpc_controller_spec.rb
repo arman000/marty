@@ -987,7 +987,6 @@ describe Marty::RpcController do
     expect(res.values[0]).to eq(expect)
   end
 
-
   class FruitsEnum
     VALUES = Set['Apple', 'Banana', 'Orange']
   end
@@ -1289,7 +1288,6 @@ describe Marty::RpcController do
             attrs: attr,
             params: params
           }
-
     end
 
     it "does conditional" do
