@@ -81,6 +81,6 @@ feature 'logger view', js: true, capybara: true do
       expect(types).to eq(exp_types.slice(0,exp_count))
       expect(messages).to eq(exp_messages.slice(0,exp_count))
       expect(details).to eq(exp_details.slice(0,exp_count))
-    end
+   end
   end
 end

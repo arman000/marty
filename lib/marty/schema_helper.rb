@@ -34,7 +34,7 @@ class Marty::SchemaHelper
                {"properties"=> var_array.each_with_object({}) do
                   |v,h|
                   h[v] = { "not" => {} }
-                end
+                               end
                }]}
   end
 
@@ -46,7 +46,7 @@ class Marty::SchemaHelper
               {"properties"=> var_array.each_with_object({}) do
                  |v,h|
                  h[v] = { "not" => {} }
-               end
+                              end
               })
   end
 
@@ -64,7 +64,7 @@ class Marty::SchemaHelper
         {"properties"=> var_array.each_with_object({}) do
            |v,h|
            h[v] = { "not" => {} }
-         end
+                        end
         }]}
   end
 

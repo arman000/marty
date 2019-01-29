@@ -137,7 +137,7 @@ DELOREAN
       within(:gridpanel, 'report_form', match: :first) do
         fill_in('Note Rate', with: '3.00')
       end
-    end
+     end
 
     and_by 'do Background Report with delayed jobs' do
       Delayed::Worker.delay_jobs = false

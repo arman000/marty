@@ -496,13 +496,15 @@ EOS
         expect{lookup_grid_helper('infinity',
                                "G9",
                                {"ltv" => 81},
-                               )}.to raise_error(/matches > 1/)
+                               )
+        }        .to raise_error(/matches > 1/)
 
         err = /Data Grid lookup failed/
         expect{lookup_grid_helper('infinity',
                                  "G9",
                                  {"state" => "CA", "ltv" => nil},
-                                 false, false)}.to raise_error(err)
+                                 false, false)
+        }        .to raise_error(err)
 
         res = lookup_grid_helper('infinity',
                                  "G9",

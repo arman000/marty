@@ -114,7 +114,8 @@ class Marty::ApiLogView < Marty::Grid
     # to text in order to compare filter input using the LIKE operator.
     # Otherwise it will fail. '<' and '>' functionality is missing.
     c.filter_with = lambda {|r, v, op|
-      r.where("timestamp::text  #{op} '#{v}%'")}
+      r.where("timestamp::text  #{op} '#{v}%'")
+    }
   end
 
 end

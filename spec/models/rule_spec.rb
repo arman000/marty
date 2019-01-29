@@ -258,31 +258,38 @@ module Marty::RuleSpec
     context "rule compute" do
       let(:complex) { Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'ComplexRule'},
-                                            {'g_string'=>'def'}).first }
+                                            {'g_string'=>'def'}).first
+      }
       let(:xyz) { Gemini::XyzRule.get_matches('infinity',
                                               {'rule_type'=>'ZRule'},
-                                              {'g_integer'=> 2}).first }
+                                              {'g_integer'=> 2}).first
+      }
       let(:simple) {
         Gemini::MyRule.get_matches('infinity',
                                    {'rule_type'=>'SimpleRule'},
-                                   {'g_bool'=>true, "g_range"=>25}).first }
+                                   {'g_bool'=>true, "g_range"=>25}).first
+      }
       let(:simple2a) {
         Gemini::MyRule.get_matches('infinity',
                                    {'rule_type'=>'SimpleRule'},
-                                   {'g_bool'=>true, "g_integer"=>99}).first }
+                                   {'g_bool'=>true, "g_integer"=>99}).first
+      }
       let(:simple2b) {
         Gemini::MyRule.get_matches('infinity',
                                    {'rule_type'=>'SimpleRule'},
-                                   {'g_bool'=>true, "g_integer"=>999}).first }
+                                   {'g_bool'=>true, "g_integer"=>999}).first
+      }
       let(:altgridmethod) {
         Gemini::MyRule.get_matches('infinity',
                                    {'rule_type'=>'ComplexRule'},
-                                   {"g_integer"=>3757}).first }
+                                   {"g_integer"=>3757}).first
+      }
       let(:gridcomputedname) {
         Gemini::MyRule.get_matches('infinity',
                                    {'rule_type'=>'ComplexRule'},
                                    {"g_string"=>"Hi Mom",
-                                    "g_integer"=>11}).first }
+                                    "g_integer"=>11}).first
+      }
       it "computed guards work" do
         c = complex.compute(@ruleopts_myrule, {"pt"=>Time.zone.now,
                                                'param2'=>'def'})
@@ -300,7 +307,8 @@ module Marty::RuleSpec
         allow_any_instance_of(Delorean::Engine).
           to receive(:evaluate).and_raise('hi mom')
         expect{simple.compute(@ruleopts_myrule,
-                              {"pt"=>Time.now})}.to raise_error(/hi mom/)
+                              {"pt"=>Time.now})
+        }        .to raise_error(/hi mom/)
         # simple2a should return results without evaluation (they are all fixed)
         expect(simple2a.compute(@ruleopts_myrule, {"pt"=>Time.zone.now})).to eq(
                                        {"simple_result"=>"b value",
@@ -340,7 +348,8 @@ module Marty::RuleSpec
                                         {"pt"=>Time.zone.now,
                                          'param1'=> 66,
                                          'param2'=>'abc',
-                                         'paramb'=>false})}.to raise_error(exp)
+                                         'paramb'=>false})
+        }        .to raise_error(exp)
       end
       it "grids embedded in result work properly and receive prior attrs" do
         v = altgridmethod.compute(@ruleopts_myrule, {"pt"=>Time.zone.now,

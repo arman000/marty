@@ -20,7 +20,8 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
     to_obfus.each{|k| env[k] = env[k][0,4] if env[k]}
 
     env.sort.each_with_object({}){|(k,v),h|
-      h[k] = v if to_block.all?{|b| !k.include?(b)} && k.include?(filter)}
+      h[k] = v if to_block.all?{|b| !k.include?(b)} && k.include?(filter)
+    }
   end
 
   # overwritten to only return inconsitent data

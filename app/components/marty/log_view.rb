@@ -70,13 +70,15 @@ class Marty::LogView < Marty::Grid
     # to text in order to compare filter input using the LIKE operator.
     # Otherwise it will fail. '<' and '>' functionality is missing.
     c.filter_with = lambda {|r, v, op|
-      r.where("timestamp::text  #{op} '#{v}%'")}
+      r.where("timestamp::text  #{op} '#{v}%'")
+    }
   end
 
   column :details do |c|
     c.getter = lambda { |r| CGI.escapeHTML(r.details.pretty_inspect) }
     c.filter_with = lambda {|r, v, op|
-      r.where("details::text  #{op} '%#{v}%'")}
+      r.where("details::text  #{op} '%#{v}%'")
+    }
   end
 
   attribute :details do |c|

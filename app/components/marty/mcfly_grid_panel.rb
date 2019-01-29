@@ -21,7 +21,7 @@ class Marty::McflyGridPanel < Marty::Grid
    model.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
                      ts, ts).scoping do
       super
-    end
+   end
   end
 
   ######################################################################

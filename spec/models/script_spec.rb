@@ -36,9 +36,11 @@ describe Marty::Script do
 
       Marty::Script.load_a_script('TestExistsAndDifferent2', s1, now - 1.minute)
       expect { Marty::Script.load_a_script('TestExistsAndDifferent2',
-                                           s2, now) }.
+                                           s2, now)
+      }      .
         to change { Marty::Script.where(name: 'TestExistsAndDifferent2',
-                                        obsoleted_dt: 'infinity').count }.by(0)
+                                        obsoleted_dt: 'infinity').count
+           }           .by(0)
       expect(Marty::Script.find_by(
                obsoleted_dt: 'infinity', name: 'TestExistsAndDifferent2').
                created_dt.to_s).to eq(now.to_s)
@@ -72,7 +74,8 @@ describe Marty::Script do
 
     it 'creates a new tag if none exist yet with provided datetime' do
       expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1,
-                                                        'Test2' => s2}, now) }.
+                                                        'Test2' => s2}, now)
+      }      .
         to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
@@ -80,7 +83,8 @@ describe Marty::Script do
     it 'creates a new tag when there is an older one present' do
       Marty::Tag.do_create(now - 1.minute, 'initial test tag')
       expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1,
-                                                        'Test2' => s2}, now) }.
+                                                        'Test2' => s2}, now)
+      }      .
         to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
@@ -88,7 +92,8 @@ describe Marty::Script do
     it 'creates a new tag when no previous tag is present and no datetime ' +
       'provided' do
       expect { tag = Marty::Script.load_script_bodies({'Test1' => s1,
-                                                       'Test2' => s2}) }.
+                                                       'Test2' => s2})
+      }      .
         to change(Marty::Tag, :count).by(1)
     end
 

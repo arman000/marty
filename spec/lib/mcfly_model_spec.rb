@@ -107,7 +107,8 @@ EOF
     end
     let(:params) {{"pt"        =>'infinity',
                    "entity"    => Gemini::Entity.all.first,
-                   "note_rate" => 2.875}}
+                   "note_rate" => 2.875}
+    }
     it "lookup mode default" do
       a1 = @engine.evaluate("A", "lookup", params)
       a2 = @engine.evaluate("A", "clookup", params)
@@ -184,12 +185,12 @@ EOF
       x=Benchmark.measure { 10000.times {
                             Gemini::FannieBup.a_func(ts,
                                                      1, 2)
-                          }
+                            }
       }
       y=Benchmark.measure { 10000.times {
                             Gemini::FannieBup.ca_func(ts,
                                                      1, 2)
-                          }
+                            }
       }
       # x time should be 30x or more than y time
       expect(x.real / y.real).to be > 30

@@ -329,7 +329,7 @@ DELOREAN
       fill_in('attrs', with: "C.pc; B.pc; A.pc;")
       fill_in('params', with: "")
       press('Compute')
-    end
+     end
 
     and_by 'see error' do
       wait_for_ajax

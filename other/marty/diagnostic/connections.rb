@@ -5,7 +5,8 @@ module Marty::Diagnostic; class Connections < Base
               sort_by{|h| [h['application_name'],
                            h['pid'],
                            h['client_addr'],
-                           h['state']]}
+                           h['state']]
+    }
 
     counts = Hash.new(0)
     conns.each_with_object({}) do |c, h|

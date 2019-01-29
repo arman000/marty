@@ -167,7 +167,8 @@ module ActiveRecord
         enum = options.delete(:enum)
 
         column_names.each { |name|
-          column(name, enum || name.to_s.pluralize, options) }
+          column(name, enum || name.to_s.pluralize, options)
+        }
       end
     end
   end
