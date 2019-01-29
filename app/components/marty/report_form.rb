@@ -147,11 +147,11 @@ class Marty::ReportForm < Marty::Form
 
       raise engine.to_s if engine.is_a?(Hash)
 
-      items, title, format = engine.
-        evaluate(root_sess[:selected_node],
-                 ["form", "title", "format"],
-                 {},
-                )
+      items, title, format = engine
+        .evaluate(root_sess[:selected_node],
+                  ["form", "title", "format"],
+                  {},
+                 )
 
       raise "bad form items" unless items.is_a?(Array)
       raise "bad format" unless

@@ -305,8 +305,8 @@ module Marty::RuleSpec
         swh = " string that contains a # character"
         expect(simple.fixed_results["stringwithhash"]).to eq(swh)
         expect(simple.fixed_results.count).to eq(5)
-        allow_any_instance_of(Delorean::Engine).
-          to receive(:evaluate).and_raise('hi mom')
+        allow_any_instance_of(Delorean::Engine)
+          .to receive(:evaluate).and_raise('hi mom')
         expect do
           simple.compute(@ruleopts_myrule,
                          { "pt" => Time.now })
@@ -321,8 +321,8 @@ module Marty::RuleSpec
                                 { "pt" => Time.zone.now,
                                  'param1' => 66,
                                  'param2' => 'abc',
-                                 'paramb' => false })).
-          to eq({ "grid1_grid_result" => 3,
+                                 'paramb' => false }))
+          .to eq({ "grid1_grid_result" => 3,
                  "grid2_grid_result" => 1300 })
       end
       it "returns computed results" do

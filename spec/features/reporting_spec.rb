@@ -79,15 +79,15 @@ DELOREAN
     with_user("dev1") do |u|
       Marty::Posting.do_create('BASE', SOME_DT, 'a comment')
 
-      Marty::Script.
-        load_script_bodies({ "SomeReport" => a_report, },
-                           Date.today)
+      Marty::Script
+        .load_script_bodies({ "SomeReport" => a_report, },
+                            Date.today)
 
-      Marty::Script.
-        load_script_bodies({ "SomeReport" =>
+      Marty::Script
+        .load_script_bodies({ "SomeReport" =>
                              a_report +
                              "CC: BB\n    title=\"CC\"\n    result = 123" },
-                           Date.today + 1.minute)
+                            Date.today + 1.minute)
     end
   end
 

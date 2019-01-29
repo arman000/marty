@@ -95,8 +95,8 @@ class Marty::DataConversion
     # build a profile for ActiveRecord klass associations which
     # enables find/import of its database records
 
-    @@associations[klass] ||= klass.reflect_on_all_associations.
-      each_with_object({}) do |assoc, h|
+    @@associations[klass] ||= klass.reflect_on_all_associations
+      .each_with_object({}) do |assoc, h|
 
       h[assoc.name.to_s] = {
         assoc_keys:  assoc_keys(assoc.klass),

@@ -112,11 +112,11 @@ class Marty::Script < Marty::Base
   end
 
   def self.delete_scripts
-    ActiveRecord::Base.connection.
-      execute("ALTER TABLE marty_scripts DISABLE TRIGGER USER;")
+    ActiveRecord::Base.connection
+      .execute("ALTER TABLE marty_scripts DISABLE TRIGGER USER;")
     Marty::Script.delete_all
-    ActiveRecord::Base.connection.
-      execute("ALTER TABLE marty_scripts ENABLE TRIGGER USER;")
+    ActiveRecord::Base.connection
+      .execute("ALTER TABLE marty_scripts ENABLE TRIGGER USER;")
   end
 
   delorean_fn :eval_to_hash, sig: 5 do |dt, script, node, attrs, params|

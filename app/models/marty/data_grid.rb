@@ -325,8 +325,8 @@ class Marty::DataGrid < Marty::Base
         v.each do |k|
           begin
             # check to see if class instance actually exists
-            Marty::DataGrid.
-              find_class_instance('infinity', klass, k) || raise(NoMethodError)
+            Marty::DataGrid
+              .find_class_instance('infinity', klass, k) || raise(NoMethodError)
           rescue NoMethodError
             raise "instance #{k} of #{type} not found"
           end
@@ -373,11 +373,11 @@ class Marty::DataGrid < Marty::Base
 
     meta_rows, h_key_rows, data_rows = export_array
 
-    Marty::DataExporter.
-      to_csv(meta_rows + [[]] + h_key_rows + data_rows,
-             "col_sep" => "\t",
-            ).
-      gsub(/\"\"/, '') # remove "" to beautify output
+    Marty::DataExporter
+      .to_csv(meta_rows + [[]] + h_key_rows + data_rows,
+              "col_sep" => "\t",
+             )
+      .gsub(/\"\"/, '') # remove "" to beautify output
   end
 
   delorean_fn :export, sig: 1 do |os|
@@ -422,8 +422,8 @@ class Marty::DataGrid < Marty::Base
       res.each do |k|
         begin
           # check to see if class instance actually exists
-          Marty::DataGrid.
-            find_class_instance(pt, klass, k) || raise(NoMethodError)
+          Marty::DataGrid
+            .find_class_instance(pt, klass, k) || raise(NoMethodError)
         rescue NoMethodError
           raise "instance #{k} of #{type} not found"
         end
@@ -542,8 +542,8 @@ class Marty::DataGrid < Marty::Base
     else
       data = data_rows.map do |r|
         r[v_infos.count, r.count].map do |v|
-          next v if !v || Marty::DataGrid.
-                         find_class_instance(pt, c_data_type, v)
+          next v if !v || Marty::DataGrid
+                         .find_class_instance(pt, c_data_type, v)
 
           raise "can't find key '#{v}' for class #{data_type}"
         end

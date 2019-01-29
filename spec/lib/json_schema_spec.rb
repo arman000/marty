@@ -37,15 +37,15 @@ module Marty
 
     it "returns error on incorrect simple data -- 1" do
       data = { "a" => 5.2 }
-      expect(JSON::Validator.
-              fully_validate(simple_schema, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(simple_schema, data, opt)[0]).to include(
       "property '#/a' of type number did not match the following type: integer")
     end
 
     it "returns error on incorrect simple data -- 2" do
       data = { "a" => "Kangaroo" }
-      expect(JSON::Validator.
-              fully_validate(simple_schema, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(simple_schema, data, opt)[0]).to include(
       "property '#/a' of type string did not match the following type: integer")
     end
 
@@ -74,8 +74,8 @@ module Marty
 
     it "returns error on non-existant enums" do
       data = { "a" => 'Beer' }
-      expect(JSON::Validator.
-              fully_validate(pg_schema_opt, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(pg_schema_opt, data, opt)[0]).to include(
          "property '#/a' value 'Beer' not contained in MammalEnum")
     end
 
@@ -86,8 +86,8 @@ module Marty
 
     it "returns error when a nil enum is passed even when enum is optional" do
       data = { "a" => nil }
-      expect(JSON::Validator.
-              fully_validate(pg_schema_opt, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(pg_schema_opt, data, opt)[0]).to include(
         "property '#/a' value '' not contained in MammalEnum")
     end
 
@@ -103,15 +103,15 @@ module Marty
 
     it "returns error when a required field is not supplied" do
       data = {}
-      expect(JSON::Validator.
-              fully_validate(pg_schema_req, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(pg_schema_req, data, opt)[0]).to include(
          "property '#/' did not contain a required property of 'a'")
     end
 
     it "returns error when a nil enum is passed when enum is required" do
       data = { "a" => nil }
-      expect(JSON::Validator.
-              fully_validate(pg_schema_req, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(pg_schema_req, data, opt)[0]).to include(
        "property '#/a' value '' not contained in MammalEnum")
     end
 
@@ -127,8 +127,8 @@ module Marty
 
     it "returns raises meaningful error on schema enum error"  do
       data = { "a" => nil }
-      expect(JSON::Validator.
-              fully_validate(pg_schema_req_bad, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(pg_schema_req_bad, data, opt)[0]).to include(
         "property '#/a': 'NotAnEnum' is not a pg_enum class")
     end
 
@@ -144,8 +144,8 @@ module Marty
 
     it "returns raises meaningful error on schema enum error"  do
       data = { "a" => nil }
-      expect(JSON::Validator.
-              fully_validate(pg_schema_req_bad2, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(pg_schema_req_bad2, data, opt)[0]).to include(
          "property '#/a': 'NotEvenAClass' is not a pg_enum class")
     end
 
@@ -175,15 +175,15 @@ module Marty
 
     it "returns error on an improperly formatted date" do
       data = { "a" => '2017-05-32' }
-      expect(JSON::Validator.
-              fully_validate(date_schema_opt, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(date_schema_opt, data, opt)[0]).to include(
         "property '#/a' must be a date in the format of YYYY-MM-DD")
     end
 
     it "returns error on an properly formatted datetime" do
       data = { "a" => '2017-05-22T14:51:44Z' }
-      expect(JSON::Validator.
-              fully_validate(date_schema_opt, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(date_schema_opt, data, opt)[0]).to include(
         "property '#/a' must be a date in the format of YYYY-MM-DD")
     end
 
@@ -194,8 +194,8 @@ module Marty
 
     it "returns error when a nil date is passed even when date is optional" do
       data = { "a" => nil }
-      expect(JSON::Validator.
-              fully_validate(date_schema_opt, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(date_schema_opt, data, opt)[0]).to include(
          "property '#/a' of type null did not match the following type: string")
     end
 
@@ -212,15 +212,15 @@ module Marty
 
     it "returns error when a required date field is not supplied" do
       data = {}
-      expect(JSON::Validator.
-              fully_validate(date_schema_req, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(date_schema_req, data, opt)[0]).to include(
          "property '#/' did not contain a required property of 'a'")
     end
 
     it "returns error when a nil date is passed when date is required" do
       data = { "a" => nil }
-      expect(JSON::Validator.
-              fully_validate(date_schema_req, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(date_schema_req, data, opt)[0]).to include(
          "property '#/a' of type null did not match the following type: string")
     end
 
@@ -250,8 +250,8 @@ module Marty
 
     it "returns error on an improperly formatted datetime" do
       data = { "a" => '2017-30-22T14:51:44Z' }
-      expect(JSON::Validator.
-              fully_validate(datetime_schema_opt, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(datetime_schema_opt, data, opt)[0]).to include(
         "property '#/a' must be a date/time in the ISO-8601 format")
     end
 
@@ -262,8 +262,8 @@ module Marty
 
     it "returns error when a nil dt is passed even when dt is opt" do
       data = { "a" => nil }
-      expect(JSON::Validator.
-              fully_validate(datetime_schema_opt, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(datetime_schema_opt, data, opt)[0]).to include(
            "property '#/a' of type null did not match the following type: string")
     end
 
@@ -280,15 +280,15 @@ module Marty
 
     it "returns error when a required field is not supplied" do
       data = {}
-      expect(JSON::Validator.
-              fully_validate(datetime_schema_req, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(datetime_schema_req, data, opt)[0]).to include(
            "property '#/' did not contain a required property of 'a'")
     end
 
     it "returns error when a nil dt is passed when dt is required" do
       data = { "a" => nil }
-      expect(JSON::Validator.
-              fully_validate(datetime_schema_req, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(datetime_schema_req, data, opt)[0]).to include(
         "property '#/a' of type null did not match the following type: string")
     end
 
@@ -507,7 +507,7 @@ module Marty
     it "validates a complex nested schema when incorrect -- 2" do
       data = { "a" => 'Dog',
                "b" => '2017-05-22T14:51:44Z',
-               "root1" => [{ "x" => { "w" => 0, "t" => 'Bar',   "f" => 0.0 }, #
+               "root1" => [{ "x" => { "w" => 0, "t" => 'Bar',   "f" => 0.0 },
                               "y" => 'Phone' },
                            { "x" => { "w" => 1, "t" => 'Human', "f" => 5 },
                              "y" => 'Terminator' },
@@ -518,8 +518,8 @@ module Marty
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.
-              fully_validate(nested_schema, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(nested_schema, data, opt)[0]).to include(
          "property '#/root1/0/x/t' value 'Bar' not contained in MammalEnum")
     end
 
@@ -528,7 +528,7 @@ module Marty
                "b" => '2017-05-22T14:51:44Z',
                "root1" => [{ "x" => { "w" => 0, "t" => 'Bear',  "f" => 0.0 },
                               "y" => 'Phone' },
-                           { "x" => { "w" => 1, "t" => 'Human', "f" => 6.0 }, #
+                           { "x" => { "w" => 1, "t" => 'Human', "f" => 6.0 },
                              "y" => 'Terminator' },
                            { "x" => { "w" => 2, "t" => 'Dog',   "f" => 65.0 },
                              "y" => 'Phone' }],
@@ -537,8 +537,8 @@ module Marty
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.
-              fully_validate(nested_schema, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(nested_schema, data, opt)[0]).to include(
             "property '#/root1/1/x/f' was not divisible by 5.0")
     end
 
@@ -548,7 +548,7 @@ module Marty
                "root1" => [{ "x" => { "w" => 0, "t" => 'Bear',  "f" => 0.0 },
                               "y" => 'Phone' },
                            { "x" => { "w" => 1, "t" => 'Human', "f" => 5.0 },
-                             "y" => 'Trminator' }, #
+                             "y" => 'Trminator' },
                            { "x" => { "w" => 2, "t" => 'Dog',   "f" => 65.0 },
                              "y" => 'Phone' }],
                "root2" => [{ "m1" => 'Cat', "e" => 'Keyboard', "m2" => 'Dog' },
@@ -556,8 +556,8 @@ module Marty
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.
-              fully_validate(nested_schema, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(nested_schema, data, opt)[0]).to include(
                       "property '#/root1/1/y' value 'Trminator' not contained "\
                       "in ElectronicsEnum")
     end
@@ -569,15 +569,15 @@ module Marty
                               "y" => 'Phone' },
                            { "x" => { "w" => 1, "t" => 'Human', "f" => 5.0 },
                              "y" => 'Terminator' },
-                           { "x" => { "w" => 5, "t" => 'Dog',   "f" => 65.0 }, #
+                           { "x" => { "w" => 5, "t" => 'Dog',   "f" => 65.0 },
                              "y" => 'Phone' }],
                "root2" => [{ "m1" => 'Cat', "e" => 'Keyboard', "m2" => 'Dog' },
                            { "m1" => 'Dog', "e" => 'Phone',    "m2" => 'Cow' }],
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.
-              fully_validate(nested_schema, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(nested_schema, data, opt)[0]).to include(
        "property '#/root1/2/x/w' did not have a maximum value of 3, inclusively")
     end
 
@@ -588,15 +588,15 @@ module Marty
                               "y" => 'Phone' },
                            { "x" => { "w" => 1, "t" => 'Human', "f" => 5.0 },
                              "y" => 'Terminator' },
-                           { "x" => { "w" => -5, "t" => 'Dog',   "f" => 65.0 }, #
+                           { "x" => { "w" => -5, "t" => 'Dog',   "f" => 65.0 },
                              "y" => 'Phone' }],
                "root2" => [{ "m1" => 'Cat', "e" => 'Keyboard', "m2" => 'Dog' },
                            { "m1" => 'Dog', "e" => 'Phone',    "m2" => 'Cow' }],
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.
-              fully_validate(nested_schema, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(nested_schema, data, opt)[0]).to include(
        "property '#/root1/2/x/w' did not have a minimum value of 0, inclusively")
     end
 
@@ -610,12 +610,12 @@ module Marty
                            { "x" => { "w" => 2, "t" => 'Dog',   "f" => 65.0 },
                              "y" => 'Phone' }],
                "root2" => [{ "m1" => 'Cat', "e" => 'Keyboard', "m2" => 'Dog' },
-                           { "m1" => 'Dog', "e" => 'Dog',    "m2" => 'Cow' }], #
+                           { "m1" => 'Dog', "e" => 'Dog',    "m2" => 'Cow' }],
                "c" => 'Terminator',
                "d" => 5
              }
-      expect(JSON::Validator.
-              fully_validate(nested_schema, data, opt)[0]).to include(
+      expect(JSON::Validator
+              .fully_validate(nested_schema, data, opt)[0]).to include(
           "property '#/root2/1/e' value 'Dog' not contained in ElectronicsEnum")
     end
   end

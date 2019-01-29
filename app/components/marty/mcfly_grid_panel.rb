@@ -59,21 +59,21 @@ class Marty::McflyGridPanel < Marty::Grid
       # FIXME: copied from basepack grid endpoint
       # :add_window__add_form__netzke_submit
 
-      params[:data] = ActiveSupport::JSON.
-                      decode(params[:data]).merge(id: nil).to_json
+      params[:data] = ActiveSupport::JSON
+                      .decode(params[:data]).merge(id: nil).to_json
 
-      client.merge!(component_instance(:add_window).
-                   component_instance(:add_form).
-                   invoke_endpoint(:submit, [params]))
+      client.merge!(component_instance(:add_window)
+                   .component_instance(:add_form)
+                   .invoke_endpoint(:submit, [params]))
 
       on_data_changed if client.netzke_set_form_values.present?
       client.delete(:netzke_set_form_values)
     else
       # FIXME: copied from basepack grid endpoint
       # :edit_window__edit_form__netzke_submit
-      client.merge!(component_instance(:edit_window).
-                     component_instance(:edit_form).
-                     invoke_endpoint(:submit, [params]))
+      client.merge!(component_instance(:edit_window)
+                     .component_instance(:edit_form)
+                     .invoke_endpoint(:submit, [params]))
       on_data_changed if client.netzke_set_form_values.present?
       client.delete(:netzke_set_form_values)
     end
@@ -84,8 +84,8 @@ class Marty::McflyGridPanel < Marty::Grid
   def self.mcfly_scope(sort_column)
     lambda { |r|
       ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
-      r.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).
-      order(sort_column.to_sym)
+      r.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts)
+      .order(sort_column.to_sym)
     }
   end
 

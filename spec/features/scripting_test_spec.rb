@@ -46,11 +46,11 @@ C:
 DELOREAN
 
     with_user("dev1") do |u|
-      Marty::Script.
-        load_script_bodies({
-                             "M1" => sample_script,
+      Marty::Script
+        .load_script_bodies({
+                              "M1" => sample_script,
                              "M2" => sample_script.gsub(/a/, "aa").gsub(/b/, "bb"),
-                           }, Date.today)
+                            }, Date.today)
 
       # add a DEV version of M1.
       s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: "M1")
@@ -75,10 +75,10 @@ B: A
 DELOREAN
 
     with_user("dev1") do |u|
-      Marty::Script.
-        load_script_bodies({
-                             "M3" => sample_script2,
-                           }, Date.today + 2.minute)
+      Marty::Script
+        .load_script_bodies({
+                              "M3" => sample_script2,
+                            }, Date.today + 2.minute)
     end
   end
 

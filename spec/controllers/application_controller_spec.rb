@@ -9,8 +9,8 @@ module Marty
 
     describe 'authentication' do
       it "should allow a registered user to log in" do
-        allow(Rails.configuration.marty).to receive(:auth_source).
-          and_return('local')
+        allow(Rails.configuration.marty).to receive(:auth_source)
+          .and_return('local')
 
         user = Marty::User.try_to_login('marty', 'marty')
         subject.set_user(user)
@@ -23,8 +23,8 @@ module Marty
       it "should allow a registered user to log in when the database " +
         "is in recovery mode" do
         allow(Marty::Util).to receive(:db_in_recovery?).and_return(true)
-        allow(Rails.configuration.marty).to receive(:auth_source).
-          and_return('local')
+        allow(Rails.configuration.marty).to receive(:auth_source)
+          .and_return('local')
 
         user = Marty::User.try_to_login('marty', 'marty')
         subject.set_user(user)

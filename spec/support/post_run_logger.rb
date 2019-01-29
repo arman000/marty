@@ -24,8 +24,8 @@ module Marty; module RSpec; module PostRunLogger
   end
 
   def post_run_log(*log_string)
-    Storage.store_data example.example_group.parent_groups.map(&:description).
-                         reverse.join(' ') + ' ' + example.description,
+    Storage.store_data example.example_group.parent_groups.map(&:description)
+                         .reverse.join(' ') + ' ' + example.description,
                        log_string
   end
 end end end

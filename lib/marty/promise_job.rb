@@ -39,15 +39,15 @@ class Delorean::BaseModule::NodeCall
     title   = params["p_title"]   || "#{script}::#{nn.demodulize}"
     timeout = params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
     hook    = params["p_hook"]
-    promise = Marty::Promise.
-      create(title:     title,
+    promise = Marty::Promise
+      .create(title:     title,
              user_id:   params[:_user_id],
              parent_id: params[:_parent_id],
-            )
+             )
     params[:_promise_id] = promise.id
     begin
-      job = Delayed::Job.enqueue Marty::PromiseJob.
-        new(promise, title, script, tag, nn, params, args, hook)
+      job = Delayed::Job.enqueue Marty::PromiseJob
+        .new(promise, title, script, tag, nn, params, args, hook)
     rescue => exc
       # log "CALLERR #{exc}"
       res = Delorean::Engine.grok_runtime_exception(exc)
@@ -71,8 +71,8 @@ class Delorean::BaseModule::NodeCall
         event.promise_id = promise.id
         event.save!
       else
-        event = Marty::Event.
-                create!(promise_id: promise.id,
+        event = Marty::Event
+                .create!(promise_id: promise.id,
                         klass:      klass,
                         subject_id: subject_id,
                         enum_event_operation: operation)

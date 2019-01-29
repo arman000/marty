@@ -24,8 +24,8 @@ module Marty; module RSpec; module SharedConnection
     end
 
     def self.reset_shared_connection
-      @@shared_connection = ConnectionPool::Wrapper.
-                              new(:size => 1) { retrieve_connection }
+      @@shared_connection = ConnectionPool::Wrapper
+                              .new(:size => 1) { retrieve_connection }
     end
   end
 end end end

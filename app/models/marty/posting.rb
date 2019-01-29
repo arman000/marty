@@ -70,18 +70,18 @@ class Marty::Posting < Marty::Base
   def self.get_latest(limit, is_test = nil)
     # IMPORTANT: is_test arg is ignored (KEEP for backward compat.)
 
-    q = where("created_dt <> 'infinity'").
-       order("created_dt DESC").limit(limit)
+    q = where("created_dt <> 'infinity'")
+       .order("created_dt DESC").limit(limit)
   end
 
   delorean_fn :get_latest_by_type, sig: [1, 2] do |limit, posting_types = []|
     raise "missing posting types list" unless posting_types
     raise "bad posting types list" unless posting_types.is_a?(Array)
 
-    q = joins(:posting_type).where("created_dt <> 'infinity'").
-       where(marty_posting_types: { name: posting_types }).
-       select(get_struct_attrs).
-       order("created_dt DESC").limit(limit || 1)
+    q = joins(:posting_type).where("created_dt <> 'infinity'")
+       .where(marty_posting_types: { name: posting_types })
+       .select(get_struct_attrs)
+       .order("created_dt DESC").limit(limit || 1)
     q.map { |ar| ar.attributes }
   end
 end

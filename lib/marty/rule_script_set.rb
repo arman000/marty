@@ -39,8 +39,8 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def paramify_h(h)
-    "{" + h.keys.reject { |k| k.ends_with?("__") }.
-                         map { |k| %Q("#{k}": #{k}) }.join(",\n") + "}"
+    "{" + h.keys.reject { |k| k.ends_with?("__") }
+                         .map { |k| %Q("#{k}": #{k}) }.join(",\n") + "}"
   end
 
   def self.grid_final_name(dgid)
@@ -155,8 +155,8 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
       # is it a dev posting?
       if Mcfly.is_infinity(pt)
-        max_dt = ruleh["classname"].constantize.order("created_dt DESC").
-                 limit(1).pluck(:created_dt).first
+        max_dt = ruleh["classname"].constantize.order("created_dt DESC")
+                 .limit(1).pluck(:created_dt).first
 
         @@dengines_dt ||= max_dt
 

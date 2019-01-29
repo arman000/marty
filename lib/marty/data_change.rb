@@ -89,8 +89,8 @@ class Marty::DataChange
   end
 
   delorean_fn :class_headers, sig: 1 do |class_name|
-    Marty::DataExporter.export_headers(class_name.constantize, nil, []).flatten.
-      map { |f| I18n.t(f, scope: 'attributes', default: f) }
+    Marty::DataExporter.export_headers(class_name.constantize, nil, []).flatten
+      .map { |f| I18n.t(f, scope: 'attributes', default: f) }
   end
 
   delorean_fn :user_name, sig: 1 do |user_id|
@@ -108,8 +108,8 @@ class Marty::DataChange
     raise "'#{klass}' not on class_list" unless
       class_list.member?(klass) || klass.constantize.is_a?(Marty::Enum)
 
-    Marty::DataExporter.
-      do_export(pt, klass.constantize, sort_field, exclude_attrs)
+    Marty::DataExporter
+      .do_export(pt, klass.constantize, sort_field, exclude_attrs)
   end
 
   delorean_fn :do_pg_enum_export, sig: 1 do |k|
@@ -128,10 +128,10 @@ class Marty::DataChange
 
     # find all changes from t0 to t1 -- orders by id to get the lower
     # ones since those are the original version in Mcfly.
-    changes = klass.select("DISTINCT ON (group_id) *").
-      where(change_q, t0, t1, t0, t1).
-      order("group_id, id").
-      to_a
+    changes = klass.select("DISTINCT ON (group_id) *")
+      .where(change_q, t0, t1, t0, t1)
+      .order("group_id, id")
+      .to_a
 
     # update/adds, deletes
     chg, del = [], []
@@ -141,8 +141,8 @@ class Marty::DataChange
         chg << o
       else
         # if a version of row existed before t0 => add it to del list
-        del << o if klass.
-          where("group_id = ? AND created_dt < ?", o.group_id, t0).exists?
+        del << o if klass
+          .where("group_id = ? AND created_dt < ?", o.group_id, t0).exists?
       end
     end
 
@@ -262,8 +262,8 @@ class Marty::DataChange
       "different"   => different,
       "same"        => same,
       "only_input"  => only_input,
-      "only_source" => Marty::DataExporter.
-                      do_export_query_result(klass, query),
+      "only_source" => Marty::DataExporter
+                      .do_export_query_result(klass, query),
     }
   end
 
@@ -294,13 +294,13 @@ class Marty::DataChange
       # not exhaustive.  There are other possibities for dead
       # references. e.g. referenced id != group_id.
       arr =
-        klass.
-        joins("INNER JOIN #{rtable} ON #{ktable}.#{fk} = #{rtable}.group_id").
-        where("#{ktable}.obsoleted_dt >= ?", ts).
-        where("#{ktable}.created_dt < ?", ts).
-        where("#{rtable}.obsoleted_dt < #{ktable}.obsoleted_dt").
-        where("#{rtable}.group_id = #{rtable}.id").
-        all
+        klass
+        .joins("INNER JOIN #{rtable} ON #{ktable}.#{fk} = #{rtable}.group_id")
+        .where("#{ktable}.obsoleted_dt >= ?", ts)
+        .where("#{ktable}.created_dt < ?", ts)
+        .where("#{rtable}.obsoleted_dt < #{ktable}.obsoleted_dt")
+        .where("#{rtable}.group_id = #{rtable}.id")
+        .all
 
       arr = arr.map { |obj| Marty::DataExporter.export_attrs(klass, obj, [fk]) }
 

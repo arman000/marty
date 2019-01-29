@@ -15,37 +15,37 @@ describe Marty::Script do
     let(:now) { Time.zone.now - 1.minute }
 
     it "creates a new script if it doesn't already exist" do
-      expect { Marty::Script.load_a_script('TestNew', s1, now) }.
-        to change(Marty::Script, :count).by(1)
-      expect(Marty::Script.find_by(obsoleted_dt: 'infinity', name: 'TestNew').
-               created_dt.to_s).to eq(now.to_s)
+      expect { Marty::Script.load_a_script('TestNew', s1, now) }
+        .to change(Marty::Script, :count).by(1)
+      expect(Marty::Script.find_by(obsoleted_dt: 'infinity', name: 'TestNew')
+               .created_dt.to_s).to eq(now.to_s)
     end
 
     it "doesn't create a new script entry if it already exists and is the " +
       "same as the existing" do
       Marty::Script.load_a_script('TestExistsAndSame', s1)
-      expect { Marty::Script.load_a_script('TestExistsAndSame', s1) }.
-        not_to change(Marty::Script, :count)
+      expect { Marty::Script.load_a_script('TestExistsAndSame', s1) }
+        .not_to change(Marty::Script, :count)
     end
 
     it 'updates the existing script entry if it already exists but is ' +
       'different' do
       Marty::Script.load_a_script('TestExistsAndDifferent1', s1)
-      expect { Marty::Script.load_a_script('TestExistsAndDifferent1', s2) }.
-        to change(Marty::Script, :count).by(1)
+      expect { Marty::Script.load_a_script('TestExistsAndDifferent1', s2) }
+        .to change(Marty::Script, :count).by(1)
 
       Marty::Script.load_a_script('TestExistsAndDifferent2', s1, now - 1.minute)
       expect do
         Marty::Script.load_a_script('TestExistsAndDifferent2',
                                     s2, now)
-      end      .
-        to change {
+      end
+        .to change {
              Marty::Script.where(name: 'TestExistsAndDifferent2',
                                         obsoleted_dt: 'infinity').count
-           }           .by(0)
+            }           .by(0)
       expect(Marty::Script.find_by(
-               obsoleted_dt: 'infinity', name: 'TestExistsAndDifferent2').
-               created_dt.to_s).to eq(now.to_s)
+               obsoleted_dt: 'infinity', name: 'TestExistsAndDifferent2')
+               .created_dt.to_s).to eq(now.to_s)
     end
   end
 
@@ -58,19 +58,19 @@ describe Marty::Script do
 
     it 'loads each script given a hash' do
       Marty::Script.load_script_bodies({ 'Test1' => s1, 'Test2' => s2 }, now)
-      expect(Marty::Script).to have_received(:load_a_script).
-        with('Test1', s1, now)
-      expect(Marty::Script).to have_received(:load_a_script).
-        with('Test2', s2, now)
+      expect(Marty::Script).to have_received(:load_a_script)
+        .with('Test1', s1, now)
+      expect(Marty::Script).to have_received(:load_a_script)
+        .with('Test2', s2, now)
       expect(Marty::Script).to have_received(:load_a_script).twice
     end
 
     it 'loads each script given an array of tuples' do
       Marty::Script.load_script_bodies([['Test1', s1], ['Test2', s2]], now)
-      expect(Marty::Script).to have_received(:load_a_script).
-        with('Test1', s1, now)
-      expect(Marty::Script).to have_received(:load_a_script).
-        with('Test2', s2, now)
+      expect(Marty::Script).to have_received(:load_a_script)
+        .with('Test1', s1, now)
+      expect(Marty::Script).to have_received(:load_a_script)
+        .with('Test2', s2, now)
       expect(Marty::Script).to have_received(:load_a_script).twice
     end
 
@@ -78,8 +78,8 @@ describe Marty::Script do
       expect do
         @tag = Marty::Script.load_script_bodies({ 'Test1' => s1,
                                                         'Test2' => s2 }, now)
-      end      .
-        to change(Marty::Tag, :count).by(1)
+      end
+        .to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
 
@@ -88,8 +88,8 @@ describe Marty::Script do
       expect do
         @tag = Marty::Script.load_script_bodies({ 'Test1' => s1,
                                                         'Test2' => s2 }, now)
-      end      .
-        to change(Marty::Tag, :count).by(1)
+      end
+        .to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
 
@@ -98,16 +98,16 @@ describe Marty::Script do
       expect do
         tag = Marty::Script.load_script_bodies({ 'Test1' => s1,
                                                        'Test2' => s2 })
-      end      .
-        to change(Marty::Tag, :count).by(1)
+      end
+        .to change(Marty::Tag, :count).by(1)
     end
 
     it "doesn't create a new tag if one is present and the script wasn't" +
       "modified" do
       Marty::Script.create!(name: 'Test1', body: s1, created_dt: now)
       Marty::Tag.do_create(now + 1.second, 'tag created by test')
-      expect { Marty::Script.load_script_bodies({ 'Test1' => s1 }) }.
-        not_to change(Marty::Tag, :count)
+      expect { Marty::Script.load_script_bodies({ 'Test1' => s1 }) }
+        .not_to change(Marty::Tag, :count)
     end
   end
 
@@ -125,8 +125,8 @@ describe Marty::Script do
 
     it 'reads in the files and loads the script bodies' do
       Marty::Script.load_scripts(scripts_path, now)
-      expect(Marty::Script).to have_received(:load_script_bodies).
-        with(match_array([['Script1', ls1], ['Script2', ls2]]), now)
+      expect(Marty::Script).to have_received(:load_script_bodies)
+        .with(match_array([['Script1', ls1], ['Script2', ls2]]), now)
     end
   end
 
@@ -144,19 +144,19 @@ describe Marty::Script do
       end
 
       it 'returns the files in the given directory' do
-        expect(Marty::Script.get_script_filenames('/test')).
-          to match_array(script_files)
+        expect(Marty::Script.get_script_filenames('/test'))
+          .to match_array(script_files)
       end
     end
 
     context 'with duplicate script file names' do
       it 'returns only the unique file names' do
-        allow(Dir).to receive(:glob).with('/test1/*.dl').
-          and_return(['/test1/sc1.dl', '/test1/sc2.dl'])
-        allow(Dir).to receive(:glob).with('/test2/*.dl').
-          and_return(['/test2/sc2.dl', '/test2/sc3.dl'])
-        expect(Marty::Script.get_script_filenames(['/test1', '/test2'])).
-          to match_array(['/test1/sc1.dl', '/test1/sc2.dl', '/test2/sc3.dl'])
+        allow(Dir).to receive(:glob).with('/test1/*.dl')
+          .and_return(['/test1/sc1.dl', '/test1/sc2.dl'])
+        allow(Dir).to receive(:glob).with('/test2/*.dl')
+          .and_return(['/test2/sc2.dl', '/test2/sc3.dl'])
+        expect(Marty::Script.get_script_filenames(['/test1', '/test2']))
+          .to match_array(['/test1/sc1.dl', '/test1/sc2.dl', '/test2/sc3.dl'])
       end
     end
 
@@ -165,8 +165,8 @@ describe Marty::Script do
         allow(Dir).to receive(:glob).and_return([])
         Marty::Script.get_script_filenames
         expect(Dir).to have_received(:glob).with("#{Rails.root}/delorean/*.dl")
-        expect(Dir).to have_received(:glob).
-          with(File.expand_path('../../../delorean/*.dl', __FILE__))
+        expect(Dir).to have_received(:glob)
+          .with(File.expand_path('../../../delorean/*.dl', __FILE__))
         expect(Dir).to have_received(:glob).twice
       end
     end

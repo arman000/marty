@@ -31,20 +31,6 @@ Layout/ClosingHeredocIndentation:
     - 'spec/support/components/netzke_combobox.rb'
     - 'spec/support/components/netzke_grid.rb'
 
-# Offense count: 218
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: leading, trailing
-Layout/DotPosition:
-  Enabled: false
-
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: AllowBorderComment, AllowMarginComment.
-Layout/EmptyComment:
-  Exclude:
-    - 'spec/lib/json_schema_spec.rb'
-
 # Offense count: 56
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyleAlignWith, AutoCorrect, Severity.

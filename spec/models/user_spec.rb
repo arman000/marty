@@ -33,8 +33,8 @@ module Marty
         user = system_user
         user.active = false
         expect(user).to_not be_valid
-        expect(user.errors[:base].to_s).
-          to include('application system account cannot be deactivated')
+        expect(user.errors[:base].to_s)
+          .to include('application system account cannot be deactivated')
       end
 
       it "should not allow accounts to be deleted" do
@@ -46,22 +46,22 @@ module Marty
       it "should not allow user managers to edit the Gemini account" do
         Mcfly.whodunnit = tuser
         user = system_user
-        allow_any_instance_of(Marty::User).to receive(:user_manager_only).
-          and_return(true)
+        allow_any_instance_of(Marty::User).to receive(:user_manager_only)
+          .and_return(true)
         user.firstname = 'Testing'
         expect(user).to_not be_valid
-        expect(user.errors[:base].to_s).
-          to include('cannot edit the application system account')
+        expect(user.errors[:base].to_s)
+          .to include('cannot edit the application system account')
       end
 
       it "should not allow user managers to edit their own account" do
         Mcfly.whodunnit = tuser
-        allow_any_instance_of(Marty::User).to receive(:user_manager_only).
-          and_return(true)
+        allow_any_instance_of(Marty::User).to receive(:user_manager_only)
+          .and_return(true)
         tuser.firstname = 'Testing'
         expect(tuser).to_not be_valid
-        expect(tuser.errors[:base].to_s).
-          to include('cannot edit or add additional roles')
+        expect(tuser.errors[:base].to_s)
+          .to include('cannot edit or add additional roles')
       end
     end
   end

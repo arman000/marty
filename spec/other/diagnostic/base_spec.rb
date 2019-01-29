@@ -59,10 +59,10 @@ describe Marty::Diagnostic::Base do
       },
     }
 
-    expect(described_class.
-             pack(include_ip = false) { test_a }).to eq(expected)
-    expect(described_class.
-             pack(include_ip = false) { test_a }).to eq(expected)
+    expect(described_class
+             .pack(include_ip = false) { test_a }).to eq(expected)
+    expect(described_class
+             .pack(include_ip = false) { test_a }).to eq(expected)
   end
 
   it 'can produce a valid diagnostic hash from an error Hash' do

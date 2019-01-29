@@ -85,8 +85,8 @@ module Marty
 
     def self.get_schema(tag, sname, node, attr)
       begin
-        Marty::ScriptSet.new(tag).get_engine(sname + 'Schemas').
-          evaluate(node, attr, {})
+        Marty::ScriptSet.new(tag).get_engine(sname + 'Schemas')
+          .evaluate(node, attr, {})
       rescue => e
         id = "#{sname}/#{node} attrs=#{attr}"
 
