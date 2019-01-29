@@ -76,11 +76,6 @@ Layout/IndentHeredoc:
 Layout/IndentationWidth:
   Enabled: false
 
-# Offense count: 23
-# Cop supports --auto-correct.
-Layout/LeadingCommentSpace:
-  Enabled: false
-
 # Offense count: 15
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

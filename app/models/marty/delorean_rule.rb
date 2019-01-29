@@ -196,7 +196,7 @@ class Marty::DeloreanRule < Marty::BaseRule
     rule_dt = attrs["rule_dt"]
     q = q.where("start_dt <= ?", rule_dt)
        .where("end_dt >= ? OR end_dt IS NULL", rule_dt) if rule_dt
-    #puts q.to_sql
+    # puts q.to_sql
     q
   end
 

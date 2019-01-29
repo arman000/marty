@@ -44,7 +44,7 @@ module Marty::Permissions
 
     self.marty_permissions.map do |action, aroles|
       # TODO: Use code below when switching to Ruby 2.1
-      #action if Set[ *aroles].intersect? roles.to_set
+      # action if Set[ *aroles].intersect? roles.to_set
       action if (Set[*aroles] & roles.to_set).length > 0
     end.compact
   end

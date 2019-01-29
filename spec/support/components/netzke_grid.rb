@@ -6,7 +6,7 @@ module Marty; module RSpec; module Components
   class NetzkeGrid
     include Netzke
     include Capybara::DSL
-    #include RSpec::Matchers
+    # include RSpec::Matchers
 
     attr_reader :name, :grid
 

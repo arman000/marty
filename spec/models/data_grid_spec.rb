@@ -180,7 +180,7 @@ Investor Services Acadamy\t-0.5
 EOS
 
 before(:each) do
-  #Mcfly.whodunnit = Marty::User.find_by_login('marty')
+  # Mcfly.whodunnit = Marty::User.find_by_login('marty')
   marty_whodunnit
 end
 

@@ -19,7 +19,7 @@ RSpec.configure do |config|
   config.include Marty::RSpec::SharedConnection
   config.include Marty::RSpec::SharedConnectionDbHelpers
 
-  #RspecMarty::SharedConnection.classes_to_exclude_shared = ['Marty::Log']
+  # RspecMarty::SharedConnection.classes_to_exclude_shared = ['Marty::Log']
   Capybara.default_max_wait_time = 3
 
   # TODO: Continue to remove should syntax from specs - remove this line to see

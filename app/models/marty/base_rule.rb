@@ -114,7 +114,7 @@ class Marty::BaseRule < Marty::Base
 
       q = q.where("(#{isn} #{filts})")
     end
-    #print q.to_sql
+    # print q.to_sql
     q.order(:name)
   end
 end

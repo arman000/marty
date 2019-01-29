@@ -93,8 +93,8 @@ SQL
               AND subject_id = #{subject_id}
               AND enum_event_operation = '#{operation}'")
 
-    #For now we return a bare hash
-    #Marty::Event.find_by_id(hash["id"])
+    # For now we return a bare hash
+    # Marty::Event.find_by_id(hash["id"])
   end
 
   def self.finish_event(klass, subject_id, operation, error = false, comment = nil)
@@ -210,7 +210,7 @@ SQL
   def self.pretty_op(hash)
     d = hash['enum_event_operation'].downcase.capitalize
 
-    #&& !(hash['comment'] =~ /^ERROR/)
+    # && !(hash['comment'] =~ /^ERROR/)
     hash['end_dt'] ? d.sub(/ing/, 'ed') : d
   end
 

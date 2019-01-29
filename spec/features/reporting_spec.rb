@@ -93,7 +93,7 @@ DELOREAN
 
   def select_node node_name
     wait_for_ajax
-    #hacky: assumes only 1 combobox without label
+    # hacky: assumes only 1 combobox without label
     within(:gridpanel, 'report_select', match: :first) do
       # hacky, hardcoding netzkecombobox dropdown arrow name
       arrow = find(:input, 'nodename')['data-componentid'] + '-trigger-picker'

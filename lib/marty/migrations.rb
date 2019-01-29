@@ -14,7 +14,7 @@ module Marty::Migrations
     str_values =
       values.map { |v| ActiveRecord::Base.connection.quote v }.join ','
 
-    #hacky way to get name
+    # hacky way to get name
     prefix = prefix_override || tb_prefix
     enum_name = klass.table_name.sub(/^#{prefix}_*/, '')
 
@@ -31,11 +31,11 @@ module Marty::Migrations
     raise "model class needs VALUES (as Set)" unless
       klass.const_defined?(:VALUES)
 
-    #hacky way to get name
+    # hacky way to get name
     prefix = prefix_override || tb_prefix
     enum_name = klass.table_name.sub(/^#{prefix}/, '')
 
-    #check values against underlying values
+    # check values against underlying values
     res = execute <<-SQL
       SELECT ENUM_RANGE(null::#{enum_name});
     SQL

@@ -92,7 +92,7 @@ class Marty::ApiLogView < Marty::Grid
     end
   end
 
-  #copied from log_view.rb
+  # copied from log_view.rb
   attribute :timestamp_custom do |c|
     c.text         = I18n.t("log_grid.timestamp")
     c.width        = 200

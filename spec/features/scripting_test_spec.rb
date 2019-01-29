@@ -83,7 +83,7 @@ DELOREAN
   end
 
   def tab_press tab_text
-    #we need a separate method for tab clicks
+    # we need a separate method for tab clicks
     wait_for_element do
         find_by_id(ext_button_id(tab_text), visible: :all).click
         true
