@@ -90,10 +90,10 @@ class Marty::User < Marty::Base
     Mcfly.whodunnit
   end
 
- def self.has_role(role)
-    mr = Mcfly.whodunnit.roles rescue []
-    mr.any? { |attr| attr.name == role }
- end
+  def self.has_role(role)
+     mr = Mcfly.whodunnit.roles rescue []
+     mr.any? { |attr| attr.name == role }
+  end
 
   private
 

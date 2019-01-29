@@ -323,12 +323,12 @@ DELOREAN
       expect(result).to have_content 'B.pc = 9'
     end
 
-     and_by 'use bad attr' do
-      wait_for_ajax
-      fill_in('attrs', with: "C.pc; B.pc; A.pc;")
-      fill_in('params', with: "")
-      press('Compute')
-     end
+    and_by 'use bad attr' do
+     wait_for_ajax
+     fill_in('attrs', with: "C.pc; B.pc; A.pc;")
+     fill_in('params', with: "")
+     press('Compute')
+    end
 
     and_by 'see error' do
       wait_for_ajax

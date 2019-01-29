@@ -371,13 +371,13 @@ class Marty::DataGrid < Marty::Base
      # return null string when called from Netzke on add_in_form
      return "" if metadata.nil? && data.nil?
 
-    meta_rows, h_key_rows, data_rows = export_array
+     meta_rows, h_key_rows, data_rows = export_array
 
-    Marty::DataExporter
-      .to_csv(meta_rows + [[]] + h_key_rows + data_rows,
-              "col_sep" => "\t",
-             )
-      .gsub(/\"\"/, '') # remove "" to beautify output
+     Marty::DataExporter
+       .to_csv(meta_rows + [[]] + h_key_rows + data_rows,
+               "col_sep" => "\t",
+              )
+       .gsub(/\"\"/, '') # remove "" to beautify output
   end
 
   delorean_fn :export, sig: 1 do |os|

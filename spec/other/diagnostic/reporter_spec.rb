@@ -164,18 +164,18 @@ describe Marty::Diagnostic::Reporter do
 
     it 'displays all nodes when there is an inconsistent node (version)' do
      Marty:: Diagnostic::Reporter.request.params = params
-      bad_ver = '0.0.0'
+     bad_ver = '0.0.0'
 
-      data = {
-        'Version' => {
-          'NodeA' => version_data(consistent = false),
-          'NodeB' => version_data + {
-            'Marty' => Marty::Diagnostic::Base.create_info(bad_ver, true, false)
-          },
-        }
-      }
+     data = {
+       'Version' => {
+         'NodeA' => version_data(consistent = false),
+         'NodeB' => version_data + {
+           'Marty' => Marty::Diagnostic::Base.create_info(bad_ver, true, false)
+         },
+       }
+     }
 
-      expected = <<-ERB
+     expected = <<-ERB
       <h3>Version</h3>
       <h3 class="error">Inconsistency Detected </h3>
       <div class="wrapper">
@@ -207,10 +207,10 @@ describe Marty::Diagnostic::Reporter do
           </tr>
       </table>
       </div>
-      ERB
+     ERB
 
-      test = described_class.displays(data)
-      expect(minimize(test)).to eq(minimize(expected))
+     test = described_class.displays(data)
+     expect(minimize(test)).to eq(minimize(expected))
     end
 
     it 'can detect errors in diagnostic for display and api' do

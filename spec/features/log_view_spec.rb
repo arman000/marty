@@ -55,30 +55,30 @@ feature 'logger view', js: true, capybara: true do
                    "[\"one\", \"two\", 3, 4.0]\n",
                    "[5]\n"
 ]
-   [[nil, 5], [7, 4], [3, 3], [0, 0]].each do |days, exp_count|
-      if days
-        press('System')
-        show_submenu('Log Maintenance')
-        press('Cleanup Log Table')
-        wait_for_ajax
-        find(:xpath, "//input[contains(@id, 'textfield')]", wait: 5).set(days)
-        press('OK')
-        wait_for_ready
-        find('.x-tool-refresh').click
-        wait_for_ready
-      end
-      wait_for_ajax
-      cnt = logview.row_count()
-      expect(cnt).to eq(exp_count)
-      types = logview.get_col_vals('message_type', cnt, 0)
-      messages = logview.get_col_vals('message', cnt, 0)
-      details = logview.get_col_vals('details', cnt, 0)
-                  .map { |d| CGI.unescapeHTML(d) }
-      ts = logview.get_col_vals('timestamp_custom', cnt, 0)
-      expect(ts).to eq(@ts.slice(0, exp_count))
-      expect(types).to eq(exp_types.slice(0, exp_count))
-      expect(messages).to eq(exp_messages.slice(0, exp_count))
-      expect(details).to eq(exp_details.slice(0, exp_count))
-   end
+    [[nil, 5], [7, 4], [3, 3], [0, 0]].each do |days, exp_count|
+       if days
+         press('System')
+         show_submenu('Log Maintenance')
+         press('Cleanup Log Table')
+         wait_for_ajax
+         find(:xpath, "//input[contains(@id, 'textfield')]", wait: 5).set(days)
+         press('OK')
+         wait_for_ready
+         find('.x-tool-refresh').click
+         wait_for_ready
+       end
+       wait_for_ajax
+       cnt = logview.row_count()
+       expect(cnt).to eq(exp_count)
+       types = logview.get_col_vals('message_type', cnt, 0)
+       messages = logview.get_col_vals('message', cnt, 0)
+       details = logview.get_col_vals('details', cnt, 0)
+                   .map { |d| CGI.unescapeHTML(d) }
+       ts = logview.get_col_vals('timestamp_custom', cnt, 0)
+       expect(ts).to eq(@ts.slice(0, exp_count))
+       expect(types).to eq(exp_types.slice(0, exp_count))
+       expect(messages).to eq(exp_messages.slice(0, exp_count))
+       expect(details).to eq(exp_details.slice(0, exp_count))
+    end
   end
 end

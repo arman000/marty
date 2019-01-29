@@ -131,13 +131,13 @@ DELOREAN
       select_node('CC (csv)')
     end
 
-     and_by 'fill form' do
-      wait_for_ajax
+    and_by 'fill form' do
+     wait_for_ajax
 
-      within(:gridpanel, 'report_form', match: :first) do
-        fill_in('Note Rate', with: '3.00')
-      end
+     within(:gridpanel, 'report_form', match: :first) do
+       fill_in('Note Rate', with: '3.00')
      end
+    end
 
     and_by 'do Background Report with delayed jobs' do
       Delayed::Worker.delay_jobs = false

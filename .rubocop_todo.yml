@@ -70,25 +70,6 @@ Layout/IndentHash:
 Layout/IndentHeredoc:
   Enabled: false
 
-# Offense count: 25
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: normal, rails
-Layout/IndentationConsistency:
-  Exclude:
-    - 'app/components/marty/config_view.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/user.rb'
-    - 'spec/features/log_view_spec.rb'
-    - 'spec/features/reporting_spec.rb'
-    - 'spec/features/scripting_test_spec.rb'
-    - 'spec/lib/data_exporter_spec.rb'
-    - 'spec/lib/data_importer_spec.rb'
-    - 'spec/lib/delorean_query_spec.rb'
-    - 'spec/lib/mcfly_model_spec.rb'
-    - 'spec/models/data_grid_spec.rb'
-    - 'spec/other/diagnostic/reporter_spec.rb'
-
 # Offense count: 230
 # Cop supports --auto-correct.
 # Configuration parameters: Width, IgnoredPatterns.
