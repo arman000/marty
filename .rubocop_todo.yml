@@ -44,18 +44,6 @@ Layout/EndAlignment:
 Layout/ExtraSpacing:
   Enabled: false
 
-# Offense count: 7
-# Cop supports --auto-correct.
-# Configuration parameters: IndentationWidth.
-Layout/IndentAssignment:
-  Exclude:
-    - 'app/controllers/marty/report_controller.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/delorean_rule.rb'
-    - 'lib/marty/xl.rb'
-    - 'other/marty/api/base.rb'
-    - 'spec/lib/data_importer_spec.rb'
-
 # Offense count: 136
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, IndentationWidth.

@@ -190,7 +190,7 @@ class Marty::Xl
 
             # counter == col0 == (colw - 1) => merge the edges:
             a = boxborders[edge_h[r.object_id][1].to_sym] =
-              merge_cell_edges(a, deep_copy(boxborders[edge_h[r.object_id][1].to_sym])) if
+                  merge_cell_edges(a, deep_copy(boxborders[edge_h[r.object_id][1].to_sym])) if
               counter == (colw - 1)
 
             a = boxborders[edge_h[r.object_id][2].to_sym] unless

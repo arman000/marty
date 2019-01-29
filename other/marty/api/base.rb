@@ -60,7 +60,7 @@ class Marty::Api::Base
       # get_schema will either return a hash with the schema,
       # or a string with the error
       input_schema = @@schemas[schema_key] ||=
-                     Marty::JsonSchema.get_schema(*schema_key)
+                       Marty::JsonSchema.get_schema(*schema_key)
     rescue => e
       return { error: e.message }
     end
@@ -88,7 +88,7 @@ class Marty::Api::Base
     if input_schema.is_a?(Hash)
       # fix numbers types
       numbers = @@numbers[schema_key] ||=
-                Marty::JsonSchema.get_numbers(input_schema)
+                  Marty::JsonSchema.get_numbers(input_schema)
 
       # modify params in place
       Marty::JsonSchema.fix_numbers(params[:params], numbers)

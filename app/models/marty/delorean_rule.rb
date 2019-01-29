@@ -76,8 +76,8 @@ class Marty::DeloreanRule < Marty::BaseRule
   def self.base_compute2(ruleh, metadata_opts, params, dgparams = params)
     begin
       id, name, eclassname, computed_guards, grids, results, fixed_results =
-          ruleh.values_at("id", "name", "engine", "computed_guards", "grids",
-                          "results", "fixed_results")
+        ruleh.values_at("id", "name", "engine", "computed_guards", "grids",
+                        "results", "fixed_results")
       raise "Error in rule '#{id}:#{name}': bad metadata_opts" if !metadata_opts
 
       eclass = eclassname && eclassname.constantize || Marty::RuleScriptSet

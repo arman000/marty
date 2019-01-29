@@ -568,7 +568,7 @@ class Marty::DataGrid < Marty::Base
 
   def update_from_import(name, import_text, created_dt = nil)
     metadata, data, data_type, lenient =
-                               self.class.parse(created_dt, import_text, {})
+      self.class.parse(created_dt, import_text, {})
 
     self.name       = name
     self.data       = data
