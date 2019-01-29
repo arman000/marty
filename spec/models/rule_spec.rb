@@ -175,8 +175,8 @@ module Marty::RuleSpec
                                             'other_flag' => true },
                                             {})
         expect(lookup.to_a.count).to eq(4)
-        expect(lookup.map { |l| l.name }.to_set).to eq(Set["Rule2", "Rule2a",
-                                                           "Rule2b", "Rule2c"])
+        expect(lookup.map(&:name).to_set).to eq(Set["Rule2", "Rule2a",
+                                                    "Rule2b", "Rule2c"])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'ComplexRule',
                                             'other_flag' => false },
@@ -399,9 +399,9 @@ module Marty::RuleSpec
           expect(e.section).to eq('computed_guards')
         end
         log_ents = Marty::Log.all
-        expect(log_ents.map { |le| le.message }).to eq(['Rule Log ZRule6',
-                                                        'Rule Log ZRule7',
-                                                        'Rule Log ZRule8'])
+        expect(log_ents.map(&:message)).to eq(['Rule Log ZRule6',
+                                               'Rule Log ZRule7',
+                                               'Rule Log ZRule8'])
         ptjson = pt.as_json
         exp = { "input" => { "p1" => 12, "p2" => 3,
                          "pt" => ptjson,

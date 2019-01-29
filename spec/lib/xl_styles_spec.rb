@@ -59,13 +59,13 @@ describe Marty::Xl do
       edges.sort_by { |k| k[0] }
     end
 
-    sp.workbook.worksheets[0].rows[0].cells[0..1].map { |c| c.value }.should ==
+    sp.workbook.worksheets[0].rows[0].cells[0..1].map(&:value).should ==
       ["", ""]
 
-    sp.workbook.worksheets[0].rows[1].cells[0..2].map { |c| c.value }.should ==
+    sp.workbook.worksheets[0].rows[1].cells[0..2].map(&:value).should ==
       ["", 1, 2]
 
-    sp.workbook.worksheets[0].rows[2].cells[0..2].map { |c| c.value }.should ==
+    sp.workbook.worksheets[0].rows[2].cells[0..2].map(&:value).should ==
       ["", 3, 4]
 
     wb.worksheets[0].styles.borders.count.should >= 4

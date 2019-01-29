@@ -14,7 +14,7 @@ describe Marty::Diagnostic::Collection do
 
   it 'all diagnostics in diagnostics class attribute are generated' do
     diags = [Marty::Diagnostic::Version, Marty::Diagnostic::Nodes]
-    expected = diags.map { |d| d.generate }.reduce(:deep_merge)
+    expected = diags.map(&:generate).reduce(:deep_merge)
     described_class.diagnostics = diags
     expect(described_class.generate).to eq(expected)
   end

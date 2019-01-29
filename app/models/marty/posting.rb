@@ -82,6 +82,6 @@ class Marty::Posting < Marty::Base
        .where(marty_posting_types: { name: posting_types })
        .select(get_struct_attrs)
        .order("created_dt DESC").limit(limit || 1)
-    q.map { |ar| ar.attributes }
+    q.map(&:attributes)
   end
 end

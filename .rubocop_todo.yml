@@ -1215,22 +1215,6 @@ Style/StructInheritance:
 Style/SymbolArray:
   EnforcedStyle: brackets
 
-# Offense count: 36
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoredMethods.
-# IgnoredMethods: respond_to, define_method
-Style/SymbolProc:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/models/marty/posting.rb'
-    - 'other/marty/diagnostic/collection.rb'
-    - 'other/marty/diagnostic/node.rb'
-    - 'spec/lib/xl_spec.rb'
-    - 'spec/lib/xl_styles_spec.rb'
-    - 'spec/models/rule_spec.rb'
-    - 'spec/other/diagnostic/collection_spec.rb'
-    - 'spec/support/performance_helper.rb'
-
 # Offense count: 7
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowSafeAssignment.
