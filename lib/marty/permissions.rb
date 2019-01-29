@@ -16,7 +16,7 @@ module Marty::Permissions
     raise "unknown role" unless
       attrs.values.flatten.to_set.subset? (ALL_ROLES << :any)
 
-    self.define_singleton_method(:marty_permissions) { attrs }
+    define_singleton_method(:marty_permissions) { attrs }
   end
 
   def current_user_roles
@@ -25,24 +25,24 @@ module Marty::Permissions
   end
 
   def can_perform_action?(action)
-    return false unless self.respond_to?(:marty_permissions)
+    return false unless respond_to?(:marty_permissions)
 
-    roles = self.current_user_roles
-    roles = roles << :any if self.has_any_perm?
+    roles = current_user_roles
+    roles = roles << :any if has_any_perm?
 
-    aroles = self.marty_permissions[action.to_sym] || []
+    aroles = marty_permissions[action.to_sym] || []
     # TODO: Use code below when switching to Ruby 2.1
     # Set[ *aroles].intersect? roles.to_set
     !(Set[*aroles] & roles.to_set).empty?
   end
 
   def can_perform_actions
-    return [] unless self.respond_to?(:marty_permissions)
+    return [] unless respond_to?(:marty_permissions)
 
-    roles = self.current_user_roles
-    roles = roles << :any if self.has_any_perm?
+    roles = current_user_roles
+    roles = roles << :any if has_any_perm?
 
-    self.marty_permissions.map do |action, aroles|
+    marty_permissions.map do |action, aroles|
       # TODO: Use code below when switching to Ruby 2.1
       # action if Set[ *aroles].intersect? roles.to_set
       action unless (Set[*aroles] & roles.to_set).empty?

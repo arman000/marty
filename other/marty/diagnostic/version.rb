@@ -22,11 +22,9 @@ module Marty::Diagnostic; class Version < Base
   end
 
   def self.db_schema
-    begin
       Database.db_schema
-    rescue => e
+  rescue => e
       error(e.message)
-    end
   end
 end
 end

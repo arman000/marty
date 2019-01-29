@@ -22,15 +22,15 @@ module Marty
                                preprocess_function = nil
                               )
 
-      recs = self.do_import(klass,
-                            data,
-                            dt,
-                            cleaner_function,
-                            validation_function,
-                            col_sep,
-                            allow_dups,
-                            preprocess_function,
-                           )
+      recs = do_import(klass,
+                       data,
+                       dt,
+                       cleaner_function,
+                       validation_function,
+                       col_sep,
+                       allow_dups,
+                       preprocess_function,
+                      )
 
       recs.each_with_object(Hash.new(0)) do |(op, id), h|
         h[op] += 1

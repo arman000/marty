@@ -661,7 +661,7 @@ module Marty
         @uri = JSON::Util::URI.parse(uri)
       end
 
-      JSON::Validator.register_validator(self.new)
+      JSON::Validator.register_validator(new)
     end
 
     marty_uri = {
@@ -709,7 +709,7 @@ module Marty
         @uri = JSON::Util::URI.parse(uri)
       end
 
-      JSON::Validator.register_validator(self.new)
+      JSON::Validator.register_validator(new)
     end
 
     class BoundCeilingSchema < JSON::Schema::Draft4
@@ -720,7 +720,7 @@ module Marty
         @uri = JSON::Util::URI.parse(uri)
       end
 
-      JSON::Validator.register_validator(self.new)
+      JSON::Validator.register_validator(new)
     end
 
     bound_floor_schema = {

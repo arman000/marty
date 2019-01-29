@@ -197,16 +197,14 @@ class Marty::Api::Base
 
   class SchemaValidator
     def self.get_schema params
-      begin
         Marty::ScriptSet.new(params[:tag]).get_engine(params[:script] + 'Schemas')
           .evaluate(params[:node], params[:attr], {})
-      rescue => e
+    rescue => e
         msg = e.message == 'No such script' ? 'Schema not defined' :
                 'Problem with schema: ' + e.message
 
         raise "Schema error for #{params[:script]}/#{params[:node]} "\
               "attrs=#{params[:attr]}: #{msg}"
-      end
     end
 
     def self.validate_schema schema, hash

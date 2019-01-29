@@ -101,7 +101,7 @@ class Marty::ApplicationController < ActionController::Base
       cookies.delete :autologin
       Marty::Token.where(user_id: Marty::User.current.id).delete_all unless
         Marty::Util.db_in_recovery?
-      self.set_user(nil)
+      set_user(nil)
     end
   end
 
@@ -120,6 +120,6 @@ class Marty::ApplicationController < ActionController::Base
   def successful_authentication(user)
     logger.info("Successful authentication for '#{user.login}' " +
                 "from #{request.remote_ip} at #{Time.now.utc}")
-    self.set_user(user)
+    set_user(user)
   end
 end

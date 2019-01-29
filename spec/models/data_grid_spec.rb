@@ -666,8 +666,8 @@ describe "lookups for infinity" do
     dgh = Marty::DataGrid.lookup_h(pt, 'G2')
     res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt, {}, dgh,
                                                        nil, true, true)
-    expect(res["data"]).to eq (expected_data)
-    expect(res["metadata"]).to eq (expected_metadata)
+    expect(res["data"]).to eq expected_data
+    expect(res["metadata"]).to eq expected_metadata
   end
 
   it "should return grid data and metadata multi (following)" do
@@ -692,8 +692,8 @@ describe "lookups for infinity" do
                                                          "state" => "RI" },
                                                        dgh, nil, true,
                                                        true)
-    expect(res["data"]).to eq (expected_data)
-    expect(res["metadata"]).to eq (expected_metadata)
+    expect(res["data"]).to eq expected_data
+    expect(res["metadata"]).to eq expected_metadata
   end
 
   it "should return grid data and metadata multi (not following)" do
@@ -708,8 +708,8 @@ describe "lookups for infinity" do
                                                          "state" => "RI" },
                                                        dgh, nil, false,
                                                        true)
-    expect(res["data"]).to eq (expected_data)
-    expect(res["metadata"]).to eq (expected_metadata)
+    expect(res["data"]).to eq expected_data
+    expect(res["metadata"]).to eq expected_metadata
   end
 
   it "should handle all characters in grid inputs" do

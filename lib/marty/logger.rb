@@ -14,13 +14,11 @@ class Marty::Logger
   end
 
   def self.with_logging(error_message, error_data)
-    begin
       yield
-    rescue => e
+  rescue => e
       error(error_message, { "message" => e.message,
                              "data" => error_data })
       raise "#{error_message}: #{e.message}"
-    end
   end
 
   delorean_fn :dllog, sig: [2, 20] do |*args|

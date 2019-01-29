@@ -56,19 +56,15 @@ module Marty::RSpec::StructureCompare
 end
 
 def struct_compare(v1raw, v2raw, cmp_opts = {})
-  begin
     res = Marty::RSpec::StructureCompare.struct_compare_all(v1raw, v2raw, nil,
                                                             cmp_opts).first
-  rescue => e
+rescue => e
     e.message
-  end
 end
 
 def struct_compare_all(v1raw, v2raw, cmp_opts = {})
-  begin
     Marty::RSpec::StructureCompare.struct_compare_all(v1raw, v2raw, nil,
                                                       cmp_opts)
-  rescue => e
+rescue => e
     e.message
-  end
 end

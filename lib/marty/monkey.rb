@@ -25,7 +25,7 @@ end
 class Hash
   # define addition on hashes -- useful in Delorean code.
   def +(x)
-    self.merge(x)
+    merge(x)
   end
 
   # define hash slice (similar to node slice in Delorean)
@@ -177,9 +177,9 @@ end
 
 class ActiveRecord::Relation
   def mcfly_pt(pt, cls = nil)
-    cls ||= self.klass
+    cls ||= klass
     tb = cls.table_name
-    self.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
+    where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
   end
 
   def attributes
@@ -217,7 +217,7 @@ class ActiveRecord::Base
       # associations attrs.  If so, convert them to symbols for joins
       # to work properly.
       new_args = args.map do |a|
-        self.reflections.has_key?(a) ? a.to_sym : a
+        reflections.has_key?(a) ? a.to_sym : a
       end
       old_joins(*new_args)
     end
@@ -278,7 +278,7 @@ end
 class OpenStruct
   # the default as_json produces {"table"=>h} which is quite goofy
   def as_json(*)
-    self.to_h
+    to_h
   end
 end
 

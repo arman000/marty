@@ -34,7 +34,7 @@ module Marty
       @names                 = ["marty-draft", RAW_URI]
     end
 
-    JSON::Validator.register_validator(self.new)
+    JSON::Validator.register_validator(new)
 
     def self.get_numbers(schema)
       numbers = []
@@ -84,10 +84,9 @@ module Marty
     end
 
     def self.get_schema(tag, sname, node, attr)
-      begin
         Marty::ScriptSet.new(tag).get_engine(sname + 'Schemas')
           .evaluate(node, attr, {})
-      rescue => e
+    rescue => e
         id = "#{sname}/#{node} attrs=#{attr}"
 
         # the schema DL might not exist at all, or might not define the attr
@@ -96,8 +95,7 @@ module Marty
                          "node #{node} is undefined"]
         msg = sch_not_found.detect { |msg| e.message.starts_with?(msg) } ?
                 'Schema not defined' : "Problem with schema: #{e.message}"
-        return "Schema error for #{id}: #{msg}"
-      end
+        "Schema error for #{id}: #{msg}"
     end
   end
 end

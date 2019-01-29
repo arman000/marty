@@ -128,7 +128,7 @@ class Marty::DataGrid < Marty::Base
   # transaction -- i.e. together with build_index.  before_save would
   # be OK, but then save inside it would cause an infinite loop.
   def save!
-    if self.changed?
+    if changed?
       transaction do
         nc, nw, n = [name_changed?, name_was, name]
         res = super
@@ -142,7 +142,7 @@ class Marty::DataGrid < Marty::Base
 
   # FIXME: hacky -- save is just save!
   def save
-    self.save!
+    save!
   end
 
   def self.type_to_index(type)
@@ -361,7 +361,7 @@ class Marty::DataGrid < Marty::Base
       v_infos.map { |inf| self.class.export_keys(inf) }.transpose
 
     data_rows = transposed_v_keys.each_with_index.map do |keys, i|
-      keys + (self.data[i] || [])
+      keys + (data[i] || [])
     end
 
     [meta_rows, h_key_rows, data_rows]
@@ -433,11 +433,9 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.maybe_get_klass(type)
-    begin
       type.constantize unless INDEX_MAP[type] || type == "float"
-    rescue NameError
+  rescue NameError
       raise "unknown header type/klass: #{type}"
-    end
   end
 
   def self.parse_keys(pt, keys, type)
@@ -555,7 +553,7 @@ class Marty::DataGrid < Marty::Base
 
   def self.create_from_import(name, import_text, created_dt = nil)
     metadata, data, data_type, lenient = parse(created_dt, import_text, {})
-    dg            = self.new
+    dg            = new
     dg.name       = name
     dg.data       = data
     dg.data_type  = data_type
@@ -567,14 +565,14 @@ class Marty::DataGrid < Marty::Base
   end
 
   def update_from_import(name, import_text, created_dt = nil)
-    metadata, data, data_type, lenient =
+    new_metadata, data, data_type, lenient =
       self.class.parse(created_dt, import_text, {})
 
     self.name       = name
     self.data       = data
     self.data_type  = data_type
     self.lenient    = !!lenient
-    self.metadata   = metadata unless self.metadata == metadata # Otherwise changed will depend on order in hashes
+    self.metadata   = new_metadata unless metadata == new_metadata # Otherwise changed will depend on order in hashes
     self.created_dt = created_dt if created_dt
     save!
   end

@@ -16,7 +16,7 @@ class Marty::Config < Marty::Base
   end
 
   def get_value
-    self.value[0]
+    value[0]
   end
 
   def set_value(v)
@@ -26,7 +26,7 @@ class Marty::Config < Marty::Base
   def self.[]=(key, value)
     entry = find_by_key(key)
     if !entry
-      entry = self.new
+      entry = new
       entry.key = key
     end
     entry.set_value(value)

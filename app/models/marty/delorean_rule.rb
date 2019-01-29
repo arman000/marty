@@ -19,7 +19,7 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def self_as_hash
-    self.attributes + { "classname" => self.class.name }
+    attributes + { "classname" => self.class.name }
   end
 
   def self.find_fixed(results)
@@ -40,7 +40,7 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   before_validation(on: [:create, :update]) do
     # identify result values that are fixed, stash them (removing quotes)
-    self.fixed_results = self.class.find_fixed(self.results)
+    self.fixed_results = self.class.find_fixed(results)
   end
 
   def self.results_cfg_var
@@ -74,7 +74,6 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def self.base_compute2(ruleh, metadata_opts, params, dgparams = params)
-    begin
       id, name, eclassname, computed_guards, grids, results, fixed_results =
         ruleh.values_at("id", "name", "engine", "computed_guards", "grids",
                         "results", "fixed_results")
@@ -148,7 +147,7 @@ class Marty::DeloreanRule < Marty::BaseRule
         end
       end
       (result.res_hash || {}) + (result.gr_hash || {})
-    ensure
+  ensure
       if ruleh['fixed_results']['log__']
         resh = result.to_h
         [:res_keys, :res_vals].each { |k| resh.delete(k) } if
@@ -163,7 +162,6 @@ class Marty::DeloreanRule < Marty::BaseRule
         Marty::Logger.info("Rule Log #{ruleh['name']}",
                            Marty::Util.scrub_obj(detail))
       end
-    end
   end
 
   delorean_fn :route_compute, sig: 4 do |ruleh, pt, params, grid_names_p|

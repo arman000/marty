@@ -17,7 +17,7 @@ module Mcfly::Model
         raise "time cannot be nil" if ts.nil?
 
         ts = Mcfly.normalize_infinity(ts)
-        q = self.where("#{table_name}.obsoleted_dt >= ? AND " +
+        q = where("#{table_name}.obsoleted_dt >= ? AND " +
                    "#{table_name}.created_dt < ?", ts, ts).scoping do
           block.call(ts, *args)
         end
@@ -51,7 +51,7 @@ module Mcfly::Model
       # the older mode=:all is not supported (it's bogus)
       raise "bad mode #{mode}" unless [nil, :first].member?(mode)
 
-      assoc = Set.new(self.reflect_on_all_associations.map(&:name))
+      assoc = Set.new(reflect_on_all_associations.map(&:name))
 
       qstr = attrs.map do |k, v|
         k = "#{k}_id" if assoc.member?(k)
@@ -79,7 +79,7 @@ module Mcfly::Model
             (attr_list[i] && attr_list[i].id) : attr_list[i]
         end
 
-        q = self.where(qstr, *attr_list_ids)
+        q = where(qstr, *attr_list_ids)
         q = q.order(order) if order
         q
       end
@@ -144,7 +144,7 @@ module Mcfly::Model
                       .find_by(rel_attr => rel)
                       .send(cat_attr_id)
 
-        q = self.send(pc_name, ts, *args)
+        q = send(pc_name, ts, *args)
         hash_if_necessary(q, priv)
       end
     end

@@ -22,9 +22,9 @@ class Marty::ImportType < Marty::Base
   before_validation do
     # Fix issue with blank strings in popup edit form or grid
     # being interpreted as a function
-    self.cleaner_function = nil if self.cleaner_function.blank?
-    self.validation_function = nil if self.validation_function.blank?
-    self.preprocess_function = nil if self.preprocess_function.blank?
+    self.cleaner_function = nil if cleaner_function.blank?
+    self.validation_function = nil if validation_function.blank?
+    self.preprocess_function = nil if preprocess_function.blank?
   end
 
   belongs_to :role

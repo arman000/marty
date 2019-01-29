@@ -12,11 +12,9 @@ describe Marty::Diagnostic::Reporter do
   end
 
   def git
-    begin
       message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
-    rescue
+  rescue
       message = error("Failed accessing git")
-    end
   end
 
   def aggregate_data opts = {}

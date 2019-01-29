@@ -41,7 +41,7 @@ module Marty::ContentHandler
 
     type, disposition = GEN_FORMATS[format]
 
-    return [res, type, disposition, "#{name}.#{format}"]
+    [res, type, disposition, "#{name}.#{format}"]
   end
 
   private

@@ -16,7 +16,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def self.body_lines
-    self.body_start.count("\n")
+    body_start.count("\n")
   end
 
   def initialize(pt)
@@ -140,7 +140,6 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def get_engine(ruleh)
-    begin
       # if rule is a str => importing a regular Script (i.e. not rule)
       return sset.get_engine(ruleh) if ruleh.is_a? String
 
@@ -175,11 +174,10 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
         @@engines[[pt, sname]] = sset.parse_check(sname, get_code(ruleh))
       end
-    rescue Delorean::ParseError => e
+  rescue Delorean::ParseError => e
       f = get_parse_error_field(ruleh, e)
       msg = e.message.capitalize
       raise "Error in rule '#{ruleh['name']}' field '#{f}': #{msg}"
-    end
   end
 
   def self.indent(s)

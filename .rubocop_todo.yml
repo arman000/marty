@@ -1103,48 +1103,6 @@ Style/RandomWithOffset:
   Exclude:
     - 'spec/models/data_grid_spec.rb'
 
-# Offense count: 16
-# Cop supports --auto-correct.
-Style/RedundantBegin:
-  Exclude:
-    - 'app/controllers/marty/diagnostic/controller.rb'
-    - 'app/controllers/marty/rpc_controller.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/delorean_rule.rb'
-    - 'app/models/marty/event.rb'
-    - 'app/models/marty/promise.rb'
-    - 'lib/marty/json_schema.rb'
-    - 'lib/marty/logger.rb'
-    - 'lib/marty/rule_script_set.rb'
-    - 'other/marty/api/base.rb'
-    - 'other/marty/diagnostic/node.rb'
-    - 'other/marty/diagnostic/version.rb'
-    - 'spec/other/diagnostic/reporter_spec.rb'
-    - 'spec/support/setup.rb'
-    - 'spec/support/structure_compare.rb'
-
-# Offense count: 6
-# Cop supports --auto-correct.
-Style/RedundantParentheses:
-  Exclude:
-    - 'spec/models/data_grid_spec.rb'
-
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Exclude:
-    - 'app/controllers/marty/report_controller.rb'
-    - 'lib/marty/content_handler.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
-    - 'spec/dummy/public/extjs/modern/theme-base/sass/utils.rb'
-    - 'spec/support/components/netzke_grid.rb'
-
-# Offense count: 79
-# Cop supports --auto-correct.
-Style/RedundantSelf:
-  Enabled: false
-
 # Offense count: 6
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowInnerSlashes.

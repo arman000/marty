@@ -14,7 +14,7 @@ module Marty::Diagnostic; class Reporter < Request
     self.diagnostics = ((ops - reps) + reps.map { |r| reports[r] }.flatten).uniq
                          .map { |d| resolve_diagnostic(d) }
 
-    self.scope == 'local' ? generate : aggregate
+    scope == 'local' ? generate : aggregate
   end
 
   private
@@ -22,7 +22,7 @@ module Marty::Diagnostic; class Reporter < Request
   def self.resolve_diagnostic diag_name
     diag_name = diag_name.camelize
     klass = nil
-    self.namespaces.each do |n|
+    namespaces.each do |n|
       klass = (n + '::Diagnostic::' + diag_name).constantize rescue nil
       break if klass
     end

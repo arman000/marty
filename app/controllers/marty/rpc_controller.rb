@@ -1,6 +1,5 @@
 class Marty::RpcController < ActionController::Base
   def evaluate
-    begin
       # set default result and params in case of unexpected errors
       # to ensure logging capabilities
       result          = nil
@@ -32,12 +31,12 @@ class Marty::RpcController < ActionController::Base
       api.before_evaluate(api_params)
       result = api.evaluate(api_params, request, api_config)
       api.after_evaluate(api_params, result)
-    rescue => e
+  rescue => e
       # log unexpected failures in rpc controller and respond with
       # generic server error
       Marty::Logger.log('rpc_controller', 'failure', e.message)
       result = { error: 'internal server error' }
-    ensure
+  ensure
       # if logging is enabled, always log the result even on error
       if api_config && api_config[:logged] && api
         api.log(result,
@@ -48,7 +47,6 @@ class Marty::RpcController < ActionController::Base
       api.respond_to(self) do
         result || { 'error' => 'internal server error' }
       end
-    end
   end
 
   private

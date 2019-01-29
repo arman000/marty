@@ -6,7 +6,7 @@ module Marty::Enum
 
     res = @LOOKUP_CACHE[index] ||= find_by_name(index)
 
-    raise "no such #{self.name}: '#{index}'" unless res
+    raise "no such #{name}: '#{index}'" unless res
 
     res
   end

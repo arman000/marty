@@ -22,14 +22,12 @@ module Marty; module RSpec; module Setup
   end
 
   def disable_triggers(table_name, &block)
-    begin
       ActiveRecord::Base.connection
         .execute("ALTER TABLE #{table_name} DISABLE TRIGGER USER;")
 
       block.call
-    ensure
+  ensure
       ActiveRecord::Base.connection
         .execute("ALTER TABLE #{table_name} ENABLE TRIGGER USER;")
-    end
   end
 end end end

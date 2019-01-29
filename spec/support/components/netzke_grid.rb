@@ -110,7 +110,7 @@ module Marty; module RSpec; module Components
       el = find_by_id(resid)
       el.click if click_after
       wait_for_ajax
-      return el
+      el
     end
 
     def set_row_vals row, fields

@@ -3,7 +3,7 @@ module Marty::PgEnum
     # if i1 is provided, then i0 is a pt and we ignore it.
     index = (i1 || i0).to_s
 
-    raise "no such #{self.name}: '#{index}'" unless
+    raise "no such #{name}: '#{index}'" unless
       self::VALUES.include?(index)
 
     index

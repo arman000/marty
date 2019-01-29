@@ -26,7 +26,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def self.has_scripting_perm?
-    self.has_admin_perm?
+    has_admin_perm?
   end
 
   def posting_menu

@@ -23,7 +23,7 @@ class Marty::Tag < Marty::Base
 
   before_validation :set_tag_name
   def set_tag_name
-    self.name = self.class.make_name(self.created_dt)
+    self.name = self.class.make_name(created_dt)
     true
   end
 
@@ -65,7 +65,7 @@ class Marty::Tag < Marty::Base
   end
 
   cached_delorean_fn :lookup, sig: 1 do |name|
-    t = self.find_by_name(name).select(get_struct_attrs)
+    t = find_by_name(name).select(get_struct_attrs)
     t && t.attributes
   end
 

@@ -13,12 +13,12 @@ module Marty::Util
   end
 
   def self.get_posting_time
-    snap = self.get_posting
+    snap = get_posting
     snap ? snap.created_dt : Float::INFINITY
   end
 
   def self.warped?
-    self.get_posting_time != Float::INFINITY
+    get_posting_time != Float::INFINITY
   end
 
   def self.logger

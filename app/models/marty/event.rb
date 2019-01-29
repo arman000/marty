@@ -13,7 +13,7 @@ class Marty::Event < Marty::Base
   validates_with EventValidator
 
   after_validation(on: [:create, :update]) do
-    self.comment = self.comment.truncate(255) if self.comment
+    self.comment = comment.truncate(255) if comment
   end
 
   UPDATE_SQL = <<SQL
@@ -66,7 +66,7 @@ SQL
                         comment = nil)
 
     # use lookup_event instead of all_running which is throttled
-    evs = self.lookup_event(klass, subject_id, operation)
+    evs = lookup_event(klass, subject_id, operation)
     running = evs.detect do |ev|
       next if ev["end_dt"]
       next true unless ev["expire_secs"]
@@ -77,13 +77,13 @@ SQL
     raise "#{operation} is already running for #{klass}/#{subject_id}" if
       running
 
-    self.create!(klass:                klass,
+    create!(klass:                klass,
                  subject_id:           subject_id,
                  enum_event_operation: operation,
                  start_dt:             start_dt,
                  expire_secs:          expire_secs,
                  comment:              comment,
-                )
+           )
   end
 
   def self.lookup_event(klass, subject_id, operation)
@@ -310,10 +310,8 @@ SQL
   end
 
   def self.cleanup
-    begin
       where('start_dt < ?', Time.zone.now - 48.hours).delete_all
-    rescue => exc
+  rescue => exc
       Marty::Util.logger.error("event GC error: #{exc}")
-    end
   end
 end

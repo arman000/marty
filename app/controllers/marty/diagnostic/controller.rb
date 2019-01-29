@@ -6,16 +6,14 @@ module Marty::Diagnostic; class Controller < ActionController::Base
   end
 
   def op
-    begin
       @result = Reporter.run(request)
-    rescue NameError
+  rescue NameError
       render file: 'public/400', formats: [:html], status: 400, layout: false
-    else
+  else
       respond_to do |format|
         format.html { @result = display_parameters }
         format.json { render json: process_result_for_api }
       end
-    end
   end
 
   def process_result_for_api

@@ -1,10 +1,8 @@
 module Marty::Diagnostic::Node
   def self.my_ip
-    begin
       Socket.ip_address_list.detect(&:ipv4_private?).ip_address
-    rescue => e
+  rescue => e
       e.message
-    end
   end
 
   def self.get_target_connections target

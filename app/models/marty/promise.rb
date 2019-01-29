@@ -42,12 +42,10 @@ class Marty::Promise < Marty::Base
   belongs_to :user, class_name: "Marty::User"
 
   def self.cleanup(all = false)
-    begin
       where('start_dt < ? AND parent_id IS NULL',
             DateTime.now - (all ? 0.hours : 4.hours)).destroy_all
-    rescue => exc
+  rescue => exc
       Marty::Util.logger.error("promise GC error: #{exc}")
-    end
   end
 
   def raw_conn
@@ -59,21 +57,21 @@ class Marty::Promise < Marty::Base
   end
 
   def set_start
-    if self.start_dt || self.result != {}
+    if start_dt || result != {}
       Marty::Util.logger.error("promise already started: #{self}")
       return
     end
 
     # mark promise as started
     self.start_dt = DateTime.now
-    self.save!
+    save!
   end
 
   def set_result(res)
     # log "SETRES #{Process.pid} #{self}"
 
     # promise must have been started and not yet ended
-    if !self.start_dt || self.end_dt || self.result != {}
+    if !start_dt || end_dt || result != {}
       # log "SETERR #{Process.pid} #{self}"
       Marty::Util.logger.error("unexpected promise state: #{self}")
       return
@@ -90,7 +88,7 @@ class Marty::Promise < Marty::Base
 
     # mark promise as ended
     self.end_dt = DateTime.now
-    self.save!
+    save!
 
     # log "NOTIFY #{Process.pid}"
     pg_notify
@@ -137,7 +135,7 @@ class Marty::Promise < Marty::Base
   def wait_for_result(timeout)
     # FIXME: Not sure that comparing result with empty hash if a good idea
     # perhaps it's better to use .present? or .blank?
-    return self.result if self.result != {}
+    return result if result != {}
 
     begin
       # start listening on promise's notification

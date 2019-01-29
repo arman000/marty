@@ -22,8 +22,8 @@ class Marty::Posting < Marty::Base
 
   before_validation :set_posting_name
   def set_posting_name
-    posting_type = Marty::PostingType.find_by_id(self.posting_type_id)
-    self.name = self.class.make_name(posting_type, self.created_dt)
+    posting_type = Marty::PostingType.find_by_id(posting_type_id)
+    self.name = self.class.make_name(posting_type, created_dt)
     true
   end
 
