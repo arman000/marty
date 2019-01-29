@@ -26,8 +26,7 @@ class Marty::ApiConfigView < Marty::Grid
       sorters: [{ property: :script, direction: :ASC },
                 { property: :node,      direction: :ASC },
                 { property: :attr,      direction: :ASC },
-                { property: :api_class, direction: :ASC },
-               ])
+                { property: :api_class, direction: :ASC },])
     @model = c.model
   end
 

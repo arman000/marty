@@ -23,18 +23,19 @@ describe Marty::Event do
     @old_start = '1970-01-01 08:00:00'
     @old_end = '1970-01-01 09:00:00'
     # add events
-    [['testcl1',  123, @time, nil,            nil,     'AVM',     'a comment',
-      nil],
-     ['testcl1',  123, @time + 2.second, nil, nil,     'CRA',     'b comment',
-      nil],
-     ['testcl1',  123, @time + 4.seconds, nil, 10000,     'PRICING', 'c comment',
-      nil],
-     ['testcl1',  234, @time - 5.seconds, @time, nil,    'PRICING', 'c comment',
-      false],
-     ['testcl2', 123, @time, nil,             2, 'AVM',     'e comment', nil],
-     ['testcl2', 123, @time + 1.second, nil,  4, 'CRA',     'f comment', nil],
-     ['testcl2', 123, Time.zone.parse(@old_start),
-      Time.zone.parse(@old_end), nil, 'PRICING', 'old event', 0],
+    [
+      ['testcl1',  123, @time, nil,            nil,     'AVM',     'a comment',
+       nil],
+      ['testcl1',  123, @time + 2.second, nil, nil,     'CRA',     'b comment',
+       nil],
+      ['testcl1',  123, @time + 4.seconds, nil, 10000,     'PRICING', 'c comment',
+       nil],
+      ['testcl1',  234, @time - 5.seconds, @time, nil,    'PRICING', 'c comment',
+       false],
+      ['testcl2', 123, @time, nil,             2, 'AVM',     'e comment', nil],
+      ['testcl2', 123, @time + 1.second, nil,  4, 'CRA',     'f comment', nil],
+      ['testcl2', 123, Time.zone.parse(@old_start),
+       Time.zone.parse(@old_end), nil, 'PRICING', 'old event', 0]
     ].each do |klass, subjid, startdt, enddt, expire, op, comment, error|
       Marty::Event.create!(klass: klass,
                            subject_id: subjid,

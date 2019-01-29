@@ -228,17 +228,18 @@ ar_instances = [ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]
 
 args_hack = [[Object, nil]] * 10
 
-[[:distinct, args_hack],
- [:find_by,  args_hack],
- [:group,    args_hack],
- [:joins,    args_hack],
- [:limit,    [Integer]],
- [:not,      args_hack],
- [:order,     args_hack],
- [:pluck,     args_hack],
- [:select,    args_hack],
- [:where,     args_hack],
- [:mcfly_pt, [[Date, Time, ActiveSupport::TimeWithZone, String], [nil, Class]]]
+[
+  [:distinct, args_hack],
+  [:find_by,  args_hack],
+  [:group,    args_hack],
+  [:joins,    args_hack],
+  [:limit,    [Integer]],
+  [:not,      args_hack],
+  [:order,     args_hack],
+  [:pluck,     args_hack],
+  [:select,    args_hack],
+  [:where,     args_hack],
+  [:mcfly_pt, [[Date, Time, ActiveSupport::TimeWithZone, String], [nil, Class]]]
 ].each do |meth, args|
   ::Delorean::Ruby.whitelist.add_method meth do |method|
     ar_instances.each do |ar|

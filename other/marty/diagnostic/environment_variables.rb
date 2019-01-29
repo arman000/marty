@@ -7,13 +7,16 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
     env = ENV.clone
 
     to_delete = (Marty::Config['DIAG_ENV_BLOCK'] || []).map(&:upcase) + [
-      'SCRIPT_URI', 'SCRIPT_URL']
+      'SCRIPT_URI', 'SCRIPT_URL'
+    ]
 
     to_obfus = (Marty::Config['DIAG_ENV_OBFUSCATE'] || []).map(&:upcase) + [
-      'SECRET_KEY_BASE']
+      'SECRET_KEY_BASE'
+    ]
 
     to_block = (Marty::Config['DIAG_ENV_BLOCK_IF_INCL'] || []).map(&:upcase) + [
-      'ACCESS', 'SECRET', 'PASSWORD', 'DEBUG']
+      'ACCESS', 'SECRET', 'PASSWORD', 'DEBUG'
+    ]
 
     to_delete.each { |k| env.delete(k) }
 

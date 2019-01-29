@@ -184,8 +184,7 @@ class Marty::ReportForm < Marty::Form
               :selected_script_name,
               :selected_node,
               # just for testing
-              :selected_testing,
-             ].map do |f|
+              :selected_testing,].map do |f|
       {
         name:   f,
         xtype:  :textfield,

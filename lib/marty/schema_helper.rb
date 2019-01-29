@@ -53,7 +53,8 @@ class Marty::SchemaHelper
       { "properties" => var_array.each_with_object({}) do |v, h|
          h[v] = { "not" => {} }
                         end
-      }] }
+      }
+    ] }
   end
 
   # if conds is true, var_array columns are not allowed

@@ -53,8 +53,7 @@ feature 'logger view', js: true, capybara: true do
                    "[1, 2, 3, {\"error\"=>\"message\"}]\n",
                    "nil\n",
                    "[\"one\", \"two\", 3, 4.0]\n",
-                   "[5]\n"
-]
+                   "[5]\n"]
     [[nil, 5], [7, 4], [3, 3], [0, 0]].each do |days, exp_count|
        if days
          press('System')

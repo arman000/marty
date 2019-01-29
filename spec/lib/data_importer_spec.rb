@@ -381,8 +381,7 @@ describe DataImporter do
                          ["VA Fixed 30 Year DURP <=80", ["TN", "CT"],
                           [1, 2, 3], ['foo', 'bar']],
                          ["VA Fixed 30 Year DURP <=80 HB", ["CA", "NY"],
-                          nil, ['foo', 'hi mom']],
-                        ].to_set)
+                          nil, ['foo', 'hi mom']],].to_set)
   end
 
   it "should properly handle cases where an association item is missing" do

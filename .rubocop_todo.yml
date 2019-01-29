@@ -76,26 +76,6 @@ Layout/IndentHeredoc:
 Layout/IndentationWidth:
   Enabled: false
 
-# Offense count: 15
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: symmetrical, new_line, same_line
-Layout/MultilineArrayBraceLayout:
-  Exclude:
-    - 'app/components/marty/api_config_view.rb'
-    - 'app/components/marty/report_form.rb'
-    - 'lib/marty/data_conversion.rb'
-    - 'lib/marty/monkey.rb'
-    - 'lib/marty/schema_helper.rb'
-    - 'other/marty/diagnostic/environment_variables.rb'
-    - 'spec/dummy/app/models/gemini/fannie_bup.rb'
-    - 'spec/dummy/app/models/gemini/streamline_type.rb'
-    - 'spec/dummy/db/migrate/20171222150100_add_rule_indices.rb'
-    - 'spec/features/log_view_spec.rb'
-    - 'spec/lib/data_importer_spec.rb'
-    - 'spec/models/event_spec.rb'
-    - 'spec/support/suite.rb'
-
 # Offense count: 44
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
