@@ -59,12 +59,10 @@ class Marty::ApiLogView < Marty::Grid
       c.filterable    = true
       c.read_only     = true
       c.getter        = lambda {|r| r.details[a.to_s] }
-      c.sorting_scope = lambda {
-        |r, dir|
+      c.sorting_scope = lambda { |r, dir|
         r.order("details->>'#{a.to_s}'" + dir.to_s)
       }
-      c.filter_with = lambda {
-        |r, v, op|
+      c.filter_with = lambda { |r, v, op|
         r.where("details->>'#{a.to_s}' #{op} '#{v}%'")
       } unless [:start_time, :endtime].include?(a)
 
@@ -73,16 +71,14 @@ class Marty::ApiLogView < Marty::Grid
         c.type        = :datetime
         c.format      = 'Y-m-d h:i:s'
         c.getter      = lambda {|r| Time.zone.parse(r.details[a.to_s])}
-        c.filter_with = lambda {
-          |r, v, op|
+        c.filter_with = lambda { |r, v, op|
           r.where("(details->>'#{a.to_s}')::date #{DATE_OP_MAP[op]} '#{v}%'")
         }
       when :input, :output
         c.getter    = lambda { |r| r.details[a.to_s].pretty_inspect }
         c.width     = 900
         c.read_only = true
-        c.filter_with = lambda {
-          |r, v, op|
+        c.filter_with = lambda { |r, v, op|
           r.where("(details->>'#{a.to_s}')::text #{op} '%#{v}%'")
         }
       end

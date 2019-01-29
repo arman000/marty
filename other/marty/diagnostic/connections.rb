@@ -2,10 +2,11 @@ module Marty::Diagnostic; class Connections < Base
   self.aggregatable = false
   diagnostic_fn do
     conns = Node.get_postgres_connections[Database.db_name].
-              sort_by{|h| [h['application_name'],
-                           h['pid'],
-                           h['client_addr'],
-                           h['state']]
+              sort_by {|h|
+              [h['application_name'],
+               h['pid'],
+               h['client_addr'],
+               h['state']]
     }
 
     counts = Hash.new(0)
@@ -14,7 +15,7 @@ module Marty::Diagnostic; class Connections < Base
       name = c['application_name']
       counts[name] += 1
       key = "#{name} #{'*' * (counts[name]-1)}"
-      h[key] = c.except('application_name').map{|k,v| "<li>#{k}: #{v}</li>"}.join
+      h[key] = c.except('application_name').map {|k,v| "<li>#{k}: #{v}</li>"}.join
     end
   end
 end

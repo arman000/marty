@@ -141,7 +141,7 @@ class Marty::Api::Base
         end
 
         if schema_errors.present?
-          errors = schema_errors.map{|e| e[:message]}
+          errors = schema_errors.map {|e| e[:message]}
 
           Marty::Logger.error(
             "API #{params[:script]}:#{params[:node]}.#{params[:attr]}",

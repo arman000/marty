@@ -22,9 +22,7 @@ class Marty::Logger
     end
   end
 
-  delorean_fn :dllog, sig: [2, 20] do
-     |*args|
-
+  delorean_fn :dllog, sig: [2, 20] do |*args|
      info args[0], args[1..-1]
   end
 end

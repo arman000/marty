@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Marty::DataGridSpec
   describe DataGrid do
-
 G1 =<<EOS
 state\tstring\tv\t\t
 ltv\tnumrange\tv\t\t
@@ -283,9 +282,11 @@ EOS
       it "validates grid modifier" do
         bad = ': abc def'
         g_bad = Gk.sub(/fha_203k_option$/, bad)
-        expect { dg_from_import( "Gk", g_bad)
+        expect {
+          dg_from_import( "Gk", g_bad)
         }.to raise_error(/invalid grid modifier expression: #{bad}/)
-        expect { dg_from_import( "Gk", Gk)
+        expect {
+          dg_from_import( "Gk", Gk)
         }.not_to raise_error
       end
     end
@@ -409,8 +410,7 @@ EOS
                                 )
         expect(res).to eq [1.655,"G3"]
 
-        [3,4].each {
-          |units|
+        [3,4].each { |units|
           res = lookup_grid_helper('infinity',
                                    "G2",
                                    {"fico" => 720,
@@ -493,14 +493,16 @@ EOS
       it "should raise on nil attr values" do
         dg_from_import("G9", G9)
 
-        expect{lookup_grid_helper('infinity',
+        expect {
+          lookup_grid_helper('infinity',
                                "G9",
                                {"ltv" => 81},
                                )
         }        .to raise_error(/matches > 1/)
 
         err = /Data Grid lookup failed/
-        expect{lookup_grid_helper('infinity',
+        expect {
+          lookup_grid_helper('infinity',
                                  "G9",
                                  {"state" => "CA", "ltv" => nil},
                                  false, false)
@@ -713,7 +715,7 @@ EOS
       it "should handle all characters in grid inputs" do
         dgh = Marty::DataGrid.lookup_h(pt, 'G1')
         5000.times do
-          st = 30.times.map{rand(224)+32}.pack('U*')
+          st = 30.times.map {rand(224)+32}.pack('U*')
           res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
                                                              { "ltv" => 10,
                                                                "fico" => 690,
@@ -728,7 +730,7 @@ EOS
         quotes = ["'", '"', '\\', '`', "\u00b4", "\u2018", "\u2019",
                   "\u201C", "\u201D"]
         100.times do
-          st = 30.times.map{quotes[rand(9)]}.join
+          st = 30.times.map {quotes[rand(9)]}.join
           res = Marty::DataGrid.lookup_grid_distinct_entry_h(
             pt, {"ltv" => 10, "fico" => 690, "state" => st}, dgh, nil, false, true)
         end
@@ -782,8 +784,7 @@ EOS
       end
 
       it "should be able to export and import back grids" do
-        [G1, G2, G3, G4, G5, G6, G7, G8, G9, Ga, Gb].each_with_index do
-          |grid, i|
+        [G1, G2, G3, G4, G5, G6, G7, G8, G9, Ga, Gb].each_with_index do |grid, i|
           dg = dg_from_import("G#{i}", grid)
           g1 = dg.export
           dg = dg_from_import("Gx#{i}", g1)

@@ -144,7 +144,7 @@ module Netzke::Basepack::DataAdapters
       end
 
       # join them by AND
-      predicates[1..-1].inject(predicates.first){ |r,p| r.and(p)  }
+      predicates[1..-1].inject(predicates.first) { |r,p| r.and(p)  }
     end
 
     def update_predecate_for_enum(table, op, value)

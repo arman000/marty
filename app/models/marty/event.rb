@@ -68,8 +68,7 @@ SQL
 
     # use lookup_event instead of all_running which is throttled
     evs = self.lookup_event(klass, subject_id, operation)
-    running = evs.detect do
-      |ev|
+    running = evs.detect do |ev|
       next if ev["end_dt"]
       next true unless ev["expire_secs"]
       (Time.zone.now - ev["start_dt"]).truncate < ev["expire_secs"]
@@ -139,8 +138,7 @@ SQL
     events = all_running.select do |pm|
       pm["klass"] == klass && subject_ids.include?(pm["subject_id"]) &&
         (operation.nil? || pm["enum_event_operation"] == operation)
-    end.group_by { |ev| ev["subject_id"] }.each_with_object({}) do
-      |(id, evs), h|
+    end.group_by { |ev| ev["subject_id"] }.each_with_object({}) do |(id, evs), h|
       h[id] = evs.sort { |a, b| a["start_dt"] <=> b["start_dt"] }.first
     end
 

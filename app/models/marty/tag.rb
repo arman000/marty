@@ -63,8 +63,7 @@ class Marty::Tag < Marty::Base
     tag
   end
 
-  cached_delorean_fn :lookup, sig: 1 do
-    |name|
+  cached_delorean_fn :lookup, sig: 1 do |name|
     t = self.find_by_name(name).select(get_struct_attrs)
     t && t.attributes
   end

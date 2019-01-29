@@ -16,7 +16,7 @@ module Marty
       end
 
       def testval_fail(val)
-        expect{testval(val)}.to raise_error(ActiveRecord::RecordInvalid,
+        expect {testval(val)}.to raise_error(ActiveRecord::RecordInvalid,
                                             'Validation failed: bad JSON value')
       end
 

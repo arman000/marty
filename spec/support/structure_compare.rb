@@ -1,7 +1,8 @@
 module Marty::RSpec::StructureCompare
   def self.struct_compare_all(v1raw, v2raw, key=nil, cmp_opts={}, path=[], errs=[])
     pathstr = path.map(&:to_s).join
-    v1,v2 = [v1raw, v2raw].map { |v| v.class == ActiveSupport::TimeWithZone ?
+    v1,v2 = [v1raw, v2raw].map { |v|
+              v.class == ActiveSupport::TimeWithZone ?
                                    DateTime.parse(v.to_s) : v
     }
 

@@ -35,23 +35,20 @@ module Marty::Diagnostic; class Base < Request
 
   def self.process_status_only infos
     return infos unless status_only
-    infos.map{|info| info.map{|test, result| [test, result['status']]}.to_h}
+    infos.map {|info| info.map {|test, result| [test, result['status']]}.to_h}
   end
 
   def self.get_difference data
     values = process_status_only(data.values)
-    Marty::DataExporter.hash_array_merge(values, true).map{
-      |test, values|
+    Marty::DataExporter.hash_array_merge(values, true).map { |test, values|
       test if values.uniq.count > 1
     }.compact
   end
 
   def self.apply_consistency data
     diff = get_difference(data)
-    data.each_with_object({}){
-      |(node, diagnostic), new_data|
-      new_data[node] = diagnostic.each_with_object({}){
-        |(test, info), new_diagnostic|
+    data.each_with_object({}) { |(node, diagnostic), new_data|
+      new_data[node] = diagnostic.each_with_object({}) { |(test, info), new_diagnostic|
         new_diagnostic[test] = info + {'consistent' => !diff.include?(test)}
       }
     }

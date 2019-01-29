@@ -70,8 +70,7 @@ class Marty::ApiConfigView < Marty::Grid
     end
   end
 
-  [:logged, :input_validated, :output_validated, :strict_validate].each do
-    |a|
+  [:logged, :input_validated, :output_validated, :strict_validate].each do |a|
     attribute a do |c|
       c.width = 110
     end

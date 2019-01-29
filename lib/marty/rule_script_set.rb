@@ -32,12 +32,12 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def write_attr(k, v)
     equals, rhs = v == :parameter ? [" =?", ""] :
-                    [" =", "\n" + v.lines.map{|l| " "*8 + l}.join("\n")]
+                    [" =", "\n" + v.lines.map {|l| " "*8 + l}.join("\n")]
     k + equals + rhs
   end
 
   def paramify_h(h)
-    "{" + h.keys.reject{|k|k.ends_with?("__")}.
+    "{" + h.keys.reject {|k| k.ends_with?("__")}.
                          map {|k| %Q("#{k}": #{k}) }.join(",\n") + "}"
   end
 
@@ -89,7 +89,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def grid_init(ruleh)
     if ruleh["grids"].present? ||
-       ruleh["results"].keys.any?{|k|k.ends_with?("_grid")}
+       ruleh["results"].keys.any? {|k| k.ends_with?("_grid")}
       write_code({ "pt" => :parameter,
                    "dgparams__" => :parameter,
                  })

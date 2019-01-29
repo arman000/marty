@@ -11,8 +11,7 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
     attr_reader *STATES
 
     def get_state instances, state
-      instances.map do
-        |i|
+      instances.map do |i|
         i.except('state') if i['state']['name'] == state
       end.compact
     end
@@ -65,6 +64,6 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
   end
 
   def get_private_ips
-    @instances.running.map{|i| i['ip']}.compact
+    @instances.running.map {|i| i['ip']}.compact
   end
 end

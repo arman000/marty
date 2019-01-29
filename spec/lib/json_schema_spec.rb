@@ -15,7 +15,6 @@ end
 module Marty
 
   describe JsonSchema do
-
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     ###                      Generic, simple data               ###
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -49,7 +48,6 @@ module Marty
       expect(JSON::Validator.
               fully_validate(simple_schema, data, opt)[0]).to include(
       "property '#/a' of type string did not match the following type: integer")
-
     end
 
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -621,7 +619,6 @@ module Marty
               fully_validate(nested_schema, data, opt)[0]).to include(
           "property '#/root2/1/e' value 'Dog' not contained in ElectronicsEnum")
     end
-
   end
 
   ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -658,7 +655,6 @@ module Marty
 
 
   describe "how @uri behaves as a key to a set of attributes" do
-
     class BoundSchema < JSON::Schema::Draft4
       def initialize
         super
@@ -704,11 +700,9 @@ module Marty
       data = {"a" => 'Table'}
       expect(JSON::Validator.validate(bound_uri, data)).to be true
     end
-
   end
 
   describe "how @uri also behaves as namespace" do
-
     class BoundFloorSchema < JSON::Schema::Draft4
       def initialize
         super
@@ -770,7 +764,6 @@ module Marty
       data = {"a" => 21}
       expect(JSON::Validator.validate(bound_ceiling_schema, data)).to be false
     end
-
   end
 
 end

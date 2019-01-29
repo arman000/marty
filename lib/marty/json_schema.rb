@@ -51,7 +51,7 @@ module Marty
       # convert the array stuff [ie. "items", "properties"] to :array
       numbers.map do |num|
         num.delete("properties")
-        num.map{|n| n=="items" ? :array : n}
+        num.map {|n| n=="items" ? :array : n}
       end
     end
 
@@ -94,7 +94,7 @@ module Marty
         # being requested
         sch_not_found = ['No such script', "undefined method `#{attr}__D'",
                          "node #{node} is undefined"]
-        msg = sch_not_found.detect{|msg| e.message.starts_with?(msg)} ?
+        msg = sch_not_found.detect {|msg| e.message.starts_with?(msg)} ?
                 'Schema not defined' : "Problem with schema: #{e.message}"
         return "Schema error for #{id}: #{msg}"
       end

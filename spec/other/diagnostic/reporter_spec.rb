@@ -95,7 +95,7 @@ describe Marty::Diagnostic::Reporter do
   end
 
   def version_data consistent = true
-    Marty::Diagnostic::Base.pack(include_ip=false){
+    Marty::Diagnostic::Base.pack(include_ip=false) {
       {
         "Marty"    => info(Marty::VERSION, true, consistent),
         "Delorean" => info(Delorean::VERSION, true, true),

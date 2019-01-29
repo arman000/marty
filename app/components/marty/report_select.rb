@@ -66,7 +66,7 @@ class Marty::ReportSelect < Marty::Form
 
     nodes.map { |node|
       roles = engine.evaluate(node, "roles") rescue nil
-      next if roles && !roles.any?{ |r| Marty::User.has_role(r) }
+      next if roles && !roles.any? { |r| Marty::User.has_role(r) }
 
       begin
         title, format = engine.evaluate(node, ["title", "format"])
@@ -74,7 +74,7 @@ class Marty::ReportSelect < Marty::Form
       rescue
         [node, node]
       end
-    }.compact.sort{ |a,b| a[1] <=> b[1]}
+    }.compact.sort { |a,b| a[1] <=> b[1]}
   end
 
   endpoint :get_combobox_options do |params|

@@ -20,8 +20,8 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     c.title = I18n.t('rule')
     c.attributes = self.class.base_fields +
                    klass.guard_info.
-                     sort_by{|_, h| h[:order] || 0}.
-                     reject{|_, h| h[:hidden]}.
+                     sort_by {|_, h| h[:order] || 0}.
+                     reject {|_, h| h[:hidden]}.
                      map { |name, _| name.to_sym } + self.class.computed_fields
     c.store_config.merge!(sorters: [{property: :name, direction: 'ASC'}])
     c.editing      = :in_form
@@ -183,7 +183,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def form_items_guards
-    klass.guard_info.reject{|_, h| h[:hidden]}.keys.map{|x|x.to_sym}
+    klass.guard_info.reject {|_, h| h[:hidden]}.keys.map {|x| x.to_sym}
   end
 
   def form_items_grids

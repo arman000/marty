@@ -106,7 +106,6 @@ EOF
                           joins("bud_category").
                           where("name LIKE '%30'").
                           count
-
     end
 
     it "perfroms select+distinct" do

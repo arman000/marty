@@ -73,8 +73,7 @@ module Mcfly::Model
 
       fn = cache ? :cached_delorean_fn : :delorean_fn
       base_mcfly_lookup(fn, name, options + {sig:  attrs.length+1,
-                                             mode: mode}) do
-        |t, *attr_list|
+                                             mode: mode}) do |t, *attr_list|
 
         attr_list_ids = attr_list.each_with_index.map {|x, i|
           assoc.member?(attrs[i]) ?
@@ -135,9 +134,7 @@ module Mcfly::Model
       fn = options.fetch(:mode, :first) ? :cached_delorean_fn : :delorean_fn
       priv = options[:private]
 
-      send(fn, name, sig: attrs.length+1) do
-        |ts, *args|
-
+      send(fn, name, sig: attrs.length+1) do |ts, *args|
         # Example: rel is a Gemini::SecurityInstrument instance.
         rel = args[lpi]
         raise "#{rel_attr} can't be nil" unless rel

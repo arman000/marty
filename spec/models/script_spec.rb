@@ -35,10 +35,12 @@ describe Marty::Script do
         to change(Marty::Script, :count).by(1)
 
       Marty::Script.load_a_script('TestExistsAndDifferent2', s1, now - 1.minute)
-      expect { Marty::Script.load_a_script('TestExistsAndDifferent2',
+      expect {
+        Marty::Script.load_a_script('TestExistsAndDifferent2',
                                            s2, now)
       }      .
-        to change { Marty::Script.where(name: 'TestExistsAndDifferent2',
+        to change {
+             Marty::Script.where(name: 'TestExistsAndDifferent2',
                                         obsoleted_dt: 'infinity').count
            }           .by(0)
       expect(Marty::Script.find_by(
@@ -73,7 +75,8 @@ describe Marty::Script do
     end
 
     it 'creates a new tag if none exist yet with provided datetime' do
-      expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1,
+      expect {
+        @tag = Marty::Script.load_script_bodies({'Test1' => s1,
                                                         'Test2' => s2}, now)
       }      .
         to change(Marty::Tag, :count).by(1)
@@ -82,7 +85,8 @@ describe Marty::Script do
 
     it 'creates a new tag when there is an older one present' do
       Marty::Tag.do_create(now - 1.minute, 'initial test tag')
-      expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1,
+      expect {
+        @tag = Marty::Script.load_script_bodies({'Test1' => s1,
                                                         'Test2' => s2}, now)
       }      .
         to change(Marty::Tag, :count).by(1)
@@ -91,7 +95,8 @@ describe Marty::Script do
 
     it 'creates a new tag when no previous tag is present and no datetime ' +
       'provided' do
-      expect { tag = Marty::Script.load_script_bodies({'Test1' => s1,
+      expect {
+        tag = Marty::Script.load_script_bodies({'Test1' => s1,
                                                        'Test2' => s2})
       }      .
         to change(Marty::Tag, :count).by(1)
@@ -123,7 +128,6 @@ describe Marty::Script do
       expect(Marty::Script).to have_received(:load_script_bodies).
         with(match_array([['Script1', ls1], ['Script2', ls2]]), now)
     end
-
   end
 
   describe '.get_script_filenames' do

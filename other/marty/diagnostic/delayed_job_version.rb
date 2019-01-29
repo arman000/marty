@@ -27,12 +27,10 @@ module Marty::Diagnostic; class DelayedJobVersion < Base
             evaluate('VersionDelay', 'result', {'count' => total_workers-1})
 
     # merge results, remove duplicates, and construct "aggregate" object
-    res.each_with_object({}){
-      |r, hash|
+    res.each_with_object({}) { |r, hash|
       hash[r[0]] ||= []
       hash[r[0]] << r[1]
-    }.map {
-      |node, result|
+    }.map { |node, result|
 
       versions = result.uniq
       status = versions.count == 1 && versions[0] == ENV['DELAYED_VER']

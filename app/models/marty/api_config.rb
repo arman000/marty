@@ -17,6 +17,6 @@ class Marty::ApiConfig < Marty::Base
 
   def self.multi_lookup(script, node, attrs)
     (attrs.nil? ? [nil] : attrs).
-      map { |attr| lookup(script, node, attr).try{|x| x.unshift(attr) }}
+      map { |attr| lookup(script, node, attr).try {|x| x.unshift(attr) }}
   end
 end

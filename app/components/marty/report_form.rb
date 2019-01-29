@@ -44,7 +44,7 @@ class Marty::ReportForm < Marty::Form
 
     roles = engine.evaluate(node, "roles", {}) rescue nil
 
-    if roles && !roles.any?{ |r| Marty::User.has_role(r) }
+    if roles && !roles.any? { |r| Marty::User.has_role(r) }
       # insufficient permissions
       return []
     end
@@ -94,8 +94,8 @@ class Marty::ReportForm < Marty::Form
   client_class do |c|
     # Find the mount path for the Marty engine. FIXME: this is likely
     # very brittle.
-    @@mount_path = Rails.application.routes.routes.detect {
-      |r| r.app.app == Marty::Engine
+    @@mount_path = Rails.application.routes.routes.detect { |r|
+                     r.app.app == Marty::Engine
     }.format({})
 
     c.mount_path = l(<<-JS)
@@ -202,7 +202,7 @@ class Marty::ReportForm < Marty::Form
     c.reptitle           = title
     c.authenticity_token = controller.send(:form_authenticity_token)
 
-    [:foreground, :link].each{|a| actions[a].disabled = !!background_only}
+    [:foreground, :link].each {|a| actions[a].disabled = !!background_only}
   end
 end
 

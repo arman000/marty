@@ -39,8 +39,8 @@ module Marty; class UserView < Marty::Grid
     end
 
     # set new roles
-    user.roles = Role.select {
-      |r| roles.include? I18n.t("roles.#{r.name}")
+    user.roles = Role.select { |r|
+                   roles.include? I18n.t("roles.#{r.name}")
     }
   end
 
@@ -48,8 +48,8 @@ module Marty; class UserView < Marty::Grid
     # Creates initial place-holder user object and validate
     user = data["id"].nil? ? User.new : User.find(data["id"])
 
-    self.user_columns.each {
-      |c| user.send("#{c}=", data[c.to_s]) unless c == :roles
+    self.user_columns.each { |c|
+      user.send("#{c}=", data[c.to_s]) unless c == :roles
     }
 
     if user.valid?

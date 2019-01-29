@@ -254,7 +254,7 @@ OUT
   # we have to get it from the database
   def get_old_enum_id(klass, name)
     ActiveRecord::Base.
-               connection.execute(<<-SQL).to_a.first.try{|v| v['id']}
+               connection.execute(<<-SQL).to_a.first.try {|v| v['id']}
       select id from #{klass.table_name} where name =
          #{ActiveRecord::Base.connection.quote(name)}
     SQL
@@ -311,9 +311,9 @@ OUT
       next [:ret, $1]  if %r(\A// RETURN[:] (.*)$).match(line)
       [:body, line]
     end.group_by(&:first)
-    args = parts[:param].map{ |(_,l)| l}.join(",\n")
+    args = parts[:param].map { |(_,l)| l}.join(",\n")
     ret =  parts[:ret][0][1]
-    body = parts[:body].map{ |(_,l)| l}.join
+    body = parts[:body].map { |(_,l)| l}.join
     <<EOT
 CREATE OR REPLACE FUNCTION #{fnname} (
 #{args}

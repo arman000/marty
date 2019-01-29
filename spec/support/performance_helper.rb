@@ -10,7 +10,7 @@ module Marty; module RSpec; module PerformanceHelper
   end
 
   def compare_baseline baseline, timings, opts={}
-    result_time = timings.map{|t| t.total}.sum
+    result_time = timings.map {|t| t.total}.sum
     factor      = result_time / baseline.total
 
     lb = opts.delete(:lower_bound) || 1.5

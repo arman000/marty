@@ -69,8 +69,7 @@ module Marty
         eline = 0
 
         begin
-          res = parsed.each_with_index.map do
-            |row, line|
+          res = parsed.each_with_index.map do |row, line|
             eline = line
 
             # skip lines which are all nil
@@ -85,8 +84,7 @@ module Marty
 
         ids = {}
         # raise an error if record referenced more than once.
-        res.each_with_index do
-          |(op, id), line|
+        res.each_with_index do |(op, id), line|
           raise Error.
             new("record referenced more than once", [ids[id], line]) if
             op != :blank && ids.member?(id) && !allow_dups

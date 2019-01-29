@@ -12,10 +12,10 @@ class Marty::Xl
   end
 
   def deep_copy(value)
-    return value.each_with_object({}){|(k, v), h| h[k] = deep_copy(v)} if
+    return value.each_with_object({}) {|(k, v), h| h[k] = deep_copy(v)} if
       value.is_a?(Hash)
 
-    value.is_a?(Array) ? value.map{|v| deep_copy(v)} : value
+    value.is_a?(Array) ? value.map {|v| deep_copy(v)} : value
   end
 
   def merge_cell_edges(a, b)
@@ -25,8 +25,7 @@ class Marty::Xl
 
     return b unless a_border.is_a?(Hash) && a_border[:edges].is_a?(Array)
 
-    non_match = a_border.detect {
-      |key, value|
+    non_match = a_border.detect { |key, value|
       key != :edges && b_border[key] != value
     }
 
@@ -37,8 +36,7 @@ class Marty::Xl
 
         # add new style/color for the new edge if there is no style
         # match with the old edges:
-        b["border_#{edge}".to_sym] = a_border.each_with_object({}) {
-          |(key, value), h|
+        b["border_#{edge}".to_sym] = a_border.each_with_object({}) { |(key, value), h|
           h[key] = value unless key == :edges
         } if non_match
       end
@@ -254,7 +252,7 @@ class Marty::Xl
             rsi["style"][ind].merge(b_styles[index][ind])
         end
 
-        rsi["style"] = rsi["style"].map{ |x| x || {} }
+        rsi["style"] = rsi["style"].map { |x| x || {} }
       end
 
       wsrows << ["row", rows[index], rsi]
@@ -270,7 +268,6 @@ class Marty::Xl
           wsrows << f
         end
       end
-
     end
 
     apply_relative_worksheet_ops(ws, wsrows + images)
@@ -363,7 +360,7 @@ class Marty::Xl
     }
     # keep the offsets of non-pos options embedded in pos opt:
     new_ops2 = ops_pos.map { |d|
-      [ d[0], d[1], d[2].select{|inner| inner if inner[0] != "pos" } ]
+      [ d[0], d[1], d[2].select {|inner| inner if inner[0] != "pos" } ]
     }
     new_ops = new_ops1 + new_ops2
     count = new_ops.select { |d|
@@ -504,7 +501,7 @@ class Marty::Xl
       end
     }
     worksheet_rows(ws,rows,styles,row_styles,format,borders,images) unless
-      [ops_pos.count, ops_brd.count].all?{ |a| a == 0 }
+      [ops_pos.count, ops_brd.count].all? { |a| a == 0 }
   end
 
   # recursive symbolize_keys. FIXME: this belongs in a generic

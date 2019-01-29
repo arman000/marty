@@ -6,7 +6,7 @@ module Marty::Diagnostic; class Collection < Base
 
   def self.generate
     raise 'No diagnostics assigned to collection.' if diagnostics.empty?
-    diagnostics.map{|d| d.generate}.reduce(:deep_merge)
+    diagnostics.map {|d| d.generate}.reduce(:deep_merge)
   end
 end
 end

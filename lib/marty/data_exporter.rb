@@ -94,9 +94,7 @@ class Marty::DataExporter
     attr_list_raw = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
     attr_list = get_attrs_in_order(klass, attr_list_raw)
 
-    attr_list.map do
-      |c|
-
+    attr_list.map do |c|
       v = obj.send(c.to_sym)
       type = col_types[c]
 
@@ -123,9 +121,7 @@ class Marty::DataExporter
     attr_list_raw = (attrs || col_types.keys).map(&:to_s) - exclude_attrs
     attr_list = get_attrs_in_order(klass, attr_list_raw)
 
-    attr_list.map do
-      |c|
-
+    attr_list.map do |c|
       type = col_types[c]
 
       next c unless type.is_a?(Hash)

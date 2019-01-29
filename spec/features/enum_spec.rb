@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'test netzke + pg_enum compatibility', js: true do
-
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
@@ -14,7 +13,6 @@ feature 'test netzke + pg_enum compatibility', js: true do
   end
 
   it 'shows netzke grid combobox works w pg_enums' do
-
     lp_grid = netzke_find('loan_program_view')
     @amort_combo = netzke_find('amortization_type__name', 'combobox')
     @mortgage_combo = netzke_find('mortgage_type__name', 'combobox')
@@ -185,6 +183,5 @@ feature 'test netzke + pg_enum compatibility', js: true do
       press("Enum state")
       expect(lp_grid.get_col_vals(:enum_state)).to eq(["WA","DC","AZ","AS"])
     end
-
   end
 end

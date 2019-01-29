@@ -105,7 +105,8 @@ EOF
       restore_clean_db(@clean_file)
       Marty::ScriptSet.clear_cache
     end
-    let(:params) {{"pt"        =>'infinity',
+    let(:params) {
+      {"pt"        =>'infinity',
                    "entity"    => Gemini::Entity.all.first,
                    "note_rate" => 2.875}
     }
@@ -139,7 +140,7 @@ EOF
       expect(a1.first.attributes.keys.to_set).to eq(Set["id", "buy_up", "buy_down"])
 
       # a1 is AR but still missing the FK entity_id so will raise
-      expect{a1.first.entity}.to raise_error(/missing attribute: entity_id/)
+      expect {a1.first.entity}.to raise_error(/missing attribute: entity_id/)
 
       expect(b1.class).to eq(OpenStruct)
 
@@ -162,7 +163,7 @@ EOF
         @errs.in_groups_of(2) do |name, fn|
           err = /Too many args to #{fn}/
 
-          expect{
+          expect {
             Marty::ScriptSet.new.get_engine(name)
           }.to raise_error(Delorean::BadCallError, err)
         end
@@ -174,7 +175,7 @@ EOF
       aggregate_failures "errors" do
         ['E5', 'a_func_p', 'E6', 'b_func_p'].in_groups_of(2) do |scr, fn|
           err = /Too many args to #{fn}/
-          expect{Marty::ScriptSet.new.get_engine(scr)}.to raise_error(
+          expect {Marty::ScriptSet.new.get_engine(scr)}.to raise_error(
                                              Delorean::BadCallError, err)
         end
       end
@@ -182,15 +183,17 @@ EOF
 
     it "caching times" do
       ts = DateTime.now
-      x=Benchmark.measure { 10000.times {
+      x=Benchmark.measure {
+          10000.times {
                             Gemini::FannieBup.a_func(ts,
                                                      1, 2)
-                            }
+          }
       }
-      y=Benchmark.measure { 10000.times {
+      y=Benchmark.measure {
+          10000.times {
                             Gemini::FannieBup.ca_func(ts,
                                                      1, 2)
-                            }
+          }
       }
       # x time should be 30x or more than y time
       expect(x.real / y.real).to be > 30

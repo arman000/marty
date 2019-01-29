@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'under Applications menu, Scripting workflows', js: true do
-
   before(:all) do
     self.use_transactional_tests = false
 
@@ -42,7 +41,6 @@ feature 'under Applications menu, Scripting workflows', js: true do
     lastid = nil
 
     with_user("dev2") {
-
       Marty::Script.
         load_script_bodies({
                              "A1" => "#1\n",

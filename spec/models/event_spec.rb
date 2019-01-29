@@ -35,8 +35,7 @@ describe Marty::Event do
      ['testcl2', 123, @time + 1.second, nil,  4, 'CRA',     'f comment', nil],
      ['testcl2', 123, Time.zone.parse(@old_start),
       Time.zone.parse(@old_end), nil, 'PRICING', 'old event', 0],
-    ].each do
-      |klass, subjid, startdt, enddt, expire, op, comment, error|
+    ].each do |klass, subjid, startdt, enddt, expire, op, comment, error|
       Marty::Event.create!(klass: klass,
                            subject_id: subjid,
                            start_dt: startdt,
@@ -118,7 +117,6 @@ describe Marty::Event do
       to eq(['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq([])
     Timecop.return
-
   end
 
   it "misc API tests" do
@@ -202,22 +200,27 @@ describe Marty::Event do
   end
 
   it "raises on error" do
-    expect {Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
+    expect {
+      Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
                                       "the comment")
     }    .not_to raise_error
 
-    expect {Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
+    expect {
+      Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
                                       "the comment")
     }    .
       to raise_error(%r!AVM is already running for testcl/1234!)
-    expect {Marty::Event.create_event('testcl', 2345, 'AVM', Time.zone.now, 600,
+    expect {
+      Marty::Event.create_event('testcl', 2345, 'AVM', Time.zone.now, 600,
                                       "the comment")
     }    .not_to raise_error
-    expect {Marty::Event.finish_event('testcl', 1234, 'AVM', false,
+    expect {
+      Marty::Event.finish_event('testcl', 1234, 'AVM', false,
                                       "new comment")
     }    .
       not_to raise_error
-    expect {Marty::Event.finish_event('testcl', 1234, 'AVM', false,
+    expect {
+      Marty::Event.finish_event('testcl', 1234, 'AVM', false,
                                       "new comment")
     }    .
       to raise_error(%r!event testcl/1234/AVM not found!)
@@ -227,7 +230,8 @@ describe Marty::Event do
       to raise_error(%r!event testcl/2345/AVM not found!)
     expect {Marty::Event.finish_event('testcl', 2345, 'AVM', nil, 'foobar') }.
       to raise_error(/error must be true or false/)
-    expect {Marty::Event.create_event('testcl', 1234, 'AMV', Time.zone.now, 600,
+    expect {
+      Marty::Event.create_event('testcl', 1234, 'AMV', Time.zone.now, 600,
                                       "the comment")
     }    .
       to raise_error(%r!PG::.*invalid input value for enum.*"AMV"!)
@@ -265,6 +269,5 @@ describe Marty::Event do
     expect(e1["comment"]).to eq(long_comment_truncated)
     expect(e2["comment"]).to eq(long_comment_truncated)
     expect(e3["comment"]).to eq(long_comment_truncated)
-
   end
 end

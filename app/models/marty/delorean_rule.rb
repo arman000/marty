@@ -52,10 +52,10 @@ class Marty::DeloreanRule < Marty::BaseRule
     # FIXME in May 2019: remove this check (use as passed)
     defkeys = pcfg.is_a?(Hash) ? pcfg.keys : pcfg
     results.keys.map {|k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k}.
-       select{|k| defkeys.include?(k)} + grid_keys(grids, ecl)
+       select {|k| defkeys.include?(k)} + grid_keys(grids, ecl)
   end
   def self.grid_keys(grids, eclass)
-      grids.keys.map{|k| eclass.grid_final_name(k) }
+      grids.keys.map {|k| eclass.grid_final_name(k) }
   end
 
   class ComputeError < StandardError
@@ -96,7 +96,7 @@ class Marty::DeloreanRule < Marty::BaseRule
                   result.err_section)
         end
         result.cg_hash = Hash[result.cg_keys.zip(result.cg_vals)]
-        fails = result.cg_hash.select{|k,v| ![v].flatten.first}
+        fails = result.cg_hash.select {|k,v| ![v].flatten.first}
         return fails if fails.present?
       end
 
@@ -145,14 +145,14 @@ class Marty::DeloreanRule < Marty::BaseRule
     ensure
       if ruleh['fixed_results']['log__']
         resh = result.to_h
-        [:res_keys, :res_vals].each {|k|resh.delete(k)} if
+        [:res_keys, :res_vals].each {|k| resh.delete(k)} if
           result.res_hash.present? || result.res_keys.blank?
-        [:cg_keys, :cg_vals].each {|k|resh.delete(k)} if
+        [:cg_keys, :cg_vals].each {|k| resh.delete(k)} if
           result.cg_hash.present? ||  result.cg_keys.blank?
         resh.delete(:gr_keys) if result.gr_hash.present? || result.gr_keys.blank?
         estack_full = resh.delete(:err_stack)
         estack = estack_full && {
-          err_stack: estack_full.select{ |l| l.starts_with?('DELOREAN')}} || {}
+          err_stack: estack_full.select { |l| l.starts_with?('DELOREAN')}} || {}
         detail = { input: params, dgparams: dgparams} + resh + estack
         Marty::Logger.info("Rule Log #{ruleh['name']}",
                            Marty::Util.scrub_obj(detail))
@@ -160,28 +160,23 @@ class Marty::DeloreanRule < Marty::BaseRule
     end
   end
 
-  delorean_fn :route_compute, sig: 4 do
-    |ruleh, pt, params, grid_names_p|
+  delorean_fn :route_compute, sig: 4 do |ruleh, pt, params, grid_names_p|
     kl = ruleh["classname"].constantize
     kl.compute(ruleh, nil, pt, params, grid_names_p)
   end
-  delorean_fn :route_compute2, sig: 5 do
-    |ruleh, metadata_opts, pt, params, grid_names_p|
+  delorean_fn :route_compute2, sig: 5 do |ruleh, metadata_opts, pt, params, grid_names_p|
     kl = ruleh["classname"].constantize
     kl.compute(ruleh, metadata_opts, pt, params, grid_names_p)
   end
-  delorean_fn :route_compute_rs, sig: 3 do
-    |ruleh, pt, features|
+  delorean_fn :route_compute_rs, sig: 3 do |ruleh, pt, features|
     kl = ruleh["classname"].constantize
     kl.compute_rs(ruleh, pt, features)
   end
-  delorean_fn :route_validate_results, sig: [1, 2] do
-    |ruleh, reqchk=false|
+  delorean_fn :route_validate_results, sig: [1, 2] do |ruleh, reqchk=false|
     kl = ruleh["classname"].constantize
     kl.validate_results(ruleh, reqchk)
   end
-  delorean_fn :route_validate_grid_attrs, sig: [2, 3] do
-    |ruleh, gridname, addl_attrs=nil|
+  delorean_fn :route_validate_grid_attrs, sig: [2, 3] do |ruleh, gridname, addl_attrs=nil|
     kl = ruleh["classname"].constantize
     kl.validate_grid_attrs(ruleh, gridname, addl_attrs)
   end
@@ -203,7 +198,8 @@ class Marty::DeloreanRule < Marty::BaseRule
     Proc.new do |old, new|
       klass.where(obsoleted_dt: 'infinity').each do |r|
         r.grids.each { |k, v| r.grids[k] = new if v == old }
-        r.results.each { |k, v| r.results[k] = %Q("#{new}") if
+        r.results.each { |k, v|
+          r.results[k] = %Q("#{new}") if
                          k.ends_with?("_grid") && r.fixed_results[k] == old
         }
         r.save! if r.changed?

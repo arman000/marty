@@ -49,19 +49,16 @@ class Marty::Posting < Marty::Base
   # may allow deletion of postings.  i.e. a new one with same name
   # might be created.  Or, use regular validates_uniqueness_of instead
   # of mcfly_validates_uniqueness_of.
-  delorean_fn :lookup, sig: 1 do
-    |name|
+  delorean_fn :lookup, sig: 1 do |name|
     p = select(get_struct_attrs).find_by_name(name)
     make_openstruct(p)
   end
 
-  delorean_fn :lookup_dt, sig: 1 do
-    |name|
+  delorean_fn :lookup_dt, sig: 1 do |name|
     find_by_name(name).try(:created_dt)
   end
 
-  delorean_fn :first_match, sig: [1, 2] do
-    |dt, posting_type=nil|
+  delorean_fn :first_match, sig: [1, 2] do |dt, posting_type=nil|
     raise "bad posting type" if
       posting_type && !posting_type.is_a?(Marty::PostingType)
 
@@ -77,8 +74,7 @@ class Marty::Posting < Marty::Base
        order("created_dt DESC").limit(limit)
   end
 
-  delorean_fn :get_latest_by_type, sig: [1, 2] do
-    |limit, posting_types=[]|
+  delorean_fn :get_latest_by_type, sig: [1, 2] do |limit, posting_types=[]|
     raise "missing posting types list" unless posting_types
     raise "bad posting types list" unless posting_types.is_a?(Array)
 
@@ -86,6 +82,6 @@ class Marty::Posting < Marty::Base
        where(marty_posting_types: { name: posting_types } ).
        select(get_struct_attrs).
        order("created_dt DESC").limit(limit || 1)
-    q.map{|ar| ar.attributes}
+    q.map {|ar| ar.attributes}
   end
 end

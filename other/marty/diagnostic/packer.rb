@@ -12,8 +12,7 @@ module Marty::Diagnostic; module Packer
   def process_hash data
     return {name.demodulize => data} if is_valid_info?(data)
 
-    data.each_with_object({}) do
-      |(k, v), h|
+    data.each_with_object({}) do |(k, v), h|
       if v.is_a?(Hash)
         raise "Invalid Diagnostic Info #{v}" unless is_valid_info?(v)
         h[k] = v

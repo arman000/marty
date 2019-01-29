@@ -46,8 +46,8 @@ class Marty::ScriptTester < Marty::Form
 
     attrs = data["attrs"].split(';').map(&:strip).reject(&:empty?)
 
-    pjson = data["params"].split("\n").map(&:strip).reject(&:empty?).map {
-      |s| s.sub(/^([a-z0-9_]*)\s*=/, '"\1": ')
+    pjson = data["params"].split("\n").map(&:strip).reject(&:empty?).map { |s|
+              s.sub(/^([a-z0-9_]*)\s*=/, '"\1": ')
     }.join(',')
 
     begin

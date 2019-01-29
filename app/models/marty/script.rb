@@ -48,8 +48,7 @@ class Marty::Script < Marty::Base
   end
 
   def self.load_script_bodies(bodies, dt=nil)
-    bodies.each {
-      |sname, body|
+    bodies.each { |sname, body|
       load_a_script(sname, body, dt)
     }
 
@@ -120,8 +119,7 @@ class Marty::Script < Marty::Base
       execute("ALTER TABLE marty_scripts ENABLE TRIGGER USER;")
   end
 
-  delorean_fn :eval_to_hash, sig: 5 do
-    |dt, script, node, attrs, params|
+  delorean_fn :eval_to_hash, sig: 5 do |dt, script, node, attrs, params|
     tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
@@ -134,8 +132,7 @@ class Marty::Script < Marty::Base
     # current tag can caused problems.
   end
 
-  delorean_fn :evaluate, sig: 5 do
-    |dt, script, node, attr, params|
+  delorean_fn :evaluate, sig: 5 do |dt, script, node, attr, params|
     tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
@@ -146,8 +143,7 @@ class Marty::Script < Marty::Base
     engine.evaluate(node, attr, params.frozen? ? params.dup : params.clone)
   end
 
-  delorean_fn :pretty_print, sig: 1 do
-    |id|
+  delorean_fn :pretty_print, sig: 1 do |id|
     script = find_by_id id
 
     next "unknown script #{id}" unless script

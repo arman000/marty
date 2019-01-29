@@ -30,9 +30,7 @@ class Marty::DataGrid < Marty::Base
       dg.errors.add(:base, "metadata item attrs must be unique") unless
         dg.metadata.map {|h| h["attr"]}.uniq.length == dg.metadata.length
 
-      dg.metadata.each do
-        |inf|
-
+      dg.metadata.each do |inf|
         attr, type, keys, rs_keep =
           inf["attr"], inf["type"], inf["keys"], inf["rs_keep"]
 
@@ -89,21 +87,18 @@ class Marty::DataGrid < Marty::Base
 
   # FIXME: if the caller requests data as part of fields, there could
   # be memory concerns with caching since some data_grids have massive data
-  cached_delorean_fn :lookup_h, sig: [2, 3] do
-    |pt, name, fields = nil|
+  cached_delorean_fn :lookup_h, sig: [2, 3] do |pt, name, fields = nil|
     fields ||= %w(id group_id created_dt metadata data_type name)
     dga = mcfly_pt(pt).where(name: name).pluck(*fields).first
     dga && Hash[fields.zip(dga)]
   end
 
   # deprecated - remove 2018-Oct
-  cached_mcfly_lookup :lookup_id, sig: 2 do
-    |pt, group_id|
+  cached_mcfly_lookup :lookup_id, sig: 2 do |pt, group_id|
     find_by_group_id group_id
   end
 
-  cached_delorean_fn :exists, sig: 2 do
-    |pt, name|
+  cached_delorean_fn :exists, sig: 2 do |pt, name|
     Marty::DataGrid.mcfly_pt(pt).where(name: name).exists?
   end
 
@@ -225,8 +220,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   # deprecated - remove 2018-Oct
-  cached_delorean_fn :lookup_grid, sig: 4 do
-    |pt, dg, h, distinct|
+  cached_delorean_fn :lookup_grid, sig: 4 do |pt, dg, h, distinct|
     dg_is_grid = Marty::DataGrid === dg
     dg_is_os   =  dg.is_a?(OpenStruct)
     raise "bad DataGrid #{dg}" unless dg_is_grid || dg_is_os
@@ -237,9 +231,7 @@ class Marty::DataGrid < Marty::Base
     res["result"]
   end
 
-  cached_delorean_fn :lookup_grid_h, sig: 4 do
-    |pt, dgn, h, distinct|
-
+  cached_delorean_fn :lookup_grid_h, sig: 4 do |pt, dgn, h, distinct|
     dgh = lookup_h(pt, dgn)
     raise "#{dgn} grid not found" unless dgh
     raise "non-hash arg #{h}" unless Hash === h
@@ -250,8 +242,7 @@ class Marty::DataGrid < Marty::Base
 
   # FIXME: using cached_delorean_fn just for the caching -- this is
   # not expected to be called from Delorean.
-  cached_delorean_fn :find_class_instance, sig: 3 do
-    |pt, klass, v|
+  cached_delorean_fn :find_class_instance, sig: 3 do |pt, klass, v|
     if Marty::PgEnum === klass
       klass.find_by_name(v)
     else
@@ -318,9 +309,7 @@ class Marty::DataGrid < Marty::Base
     type = inf["type"]
     klass = type.constantize unless INDEX_MAP[type]
 
-    inf["keys"].map do
-      |v|
-
+    inf["keys"].map do |v|
       case type
       when "numrange", "int4range"
         Marty::Util.pg_range_to_human(v)
@@ -388,8 +377,7 @@ class Marty::DataGrid < Marty::Base
       gsub(/\"\"/, '') # remove "" to beautify output
   end
 
-  delorean_fn :export, sig: 1 do
-    |os|
+  delorean_fn :export, sig: 1 do |os|
     dg = find(os.id)
     dg.export
   end
@@ -427,8 +415,7 @@ class Marty::DataGrid < Marty::Base
       # AR class
       # FIXME: won't work if the obj identifier (name) has ARRSEP
       res = v.split(ARRSEP).uniq
-      res.each do
-        |k|
+      res.each do |k|
         begin
           # check to see if class instance actually exists
           Marty::DataGrid.
@@ -451,8 +438,7 @@ class Marty::DataGrid < Marty::Base
 
   def self.parse_keys(pt, keys, type)
     klass = maybe_get_klass(type)
-    keys.map do
-      |v|
+    keys.map do |v|
       parse_fvalue(pt, v, type, klass)
     end
   end
@@ -487,9 +473,7 @@ class Marty::DataGrid < Marty::Base
       data_type = dts.first
     end
 
-    metadata = rows[(data_type || lenient ? 1 : 0)...blank_index].map do
-      |attr, type, dir, rs_keep, key|
-
+    metadata = rows[(data_type || lenient ? 1 : 0)...blank_index].map do |attr, type, dir, rs_keep, key|
       raise "metadata elements must include attr/type/dir" unless
         attr && type && dir
       raise "bad dir #{dir}" unless ["h", "v"].member? dir
@@ -513,9 +497,7 @@ class Marty::DataGrid < Marty::Base
     data_index = blank_index+1
 
     # process horizontal key rows
-    h_infos.each_with_index do
-      |inf, i|
-
+    h_infos.each_with_index do |inf, i|
       row = rows[data_index+i]
 
       raise "horiz. key row #{data_index+i} must include nil starting cells" if
@@ -548,18 +530,14 @@ class Marty::DataGrid < Marty::Base
     if String === c_data_type
       tsym = c_data_type.to_sym
 
-      data = data_rows.map do
-        |r|
-        r[v_infos.count, r.count].map do
-          |v|
+      data = data_rows.map do |r|
+        r[v_infos.count, r.count].map do |v|
           Marty::DataConversion.convert(v, tsym) if v
         end
       end
     else
-      data = data_rows.map do
-        |r|
-        r[v_infos.count, r.count].map do
-          |v|
+      data = data_rows.map do |r|
+        r[v_infos.count, r.count].map do |v|
           next v if !v || Marty::DataGrid.
                          find_class_instance(pt, c_data_type, v)
 
@@ -600,17 +578,13 @@ class Marty::DataGrid < Marty::Base
   # FIXME: should be private
   def build_index
     # create indices for the metadata
-    metadata.each do
-      |inf|
-
+    metadata.each do |inf|
       attr, type, keys = inf["attr"], inf["type"], inf["keys"]
 
       # find index class
       idx_class = Marty::DataGrid.type_to_index(type)
 
-      keys.each_with_index do
-        |k, index|
-
+      keys.each_with_index do |k, index|
         gi              = idx_class.new
         gi.attr         = attr
         gi.key          = k
@@ -652,8 +626,7 @@ class Marty::DataGrid < Marty::Base
 
     removes.reject! { |dir, set| set.empty? }
 
-    removes.each do
-      |dir, set|
+    removes.each do |dir, set|
       metadata_copy.select { |m| m["dir"] == dir }.each do |meta|
         meta["keys"] = remove_indices(meta["keys"], removes[dir])
       end
@@ -731,7 +704,6 @@ class Marty::DataGrid < Marty::Base
           prune_a.push(index)
         end
       end
-
     end
     [prune_a, rewrite_a]
   end
@@ -741,7 +713,6 @@ class Marty::DataGrid < Marty::Base
     prune_a, rewrite_a, value = [], [], Array(val)
 
     keys.each_with_index do |key, index|
-
       # rewrite any nil (wildcard) keys in the dimension
       # to be our 'to-keep' val(s)
       if key.nil?

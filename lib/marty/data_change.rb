@@ -6,9 +6,7 @@ class Marty::DataChange
 
   # will break if DataExporter::export_attrs recurses more than 1 level
   # and a level 2+ child table has a compound mcfly_uniqueness key
-  delorean_fn :changes, sig: [3, 4] do
-    |t0, t1, class_name, ids = nil|
-
+  delorean_fn :changes, sig: [3, 4] do |t0, t1, class_name, ids = nil|
     klass = class_name.constantize
 
     t0 = Mcfly.normalize_infinity t0
@@ -43,8 +41,7 @@ class Marty::DataChange
 
         # assumes cols order is same as that returned by export_attrs
 
-        profile["attrs"] = cols_model.each_with_index.with_object([]) do
-          |(col, i), a|
+        profile["attrs"] = cols_model.each_with_index.with_object([]) do |(col, i), a|
           header_current = cols_header[i]
           valcount = Array === header_current ? header_current.count : 1
           changed = o.send(col.to_sym) != prev.send(col.to_sym) if prev
@@ -60,9 +57,7 @@ class Marty::DataChange
     end
   end
 
-  delorean_fn :change_summary, sig: 3 do
-    |t0, t1, class_name|
-
+  delorean_fn :change_summary, sig: 3 do |t0, t1, class_name|
     klass = class_name.constantize
 
     t0 = Mcfly.normalize_infinity t0
@@ -93,28 +88,22 @@ class Marty::DataChange
     Rails.configuration.marty.class_list.sort.uniq || []
   end
 
-  delorean_fn :class_headers, sig: 1 do
-    |class_name|
+  delorean_fn :class_headers, sig: 1 do |class_name|
     Marty::DataExporter.export_headers(class_name.constantize, nil, []).flatten.
       map { |f| I18n.t(f, scope: 'attributes', default: f) }
   end
 
-  delorean_fn :user_name, sig: 1 do
-    |user_id|
-
+  delorean_fn :user_name, sig: 1 do |user_id|
     Marty::User.find_by_id(user_id).try(:name)
   end
 
-  delorean_fn :sanitize_classes, sig: 1 do
-    |classes|
+  delorean_fn :sanitize_classes, sig: 1 do |classes|
     classes = classes.split(/,\s*/) if classes.is_a? String
 
     classes.to_set & class_list.to_set
   end
 
-  delorean_fn :do_export, sig: [2, 4] do
-    |pt, klass, sort_field=nil, exclude_attrs=[]|
-
+  delorean_fn :do_export, sig: [2, 4] do |pt, klass, sort_field=nil, exclude_attrs=[]|
     # allow classes on class_list or any Enum to be exported
     raise "'#{klass}' not on class_list" unless
       class_list.member?(klass) || klass.constantize.is_a?(Marty::Enum)
@@ -123,15 +112,12 @@ class Marty::DataChange
       do_export(pt, klass.constantize, sort_field, exclude_attrs)
   end
 
-  delorean_fn :do_pg_enum_export, sig: 1 do
-    |k|
+  delorean_fn :do_pg_enum_export, sig: 1 do |k|
     klass = k.constantize
     next (klass.is_a? Marty::PgEnum) ? klass.get_all : []
   end
 
-  delorean_fn :export_changes, sig: 3 do
-    |t0, t1, class_name|
-
+  delorean_fn :export_changes, sig: 3 do |t0, t1, class_name|
     klass = class_name.constantize
 
     t0 = Mcfly.normalize_infinity t0
@@ -209,18 +195,14 @@ class Marty::DataChange
   # {"source" => {k1=>v1, k2=>v2, ...},
   #  "input"  => {k1=>v1, k2=>v2, ...}}
 
-  delorean_fn :diff, sig: [2, 3] do
-    |klass, input_data, ts='infinity'|
-
+  delorean_fn :diff, sig: [2, 3] do |klass, input_data, ts='infinity'|
     ts = Mcfly.normalize_infinity(ts)
     keys = Marty::DataConversion.assoc_keys(klass).map(&:to_s).to_set
 
     only_source, only_input, different, same = [], [], [], []
     found_sources = Set[]
 
-    input_data.each do
-      |input|
-
+    input_data.each do |input|
       input_keys = input.keys
 
       raise "non-String keys in input data" unless
@@ -289,9 +271,7 @@ class Marty::DataChange
 
   # Given a Mcfly class_name, find all of the obsoleted Mcfly objects
   # which are referenced by live (non-obsoleted) class instances.
-  delorean_fn :dead_refs, sig: 2 do
-    |ts, class_name|
-
+  delorean_fn :dead_refs, sig: 2 do |ts, class_name|
     klass = class_name.constantize
 
     return unless Mcfly.has_mcfly?(klass)
@@ -303,9 +283,7 @@ class Marty::DataChange
       Hash === h && Mcfly.has_mcfly?(h[:assoc_class]) && h || nil
     }.compact
 
-    mcfly_cols.each_with_object({}) {
-      |h, res|
-
+    mcfly_cols.each_with_object({}) { |h, res|
       fk = h[:foreign_key]
       rtable = h[:assoc_class].table_name
       ktable = klass.table_name

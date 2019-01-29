@@ -35,7 +35,6 @@ S:
 EOS
 
 describe Marty::Xl do
-
   let(:engine) {
     Delorean::Engine.new "YYY"
   }
@@ -58,7 +57,7 @@ describe Marty::Xl do
       b.prs.each do |pr|
         edges << [pr.name, pr.style, pr.color.rgb]
       end
-      edges.sort_by{ |k| k[0] }
+      edges.sort_by { |k| k[0] }
     end
 
     sp.workbook.worksheets[0].rows[0].cells[0..1].map { |c| c.value }.should ==
@@ -110,6 +109,5 @@ describe Marty::Xl do
         next
       end
     end
-
   end
 end

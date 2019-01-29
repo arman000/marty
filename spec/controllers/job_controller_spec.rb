@@ -215,9 +215,7 @@ describe Marty::JobController, slow: true do
 
     expect(response.content_type).to eq "application/zip"
 
-    Zip::InputStream.open(StringIO.new(response.body)) {
-      |io|
-
+    Zip::InputStream.open(StringIO.new(response.body)) { |io|
       count = 0
       while (entry = io.get_next_entry)
         expect(entry.name).to match /PromiseB.*\.csv/

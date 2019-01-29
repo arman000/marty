@@ -384,7 +384,6 @@ EOF
                            ["VA Fixed 30 Year DURP <=80 HB", ["CA", "NY"],
                             nil, ['foo', 'hi mom']],
                           ].to_set)
-
     end
 
     it "should properly handle cases where an association item is missing" do
@@ -495,7 +494,6 @@ EOF
 
     context 'when exporting' do
       it "exports the locale value for the column header" do
-
         expect(@res[0][1][0][1].length).to eq(12)
         expect(@res[0][1][0][1][7]).to eq("Note Rate")
       end

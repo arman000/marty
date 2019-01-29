@@ -11,8 +11,7 @@ class Marty::Config < Marty::Base
   validates_uniqueness_of :key
   validates_with ConfigValidator
 
-  delorean_fn :lookup, sig: 1 do
-    |key|
+  delorean_fn :lookup, sig: 1 do |key|
     self[key]
   end
 

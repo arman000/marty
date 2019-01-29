@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'logger view', js: true, capybara: true do
-
   before(:all) do
     self.use_transactional_tests = false
     Marty::Log.delete_all
@@ -23,8 +22,7 @@ feature 'logger view', js: true, capybara: true do
                        details: [5],
                        timestamp: Time.zone.now - 10.days)
 
-    @ts = Marty::Log.select(:timestamp).order(timestamp: :desc).map do
-      |(ts)|
+    @ts = Marty::Log.select(:timestamp).order(timestamp: :desc).map do |(ts)|
       Time.zone.at(ts[:timestamp]).strftime('%Y-%m-%dT%H:%M:%S.%L%:z')
     end
 

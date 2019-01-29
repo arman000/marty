@@ -34,9 +34,8 @@ module Marty::Diagnostic
         get :op, params: {format: :json, op: 'version', data: 'true'}
 
         # generate version data and declare all values consistent
-        versions = Version.generate.each_with_object({}){
-          |(n, v),h|
-          h[n] = v.each{|t, r| r['consistent'] = true}
+        versions = Version.generate.each_with_object({}) { |(n, v), h|
+          h[n] = v.each {|t, r| r['consistent'] = true}
         }
 
         expected = {

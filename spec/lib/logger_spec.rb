@@ -32,8 +32,8 @@ module Marty
       Marty::Logger.error('error message', error_s)
       Marty::Logger.fatal('fatal message', fatal_s)
       log = Marty::Log.all
-      log_detail = log.map{|l| [l[:message_type], l[:message], l[:details]]}
-      log_ts = log.map{|l| l[:timestamp]}
+      log_detail = log.map {|l| [l[:message_type], l[:message], l[:details]]}
+      log_ts = log.map {|l| l[:timestamp]}
       expect(log_detail[0]).to eq(["info", "info message", info_s])
       expect(log_detail[1]).to eq(["error", "error message", error_s])
       expect(log_detail[2]).to eq(["fatal", "fatal message", fatal_s])
@@ -101,8 +101,7 @@ module Marty
         line_count = File.readlines("/tmp/logaction.txt").count
 
         log_count = Marty::Log.all.count
-        failed_count = f.readlines.select do
-          |l|
+        failed_count = f.readlines.select do |l|
           l == "Marty::Logger failure: database is locked\n"
         end.count
 

@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'under Sytem menu, User Management worflows', js: true do
-
   def go_to_user_view
     press('System')
     press('User Management')
@@ -104,7 +103,6 @@ feature 'under Sytem menu, User Management worflows', js: true do
   end
 
   describe 'check user permissions & what buttons appear' do
-
     before(:all) do
       populate_test_users
     end
