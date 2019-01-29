@@ -59,12 +59,12 @@ class Marty::ReportSelect < Marty::Form
 
     return [] unless engine
 
-    nodes = engine.enumerate_nodes.select { |n|
+    nodes = engine.enumerate_nodes.select do |n|
       attrs = Set.new(engine.enumerate_attrs_by_node(n))
       attrs.superset? REPORT_ATTR_SET
-    }
+    end
 
-    nodes.map { |node|
+    nodes.map do |node|
       roles = engine.evaluate(node, "roles") rescue nil
       next if roles && !roles.any? { |r| Marty::User.has_role(r) }
 
@@ -74,7 +74,7 @@ class Marty::ReportSelect < Marty::Form
       rescue
         [node, node]
       end
-    }.compact.sort { |a,b| a[1] <=> b[1]}
+    end.compact.sort { |a,b| a[1] <=> b[1]}
   end
 
   endpoint :get_combobox_options do |params|

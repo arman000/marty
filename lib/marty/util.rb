@@ -99,10 +99,10 @@ module Marty::Util
     when Array
       obj.map {|o| deep_round(o, digits)}
     when Hash
-      obj.inject({}) { |result, (key, value)|
+      obj.inject({}) do |result, (key, value)|
         result[key] = deep_round(value, digits)
         result
-      }
+      end
     else
       obj.is_a?(Float)? obj.round(digits) : obj
     end

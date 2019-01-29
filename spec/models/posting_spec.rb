@@ -29,9 +29,9 @@ module Marty
 
       describe ".get_latest" do
         it "provide a list of latest of postings in descending order" do
-          4.times { |d|
+          4.times do |d|
             Posting.do_create("BASE", d.day.from_now, 'a comment')
-          }
+          end
           dt3 = 3.day.from_now
 
           latest = Posting.get_latest(1)

@@ -344,22 +344,22 @@ class Marty::DataGrid < Marty::Base
 
     meta_rows = dt_row.empty? ? [] : [[dt_row.join(' ')]]
 
-    meta_rows += metadata.map { |inf|
+    meta_rows += metadata.map do |inf|
       [inf["attr"], inf["type"], inf["dir"], inf["rs_keep"] || ""]
-    }
+    end
 
     v_infos, h_infos = dir_infos("v"), dir_infos("h")
 
-    h_key_rows = h_infos.map { |inf|
+    h_key_rows = h_infos.map do |inf|
       [nil]*v_infos.count + self.class.export_keys(inf)
-    }
+    end
 
     transposed_v_keys = v_infos.empty? ? [[]] :
       v_infos.map {|inf| self.class.export_keys(inf)}.transpose
 
-    data_rows = transposed_v_keys.each_with_index.map { |keys, i|
+    data_rows = transposed_v_keys.each_with_index.map do |keys, i|
       keys + (self.data[i] || [])
-    }
+    end
 
     [meta_rows, h_key_rows, data_rows]
   end

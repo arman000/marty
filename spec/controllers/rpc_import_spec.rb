@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Marty::RpcController do
   before(:each) { @routes = Marty::Engine.routes }
 
-  before(:each) {
+  before(:each) do
     @tags = []
     @tags << Marty::Script.load_script_bodies({
                          "A" => "A:\n    a = 1\n",
@@ -23,14 +23,14 @@ describe Marty::RpcController do
     s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: "A")
     s.body = "A:\n    a = 3\n"
     s.save!
-  }
+  end
 
   let(:tags) { @tags }
 
   it "should properly import different versions of a script" do
     # try the test 3 times for fun
-    (0..2).each {
-      tags.each_with_index { |t, i|
+    (0..2).each do
+      tags.each_with_index do |t, i|
         get 'evaluate', params: {
               format: :json,
               script: "B",
@@ -39,7 +39,7 @@ describe Marty::RpcController do
               tag: t.name,
             }
         response.body.should == i.to_json
-      }
-    }
+      end
+    end
   end
 end

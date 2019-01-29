@@ -198,10 +198,10 @@ class Marty::DeloreanRule < Marty::BaseRule
     Proc.new do |old, new|
       klass.where(obsoleted_dt: 'infinity').each do |r|
         r.grids.each { |k, v| r.grids[k] = new if v == old }
-        r.results.each { |k, v|
+        r.results.each do |k, v|
           r.results[k] = %Q("#{new}") if
                          k.ends_with?("_grid") && r.fixed_results[k] == old
-        }
+        end
         r.save! if r.changed?
       end
     end

@@ -76,7 +76,7 @@ DD: BB
     result = 444
 DELOREAN
 
-    with_user("dev1") { |u|
+    with_user("dev1") do |u|
       Marty::Posting.do_create('BASE', SOME_DT, 'a comment')
 
       Marty::Script.
@@ -88,7 +88,7 @@ DELOREAN
                              a_report +
                              "CC: BB\n    title=\"CC\"\n    result = 123" },
                            Date.today + 1.minute)
-    }
+    end
   end
 
   def select_node node_name

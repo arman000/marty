@@ -180,9 +180,9 @@ class Marty::DataConversion
     # FIXME: map all empty string values to nil --- this means that
     # user can't import empty strings -- Perhaps, mapping "" -> nil
     # should be optional?
-    row = row.each_with_object({}) { |(k, v), h|
+    row = row.each_with_object({}) do |(k, v), h|
       h[k.to_s] = v == '' ? nil : v
-    }
+    end
     key_groups.each_with_object({}) do |(ga, g), h|
       # find the association's details
       ai = assoc[ga]

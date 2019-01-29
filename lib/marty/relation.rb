@@ -6,9 +6,9 @@ class Marty::Relation
 
     ids = klass.where(obsoleted_dt: 'infinity').pluck(:group_id)
 
-    ref_ids = ref_classes.map { |rclass|
+    ref_ids = ref_classes.map do |rclass|
       rclass.where(obsoleted_dt: 'infinity', col => ids).pluck(col)
-    }.flatten.uniq
+    end.flatten.uniq
 
     klass.where(id: ids - ref_ids).to_a
   end

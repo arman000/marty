@@ -105,11 +105,11 @@ EOF
       restore_clean_db(@clean_file)
       Marty::ScriptSet.clear_cache
     end
-    let(:params) {
+    let(:params) do
       {"pt"        =>'infinity',
                    "entity"    => Gemini::Entity.all.first,
                    "note_rate" => 2.875}
-    }
+    end
     it "lookup mode default" do
       a1 = @engine.evaluate("A", "lookup", params)
       a2 = @engine.evaluate("A", "clookup", params)
@@ -163,9 +163,9 @@ EOF
         @errs.in_groups_of(2) do |name, fn|
           err = /Too many args to #{fn}/
 
-          expect {
+          expect do
             Marty::ScriptSet.new.get_engine(name)
-          }.to raise_error(Delorean::BadCallError, err)
+          end.to raise_error(Delorean::BadCallError, err)
         end
       end
     end
@@ -183,18 +183,18 @@ EOF
 
     it "caching times" do
       ts = DateTime.now
-      x=Benchmark.measure {
-          10000.times {
+      x=Benchmark.measure do
+          10000.times do
                             Gemini::FannieBup.a_func(ts,
                                                      1, 2)
-          }
-      }
-      y=Benchmark.measure {
-          10000.times {
+          end
+      end
+      y=Benchmark.measure do
+          10000.times do
                             Gemini::FannieBup.ca_func(ts,
                                                      1, 2)
-          }
-      }
+          end
+      end
       # x time should be 30x or more than y time
       expect(x.real / y.real).to be > 30
     end

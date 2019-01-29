@@ -1,10 +1,10 @@
 module Marty::RSpec::StructureCompare
   def self.struct_compare_all(v1raw, v2raw, key=nil, cmp_opts={}, path=[], errs=[])
     pathstr = path.map(&:to_s).join
-    v1,v2 = [v1raw, v2raw].map { |v|
+    v1,v2 = [v1raw, v2raw].map do |v|
               v.class == ActiveSupport::TimeWithZone ?
                                    DateTime.parse(v.to_s) : v
-    }
+    end
 
     return errs + [v1["error"]] if
       v1.class != v2.class && v1.class == Hash && v1["error"]

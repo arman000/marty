@@ -40,16 +40,16 @@ module Marty
       end
 
       it "should handle del" do
-        (0..10).each { |i|
+        (0..10).each do |i|
           v = {"i" => i}
           Marty::Config["k#{i}"] = v
           expect(Marty::Config["k#{i}"]).to eq(v)
-        }
+        end
 
-        (0..10).each { |i|
+        (0..10).each do |i|
           Marty::Config.del("k#{i}")
           expect(Marty::Config["k#{i}"]).to eq(nil)
-        }
+        end
       end
 
       it "should allow the assignment of individual boolean values" do

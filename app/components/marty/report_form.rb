@@ -94,9 +94,9 @@ class Marty::ReportForm < Marty::Form
   client_class do |c|
     # Find the mount path for the Marty engine. FIXME: this is likely
     # very brittle.
-    @@mount_path = Rails.application.routes.routes.detect { |r|
+    @@mount_path = Rails.application.routes.routes.detect do |r|
                      r.app.app == Marty::Engine
-    }.format({})
+    end.format({})
 
     c.mount_path = l(<<-JS)
     function() {
@@ -115,9 +115,9 @@ class Marty::ReportForm < Marty::Form
     when Array
       items.map {|x| eval_form_items(engine, x)}
     when Hash
-      items.each_with_object({}) { |(key, value), result|
+      items.each_with_object({}) do |(key, value), result|
         result[key] = eval_form_items(engine, value)
-      }
+      end
     when String
       items.starts_with?(':') ? items[1..-1].to_sym : items
     when Class
@@ -187,14 +187,14 @@ class Marty::ReportForm < Marty::Form
               :selected_node,
               # just for testing
               :selected_testing,
-             ].map { |f|
+             ].map do |f|
       {
         name:   f,
         xtype:  :textfield,
         hidden: true,
         value:  root_sess[f],
       }
-    }
+    end
 
     c.items              = items
     c.repformat          = format

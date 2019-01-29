@@ -25,9 +25,9 @@ class Marty::Xl
 
     return b unless a_border.is_a?(Hash) && a_border[:edges].is_a?(Array)
 
-    non_match = a_border.detect { |key, value|
+    non_match = a_border.detect do |key, value|
       key != :edges && b_border[key] != value
-    }
+    end
 
     a_border[:edges].each do |edge|
       unless b_border[:edges].include? edge
@@ -36,9 +36,9 @@ class Marty::Xl
 
         # add new style/color for the new edge if there is no style
         # match with the old edges:
-        b["border_#{edge}".to_sym] = a_border.each_with_object({}) { |(key, value), h|
+        b["border_#{edge}".to_sym] = a_border.each_with_object({}) do |(key, value), h|
           h[key] = value unless key == :edges
-        } if non_match
+        end if non_match
       end
     end
     b
@@ -109,7 +109,7 @@ class Marty::Xl
     x_coords = x2.is_a?(Integer) || d[0] != "image" ? [x1, x2] : [x1]
 
     # add the row offset:
-    y1, y2 = y_coords.map { |y|
+    y1, y2 = y_coords.map do |y|
       if y.is_a?(Integer)
         row_offset + y
       elsif y.is_a?(Hash) && y["off"].is_a?(Integer)
@@ -117,13 +117,13 @@ class Marty::Xl
       else
         raise "bad offset #{y}"
       end
-    }
+    end
 
     # add the column offset:
-    x1, x2 = x_coords.map { |x|
+    x1, x2 = x_coords.map do |x|
       raise "bad range point #{x}" unless x.is_a? Integer
       column_offset + x
-    }
+    end
 
     el[last_row] = [] unless
       el[last_row] || ["border", "image"].member?(d[0])
@@ -293,7 +293,7 @@ class Marty::Xl
 
     worksheets << ["No data", []] if worksheets.count == 0
 
-    worksheets.each { |opl|
+    worksheets.each do |opl|
       name, ops, opts = opl
 
       raise "bad worksheet name: #{name}" unless name.is_a?(String)
@@ -315,7 +315,7 @@ class Marty::Xl
       ws.sheet_view.show_grid_lines = gridlines
 
       apply_relative_worksheet_ops(ws, ops)
-    }
+    end
     @package.use_shared_strings = true
   end
 
@@ -323,9 +323,9 @@ class Marty::Xl
     raise "bad style" unless style.is_a?(Hash) || style.is_a?(Array)
 
     if style.is_a?(Array)
-      style.map { |s|
+      style.map do |s|
         styles[s] ||= package.workbook.styles.add_style(s)
-      }
+      end
     else
       styles[style] ||= package.workbook.styles.add_style(style)
     end
@@ -336,38 +336,38 @@ class Marty::Xl
     raise "bad range #{range}" unless range.is_a?(Array) && range.length==4
     x1, y1, x2, y2 = range
 
-    y1, y2 = [y1, y2].map { |y|
+    y1, y2 = [y1, y2].map do |y|
       next y unless y.is_a?(Hash)
       raise "bad offset #{y}" unless y["off"].is_a?(Integer)
       ws.rows.last.row_index + y["off"]
-    }
+    end
 
-    [x1, y1, x2, y2].each { |x|
+    [x1, y1, x2, y2].each do |x|
       raise "bad range point #{x}" unless x.is_a? Integer
-    }
+    end
     Axlsx.cell_r(x1, y1) + ":" + Axlsx.cell_r(x2, y2)
   end
 
   def recalc_offsets(ops_pos)
     new_ops1, new_ops2, new_ops = [], [], []
     # precalculate the offsets of pos options embedded in another pos opt:
-    ops_pos.each { |d|
-      new_ops1 += d[2].select { |inner_ops|
+    ops_pos.each do |d|
+      new_ops1 += d[2].select do |inner_ops|
         inner_ops if inner_ops[0] == "pos"
-      }.map { |inner|
+      end.map do |inner|
         [inner[0], d[1].zip(inner[1]).map { |x,y| x+y }, inner[2] ]
-      }
-    }
+      end
+    end
     # keep the offsets of non-pos options embedded in pos opt:
-    new_ops2 = ops_pos.map { |d|
+    new_ops2 = ops_pos.map do |d|
       [ d[0], d[1], d[2].select {|inner| inner if inner[0] != "pos" } ]
-    }
+    end
     new_ops = new_ops1 + new_ops2
-    count = new_ops.select { |d|
-      d[2].select { |inner_ops|
+    count = new_ops.select do |d|
+      d[2].select do |inner_ops|
         inner_ops if inner_ops[0] == "pos"
-      }.count > 0
-    }.count
+      end.count > 0
+    end.count
 
     count == 0 ? new_ops.sort : recalc_offsets(new_ops)
   end
@@ -390,7 +390,7 @@ class Marty::Xl
     end
 
     rows, styles, row_styles, format, borders, images = [], [], [], [], [], []
-    ops.each { |opl|
+    ops.each do |opl|
       raise "bad op #{opl}" unless opl.length > 1
       case opl[0]
       when "pos"
@@ -499,7 +499,7 @@ class Marty::Xl
       else
         raise "unknown op #{opl[0]}"
       end
-    }
+    end
     worksheet_rows(ws,rows,styles,row_styles,format,borders,images) unless
       [ops_pos.count, ops_brd.count].all? { |a| a == 0 }
   end
@@ -511,11 +511,11 @@ class Marty::Xl
     when Array
       obj.map {|x| symbolize_keys(x, sym_str)}
     when Hash
-      obj.inject({}) { |result, (key, value)|
+      obj.inject({}) do |result, (key, value)|
         key = key.to_sym if key.is_a?(String)
         result[key] = symbolize_keys(value, sym_str)
         result
-      }
+      end
     when String
       (sym_str && obj.starts_with?(sym_str)) ? obj[sym_str.length..-1].to_sym : obj
     else

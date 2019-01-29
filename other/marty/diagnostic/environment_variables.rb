@@ -19,20 +19,20 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
 
     to_obfus.each {|k| env[k] = env[k][0,4] if env[k]}
 
-    env.sort.each_with_object({}) {|(k,v),h|
+    env.sort.each_with_object({}) do |(k,v),h|
       h[k] = v if to_block.all? {|b| !k.include?(b)} && k.include?(filter)
-    }
+    end
   end
 
   # overwritten to only return inconsitent data
   def self.apply_consistency data
     diff = get_difference(data)
-    data.each_with_object({}) { |(node, diagnostic), new_data|
-      new_data[node] = diagnostic.each_with_object({}) { |(test, info), new_diagnostic|
+    data.each_with_object({}) do |(node, diagnostic), new_data|
+      new_data[node] = diagnostic.each_with_object({}) do |(test, info), new_diagnostic|
         new_diagnostic[test] = info + {'consistent' => false} if
           diff.include?(test)
-      }
-    }
+      end
+    end
   end
 end
 end

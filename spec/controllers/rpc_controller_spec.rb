@@ -430,16 +430,16 @@ A:
     v0 = { "properties": properties}
 eof
 describe Marty::RpcController do
-  before(:each) {
+  before(:each) do
     @routes = Marty::Engine.routes
 
     # HACKY: 'params' param is special to the Rails controller test helper (at
     # least as of 4.2). Setting this avoids test framework code that relies on
     # params being a hash.
     @request.env['PATH_INFO'] = "/marty/rpc/evaluate.json"
-  }
+  end
 
-  before(:each) {
+  before(:each) do
     @p0 = Marty::Posting.do_create("BASE", Date.today, 'a comment')
 
     @t1 = Marty::Script.load_script_bodies({
@@ -478,7 +478,7 @@ describe Marty::RpcController do
     @data = [["some data",7,[1,2,3],{foo: "bar", baz: "quz"},5,"string"],
              ["some more data",[1,2,3],5,{foo: "bar", baz: "quz"},5,"string"]]
     @data_json = @data.to_json
-  }
+  end
 
   after(:each) do
     Marty::Log.delete_all

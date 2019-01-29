@@ -46,9 +46,9 @@ class Marty::ScriptTester < Marty::Form
 
     attrs = data["attrs"].split(';').map(&:strip).reject(&:empty?)
 
-    pjson = data["params"].split("\n").map(&:strip).reject(&:empty?).map { |s|
+    pjson = data["params"].split("\n").map(&:strip).reject(&:empty?).map do |s|
               s.sub(/^([a-z0-9_]*)\s*=/, '"\1": ')
-    }.join(',')
+    end.join(',')
 
     begin
       phash = ActiveSupport::JSON.decode("{ #{pjson} }")
@@ -60,7 +60,7 @@ class Marty::ScriptTester < Marty::Form
     engine = new_engine
 
     begin
-      result = attrs.map { |a|
+      result = attrs.map do |a|
         node, attr = a.split('.')
         raise "bad attribute: '#{a}'" if !attr
         # Need to clone phash since it's modified by eval.  It can
@@ -68,7 +68,7 @@ class Marty::ScriptTester < Marty::Form
         res = engine.evaluate(node, attr, phash.clone)
         q = CGI::escapeHTML(res.to_json)
         "#{a} = #{q}"
-      }
+      end
 
       client.netzke_notify "done"
       client.set_result result.join("<br/>")

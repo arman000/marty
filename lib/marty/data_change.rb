@@ -67,8 +67,8 @@ class Marty::DataChange
 
     created = updated = deleted = 0
 
-    changes.each { |group_id, ol|
-      ol.each_with_index.map { |o, i|
+    changes.each do |group_id, ol|
+      ol.each_with_index.map do |o, i|
         deleted +=1 if (group_id == o.id &&
                         o.obsoleted_dt != Float::INFINITY &&
                         (t1 == 'infinity' || o.obsoleted_dt < t1)
@@ -78,8 +78,8 @@ class Marty::DataChange
         else
           updated += 1
         end
-      }
-    }
+      end
+    end
 
     {'created' => created, 'updated' => updated, 'deleted' => deleted}
   end
@@ -146,9 +146,9 @@ class Marty::DataChange
       end
     end
 
-    [chg, del].map {|l|
+    [chg, del].map do |l|
       l.empty? ? nil : Marty::DataExporter.do_export_query_result(klass, l)
-    }
+    end
   end
 
   def self.get_changed_data(t0, t1, klass, ids=nil)
@@ -279,11 +279,11 @@ class Marty::DataChange
     ts = Mcfly.normalize_infinity(ts)
     col_types = Marty::DataConversion.col_types(klass)
 
-    mcfly_cols = col_types.map { |attr, h|
+    mcfly_cols = col_types.map do |attr, h|
       Hash === h && Mcfly.has_mcfly?(h[:assoc_class]) && h || nil
-    }.compact
+    end.compact
 
-    mcfly_cols.each_with_object({}) { |h, res|
+    mcfly_cols.each_with_object({}) do |h, res|
       fk = h[:foreign_key]
       rtable = h[:assoc_class].table_name
       ktable = klass.table_name
@@ -305,6 +305,6 @@ class Marty::DataChange
       arr = arr.map {|obj| Marty::DataExporter.export_attrs(klass, obj, [fk])}
 
       res[fk] = arr unless arr.empty?
-    }
+    end
   end
 end

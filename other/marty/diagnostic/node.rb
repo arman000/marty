@@ -10,12 +10,12 @@ module Marty::Diagnostic::Node
 
 
   def self.get_target_connections target
-    Marty::Diagnostic::Database.current_connections.select {|conn|
+    Marty::Diagnostic::Database.current_connections.select do |conn|
       conn['application_name'].include?(target)
-    }.map {|conn|
+    end.map do |conn|
       conn['client_addr'] == '127.0.0.1' ? my_ip :
         conn['client_addr'] || '127.0.0.1'
-    }
+    end
   end
 
   def self.get_nodes

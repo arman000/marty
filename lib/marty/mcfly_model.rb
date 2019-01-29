@@ -54,18 +54,18 @@ module Mcfly::Model
 
       assoc = Set.new(self.reflect_on_all_associations.map(&:name))
 
-      qstr = attrs.map {|k, v|
+      qstr = attrs.map do |k, v|
         k = "#{k}_id" if assoc.member?(k)
 
         v ? "(#{k} = ? OR #{k} IS NULL)" : "(#{k} = ?)"
-      }.join(" AND ")
+      end.join(" AND ")
 
       if Hash === attrs
-        order = attrs.select {|k, v| v}.keys.reverse.map { |k|
+        order = attrs.select {|k, v| v}.keys.reverse.map do |k|
           k = "#{k}_id" if assoc.member?(k)
 
           "#{k} NULLS LAST"
-        }.join(", ")
+        end.join(", ")
         attrs = attrs.keys
       else
         raise "bad attrs" unless Array === attrs
@@ -75,10 +75,10 @@ module Mcfly::Model
       base_mcfly_lookup(fn, name, options + {sig:  attrs.length+1,
                                              mode: mode}) do |t, *attr_list|
 
-        attr_list_ids = attr_list.each_with_index.map {|x, i|
+        attr_list_ids = attr_list.each_with_index.map do |x, i|
           assoc.member?(attrs[i]) ?
             (attr_list[i] && attr_list[i].id) : attr_list[i]
-        }
+        end
 
         q = self.where(qstr, *attr_list_ids)
         q = q.order(order) if order
@@ -117,9 +117,9 @@ module Mcfly::Model
       cat_attr_id = "#{cat_attr}_id"
 
       # replace rel_attr with cat_attr in attrs
-      pc_attrs = attrs.each_with_object({}) {|(k, v), h|
+      pc_attrs = attrs.each_with_object({}) do |(k, v), h|
         h[k == rel_attr ? cat_attr_id : k] = v
-      }
+      end
 
       pc_name = "pc_#{name}".to_sym
 

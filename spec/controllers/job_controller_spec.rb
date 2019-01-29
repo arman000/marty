@@ -50,11 +50,11 @@ describe Marty::JobController, slow: true do
 
     expect(Marty::Promise.where(start_dt: nil).count).to eq 0
 
-    expect {
+    expect do
       res = engine.evaluate("Y", "d", {"s" => 1})
       # force res to be evaluated
       res.to_s
-    }.to raise_error(RuntimeError)
+    end.to raise_error(RuntimeError)
 
     wait_for_jobs
 
@@ -75,10 +75,10 @@ describe Marty::JobController, slow: true do
                      {"z"=>slp,"a"=>{"b"=>{"e"=>3-slp}}},
                     ]}
 
-    bench = Benchmark.measure {
+    bench = Benchmark.measure do
       res = engine.evaluate("Y", "f", {"s" => slp})
       expect(res).to eq exp_res
-    }
+    end
 
     # If "f" is evaluated in serial fashion, then the process would
     # take slp*3+ seconds.  Make sure that we had some parallel
@@ -92,11 +92,11 @@ describe Marty::JobController, slow: true do
     slp = 5 # hard-coded in script
     exp_res = {"d"=>[{"a"=>1}, {"a"=>4}]}
 
-    bench = Benchmark.measure {
+    bench = Benchmark.measure do
       res = engine.background_eval("Y", {}, ["d"])
 
       expect(res).to eq exp_res
-    }
+    end
 
     expect(bench.real).to be_between(slp, slp*2)
   end
@@ -145,10 +145,10 @@ describe Marty::JobController, slow: true do
 
     expect(pl.count).to eq 2
 
-    pl.each { |p|
+    pl.each do |p|
       expect(p.result["error"]).not_to eq nil
       expect(p.end_dt).not_to eq nil
-    }
+    end
   end
 
   it "should pass p_title to promise create()" do
@@ -215,7 +215,7 @@ describe Marty::JobController, slow: true do
 
     expect(response.content_type).to eq "application/zip"
 
-    Zip::InputStream.open(StringIO.new(response.body)) { |io|
+    Zip::InputStream.open(StringIO.new(response.body)) do |io|
       count = 0
       while (entry = io.get_next_entry)
         expect(entry.name).to match /PromiseB.*\.csv/
@@ -223,7 +223,7 @@ describe Marty::JobController, slow: true do
         count += 1
       end
       expect(count).to eq 3
-    }
+    end
   end
 
   it "should be able to start promises on imported nodes" do

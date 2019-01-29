@@ -32,9 +32,9 @@ module Marty
                             preprocess_function,
                             )
 
-      recs.each_with_object(Hash.new(0)) {|(op, id), h|
+      recs.each_with_object(Hash.new(0)) do |(op, id), h|
         h[op] += 1
-      }
+      end
     end
 
     # Given a Mcfly klass and CSV data, import data into the database

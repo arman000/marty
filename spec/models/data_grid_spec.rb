@@ -193,101 +193,101 @@ EOS
 
     describe "imports" do
       it "should not allow imports with trailing blank columns" do
-        expect {
+        expect do
           dg_from_import("G1", G1.gsub("\n", "\t\n"))
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
       end
 
       it "should not allow imports with last blank row" do
-        expect {
+        expect do
           dg_from_import("Gh", Gh+"\t\t\n")
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
       end
     end
 
     describe "validations" do
       it "should not allow bad axis types" do
-        expect {
+        expect do
           dg_from_import("Gi", Gi)
-        }.to raise_error(/unknown metadata type float/)
-        expect {
+        end.to raise_error(/unknown metadata type float/)
+        expect do
           dg_from_import("Gi", Gi.sub(/float/, 'abcdef'))
-        }.to raise_error(/unknown metadata type abcdef/)
+        end.to raise_error(/unknown metadata type abcdef/)
       end
 
       it "should not allow dup attr names" do
         g_bad = G1.sub(/fico/, "ltv")
 
-        expect {
+        expect do
           dg_from_import("G2", g_bad)
-        }.to raise_error(ActiveRecord::RecordInvalid)
+        end.to raise_error(ActiveRecord::RecordInvalid)
       end
 
       it "should not allow dup grid names" do
         dg_from_import("G1", G1)
 
-        expect {
+        expect do
           dg_from_import("G1", G2)
-        }.to raise_error(ActiveRecord::RecordInvalid)
+        end.to raise_error(ActiveRecord::RecordInvalid)
       end
 
       it "should not allow extra attr rows" do
         g_bad = "x\tnumrange\th\t\t\n" + G1
 
-        expect {
+        expect do
           dg_from_import("G2", g_bad)
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
       end
 
       it "should not allow dup row/col key combos" do
         g_bad = G1 + G1.split("\n").last + "\n"
-        expect {
+        expect do
           dg_from_import("G2", g_bad)
-        }.to raise_error(ActiveRecord::RecordInvalid)
+        end.to raise_error(ActiveRecord::RecordInvalid)
 
         g_bad = G2 + G2.split("\n").last + "\n"
-        expect {
+        expect do
           dg_from_import("G2", g_bad)
-        }.to raise_error(ActiveRecord::RecordInvalid)
+        end.to raise_error(ActiveRecord::RecordInvalid)
       end
 
       it "Unknown keys for typed grids should raise error" do
         g_bad = G8.sub(/G3/, "XXXXX")
 
-        expect {
+        expect do
           dg_from_import("G8", g_bad)
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
 
         g_bad = G8.sub(/DataGrid/, "Division")
 
-        expect {
+        expect do
           dg_from_import("G8", g_bad)
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
       end
 
       it "Unknown keys for grid headers should raise error" do
         g_bad = Ga.sub(/G3/, "XXXXX")
 
-        expect {
+        expect do
           dg_from_import("Ga", g_bad)
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
 
         g_bad = Ga.sub(/DataGrid/, "Division")
 
-        expect {
+        expect do
           dg_from_import("Ga", g_bad)
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
       end
 
       it "validates grid modifier" do
         bad = ': abc def'
         g_bad = Gk.sub(/fha_203k_option$/, bad)
-        expect {
+        expect do
           dg_from_import( "Gk", g_bad)
-        }.to raise_error(/invalid grid modifier expression: #{bad}/)
-        expect {
+        end.to raise_error(/invalid grid modifier expression: #{bad}/)
+        expect do
           dg_from_import( "Gk", Gk)
-        }.not_to raise_error
+        end.not_to raise_error
       end
     end
 
@@ -296,9 +296,9 @@ EOS
 
       before(:each) do
         ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "Ga", "Gb",
-         "Gc", "Gd", "Ge", "Gf", "Gg", "Gh", "Gj"].each { |g|
+         "Gc", "Gd", "Ge", "Gf", "Gg", "Gh", "Gj"].each do |g|
           dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
-        }
+        end
       end
 
       context "should handle NULL key values" do
@@ -370,9 +370,9 @@ EOS
 
         expect(res).to eq(1.1)
 
-        expect {
+        expect do
           Marty::DataGrid.lookup_grid_h(pt, "Ge", {"ltv"=>500}, true)
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
       end
 
       it "should handle non-distinct lookups (2)" do
@@ -385,19 +385,19 @@ EOS
         # should return the upper left corner match
         expect(res).to eq(0.25)
 
-        expect {
+        expect do
           Marty::DataGrid.lookup_grid_h(pt, "Gj", params, true)
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
       end
 
       it "should handle boolean lookups" do
-        res = [true, false].map { |hb_indicator|
+        res = [true, false].map do |hb_indicator|
           lookup_grid_helper('infinity',
                              "Gd",
                              {"hb_indicator" => hb_indicator,
                              },
                             )
-        }
+        end
         expect(res).to eq [[456.0, "Gd"], [123.0, "Gd"]]
       end
 
@@ -410,7 +410,7 @@ EOS
                                 )
         expect(res).to eq [1.655,"G3"]
 
-        [3,4].each { |units|
+        [3,4].each do |units|
           res = lookup_grid_helper('infinity',
                                    "G2",
                                    {"fico" => 720,
@@ -420,7 +420,7 @@ EOS
                                    },
                                   )
           expect(res).to eq [5.6,"G2"]
-        }
+        end
 
         dg = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G1")
 
@@ -440,7 +440,7 @@ EOS
       end
 
       it "should result in error when there are multiple cell hits" do
-        expect {
+        expect do
           lookup_grid_helper('infinity',
                              "G2",
                              {"fico" => 720,
@@ -448,7 +448,7 @@ EOS
                               "cltv" => 110.1,
                              },
                             )
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
       end
 
       it "should return nil when matching data grid cell is nil" do
@@ -476,12 +476,12 @@ EOS
       it "should handle matches which also have a wildcard match" do
         dg_from_import("G9", G9)
 
-        expect {
+        expect do
           res = lookup_grid_helper('infinity',
                                    "G9",
                                    {"state" => "CA", "ltv" => 81},
                                   )
-        }.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError)
 
         res = lookup_grid_helper('infinity',
                                  "G9",
@@ -493,20 +493,20 @@ EOS
       it "should raise on nil attr values" do
         dg_from_import("G9", G9)
 
-        expect {
+        expect do
           lookup_grid_helper('infinity',
                                "G9",
                                {"ltv" => 81},
                                )
-        }        .to raise_error(/matches > 1/)
+        end        .to raise_error(/matches > 1/)
 
         err = /Data Grid lookup failed/
-        expect {
+        expect do
           lookup_grid_helper('infinity',
                                  "G9",
                                  {"state" => "CA", "ltv" => nil},
                                  false, false)
-        }        .to raise_error(err)
+        end        .to raise_error(err)
 
         res = lookup_grid_helper('infinity',
                                  "G9",

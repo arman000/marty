@@ -11,11 +11,11 @@ class Marty::Api::Base
     result = yield
     controller.respond_to do |format|
       format.json { controller.send_data result.to_json }
-      format.csv  {
+      format.csv  do
         # SEMI-HACKY: strip outer list if there's only one element.
         result = result[0] if result.is_a?(Array) && result.length==1
         controller.send_data Marty::DataExporter.to_csv(result)
-      }
+      end
     end
   end
 

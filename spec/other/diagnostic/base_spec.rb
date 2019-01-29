@@ -65,9 +65,9 @@ describe Marty::Diagnostic::Base do
   end
 
   it 'can produce a valid diagnostic hash from an error Hash' do
-    test = described_class.pack(include_ip=false) {
+    test = described_class.pack(include_ip=false) do
       described_class.error('E')
-    }
+    end
 
     expected = {
       "Base"=>{

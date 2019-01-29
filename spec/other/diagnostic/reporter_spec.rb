@@ -95,14 +95,14 @@ describe Marty::Diagnostic::Reporter do
   end
 
   def version_data consistent = true
-    Marty::Diagnostic::Base.pack(include_ip=false) {
+    Marty::Diagnostic::Base.pack(include_ip=false) do
       {
         "Marty"    => info(Marty::VERSION, true, consistent),
         "Delorean" => info(Delorean::VERSION, true, true),
         "Mcfly"    => info(Mcfly::VERSION, true, true),
         "Git"      => info(git, true, true),
       }
-    }
+    end
   end
 
   def minimize(str)

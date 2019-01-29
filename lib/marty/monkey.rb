@@ -30,9 +30,9 @@ class Hash
 
   # define hash slice (similar to node slice in Delorean)
   def %(x)
-    x.each_with_object({}) { |k, h|
+    x.each_with_object({}) do |k, h|
       h[k] = self[k]
-    }
+    end
   end
 end
 
@@ -166,9 +166,9 @@ module ActiveRecord
 
         enum = options.delete(:enum)
 
-        column_names.each { |name|
+        column_names.each do |name|
           column(name, enum || name.to_s.pluralize, options)
-        }
+        end
       end
     end
   end
@@ -217,9 +217,9 @@ class ActiveRecord::Base
       # when joins args are strings, checks to see if they're
       # associations attrs.  If so, convert them to symbols for joins
       # to work properly.
-      new_args = args.map {|a|
+      new_args = args.map do |a|
         self.reflections.has_key?(a) ? a.to_sym : a
-      }
+      end
       old_joins(*new_args)
     end
   end

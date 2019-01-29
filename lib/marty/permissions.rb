@@ -42,19 +42,19 @@ module Marty::Permissions
     roles = self.current_user_roles
     roles = roles << :any if self.has_any_perm?
 
-    self.marty_permissions.map { |action, aroles|
+    self.marty_permissions.map do |action, aroles|
       # TODO: Use code below when switching to Ruby 2.1
       #action if Set[ *aroles].intersect? roles.to_set
       action if (Set[ *aroles] & roles.to_set).length > 0
-    }.compact
+    end.compact
   end
 
   # generate has_xxx_perm? methods for all permissions.
-  Rails.configuration.marty.roles.each { |role|
+  Rails.configuration.marty.roles.each do |role|
     define_method("has_#{role}_perm?") do
       current_user_roles.member? role
     end
-  }
+  end
 
   def has_any_perm?
     !(current_user_roles & ALL_ROLES).empty?

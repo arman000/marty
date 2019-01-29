@@ -86,9 +86,9 @@ module Marty::Migrations
 
     add_mcfly_attrs_index(tb, *attrs)
 
-    MCFLY_INDEX_COLUMNS.each { |a|
+    MCFLY_INDEX_COLUMNS.each do |a|
       add_index tb.to_sym, a, index_opts(tb, a)
-    }
+    end
   end
 
   def add_mcfly_unique_index(klass)
@@ -278,11 +278,11 @@ OUT
   end
 
   def add_mcfly_attrs_index(tb, *attrs)
-    attrs.each { |a|
+    attrs.each do |a|
       options = index_opts(tb, a)
       options[:order] = {a.to_sym => "NULLS LAST"}
       add_index tb.to_sym, a, options
-    }
+    end
   end
 
   def unique_index_name(klass)

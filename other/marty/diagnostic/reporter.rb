@@ -35,13 +35,13 @@ module Marty::Diagnostic; class Reporter < Request
   end
 
   def self.generate
-    diagnostics.each_with_object({}) { |d, h|
+    diagnostics.each_with_object({}) do |d, h|
       begin
         h[d.name.demodulize] = d.generate
       rescue => e
         h.deep_merge!(Fatal.message(e.message, type: d.name.demodulize))
       end
-    }
+    end
   end
 
   def self.aggregate
@@ -50,22 +50,22 @@ module Marty::Diagnostic; class Reporter < Request
   end
 
   def self.consistency data
-    data.each_with_object({}) { |(klass, result), h|
+    data.each_with_object({}) do |(klass, result), h|
       h[klass] = resolve_diagnostic(klass).apply_consistency(result)
-    }
+    end
   end
 
   def self.errors data
-    data.each_with_object({}) { |(klass, result), new_data|
-      new_data[klass] = result.each_with_object({}) { |(node, diagnostic), new_result|
-        new_result[node] = diagnostic.each_with_object({}) { |(test, info), new_diagnostic|
+    data.each_with_object({}) do |(klass, result), new_data|
+      new_data[klass] = result.each_with_object({}) do |(node, diagnostic), new_result|
+        new_result[node] = diagnostic.each_with_object({}) do |(test, info), new_diagnostic|
           new_diagnostic[test] = info unless
             info['status'] && (scope == 'local' || info['consistent'])
-        }
+        end
         new_result.delete(node) if new_result[node].empty?
-      }
+      end
       new_data.delete(klass) if new_data[klass].empty?
-    }
+    end
   end
 
   def self.displays result

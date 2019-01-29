@@ -40,18 +40,18 @@ module Marty::Diagnostic; class Base < Request
 
   def self.get_difference data
     values = process_status_only(data.values)
-    Marty::DataExporter.hash_array_merge(values, true).map { |test, values|
+    Marty::DataExporter.hash_array_merge(values, true).map do |test, values|
       test if values.uniq.count > 1
-    }.compact
+    end.compact
   end
 
   def self.apply_consistency data
     diff = get_difference(data)
-    data.each_with_object({}) { |(node, diagnostic), new_data|
-      new_data[node] = diagnostic.each_with_object({}) { |(test, info), new_diagnostic|
+    data.each_with_object({}) do |(node, diagnostic), new_data|
+      new_data[node] = diagnostic.each_with_object({}) do |(test, info), new_diagnostic|
         new_diagnostic[test] = info + {'consistent' => !diff.include?(test)}
-      }
-    }
+      end
+    end
   end
 
   def self.consistent? data

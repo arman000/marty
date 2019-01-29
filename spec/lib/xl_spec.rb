@@ -85,9 +85,9 @@ EOS
 
 
 describe Marty::Xl do
-  let(:engine) {
+  let(:engine) do
     Delorean::Engine.new "YYY"
-  }
+  end
 
   def worksheet(ind, c)
     code = CODE.clone

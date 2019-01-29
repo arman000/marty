@@ -35,9 +35,9 @@ S:
 EOS
 
 describe Marty::Xl do
-  let(:engine) {
+  let(:engine) do
     Delorean::Engine.new "YYY"
-  }
+  end
 
   before(:each) do
     code = STYLE_CODE.clone

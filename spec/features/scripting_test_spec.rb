@@ -45,7 +45,7 @@ C:
     a = 456.0 + p0
 DELOREAN
 
-    with_user("dev1") { |u|
+    with_user("dev1") do |u|
       Marty::Script.
         load_script_bodies({
                              "M1" => sample_script,
@@ -56,7 +56,7 @@ DELOREAN
       s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: "M1")
       s.body = sample_script.gsub(/A/, "AA") + '    e =? "hello"'
       s.save!
-    }
+    end
   end
 
   def populate_sample_scripts2
@@ -74,12 +74,12 @@ B: A
     p =? 5
 DELOREAN
 
-    with_user("dev1") { |u|
+    with_user("dev1") do |u|
       Marty::Script.
         load_script_bodies({
                              "M3" => sample_script2,
                            }, Date.today + 2.minute)
-    }
+    end
   end
 
   def tab_press tab_text

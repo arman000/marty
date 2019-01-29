@@ -12,10 +12,10 @@ class Marty::ImportType < Marty::Base
         entry.cleaner_function,
         entry.validation_function,
         entry.preprocess_function,
-      ].each { |func|
+      ].each do |func|
         entry.errors.add(:base, "unknown class method #{func}") if
         func && !klass.respond_to?(func.to_sym)
-      }
+      end
     end
   end
 

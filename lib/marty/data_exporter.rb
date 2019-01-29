@@ -18,9 +18,9 @@ class Marty::DataExporter
 
     keys = hash_array_keys(hl)
 
-    return keys.each_with_object({}) { |k, rh|
+    return keys.each_with_object({}) do |k, rh|
         rh[k] = hl.map { |h| h[k] }
-    } if transpose
+    end if transpose
 
     [keys.to_a] + hl.map {|h| keys.map {|k| h[k]}}
   end
@@ -43,9 +43,9 @@ class Marty::DataExporter
       obj.is_a?(Array) && obj.all? {|x| x.is_a? Hash}
 
     # symbolize config keys as expected by CSV.generate
-    conf = config.each_with_object({}) { |(k,v), h|
+    conf = config.each_with_object({}) do |(k,v), h|
       h[k.to_sym] = v unless k.to_s == "transpose"
-    }
+    end
 
     # FIXME: very hacky to default row_sep to CRLF
     conf[:row_sep] ||= "\r\n"
@@ -69,7 +69,7 @@ class Marty::DataExporter
     CSV.generate(conf) do |csv|
       obj.each do |x|
         x = [x] unless x.respond_to? :map
-        csv << x.map { |v|
+        csv << x.map do |v|
           case v
           when Array, Hash
             readable ? v.to_json : encode_json(v.to_json)
@@ -78,7 +78,7 @@ class Marty::DataExporter
           else
             v.to_s
           end
-        }
+        end
       end
     end
   end
@@ -156,9 +156,9 @@ class Marty::DataExporter
     # strip _id from assoc fields
     header = [ export_headers(klass, nil, exclude_attrs).flatten ]
 
-    header + qres.map {|obj|
+    header + qres.map do |obj|
       export_attrs(klass, obj, nil, exclude_attrs).flatten(1)
-    }
+    end
   end
 
   # Export a single object to hash -- FIXME: inefficient

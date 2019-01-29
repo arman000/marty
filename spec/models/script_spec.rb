@@ -35,10 +35,10 @@ describe Marty::Script do
         to change(Marty::Script, :count).by(1)
 
       Marty::Script.load_a_script('TestExistsAndDifferent2', s1, now - 1.minute)
-      expect {
+      expect do
         Marty::Script.load_a_script('TestExistsAndDifferent2',
                                            s2, now)
-      }      .
+      end      .
         to change {
              Marty::Script.where(name: 'TestExistsAndDifferent2',
                                         obsoleted_dt: 'infinity').count
@@ -75,30 +75,30 @@ describe Marty::Script do
     end
 
     it 'creates a new tag if none exist yet with provided datetime' do
-      expect {
+      expect do
         @tag = Marty::Script.load_script_bodies({'Test1' => s1,
                                                         'Test2' => s2}, now)
-      }      .
+      end      .
         to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
 
     it 'creates a new tag when there is an older one present' do
       Marty::Tag.do_create(now - 1.minute, 'initial test tag')
-      expect {
+      expect do
         @tag = Marty::Script.load_script_bodies({'Test1' => s1,
                                                         'Test2' => s2}, now)
-      }      .
+      end      .
         to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
 
     it 'creates a new tag when no previous tag is present and no datetime ' +
       'provided' do
-      expect {
+      expect do
         tag = Marty::Script.load_script_bodies({'Test1' => s1,
                                                        'Test2' => s2})
-      }      .
+      end      .
         to change(Marty::Tag, :count).by(1)
     end
 

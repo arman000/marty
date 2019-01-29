@@ -48,9 +48,9 @@ module Marty; class UserView < Marty::Grid
     # Creates initial place-holder user object and validate
     user = data["id"].nil? ? User.new : User.find(data["id"])
 
-    self.user_columns.each { |c|
+    self.user_columns.each do |c|
       user.send("#{c}=", data[c.to_s]) unless c == :roles
-    }
+    end
 
     if user.valid?
       user.save

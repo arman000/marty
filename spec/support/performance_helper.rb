@@ -4,9 +4,9 @@ module Marty; module RSpec; module PerformanceHelper
   include Marty::RSpec::PostRunLogger
 
   def calculate_baseline iterations
-    Benchmark.measure {
+    Benchmark.measure do
       ActiveRecord::Base.uncached {(0...iterations).each { yield }}
-    }
+    end
   end
 
   def compare_baseline baseline, timings, opts={}

@@ -40,7 +40,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
   def populate_test_scripts
     lastid = nil
 
-    with_user("dev2") {
+    with_user("dev2") do
       Marty::Script.
         load_script_bodies({
                              "A1" => "#1\n",
@@ -51,15 +51,15 @@ feature 'under Applications menu, Scripting workflows', js: true do
                            }, Date.today)
 
       # create 3 additional tags and modify A5 in the process
-      (1..3).each { |i|
+      (1..3).each do |i|
         body = Marty::Script.find_by(name: "A5").body
 
         Marty::Script.
           load_script_bodies({
                                "A5" => body + "##{i}\n"
                              }, Date.today + i.minute)
-      }
-    }
+      end
+    end
   end
 
   it 'adding scripts and tags & ensure proper validations' do

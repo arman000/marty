@@ -7,9 +7,9 @@ module Marty
         system_user.login
     end
 
-    let (:tuser) {
+    let (:tuser) do
       create_user('other_user')
-    }
+    end
 
     describe "validations" do
       it "should require login, firstname and lastname" do

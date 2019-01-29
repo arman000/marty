@@ -53,18 +53,18 @@ module Marty::ContentHandler
   end
 
   def self.uniq_filename(filename, fset)
-    (0..1000).each { |i|
+    (0..1000).each do |i|
       post = i==0 ? "" : " (#{i})"
       fn = filename + post
       return fn unless fset.member? fn
-    }
+    end
     filename
   end
 
   def self.to_zip_stream(stream, path, data)
     fset = Set.new
 
-    data.each { |r|
+    data.each do |r|
       title, format, result = r["title"], r["format"], r["result"]
 
       log_and_raise "Result has no title" unless title
@@ -82,7 +82,7 @@ module Marty::ContentHandler
 
       stream.put_next_entry((path + [filename]).join('/'))
       stream.write res_data
-    }
+    end
   end
 
   def self.to_zip(data)

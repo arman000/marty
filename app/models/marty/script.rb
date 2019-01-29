@@ -48,9 +48,9 @@ class Marty::Script < Marty::Base
   end
 
   def self.load_script_bodies(bodies, dt=nil)
-    bodies.each { |sname, body|
+    bodies.each do |sname, body|
       load_a_script(sname, body, dt)
-    }
+    end
 
     # Create a new tag if scripts were modified after the last tag
     tag = Marty::Tag.get_latest1
@@ -76,10 +76,10 @@ class Marty::Script < Marty::Base
   end
 
   def self.read_script_files(files)
-    files.collect { |fpath|
+    files.collect do |fpath|
       fname = File.basename(fpath)[0..-4].camelize
       [fname, File.read(fpath)]
-    }
+    end
   end
 
   def self.get_script_filenames(paths = nil)
