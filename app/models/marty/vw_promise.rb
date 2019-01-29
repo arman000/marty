@@ -53,7 +53,7 @@ class Marty::VwPromise < Marty::Base
 
   # Support UI live search -- FIXME: hacky to have UI scoping here
   scope :live_search, lambda { |search_text|
-    return if !search_text || search_text.strip.length < 1
+    return if !search_text || search_text.strip.empty?
 
     # Searches user login/firstname/lastname
     query = [

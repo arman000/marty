@@ -52,7 +52,7 @@ class Marty::DataGrid < Marty::Base
           Marty::DataGrid.type_to_index(type)
 
         dg.errors.add(:base, "bad metadata keys") unless
-          keys.is_a?(Array) && keys.length > 0
+          keys.is_a?(Array) && !keys.empty?
       end
 
       # Check key uniqueness of vertical/horizontal key

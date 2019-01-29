@@ -1308,15 +1308,6 @@ Style/WordArray:
   EnforcedStyle: percent
   MinSize: 18
 
-# Offense count: 5
-# Cop supports --auto-correct.
-Style/ZeroLengthPredicate:
-  Exclude:
-    - 'app/components/marty/main_auth_app.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/vw_promise.rb'
-    - 'lib/marty/permissions.rb'
-
 # Offense count: 247
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https

@@ -313,7 +313,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   endpoint :bg_stop do |params|
     cmd = bg_command("stop")
     res = `#{cmd}`
-    res = "delayed_job: no instances running. Nothing to stop." if res.length == 0
+    res = "delayed_job: no instances running. Nothing to stop." if res.empty?
     client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Delayed Job Stop'
   end
 
