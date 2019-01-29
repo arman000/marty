@@ -37,7 +37,7 @@ describe Marty::Script do
       Marty::Script.load_a_script('TestExistsAndDifferent2', s1, now - 1.minute)
       expect do
         Marty::Script.load_a_script('TestExistsAndDifferent2',
-                                           s2, now)
+                                    s2, now)
       end      .
         to change {
              Marty::Script.where(name: 'TestExistsAndDifferent2',

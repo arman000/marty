@@ -145,9 +145,9 @@ module Marty; class UserView < Marty::Grid
     c.label   = I18n.t("user_grid.roles")
     c.type    = :string,
 
-    c.getter = lambda do |r|
-      r.roles.map { |ur| I18n.t("roles.#{ur.name}") }.sort
-    end
+                c.getter = lambda do |r|
+                  r.roles.map { |ur| I18n.t("roles.#{ur.name}") }.sort
+                end
 
     c.editor_config = {
       multi_select: true,

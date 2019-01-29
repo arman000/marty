@@ -173,8 +173,8 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       type:          :string,
       getter: jsonb_field_getter(:grids, c.to_s),
       setter: jsonb_field_setter(:grids, c.to_s),
-#      getter: lambda { |r| r.grids[c.to_s] },
-#      setter: lambda { |r, v| r.grids[c.to_s] = v },
+      #      getter: lambda { |r| r.grids[c.to_s] },
+      #      setter: lambda { |r, v| r.grids[c.to_s] = v },
     }
   end
 
@@ -214,7 +214,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
              form_items_guards,
              border: false,
              width: "40%",
-        ),
+            ),
         vbox(width: '2%', border: false),
         vbox(
              width: '55%', border: false),
@@ -227,7 +227,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
              form_items_results,
              width: '99%',
              border: false
-        ),
+            ),
         height: '40%',
        border: false
       )

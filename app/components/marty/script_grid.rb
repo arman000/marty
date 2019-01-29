@@ -26,7 +26,7 @@ class Marty::ScriptGrid < Marty::Grid
 
     tb = model.table_name
     model.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
-                     ts, ts).scoping do
+                ts, ts).scoping do
       super
     end
   end

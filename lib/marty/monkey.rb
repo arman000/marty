@@ -255,7 +255,7 @@ end
 ::Delorean::Ruby.whitelist.add_method :lookup_grid_distinct_entry do |method|
   method.called_on OpenStruct, with: [[Date, Time,
                                        ActiveSupport::TimeWithZone, String],
-                                        Hash]
+                                      Hash]
 end
 
 

@@ -29,7 +29,7 @@ class Marty::DataChange
         profile["deleted"] = (group_id == o.id &&
                               o.obsoleted_dt != Float::INFINITY &&
                               (t1 == 'infinity' || o.obsoleted_dt < t1)
-                              )
+                             )
         if i == 0
           profile["status"] = o.created_dt < t0 ? "old" : "new"
           prev = nil

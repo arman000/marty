@@ -19,7 +19,7 @@ class Marty::McflyGridPanel < Marty::Grid
    tb = model.table_name
 
    model.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
-                     ts, ts).scoping do
+               ts, ts).scoping do
       super
    end
   end
@@ -79,7 +79,7 @@ class Marty::McflyGridPanel < Marty::Grid
     end
   end
 
-private
+  private
   def self.mcfly_scope(sort_column)
     lambda { |r|
       ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)

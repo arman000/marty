@@ -154,7 +154,7 @@ EOF
                           nil,
                           nil,
                           ",",
-                          )
+                         )
       res.should == { create: 6 }
       Gemini::FannieBup.count.should == 6
     end
@@ -186,7 +186,7 @@ EOF
                           fannie_bup1,
                           'infinity',
                           'import_cleaner',
-                          )
+                         )
       res.should == { create: 6 }
 
       res = Marty::DataImporter.
@@ -194,7 +194,7 @@ EOF
                           fannie_bup1,
                           'infinity',
                           'import_cleaner',
-                          )
+                         )
       res.should == { same: 6 }
 
       res = Marty::DataImporter.
@@ -202,7 +202,7 @@ EOF
                           fannie_bup3,
                           'infinity',
                           'import_cleaner',
-                          )
+                         )
       res.should == { update: 1, clean: 5 }
 
       res = Marty::DataImporter.
@@ -210,7 +210,7 @@ EOF
                           fannie_bup2,
                           'infinity',
                           'import_cleaner',
-                          )
+                         )
       res.should == { create: 6, blank: 2, clean: 1 }
     end
 
@@ -222,7 +222,7 @@ EOF
         do_import_summary(Gemini::FannieBup,
                           fannie_bup1,
                           'infinity',
-                          )
+                         )
       res.should == { create: 6 }
 
       lambda {
@@ -232,7 +232,7 @@ EOF
                           'infinity',
                           nil,
                           'import_validation',
-                          )
+                         )
       }.should raise_error(Marty::DataImporter::Error)
 
       res = Marty::DataImporter.
@@ -241,7 +241,7 @@ EOF
                           'infinity',
                           nil,
                           'import_validation',
-                          )
+                         )
 
       res.should == { create: 6 }
 
@@ -252,7 +252,7 @@ EOF
                           'infinity',
                           'import_cleaner',
                           'import_validation',
-                          )
+                         )
       }.should raise_error(Marty::DataImporter::Error)
 
       res = Marty::DataImporter.
@@ -261,7 +261,7 @@ EOF
                           'infinity',
                           'import_cleaner',
                           'import_validation',
-                          )
+                         )
       res.should == { update: 1, clean: 11 }
     end
 
@@ -301,7 +301,7 @@ EOF
                           'infinity',
                           nil,
                           'import_validation',
-                          )
+                         )
       }.should_not raise_error
 
       # Load data into prior mm/yy - should fail since import_validation
@@ -313,7 +313,7 @@ EOF
                           'infinity',
                           nil,
                           'import_validation',
-                          )
+                         )
       }.should raise_error(Marty::DataImporter::Error)
 
       # Load data into prior mm/yy - should not fail since
@@ -325,7 +325,7 @@ EOF
                           'infinity',
                           nil,
                           'import_validation_allow_prior_month',
-                          )
+                         )
       }.should_not raise_error
 
       # Load data into mm/yy more than 1 month prior - should fail even
@@ -337,7 +337,7 @@ EOF
                           'infinity',
                           nil,
                           'import_validation_allow_prior_month',
-                          )
+                         )
       }.should raise_error(Marty::DataImporter::Error)
     end
 
@@ -432,7 +432,7 @@ EOF
                               "pt_name"    => p.name,
                               "class_name" => "Gemini::FannieBup",
                             },
-                            )
+                           )
       res[0].should == fannie_bup1_export[0]
       res[1..-1].sort.should == fannie_bup1_export[1..-1].sort
     end

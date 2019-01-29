@@ -95,7 +95,7 @@ class Marty::User < Marty::Base
     mr.any? { |attr| attr.name == role }
  end
 
-private
+  private
   def verify_changes
     # If current users role is only user_manager, restrict following
     # 1 - Do not allow user to edit own record
@@ -111,7 +111,7 @@ private
           "or add additional roles to their own accounts"
       elsif self.id == system_id
         errors.add :base,
-        "User Managers cannot edit the application system account"
+                   "User Managers cannot edit the application system account"
       end
     end
 
@@ -135,7 +135,7 @@ private
     # Default to disallowing any deletions for now
 
     errors.add :base,
-    "Users cannot be deleted - set 'Active' to false to disable the account"
+               "Users cannot be deleted - set 'Active' to false to disable the account"
 
     throw :abort unless errors.blank?
   end

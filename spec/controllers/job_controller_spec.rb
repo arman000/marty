@@ -190,7 +190,7 @@ describe Marty::JobController, slow: true do
     engine.background_eval("Z",
                            {},
                            ["result", "format", "title"],
-                           )
+                          )
     sleep 5
 
     promise = Marty::Promise.find_by_title(NAME_B)

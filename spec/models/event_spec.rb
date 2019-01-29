@@ -202,26 +202,26 @@ describe Marty::Event do
   it "raises on error" do
     expect do
       Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
-                                      "the comment")
+                                "the comment")
     end    .not_to raise_error
 
     expect do
       Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
-                                      "the comment")
+                                "the comment")
     end    .
       to raise_error(%r!AVM is already running for testcl/1234!)
     expect do
       Marty::Event.create_event('testcl', 2345, 'AVM', Time.zone.now, 600,
-                                      "the comment")
+                                "the comment")
     end    .not_to raise_error
     expect do
       Marty::Event.finish_event('testcl', 1234, 'AVM', false,
-                                      "new comment")
+                                "new comment")
     end    .
       not_to raise_error
     expect do
       Marty::Event.finish_event('testcl', 1234, 'AVM', false,
-                                      "new comment")
+                                "new comment")
     end    .
       to raise_error(%r!event testcl/1234/AVM not found!)
     expect { Marty::Event.finish_event('testcl', 2345, 'AVM', false, 'foobar') }.
@@ -232,7 +232,7 @@ describe Marty::Event do
       to raise_error(/error must be true or false/)
     expect do
       Marty::Event.create_event('testcl', 1234, 'AMV', Time.zone.now, 600,
-                                      "the comment")
+                                "the comment")
     end    .
       to raise_error(%r!PG::.*invalid input value for enum.*"AMV"!)
     Marty::Event.clear_cache

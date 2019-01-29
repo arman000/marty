@@ -115,10 +115,10 @@ module Marty::Migrations
 
     remove_index(klass.table_name.to_sym,
                  name: unique_index_name(klass)
-                 ) if index_exists?(klass.table_name.to_sym,
-                                    attrs,
-                                    name: unique_index_name(klass),
-                                    unique: true)
+                ) if index_exists?(klass.table_name.to_sym,
+                                   attrs,
+                                   name: unique_index_name(klass),
+                                   unique: true)
   end
 
   def self.write_view(target_dir, target_view, klass, jsons, excludes, extras)

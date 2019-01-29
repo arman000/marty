@@ -192,7 +192,7 @@ EOF
       y = Benchmark.measure do
           10000.times do
                             Gemini::FannieBup.ca_func(ts,
-                                                     1, 2)
+                                                      1, 2)
           end
       end
       # x time should be 30x or more than y time

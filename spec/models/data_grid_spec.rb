@@ -187,7 +187,7 @@ EOS
     def lookup_grid_helper(pt, gridname, params, follow = false, distinct = true)
       dgh = Marty::DataGrid.lookup_h(pt, gridname)
       res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh, nil, follow,
-                                                       false, distinct)
+                                                         false, distinct)
       [res["result"], res["name"]]
     end
 
@@ -495,17 +495,17 @@ EOS
 
         expect do
           lookup_grid_helper('infinity',
-                               "G9",
-                               { "ltv" => 81 },
-                               )
+                             "G9",
+                             { "ltv" => 81 },
+                            )
         end        .to raise_error(/matches > 1/)
 
         err = /Data Grid lookup failed/
         expect do
           lookup_grid_helper('infinity',
-                                 "G9",
-                                 { "state" => "CA", "ltv" => nil },
-                                 false, false)
+                             "G9",
+                             { "state" => "CA", "ltv" => nil },
+                             false, false)
         end        .to raise_error(err)
 
         res = lookup_grid_helper('infinity',
@@ -589,9 +589,9 @@ EOS
         expect(g1_res).to eq [11, "G1"]
 
         res = lookup_grid_helper('infinity',
-                                       "G8",
-                                       h, true
-                                      )
+                                 "G8",
+                                 h, true
+                               )
         expect(g1_res).to eq res
       end
 
@@ -691,7 +691,7 @@ EOS
                                                            { "ltv" => 10,
                                                              "state" => "RI" },
                                                            dgh, nil, true,
-                                            true)
+                                                           true)
         expect(res["data"]).to eq (expected_data)
         expect(res["metadata"]).to eq (expected_metadata)
       end
@@ -707,7 +707,7 @@ EOS
                                                            { "ltv" => 10,
                                                              "state" => "RI" },
                                                            dgh, nil, false,
-                                            true)
+                                                           true)
         expect(res["data"]).to eq (expected_data)
         expect(res["metadata"]).to eq (expected_metadata)
       end
@@ -763,16 +763,16 @@ EOS
         dgch = dgc.attributes.
                slice("id", "group_id", "created_dt",  "metadata", "data_type")
         res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2014',
-                                             { "property_state" => "CA" }, dgch)
+                                                           { "property_state" => "CA" }, dgch)
         expect(res["result"]).to eq(70)
 
         res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2015',
-                                             { "property_state" => "CA" }, dgch)
+                                                           { "property_state" => "CA" }, dgch)
 
         expect(res["result"]).to eq(333)
 
         res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2016',
-                                             { "property_state" => "CA" }, dgch)
+                                                           { "property_state" => "CA" }, dgch)
 
         expect(res["result"]).to eq(444)
       end

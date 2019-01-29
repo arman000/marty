@@ -84,7 +84,7 @@ class Marty::ReportForm < Marty::Form
     engine.background_eval(node,
                            d_params,
                            ["result", "title", "format"],
-                           )
+                          )
 
     client.netzke_notify "Report can be accessed from the Jobs Dashboard ..."
   end
@@ -150,9 +150,9 @@ class Marty::ReportForm < Marty::Form
 
       items, title, format = engine.
         evaluate(root_sess[:selected_node],
-                       ["form", "title", "format"],
-                       {},
-                       )
+                 ["form", "title", "format"],
+                 {},
+                )
 
       raise "bad form items" unless items.is_a?(Array)
       raise "bad format" unless

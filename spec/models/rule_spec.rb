@@ -8,7 +8,7 @@ module Marty::RuleSpec
       marty_whodunnit
       Marty::Script.load_scripts
       @ruleopts_myrule = ['simple_result', 'computed_value', 'final_value',
-                        'grid_sum', 'c1', 'sr2']
+                          'grid_sum', 'c1', 'sr2']
       @ruleopts_xyz = ['bvlength', 'bv']
     end
     after(:all) do
@@ -108,13 +108,13 @@ module Marty::RuleSpec
           [r.name, r.simple_guards["g_has_default"]]
         end
         expect(vals.sort).to eq([["Rule1", "different"],
-                            ["Rule2", "string default"],
-                            ["Rule2a", "string default"],
-                            ["Rule2b", "string default"],
-                            ["Rule2c", "string default"],
-                            ["Rule3", "string default"],
-                            ["Rule4", "string default"],
-                            ["Rule5", "foo"]].sort)
+                                 ["Rule2", "string default"],
+                                 ["Rule2a", "string default"],
+                                 ["Rule2b", "string default"],
+                                 ["Rule2c", "string default"],
+                                 ["Rule3", "string default"],
+                                 ["Rule4", "string default"],
+                                 ["Rule5", "foo"]].sort)
       end
     end
     context "validation (xyz type)" do
@@ -127,7 +127,7 @@ module Marty::RuleSpec
                                computed_guards: @computed_guards || {},
                                grids: @grids || {},
                                results: @results || {}
-                               )
+                                   )
         r.reload
       end
       it "detects script errors" do
@@ -176,7 +176,7 @@ module Marty::RuleSpec
                                             {})
         expect(lookup.to_a.count).to eq(4)
         expect(lookup.map { |l| l.name }.to_set).to eq(Set["Rule2", "Rule2a",
-                                                       "Rule2b", "Rule2c"])
+                                                           "Rule2b", "Rule2c"])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'ComplexRule',
                                             'other_flag' => false },
@@ -235,7 +235,7 @@ module Marty::RuleSpec
                                             {})
         expect(lookup.to_a.count).to eq(6)
         expect(lookup.pluck(:name).to_set).to eq(Set["Rule1", "Rule2", "Rule2a",
-                                                   "Rule2b", "Rule2c", "Rule3"])
+                                                     "Rule2b", "Rule2c", "Rule3"])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_dt' => "2017-4-1 16:00:00" },
                                             {})
@@ -257,13 +257,13 @@ module Marty::RuleSpec
     context "rule compute" do
       let(:complex) do
         Gemini::MyRule.get_matches('infinity',
-                                            { 'rule_type' => 'ComplexRule' },
-                                            { 'g_string' => 'def' }).first
+                                   { 'rule_type' => 'ComplexRule' },
+                                   { 'g_string' => 'def' }).first
       end
       let(:xyz) do
         Gemini::XyzRule.get_matches('infinity',
-                                              { 'rule_type' => 'ZRule' },
-                                              { 'g_integer' => 2 }).first
+                                    { 'rule_type' => 'ZRule' },
+                                    { 'g_integer' => 2 }).first
       end
       let(:simple) do
         Gemini::MyRule.get_matches('infinity',
@@ -309,7 +309,7 @@ module Marty::RuleSpec
           to receive(:evaluate).and_raise('hi mom')
         expect do
           simple.compute(@ruleopts_myrule,
-                              { "pt" => Time.now })
+                         { "pt" => Time.now })
         end        .to raise_error(/hi mom/)
         # simple2a should return results without evaluation (they are all fixed)
         expect(simple2a.compute(@ruleopts_myrule, { "pt" => Time.zone.now })).to eq(
@@ -347,10 +347,10 @@ module Marty::RuleSpec
                          "DataGridX grid not found")
         expect do
           gridcomputedname.compute(@ruleopts_myrule,
-                                        { "pt" => Time.zone.now,
-                                         'param1' => 66,
-                                         'param2' => 'abc',
-                                         'paramb' => false })
+                                   { "pt" => Time.zone.now,
+                                    'param1' => 66,
+                                    'param2' => 'abc',
+                                    'paramb' => false })
         end        .to raise_error(exp)
       end
       it "grids embedded in result work properly and receive prior attrs" do
@@ -377,8 +377,8 @@ module Marty::RuleSpec
           exp = 'no implicit conversion of Integer into String'
           expect(e.message).to include(exp)
           expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
-                 /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
-                 /DELOREAN__XyzRule_\d+_1483228800.0:27:in .bv__D'/]
+                    /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
+                    /DELOREAN__XyzRule_\d+_1483228800.0:27:in .bv__D'/]
           expres.each_with_index do |expre, i|
             expect(e.backtrace[i]).to match(expre)
           end
@@ -391,7 +391,7 @@ module Marty::RuleSpec
           exp = 'divided by 0'
           expect(e.message).to include(exp)
           expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:5:in ./'),
-                 /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]
+                    /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]
           expres.each_with_index do |expre, i|
             expect(e.backtrace[i]).to match(expre)
           end
@@ -400,8 +400,8 @@ module Marty::RuleSpec
         end
         log_ents = Marty::Log.all
         expect(log_ents.map { |le| le.message }).to eq(['Rule Log ZRule6',
-                                                   'Rule Log ZRule7',
-                                                   'Rule Log ZRule8'])
+                                                        'Rule Log ZRule7',
+                                                        'Rule Log ZRule8'])
         ptjson = pt.as_json
         exp = { "input" => { "p1" => 12, "p2" => 3,
                          "pt" => ptjson,
@@ -430,8 +430,8 @@ module Marty::RuleSpec
                "err_message" => "no implicit conversion of Integer into String" }
         expect(log_ents[1].details.except('err_stack')).to eq(exp)
         expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
-               /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
-               /DELOREAN__XyzRule_\d+_1483228800.0:27:in .bv__D'/]
+                  /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
+                  /DELOREAN__XyzRule_\d+_1483228800.0:27:in .bv__D'/]
         expres.each_with_index do |expre, i|
           expect(log_ents[1].details['err_stack'][i]).to match(expre)
         end
@@ -446,7 +446,7 @@ module Marty::RuleSpec
                "err_message" => "divided by 0" }
         expect(log_ents[2].details.except('err_stack')).to eq(exp)
         expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:5:in ./'),
-               /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]
+                  /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]
         expres.each_with_index do |expre, i|
           expect(log_ents[2].details['err_stack'][i]).to match(expre)
         end

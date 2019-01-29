@@ -15,7 +15,7 @@ class Marty::ScriptTester < Marty::Form
                   min_height:   125,
                 },
                 {},
-                ),
+               ),
        fieldset(I18n.t("script_tester.parameters"),
                 {
                   name:         "params",
@@ -25,7 +25,7 @@ class Marty::ScriptTester < Marty::Form
                   min_height:   125,
                 },
                 {},
-                ),
+               ),
        :result,
       ]
   end

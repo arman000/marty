@@ -40,7 +40,7 @@ class Marty::ReportSelect < Marty::Form
                   width:        200,
                 },
                 {},
-                ),
+               ),
       ]
     c.bbar = nil
   end

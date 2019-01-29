@@ -27,6 +27,6 @@ class Marty::JobController < ActionController::Base
               type:        type,
               filename:    filename,
               disposition: disposition,
-              )
+             )
   end
 end

@@ -20,7 +20,7 @@ module Marty
                                col_sep             = "\t",
                                allow_dups          = false,
                                preprocess_function = nil
-                               )
+                              )
 
       recs = self.do_import(klass,
                             data,
@@ -30,7 +30,7 @@ module Marty
                             col_sep,
                             allow_dups,
                             preprocess_function,
-                            )
+                           )
 
       recs.each_with_object(Hash.new(0)) do |(op, id), h|
         h[op] += 1
@@ -50,7 +50,7 @@ module Marty
                        col_sep             = "\t",
                        allow_dups          = false,
                        preprocess_function = nil
-                       )
+                      )
 
       parsed = data.is_a?(Array) ? data :
         CSV.new(data, headers: true, col_sep: col_sep)

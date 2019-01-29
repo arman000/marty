@@ -365,7 +365,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   def export
-    # return null string when called from Netzke on add_in_form
+     # return null string when called from Netzke on add_in_form
      return "" if metadata.nil? && data.nil?
 
     meta_rows, h_key_rows, data_rows = export_array
@@ -373,7 +373,7 @@ class Marty::DataGrid < Marty::Base
     Marty::DataExporter.
       to_csv(meta_rows + [[]] + h_key_rows + data_rows,
              "col_sep" => "\t",
-             ).
+            ).
       gsub(/\"\"/, '') # remove "" to beautify output
   end
 

@@ -43,7 +43,7 @@ class Delorean::BaseModule::NodeCall
       create(title:     title,
              user_id:   params[:_user_id],
              parent_id: params[:_parent_id],
-             )
+            )
     params[:_promise_id] = promise.id
     begin
       job = Delayed::Job.enqueue Marty::PromiseJob.
@@ -103,7 +103,7 @@ class Marty::PromiseJob < Struct.new(:promise,
                                      :params,
                                      :attrs,
                                      :hook,
-                                     )
+                                    )
   # def log(msg)
   #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
   # end

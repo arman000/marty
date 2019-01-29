@@ -6,42 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 7
-# Cop supports --auto-correct.
-# Configuration parameters: TreatCommentsAsGroupSeparators, Include.
-# Include: **/*.gemfile, **/Gemfile, **/gems.rb
-Bundler/OrderedGems:
-  Exclude:
-    - 'Gemfile'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: TreatCommentsAsGroupSeparators, Include.
-# Include: **/*.gemspec
-Gemspec/OrderedDependencies:
-  Exclude:
-    - 'marty.gemspec'
-
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: outdent, indent
-Layout/AccessModifierIndentation:
-  Exclude:
-    - 'app/components/marty/mcfly_grid_panel.rb'
-    - 'app/models/marty/token.rb'
-    - 'app/models/marty/user.rb'
-    - 'spec/dummy/app/models/gemini/extras/settlement_import.rb'
-
-# Offense count: 18
-# Cop supports --auto-correct.
-Layout/AlignArray:
-  Exclude:
-    - 'app/components/marty/user_view.rb'
-    - 'db/migrate/201_create_marty_events.rb'
-    - 'lib/marty/monkey.rb'
-    - 'spec/models/rule_spec.rb'
-
 # Offense count: 526
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedHashRocketStyle, EnforcedColonStyle, EnforcedLastArgumentHashStyle.
@@ -49,13 +13,6 @@ Layout/AlignArray:
 # SupportedColonStyles: key, separator, table
 # SupportedLastArgumentHashStyles: always_inspect, always_ignore, ignore_implicit, ignore_explicit
 Layout/AlignHash:
-  Enabled: false
-
-# Offense count: 39
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: with_first_parameter, with_fixed_indentation
-Layout/AlignParameters:
   Enabled: false
 
 # Offense count: 2
@@ -73,44 +30,6 @@ Layout/ClosingHeredocIndentation:
     - 'spec/features/rule_spec.rb'
     - 'spec/support/components/netzke_combobox.rb'
     - 'spec/support/components/netzke_grid.rb'
-
-# Offense count: 38
-# Cop supports --auto-correct.
-Layout/ClosingParenthesisIndentation:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/components/marty/report_form.rb'
-    - 'app/components/marty/report_select.rb'
-    - 'app/components/marty/script_tester.rb'
-    - 'app/controllers/marty/job_controller.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'lib/marty/data_change.rb'
-    - 'lib/marty/data_importer.rb'
-    - 'lib/marty/migrations.rb'
-    - 'lib/marty/promise_job.rb'
-    - 'spec/controllers/job_controller_spec.rb'
-    - 'spec/dummy/app/components/gemini/my_rule_view.rb'
-    - 'spec/lib/data_importer_spec.rb'
-    - 'spec/models/data_grid_spec.rb'
-    - 'spec/models/rule_spec.rb'
-
-# Offense count: 7
-# Cop supports --auto-correct.
-Layout/CommentIndentation:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/token.rb'
-    - 'spec/dummy/db/schema.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect, Severity.
-# SupportedStylesAlignWith: start_of_line, def
-Layout/DefEndAlignment:
-  Exclude:
-    - 'spec/dummy/db/migrate/20171221095312_create_gemini_my_rules.rb'
-    - 'spec/dummy/db/migrate/20171221095359_create_gemini_xyz_rules.rb'
 
 # Offense count: 218
 # Cop supports --auto-correct.

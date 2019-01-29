@@ -12,7 +12,7 @@ class Marty::ApplicationController < ActionController::Base
   end
 
   before_action :session_expiration,
-  :user_setup
+                :user_setup
 
   def get_conf
     Rails.configuration.marty
