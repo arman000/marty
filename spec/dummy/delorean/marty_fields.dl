@@ -32,6 +32,15 @@ ClassField: ClassListField
 
 ######################################################################
 
+
+CheckboxField:
+    xtype           = ":checkboxfield"
+    checked         = false
+    input_value     = true
+    unchecked_value = false
+
+######################################################################
+
 JsonField:
     xtype       = ":textareafield"
     name        = "json_field"

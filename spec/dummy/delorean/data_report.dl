@@ -1,4 +1,4 @@
-import Fields
+import MartyFields
 import Styles
 
 ######################################################################
@@ -23,8 +23,8 @@ TableReport:
     row_count   = result_raw.length
     result      = Gemini::Helper.to_csv(result_raw)
     form        = [
-        Fields::PostingField,
-        Fields::ClassField,
+        MartyFields::PostingField,
+        MartyFields::ClassField,
         ]
     format      = "csv"
 
@@ -61,7 +61,7 @@ EnumReport:
 
 #####################################################################
 
-DataImportParam: Fields::CsvField
+DataImportParam: MartyFields::CsvField
     field_label = "Import Text"
     name        = "data_import_field"
     height      =  600
