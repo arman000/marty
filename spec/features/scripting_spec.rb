@@ -41,23 +41,23 @@ feature 'under Applications menu, Scripting workflows', js: true do
     lastid = nil
 
     with_user("dev2") do
-      Marty::Script
-        .load_script_bodies({
-                              "A1" => "#1\n",
+      Marty::Script.
+        load_script_bodies({
+                             "A1" => "#1\n",
                              "A2" => "#2\n",
                              "A3" => "#3\n",
                              "A4" => "#4\n",
                              "A5" => "#5\n",
-                            }, Date.today)
+                           }, Date.today)
 
       # create 3 additional tags and modify A5 in the process
       (1..3).each do |i|
         body = Marty::Script.find_by(name: "A5").body
 
-        Marty::Script
-          .load_script_bodies({
-                                "A5" => body + "##{i}\n"
-                              }, Date.today + i.minute)
+        Marty::Script.
+          load_script_bodies({
+                               "A5" => body + "##{i}\n"
+                             }, Date.today + i.minute)
       end
     end
   end

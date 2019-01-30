@@ -8,8 +8,8 @@ module Marty
         c = Posting.count
         Posting.do_create("BASE", dt, 'a comment')
         Posting.count.should == c + 1
-        expect { s = Posting.do_create("BASE", dt, 'a comment') }
-          .to raise_error(ActiveRecord::RecordInvalid)
+        expect { s = Posting.do_create("BASE", dt, 'a comment') }.
+          to raise_error(ActiveRecord::RecordInvalid)
       end
 
       it "creates name based on PDT" do
@@ -43,13 +43,13 @@ module Marty
       describe ".get_latest_by_type" do
         context "when invalid parameters are supplied" do
           it "raises 'posting type list missing' error" do
-            expect { Posting.get_latest_by_type(10, nil) }
-              .to raise_error "missing posting types list"
+            expect { Posting.get_latest_by_type(10, nil) }.
+              to raise_error "missing posting types list"
           end
 
           it "raises 'bad posting types list' error" do
-            expect { Posting.get_latest_by_type(10, 'BASE') }
-              .to raise_error "bad posting types list"
+            expect { Posting.get_latest_by_type(10, 'BASE') }.
+              to raise_error "bad posting types list"
           end
         end
 

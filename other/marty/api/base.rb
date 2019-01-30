@@ -197,8 +197,8 @@ class Marty::Api::Base
 
   class SchemaValidator
     def self.get_schema params
-        Marty::ScriptSet.new(params[:tag]).get_engine(params[:script] + 'Schemas')
-          .evaluate(params[:node], params[:attr], {})
+        Marty::ScriptSet.new(params[:tag]).get_engine(params[:script] + 'Schemas').
+          evaluate(params[:node], params[:attr], {})
     rescue => e
         msg = e.message == 'No such script' ? 'Schema not defined' :
                 'Problem with schema: ' + e.message
@@ -218,8 +218,8 @@ class Marty::Api::Base
     end
 
     def self.massage_message(msg)
-      m = %r|'#/([^']+)' of type ([^ ]+) matched the disallowed schema|
-            .match(msg)
+      m = %r|'#/([^']+)' of type ([^ ]+) matched the disallowed schema|.
+            match(msg)
 
       return msg unless m
 

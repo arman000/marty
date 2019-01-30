@@ -22,10 +22,10 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     c.model = self.class.klass
     c.title = I18n.t('rule')
     c.attributes = self.class.base_fields +
-                   klass.guard_info
-                     .sort_by { |_, h| h[:order] || 0 }
-                     .reject { |_, h| h[:hidden] }
-                     .map { |name, _| name.to_sym } + self.class.computed_fields
+                   klass.guard_info.
+                     sort_by { |_, h| h[:order] || 0 }.
+                     reject { |_, h| h[:hidden] }.
+                     map { |name, _| name.to_sym } + self.class.computed_fields
     c.store_config.merge!(sorters: [{ property: :name, direction: 'ASC' }])
     c.editing      = :in_form
     c.paging       = :pagination
@@ -169,8 +169,8 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     editor_config = {
       trigger_action: :all,
       xtype:          :combo,
-      store:          Marty::DataGrid.where(obsoleted_dt: 'infinity')
-        .pluck(:name) + ['---'],
+      store:          Marty::DataGrid.where(obsoleted_dt: 'infinity').
+        pluck(:name) + ['---'],
       forceSelection: true,
     }
     {

@@ -263,8 +263,8 @@ SQL
     }
     @poll_secs ||= Marty::Config['MARTY_EVENT_POLL_SECS'] || 0
     time_now_i = Time.zone.now.to_i
-    cutoff = Time.zone.at(@all_finished[:timestamp])
-             .strftime('%Y-%m-%d %H:%M:%S.%6N')
+    cutoff = Time.zone.at(@all_finished[:timestamp]).
+             strftime('%Y-%m-%d %H:%M:%S.%6N')
 
     upd_count = update_start_and_end
     if upd_count > 0 ||

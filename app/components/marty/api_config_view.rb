@@ -52,8 +52,8 @@ class Marty::ApiConfigView < Marty::Grid
     editor_config = {
       trigger_action: :all,
       xtype:          :combo,
-      store:          Marty::Script.where(obsoleted_dt: 'infinity')
-        .order(:name).pluck(:name),
+      store:          Marty::Script.where(obsoleted_dt: 'infinity').
+        order(:name).pluck(:name),
       forceSelection: true,
     }
     c.merge!(

@@ -104,13 +104,13 @@ describe DataImporter do
   it "should be able to import into classes with id as uniqueness" do
     pending("Fix data importer to handle at least group_id as mcfly_uniqueness")
 
-    res = Marty::DataImporter
-          .do_import_summary(Gemini::Simple,
-                             [{ "some_name" => "hello" }])
+    res = Marty::DataImporter.
+          do_import_summary(Gemini::Simple,
+                            [{ "some_name" => "hello" }])
     res.should == { create: 1 }
-    res = Marty::DataImporter
-          .do_import_summary(Gemini::Simple,
-                             [{ "group_id" => Gemini::Simple.first.group_id, "some_name" => "hello" }])
+    res = Marty::DataImporter.
+          do_import_summary(Gemini::Simple,
+                            [{ "group_id" => Gemini::Simple.first.group_id, "some_name" => "hello" }])
     res.should == { same: 1 }
   end
 
@@ -146,23 +146,23 @@ describe DataImporter do
 
   it "should be able to use comma separated files" do
     res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1.gsub("\t", ","),
-                         'infinity',
-                         nil,
-                         nil,
-                         ",",
-                        )
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1.gsub("\t", ","),
+                        'infinity',
+                        nil,
+                        nil,
+                        ",",
+                       )
     res.should == { create: 6 }
     Gemini::FannieBup.count.should == 6
   end
 
   it "should be all-or-nothing" do
     lambda {
-      Marty::DataImporter
-      .do_import_summary(Gemini::BudCategory,
-                         bud_cats + bud_cats.sub(/name\n/, ""))
+      Marty::DataImporter.
+      do_import_summary(Gemini::BudCategory,
+                        bud_cats + bud_cats.sub(/name\n/, ""))
     }.should raise_error(Marty::DataImporter::Error)
     Gemini::BudCategory.count.should == 0
   end
@@ -180,36 +180,36 @@ describe DataImporter do
 
   it "should be able to import with cleaner" do
     res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1,
-                         'infinity',
-                         'import_cleaner',
-                        )
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1,
+                        'infinity',
+                        'import_cleaner',
+                       )
     res.should == { create: 6 }
 
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1,
-                         'infinity',
-                         'import_cleaner',
-                        )
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1,
+                        'infinity',
+                        'import_cleaner',
+                       )
     res.should == { same: 6 }
 
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup3,
-                         'infinity',
-                         'import_cleaner',
-                        )
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup3,
+                        'infinity',
+                        'import_cleaner',
+                       )
     res.should == { update: 1, clean: 5 }
 
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup2,
-                         'infinity',
-                         'import_cleaner',
-                        )
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup2,
+                        'infinity',
+                        'import_cleaner',
+                       )
     res.should == { create: 6, blank: 2, clean: 1 }
   end
 
@@ -217,65 +217,65 @@ describe DataImporter do
     Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
 
     # first load some old data
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1,
-                         'infinity',
-                        )
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1,
+                        'infinity',
+                       )
     res.should == { create: 6 }
 
     lambda {
-      Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1.sub("2012", "2100"), # change 1st row
-                         'infinity',
-                         nil,
-                         'import_validation',
-                        )
+      Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1.sub("2012", "2100"), # change 1st row
+                        'infinity',
+                        nil,
+                        'import_validation',
+                       )
     }.should raise_error(Marty::DataImporter::Error)
 
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1.gsub("2012", "2100"),
-                         'infinity',
-                         nil,
-                         'import_validation',
-                        )
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1.gsub("2012", "2100"),
+                        'infinity',
+                        nil,
+                        'import_validation',
+                       )
 
     res.should == { create: 6 }
 
     lambda {
-      Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup3,
-                         'infinity',
-                         'import_cleaner',
-                         'import_validation',
-                        )
+      Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup3,
+                        'infinity',
+                        'import_cleaner',
+                        'import_validation',
+                       )
     }.should raise_error(Marty::DataImporter::Error)
 
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup3.gsub("2012", "2100"),
-                         'infinity',
-                         'import_cleaner',
-                         'import_validation',
-                        )
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup3.gsub("2012", "2100"),
+                        'infinity',
+                        'import_cleaner',
+                        'import_validation',
+                       )
     res.should == { update: 1, clean: 11 }
   end
 
   it "should be able to import with preprocess" do
     res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup7,
-                         'infinity',
-                         'import_cleaner',
-                         nil,
-                         "\t",
-                         false,
-                         'import_preprocess',
-                        )
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup7,
+                        'infinity',
+                        'import_cleaner',
+                        nil,
+                        "\t",
+                        false,
+                        'import_preprocess',
+                       )
     res.should == { create: 6 }
   end
 
@@ -283,8 +283,8 @@ describe DataImporter do
     Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
 
     # first load some data without any validation
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup, fannie_bup1, 'infinity')
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup, fannie_bup1, 'infinity')
     res.should == { create: 6 }
 
     now = DateTime.now
@@ -294,56 +294,56 @@ describe DataImporter do
 
     # Load data into current mm/yy
     lambda {
-      Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1.gsub("12\t2012", "#{cm}\t#{cy}"),
-                         'infinity',
-                         nil,
-                         'import_validation',
-                        )
+      Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1.gsub("12\t2012", "#{cm}\t#{cy}"),
+                        'infinity',
+                        nil,
+                        'import_validation',
+                       )
     }.should_not raise_error
 
     # Load data into prior mm/yy - should fail since import_validation
     # only allows current or future months
     lambda {
-      Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1.gsub("12\t2012", "#{pm1}\t#{py1}"),
-                         'infinity',
-                         nil,
-                         'import_validation',
-                        )
+      Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1.gsub("12\t2012", "#{pm1}\t#{py1}"),
+                        'infinity',
+                        nil,
+                        'import_validation',
+                       )
     }.should raise_error(Marty::DataImporter::Error)
 
     # Load data into prior mm/yy - should not fail since
     # import_validation_allow_prior_month is specified
     lambda {
-      Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1.gsub("12\t2012", "#{pm1}\t#{py1}"),
-                         'infinity',
-                         nil,
-                         'import_validation_allow_prior_month',
-                        )
+      Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1.gsub("12\t2012", "#{pm1}\t#{py1}"),
+                        'infinity',
+                        nil,
+                        'import_validation_allow_prior_month',
+                       )
     }.should_not raise_error
 
     # Load data into mm/yy more than 1 month prior - should fail even
     # if import_validation_allow_prior_month is specified
     lambda {
-      Marty::DataImporter
-      .do_import_summary(Gemini::FannieBup,
-                         fannie_bup1.gsub("12\t2012", "#{pm2}\t#{py2}"),
-                         'infinity',
-                         nil,
-                         'import_validation_allow_prior_month',
-                        )
+      Marty::DataImporter.
+      do_import_summary(Gemini::FannieBup,
+                        fannie_bup1.gsub("12\t2012", "#{pm2}\t#{py2}"),
+                        'infinity',
+                        nil,
+                        'import_validation_allow_prior_month',
+                       )
     }.should raise_error(Marty::DataImporter::Error)
   end
 
   it "should properly handle validation errors" do
     res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
-    res = Marty::DataImporter
-      .do_import_summary(Gemini::LoanProgram, loan_programs)
+    res = Marty::DataImporter.
+      do_import_summary(Gemini::LoanProgram, loan_programs)
     res.should == { create: 4 }
 
     begin
@@ -406,8 +406,8 @@ describe DataImporter do
   it "should handle bad data" do
     res = Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
     begin
-      res = Marty::DataImporter
-        .do_import_summary(Gemini::FannieBup, fannie_bup6)
+      res = Marty::DataImporter.
+        do_import_summary(Gemini::FannieBup, fannie_bup6)
     rescue Marty::DataImporter::Error => exc
       exc.lines.should == [1]
       exc.message.should =~ /bad float/

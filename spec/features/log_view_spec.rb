@@ -71,8 +71,8 @@ feature 'logger view', js: true, capybara: true do
        expect(cnt).to eq(exp_count)
        types = logview.get_col_vals('message_type', cnt, 0)
        messages = logview.get_col_vals('message', cnt, 0)
-       details = logview.get_col_vals('details', cnt, 0)
-                   .map { |d| CGI.unescapeHTML(d) }
+       details = logview.get_col_vals('details', cnt, 0).
+                   map { |d| CGI.unescapeHTML(d) }
        ts = logview.get_col_vals('timestamp_custom', cnt, 0)
        expect(ts).to eq(@ts.slice(0, exp_count))
        expect(types).to eq(exp_types.slice(0, exp_count))

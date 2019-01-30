@@ -37,8 +37,8 @@ class Marty::ScriptTester < Marty::Form
   def new_engine
     return unless root_sess[:selected_script_name]
 
-    Marty::ScriptSet.new(root_sess[:selected_tag_id])
-      .get_engine(root_sess[:selected_script_name])
+    Marty::ScriptSet.new(root_sess[:selected_tag_id]).
+      get_engine(root_sess[:selected_script_name])
   end
 
   endpoint :submit do |params|

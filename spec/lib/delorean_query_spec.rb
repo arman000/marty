@@ -101,53 +101,53 @@ describe 'DeloreanQuery' do
   it "perfroms join+count" do
     res = @engine.evaluate("A", "c", {})
 
-    expect(res).to eq Gemini::FannieBup
-                        .joins("bud_category")
-                        .where("name LIKE '%30'")
-                        .count
+    expect(res).to eq Gemini::FannieBup.
+                        joins("bud_category").
+                        where("name LIKE '%30'").
+                        count
   end
 
   it "perfroms select+distinct" do
     res = @engine.evaluate("A", "s", {})
 
-    expect(res).to eq Gemini::FannieBup
-                        .joins("bud_category")
-                        .select("name")
-                        .distinct("name")
-                        .pluck("name")
+    expect(res).to eq Gemini::FannieBup.
+                        joins("bud_category").
+                        select("name").
+                        distinct("name").
+                        pluck("name")
   end
 
   it "perfroms mcfly_pt" do
     res = @engine.evaluate("A", ["m", "mm"], {})
 
     expect(res).to eq [
-      Gemini::FannieBup
-        .joins("bud_category")
-        .mcfly_pt('infinity')
-        .select("name")
-        .pluck("name"),
-      Gemini::FannieBup
-        .mcfly_pt('01-01-2003').count,
+      Gemini::FannieBup.
+        joins("bud_category").
+        mcfly_pt('infinity').
+        select("name").
+        pluck("name"),
+      Gemini::FannieBup.
+        mcfly_pt('01-01-2003').count,
     ]
   end
 
   it "perfroms order+first" do
     res = @engine.evaluate("A", "o", {})
 
-    expect(res).to eq Gemini::FannieBup
-                        .order("note_rate DESC", "buy_down ASC")
-                        .select("note_rate")
-                        .first.note_rate
+    expect(res).to eq Gemini::FannieBup.
+                        order("note_rate DESC", "buy_down ASC").
+                        select("note_rate").
+                        first.note_rate
   end
 
   it "perfroms order+find_by" do
     res = @engine.evaluate("A", "oo", {})
 
-    expect(res).to eq Gemini::FannieBup
-                        .order("note_rate", "buy_down ASC")
-                        .select("note_rate")
-                        .find_by("obsoleted_dt = 'infinity'")
-                        .note_rate
+    expect(res).to eq Gemini::FannieBup.
+                        order("note_rate", "buy_down ASC").
+                        select("note_rate").
+                        find_by("obsoleted_dt = 'infinity'").
+                        note_rate
   end
 
   it "perfroms find_by on class" do
@@ -159,12 +159,12 @@ describe 'DeloreanQuery' do
   it "perfroms group+count" do
     res = @engine.evaluate("A", "gg", {})
 
-    expect(res)
-      .to eq Gemini::FannieBup
-              .select("settlement_yy*settlement_mm AS x, count(*) AS c")
-              .group("settlement_mm", "settlement_yy")
-              .order("settlement_mm")
-              .map(&:attributes)
+    expect(res).
+      to eq Gemini::FannieBup.
+              select("settlement_yy*settlement_mm AS x, count(*) AS c").
+              group("settlement_mm", "settlement_yy").
+              order("settlement_mm").
+              map(&:attributes)
   end
 
   it "perfroms where+not" do

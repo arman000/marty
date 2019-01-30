@@ -54,8 +54,8 @@ class Marty::DeloreanRule < Marty::BaseRule
   def self.comp_res_keys(results, grids, ecl, pcfg)
     # FIXME in May 2019: remove this check (use as passed)
     defkeys = pcfg.is_a?(Hash) ? pcfg.keys : pcfg
-    results.keys.map { |k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k }
-       .select { |k| defkeys.include?(k) } + grid_keys(grids, ecl)
+    results.keys.map { |k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k }.
+       select { |k| defkeys.include?(k) } + grid_keys(grids, ecl)
   end
 
   def self.grid_keys(grids, eclass)
@@ -192,8 +192,8 @@ class Marty::DeloreanRule < Marty::BaseRule
   def self.get_matches_(pt, attrs, params)
     q = super(pt, attrs.except("rule_dt"), params)
     rule_dt = attrs["rule_dt"]
-    q = q.where("start_dt <= ?", rule_dt)
-       .where("end_dt >= ? OR end_dt IS NULL", rule_dt) if rule_dt
+    q = q.where("start_dt <= ?", rule_dt).
+       where("end_dt >= ? OR end_dt IS NULL", rule_dt) if rule_dt
     # puts q.to_sql
     q
   end

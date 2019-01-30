@@ -11,8 +11,8 @@ module Marty::Diagnostic; class Reporter < Request
     ops = op.split(/,\s*/).uniq - [unresolve_diagnostic(self)]
     reps = ops.select { |o| reports.keys.include?(o) }
 
-    self.diagnostics = ((ops - reps) + reps.map { |r| reports[r] }.flatten).uniq
-                         .map { |d| resolve_diagnostic(d) }
+    self.diagnostics = ((ops - reps) + reps.map { |r| reports[r] }.flatten).uniq.
+                         map { |d| resolve_diagnostic(d) }
 
     scope == 'local' ? generate : aggregate
   end

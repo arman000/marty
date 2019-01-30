@@ -69,8 +69,8 @@ module Marty
 
         @import.preprocess_function = "missing_func"
         expect(@import).to_not be_valid
-        expect(@import.errors[:base][0])
-          .to eq "unknown class method missing_func"
+        expect(@import.errors[:base][0]).
+          to eq "unknown class method missing_func"
       end
     end
   end

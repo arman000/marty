@@ -45,8 +45,8 @@ class Marty::ImportView < Marty::Form
   end
 
   def import data
-    Marty::DataImporter
-      .do_import_summary(@import_model, data, 'infinity', nil, nil)
+    Marty::DataImporter.
+      do_import_summary(@import_model, data, 'infinity', nil, nil)
   end
 
   def format_message k, v

@@ -17,8 +17,8 @@ class Marty::ScriptForm < Marty::Form
     # logic from basepack's form_panel.service -- need to set @record.
     @record = script = Marty::Script.find_script(script_name, tag_id)
 
-    title = [script.name, script.find_tag.try(:name)]
-      .join(" #{Marty::ScriptForm::DASH} ") if script
+    title = [script.name, script.find_tag.try(:name)].
+      join(" #{Marty::ScriptForm::DASH} ") if script
 
     # create an empty record if no script
     js_data = @record ? js_record_data : {

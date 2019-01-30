@@ -219,9 +219,9 @@ module Marty; module RSpec; module Netzke
   end
 
   def simple_escape text
-    text.gsub(/(\r\n|\n)/, "\\n")
-      .gsub(/\t/, "\\t")
-      .gsub(/"/, '\"')
+    text.gsub(/(\r\n|\n)/, "\\n").
+      gsub(/\t/, "\\t").
+      gsub(/"/, '\"')
   end
 
   def type_in(type_s, el_id)

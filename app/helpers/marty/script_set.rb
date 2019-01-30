@@ -29,8 +29,8 @@ class Marty::ScriptSet < Delorean::AbstractContainer
       # the middle of a DEV import sequence. But, DEV imports are
       # hacky/rare anyway.  So, don't bother for now.
 
-      max_dt = Marty::Script
-        .order("created_dt DESC").limit(1).pluck(:created_dt).first
+      max_dt = Marty::Script.
+        order("created_dt DESC").limit(1).pluck(:created_dt).first
 
       @@dengines_dt ||= max_dt
 

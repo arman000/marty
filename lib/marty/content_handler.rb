@@ -47,9 +47,9 @@ module Marty::ContentHandler
   private
 
   def self.sanitize_filename(filename)
-    filename.strip
-      .gsub(/[\\\/]/, '_')
-      .gsub(/[^[:print:]]/, '_')
+    filename.strip.
+      gsub(/[\\\/]/, '_').
+      gsub(/[^[:print:]]/, '_')
   end
 
   def self.uniq_filename(filename, fset)

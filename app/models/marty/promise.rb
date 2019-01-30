@@ -126,8 +126,8 @@ class Marty::Promise < Marty::Base
 
   def work_off_job(job)
     # Create a temporary worker to work off the job
-    Delayed::Job.where(id: job.id)
-      .update_all(locked_at: Delayed::Job.db_time_now, locked_by: "Temp")
+    Delayed::Job.where(id: job.id).
+      update_all(locked_at: Delayed::Job.db_time_now, locked_by: "Temp")
     w = Delayed::Worker.new
     w.run(job)
   end

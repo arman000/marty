@@ -15,8 +15,8 @@ module Marty::Diagnostic
     end
 
     def git
-      `cd #{Rails.root.to_s}; git describe --tags --always;`
-        .strip rescue "Failed accessing git"
+      `cd #{Rails.root.to_s}; git describe --tags --always;`.
+        strip rescue "Failed accessing git"
     end
 
     describe 'GET #op' do
@@ -142,8 +142,8 @@ module Marty::Diagnostic
         expect(Reporter.namespaces).to include('Test')
 
         class Test::Diagnostic::Version; end
-        expect(Reporter.resolve_diagnostic('Version').name)
-          .to eq('Test::Diagnostic::Version')
+        expect(Reporter.resolve_diagnostic('Version').name).
+          to eq('Test::Diagnostic::Version')
 
         Reporter.namespaces.shift
       end

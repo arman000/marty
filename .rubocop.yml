@@ -10,3 +10,6 @@ AllCops:
     - 'lib/tasks/marty_tasks.rake'
     - !ruby/regexp /old_and_unused\.rb$/
 
+Layout/DotPosition:
+  EnforcedStyle: 'trailing'
+

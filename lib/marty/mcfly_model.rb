@@ -138,11 +138,11 @@ module Mcfly::Model
         rel = args[lpi]
         raise "#{rel_attr} can't be nil" unless rel
 
-        args[lpi] = cat_assoc_klass
-                      .mcfly_pt(ts)
-                      .select(cat_attr_id)
-                      .find_by(rel_attr => rel)
-                      .send(cat_attr_id)
+        args[lpi] = cat_assoc_klass.
+                      mcfly_pt(ts).
+                      select(cat_attr_id).
+                      find_by(rel_attr => rel).
+                      send(cat_attr_id)
 
         q = send(pc_name, ts, *args)
         hash_if_necessary(q, priv)
