@@ -394,8 +394,7 @@ describe "lookups for infinity" do
     res = [true, false].map do |hb_indicator|
       lookup_grid_helper('infinity',
                          "Gd",
-                         { "hb_indicator" => hb_indicator,
-                         },
+                         "hb_indicator" => hb_indicator,
                         )
     end
     expect(res).to eq [[456.0, "Gd"], [123.0, "Gd"]]
@@ -404,20 +403,18 @@ describe "lookups for infinity" do
   it "should handle basic lookups" do
     res = lookup_grid_helper('infinity',
                              "G3",
-                             { "amount" => 160300,
-                              "state" => "HI",
-                             },
+                             "amount" => 160300,
+                             "state" => "HI",
                             )
     expect(res).to eq [1.655, "G3"]
 
     [3, 4].each do |units|
       res = lookup_grid_helper('infinity',
                                "G2",
-                               { "fico" => 720,
-                                "units" => units,
-                                "ltv" => 100,
-                                "cltv" => 110.1,
-                               },
+                               "fico" => 720,
+                               "units" => units,
+                               "ltv" => 100,
+                               "cltv" => 110.1,
                               )
       expect(res).to eq [5.6, "G2"]
     end
@@ -443,10 +440,9 @@ describe "lookups for infinity" do
     expect do
       lookup_grid_helper('infinity',
                          "G2",
-                         { "fico" => 720,
-                          "ltv" => 100,
-                          "cltv" => 110.1,
-                         },
+                         "fico" => 720,
+                         "ltv" => 100,
+                         "cltv" => 110.1,
                         )
     end.to raise_error(RuntimeError)
   end
@@ -454,10 +450,9 @@ describe "lookups for infinity" do
   it "should return nil when matching data grid cell is nil" do
     res = lookup_grid_helper('infinity',
                              "G1",
-                             { "fico" => 800,
-                              "state" => "MA",
-                              "ltv" => 81,
-                             },
+                             "fico" => 800,
+                             "state" => "MA",
+                             "ltv" => 81,
                             )
     expect(res).to eq [nil, "G1"]
   end
@@ -465,10 +460,9 @@ describe "lookups for infinity" do
   it "should handle string wildcards" do
     res = lookup_grid_helper('infinity',
                              "G1",
-                             { "fico" => 720,
-                              "state" => "GU",
-                              "ltv" => 80,
-                             },
+                             "fico" => 720,
+                             "state" => "GU",
+                             "ltv" => 80,
                             )
     expect(res).to eq [22, "G1"]
   end
@@ -479,13 +473,13 @@ describe "lookups for infinity" do
     expect do
       res = lookup_grid_helper('infinity',
                                "G9",
-                               { "state" => "CA", "ltv" => 81 },
+                               "state" => "CA", "ltv" => 81,
                               )
     end.to raise_error(RuntimeError)
 
     res = lookup_grid_helper('infinity',
                              "G9",
-                             { "state" => "GU", "ltv" => 81 },
+                             "state" => "GU", "ltv" => 81,
                             )
     expect(res).to eq [456, "G9"]
   end
@@ -496,7 +490,7 @@ describe "lookups for infinity" do
     expect do
       lookup_grid_helper('infinity',
                          "G9",
-                         { "ltv" => 81 },
+                         "ltv" => 81,
                         )
     end        .to raise_error(/matches > 1/)
 
@@ -519,17 +513,15 @@ describe "lookups for infinity" do
   it "should handle boolean keys" do
     res = lookup_grid_helper('infinity',
                              "G4",
-                             { "hb_indicator" => true,
-                              "cltv" => 80,
-                             },
+                             "hb_indicator" => true,
+                             "cltv" => 80,
                             )
     expect(res).to eq [-1.5, "G4"]
 
     res = lookup_grid_helper('infinity',
                              "G4",
-                             { "hb_indicator" => false,
-                              "cltv" => 80,
-                             },
+                             "hb_indicator" => false,
+                             "cltv" => 80,
                             )
     expect(res).to eq [nil, "G4"]
   end
@@ -537,7 +529,7 @@ describe "lookups for infinity" do
   it "should handle vertical-only grids" do
     res = lookup_grid_helper('infinity',
                              "G5",
-                             { "ltv" => 80 },
+                             "ltv" => 80,
                             )
     expect(res).to eq [-0.375, "G5"]
   end
@@ -545,7 +537,7 @@ describe "lookups for infinity" do
   it "should handle horiz-only grids" do
     res = lookup_grid_helper('infinity',
                              "G6",
-                             { "ltv" => 80, "conforming" => true },
+                             "ltv" => 80, "conforming" => true,
                             )
     expect(res).to eq [-0.375, "G6"]
   end
@@ -555,9 +547,8 @@ describe "lookups for infinity" do
 
     res = lookup_grid_helper('infinity',
                              "G7",
-                             { "hb_indicator" => true,
-                              "cltv" => 80,
-                             },
+                             "hb_indicator" => true,
+                             "cltv" => 80,
                             )
     expect(res).to eq ["test", "G7"]
   end
@@ -569,8 +560,7 @@ describe "lookups for infinity" do
 
     res = lookup_grid_helper('infinity',
                              "G8",
-                             { "ltv" => 80,
-                             },
+                             "ltv" => 80,
                             )
     expect(res).to eq [g1, "G8"]
   end
@@ -600,16 +590,14 @@ describe "lookups for infinity" do
 
     res = lookup_grid_helper('infinity',
                              "Ga",
-                             { "dg" => g1,
-                             },
+                             "dg" => g1,
                             )
     expect(res).to eq [7, "Ga"]
 
     # should be able to lookup bu name as well
     res = lookup_grid_helper('infinity',
                              "Ga",
-                             { "dg" => "G2",
-                             },
+                             "dg" => "G2",
                             )
     expect(res).to eq [7, "Ga"]
   end
@@ -619,16 +607,14 @@ describe "lookups for infinity" do
 
     res = lookup_grid_helper('infinity',
                              "Gb",
-                             { "property_state" => ca,
-                             },
+                             "property_state" => ca,
                             )
     expect(res).to eq [70, "Gb"]
 
     # should be able to lookup bu name as well
     res = lookup_grid_helper('infinity',
                              "Gb",
-                             { "property_state" => "CA",
-                             },
+                             "property_state" => "CA",
                             )
     expect(res).to eq [70, "Gb"]
   end
@@ -803,10 +789,8 @@ describe "updates" do
     engine = Marty::ScriptSet.new.get_engine("DataReport")
     res = engine.evaluate("TableReport",
                           "result",
-                          {
-                            "pt_name"    => p.name,
-                            "class_name" => "Marty::DataGrid",
-                          },
+                          "pt_name"    => p.name,
+                          "class_name" => "Marty::DataGrid",
                          )
 
     # FIXME: really hacky removing "" (data_grid) -- This is a bug
@@ -820,14 +804,14 @@ describe "updates" do
                             ",",
                            )
 
-    expect(sum).to eq({ same: 1 })
+    expect(sum).to eq(same: 1)
 
     res11 = res.sub(/G1/, "G11")
 
     sum = do_import_summary(
       Marty::DataGrid, res11, 'infinity', nil, nil, ",")
 
-    expect(sum).to eq({ create: 1 })
+    expect(sum).to eq(create: 1)
 
     g1  = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G1")
     g11 = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G11")

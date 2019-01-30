@@ -52,7 +52,7 @@ describe Marty::JobController, slow: true do
     expect(Marty::Promise.where(start_dt: nil).count).to eq 0
 
     expect do
-      res = engine.evaluate("Y", "d", { "s" => 1 })
+      res = engine.evaluate("Y", "d", "s" => 1)
       # force res to be evaluated
       res.to_s
     end.to raise_error(RuntimeError)
@@ -77,7 +77,7 @@ describe Marty::JobController, slow: true do
     ] }
 
     bench = Benchmark.measure do
-      res = engine.evaluate("Y", "f", { "s" => slp })
+      res = engine.evaluate("Y", "f", "s" => slp)
       expect(res).to eq exp_res
     end
 
@@ -154,10 +154,10 @@ describe Marty::JobController, slow: true do
 
   it "should pass p_title to promise create()" do
     engine = Marty::ScriptSet.new.get_engine(NAME_A)
-    res = engine.evaluate("Y", "a", { "q" => 1 })
+    res = engine.evaluate("Y", "a", "q" => 1)
     wait_for_jobs
 
-    expect(res).to eq({ "b" => { "e" => 0.125 } })
+    expect(res).to eq("b" => { "e" => 0.125 })
     expect(Marty::Promise.all.map(&:title).sort).to eq(["aaa", "bbb"])
   end
 
@@ -196,11 +196,11 @@ describe Marty::JobController, slow: true do
 
     promise = Marty::Promise.find_by_title(NAME_B)
 
-    expect(promise.result).to eq({
+    expect(promise.result).to eq(
       "result" => [{ "a" => 1, "b" => 1 }, { "a" => 2, "b" => 4 }, { "a" => 3, "b" => 9 }],
       "format" => "csv",
       "title" => "PromiseB",
-    })
+    )
 
     get 'download', params: {
       job_id: promise.id,

@@ -288,7 +288,7 @@ class Marty::DataGrid < Marty::Base
                Marty::DataConversion.find_row(c_data_type, { "name" => res }, pt)
          end
 
-    return vhash.merge({ "result" => v }) unless (Marty::DataGrid == c_data_type &&
+    return vhash.merge("result" => v) unless (Marty::DataGrid == c_data_type &&
                                               follow)
 
     visited ||= []

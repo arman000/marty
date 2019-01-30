@@ -57,8 +57,8 @@ module Marty
       log = Marty::Log.first
       expect(log.message_type).to eq('error')
       expect(log.message).to eq(bd)
-      expect(log.details).to eq({ "message" => the_error,
-                                  "data" => JSON.parse(data.to_json) })
+      expect(log.details).to eq("message" => the_error,
+                                  "data" => JSON.parse(data.to_json))
     end
   end
 

@@ -426,10 +426,8 @@ describe DataImporter do
     engine = Marty::ScriptSet.new.get_engine("DataReport")
     res = engine.evaluate("TableReport",
                           "result_raw",
-                          {
-                            "pt_name"    => p.name,
-                            "class_name" => "Gemini::FannieBup",
-                          },
+                          "pt_name"    => p.name,
+                          "class_name" => "Gemini::FannieBup",
                          )
     res[0].should == fannie_bup1_export[0]
     res[1..-1].sort.should == fannie_bup1_export[1..-1].sort
@@ -438,11 +436,11 @@ end
 
 describe "Blame Report without yml translations" do
   before(:each) do
-    I18n.backend.store_translations(:en, {
-      attributes: {
-        note_rate: nil
-      }
-    })
+    I18n.backend.store_translations(:en,
+                                    attributes: {
+                                      note_rate: nil
+                                    }
+                                   )
     Marty::Script.load_scripts(nil, Date.today)
     Marty::ScriptSet.clear_cache
     p = Marty::Posting.do_create("BASE", DateTime.yesterday, 'yesterday')
@@ -452,10 +450,8 @@ describe "Blame Report without yml translations" do
     engine = Marty::ScriptSet.new.get_engine("BlameReport")
     @res = engine.evaluate("DataBlameReport",
                            "result",
-                           {
-                             "pt_name1"    => p.name,
-                             "pt_name2"    => p2.name
-                           },
+                           "pt_name1"    => p.name,
+                           "pt_name2"    => p2.name
                           )
   end
 
@@ -469,11 +465,11 @@ end
 
 describe "Blame Report with yml translations" do
   before(:each) do
-    I18n.backend.store_translations(:en, {
-      attributes: {
-        note_rate: "Note Rate"
-      }
-    })
+    I18n.backend.store_translations(:en,
+                                    attributes: {
+                                      note_rate: "Note Rate"
+                                    }
+                                   )
     Marty::Script.load_scripts(nil, Date.today)
     Marty::ScriptSet.clear_cache
     p = Marty::Posting.do_create("BASE", DateTime.yesterday, 'yesterday')
@@ -483,10 +479,8 @@ describe "Blame Report with yml translations" do
     engine = Marty::ScriptSet.new.get_engine("BlameReport")
     @res = engine.evaluate("DataBlameReport",
                            "result",
-                           {
-                             "pt_name1"    => p.name,
-                             "pt_name2"    => p2.name
-                           },
+                           "pt_name1"    => p.name,
+                           "pt_name2"    => p2.name
                           )
   end
 

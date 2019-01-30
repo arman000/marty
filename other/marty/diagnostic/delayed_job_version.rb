@@ -24,7 +24,7 @@ module Marty::Diagnostic; class DelayedJobVersion < Base
 
     d_engine = Marty::ScriptSet.new.get_engine("Diagnostics")
     res = d_engine
-            .evaluate('VersionDelay', 'result', { 'count' => total_workers - 1 })
+            .evaluate('VersionDelay', 'result', 'count' => total_workers - 1)
 
     # merge results, remove duplicates, and construct "aggregate" object
     res.each_with_object({}) do |r, hash|

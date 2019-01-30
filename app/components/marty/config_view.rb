@@ -39,10 +39,10 @@ class Marty::ConfigView < Marty::Grid
   def default_form_items
     [
       :key,
-      jsonb_field(:value, {
-                    getter: my_jsonb_pretty_getter,
-                    setter: my_jsonb_setter,
-                  }),
+      jsonb_field(:value,
+                  getter: my_jsonb_pretty_getter,
+                  setter: my_jsonb_setter,
+                 ),
       textarea_field(:description),
     ]
   end

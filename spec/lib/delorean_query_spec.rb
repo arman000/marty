@@ -184,7 +184,7 @@ describe 'DeloreanQuery' do
 
   it "handle query params" do
     res = @engine.evaluate("A", "pq",
-                           { "settlement_mm" => 12, "note_rate" => 2.5 })
+                           "settlement_mm" => 12, "note_rate" => 2.5)
     expect(res).to eq [2.625, 2.75, 2.875]
   end
 end

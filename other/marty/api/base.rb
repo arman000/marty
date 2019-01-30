@@ -145,7 +145,7 @@ class Marty::Api::Base
 
           Marty::Logger.error(
             "API #{params[:script]}:#{params[:node]}.#{params[:attr]}",
-            { error: errors, data: res }
+            error: errors, data: res
           )
 
           msg = "Error(s) validating: #{errors}"
@@ -209,7 +209,7 @@ class Marty::Api::Base
 
     def self.validate_schema schema, hash
       JSON::Validator.fully_validate(
-        schema.merge({ "\$schema" => Marty::JsonSchema::RAW_URI }),
+        schema.merge("\$schema" => Marty::JsonSchema::RAW_URI),
         hash,
         validate_schema:   true,
         errors_as_objects: true,

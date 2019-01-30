@@ -166,7 +166,7 @@ module Marty::RuleSpec
       it "matches" do
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            { 'g_array' => 'G1V3' })
+                                            'g_array' => 'G1V3')
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.first.name).to eq("Rule1")
         lookup = Gemini::MyRule.get_matches('infinity',
@@ -187,44 +187,44 @@ module Marty::RuleSpec
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'ComplexRule',
                                             'other_flag' => false },
-                                            { 'g_bool' => false })
+                                            'g_bool' => false)
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.first.name).to eq("Rule3")
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'ComplexRule' },
-                                            { 'g_string' => 'def' })
+                                            'g_string' => 'def')
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.first.name).to eq("Rule3")
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'ComplexRule' },
-                                            { 'g_string' => 'abc' })
+                                            'g_string' => 'abc')
         expect(lookup).to eq([])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            { 'g_bool' => true, "g_range" => 25,
-                                             'g_integer' => 99 })
+                                            'g_bool' => true, "g_range" => 25,
+                                            'g_integer' => 99)
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.first.name).to eq("Rule2a")
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            { 'g_bool' => true, "g_range" => 75 })
+                                            'g_bool' => true, "g_range" => 75)
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.first.name).to eq("Rule1")
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            { 'g_bool' => true, "g_range" => 75,
-                                             'g_integer' => 11 })
+                                            'g_bool' => true, "g_range" => 75,
+                                            'g_integer' => 11)
         expect(lookup).to eq([])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            { 'g_bool' => true, "g_range" => 75,
-                                             'g_integer' => 10 })
+                                            'g_bool' => true, "g_range" => 75,
+                                            'g_integer' => 10)
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.first.name).to eq("Rule1")
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            { 'g_bool' => false, "g_range" => 25,
-                                             'g_integer' => 10 })
+                                            'g_bool' => false, "g_range" => 25,
+                                            'g_integer' => 10)
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.first.name).to eq("Rule2c")
         lookup = Gemini::MyRule.get_matches('infinity',
@@ -248,8 +248,8 @@ module Marty::RuleSpec
                                             { 'rule_dt' => "2017-5-1 00:00:01" }, {})
         expect(lookup.to_a).to eq([])
         lookup = Gemini::MyRule.get_matches('infinity', {},
-                                            { "g_bool_def" => false,
-                                             "g_nbool_def" => true })
+                                            "g_bool_def" => false,
+                                            "g_nbool_def" => true)
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.pluck(:name).first).to eq("Rule1")
       end
@@ -258,43 +258,43 @@ module Marty::RuleSpec
       let(:complex) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'ComplexRule' },
-                                   { 'g_string' => 'def' }).first
+                                   'g_string' => 'def').first
       end
       let(:xyz) do
         Gemini::XyzRule.get_matches('infinity',
                                     { 'rule_type' => 'ZRule' },
-                                    { 'g_integer' => 2 }).first
+                                    'g_integer' => 2).first
       end
       let(:simple) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'SimpleRule' },
-                                   { 'g_bool' => true, "g_range" => 25 }).first
+                                   'g_bool' => true, "g_range" => 25).first
       end
       let(:simple2a) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'SimpleRule' },
-                                   { 'g_bool' => true, "g_integer" => 99 }).first
+                                   'g_bool' => true, "g_integer" => 99).first
       end
       let(:simple2b) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'SimpleRule' },
-                                   { 'g_bool' => true, "g_integer" => 999 }).first
+                                   'g_bool' => true, "g_integer" => 999).first
       end
       let(:altgridmethod) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'ComplexRule' },
-                                   { "g_integer" => 3757 }).first
+                                   "g_integer" => 3757).first
       end
       let(:gridcomputedname) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'ComplexRule' },
-                                   { "g_string" => "Hi Mom",
-                                    "g_integer" => 11 }).first
+                                   "g_string" => "Hi Mom",
+                                   "g_integer" => 11).first
       end
       it "computed guards work" do
-        c = complex.compute(@ruleopts_myrule, { "pt" => Time.zone.now,
-                                               'param2' => 'def' })
-        expect(c).to eq({ "cguard2" => [false, "a string"] })
+        c = complex.compute(@ruleopts_myrule,  "pt" => Time.zone.now,
+                                               'param2' => 'def')
+        expect(c).to eq("cguard2" => [false, "a string"])
       end
       it "returns simple results via #fixed_results" do
         expect(simple.fixed_results["simple_result"]).to eq("b value")
@@ -309,61 +309,61 @@ module Marty::RuleSpec
           .to receive(:evaluate).and_raise('hi mom')
         expect do
           simple.compute(@ruleopts_myrule,
-                         { "pt" => Time.now })
+                         "pt" => Time.now)
         end        .to raise_error(/hi mom/)
         # simple2a should return results without evaluation (they are all fixed)
-        expect(simple2a.compute(@ruleopts_myrule, { "pt" => Time.zone.now })).to eq(
-          { "simple_result" => "b value",
-           "sr2" => true,
-          })
+        expect(simple2a.compute(@ruleopts_myrule, "pt" => Time.zone.now)).to eq(
+          "simple_result" => "b value",
+          "sr2" => true,
+        )
         # simple2b should return grid results without evaluation
         expect(simple2b.compute(@ruleopts_myrule,
-                                { "pt" => Time.zone.now,
-                                 'param1' => 66,
-                                 'param2' => 'abc',
-                                 'paramb' => false }))
-          .to eq({ "grid1_grid_result" => 3,
-                 "grid2_grid_result" => 1300 })
+                                "pt" => Time.zone.now,
+                                'param1' => 66,
+                                'param2' => 'abc',
+                                'paramb' => false))
+          .to eq("grid1_grid_result" => 3,
+                 "grid2_grid_result" => 1300)
       end
       it "returns computed results" do
-        c = complex.compute(@ruleopts_myrule, { "pt" => Time.zone.now,
+        c = complex.compute(@ruleopts_myrule,  "pt" => Time.zone.now,
                                                'param1' => 66,
                                                'param2' => 'abc',
-                                               'paramb' => false })
-        expect(c).to eq({ "simple_result" => "c value",
+                                               'paramb' => false)
+        expect(c).to eq("simple_result" => "c value",
                          "computed_value" => 19, "grid1_grid_result" => 3,
-                         "grid2_grid_result" => 1300 })
+                         "grid2_grid_result" => 1300)
       end
       it "returns computed results (with delorean import)" do
-        c = xyz.compute(@ruleopts_xyz, { "pt" => Time.zone.now + 1,
+        c = xyz.compute(@ruleopts_xyz,  "pt" => Time.zone.now + 1,
                                         "p1" => 12,
                                         "p2" => 3,
-                                        "flavor" => "cherry" })
-        expect(c).to eq({ "bvlength" => 13, "bv" => "cherry --> 36",
-                         "grid1_grid_result" => 19 })
+                                        "flavor" => "cherry")
+        expect(c).to eq("bvlength" => 13, "bv" => "cherry --> 36",
+                         "grid1_grid_result" => 19)
       end
       it "reports bad grid name" do
         exp = Regexp.new("Error .results. in rule '\\d+:Rule4': "\
                          "DataGridX grid not found")
         expect do
           gridcomputedname.compute(@ruleopts_myrule,
-                                   { "pt" => Time.zone.now,
-                                    'param1' => 66,
-                                    'param2' => 'abc',
-                                    'paramb' => false })
+                                   "pt" => Time.zone.now,
+                                   'param1' => 66,
+                                   'param2' => 'abc',
+                                   'paramb' => false)
         end        .to raise_error(exp)
       end
       it "grids embedded in result work properly and receive prior attrs" do
-        v = altgridmethod.compute(@ruleopts_myrule, { "pt" => Time.zone.now,
+        v = altgridmethod.compute(@ruleopts_myrule,  "pt" => Time.zone.now,
                                                      'param1' => 45,
-                                                     'param2' => 1 })
+                                                     'param2' => 1)
         expect(v["final_value"]).to eq(15)
       end
       it "exceptions/logging" do
         r6, r7, r8 = [6, 7, 8].map do |i|
           Gemini::XyzRule.get_matches('infinity',
                                       { 'rule_type' => 'ZRule' },
-                                      { 'g_integer' => i }).first
+                                      'g_integer' => i).first
         end
         pt = Time.zone.now + 1
         input = { "pt" => pt,

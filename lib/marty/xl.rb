@@ -157,7 +157,7 @@ class Marty::Xl
 
       boxborders = Hash.new do |hash, key|
         hash[key] = {
-          border: defaults.merge({ edges: key.to_s.split('_').map(&:to_sym) })
+          border: defaults.merge(edges: key.to_s.split('_').map(&:to_sym))
         }
       end
 

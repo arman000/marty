@@ -34,10 +34,10 @@ class Marty::SchemaHelper
   # if param is present, disallow cols
   delorean_fn :disallow_if_present, sig: [2, 20] do |dep_column, *var_array|
     dep_check(dep_column,
-              { "properties" => var_array.each_with_object({}) do |v, h|
-                 h[v] = { "not" => {} }
-                                end
-              })
+              "properties" => var_array.each_with_object({}) do |v, h|
+                h[v] = { "not" => {} }
+                              end
+             )
   end
 
   # if param is not present, disallow cols

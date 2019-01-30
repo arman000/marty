@@ -103,7 +103,7 @@ feature 'rule view', js: true do
     press("OK")
     wait_for_ajax
     expect(mrv.row_count()).to eq(9)
-    expect(mrv.get_row_vals(1)).to include({ "name" => "abc",
+    expect(mrv.get_row_vals(1)).to include("name" => "abc",
                                             "rule_type" => "SimpleRule",
                                             "start_dt" => "2013-01-01T11:03:01",
                                             "end_dt" => "2030-01-01T08:03:01",
@@ -121,10 +121,10 @@ feature 'rule view', js: true do
                                             "computed_guards" => "",
                                             "grids" => "",
                                             "results" => "",
-                                           })
+                                          )
 
     r = Gemini::MyRule.find_by(obsoleted_dt: 'infinity', name: 'abc')
-    expect(r.attributes).to include({ "user_id" => 1,
+    expect(r.attributes).to include("user_id" => 1,
                                      "o_user_id" => nil,
                                      "name" => "abc",
                                      "engine" => "Gemini::MyRuleScriptSet",
@@ -137,7 +137,7 @@ feature 'rule view', js: true do
                                      "computed_guards" => {},
                                      "grids" => {},
                                      "results" => {},
-                                    })
+                                   )
     # type validation (string with values list)
     mrv.select_row(1)
     press("Edit")
@@ -341,8 +341,8 @@ EOL
     fill_in("Range Guard 2", with: "[30,40)")
     press("OK")
     wait_for_ajax
-    r = Gemini::XyzRule.get_matches('infinity', {}, { "g_range1" => 150,
-                                                     "g_range2" => 35 })
+    r = Gemini::XyzRule.get_matches('infinity', {},  "g_range1" => 150,
+                                                     "g_range2" => 35)
 
     expect(r.to_a.count).to eq(1)
     exp = { "user_id" => 1,

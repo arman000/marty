@@ -96,8 +96,8 @@ describe Marty::Script do
     it 'creates a new tag when no previous tag is present and no datetime ' +
       'provided' do
       expect do
-        tag = Marty::Script.load_script_bodies({ 'Test1' => s1,
-                                                       'Test2' => s2 })
+        tag = Marty::Script.load_script_bodies('Test1' => s1,
+                                                       'Test2' => s2)
       end
         .to change(Marty::Tag, :count).by(1)
     end
@@ -106,7 +106,7 @@ describe Marty::Script do
       "modified" do
       Marty::Script.create!(name: 'Test1', body: s1, created_dt: now)
       Marty::Tag.do_create(now + 1.second, 'tag created by test')
-      expect { Marty::Script.load_script_bodies({ 'Test1' => s1 }) }
+      expect { Marty::Script.load_script_bodies('Test1' => s1) }
         .not_to change(Marty::Tag, :count)
     end
   end

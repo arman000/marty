@@ -11,7 +11,7 @@ class Marty::McflyGridPanel < Marty::Grid
     end
 
     # default sort all Mcfly grids with id
-    c.store_config.merge!({ sorters: [{ property: :id, direction: 'ASC' }] })
+    c.store_config.merge!(sorters: [{ property: :id, direction: 'ASC' }])
   end
 
   def get_records(params)

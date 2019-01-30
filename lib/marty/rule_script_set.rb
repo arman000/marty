@@ -94,9 +94,9 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   def grid_init(ruleh)
     if ruleh["grids"].present? ||
        ruleh["results"].keys.any? { |k| k.ends_with?("_grid") }
-      write_code({ "pt" => :parameter,
+      write_code("pt" => :parameter,
                    "dgparams__" => :parameter,
-                 })
+                )
     else
       ''
     end

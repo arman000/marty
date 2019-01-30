@@ -26,7 +26,7 @@ module Marty
         testval([1, 2, 3])
         testval([1, "2,3"])
 
-        testval({ "key1" => [1, 2, 3], "keystr" => { "val" => "val" } })
+        testval("key1" => [1, 2, 3], "keystr" => { "val" => "val" })
         testval(%Q({ "key1" : [1,2,3], "keystr" : { "val" : "val"}}))
 
         testval("123456.1234")
@@ -63,7 +63,7 @@ module Marty
 
       it "should allow nil (null) to exist in other structures" do
         testval([nil, 1, 2, nil])
-        testval({ "key1" => nil, "key2" => false, "key3" => 'val' })
+        testval("key1" => nil, "key2" => false, "key3" => 'val')
       end
     end
   end

@@ -519,7 +519,7 @@ describe Marty::RpcController do
 
     promise = Marty::Promise.find_by_id(job_id)
 
-    expect(promise.result).to eq({ "e" => 4 })
+    expect(promise.result).to eq("e" => 4)
 
     Delayed::Worker.delay_jobs = true
   end
@@ -541,7 +541,7 @@ describe Marty::RpcController do
 
     promise = Marty::Promise.find_by_id(job_id)
 
-    expect(promise.result).to eq({ "e" => 4 })
+    expect(promise.result).to eq("e" => 4)
 
     Delayed::Worker.delay_jobs = true
   end
@@ -1251,7 +1251,7 @@ describe Marty::RpcController do
               params: t['request'].to_json
             }
         resp = JSON.parse(response.body)
-        comp = struct_compare(resp, t['result'], { "float_int_nomatch" => true })
+        comp = struct_compare(resp, t['result'], "float_int_nomatch" => true)
         (puts "TEST=#{idx}\n#{comp}"; binding.pry) if comp &&
                                                       ENV['PRY'] == 'true'
 
@@ -1272,9 +1272,9 @@ describe Marty::RpcController do
     end
     def do_call(req1, req2, req3, optionals = {})
       attr = "v1"
-      params = optionals.merge({ "req1" => req1,
+      params = optionals.merge("req1" => req1,
                                 "req2" => req2,
-                                "req3" => req3 }).to_json
+                                "req3" => req3).to_json
 
       # to see what the schema helpers generated:
       # engine = Marty::ScriptSet.new(nil).get_engine("M10Schemas")

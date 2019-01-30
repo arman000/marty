@@ -10,7 +10,7 @@ class Marty::ApiAuthView < Marty::McflyGridPanel
     c.title   = I18n.t('api_auth', default: "API Authorization")
     c.model   = "Marty::ApiAuth"
     c.attributes = [:app_name, :api_key, :script_name]
-    c.store_config.merge!({ sorters: [{ property: :app_name, direction: 'ASC' }] })
+    c.store_config.merge!(sorters: [{ property: :app_name, direction: 'ASC' }])
   end
 
   attribute :app_name do |c|

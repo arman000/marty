@@ -575,13 +575,6 @@ Style/BarePercentLiterals:
     - 'spec/models/config_spec.rb'
     - 'spec/support/netzke.rb'
 
-# Offense count: 126
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: braces, no_braces, context_dependent
-Style/BracesAroundHashParameters:
-  Enabled: false
-
 # Offense count: 21
 Style/CaseEquality:
   Exclude:
@@ -1231,3 +1224,12 @@ Style/WordArray:
 # URISchemes: http, https
 Metrics/LineLength:
   Max: 275
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false

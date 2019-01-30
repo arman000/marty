@@ -46,10 +46,10 @@ class Marty::DataChange
           valcount = Array === header_current ? header_current.count : 1
           changed = o.send(col.to_sym) != prev.send(col.to_sym) if prev
           valcount.times do
-            a.push({
+            a.push(
               "value"     => exp_attrs.shift,
               "changed"   => changed
-            })
+            )
           end
         end
         profile
