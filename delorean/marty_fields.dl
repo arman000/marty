@@ -1,0 +1,62 @@
+PostingField:
+    field_label = "Posting"
+    xtype       = ":combo"
+    name        = "pt_name"
+    store       =  Marty::Posting.
+                   where("created_dt <> 'infinity'").
+                   order("created_dt DESC").limit(10).pluck("name")
+    value       = store[0]
+
+######################################################################
+
+PostingField1: PostingField
+    field_label = "Posting 1"
+    name        = "pt_name1"
+
+PostingField2: PostingField
+    field_label = "Posting 2"
+    name        = "pt_name2"
+
+######################################################################
+
+ClassListField:
+    field_label = "Tables"
+    xtype       = ":multiselectcombo"
+    name        = "class_list"
+    store       = Marty::DataChange.class_list
+
+ClassField: ClassListField
+    xtype       = ":combo"
+    name        = "class_name"
+    store       = Marty::DataChange.class_list
+
+######################################################################
+
+CheckboxField:
+    xtype           = ":checkboxfield"
+    checked         = false
+    input_value     = true
+    unchecked_value = false
+
+######################################################################
+
+JsonField:
+    xtype       = ":textareafield"
+    name        = "json_field"
+    field_label = "JSON"
+    auto_scroll = true
+    spellcheck  = false
+    field_style = {
+        "font_family": 'courier new',
+        "font_size": '12px'
+        }
+    height      = 400
+
+CsvField: JsonField
+    field_label = "CSV"
+    name        = "csv_field"
+
+TextField:
+    xtype        = ":textfield"
+    field_label  = "Text"
+    name         = "text_field"
