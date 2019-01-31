@@ -111,7 +111,11 @@ EOF
       res.should == {create: 1}
       res = Marty::DataImporter.
             do_import_summary(Gemini::Simple,
-                              [{"group_id" => Gemini::Simple.first.group_id, "some_name" => "hello"}])
+                              [{
+                                  "group_id" => Gemini::Simple.first.group_id,
+                                  "some_name" => "hello"
+                               }]
+                             )
       res.should == {same: 1}
     end
 

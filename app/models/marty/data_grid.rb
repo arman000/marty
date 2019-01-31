@@ -592,7 +592,8 @@ class Marty::DataGrid < Marty::Base
     self.data       = data
     self.data_type  = data_type
     self.lenient    = !!lenient
-    self.metadata   = metadata unless self.metadata == metadata # Otherwise changed will depend on order in hashes
+    # Otherwise changed will depend on order in hashes
+    self.metadata   = metadata unless self.metadata == metadata
     self.created_dt = created_dt if created_dt
     save!
   end

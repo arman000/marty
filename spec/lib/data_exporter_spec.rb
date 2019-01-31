@@ -46,7 +46,11 @@ EOF
       expect(res).to eq({create: 4})
       Gemini::HeadVersion.count.should == 4
 
-      res = Marty::DataImporter.do_import_summary(Gemini::GroupingHeadVersion, grouping_head_versions)
+      res = Marty::DataImporter.do_import_summary(
+        Gemini::GroupingHeadVersion,
+        grouping_head_versions
+      )
+
       expect(res).to eq({create: 4})
       Gemini::GroupingHeadVersion.count.should == 4
 

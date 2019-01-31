@@ -150,7 +150,8 @@ class Marty::Promise < Marty::Base
       if !last.start_dt
         job = Marty::Promise.job_by_id(last.job_id)
 
-        # FIXME: this block is needed since a lot of specs rely on delayed job being runned in the same thread as promise
+        # FIXME: this block is needed since a lot of specs rely on
+        # delayed job being runned in the same thread as promise
         # Can be deleted later and replaces with simple timeout below
         if !job || job.locked_at
           # job has been locked, so it looks like it started already

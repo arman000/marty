@@ -38,16 +38,22 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
   end
 
   def ext_button_id title
-    id = page.evaluate_script("Ext.ComponentQuery.query(\"button{isVisible(true)}[text='#{title}']\")[0].id")
+    id = page.evaluate_script(
+      "Ext.ComponentQuery.query(\"button{isVisible(true)}[text='#{title}']\")[0].id"
+    )
     "##{id}"
   end
 
   def ext_menuitem_id title
-    id = page.evaluate_script("Ext.ComponentQuery.query(\"menuitem[text='#{title}']\")[0].id")
+    id = page.evaluate_script(
+      "Ext.ComponentQuery.query(\"menuitem[text='#{title}']\")[0].id"
+    )
     "##{id}"
   end
 
   def tree_row_count name
-    page.evaluate_script("Ext.ComponentQuery.query('treepanel[title=\"#{name}\"]')[0].getStore().getCount()")
+    page.evaluate_script(
+      "Ext.ComponentQuery.query('treepanel[title=\"#{name}\"]')[0].getStore().getCount()"
+    )
   end
 end

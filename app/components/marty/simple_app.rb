@@ -6,13 +6,22 @@
 # * AJAX activity indicator
 #
 # == Extending SimpleApp
-# You may want to extend SimpleApp to provide a custom layout. Make sure you create three regions with predefined itemId's that will be used by SimpleApp. You can use the following methods defined by SimpleApp: main_panel_config, status_bar_config, and menu_bar_config, e.g.:
+# You may want to extend SimpleApp to provide a custom layout.
+# Make sure you create three regions with predefined itemId's
+# that will be used by SimpleApp.
+# You can use the following methods defined by SimpleApp:
+# main_panel_config, status_bar_config, and menu_bar_config, e.g.:
 #
 #     class MySimpleApp < Netzke::Basepack::SimpleApp
 #
 #       def configuration
 #         super.merge(
-#           :items => [my_custom_navigation_config, main_panel_config, menu_bar_config, status_bar_config]
+#           :items => [
+#             my_custom_navigation_config,
+#             main_panel_config,
+#             menu_bar_config,
+#             status_bar_config
+#           ]
 #         )
 #       end
 #
@@ -27,12 +36,16 @@
 #       ...
 #     end
 #
-# The JS side of the component will have those regions referenced as this.mainPanel, this.statusBar, and this.menuBar.
+# The JS side of the component will have those regions referenced
+# as this.mainPanel, this.statusBar, and this.menuBar.
 class Marty::SimpleApp < Netzke::Base
   client_class do |c|
     c.extend = "Ext.container.Viewport"
     c.layout = :border
-    c.require Netzke::Core.ext_path.join("packages/ux/classic/src/statusbar/StatusBar.js"), :statusbar_ext
+    c.require(
+      Netzke::Core.ext_path.join("packages/ux/classic/src/statusbar/StatusBar.js"),
+      :statusbar_ext
+    )
     c.include :simple_app
   end
 
