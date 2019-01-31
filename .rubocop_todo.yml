@@ -911,14 +911,6 @@ Performance/DoubleStartEndWith:
 
 # Offense count: 2
 # Cop supports --auto-correct.
-# Configuration parameters: EnabledForFlattenWithoutParams.
-Performance/FlatMap:
-  Exclude:
-    - 'lib/marty/aws/request.rb'
-    - 'other/marty/diagnostic/aws/ec2_instance.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
 Performance/InefficientHashSearch:
   Exclude:
     - 'app/components/marty/base_rule_view.rb'
