@@ -567,7 +567,7 @@ describe Marty::RpcController do
            format: :json,
            script: "M1",
            node: "D",
-           attrs:"out",
+           attrs: "out",
            tag: t1.name,
            params: {in: @data}.to_json
          }

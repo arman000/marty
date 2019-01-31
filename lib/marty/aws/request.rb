@@ -21,7 +21,7 @@ class Marty::Aws::Request < Marty::Aws::Base
                                  access_key_id:     @creds[:access_key_id],
                                  secret_access_key: @creds[:secret_access_key],
                                  session_token:     @creds[:token])
-    signed_url = sig.presign_url(http_method:'GET', url: url)
+    signed_url = sig.presign_url(http_method: 'GET', url: url)
 
     http = Net::HTTP.new(host, 443)
     http.use_ssl = true
