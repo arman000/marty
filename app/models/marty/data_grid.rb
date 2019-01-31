@@ -732,7 +732,6 @@ class Marty::DataGrid < Marty::Base
           prune_a.push(index)
         end
       end
-
     end
     [prune_a, rewrite_a]
   end
@@ -742,7 +741,6 @@ class Marty::DataGrid < Marty::Base
     prune_a, rewrite_a, value = [], [], Array(val)
 
     keys.each_with_index do |key, index|
-
       # rewrite any nil (wildcard) keys in the dimension
       # to be our 'to-keep' val(s)
       if key.nil?

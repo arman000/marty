@@ -118,7 +118,6 @@ describe Marty::Event do
       to eq(['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq([])
     Timecop.return
-
   end
 
   it "misc API tests" do
@@ -259,6 +258,5 @@ describe Marty::Event do
     expect(e1["comment"]).to eq(long_comment_truncated)
     expect(e2["comment"]).to eq(long_comment_truncated)
     expect(e3["comment"]).to eq(long_comment_truncated)
-
   end
 end

@@ -82,5 +82,4 @@ class Marty::SchemaHelper
                        {"type"=>"object",
                         "allOf"=> checks}}}
   end
-
 end

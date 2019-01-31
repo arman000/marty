@@ -26,7 +26,6 @@ module Marty; module RSpec; module Chromedriver
   headless_args = ['no-sandbox', 'headless', 'disable-gpu', "window-size=#{window_size}"]
 
   register_chrome_driver(:headless_chrome, args: headless_args) do |driver|
-
     # workaround to enable downloading with headless chrome
     bridge = driver.browser.send(:bridge)
     bridge.http.call(:post,

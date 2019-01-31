@@ -122,5 +122,4 @@ class Marty::ApplicationController < ActionController::Base
                 "from #{request.remote_ip} at #{Time.now.utc}")
     self.set_user(user)
   end
-
 end

@@ -26,5 +26,4 @@ private
       Token.delete_all(['user_id = ?', user.id])
     end
   end
-
 end

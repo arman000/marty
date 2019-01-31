@@ -87,7 +87,6 @@ class String
   def in_time_zone(zone = ::Time.zone)
     self == 'infinity' ? self : old_in_time_zone(zone)
   end
-
 end
 
 ######################################################################

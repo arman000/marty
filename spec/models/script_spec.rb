@@ -118,7 +118,6 @@ describe Marty::Script do
       expect(Marty::Script).to have_received(:load_script_bodies).
         with(match_array([['Script1', ls1], ['Script2', ls2]]), now)
     end
-
   end
 
   describe '.get_script_filenames' do

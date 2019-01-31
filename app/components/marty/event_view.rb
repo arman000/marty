@@ -123,7 +123,6 @@ class Marty::EventView < Marty::Grid
     c.getter = promise_getter(:status)
     c.read_only = true
   end
-
 end
 
 EventView = Marty::EventView

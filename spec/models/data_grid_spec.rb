@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Marty::DataGridSpec
   describe DataGrid do
-
 G1 =<<EOS
 state\tstring\tv\t\t
 ltv\tnumrange\tv\t\t

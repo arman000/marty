@@ -63,7 +63,6 @@ describe "Blame Report", slow: true do
     fannie_bup1.update!(buy_up: 1.125, created_dt: time2)
     fannie_bup1.update!(buy_up: 1.126, created_dt: time4)
     fannie_bup1.update!(buy_up: 1.127, created_dt: time5)
-
   end
 
   it "should generate Table report" do

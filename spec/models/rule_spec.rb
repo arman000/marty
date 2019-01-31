@@ -314,7 +314,6 @@ module Marty::RuleSpec
                                  'paramb'=>false})).
           to eq({"grid1_grid_result"=>3,
                  "grid2_grid_result"=>1300})
-
       end
       it "returns computed results" do
         c = complex.compute(@ruleopts_myrule, {"pt"=>Time.zone.now,

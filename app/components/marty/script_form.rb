@@ -8,7 +8,6 @@ class Marty::ScriptForm < Marty::Form
   ######################################################################
 
   endpoint :netzke_load do |params|
-
     return client.netzke_notify("Permission Denied") unless
       self.class.has_any_perm?
 
@@ -53,7 +52,6 @@ class Marty::ScriptForm < Marty::Form
   end
 
   endpoint :submit do |params|
-
     return client.netzke_notify("Permission Denied") unless
       self.class.has_any_perm?
 

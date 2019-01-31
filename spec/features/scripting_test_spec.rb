@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'under Applications menu, Scripting (debug) workflows', js: true do
-
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)

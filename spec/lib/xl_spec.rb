@@ -85,7 +85,6 @@ EOS
 
 
 describe Marty::Xl do
-
   let(:engine) {
     Delorean::Engine.new "YYY"
   }
@@ -144,7 +143,6 @@ describe Marty::Xl do
 
     sp.workbook.worksheets[0].rows[13].cells[0..15].map { |c| c.value }.should ==
       ["", "", "text", 72, 4, 75, 6, 78, "", "text", 72, 4, 75, 6, 78]
-
   end
 
   it "should be able to create a spreadsheet that includes multiple datasets that overlap " do

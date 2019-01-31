@@ -270,7 +270,6 @@ class Marty::Xl
           wsrows << f
         end
       end
-
     end
 
     apply_relative_worksheet_ops(ws, wsrows + images)
@@ -525,5 +524,4 @@ class Marty::Xl
       obj
     end
   end
-
 end

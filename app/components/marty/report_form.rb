@@ -1,5 +1,4 @@
 class Marty::ReportForm < Marty::Form
-
   # override apply for background generation
   action :apply do |a|
     a.text     = a.tooltip = I18n.t("reporting.background")

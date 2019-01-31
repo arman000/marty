@@ -1,5 +1,4 @@
 class Marty::Event < Marty::Base
-
   class EventValidator < ActiveModel::Validator
     def validate(event)
       event.errors[:base] << "Must have promise_id or start_dt" unless
@@ -316,5 +315,4 @@ SQL
       Marty::Util.logger.error("event GC error: #{exc}")
     end
   end
-
 end

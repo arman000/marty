@@ -1097,7 +1097,6 @@ describe Marty::RpcController do
     expect(log.details['output']).to eq([9, 9])
     expect(log.details['remote_ip']).to eq("0.0.0.0")
     expect(log.details['error']).to eq(nil)
-
   end
 
   it "should log good req [background]" do
@@ -1117,7 +1116,6 @@ describe Marty::RpcController do
         }
     expect(response.body).to match(/job_id,/)
     log = Marty::Log.order(id: :desc).first
-
   end
 
   it "should not log if it should not log" do
@@ -1154,7 +1152,6 @@ describe Marty::RpcController do
     expect(log.details['output']).to eq([9, 9])
     expect(log.details['remote_ip']).to eq("0.0.0.0")
     expect(log.details['error']).to eq(nil)
-
   end
 
   it "should support api authorization - api_key not required" do

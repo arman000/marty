@@ -1,5 +1,4 @@
 class Marty::Scripting < Netzke::Base
-
   def configure(c)
     super
 
@@ -72,7 +71,6 @@ class Marty::Scripting < Netzke::Base
     c.title            = I18n.t("script.tester")
     c.flex             = 1
   end
-
 end
 
 Scripting = Marty::Scripting

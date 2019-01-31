@@ -116,6 +116,5 @@ class Marty::ApiLogView < Marty::Grid
     c.filter_with = lambda {|r, v, op|
       r.where("timestamp::text  #{op} '#{v}%'")}
   end
-
 end
 ApiLogView = Marty::ApiLogView

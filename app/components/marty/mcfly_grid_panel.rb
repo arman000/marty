@@ -55,7 +55,6 @@ class Marty::McflyGridPanel < Marty::Grid
 
   # edit-in-form submit with dup support
   endpoint :edit_window__edit_form__submit do |params|
-
     if params["dup"]
       # FIXME: copied from basepack grid endpoint
       # :add_window__add_form__netzke_submit

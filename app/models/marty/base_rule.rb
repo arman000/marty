@@ -111,5 +111,4 @@ class Marty::BaseRule < Marty::Base
     #print q.to_sql
     q.order(:name)
   end
-
 end

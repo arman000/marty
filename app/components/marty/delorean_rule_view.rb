@@ -22,5 +22,4 @@ class Marty::DeloreanRuleView < Marty::BaseRuleView
   attribute :rule_type do |c|
     c.width = 200
   end
-
 end

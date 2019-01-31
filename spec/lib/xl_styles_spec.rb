@@ -35,7 +35,6 @@ S:
 EOS
 
 describe Marty::Xl do
-
   let(:engine) {
     Delorean::Engine.new "YYY"
   }
@@ -110,6 +109,5 @@ describe Marty::Xl do
         next
       end
     end
-
   end
 end

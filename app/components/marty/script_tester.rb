@@ -102,7 +102,6 @@ class Marty::ScriptTester < Marty::Form
     c.min_height  = 250
     c.auto_scroll = true
   end
-
 end
 
 ScriptTester = Marty::ScriptTester

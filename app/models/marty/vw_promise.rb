@@ -1,5 +1,4 @@
 class Marty::VwPromise < Marty::Base
-
   has_many :children,
            foreign_key: 'parent_id',
            class_name: "Marty::VwPromise",
