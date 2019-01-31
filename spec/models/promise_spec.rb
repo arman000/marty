@@ -21,7 +21,7 @@ describe Marty::Promise, slow: true do
     @time = DateTime.now
     expect(Marty::Promise.count).to eq(0)
     engine = Marty::ScriptSet.new.get_engine(NAME_A)
-    engine.background_eval("Y", {"p_title" => NAME_A}, ["d"])
+    engine.background_eval("Y", { "p_title" => NAME_A }, ["d"])
     sleep 5
     Marty::Promise.cleanup
     expect(Marty::Promise.count).to eq(10)

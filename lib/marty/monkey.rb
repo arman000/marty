@@ -25,14 +25,14 @@ end
 class Hash
   # define addition on hashes -- useful in Delorean code.
   def +(x)
-    self.merge(x)
+    merge(x)
   end
 
   # define hash slice (similar to node slice in Delorean)
   def %(x)
-    x.each_with_object({}) { |k, h|
+    x.each_with_object({}) do |k, h|
       h[k] = self[k]
-    }
+    end
   end
 end
 
@@ -42,7 +42,7 @@ require 'netzke-basepack'
 
 class Netzke::Base
   # get root component session
-  def root_sess(component=nil)
+  def root_sess(component = nil)
     component ||= self
     component.parent ? root_sess(component.parent) : component.component_session
   end
@@ -87,7 +87,6 @@ class String
   def in_time_zone(zone = ::Time.zone)
     self == 'infinity' ? self : old_in_time_zone(zone)
   end
-
 end
 
 ######################################################################
@@ -144,7 +143,7 @@ module Netzke::Basepack::DataAdapters
       end
 
       # join them by AND
-      predicates[1..-1].inject(predicates.first){ |r,p| r.and(p)  }
+      predicates[1..-1].inject(predicates.first) { |r, p| r.and(p)  }
     end
 
     def update_predecate_for_enum(table, op, value)
@@ -166,8 +165,9 @@ module ActiveRecord
 
         enum = options.delete(:enum)
 
-        column_names.each { |name|
-          column(name, enum || name.to_s.pluralize, options) }
+        column_names.each do |name|
+          column(name, enum || name.to_s.pluralize, options)
+        end
       end
     end
   end
@@ -176,10 +176,10 @@ end
 ######################################################################
 
 class ActiveRecord::Relation
-  def mcfly_pt(pt, cls=nil)
-    cls ||= self.klass
+  def mcfly_pt(pt, cls = nil)
+    cls ||= klass
     tb = cls.table_name
-    self.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
+    where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
   end
 
   def attributes
@@ -216,9 +216,9 @@ class ActiveRecord::Base
       # when joins args are strings, checks to see if they're
       # associations attrs.  If so, convert them to symbols for joins
       # to work properly.
-      new_args = args.map {|a|
-        self.reflections.has_key?(a) ? a.to_sym : a
-      }
+      new_args = args.map do |a|
+        reflections.has_key?(a) ? a.to_sym : a
+      end
       old_joins(*new_args)
     end
   end
@@ -226,19 +226,20 @@ end
 
 ar_instances = [ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]
 
-args_hack = [[Object, nil]]*10
+args_hack = [[Object, nil]] * 10
 
-[[:distinct, args_hack],
- [:find_by,  args_hack],
- [:group,    args_hack],
- [:joins,    args_hack],
- [:limit,    [Integer]],
- [:not,      args_hack],
- [:order,     args_hack],
- [:pluck,     args_hack],
- [:select,    args_hack],
- [:where,     args_hack],
- [:mcfly_pt, [[Date, Time, ActiveSupport::TimeWithZone, String], [nil, Class]]]
+[
+  [:distinct, args_hack],
+  [:find_by,  args_hack],
+  [:group,    args_hack],
+  [:joins,    args_hack],
+  [:limit,    [Integer]],
+  [:not,      args_hack],
+  [:order,     args_hack],
+  [:pluck,     args_hack],
+  [:select,    args_hack],
+  [:where,     args_hack],
+  [:mcfly_pt, [[Date, Time, ActiveSupport::TimeWithZone, String], [nil, Class]]]
 ].each do |meth, args|
   ::Delorean::Ruby.whitelist.add_method meth do |method|
     ar_instances.each do |ar|
@@ -254,9 +255,8 @@ end
 ::Delorean::Ruby.whitelist.add_method :lookup_grid_distinct_entry do |method|
   method.called_on OpenStruct, with: [[Date, Time,
                                        ActiveSupport::TimeWithZone, String],
-                                        Hash]
+                                      Hash]
 end
-
 
 mcfly_cache_adapter = ::Marty::CacheAdapters::McflyRubyCache.new(
   size_per_class: 1000
@@ -278,7 +278,7 @@ end
 class OpenStruct
   # the default as_json produces {"table"=>h} which is quite goofy
   def as_json(*)
-    self.to_h
+    to_h
   end
 end
 

@@ -4,6 +4,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   def self.klass
     Marty::BaseRule
   end
+
   def klass
     self.class.klass
   end
@@ -11,19 +12,21 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   def self.base_fields
     [:name]
   end
+
   def self.computed_fields
     [:computed_guards, :grids, :results]
   end
+
   def configure(c)
     super
     c.model = self.class.klass
     c.title = I18n.t('rule')
     c.attributes = self.class.base_fields +
                    klass.guard_info.
-                     sort_by{|_, h| h[:order] || 0}.
-                     reject{|_, h| h[:hidden]}.
+                     sort_by { |_, h| h[:order] || 0 }.
+                     reject { |_, h| h[:hidden] }.
                      map { |name, _| name.to_sym } + self.class.computed_fields
-    c.store_config.merge!(sorters: [{property: :name, direction: 'ASC'}])
+    c.store_config.merge!(sorters: [{ property: :name, direction: 'ASC' }])
     c.editing      = :in_form
     c.paging       = :pagination
     c.multi_select = false
@@ -42,6 +45,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       @key    = key
       @lineno = lineno
     end
+
     def message
       "keyword '#{@key}' specified more than once (line #{@lineno})"
     end
@@ -53,17 +57,20 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     last_key = nil
     s.lines.each.with_index(1) do |line, idx|
       next if /\A\s*\z/.match(line)
+
       line.chomp!
       begin
         m = /\A\s*([a-z][a-z0-9_]*)\s*=\s*(.*)\s*\z/.match(line)
         if m
           k, v = m[1], m[2]
           raise DupKeyError.new(k, idx) if result.keys.include?(k)
+
           save_linenos[k] = idx
           result[k] = v
           last_key = k
         else
           raise unless last_key
+
           result[last_key] += "\n" + line.strip
         end
       rescue DupKeyError => e
@@ -77,6 +84,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
 
   def self.hash_to_simple(h)
     return unless h && h.present?
+
     lhs_wid = h.keys.map(&:length).max
     fmt = "%-#{lhs_wid}s = %s"
     result = []
@@ -84,7 +92,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       vlines = vstr.lines.map(&:chomp)
       fst = vlines.shift
       result << fmt % [k, fst]
-      vlines.each {|l| result << " "*(lhs_wid+3) + l}
+      vlines.each { |l| result << " " * (lhs_wid + 3) + l }
     end
     result.join("\n")
   end
@@ -94,7 +102,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def jsonb_simple_getter(c)
-    lambda {|r| Marty::BaseRuleView.hash_to_simple(r.send(c)) }
+    lambda { |r| Marty::BaseRuleView.hash_to_simple(r.send(c)) }
   end
 
   def jsonb_simple_setter(c)
@@ -115,7 +123,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     }
   end
 
-  def self.jsonb_field_getter(j, c, nullbool=nil)
+  def self.jsonb_field_getter(j, c, nullbool = nil)
     lambda do |r|
       rv = r.send(j)[c]
       v = nullbool ? (rv == true ? 'True' :
@@ -124,7 +132,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     end
   end
 
-  def self.jsonb_field_setter(j, c, bool=nil)
+  def self.jsonb_field_setter(j, c, bool = nil)
     lambda do |r, rv|
       v = bool ? rv.to_s.downcase == 'true' : rv
       rv == '' || rv == '---' ? r.send(j).delete(c) : r.send(j)[c] = v
@@ -157,7 +165,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     c.width = 150
   end
 
-  def self.grid_column(c, label=nil)
+  def self.grid_column(c, label = nil)
     editor_config = {
       trigger_action: :all,
       xtype:          :combo,
@@ -173,8 +181,8 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       type:          :string,
       getter: jsonb_field_getter(:grids, c.to_s),
       setter: jsonb_field_setter(:grids, c.to_s),
-#      getter: lambda { |r| r.grids[c.to_s] },
-#      setter: lambda { |r, v| r.grids[c.to_s] = v },
+      #      getter: lambda { |r| r.grids[c.to_s] },
+      #      setter: lambda { |r, v| r.grids[c.to_s] = v },
     }
   end
 
@@ -183,7 +191,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def form_items_guards
-    klass.guard_info.reject{|_, h| h[:hidden]}.keys.map{|x|x.to_sym}
+    klass.guard_info.reject { |_, h| h[:hidden] }.keys.map(&:to_sym)
   end
 
   def form_items_grids
@@ -214,10 +222,10 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
              form_items_guards,
              border: false,
              width: "40%",
-        ),
+            ),
         vbox(width: '2%', border: false),
         vbox(
-             width: '55%', border: false),
+          width: '55%', border: false),
         height: '40%',
         border: false,
       ),
@@ -227,7 +235,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
              form_items_results,
              width: '99%',
              border: false
-        ),
+            ),
         height: '40%',
        border: false
       )
@@ -264,7 +272,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       if h[:type] != :range
         c.getter = Marty::BaseRuleView.jsonb_field_getter(meth, namestr, nullbool)
         c.setter = Marty::BaseRuleView.jsonb_field_setter(meth, namestr,
-                                                          h[:type]==:boolean)
+                                                          h[:type] == :boolean)
         c.filter_with = lambda do |rel, value, op|
           v = ActiveRecord::Base.connection.quote(value)[1..-2]
           rel.where("#{meth}->>'#{namestr}' like '%#{v}%'")

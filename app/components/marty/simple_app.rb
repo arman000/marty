@@ -77,7 +77,7 @@ class Marty::SimpleApp < Netzke::Base
   def menu_bar_config(overrides = {})
     {
       :itemId => 'menu_bar',
-      :layout => {overflow_handler: 'Menu'},
+      :layout => { overflow_handler: 'Menu' },
       :xtype => 'toolbar',
       :region => 'north',
       :items => menu

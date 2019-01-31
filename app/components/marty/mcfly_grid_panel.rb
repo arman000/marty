@@ -4,14 +4,14 @@ class Marty::McflyGridPanel < Marty::Grid
 
     warped = Marty::Util.warped?
 
-    c.editing  = !warped && c.editing || :none
+    c.editing = !warped && c.editing || :none
 
     [:update, :delete, :create].each do |perm|
       c.permissions[perm] = false if warped
     end
 
     # default sort all Mcfly grids with id
-    c.store_config.merge!({sorters: [{property: :id, direction: 'ASC'}]})
+    c.store_config.merge!(sorters: [{ property: :id, direction: 'ASC' }])
   end
 
   def get_records(params)
@@ -19,9 +19,9 @@ class Marty::McflyGridPanel < Marty::Grid
    tb = model.table_name
 
    model.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
-                     ts, ts).scoping do
+               ts, ts).scoping do
       super
-    end
+   end
   end
 
   ######################################################################
@@ -55,7 +55,6 @@ class Marty::McflyGridPanel < Marty::Grid
 
   # edit-in-form submit with dup support
   endpoint :edit_window__edit_form__submit do |params|
-
     if params["dup"]
       # FIXME: copied from basepack grid endpoint
       # :add_window__add_form__netzke_submit
@@ -80,7 +79,8 @@ class Marty::McflyGridPanel < Marty::Grid
     end
   end
 
-private
+  private
+
   def self.mcfly_scope(sort_column)
     lambda { |r|
       ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)

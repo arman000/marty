@@ -20,7 +20,7 @@ class Marty::PromiseView < Netzke::Tree::Base
     config.title = I18n.t("jobs.promise_view")
     config.model = "Marty::VwPromise"
     config.attributes = [
-      {name: :title, xtype: :treecolumn},
+      { name: :title, xtype: :treecolumn },
       :user__login,
       :job_id,
       :start_dt,

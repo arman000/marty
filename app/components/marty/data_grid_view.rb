@@ -10,7 +10,7 @@ module Marty; class DataGridView < McflyGridPanel
   # handles so they can be used by various other components
   # FIXME: add the ability to pull specific functions
   # from other component javascripts or add a base to pull from
-  def self.show_grid_js(options={})
+  def self.show_grid_js(options = {})
     dg        = options[:data_grid] || 'data_grid'
     title_str = options[:title_str] || 'Data Grid'
 
@@ -74,15 +74,15 @@ module Marty; class DataGridView < McflyGridPanel
     c.model   = "Marty::DataGrid"
     c.attributes =
       [
-       :name,
-       :vcols,
-       :hcols,
-       :lenient,
-       :data_type,
-       :created_dt,
+        :name,
+        :vcols,
+        :hcols,
+        :lenient,
+        :data_type,
+        :created_dt,
       ]
 
-    c.store_config.merge!({sorters:  [{property: :name, direction: 'ASC'}]})
+    c.store_config.merge!(sorters:  [{ property: :name, direction: 'ASC' }])
     c.editing      = :in_form
     c.paging       = :pagination
     c.multi_select = false
@@ -153,8 +153,8 @@ module Marty; class DataGridView < McflyGridPanel
 
   def default_form_items
     [
-     :name,
-     textarea_field(:export, height: 300, hide_label: true),
+      :name,
+      textarea_field(:export, height: 300, hide_label: true),
     ]
   end
 
@@ -176,7 +176,7 @@ module Marty; class DataGridView < McflyGridPanel
     c.label  = "Horizontal Attrs"
     c.width  = 200
     c.getter = lambda { |r|
-      r.dir_infos("h").map {|inf| inf["attr"]}.join(', ')
+      r.dir_infos("h").map { |inf| inf["attr"] }.join(', ')
     }
   end
 
@@ -184,7 +184,7 @@ module Marty; class DataGridView < McflyGridPanel
     c.label  = "Vertical Attrs"
     c.width  = 200
     c.getter = lambda { |r|
-      r.dir_infos("v").map {|inf| inf["attr"]}.join(', ')
+      r.dir_infos("v").map { |inf| inf["attr"] }.join(', ')
     }
   end
 

@@ -8,7 +8,6 @@ class Marty::ScriptForm < Marty::Form
   ######################################################################
 
   endpoint :netzke_load do |params|
-
     return client.netzke_notify("Permission Denied") unless
       self.class.has_any_perm?
 
@@ -53,13 +52,12 @@ class Marty::ScriptForm < Marty::Form
   end
 
   endpoint :submit do |params|
-
     return client.netzke_notify("Permission Denied") unless
       self.class.has_any_perm?
 
     # copied from corresponding method in form_panel.services
     data = ActiveSupport::JSON.decode(params[:data])
-    data.each_pair do |k,v|
+    data.each_pair do |k, v|
       data[k] = nil if v.blank? || v == "null"
     end
 
@@ -153,18 +151,18 @@ class Marty::ScriptForm < Marty::Form
     c.model = "Marty::Script"
     c.items =
       [
-       {
-         line_numbers:   true,
-         indent_unit:    4,
-         tab_mode:       "shift",
-         match_brackets: true,
-         hide_label:     true,
-         xtype:          :codemirror,
-         mode:           "text/x-delorean",
-         name:           :body,
-         empty_text:     "No script selected.",
-         getter:         lambda { |r| r.body },
-       },
+        {
+          line_numbers:   true,
+          indent_unit:    4,
+          tab_mode:       "shift",
+          match_brackets: true,
+          hide_label:     true,
+          xtype:          :codemirror,
+          mode:           "text/x-delorean",
+          name:           :body,
+          empty_text:     "No script selected.",
+          getter:         lambda { |r| r.body },
+        },
       ]
   end
 end

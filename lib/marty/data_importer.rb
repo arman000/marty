@@ -20,21 +20,21 @@ module Marty
                                col_sep             = "\t",
                                allow_dups          = false,
                                preprocess_function = nil
-                               )
+                              )
 
-      recs = self.do_import(klass,
-                            data,
-                            dt,
-                            cleaner_function,
-                            validation_function,
-                            col_sep,
-                            allow_dups,
-                            preprocess_function,
-                            )
+      recs = do_import(klass,
+                       data,
+                       dt,
+                       cleaner_function,
+                       validation_function,
+                       col_sep,
+                       allow_dups,
+                       preprocess_function,
+                      )
 
-      recs.each_with_object(Hash.new(0)) {|(op, id), h|
+      recs.each_with_object(Hash.new(0)) do |(op, id), h|
         h[op] += 1
-      }
+      end
     end
 
     # Given a Mcfly klass and CSV data, import data into the database
@@ -50,7 +50,7 @@ module Marty
                        col_sep             = "\t",
                        allow_dups          = false,
                        preprocess_function = nil
-                       )
+                      )
 
       parsed = data.is_a?(Array) ? data :
         CSV.new(data, headers: true, col_sep: col_sep)
@@ -64,13 +64,12 @@ module Marty
           []
 
         raise "bad cleaner function result" unless
-          cleaner_ids.all? {|id| id.is_a?(Integer) }
+          cleaner_ids.all? { |id| id.is_a?(Integer) }
 
         eline = 0
 
         begin
-          res = parsed.each_with_index.map do
-            |row, line|
+          res = parsed.each_with_index.map do |row, line|
             eline = line
 
             # skip lines which are all nil
@@ -85,8 +84,7 @@ module Marty
 
         ids = {}
         # raise an error if record referenced more than once.
-        res.each_with_index do
-          |(op, id), line|
+        res.each_with_index do |(op, id), line|
           raise Error.
             new("record referenced more than once", [ids[id], line]) if
             op != :blank && ids.member?(id) && !allow_dups
@@ -110,7 +108,7 @@ module Marty
           ids.keys.compact.count == 0
 
         klass.delete(remainder_ids)
-        res + remainder_ids.map {|id| [:clean, id]}
+        res + remainder_ids.map { |id| [:clean, id] }
       end
     end
   end

@@ -90,12 +90,13 @@ class Marty::User < Marty::Base
     Mcfly.whodunnit
   end
 
- def self.has_role(role)
-    mr = Mcfly.whodunnit.roles rescue []
-    mr.any? {|attr| attr.name == role}
- end
+  def self.has_role(role)
+     mr = Mcfly.whodunnit.roles rescue []
+     mr.any? { |attr| attr.name == role }
+  end
 
-private
+  private
+
   def verify_changes
     # If current users role is only user_manager, restrict following
     # 1 - Do not allow user to edit own record
@@ -105,19 +106,19 @@ private
         Rails.configuration.marty.system_account.to_s)
       system_id = system_user.id if system_user
 
-      if self.id == Mcfly.whodunnit.id
-        roles.each {|r| roles.delete r unless r.name == "user_manager"}
+      if id == Mcfly.whodunnit.id
+        roles.each { |r| roles.delete r unless r.name == "user_manager" }
         errors.add :base, "User Managers cannot edit "\
           "or add additional roles to their own accounts"
-      elsif self.id == system_id
+      elsif id == system_id
         errors.add :base,
-        "User Managers cannot edit the application system account"
+                   "User Managers cannot edit the application system account"
       end
     end
 
     errors.add :base, "The application system account cannot be deactivated" if
-      self.login == Rails.configuration.marty.system_account.to_s &&
-      !self.active
+      login == Rails.configuration.marty.system_account.to_s &&
+      !active
 
     errors.blank?
   end
@@ -128,14 +129,14 @@ private
 
   def destroy_user
     errors.add :base, "You cannot delete your own account" if
-      self.login == Mcfly.whodunnit.login
+      login == Mcfly.whodunnit.login
 
     errors.add :base, "You cannot delete the system account" if
-      self.login == Rails.configuration.marty.system_account.to_s
+      login == Rails.configuration.marty.system_account.to_s
     # Default to disallowing any deletions for now
 
     errors.add :base,
-    "Users cannot be deleted - set 'Active' to false to disable the account"
+               "Users cannot be deleted - set 'Active' to false to disable the account"
 
     throw :abort unless errors.blank?
   end

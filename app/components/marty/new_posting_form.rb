@@ -27,14 +27,14 @@ class Marty::NewPostingForm < Marty::Form
 
     c.model = "Marty::Posting"
     c.items = [
-               {
-                 name: :posting_type__name,
-                 scope: lambda { |r|
-                   r.where(name: Marty::NewPostingForm.can_perform_actions)
-                 },
-               },
-               :comment,
-              ]
+      {
+        name: :posting_type__name,
+        scope: lambda { |r|
+          r.where(name: Marty::NewPostingForm.can_perform_actions)
+        },
+      },
+      :comment,
+    ]
   end
 end
 

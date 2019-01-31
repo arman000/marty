@@ -36,14 +36,14 @@ Gem::Specification.new do |s|
   s.add_dependency 'mcfly', '0.0.20'
 
   s.add_dependency 'coderay'
+  s.add_dependency 'json-schema'
   s.add_dependency 'net-ldap', '~> 0.16.1'
   s.add_dependency 'rubyzip'
   s.add_dependency 'sqlite3'
-  s.add_dependency 'json-schema'
 
   # used for signing aws ec2 requests
   s.add_dependency 'aws-sigv4', '~> 1.0', '>= 1.0.2'
 
-  s.add_dependency 'delayed_job_active_record'
   s.add_dependency 'daemons', '~> 1.3.1'
+  s.add_dependency 'delayed_job_active_record'
 end

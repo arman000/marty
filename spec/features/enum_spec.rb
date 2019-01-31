@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'test netzke + pg_enum compatibility', js: true do
-
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
@@ -14,7 +13,6 @@ feature 'test netzke + pg_enum compatibility', js: true do
   end
 
   it 'shows netzke grid combobox works w pg_enums' do
-
     lp_grid = netzke_find('loan_program_view')
     @amort_combo = netzke_find('amortization_type__name', 'combobox')
     @mortgage_combo = netzke_find('mortgage_type__name', 'combobox')
@@ -41,7 +39,6 @@ feature 'test netzke + pg_enum compatibility', js: true do
       press('Pricing Config.')
       press('Loan Programs')
     end
-
 
     and_by 'bring up new window' do
       press('Add')
@@ -86,7 +83,7 @@ feature 'test netzke + pg_enum compatibility', js: true do
       wait_for_ajax
       aggregate_failures do
         expect(lp_grid.row_count).to eq(2)
-        expect(lp_grid.get_row_vals(2)).to netzke_include({enum_state: 'CA'})
+        expect(lp_grid.get_row_vals(2)).to netzke_include(enum_state: 'CA')
       end
     end
 
@@ -112,7 +109,7 @@ feature 'test netzke + pg_enum compatibility', js: true do
       wait_for_ajax
       aggregate_failures do
         expect(lp_grid.row_count).to eq(2)
-        expect(lp_grid.get_row_vals(1)).to netzke_include({enum_state: nil})
+        expect(lp_grid.get_row_vals(1)).to netzke_include(enum_state: nil)
       end
     end
 
@@ -178,13 +175,12 @@ feature 'test netzke + pg_enum compatibility', js: true do
 
     and_by "filter form by state_enum ASCENDING" do
       press("Enum state")
-      expect(lp_grid.get_col_vals(:enum_state)).to eq(["AS","AZ","DC","WA"])
+      expect(lp_grid.get_col_vals(:enum_state)).to eq(["AS", "AZ", "DC", "WA"])
     end
 
     and_by "filter form by state_enum DESCENDING" do
       press("Enum state")
-      expect(lp_grid.get_col_vals(:enum_state)).to eq(["WA","DC","AZ","AS"])
+      expect(lp_grid.get_col_vals(:enum_state)).to eq(["WA", "DC", "AZ", "AS"])
     end
-
   end
 end

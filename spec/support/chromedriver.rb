@@ -2,12 +2,12 @@ require 'selenium-webdriver'
 require Pathname.new(__FILE__).parent.to_s + '/download_helper'
 
 module Marty; module RSpec; module Chromedriver
-  def self.register_chrome_driver driver= :chrome, opts={}
+  def self.register_chrome_driver driver = :chrome, opts = {}
     Capybara.register_driver driver do |app|
       copts = {
         chromeOptions: opts.deep_merge(
-          prefs: {'download.default_directory' =>
-                  Marty::RSpec::DownloadHelper::PATH.to_s}),
+          prefs: { 'download.default_directory' =>
+                  Marty::RSpec::DownloadHelper::PATH.to_s }),
         pageLoadStrategy: 'none',
       }
 
@@ -26,7 +26,6 @@ module Marty; module RSpec; module Chromedriver
   headless_args = ['no-sandbox', 'headless', 'disable-gpu', "window-size=#{window_size}"]
 
   register_chrome_driver(:headless_chrome, args: headless_args) do |driver|
-
     # workaround to enable downloading with headless chrome
     bridge = driver.browser.send(:bridge)
     bridge.http.call(:post,
@@ -41,5 +40,4 @@ module Marty; module RSpec; module Chromedriver
   Capybara.default_driver    = :chrome
   Capybara.javascript_driver = ENV['HEADLESS'] == 'true' ?
                                  :headless_chrome : :chrome
-
 end end end

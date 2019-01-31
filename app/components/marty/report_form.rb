@@ -1,5 +1,4 @@
 class Marty::ReportForm < Marty::Form
-
   # override apply for background generation
   action :apply do |a|
     a.text     = a.tooltip = I18n.t("reporting.background")
@@ -32,7 +31,7 @@ class Marty::ReportForm < Marty::Form
 
   def self.get_report_engine(params)
     d_params = ActiveSupport::JSON.decode(params[:data] || "{}")
-    d_params.each_pair do |k,v|
+    d_params.each_pair do |k, v|
       d_params[k] = nil if v.blank? || v == "null"
     end
 
@@ -44,7 +43,7 @@ class Marty::ReportForm < Marty::Form
 
     roles = engine.evaluate(node, "roles", {}) rescue nil
 
-    if roles && !roles.any?{ |r| Marty::User.has_role(r) }
+    if roles && !roles.any? { |r| Marty::User.has_role(r) }
       # insufficient permissions
       return []
     end
@@ -67,7 +66,7 @@ class Marty::ReportForm < Marty::Form
 
       res = Delorean::Engine.grok_runtime_exception(exc)
       res["backtrace"] =
-        res["backtrace"].map {|m, line, fn| "#{m}:#{line} #{fn}"}.join('\n')
+        res["backtrace"].map { |m, line, fn| "#{m}:#{line} #{fn}" }.join('\n')
       res
     end
   end
@@ -84,7 +83,7 @@ class Marty::ReportForm < Marty::Form
     engine.background_eval(node,
                            d_params,
                            ["result", "title", "format"],
-                           )
+                          )
 
     client.netzke_notify "Report can be accessed from the Jobs Dashboard ..."
   end
@@ -94,9 +93,9 @@ class Marty::ReportForm < Marty::Form
   client_class do |c|
     # Find the mount path for the Marty engine. FIXME: this is likely
     # very brittle.
-    @@mount_path = Rails.application.routes.routes.detect {
-      |r| r.app.app == Marty::Engine
-    }.format({})
+    @@mount_path = Rails.application.routes.routes.detect do |r|
+                     r.app.app == Marty::Engine
+    end.format({})
 
     c.mount_path = l(<<-JS)
     function() {
@@ -113,11 +112,11 @@ class Marty::ReportForm < Marty::Form
   def eval_form_items(engine, items)
     case items
     when Array
-      items.map {|x| eval_form_items(engine, x)}
+      items.map { |x| eval_form_items(engine, x) }
     when Hash
-      items.each_with_object({}) { |(key, value), result|
+      items.each_with_object({}) do |(key, value), result|
         result[key] = eval_form_items(engine, value)
-      }
+      end
     when String
       items.starts_with?(':') ? items[1..-1].to_sym : items
     when Class
@@ -150,24 +149,23 @@ class Marty::ReportForm < Marty::Form
 
       items, title, format = engine.
         evaluate(root_sess[:selected_node],
-                       ["form", "title", "format"],
-                       {},
-                       )
+                 ["form", "title", "format"],
+                 {},
+                )
 
       raise "bad form items" unless items.is_a?(Array)
       raise "bad format" unless
         Marty::ContentHandler::GEN_FORMATS.member?(format)
-
     rescue => exc
       c.title = "ERROR"
       c.items =
         [
-         {
-           field_label: 'Exception',
-           xtype:       :displayfield,
-           name:        'displayfield1',
-           value:       "<span style=\"color:red;\">#{exc}</span>"
-         },
+          {
+            field_label: 'Exception',
+            xtype:       :displayfield,
+            name:        'displayfield1',
+            value:       "<span style=\"color:red;\">#{exc}</span>"
+          },
         ]
       return
     end
@@ -178,7 +176,7 @@ class Marty::ReportForm < Marty::Form
 
     items = Marty::Xl.symbolize_keys(eval_form_items(engine, items), ':')
 
-    items = [{html: "<br><b>No input is needed for this report.</b>"}] if
+    items = [{ html: "<br><b>No input is needed for this report.</b>" }] if
       items.empty?
 
     # add hidden fields for selected tag/script/node
@@ -186,15 +184,14 @@ class Marty::ReportForm < Marty::Form
               :selected_script_name,
               :selected_node,
               # just for testing
-              :selected_testing,
-             ].map { |f|
+              :selected_testing,].map do |f|
       {
         name:   f,
         xtype:  :textfield,
         hidden: true,
         value:  root_sess[f],
       }
-    }
+    end
 
     c.items              = items
     c.repformat          = format
@@ -202,7 +199,7 @@ class Marty::ReportForm < Marty::Form
     c.reptitle           = title
     c.authenticity_token = controller.send(:form_authenticity_token)
 
-    [:foreground, :link].each{|a| actions[a].disabled = !!background_only}
+    [:foreground, :link].each { |a| actions[a].disabled = !!background_only }
   end
 end
 

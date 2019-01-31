@@ -12,8 +12,7 @@ relative = Pathname.new(__FILE__).parent.to_s
  'performance_helper',
  'structure_compare',
  'custom_matchers',
- 'custom_selectors',
-].each {|f| require (relative + '/' + f)}
+ 'custom_selectors',].each { |f| require (relative + '/' + f) }
 
 module Marty; module RSpec; module Suite
   include Marty::RSpec::Setup

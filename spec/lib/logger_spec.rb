@@ -24,16 +24,16 @@ module Marty
     end
 
     it "logs" do
-      info_s = {'info' => 'message'}
-      error_s = [1, 2, 3, {'error' =>'message'}]
-      fatal_s = ["string", 123, {'fatal' => "message",
-                                 'another_key' => 'value'}]
+      info_s = { 'info' => 'message' }
+      error_s = [1, 2, 3, { 'error' => 'message' }]
+      fatal_s = ["string", 123, { 'fatal' => "message",
+                                 'another_key' => 'value' }]
       Marty::Logger.info('info message', info_s)
       Marty::Logger.error('error message', error_s)
       Marty::Logger.fatal('fatal message', fatal_s)
       log = Marty::Log.all
-      log_detail = log.map{|l| [l[:message_type], l[:message], l[:details]]}
-      log_ts = log.map{|l| l[:timestamp]}
+      log_detail = log.map { |l| [l[:message_type], l[:message], l[:details]] }
+      log_ts = log.map { |l| l[:timestamp] }
       expect(log_detail[0]).to eq(["info", "info message", info_s])
       expect(log_detail[1]).to eq(["error", "error message", error_s])
       expect(log_detail[2]).to eq(["fatal", "fatal message", fatal_s])
@@ -57,8 +57,8 @@ module Marty
       log = Marty::Log.first
       expect(log.message_type).to eq('error')
       expect(log.message).to eq(bd)
-      expect(log.details).to eq({ "message" => the_error,
-                                  "data" => JSON.parse(data.to_json)})
+      expect(log.details).to eq("message" => the_error,
+                                  "data" => JSON.parse(data.to_json))
     end
   end
 
@@ -92,17 +92,16 @@ module Marty
         engine = Marty::ScriptSet.new.get_engine(NAME_K)
 
         res = (1..1000).map do |i|
-          engine.background_eval("LOGGER", {"msgid" => i}, ["result"])
+          engine.background_eval("LOGGER", { "msgid" => i }, ["result"])
         end
 
         # wait for all the jobs to finish; collect/check their result
-        expect(res.map {|x| x["result"]}.sort).to eq (1..1000).to_a
+        expect(res.map { |x| x["result"] }.sort).to eq (1..1000).to_a
 
         line_count = File.readlines("/tmp/logaction.txt").count
 
         log_count = Marty::Log.all.count
-        failed_count = f.readlines.select do
-          |l|
+        failed_count = f.readlines.select do |l|
           l == "Marty::Logger failure: database is locked\n"
         end.count
 

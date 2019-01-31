@@ -8,7 +8,9 @@ class Marty::ImportView < Marty::Form
   end
 
   def parent_model; end
+
   def import_model; end
+
   def model_view;   end
 
   def initialize args, kwargs
@@ -76,18 +78,17 @@ class Marty::ImportView < Marty::Form
     begin
       processed = process_import_data
       res       = import(processed)
-      result    = res.map{|k,v| format_message(k,v)}
+      result    = res.map { |k, v| format_message(k, v) }
 
       messages  = post_import
       result << messages if messages
 
       client.set_result result.join("<br/>")
-
     rescue Marty::DataImporter::Error => exc
       result = [
-                "Import failed on line(s): #{exc.lines.join(', ')}",
-                "Error: #{exc.to_s}",
-               ]
+        "Import failed on line(s): #{exc.lines.join(', ')}",
+        "Error: #{exc.to_s}",
+      ]
 
       client.set_result '<font color="red">' + result.join("<br/>") + "</font>"
     rescue => e

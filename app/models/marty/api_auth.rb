@@ -7,8 +7,8 @@ class Marty::ApiAuth < Marty::Base
 
   class ApiAuthValidator < ActiveModel::Validator
     def validate(api)
-      api.errors.add(:base, "API Key length must be #{KEY_SIZE*2}") if
-        api.api_key && api.api_key.length != KEY_SIZE*2
+      api.errors.add(:base, "API Key length must be #{KEY_SIZE * 2}") if
+        api.api_key && api.api_key.length != KEY_SIZE * 2
 
       api.errors.add(:base, "Script Name must reference a valid script") unless
         Marty::Script.find_script(api.script_name, nil)
@@ -21,10 +21,9 @@ class Marty::ApiAuth < Marty::Base
   validates_uniqueness_of :app_name, scope: [:script_name,
                                              :obsoleted_dt]
 
-
   before_validation do
     self.api_key = Marty::ApiAuth.generate_key if
-      self.api_key.blank?
+      api_key.blank?
   end
 
   def self.generate_key

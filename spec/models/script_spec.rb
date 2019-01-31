@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-s1 =<<eof
+s1 = <<eof
 NodeA:
   attr = 123
 eof
 
-s2 =<<eof
+s2 = <<eof
 NodeB:
   attr = 456
 eof
@@ -35,12 +35,16 @@ describe Marty::Script do
         to change(Marty::Script, :count).by(1)
 
       Marty::Script.load_a_script('TestExistsAndDifferent2', s1, now - 1.minute)
-      expect { Marty::Script.load_a_script('TestExistsAndDifferent2',
-                                           s2, now) }.
-        to change { Marty::Script.where(name: 'TestExistsAndDifferent2',
-                                        obsoleted_dt: 'infinity').count }.by(0)
+      expect do
+        Marty::Script.load_a_script('TestExistsAndDifferent2',
+                                    s2, now)
+      end.
+        to change {
+             Marty::Script.where(name: 'TestExistsAndDifferent2',
+                                        obsoleted_dt: 'infinity').count
+           }           .by(0)
       expect(Marty::Script.find_by(
-               obsoleted_dt: 'infinity', name: 'TestExistsAndDifferent2').
+        obsoleted_dt: 'infinity', name: 'TestExistsAndDifferent2').
                created_dt.to_s).to eq(now.to_s)
     end
   end
@@ -53,7 +57,7 @@ describe Marty::Script do
     let(:now) { Time.zone.now - 1.minute }
 
     it 'loads each script given a hash' do
-      Marty::Script.load_script_bodies({'Test1' => s1, 'Test2' => s2}, now)
+      Marty::Script.load_script_bodies({ 'Test1' => s1, 'Test2' => s2 }, now)
       expect(Marty::Script).to have_received(:load_a_script).
         with('Test1', s1, now)
       expect(Marty::Script).to have_received(:load_a_script).
@@ -71,24 +75,30 @@ describe Marty::Script do
     end
 
     it 'creates a new tag if none exist yet with provided datetime' do
-      expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1,
-                                                        'Test2' => s2}, now) }.
+      expect do
+        @tag = Marty::Script.load_script_bodies({ 'Test1' => s1,
+                                                        'Test2' => s2 }, now)
+      end.
         to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
 
     it 'creates a new tag when there is an older one present' do
       Marty::Tag.do_create(now - 1.minute, 'initial test tag')
-      expect { @tag = Marty::Script.load_script_bodies({'Test1' => s1,
-                                                        'Test2' => s2}, now) }.
+      expect do
+        @tag = Marty::Script.load_script_bodies({ 'Test1' => s1,
+                                                        'Test2' => s2 }, now)
+      end.
         to change(Marty::Tag, :count).by(1)
       expect(@tag.created_dt).to eq(now + 1.second)
     end
 
     it 'creates a new tag when no previous tag is present and no datetime ' +
       'provided' do
-      expect { tag = Marty::Script.load_script_bodies({'Test1' => s1,
-                                                       'Test2' => s2}) }.
+      expect do
+        tag = Marty::Script.load_script_bodies('Test1' => s1,
+                                                       'Test2' => s2)
+      end.
         to change(Marty::Tag, :count).by(1)
     end
 
@@ -96,7 +106,7 @@ describe Marty::Script do
       "modified" do
       Marty::Script.create!(name: 'Test1', body: s1, created_dt: now)
       Marty::Tag.do_create(now + 1.second, 'tag created by test')
-      expect { Marty::Script.load_script_bodies({'Test1' => s1}) }.
+      expect { Marty::Script.load_script_bodies('Test1' => s1) }.
         not_to change(Marty::Tag, :count)
     end
   end
@@ -118,7 +128,6 @@ describe Marty::Script do
       expect(Marty::Script).to have_received(:load_script_bodies).
         with(match_array([['Script1', ls1], ['Script2', ls2]]), now)
     end
-
   end
 
   describe '.get_script_filenames' do

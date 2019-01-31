@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'under Sytem menu, User Management worflows', js: true do
-
   def go_to_user_view
     press('System')
     press('User Management')
@@ -78,13 +77,13 @@ feature 'under Sytem menu, User Management worflows', js: true do
 
     and_by 'check row got edited' do
       wait_for_ajax
-      expect(user_view.get_row_vals(2)).to netzke_include({
-        :login=>"new_login",
-        :firstname=>"new_fname",
-        :lastname=>"new_lname",
-        :active=>true,
-        :roles=>"User Manager,Viewer",
-        })
+      expect(user_view.get_row_vals(2)).to netzke_include(
+        :login => "new_login",
+        :firstname => "new_fname",
+        :lastname => "new_lname",
+        :active => true,
+        :roles => "User Manager,Viewer",
+      )
     end
 
     and_by 'delete user fails' do
@@ -104,7 +103,6 @@ feature 'under Sytem menu, User Management worflows', js: true do
   end
 
   describe 'check user permissions & what buttons appear' do
-
     before(:all) do
       populate_test_users
     end

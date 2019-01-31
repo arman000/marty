@@ -1,7 +1,7 @@
 class Marty::RpcCall
   # POST to a remote marty
-  def self.marty_post(host, port, path, script, node, attrs, params, options={},
-                      ssl=false)
+  def self.marty_post(host, port, path, script, node, attrs, params, options = {},
+                      ssl = false)
     http = Net::HTTP.new(host, port)
     http.use_ssl = ssl
     request = Net::HTTP::Post.new(path)
@@ -20,11 +20,12 @@ class Marty::RpcCall
 
     res = JSON.parse(response.body)
     raise res["error"] if res.is_a?(Hash) && !res["error"].blank?
+
     res
   end
 
-  def self.marty_download(host, port, path, job_id, ssl=false)
-    params = {job_id: job_id}
+  def self.marty_download(host, port, path, job_id, ssl = false)
+    params = { job_id: job_id }
     url = path + '?' + URI.encode(URI.encode_www_form(params))
 
     http = Net::HTTP.new(host, port)

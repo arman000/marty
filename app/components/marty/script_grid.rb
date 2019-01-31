@@ -1,9 +1,9 @@
 class Marty::ScriptGrid < Marty::Grid
   has_marty_permissions \
-  create: [:dev],
-  read: :any,
-  update: [:dev],
-  delete: [:dev]
+    create: [:dev],
+    read: :any,
+    update: [:dev],
+    delete: [:dev]
 
   def configure(c)
     super
@@ -11,8 +11,8 @@ class Marty::ScriptGrid < Marty::Grid
     c.model                  = "Marty::Script"
     c.multi_select           = false
     c.attributes ||= [:name, :created_dt, :tag]
-    c.title   ||= I18n.t('scripts', default: "Scripts")
-    c.store_config.merge!({sorters: [{property: :name, direction: 'ASC'}]})
+    c.title ||= I18n.t('scripts', default: "Scripts")
+    c.store_config.merge!(sorters: [{ property: :name, direction: 'ASC' }])
   end
 
   def get_records(params)
@@ -26,7 +26,7 @@ class Marty::ScriptGrid < Marty::Grid
 
     tb = model.table_name
     model.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
-                     ts, ts).scoping do
+                ts, ts).scoping do
       super
     end
   end

@@ -11,13 +11,12 @@ class Marty::Aws::Base
               :creds,
               :version,
               :host,
-
-  def self.get url
-    uri = URI.parse(url)
-    req = Net::HTTP.new(uri.host, uri.port)
-    req.read_timeout = req.open_timeout = ENV['AWS_REQUEST_TIMEOUT'] || 0.25
-    req.start {|http| http.get(uri.to_s) }.body
-  end
+              def self.get url
+                uri = URI.parse(url)
+                req = Net::HTTP.new(uri.host, uri.port)
+                req.read_timeout = req.open_timeout = ENV['AWS_REQUEST_TIMEOUT'] || 0.25
+                req.start { |http| http.get(uri.to_s) }.body
+              end
 
   def self.is_aws?
     # FIXME: hack to pass tests on CI
@@ -44,6 +43,7 @@ class Marty::Aws::Base
   end
 
   private
+
   def get_instance_id
     query_meta_data('instance-id').to_s
   end
@@ -53,7 +53,7 @@ class Marty::Aws::Base
   end
 
   def sym obj
-    obj.each_with_object({}){|(k,v),h| h[k.underscore.to_sym] = v}
+    obj.each_with_object({}) { |(k, v), h| h[k.underscore.to_sym] = v }
   end
 
   def get_credentials

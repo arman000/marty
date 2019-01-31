@@ -34,6 +34,7 @@ describe Marty::JobController, slow: true do
   def wait_for_jobs
     60.times do
       break unless Marty::Promise.where(result: {}).exists?
+
       sleep 1
     end
   end
@@ -43,18 +44,18 @@ describe Marty::JobController, slow: true do
 
     res = engine.evaluate("Y", "d")
     expect(res).to eq([
-                       {"z"=>0.875, "a"=>{"b"=>{"e"=>0.125}}},
-                       {"z"=>0.875, "a"=>{"b"=>{"e"=>1.125}}},
-                       {"z"=>0.875, "a"=>{"b"=>{"e"=>2.125}}},
+                        { "z" => 0.875, "a" => { "b" => { "e" => 0.125 } } },
+                        { "z" => 0.875, "a" => { "b" => { "e" => 1.125 } } },
+                        { "z" => 0.875, "a" => { "b" => { "e" => 2.125 } } },
                       ])
 
     expect(Marty::Promise.where(start_dt: nil).count).to eq 0
 
-    expect {
-      res = engine.evaluate("Y", "d", {"s" => 1})
+    expect do
+      res = engine.evaluate("Y", "d", "s" => 1)
       # force res to be evaluated
       res.to_s
-    }.to raise_error(RuntimeError)
+    end.to raise_error(RuntimeError)
 
     wait_for_jobs
 
@@ -69,36 +70,36 @@ describe Marty::JobController, slow: true do
     # However - delayed_job initializer config sets this to 1 for test
     slp = 5
 
-    exp_res = {"d"=>[
-                     {"z"=>slp,"a"=>{"b"=>{"e"=>1-slp}}},
-                     {"z"=>slp,"a"=>{"b"=>{"e"=>2-slp}}},
-                     {"z"=>slp,"a"=>{"b"=>{"e"=>3-slp}}},
-                    ]}
+    exp_res = { "d" => [
+      { "z" => slp, "a" => { "b" => { "e" => 1 - slp } } },
+      { "z" => slp, "a" => { "b" => { "e" => 2 - slp } } },
+      { "z" => slp, "a" => { "b" => { "e" => 3 - slp } } },
+    ] }
 
-    bench = Benchmark.measure {
-      res = engine.evaluate("Y", "f", {"s" => slp})
+    bench = Benchmark.measure do
+      res = engine.evaluate("Y", "f", "s" => slp)
       expect(res).to eq exp_res
-    }
+    end
 
     # If "f" is evaluated in serial fashion, then the process would
     # take slp*3+ seconds.  Make sure that we had some parallel
     # behavior.
-    expect(bench.real).to be_between(slp, slp*2)
+    expect(bench.real).to be_between(slp, slp * 2)
   end
 
   it "should be able to run long-running tasks in separate jobs (2)" do
     engine = Marty::ScriptSet.new.get_engine(NAME_H)
 
     slp = 5 # hard-coded in script
-    exp_res = {"d"=>[{"a"=>1}, {"a"=>4}]}
+    exp_res = { "d" => [{ "a" => 1 }, { "a" => 4 }] }
 
-    bench = Benchmark.measure {
+    bench = Benchmark.measure do
       res = engine.background_eval("Y", {}, ["d"])
 
       expect(res).to eq exp_res
-    }
+    end
 
-    expect(bench.real).to be_between(slp, slp*2)
+    expect(bench.real).to be_between(slp, slp * 2)
   end
 
   xit "should be to handle non-serializable errors" do
@@ -107,7 +108,7 @@ describe Marty::JobController, slow: true do
     # started when it's forced.  Not sure this is really an issue.
 
     engine = Marty::ScriptSet.new.get_engine(NAME_C)
-    res = engine.background_eval("Z", {"p_title" => NAME_C}, ["result"])
+    res = engine.background_eval("Z", { "p_title" => NAME_C }, ["result"])
     wait_for_jobs
 
     promise = Marty::Promise.find_by_title(NAME_C)
@@ -122,7 +123,7 @@ describe Marty::JobController, slow: true do
 
   it "promise proxies should be stored lazily (not expanded)" do
     engine = Marty::ScriptSet.new.get_engine(NAME_E)
-    engine.background_eval("Z", {"p_title" => NAME_E}, ["result"])
+    engine.background_eval("Z", { "p_title" => NAME_E }, ["result"])
     wait_for_jobs
 
     promise = Marty::Promise.find_by_title(NAME_E)
@@ -138,41 +139,41 @@ describe Marty::JobController, slow: true do
 
   it "should not leave zombie promises when we have exceptions" do
     engine = Marty::ScriptSet.new.get_engine(NAME_D)
-    engine.background_eval("Z", {"p_title" => NAME_D}, ["result"])
+    engine.background_eval("Z", { "p_title" => NAME_D }, ["result"])
     wait_for_jobs
 
     pl = Marty::Promise.all
 
     expect(pl.count).to eq 2
 
-    pl.each { |p|
+    pl.each do |p|
       expect(p.result["error"]).not_to eq nil
       expect(p.end_dt).not_to eq nil
-    }
+    end
   end
 
   it "should pass p_title to promise create()" do
     engine = Marty::ScriptSet.new.get_engine(NAME_A)
-    res = engine.evaluate("Y", "a", {"q" => 1})
+    res = engine.evaluate("Y", "a", "q" => 1)
     wait_for_jobs
 
-    expect(res).to eq({"b"=>{"e"=>0.125}})
+    expect(res).to eq("b" => { "e" => 0.125 })
     expect(Marty::Promise.all.map(&:title).sort).to eq(["aaa", "bbb"])
   end
 
   it "should be able to ask controller for job result" do
     title = "BG RPC"
     engine = Marty::ScriptSet.new.get_engine(NAME_A)
-    engine.background_eval("Y", {"p_title" => title}, ["d"])
+    engine.background_eval("Y", { "p_title" => title }, ["d"])
     sleep 5
 
     promise = Marty::Promise.find_by_title(title)
 
-    res = {"d"=>[
-                 {"z"=>0.875, "a"=>{"b"=>{"e"=>0.125}}},
-                 {"z"=>0.875, "a"=>{"b"=>{"e"=>1.125}}},
-                 {"z"=>0.875, "a"=>{"b"=>{"e"=>2.125}}},
-                ]}
+    res = { "d" => [
+      { "z" => 0.875, "a" => { "b" => { "e" => 0.125 } } },
+      { "z" => 0.875, "a" => { "b" => { "e" => 1.125 } } },
+      { "z" => 0.875, "a" => { "b" => { "e" => 2.125 } } },
+    ] }
 
     expect(promise.latest.result).to eq res
 
@@ -190,16 +191,16 @@ describe Marty::JobController, slow: true do
     engine.background_eval("Z",
                            {},
                            ["result", "format", "title"],
-                           )
+                          )
     sleep 5
 
     promise = Marty::Promise.find_by_title(NAME_B)
 
-    expect(promise.result).to eq({
-      "result"=>[{"a"=>1, "b"=>1},{"a"=>2, "b"=>4},{"a"=>3, "b"=>9}],
-      "format"=>"csv",
-      "title"=>"PromiseB",
-    })
+    expect(promise.result).to eq(
+      "result" => [{ "a" => 1, "b" => 1 }, { "a" => 2, "b" => 4 }, { "a" => 3, "b" => 9 }],
+      "format" => "csv",
+      "title" => "PromiseB",
+    )
 
     get 'download', params: {
       job_id: promise.id,
@@ -215,9 +216,7 @@ describe Marty::JobController, slow: true do
 
     expect(response.content_type).to eq "application/zip"
 
-    Zip::InputStream.open(StringIO.new(response.body)) {
-      |io|
-
+    Zip::InputStream.open(StringIO.new(response.body)) do |io|
       count = 0
       while (entry = io.get_next_entry)
         expect(entry.name).to match /PromiseB.*\.csv/
@@ -225,20 +224,20 @@ describe Marty::JobController, slow: true do
         count += 1
       end
       expect(count).to eq 3
-    }
+    end
   end
 
   it "should be able to start promises on imported nodes" do
     engine = Marty::ScriptSet.new.get_engine(NAME_F)
     res = engine.evaluate("Z", "result", {})
-    expect(res).to eq "x"*10
+    expect(res).to eq "x" * 10
   end
 
   it "promises called from regular node calls should pass parent promise id" do
     engine = Marty::ScriptSet.new.get_engine(NAME_G)
     res = engine.evaluate("V", "result", {})
     expect(res).to eq [123]
-    p1 = Marty::Promise.find_by_title("#{NAME_G}")
+    p1 = Marty::Promise.find_by_title(NAME_G.to_s)
     p2 = Marty::Promise.find_by_title("#{NAME_G}2")
     expect(p2.parent_id).to eq p1.id
   end

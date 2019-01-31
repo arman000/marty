@@ -12,9 +12,9 @@ module Marty::Migrations
 
     values = klass::VALUES
     str_values =
-      values.map {|v| ActiveRecord::Base.connection.quote v}.join ','
+      values.map { |v| ActiveRecord::Base.connection.quote v }.join ','
 
-    #hacky way to get name
+    # hacky way to get name
     prefix = prefix_override || tb_prefix
     enum_name = klass.table_name.sub(/^#{prefix}_*/, '')
 
@@ -31,11 +31,11 @@ module Marty::Migrations
     raise "model class needs VALUES (as Set)" unless
       klass.const_defined?(:VALUES)
 
-    #hacky way to get name
+    # hacky way to get name
     prefix = prefix_override || tb_prefix
     enum_name = klass.table_name.sub(/^#{prefix}/, '')
 
-    #check values against underlying values
+    # check values against underlying values
     res = execute <<-SQL
       SELECT ENUM_RANGE(null::#{enum_name});
     SQL
@@ -86,9 +86,9 @@ module Marty::Migrations
 
     add_mcfly_attrs_index(tb, *attrs)
 
-    MCFLY_INDEX_COLUMNS.each { |a|
+    MCFLY_INDEX_COLUMNS.each do |a|
       add_index tb.to_sym, a, index_opts(tb, a)
-    }
+    end
   end
 
   def add_mcfly_unique_index(klass)
@@ -115,10 +115,10 @@ module Marty::Migrations
 
     remove_index(klass.table_name.to_sym,
                  name: unique_index_name(klass)
-                 ) if index_exists?(klass.table_name.to_sym,
-                                    attrs,
-                                    name: unique_index_name(klass),
-                                    unique: true)
+                ) if index_exists?(klass.table_name.to_sym,
+                                   attrs,
+                                   name: unique_index_name(klass),
+                                   unique: true)
   end
 
   def self.write_view(target_dir, target_view, klass, jsons, excludes, extras)
@@ -149,7 +149,7 @@ module Marty::Migrations
           tn_alias = "#{table_name}#{jointabs[table_name]}"
           joins.push "left join #{table_name} #{tn_alias} on main.#{c} " +
                      "= #{tn_alias}.id"
-          target_name = c.gsub(/_id$/,'_name')
+          target_name = c.gsub(/_id$/, '_name')
           columns.push "#{tn_alias}.name as #{target_name}"
           extras.each do |(table, column, new_colname)|
             columns.push "#{tn_alias}.#{column} as #{new_colname}" if
@@ -254,20 +254,21 @@ OUT
   # we have to get it from the database
   def get_old_enum_id(klass, name)
     ActiveRecord::Base.
-               connection.execute(<<-SQL).to_a.first.try{|v| v['id']}
+               connection.execute(<<-SQL).to_a.first.try { |v| v['id'] }
       select id from #{klass.table_name} where name =
          #{ActiveRecord::Base.connection.quote(name)}
     SQL
   end
 
   private
+
   def fk_opts(from, to, column)
     name = "fk_#{from}_#{to}_#{column}"
     if name.length > 63
       s = Digest::MD5.hexdigest("#{to}_#{column}").slice(0..9)
       name = "fk_#{from}_#{s}"
     end
-    {name: name}
+    { name: name }
   end
 
   def index_opts(tb, a)
@@ -278,11 +279,11 @@ OUT
   end
 
   def add_mcfly_attrs_index(tb, *attrs)
-    attrs.each { |a|
+    attrs.each do |a|
       options = index_opts(tb, a)
-      options[:order] = {a.to_sym => "NULLS LAST"}
+      options[:order] = { a.to_sym => "NULLS LAST" }
       add_index tb.to_sym, a, options
-    }
+    end
   end
 
   def unique_index_name(klass)
@@ -305,15 +306,16 @@ OUT
 
   def self.get_plv8_migration(file)
     fnname = %r(/([^/]+)_v[0-9]+\.js\z).match(file)[1]
-    lines=File.readlines(file)
+    lines = File.readlines(file)
     parts = lines.map do |line|
       next [:param, $1] if %r(\A// PARAM[:] (.*)$).match(line)
       next [:ret, $1]  if %r(\A// RETURN[:] (.*)$).match(line)
+
       [:body, line]
     end.group_by(&:first)
-    args = parts[:param].map{ |(_,l)| l}.join(",\n")
+    args = parts[:param].map { |(_, l)| l }.join(",\n")
     ret =  parts[:ret][0][1]
-    body = parts[:body].map{ |(_,l)| l}.join
+    body = parts[:body].map { |(_, l)| l }.join
     <<EOT
 CREATE OR REPLACE FUNCTION #{fnname} (
 #{args}

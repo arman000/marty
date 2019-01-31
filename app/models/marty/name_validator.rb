@@ -1,6 +1,7 @@
 class Marty::NameValidator < ActiveModel::Validator
   def validate(entry)
     raise "need field option" unless options[:field]
+
     field = options[:field].to_sym
     value = entry.send(field)
 

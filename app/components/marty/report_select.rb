@@ -6,7 +6,7 @@ class Marty::ReportSelect < Marty::Form
     c.height           = 200
     c.load_inline_data = false
     c.title            = I18n.t("script.selection_history")
-    c.attributes          = [:name, :created_dt, :comment]
+    c.attributes = [:name, :created_dt, :comment]
     c.bbar             = []
   end
 
@@ -15,8 +15,8 @@ class Marty::ReportSelect < Marty::Form
     c.klass            = Marty::ScriptGrid
     c.title            = I18n.t("script.selection_list")
     c.bbar             = []
-    c.attributes          = [:name, :tag]
-    c.scope            = lambda { |r|
+    c.attributes = [:name, :tag]
+    c.scope = lambda { |r|
       r.where("name like '%Report'")
     }
   end
@@ -28,18 +28,18 @@ class Marty::ReportSelect < Marty::Form
 
     c.items =
       [
-       :tag_grid,
-       :script_grid,
-       fieldset(I18n.t("reporting.report_select"),
-                {
-                  xtype:        :netzkeremotecombo,
-                  name:         "nodename",
-                  attr_type:    :string,
-                  virtual:      true,
-                  hide_label:   true,
-                  width:        200,
-                },
-                {},
+        :tag_grid,
+        :script_grid,
+        fieldset(I18n.t("reporting.report_select"),
+                 {
+                   xtype:        :netzkeremotecombo,
+                   name:         "nodename",
+                   attr_type:    :string,
+                   virtual:      true,
+                   hide_label:   true,
+                   width:        200,
+                 },
+                 {},
                 ),
       ]
     c.bbar = nil
@@ -59,14 +59,14 @@ class Marty::ReportSelect < Marty::Form
 
     return [] unless engine
 
-    nodes = engine.enumerate_nodes.select { |n|
+    nodes = engine.enumerate_nodes.select do |n|
       attrs = Set.new(engine.enumerate_attrs_by_node(n))
       attrs.superset? REPORT_ATTR_SET
-    }
+    end
 
-    nodes.map { |node|
+    nodes.map do |node|
       roles = engine.evaluate(node, "roles") rescue nil
-      next if roles && !roles.any?{ |r| Marty::User.has_role(r) }
+      next if roles && !roles.any? { |r| Marty::User.has_role(r) }
 
       begin
         title, format = engine.evaluate(node, ["title", "format"])
@@ -74,7 +74,7 @@ class Marty::ReportSelect < Marty::Form
       rescue
         [node, node]
       end
-    }.compact.sort{ |a,b| a[1] <=> b[1]}
+    end.compact.sort { |a, b| a[1] <=> b[1] }
   end
 
   endpoint :get_combobox_options do |params|

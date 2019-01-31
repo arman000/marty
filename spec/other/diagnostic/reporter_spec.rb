@@ -7,19 +7,17 @@ describe Marty::Diagnostic::Reporter do
     attr_accessor :params, :port
   end
 
-  def params diagnostic='base', scope=nil
-    {op: diagnostic, scope: scope}
+  def params diagnostic = 'base', scope = nil
+    { op: diagnostic, scope: scope }
   end
 
   def git
-    begin
       message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
-    rescue
+  rescue
       message = error("Failed accessing git")
-    end
   end
 
-  def aggregate_data opts={}
+  def aggregate_data opts = {}
     {
       'Dummy' => {
         'NodeA' => {
@@ -33,7 +31,7 @@ describe Marty::Diagnostic::Reporter do
     }
   end
 
-  def aggregate_consistency_data diagnostic='Base'
+  def aggregate_consistency_data diagnostic = 'Base'
     original_a = Marty::Diagnostic::Base.create_info('A')
     original_b = Marty::Diagnostic::Base.create_info('B')
 
@@ -75,12 +73,12 @@ describe Marty::Diagnostic::Reporter do
       expected = {
         diagnostic => {
           'NodeA' => {
-            'CONSTANTA' => original_a + {'consistent' => true},
+            'CONSTANTA' => original_a + { 'consistent' => true },
             'CONSTANTB' => inconsistent_b,
             'CONSTANTB2' => inconsistent_b,
           },
           'NodeB' => {
-            'CONSTANTA' => original_a + {'consistent' => true},
+            'CONSTANTA' => original_a + { 'consistent' => true },
             'CONSTANTB' => inconsistent_c,
             'CONSTANTB2' => inconsistent_c,
           },
@@ -95,14 +93,14 @@ describe Marty::Diagnostic::Reporter do
   end
 
   def version_data consistent = true
-    Marty::Diagnostic::Base.pack(include_ip=false){
+    Marty::Diagnostic::Base.pack(include_ip = false) do
       {
         "Marty"    => info(Marty::VERSION, true, consistent),
         "Delorean" => info(Delorean::VERSION, true, true),
         "Mcfly"    => info(Mcfly::VERSION, true, true),
         "Git"      => info(git, true, true),
       }
-    }
+    end
   end
 
   def minimize(str)
@@ -119,7 +117,7 @@ describe Marty::Diagnostic::Reporter do
     end
 
     it 'masks consistent nodes for display (version)' do
-      described_class.request.params = params(scope='local')
+      described_class.request.params = params(scope = 'local')
       data = {
         'Version' => {
           'NodeA' => version_data,
@@ -164,18 +162,18 @@ describe Marty::Diagnostic::Reporter do
 
     it 'displays all nodes when there is an inconsistent node (version)' do
      Marty:: Diagnostic::Reporter.request.params = params
-      bad_ver = '0.0.0'
+     bad_ver = '0.0.0'
 
-      data = {
-        'Version' => {
-          'NodeA' => version_data(consistent=false),
-          'NodeB' => version_data + {
-            'Marty' => Marty::Diagnostic::Base.create_info(bad_ver, true, false)
-          },
-        }
-      }
+     data = {
+       'Version' => {
+         'NodeA' => version_data(consistent = false),
+         'NodeB' => version_data + {
+           'Marty' => Marty::Diagnostic::Base.create_info(bad_ver, true, false)
+         },
+       }
+     }
 
-      expected = <<-ERB
+     expected = <<-ERB
       <h3>Version</h3>
       <h3 class="error">Inconsistency Detected </h3>
       <div class="wrapper">
@@ -207,10 +205,10 @@ describe Marty::Diagnostic::Reporter do
           </tr>
       </table>
       </div>
-      ERB
+     ERB
 
-      test = described_class.displays(data)
-      expect(minimize(test)).to eq(minimize(expected))
+     test = described_class.displays(data)
+     expect(minimize(test)).to eq(minimize(expected))
     end
 
     it 'can detect errors in diagnostic for display and api' do

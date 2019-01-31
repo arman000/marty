@@ -15,7 +15,8 @@ class Marty::Token < Marty::Base
   #   return Time.now > self.created_on + @@validity_time
   # end
 
-private
+  private
+
   def self.generate_token_value
     SecureRandom.hex(20)
   end
@@ -26,5 +27,4 @@ private
       Token.delete_all(['user_id = ?', user.id])
     end
   end
-
 end

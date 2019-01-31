@@ -7,13 +7,13 @@ class Marty::Aws::Request < Marty::Aws::Base
     endpoint = info[:endpoint]
     method   = info[:method] || :get
 
-    default = action ? {'Action' => action, 'Version' => @version} : {}
+    default = action ? { 'Action' => action, 'Version' => @version } : {}
 
     host = "#{@service}.#{@doc[:region]}.amazonaws.com"
 
     url = "https://#{host}/"
     url += endpoint if endpoint
-    url += '?' + (default + params).map{|a, v| "#{a}=#{v}"}.join('&') unless
+    url += '?' + (default + params).map { |a, v| "#{a}=#{v}" }.join('&') unless
       params.empty?
 
     sig = Aws::Sigv4::Signer.new(service:           @service,
@@ -21,7 +21,7 @@ class Marty::Aws::Request < Marty::Aws::Base
                                  access_key_id:     @creds[:access_key_id],
                                  secret_access_key: @creds[:secret_access_key],
                                  session_token:     @creds[:token])
-    signed_url = sig.presign_url(http_method:'GET', url: url)
+    signed_url = sig.presign_url(http_method: 'GET', url: url)
 
     http = Net::HTTP.new(host, 443)
     http.use_ssl = true
@@ -38,7 +38,7 @@ class Marty::Aws::Request < Marty::Aws::Base
 
       ensure_resp(path, obj[key])
     else
-      obj.map{|s| ensure_resp(path.clone, s)}.flatten(1)
+      obj.map { |s| ensure_resp(path.clone, s) }.flatten(1)
     end
   end
 end

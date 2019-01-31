@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'under Applications menu, Scripting workflows', js: true do
-
   before(:all) do
     self.use_transactional_tests = false
 
@@ -41,8 +40,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
   def populate_test_scripts
     lastid = nil
 
-    with_user("dev2") {
-
+    with_user("dev2") do
       Marty::Script.
         load_script_bodies({
                              "A1" => "#1\n",
@@ -53,15 +51,15 @@ feature 'under Applications menu, Scripting workflows', js: true do
                            }, Date.today)
 
       # create 3 additional tags and modify A5 in the process
-      (1..3).each { |i|
+      (1..3).each do |i|
         body = Marty::Script.find_by(name: "A5").body
 
         Marty::Script.
           load_script_bodies({
                                "A5" => body + "##{i}\n"
                              }, Date.today + i.minute)
-      }
-    }
+      end
+    end
   end
 
   it 'adding scripts and tags & ensure proper validations' do
@@ -87,7 +85,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
     and_by 'select the new script' do
       wait_for_ajax
       within(:gridpanel, 'script_grid', match: :first) do
-        expect(script_grid.get_row_vals(6)).to netzke_include({:name=>"Xyz", :tag=>"DEV"})
+        expect(script_grid.get_row_vals(6)).to netzke_include(:name => "Xyz", :tag => "DEV")
         script_grid.select_row(6)
       end
     end
@@ -211,7 +209,6 @@ feature 'under Applications menu, Scripting workflows', js: true do
     script_grid = netzke_find('script_grid')
     tag_grid = netzke_find('tag_grid')
 
-
     by 'select tag row 2' do
       wait_for_ajax
       tag_grid.select_row(2)
@@ -292,7 +289,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
       wait_for_ajax
       script_grid.select_row(5)
       expect(page).to have_content "1 #123 2 #456"
-      expect(tag_grid.get_row_vals(2)).to netzke_include({:comment=>"ABCD"})
+      expect(tag_grid.get_row_vals(2)).to netzke_include(:comment => "ABCD")
     end
   end
 

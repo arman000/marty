@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'job_helper'
 
 describe Marty::Diagnostic::DelayedJobWorkers do
-  def sample_data ip=nil, error=false
+  def sample_data ip = nil, error = false
     {
       ip || Marty::Helper.my_ip => {
         'Delayed Workers / Node' => {
@@ -14,12 +14,12 @@ describe Marty::Diagnostic::DelayedJobWorkers do
     }
   end
 
-  def sample_aggregate error=false
+  def sample_aggregate error = false
     [
-      sample_data(ip='0.0.0.0'),
-      sample_data(ip='0.0.0.1'),
-      sample_data(ip='0.0.0.2', error=error),
-      sample_data(ip='0.0.0.3'),
+      sample_data(ip = '0.0.0.0'),
+      sample_data(ip = '0.0.0.1'),
+      sample_data(ip = '0.0.0.2', error = error),
+      sample_data(ip = '0.0.0.3'),
     ].reduce(:merge)
   end
 
@@ -31,7 +31,7 @@ describe Marty::Diagnostic::DelayedJobWorkers do
 
   it 'can determine if there are nodes with missing workers' do
     consistent   = sample_aggregate
-    inconsistent = sample_aggregate(error=true)
+    inconsistent = sample_aggregate(error = true)
 
     expect(described_class.consistent?(consistent)).to eq(true)
     expect(described_class.consistent?(inconsistent)).to eq(false)

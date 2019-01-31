@@ -21,7 +21,6 @@ module Marty; module RSpec; module PostRunLogger
         puts data
       end
     end
-
   end
 
   def post_run_log(*log_string)

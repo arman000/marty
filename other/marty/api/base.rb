@@ -11,11 +11,11 @@ class Marty::Api::Base
     result = yield
     controller.respond_to do |format|
       format.json { controller.send_data result.to_json }
-      format.csv  {
+      format.csv  do
         # SEMI-HACKY: strip outer list if there's only one element.
-        result = result[0] if result.is_a?(Array) && result.length==1
+        result = result[0] if result.is_a?(Array) && result.length == 1
         controller.send_data Marty::DataExporter.to_csv(result)
-      }
+      end
     end
   end
 
@@ -60,27 +60,27 @@ class Marty::Api::Base
       # get_schema will either return a hash with the schema,
       # or a string with the error
       input_schema = @@schemas[schema_key] ||=
-                     Marty::JsonSchema.get_schema(*schema_key)
+                       Marty::JsonSchema.get_schema(*schema_key)
     rescue => e
-      return {error: e.message}
+      return { error: e.message }
     end
 
     # validate input schema
     if config[:input_validated]
 
       # must fail if schema not found or some other error
-      return {"error": input_schema} if input_schema.is_a?(String)
+      return { "error": input_schema } if input_schema.is_a?(String)
 
       begin
         res = SchemaValidator::validate_schema(input_schema, params[:params])
       rescue NameError
-        return {error: "Unrecognized PgEnum for attribute #{params[:attr]}"}
+        return { error: "Unrecognized PgEnum for attribute #{params[:attr]}" }
       rescue => e
-        return {error: "#{params[:attr]}: #{e.message}"}
+        return { error: "#{params[:attr]}: #{e.message}" }
       end
 
       schema_errors = SchemaValidator::get_errors(res) unless res.empty?
-      return {error: "Error(s) validating: #{schema_errors}"} if
+      return { error: "Error(s) validating: #{schema_errors}" } if
         schema_errors
     end
 
@@ -88,13 +88,13 @@ class Marty::Api::Base
     if input_schema.is_a?(Hash)
       # fix numbers types
       numbers = @@numbers[schema_key] ||=
-                Marty::JsonSchema.get_numbers(input_schema)
+                  Marty::JsonSchema.get_numbers(input_schema)
 
       # modify params in place
       Marty::JsonSchema.fix_numbers(params[:params], numbers)
     elsif !input_schema.include?("Schema not defined")
       # else if some error besides schema not defined, fail
-      return {error: input_schema}
+      return { error: input_schema }
     end
 
     # get script engine
@@ -104,7 +104,7 @@ class Marty::Api::Base
       error = "Can't get engine: #{params[:script] || 'nil'} with tag: " +
                 "#{params[:tag] || 'nil'}; message: #{e.message}"
       Marty::Logger.info error
-      return {error: error}
+      return { error: error }
     end
 
     retval = nil
@@ -116,7 +116,7 @@ class Marty::Api::Base
                                      params[:params],
                                      params[:attr])
 
-        return retval = {"job_id" => res.__promise__.id}
+        return retval = { "job_id" => res.__promise__.id }
       end
 
       res = engine.evaluate(params[:node],
@@ -126,36 +126,35 @@ class Marty::Api::Base
       # validate output schema
       if config[:output_validated] && !(res.is_a?(Hash) && res['error'])
         begin
-          output_schema_params = params + {attr: params[:attr] + '_'}
+          output_schema_params = params + { attr: params[:attr] + '_' }
           schema = SchemaValidator::get_schema(output_schema_params)
         rescue => e
-          return {error: e.message}
+          return { error: e.message }
         end
 
         begin
           schema_errors = SchemaValidator::validate_schema(schema, res)
         rescue NameError
-          return {error: "Unrecognized PgEnum for attribute #{attr}"}
+          return { error: "Unrecognized PgEnum for attribute #{attr}" }
         rescue => e
-          return {error: "#{attr}: #{e.message}"}
+          return { error: "#{attr}: #{e.message}" }
         end
 
         if schema_errors.present?
-          errors = schema_errors.map{|e| e[:message]}
+          errors = schema_errors.map { |e| e[:message] }
 
           Marty::Logger.error(
             "API #{params[:script]}:#{params[:node]}.#{params[:attr]}",
-            {error: errors, data: res}
+            error: errors, data: res
           )
 
           msg = "Error(s) validating: #{errors}"
-          res = config[:strict_validate] ? {error: msg ,data: res} : res
+          res = config[:strict_validate] ? { error: msg, data: res } : res
         end
       end
 
       # if attr is an array, return result as an array
       return retval = params[:return_array] ? [res] : res
-
     rescue => e
       msg = Delorean::Engine.grok_runtime_exception(e).symbolize_keys
       Marty::Logger.info "Evaluation error: #{msg}"
@@ -167,6 +166,7 @@ class Marty::Api::Base
 
   def self.filter_hash hash, filter_params
     return unless hash
+
     pf = ActionDispatch::Http::ParameterFilter.new(filter_params)
     pf.filter(hash)
   end
@@ -175,7 +175,7 @@ class Marty::Api::Base
     res     = result.is_a?(Hash) ? result.stringify_keys : result
     ret_arr = params[:return_array]
     input   = filter_hash(params[:params], engine_params_filter)
-    {script:     params[:script],
+    { script:     params[:script],
      node:       params[:node],
      attrs:      ret_arr ? [params[:attr]] : params[:attr],
      input:      input,
@@ -197,21 +197,19 @@ class Marty::Api::Base
 
   class SchemaValidator
     def self.get_schema params
-      begin
-        Marty::ScriptSet.new(params[:tag]).get_engine(params[:script]+'Schemas').
+        Marty::ScriptSet.new(params[:tag]).get_engine(params[:script] + 'Schemas').
           evaluate(params[:node], params[:attr], {})
-      rescue => e
+    rescue => e
         msg = e.message == 'No such script' ? 'Schema not defined' :
                 'Problem with schema: ' + e.message
 
         raise "Schema error for #{params[:script]}/#{params[:node]} "\
               "attrs=#{params[:attr]}: #{msg}"
-      end
     end
 
     def self.validate_schema schema, hash
       JSON::Validator.fully_validate(
-        schema.merge({"\$schema" => Marty::JsonSchema::RAW_URI}),
+        schema.merge("\$schema" => Marty::JsonSchema::RAW_URI),
         hash,
         validate_schema:   true,
         errors_as_objects: true,
@@ -224,6 +222,7 @@ class Marty::Api::Base
             match(msg)
 
       return msg unless m
+
       "disallowed parameter '#{m[1]}' of type #{m[2]} was received"
     end
 
@@ -237,7 +236,7 @@ class Marty::Api::Base
           fa, fragment, message, errors = errs.values_at(:failed_attribute,
                                                          :fragment,
                                                          :message, :errors)
-          ((['AllOf','AnyOf','Not'].include?(fa) && fragment =='#/') ?
+          ((['AllOf', 'AnyOf', 'Not'].include?(fa) && fragment == '#/') ?
              [] : [massage_message(message)]) + _get_errors(errors || {})
         end
       end

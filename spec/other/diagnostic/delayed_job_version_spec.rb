@@ -37,7 +37,7 @@ describe Marty::Diagnostic::DelayedJobVersion do
   it 'will fail if DELAYED_VER is not set' do
     ENV.delete('DELAYED_VER')
     start_delayed_job
-    expect{described_class.generate}.to raise_error(RuntimeError)
+    expect { described_class.generate }.to raise_error(RuntimeError)
     stop_delayed_job
   end
 end

@@ -17,12 +17,12 @@ class Delorean::BaseModule::NodeCall
   # Monkey-patch '|' method for Delorean NodeCall to create promise
   # jobs and return promise proxy objects.
   def |(args)
-
     if args.is_a?(String)
       attr = args
       args = [attr]
     else
       raise "bad arg to %" unless args.is_a?(Array)
+
       attr = nil
     end
     script, tag = engine.module_name, engine.sset.tag
@@ -43,7 +43,7 @@ class Delorean::BaseModule::NodeCall
       create(title:     title,
              user_id:   params[:_user_id],
              parent_id: params[:_parent_id],
-             )
+            )
     params[:_promise_id] = promise.id
     begin
       job = Delayed::Job.enqueue Marty::PromiseJob.
@@ -82,10 +82,10 @@ class Delorean::BaseModule::NodeCall
   end
 end
 
-
 class Delorean::Engine
   def background_eval(node, params, attrs, event = {})
     raise "background_eval bad params" unless params.is_a?(Hash)
+
     params["p_event"] = event.each_with_object({}) do |(k, v), h|
       h[k.to_s] = v
     end unless event.empty?
@@ -103,7 +103,7 @@ class Marty::PromiseJob < Struct.new(:promise,
                                      :params,
                                      :attrs,
                                      :hook,
-                                     )
+                                    )
   # def log(msg)
   #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
   # end

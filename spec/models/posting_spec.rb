@@ -29,9 +29,9 @@ module Marty
 
       describe ".get_latest" do
         it "provide a list of latest of postings in descending order" do
-          4.times { |d|
+          4.times do |d|
             Posting.do_create("BASE", d.day.from_now, 'a comment')
-          }
+          end
           dt3 = 3.day.from_now
 
           latest = Posting.get_latest(1)
@@ -55,14 +55,14 @@ module Marty
 
         context "when valid parameters are supplied" do
           before do
-            PostingType.create({name: 'SNAPSHOT'})
-            PostingType.create({name: 'OTHER'})
+            PostingType.create(name: 'SNAPSHOT')
+            PostingType.create(name: 'OTHER')
             Posting.do_create("BASE",     0.day.from_now, 'base posting')
             Posting.do_create("SNAPSHOT", 1.day.from_now, 'snapshot1 posting')
             Posting.do_create("SNAPSHOT", 2.day.from_now, 'snapshot2 posting')
-            Posting.do_create("OTHER"   , 3.day.from_now, 'other1 posting')
+            Posting.do_create("OTHER", 3.day.from_now, 'other1 posting')
             Posting.do_create("SNAPSHOT", 4.day.from_now, 'snapshot3 posting')
-            Posting.do_create("OTHER"   , 5.day.from_now, 'other2 posting')
+            Posting.do_create("OTHER", 5.day.from_now, 'other2 posting')
           end
 
           it "filters on a single posting type" do

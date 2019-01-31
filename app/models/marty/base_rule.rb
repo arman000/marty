@@ -9,6 +9,7 @@ class Marty::BaseRule < Marty::Base
   def chkrange(v)
     v.match(/\A(\[|\()([0-9\.-]*),([0-9\.-]*)(\]|\))\z/)
   end
+
   def gettypes(v)
     types = []
     types << :string if v.is_a?(String)
@@ -20,6 +21,7 @@ class Marty::BaseRule < Marty::Base
     types << :boolean if [true, false, 'True', 'False'].include?(v)
     types
   end
+
   def check(name, h)
     multi, type, enum, values, req = h.values_at(:multi, :type, :enum, :values,
                                                  :required)
@@ -31,6 +33,7 @@ class Marty::BaseRule < Marty::Base
     return errors[errtype] << "- Required field #{ns} is missing" if
       v.blank? && req
     return if v.blank?
+
     gotmulti = v.is_a?(Array) ? 'multi' : 'single'
     return errors[errtype] << "- Wrong arity for #{ns} (expected #{expmulti} "\
                               "got #{gotmulti})" if expmulti != gotmulti
@@ -40,12 +43,14 @@ class Marty::BaseRule < Marty::Base
         gettypes(vv).member?(type)
     end
     return unless enum || values
+
     vals = enum && enum::VALUES || values.to_set
     bad = (vs - vals)
     p = bad.count > 1 ? 's' : ''
     return errors[errtype] <<
            %Q(- Bad value#{p} '#{bad.to_a.join("', '")}' for #{ns}) if bad.present?
   end
+
   def validate
     self.class.guard_info.each { |name, h| check(name, h) }
     grids.each do |vn, gn|
@@ -71,8 +76,9 @@ class Marty::BaseRule < Marty::Base
   end
 
   before_create do
-    self.class.guard_info.each do |k,v|
+    self.class.guard_info.each do |k, v|
       next if !v.include?(:default) || self.simple_guards.include?(k)
+
       self.simple_guards[k] = v[:default]
     end
   end
@@ -91,15 +97,15 @@ class Marty::BaseRule < Marty::Base
   end
 
   def self.get_matches_(pt, attrs, params)
-
     q = select("DISTINCT ON (name) *").where(attrs)
 
     params.each do |k, vraw|
       h = guard_info
       use_k = (h[k] && k) ||
-              (h[k+"_array"] && k+"_array") ||
-              (h[k+"_range"] && k+"_range")
+              (h[k + "_array"] && k + "_array") ||
+              (h[k + "_range"] && k + "_range")
       next unless use_k
+
       multi, type = h[use_k].values_at(:multi, :type)
       filts = [vraw].flatten.map do |v|
         qstr = get_subq('simple_guards', use_k, multi, type, v)
@@ -108,8 +114,7 @@ class Marty::BaseRule < Marty::Base
 
       q = q.where("(#{isn} #{filts})")
     end
-    #print q.to_sql
+    # print q.to_sql
     q.order(:name)
   end
-
 end

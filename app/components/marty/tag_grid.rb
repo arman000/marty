@@ -1,7 +1,7 @@
 class Marty::TagGrid < Marty::Grid
   has_marty_permissions \
-  read:   :any,
-  create: :dev
+    read:   :any,
+    create: :dev
 
   def configure(c)
     super
@@ -12,8 +12,8 @@ class Marty::TagGrid < Marty::Grid
 
     c.attributes ||= [:name, :created_dt, :user__name, :comment]
 
-    c.store_config.merge!({sorters: [{property: :created_dt,
-                                      direction: 'DESC'}]})
+    c.store_config.merge!(sorters: [{ property: :created_dt,
+                                      direction: 'DESC' }])
   end
 
   endpoint :add_window__add_form__submit do |params|
@@ -71,7 +71,6 @@ class Marty::TagGrid < Marty::Grid
     c.width  = 100
     c.flex   = 1
   end
-
 end
 
 TagGrid = Marty::TagGrid

@@ -7,11 +7,11 @@ module Marty; class UserView < Marty::Grid
   # list of columns to be displayed in the grid view
   def self.user_columns
     [
-     :login,
-     :firstname,
-     :lastname,
-     :active,
-     :roles,
+      :login,
+      :firstname,
+      :lastname,
+      :active,
+      :roles,
     ]
   end
 
@@ -24,7 +24,7 @@ module Marty; class UserView < Marty::Grid
     c.editing        = :in_form
     c.paging         = :pagination
     c.multi_select   = false
-    c.store_config.merge!(sorters: [{property: :login,
+    c.store_config.merge!(sorters: [{ property: :login,
                                      direction: 'ASC',
                                     }]) if c.attributes.include?(:login)
     c.scope = ->(arel) { arel.includes(:roles) }
@@ -39,8 +39,8 @@ module Marty; class UserView < Marty::Grid
     end
 
     # set new roles
-    user.roles = Role.select {
-      |r| roles.include? I18n.t("roles.#{r.name}")
+    user.roles = Role.select { |r|
+                   roles.include? I18n.t("roles.#{r.name}")
     }
   end
 
@@ -48,9 +48,9 @@ module Marty; class UserView < Marty::Grid
     # Creates initial place-holder user object and validate
     user = data["id"].nil? ? User.new : User.find(data["id"])
 
-    self.user_columns.each {
-      |c| user.send("#{c}=", data[c.to_s]) unless c == :roles
-    }
+    user_columns.each do |c|
+      user.send("#{c}=", data[c.to_s]) unless c == :roles
+    end
 
     if user.valid?
       user.save
@@ -145,14 +145,14 @@ module Marty; class UserView < Marty::Grid
     c.label   = I18n.t("user_grid.roles")
     c.type    = :string,
 
-    c.getter = lambda do |r|
-      r.roles.map { |ur| I18n.t("roles.#{ur.name}") }.sort
-    end
+                c.getter = lambda do |r|
+                  r.roles.map { |ur| I18n.t("roles.#{ur.name}") }.sort
+                end
 
     c.editor_config = {
       multi_select: true,
       empty_text:   I18n.t("user_grid.select_roles"),
-      store:        Role.pluck(:name).map {|n| I18n.t("roles.#{n}")}.sort,
+      store:        Role.pluck(:name).map { |n| I18n.t("roles.#{n}") }.sort,
       type:         :string,
       xtype:        :combo,
     }

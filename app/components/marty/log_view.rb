@@ -17,7 +17,7 @@ class Marty::LogView < Marty::Grid
       :details
     ]
 
-    c.store_config.merge!(sorters: [{property: :timestamp, direction: 'DESC'}])
+    c.store_config.merge!(sorters: [{ property: :timestamp, direction: 'DESC' }])
   end
 
   def default_context_menu
@@ -29,7 +29,7 @@ class Marty::LogView < Marty::Grid
       :timestamp_custom,
       :message_type,
       :message,
-      textarea_field(:details).merge!({height: 400})
+      textarea_field(:details).merge!(height: 400)
     ]
   end
 
@@ -64,26 +64,28 @@ class Marty::LogView < Marty::Grid
       xtype: :displayfield,
     }
     c.getter = lambda { |r| Time.at(r.timestamp) }
-    c.sorting_scope = lambda {|r, dir| r.order("timestamp " + dir.to_s)}
+    c.sorting_scope = lambda { |r, dir| r.order("timestamp " + dir.to_s) }
 
     # FIXME?: The UI AR/PG DateTime workaround requires the timestamp to be cast
     # to text in order to compare filter input using the LIKE operator.
     # Otherwise it will fail. '<' and '>' functionality is missing.
-    c.filter_with = lambda {|r, v, op|
-      r.where("timestamp::text  #{op} '#{v}%'")}
+    c.filter_with = lambda { |r, v, op|
+      r.where("timestamp::text  #{op} '#{v}%'")
+    }
   end
 
   column :details do |c|
     c.getter = lambda { |r| CGI.escapeHTML(r.details.pretty_inspect) }
-    c.filter_with = lambda {|r, v, op|
-      r.where("details::text  #{op} '%#{v}%'")}
+    c.filter_with = lambda { |r, v, op|
+      r.where("details::text  #{op} '%#{v}%'")
+    }
   end
 
   attribute :details do |c|
     c.text      = I18n.t("log_grid.details")
     c.width     = 900
     c.read_only = true
-    c.getter    = lambda { |r| r.details.pretty_inspect}
+    c.getter    = lambda { |r| r.details.pretty_inspect }
   end
 end
 

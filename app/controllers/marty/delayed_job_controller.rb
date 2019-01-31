@@ -8,6 +8,7 @@ class Marty::DelayedJobController < ActionController::Base
 
   def delayed_job
     return unless params['id'].present?
+
     @delayed_job ||= ::Delayed::Job.find_by(id: params['id'])
   end
 

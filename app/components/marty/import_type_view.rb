@@ -1,9 +1,9 @@
 class Marty::ImportTypeView < Marty::Grid
   has_marty_permissions \
-  create: :admin,
-  read: :any,
-  update: :admin,
-  delete: :admin
+    create: :admin,
+    read: :any,
+    update: :admin,
+    delete: :admin
 
   def configure(c)
     super
@@ -12,14 +12,14 @@ class Marty::ImportTypeView < Marty::Grid
     c.model   = "Marty::ImportType"
     c.attributes =
       [
-       :name,
-       :role__name,
-       :db_model_name,
-       :cleaner_function,
-       :validation_function,
-       :preprocess_function,
+        :name,
+        :role__name,
+        :db_model_name,
+        :cleaner_function,
+        :validation_function,
+        :preprocess_function,
       ]
-    c.store_config.merge!({sorters: [{property: :name, direction: 'ASC'}]})
+    c.store_config.merge!(sorters: [{ property: :name, direction: 'ASC' }])
   end
 
   attribute :name do |c|

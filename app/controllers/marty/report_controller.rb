@@ -14,16 +14,16 @@ class Marty::ReportController < Marty::ApplicationController
     exp_format = format == "txt" ? "csv" : format
 
     res, type, disposition, filename =
-                            Marty::ContentHandler.
-                              export(data, exp_format, title)
+      Marty::ContentHandler.
+        export(data, exp_format, title)
 
     # hack for testing -- set content-type
     type = "text/plain" if format == "txt" && type =~ /csv/
 
-    return send_data(res,
-                     type:        type,
-                     filename:    filename,
-                     disposition: req_disposition || disposition,
-                    )
+    send_data(res,
+              type:        type,
+              filename:    filename,
+              disposition: req_disposition || disposition,
+             )
   end
 end

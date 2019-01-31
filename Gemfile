@@ -5,24 +5,24 @@ source "http://rubygems.org"
 # development dependencies will be added by default to the :development group.
 gemspec
 
-gem 'delayed_job_active_record'
 gem 'daemons'
-gem 'rails', '~> 5.1.4'
+gem 'delayed_job_active_record'
 gem 'pg'
+gem 'rails', '~> 5.1.4'
 gem 'sqlite3'
 
 group :development, :test do
-  gem 'pry-rails'
-  gem 'rspec-rails'
-  gem 'rspec-instafail', require: false
-  gem 'rubocop', require: false
   gem 'capybara'
-  gem 'selenium-webdriver'
   gem 'chromedriver-helper'
-  gem 'timecop'
-  gem 'database_cleaner'
-  gem 'rails-controller-testing'
   gem 'connection_pool'
+  gem 'database_cleaner'
+  gem 'pry-rails'
+  gem 'rails-controller-testing'
+  gem 'rspec-instafail', require: false
+  gem 'rspec-rails'
+  gem 'rubocop', require: false
+  gem 'selenium-webdriver'
+  gem 'timecop'
 
   # gem 'mcfly', path: File.expand_path('../../mcfly', __FILE__)
   gem 'mcfly'

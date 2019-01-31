@@ -1,5 +1,5 @@
 class Marty::DataConversion
-  EXCEL_START_DATE = Date.parse('1/1/1900')-2
+  EXCEL_START_DATE = Date.parse('1/1/1900') - 2
 
   FLOAT_PAT = /^-?\d+(\.\d+)?$/
 
@@ -81,11 +81,13 @@ class Marty::DataConversion
 
   def self.assoc_keys(klass)
     return Mcfly.mcfly_uniqueness(klass) if Mcfly.has_mcfly?(klass)
+
     # FIXME: very hacky -- picks 1st non-id attr as the association
     # key for regular (non-mcfly) AR models which don't have
     # MARTY_IMPORT_UNIQUENESS.
     klass.const_get(:MARTY_IMPORT_UNIQUENESS) rescue [
-    klass.column_names.reject{|x| x=="id"}.first.to_sym]
+      klass.column_names.reject { |x| x == "id" }.first.to_sym
+    ]
   end
 
   @@associations = {}
@@ -95,8 +97,7 @@ class Marty::DataConversion
     # enables find/import of its database records
 
     @@associations[klass] ||= klass.reflect_on_all_associations.
-      each_with_object({}) do
-      |assoc, h|
+      each_with_object({}) do |assoc, h|
 
       h[assoc.name.to_s] = {
         assoc_keys:  assoc_keys(assoc.klass),
@@ -119,9 +120,7 @@ class Marty::DataConversion
     # build profile for ActiveRecord non-assoc columns -- used to
     # find/import of klass database records.
 
-    @@col_types[klass] ||= klass.columns.each_with_object({}) do
-      |col, h|
-
+    @@col_types[klass] ||= klass.columns.each_with_object({}) do |col, h|
       assoc ||= associations(klass)
       acols ||= assoc_cols(klass)
 
@@ -153,7 +152,7 @@ class Marty::DataConversion
 
     raise "no key_attrs for #{klass}" unless key_attrs
 
-    find_options = options.select { |k,v| key_attrs.member? k.to_sym }
+    find_options = options.select { |k, v| key_attrs.member? k.to_sym }
 
     raise "no keys for #{klass} -- #{options}" if find_options.empty?
 
@@ -178,18 +177,15 @@ class Marty::DataConversion
 
     raise "bad row (extra columns?) -- #{row}" if row.has_key?(nil)
 
-    key_groups = row.keys.group_by {|x| x.to_s.split('__').first}
+    key_groups = row.keys.group_by { |x| x.to_s.split('__').first }
 
     # FIXME: map all empty string values to nil --- this means that
     # user can't import empty strings -- Perhaps, mapping "" -> nil
     # should be optional?
-    row = row.each_with_object({}) {
-      |(k,v), h|
+    row = row.each_with_object({}) do |(k, v), h|
       h[k.to_s] = v == '' ? nil : v
-    }
-    key_groups.each_with_object({}) do
-      |(ga, g), h|
-
+    end
+    key_groups.each_with_object({}) do |(ga, g), h|
       # find the association's details
       ai = assoc[ga]
 
@@ -234,7 +230,7 @@ class Marty::DataConversion
 
         # If it's an Enum, use the faster cached looked mechanism
         if Marty::Enum === srch_class
-          h[fk] = srch_class[ v ].id
+          h[fk] = srch_class[v].id
           next
         end
       end
@@ -244,9 +240,7 @@ class Marty::DataConversion
 
       # build a new row map for this association, we need to convert
       # it and search for it.
-      arow = g.each_with_object({}) do
-        |k, h|
-
+      arow = g.each_with_object({}) do |k, h|
         # Some old exports don't provide full assoc__attr column names
         # (e.g. 'xxx_name').  Instead the columns are just named by
         # assoc (e.g. 'xxx').
@@ -263,7 +257,6 @@ class Marty::DataConversion
 
       h[fk] = o_arow.id
     end
-
   end
 
   ######################################################################
@@ -279,8 +272,7 @@ class Marty::DataConversion
 
     obj ||= klass.new
 
-    c_row.each do
-      |k, v|
+    c_row.each do |k, v|
       # For each attr, check to see if it's begin changed before
       # setting it.  The AR obj.changed? doesn't work properly
       # with array, JSON or lazy attrs.

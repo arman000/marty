@@ -6,42 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 7
-# Cop supports --auto-correct.
-# Configuration parameters: TreatCommentsAsGroupSeparators, Include.
-# Include: **/*.gemfile, **/Gemfile, **/gems.rb
-Bundler/OrderedGems:
-  Exclude:
-    - 'Gemfile'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: TreatCommentsAsGroupSeparators, Include.
-# Include: **/*.gemspec
-Gemspec/OrderedDependencies:
-  Exclude:
-    - 'marty.gemspec'
-
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: outdent, indent
-Layout/AccessModifierIndentation:
-  Exclude:
-    - 'app/components/marty/mcfly_grid_panel.rb'
-    - 'app/models/marty/token.rb'
-    - 'app/models/marty/user.rb'
-    - 'spec/dummy/app/models/gemini/extras/settlement_import.rb'
-
-# Offense count: 18
-# Cop supports --auto-correct.
-Layout/AlignArray:
-  Exclude:
-    - 'app/components/marty/user_view.rb'
-    - 'db/migrate/201_create_marty_events.rb'
-    - 'lib/marty/monkey.rb'
-    - 'spec/models/rule_spec.rb'
-
 # Offense count: 526
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedHashRocketStyle, EnforcedColonStyle, EnforcedLastArgumentHashStyle.
@@ -50,44 +14,6 @@ Layout/AlignArray:
 # SupportedLastArgumentHashStyles: always_inspect, always_ignore, ignore_implicit, ignore_explicit
 Layout/AlignHash:
   Enabled: false
-
-# Offense count: 39
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: with_first_parameter, with_fixed_indentation
-Layout/AlignParameters:
-  Enabled: false
-
-# Offense count: 9
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith.
-# SupportedStylesAlignWith: either, start_of_block, start_of_line
-Layout/BlockAlignment:
-  Exclude:
-    - 'app/components/marty/mcfly_grid_panel.rb'
-    - 'lib/marty/schema_helper.rb'
-    - 'spec/features/log_view_spec.rb'
-    - 'spec/features/reporting_spec.rb'
-    - 'spec/features/scripting_test_spec.rb'
-    - 'spec/lib/mcfly_model_spec.rb'
-
-# Offense count: 32
-# Cop supports --auto-correct.
-Layout/BlockEndNewline:
-  Exclude:
-    - 'app/components/marty/api_log_view.rb'
-    - 'app/components/marty/config_view.rb'
-    - 'app/components/marty/log_view.rb'
-    - 'app/models/marty/delorean_rule.rb'
-    - 'lib/marty/monkey.rb'
-    - 'other/marty/diagnostic/connections.rb'
-    - 'other/marty/diagnostic/environment_variables.rb'
-    - 'spec/lib/mcfly_model_spec.rb'
-    - 'spec/models/data_grid_spec.rb'
-    - 'spec/models/event_spec.rb'
-    - 'spec/models/rule_spec.rb'
-    - 'spec/models/script_spec.rb'
-    - 'spec/support/structure_compare.rb'
 
 # Offense count: 2
 # Cop supports --auto-correct.
@@ -105,180 +31,6 @@ Layout/ClosingHeredocIndentation:
     - 'spec/support/components/netzke_combobox.rb'
     - 'spec/support/components/netzke_grid.rb'
 
-# Offense count: 38
-# Cop supports --auto-correct.
-Layout/ClosingParenthesisIndentation:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/components/marty/report_form.rb'
-    - 'app/components/marty/report_select.rb'
-    - 'app/components/marty/script_tester.rb'
-    - 'app/controllers/marty/job_controller.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'lib/marty/data_change.rb'
-    - 'lib/marty/data_importer.rb'
-    - 'lib/marty/migrations.rb'
-    - 'lib/marty/promise_job.rb'
-    - 'spec/controllers/job_controller_spec.rb'
-    - 'spec/dummy/app/components/gemini/my_rule_view.rb'
-    - 'spec/lib/data_importer_spec.rb'
-    - 'spec/models/data_grid_spec.rb'
-    - 'spec/models/rule_spec.rb'
-
-# Offense count: 7
-# Cop supports --auto-correct.
-Layout/CommentIndentation:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/token.rb'
-    - 'spec/dummy/db/schema.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect, Severity.
-# SupportedStylesAlignWith: start_of_line, def
-Layout/DefEndAlignment:
-  Exclude:
-    - 'spec/dummy/db/migrate/20171221095312_create_gemini_my_rules.rb'
-    - 'spec/dummy/db/migrate/20171221095359_create_gemini_xyz_rules.rb'
-
-# Offense count: 218
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: leading, trailing
-Layout/DotPosition:
-  Enabled: false
-
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: AllowBorderComment, AllowMarginComment.
-Layout/EmptyComment:
-  Exclude:
-    - 'spec/lib/json_schema_spec.rb'
-
-# Offense count: 64
-# Cop supports --auto-correct.
-Layout/EmptyLineAfterGuardClause:
-  Enabled: false
-
-# Offense count: 39
-# Cop supports --auto-correct.
-# Configuration parameters: AllowAdjacentOneLineDefs, NumberOfEmptyLines.
-Layout/EmptyLineBetweenDefs:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/components/marty/import_view.rb'
-    - 'app/models/marty/base_rule.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/delorean_rule.rb'
-    - 'db/migrate/411_create_vw_promises.rb'
-    - 'lib/marty/rule_script_set.rb'
-    - 'other/marty/diagnostic/node.rb'
-    - 'spec/dummy/app/components/gemini/my_rule_view.rb'
-    - 'spec/dummy/app/models/gemini/my_rule.rb'
-    - 'spec/dummy/app/models/gemini/xyz_rule.rb'
-    - 'spec/dummy/lib/gemini/xyz_rule_script_set.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
-    - 'spec/features/rule_spec.rb'
-    - 'spec/support/structure_compare.rb'
-
-# Offense count: 17
-# Cop supports --auto-correct.
-Layout/EmptyLines:
-  Exclude:
-    - 'Rakefile'
-    - 'app/models/marty/api_auth.rb'
-    - 'lib/marty/monkey.rb'
-    - 'lib/marty/promise_job.rb'
-    - 'lib/marty/schema_helper.rb'
-    - 'other/marty/diagnostic/node.rb'
-    - 'spec/controllers/rpc_controller_spec.rb'
-    - 'spec/controllers/rpc_import_spec.rb'
-    - 'spec/features/enum_spec.rb'
-    - 'spec/features/scripting_spec.rb'
-    - 'spec/lib/json_schema_spec.rb'
-    - 'spec/lib/xl_spec.rb'
-    - 'spec/lib/xl_styles_spec.rb'
-    - 'spec/models/event_spec.rb'
-
-# Offense count: 12
-# Cop supports --auto-correct.
-Layout/EmptyLinesAroundAccessModifier:
-  Exclude:
-    - 'app/components/marty/mcfly_grid_panel.rb'
-    - 'app/controllers/marty/rpc_controller.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/token.rb'
-    - 'app/models/marty/user.rb'
-    - 'lib/marty/aws/base.rb'
-    - 'lib/marty/json_schema.rb'
-    - 'lib/marty/migrations.rb'
-    - 'other/marty/diagnostic/aws/ec2_instance.rb'
-    - 'other/marty/diagnostic/reporter.rb'
-    - 'spec/dummy/app/models/gemini/extras/settlement_import.rb'
-    - 'spec/support/netzke.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Layout/EmptyLinesAroundArguments:
-  Exclude:
-    - 'lib/marty/aws/base.rb'
-    - 'spec/dummy/app/models/gemini/enum_state.rb'
-
-# Offense count: 42
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: empty_lines, no_empty_lines
-Layout/EmptyLinesAroundBlockBody:
-  Enabled: false
-
-# Offense count: 27
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: empty_lines, empty_lines_except_namespace, empty_lines_special, no_empty_lines, beginning_only, ending_only
-Layout/EmptyLinesAroundClassBody:
-  Enabled: false
-
-# Offense count: 5
-# Cop supports --auto-correct.
-Layout/EmptyLinesAroundExceptionHandlingKeywords:
-  Exclude:
-    - 'app/components/marty/import_view.rb'
-    - 'app/components/marty/report_form.rb'
-    - 'app/components/marty/script_tester.rb'
-    - 'other/marty/api/base.rb'
-
-# Offense count: 9
-# Cop supports --auto-correct.
-Layout/EmptyLinesAroundMethodBody:
-  Exclude:
-    - 'app/models/marty/base_rule.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'lib/marty/data_conversion.rb'
-    - 'lib/marty/json_schema.rb'
-    - 'lib/marty/mcfly_model.rb'
-    - 'lib/marty/promise_job.rb'
-    - 'lib/marty/xl.rb'
-    - 'spec/controllers/rpc_controller_spec.rb'
-    - 'spec/support/users.rb'
-
-# Offense count: 10
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: empty_lines, empty_lines_except_namespace, empty_lines_special, no_empty_lines
-Layout/EmptyLinesAroundModuleBody:
-  Exclude:
-    - 'app/models/marty/pg_enum.rb'
-    - 'lib/marty/json_schema.rb'
-    - 'spec/lib/data_exporter_spec.rb'
-    - 'spec/lib/data_importer_spec.rb'
-    - 'spec/lib/delorean_query_spec.rb'
-    - 'spec/lib/json_schema_spec.rb'
-    - 'spec/lib/mcfly_model_spec.rb'
-    - 'spec/support/chromedriver.rb'
-    - 'spec/support/setup.rb'
-
 # Offense count: 56
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyleAlignWith, AutoCorrect, Severity.
@@ -291,32 +43,6 @@ Layout/EndAlignment:
 # Configuration parameters: AllowForAlignment, ForceEqualSignAlignment.
 Layout/ExtraSpacing:
   Enabled: false
-
-# Offense count: 44
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: consistent, consistent_relative_to_receiver, special_for_inner_method_call, special_for_inner_method_call_in_parentheses
-Layout/FirstParameterIndentation:
-  Enabled: false
-
-# Offense count: 42
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: special_inside_parentheses, consistent, align_brackets
-Layout/IndentArray:
-  Enabled: false
-
-# Offense count: 7
-# Cop supports --auto-correct.
-# Configuration parameters: IndentationWidth.
-Layout/IndentAssignment:
-  Exclude:
-    - 'app/controllers/marty/report_controller.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/delorean_rule.rb'
-    - 'lib/marty/xl.rb'
-    - 'other/marty/api/base.rb'
-    - 'spec/lib/data_importer_spec.rb'
 
 # Offense count: 136
 # Cop supports --auto-correct.
@@ -344,59 +70,10 @@ Layout/IndentHash:
 Layout/IndentHeredoc:
   Enabled: false
 
-# Offense count: 25
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: normal, rails
-Layout/IndentationConsistency:
-  Exclude:
-    - 'app/components/marty/config_view.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/user.rb'
-    - 'spec/features/log_view_spec.rb'
-    - 'spec/features/reporting_spec.rb'
-    - 'spec/features/scripting_test_spec.rb'
-    - 'spec/lib/data_exporter_spec.rb'
-    - 'spec/lib/data_importer_spec.rb'
-    - 'spec/lib/delorean_query_spec.rb'
-    - 'spec/lib/mcfly_model_spec.rb'
-    - 'spec/models/data_grid_spec.rb'
-    - 'spec/other/diagnostic/reporter_spec.rb'
-
 # Offense count: 230
 # Cop supports --auto-correct.
 # Configuration parameters: Width, IgnoredPatterns.
 Layout/IndentationWidth:
-  Enabled: false
-
-# Offense count: 23
-# Cop supports --auto-correct.
-Layout/LeadingCommentSpace:
-  Enabled: false
-
-# Offense count: 15
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: symmetrical, new_line, same_line
-Layout/MultilineArrayBraceLayout:
-  Exclude:
-    - 'app/components/marty/api_config_view.rb'
-    - 'app/components/marty/report_form.rb'
-    - 'lib/marty/data_conversion.rb'
-    - 'lib/marty/monkey.rb'
-    - 'lib/marty/schema_helper.rb'
-    - 'other/marty/diagnostic/environment_variables.rb'
-    - 'spec/dummy/app/models/gemini/fannie_bup.rb'
-    - 'spec/dummy/app/models/gemini/streamline_type.rb'
-    - 'spec/dummy/db/migrate/20171222150100_add_rule_indices.rb'
-    - 'spec/features/log_view_spec.rb'
-    - 'spec/lib/data_importer_spec.rb'
-    - 'spec/models/event_spec.rb'
-    - 'spec/support/suite.rb'
-
-# Offense count: 160
-# Cop supports --auto-correct.
-Layout/MultilineBlockLayout:
   Enabled: false
 
 # Offense count: 44
@@ -447,126 +124,6 @@ Layout/MultilineOperationIndentation:
     - 'spec/models/script_spec.rb'
     - 'spec/support/shared_connection.rb'
 
-# Offense count: 4
-# Cop supports --auto-correct.
-Layout/SpaceAfterColon:
-  Exclude:
-    - 'app/models/marty/helper.rb'
-    - 'lib/marty/aws/request.rb'
-    - 'spec/controllers/rpc_controller_spec.rb'
-
-# Offense count: 165
-# Cop supports --auto-correct.
-Layout/SpaceAfterComma:
-  Enabled: false
-
-# Offense count: 13
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleInsidePipes.
-# SupportedStylesInsidePipes: space, no_space
-Layout/SpaceAroundBlockParameters:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/models/marty/delorean_rule.rb'
-    - 'lib/marty/rule_script_set.rb'
-    - 'spec/dummy/app/models/gemini/xyz_rule.rb'
-    - 'spec/dummy/lib/gemini/xyz_rule_script_set.rb'
-    - 'spec/features/rule_spec.rb'
-    - 'spec/models/rule_spec.rb'
-    - 'spec/support/custom_matchers.rb'
-
-# Offense count: 108
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceAroundEqualsInParameterDefault:
-  Enabled: false
-
-# Offense count: 4
-# Cop supports --auto-correct.
-Layout/SpaceAroundKeyword:
-  Exclude:
-    - 'lib/marty/json_schema.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/overrides.rb'
-
-# Offense count: 696
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment.
-Layout/SpaceAroundOperators:
-  Enabled: false
-
-# Offense count: 116
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceBeforeBlockBraces:
-  Enabled: false
-
-# Offense count: 3
-# Cop supports --auto-correct.
-Layout/SpaceBeforeComma:
-  Exclude:
-    - 'other/marty/api/base.rb'
-    - 'spec/models/posting_spec.rb'
-
-# Offense count: 146
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBrackets.
-# SupportedStyles: space, no_space, compact
-# SupportedStylesForEmptyBrackets: space, no_space
-Layout/SpaceInsideArrayLiteralBrackets:
-  Exclude:
-    - 'lib/marty/data_exporter.rb'
-    - 'lib/marty/xl.rb'
-    - 'spec/dummy/db/seeds.rb'
-    - 'spec/features/log_view_spec.rb'
-    - 'spec/lib/json_schema_spec.rb'
-
-# Offense count: 356
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideBlockBraces:
-  Enabled: false
-
-# Offense count: 1027
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.
-# SupportedStyles: space, no_space, compact
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideHashLiteralBraces:
-  Enabled: false
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceInsideParens:
-  Exclude:
-    - 'app/models/marty/posting.rb'
-    - 'lib/marty/xl.rb'
-    - 'spec/models/data_grid_spec.rb'
-
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBrackets.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBrackets: space, no_space
-Layout/SpaceInsideReferenceBrackets:
-  Exclude:
-    - 'lib/marty/data_conversion.rb'
-    - 'lib/marty/data_exporter.rb'
-    - 'lib/marty/permissions.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceInsideStringInterpolation:
-  Exclude:
-    - 'spec/dummy/app/models/gemini/extras/settlement_import.rb'
 
 # Offense count: 11
 # Cop supports --auto-correct.
@@ -800,7 +357,7 @@ Metrics/MethodLength:
 # Offense count: 12
 # Configuration parameters: CountComments.
 Metrics/ModuleLength:
-  Max: 675
+  Max: 690
 
 # Offense count: 13
 # Configuration parameters: CountKeywordArgs.
@@ -1017,23 +574,6 @@ Style/BarePercentLiterals:
     - 'spec/features/rule_spec.rb'
     - 'spec/models/config_spec.rb'
     - 'spec/support/netzke.rb'
-
-# Offense count: 155
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, ProceduralMethods, FunctionalMethods, IgnoredMethods.
-# SupportedStyles: line_count_based, semantic, braces_for_chaining
-# ProceduralMethods: benchmark, bm, bmbm, create, each_with_object, measure, new, realtime, tap, with_object
-# FunctionalMethods: let, let!, subject, watch
-# IgnoredMethods: lambda, proc, it
-Style/BlockDelimiters:
-  Enabled: false
-
-# Offense count: 126
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: braces, no_braces, context_dependent
-Style/BracesAroundHashParameters:
-  Enabled: false
 
 # Offense count: 21
 Style/CaseEquality:
@@ -1556,48 +1096,6 @@ Style/RandomWithOffset:
   Exclude:
     - 'spec/models/data_grid_spec.rb'
 
-# Offense count: 16
-# Cop supports --auto-correct.
-Style/RedundantBegin:
-  Exclude:
-    - 'app/controllers/marty/diagnostic/controller.rb'
-    - 'app/controllers/marty/rpc_controller.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/delorean_rule.rb'
-    - 'app/models/marty/event.rb'
-    - 'app/models/marty/promise.rb'
-    - 'lib/marty/json_schema.rb'
-    - 'lib/marty/logger.rb'
-    - 'lib/marty/rule_script_set.rb'
-    - 'other/marty/api/base.rb'
-    - 'other/marty/diagnostic/node.rb'
-    - 'other/marty/diagnostic/version.rb'
-    - 'spec/other/diagnostic/reporter_spec.rb'
-    - 'spec/support/setup.rb'
-    - 'spec/support/structure_compare.rb'
-
-# Offense count: 6
-# Cop supports --auto-correct.
-Style/RedundantParentheses:
-  Exclude:
-    - 'spec/models/data_grid_spec.rb'
-
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Exclude:
-    - 'app/controllers/marty/report_controller.rb'
-    - 'lib/marty/content_handler.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
-    - 'spec/dummy/public/extjs/modern/theme-base/sass/utils.rb'
-    - 'spec/support/components/netzke_grid.rb'
-
-# Offense count: 79
-# Cop supports --auto-correct.
-Style/RedundantSelf:
-  Enabled: false
-
 # Offense count: 6
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowInnerSlashes.
@@ -1668,22 +1166,6 @@ Style/StructInheritance:
 Style/SymbolArray:
   EnforcedStyle: brackets
 
-# Offense count: 36
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoredMethods.
-# IgnoredMethods: respond_to, define_method
-Style/SymbolProc:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/models/marty/posting.rb'
-    - 'other/marty/diagnostic/collection.rb'
-    - 'other/marty/diagnostic/node.rb'
-    - 'spec/lib/xl_spec.rb'
-    - 'spec/lib/xl_styles_spec.rb'
-    - 'spec/models/rule_spec.rb'
-    - 'spec/other/diagnostic/collection_spec.rb'
-    - 'spec/support/performance_helper.rb'
-
 # Offense count: 7
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowSafeAssignment.
@@ -1721,24 +1203,6 @@ Style/TrailingCommaInArrayLiteral:
 Style/TrailingCommaInHashLiteral:
   Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/UnlessElse:
-  Exclude:
-    - 'lib/marty/xl.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/overrides.rb'
-
-# Offense count: 8
-# Cop supports --auto-correct.
-Style/UnneededInterpolation:
-  Exclude:
-    - 'app/components/marty/main_auth_app.rb'
-    - 'lib/marty/rule_script_set.rb'
-    - 'spec/controllers/job_controller_spec.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
-    - 'spec/dummy/public/extjs/modern/theme-base/sass/utils.rb'
-    - 'spec/support/netzke.rb'
-
 # Offense count: 12
 # Cop supports --auto-correct.
 Style/UnneededPercentQ:
@@ -1746,12 +1210,6 @@ Style/UnneededPercentQ:
     - 'app/components/marty/simple_app.rb'
     - 'spec/features/rule_spec.rb'
     - 'spec/models/config_spec.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/WhileUntilDo:
-  Exclude:
-    - 'app/models/marty/promise.rb'
 
 # Offense count: 133
 # Cop supports --auto-correct.
@@ -1761,17 +1219,17 @@ Style/WordArray:
   EnforcedStyle: percent
   MinSize: 18
 
-# Offense count: 5
-# Cop supports --auto-correct.
-Style/ZeroLengthPredicate:
-  Exclude:
-    - 'app/components/marty/main_auth_app.rb'
-    - 'app/models/marty/data_grid.rb'
-    - 'app/models/marty/vw_promise.rb'
-    - 'lib/marty/permissions.rb'
-
 # Offense count: 247
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
 Metrics/LineLength:
   Max: 275
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false

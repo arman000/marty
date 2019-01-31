@@ -1,31 +1,30 @@
 class Marty::Scripting < Netzke::Base
-
   def configure(c)
     super
 
     c.items =
       [
-       :script_form,
-       {
-         xtype: "tabpanel",
-         active_tab: 0,
-         region: :center,
-         split: true,
-         items: [
-                 {
-                   title: I18n.t("script.selection"),
-                   layout: {
-                     type: :vbox,
-                     align: :stretch,
-                   },
-                   items: [
-                           :tag_grid,
-                           :script_grid,
-                          ],
-                 },
-                 :script_tester,
-                ],
-       },
+        :script_form,
+        {
+          xtype: "tabpanel",
+          active_tab: 0,
+          region: :center,
+          split: true,
+          items: [
+            {
+              title: I18n.t("script.selection"),
+              layout: {
+                type: :vbox,
+                align: :stretch,
+              },
+              items: [
+                :tag_grid,
+                :script_grid,
+              ],
+            },
+            :script_tester,
+          ],
+        },
       ]
   end
 
@@ -72,7 +71,6 @@ class Marty::Scripting < Netzke::Base
     c.title            = I18n.t("script.tester")
     c.flex             = 1
   end
-
 end
 
 Scripting = Marty::Scripting

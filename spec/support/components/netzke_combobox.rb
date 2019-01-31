@@ -6,7 +6,7 @@ module Marty; module RSpec; module Components
   class NetzkeCombobox
     include Netzke
     include Capybara::DSL
-    #include RSpec::Matchers
+    # include RSpec::Matchers
 
     attr_reader :name, :combobox
 

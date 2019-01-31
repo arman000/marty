@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe Marty::Diagnostic::Base do
-  def sample_data consistent=true
-    node_data_a = described_class.pack(include_ip=false){'A'}
-    node_data_b = described_class.pack(include_ip=false){'B'}
+  def sample_data consistent = true
+    node_data_a = described_class.pack(include_ip = false) { 'A' }
+    node_data_b = described_class.pack(include_ip = false) { 'B' }
 
     data = {
       'NodeA' => node_data_a,
@@ -11,12 +11,13 @@ describe Marty::Diagnostic::Base do
     }
 
     return data if consistent
-    data + {'NodeB' => node_data_b}
+
+    data + { 'NodeB' => node_data_b }
   end
 
   it 'determines consistency of aggregate diagnostics' do
     a = sample_data
-    b = sample_data(consistent=false)
+    b = sample_data(consistent = false)
 
     expect(described_class.consistent?(a)).to eq(true)
     expect(described_class.consistent?(b)).to eq(false)
@@ -31,20 +32,20 @@ describe Marty::Diagnostic::Base do
       }
     }
 
-    expect(described_class.pack(include_ip=false){'A'}).to eq(expected)
+    expect(described_class.pack(include_ip = false) { 'A' }).to eq(expected)
   end
 
   it 'can produce a valid diagnostic hash from a Hash' do
     test_a = {
       'ImportantA' => 'A',
       'ImportantB' => 'B',
-      'ImportantC' => 'C'}
+      'ImportantC' => 'C' }
 
     test_b = {
       'ImportantA' => {
-        'description' => 'A', 'status' => true, 'consistent' => nil},
+        'description' => 'A', 'status' => true, 'consistent' => nil },
       'ImportantB' => 'B',
-      'ImportantC' => 'C'}
+      'ImportantC' => 'C' }
 
     expected = {
       'ImportantA' => {
@@ -59,21 +60,21 @@ describe Marty::Diagnostic::Base do
     }
 
     expect(described_class.
-             pack(include_ip=false){test_a}).to eq(expected)
+             pack(include_ip = false) { test_a }).to eq(expected)
     expect(described_class.
-             pack(include_ip=false){test_a}).to eq(expected)
+             pack(include_ip = false) { test_a }).to eq(expected)
   end
 
   it 'can produce a valid diagnostic hash from an error Hash' do
-    test = described_class.pack(include_ip=false){
+    test = described_class.pack(include_ip = false) do
       described_class.error('E')
-    }
+    end
 
     expected = {
-      "Base"=>{
-        "description"=>"E",
-        "status"=>false,
-        "consistent"=>nil}
+      "Base" => {
+        "description" => "E",
+        "status" => false,
+        "consistent" => nil }
     }
 
     expect(test).to eq(expected)
@@ -96,7 +97,7 @@ describe Marty::Diagnostic::Base do
       }
     }
 
-    expect{described_class.pack{test_a}}.to raise_error(RuntimeError)
-    expect{described_class.pack{test_b}}.to raise_error(RuntimeError)
+    expect { described_class.pack { test_a } }.to raise_error(RuntimeError)
+    expect { described_class.pack { test_b } }.to raise_error(RuntimeError)
   end
 end
