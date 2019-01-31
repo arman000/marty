@@ -35,7 +35,7 @@ module Marty::Diagnostic
 
         # generate version data and declare all values consistent
         versions = Version.generate.each_with_object({}){
-          |(n, v),h|
+          |(n, v), h|
           h[n] = v.each{|t, r| r['consistent'] = true}
         }
 

@@ -18,7 +18,7 @@ module Marty::RuleSpec
       dt = DateTime.parse('2017-1-1')
       p = File.expand_path('../../fixtures/csv/rule', __FILE__)
       [Marty::DataGrid, Gemini::XyzRule, Gemini::MyRule].each do |klass|
-        f = "%s/%s.csv" % [p, klass.to_s.sub(/(Gemini|Marty)::/,'')]
+        f = "%s/%s.csv" % [p, klass.to_s.sub(/(Gemini|Marty)::/, '')]
         Marty::DataImporter.do_import(klass, File.read(f), dt, nil, nil, ",")
       end
       Marty::Tag.do_create('2017-01-01', 'tag')
@@ -60,7 +60,7 @@ module Marty::RuleSpec
       end
       it "detects arity errors 1" do
         @rule_type = "SimpleRule"
-        @g_single = ["G2V1","G2V2"]
+        @g_single = ["G2V1", "G2V2"]
         exp = /Guards - Wrong arity for 'g_single' .expected single got multi./
         expect{subject}.to raise_error(exp)
       end
@@ -79,27 +79,27 @@ module Marty::RuleSpec
       it "detects errors in computed results" do
         @rule_type = "SimpleRule"
         @results = {"does_not_compute"=> "zvjsdf12.z8*"}
-        @grids = {"grid1"=>"DataGrid1","grid2"=>"DataGrid2"}
+        @grids = {"grid1"=>"DataGrid1", "grid2"=>"DataGrid2"}
         exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "detects errors in computed results 2" do
         @rule_type = "SimpleRule"
         @results = {"does_not_compute"=> "zvjsdf12.z8*"}
-        @grids = {"grid1"=>"DataGrid1","grid2"=>"DataGrid1","grid3"=>"DataGrid3"}
+        @grids = {"grid1"=>"DataGrid1", "grid2"=>"DataGrid1", "grid3"=>"DataGrid3"}
         exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "detects errors in computed results 3" do
         @rule_type = "SimpleRule"
         @results = {"does_not_compute"=> "zvjsdf12.z8*"}
-        @grids = {"grid1"=>"DataGrid1","grid2"=>"DataGrid1","grid3"=>"DataGrid1"}
+        @grids = {"grid1"=>"DataGrid1", "grid2"=>"DataGrid1", "grid3"=>"DataGrid1"}
         exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect{subject}.to raise_error(exp)
       end
       it "reports bad grid names" do
         @rule_type = "SimpleRule"
-        @grids = {"grid1"=>"xyz","grid2"=>"DataGrid2","grid3"=>"DataGrid1"}
+        @grids = {"grid1"=>"xyz", "grid2"=>"DataGrid2", "grid3"=>"DataGrid1"}
         exp = /Grids - Bad grid name 'xyz' for 'grid1'/
         expect{subject}.to raise_error(exp)
       end
@@ -153,8 +153,8 @@ module Marty::RuleSpec
         @rule_type = 'XRule'
         @computed_guards = {"abc"=>"true", "xyz_guard"=> "!xyz_param"}
         rule = subject
-        expect(rule.compute_xyz('infinity',true)).to be false
-        expect(rule.compute_xyz('infinity',false)).to be true
+        expect(rule.compute_xyz('infinity', true)).to be false
+        expect(rule.compute_xyz('infinity', false)).to be true
       end
       it "no error" do
         @rule_type = 'XRule'
@@ -176,7 +176,7 @@ module Marty::RuleSpec
                                             'other_flag'=>true},
                                             {})
         expect(lookup.to_a.count).to eq(4)
-        expect(lookup.map{|l| l.name}.to_set).to eq(Set["Rule2","Rule2a",
+        expect(lookup.map{|l| l.name}.to_set).to eq(Set["Rule2", "Rule2a",
                                                        "Rule2b", "Rule2c"])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             {'rule_type'=>'ComplexRule',
@@ -329,7 +329,7 @@ module Marty::RuleSpec
                                         "p1"=>12,
                                         "p2"=>3,
                                         "flavor"=>"cherry"})
-        expect(c).to eq({"bvlength"=>13,"bv"=>"cherry --> 36",
+        expect(c).to eq({"bvlength"=>13, "bv"=>"cherry --> 36",
                          "grid1_grid_result"=>19})
       end
       it "reports bad grid name" do

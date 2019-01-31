@@ -13,7 +13,7 @@ module Marty::Diagnostic; class Connections < Base
       name = c['application_name']
       counts[name] += 1
       key = "#{name} #{'*' * (counts[name]-1)}"
-      h[key] = c.except('application_name').map{|k,v| "<li>#{k}: #{v}</li>"}.join
+      h[key] = c.except('application_name').map{|k, v| "<li>#{k}: #{v}</li>"}.join
     end
   end
 end

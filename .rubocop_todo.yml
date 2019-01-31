@@ -387,11 +387,6 @@ Layout/MultilineOperationIndentation:
     - 'spec/models/script_spec.rb'
     - 'spec/support/shared_connection.rb'
 
-# Offense count: 165
-# Cop supports --auto-correct.
-Layout/SpaceAfterComma:
-  Enabled: false
-
 # Offense count: 108
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

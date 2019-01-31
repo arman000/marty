@@ -35,7 +35,7 @@ module Marty::Diagnostic; class Nodes < Base
        'terminated'    => error_if(instances.terminated),
        'stopping'      => error_if(instances.stopping),
        'stopped'       => error_if(instances.stopped),
-      }.delete_if{|k,v| v.empty?}
+      }.delete_if{|k, v| v.empty?}
     rescue => e
       error(e.message)
     end

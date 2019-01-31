@@ -96,7 +96,7 @@ class Marty::DeloreanRule < Marty::BaseRule
                   result.err_section)
         end
         result.cg_hash = Hash[result.cg_keys.zip(result.cg_vals)]
-        fails = result.cg_hash.select{|k,v| ![v].flatten.first}
+        fails = result.cg_hash.select{|k, v| ![v].flatten.first}
         return fails if fails.present?
       end
 
@@ -135,7 +135,7 @@ class Marty::DeloreanRule < Marty::BaseRule
         result.gr_hash = grids.each_with_object({}) do |(gvar, gname), h|
           usename = eclass.grid_final_name(gvar)
           next h[usename] = gres[gname] if gres[gname]
-          dg = Marty::DataGrid.lookup_h(pt,gname)
+          dg = Marty::DataGrid.lookup_h(pt, gname)
           dgr = dg && Marty::DataGrid.lookup_grid_distinct_entry_h(pt, dgparams,
                                                                    dg)
           h[usename] = gres[gname] = dgr["result"] if dgr

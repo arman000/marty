@@ -76,10 +76,10 @@ feature 'logger view', js: true, capybara: true do
       details = logview.get_col_vals('details', cnt, 0).
                   map { |d| CGI.unescapeHTML(d) }
       ts = logview.get_col_vals('timestamp_custom', cnt, 0)
-      expect(ts).to eq(@ts.slice(0,exp_count))
-      expect(types).to eq(exp_types.slice(0,exp_count))
-      expect(messages).to eq(exp_messages.slice(0,exp_count))
-      expect(details).to eq(exp_details.slice(0,exp_count))
+      expect(ts).to eq(@ts.slice(0, exp_count))
+      expect(types).to eq(exp_types.slice(0, exp_count))
+      expect(messages).to eq(exp_messages.slice(0, exp_count))
+      expect(details).to eq(exp_details.slice(0, exp_count))
     end
   end
 end

@@ -10,7 +10,7 @@ feature 'rule view', js: true do
     dt = DateTime.parse('2017-1-1')
     p = File.expand_path('../../fixtures/csv/rule', __FILE__)
     [Marty::DataGrid, Gemini::XyzRule, Gemini::MyRule].each do |klass|
-      f = "%s/%s.csv" % [p, klass.to_s.sub(/(Gemini|Marty)::/,'')]
+      f = "%s/%s.csv" % [p, klass.to_s.sub(/(Gemini|Marty)::/, '')]
       Marty::DataImporter.do_import(klass, File.read(f), dt, nil, nil, ",")
     end
   end
@@ -43,7 +43,7 @@ feature 'rule view', js: true do
   end
 
   # click_col in marty_rspec is not reliable
-  def click_column(rv,name)
+  def click_column(rv, name)
     cid = col_id(rv, name)
     c = find('#'+cid)
     c.select_option   #   .click does not work reliably
@@ -53,13 +53,13 @@ feature 'rule view', js: true do
     sleep 1.0
   end
 
-  def column_filter(rv,name,value)
+  def column_filter(rv, name, value)
     cid = col_id(rv, name)
     c = find('#'+cid)
     c.send_keys([:down, :down, :down, :down, :right, value, :return])
     sleep 1.0
   end
-  def column_filter_toggle(rv,name)
+  def column_filter_toggle(rv, name)
     cid = col_id(rv, name)
     c = find('#'+cid)
     c.send_keys([:down, :down, :down, :down, ' ', :escape])
@@ -71,7 +71,7 @@ feature 'rule view', js: true do
     dt.native.clear()
     dt.native.send_keys(value)
   end
-  def time_fill_in(idx,value)
+  def time_fill_in(idx, value)
     tm = all(:xpath, "//input[contains(@name, 'timefield')]")[idx]
     tm.native.clear()
     tm.native.send_keys(value)
@@ -171,7 +171,7 @@ feature 'rule view', js: true do
            "grids"=>"{\"grid1\":\"DataGrid1\",\"grid2\":\"DataGrid2\"}",
            "results"=>"",
           }
-    r = Gemini::MyRule.lookup('infinity','abc')
+    r = Gemini::MyRule.lookup('infinity', 'abc')
     expect(r["simple_guards"]["g_nullbool"]).to eq(false)
     expect(mrv.get_row_vals(1)).to include(exp)
     # grid edits
@@ -188,7 +188,7 @@ feature 'rule view', js: true do
     expect(mrv.get_row_vals(1)).to include(exp+{"g_nullbool"=>"",
                                                 "grids"=>
                                                 "{\"grid1\":\"DataGrid1\"}"})
-    r = Gemini::MyRule.lookup('infinity','abc')
+    r = Gemini::MyRule.lookup('infinity', 'abc')
     expect(r["simple_guards"]).not_to include('g_nullbool')
     # computed fields
     press("Edit")
@@ -366,26 +366,26 @@ EOL
                                                      "ddd", "ccc", "bbb", "aaa"])
     column_filter(xrv, "String list Guard", "eee")
     rc = xrv.row_count
-    expect(xrv.get_col_vals(:g_string,rc,0)).to eq(["eee", "eee", "eee", "eee"])
+    expect(xrv.get_col_vals(:g_string, rc, 0)).to eq(["eee", "eee", "eee", "eee"])
     column_filter_toggle(xrv, "String list Guard")
     rc = xrv.row_count
-    expect(xrv.get_col_vals(:g_string,rc,0)).to eq(["eee", "eee", "eee", "eee",
-                                                    "ddd", "ccc", "bbb", "aaa"])
+    expect(xrv.get_col_vals(:g_string, rc, 0)).to eq(["eee", "eee", "eee", "eee",
+                                                      "ddd", "ccc", "bbb", "aaa"])
     column_filter(xrv, "Grids", "Grid1")
     rc = xrv.row_count
     # netzke reports jsonb as string
-    expect(xrv.get_col_vals(:grids,rc,0)).to eq([%Q({"grid1":"DataGrid1"}),
-                                                 %Q({"grid1":"DataGrid1"})])
+    expect(xrv.get_col_vals(:grids, rc, 0)).to eq([%Q({"grid1":"DataGrid1"}),
+                                                   %Q({"grid1":"DataGrid1"})])
     column_filter_toggle(xrv, "Grids")
     rc = xrv.row_count
-    expect(xrv.get_col_vals(:grids,rc,0)).to eq([%Q({"grid1":"DataGrid3"}),
-                                                 %Q({"grid1":"DataGrid3"}),
-                                                 %Q({"grid1":"DataGrid3"}),
-                                                 %Q({"grid1":"DataGrid3"}),
-                                                 %Q({"grid1":"DataGrid3"}),
-                                                 %Q({"grid1":"DataGrid2"}),
-                                                 %Q({"grid1":"DataGrid1"}),
-                                                 %Q({"grid1":"DataGrid1"})])
+    expect(xrv.get_col_vals(:grids, rc, 0)).to eq([%Q({"grid1":"DataGrid3"}),
+                                                   %Q({"grid1":"DataGrid3"}),
+                                                   %Q({"grid1":"DataGrid3"}),
+                                                   %Q({"grid1":"DataGrid3"}),
+                                                   %Q({"grid1":"DataGrid3"}),
+                                                   %Q({"grid1":"DataGrid2"}),
+                                                   %Q({"grid1":"DataGrid1"}),
+                                                   %Q({"grid1":"DataGrid1"})])
     press("Applications")
     press("Data Grids")
     dgv = netzke_find("data_grid_view")

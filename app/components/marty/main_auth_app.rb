@@ -307,21 +307,21 @@ class Marty::MainAuthApp < Marty::AuthApp
   endpoint :bg_status do |params|
     cmd = bg_command('status')
     res = `#{cmd}`
-    client.show_detail res.html_safe.gsub("\n","<br/>"), 'Delayed Job Status'
+    client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Delayed Job Status'
   end
 
   endpoint :bg_stop do |params|
     cmd = bg_command("stop")
     res = `#{cmd}`
     res = "delayed_job: no instances running. Nothing to stop." if res.length==0
-    client.show_detail res.html_safe.gsub("\n","<br/>"), 'Delayed Job Stop'
+    client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Delayed Job Stop'
   end
 
   endpoint :bg_restart do |params|
     params = Marty::Config["DELAYED_JOB_PARAMS"] || ""
     cmd = bg_command("restart #{params}")
     res = `#{cmd}`
-    client.show_detail res.html_safe.gsub("\n","<br/>"), 'Delayed Job Restart'
+    client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Delayed Job Restart'
   end
 
   endpoint :log_cleanup do |params|
@@ -329,7 +329,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       Marty::Log.cleanup(params)
     rescue => e
       res = e.message
-      client.show_detail res.html_safe.gsub("\n","<br/>"), 'Log Cleanup'
+      client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Log Cleanup'
     end
   end
 

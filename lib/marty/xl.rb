@@ -209,7 +209,7 @@ class Marty::Xl
 
           a = i == 0 ? top_row : []
 
-          a = merge_row_edges(a,bottom_row) if
+          a = merge_row_edges(a, bottom_row) if
             i == (rowh - row0 - 1)
 
           a = middle_row unless
@@ -357,7 +357,7 @@ class Marty::Xl
       new_ops1 += d[2].select { |inner_ops|
         inner_ops if inner_ops[0] == "pos"
       }.map { |inner|
-        [inner[0], d[1].zip(inner[1]).map { |x,y| x+y }, inner[2] ]
+        [inner[0], d[1].zip(inner[1]).map { |x, y| x+y }, inner[2] ]
       }
     }
     # keep the offsets of non-pos options embedded in pos opt:
@@ -501,7 +501,7 @@ class Marty::Xl
         raise "unknown op #{opl[0]}"
       end
     }
-    worksheet_rows(ws,rows,styles,row_styles,format,borders,images) unless
+    worksheet_rows(ws, rows, styles, row_styles, format, borders, images) unless
       [ops_pos.count, ops_brd.count].all?{ |a| a == 0 }
   end
 

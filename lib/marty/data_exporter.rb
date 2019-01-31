@@ -43,7 +43,7 @@ class Marty::DataExporter
       obj.is_a?(Array) && obj.all? {|x| x.is_a? Hash}
 
     # symbolize config keys as expected by CSV.generate
-    conf = config.each_with_object({}) { |(k,v), h|
+    conf = config.each_with_object({}) { |(k, v), h|
       h[k.to_sym] = v unless k.to_s == "transpose"
     }
 

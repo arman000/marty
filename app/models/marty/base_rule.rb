@@ -71,7 +71,7 @@ class Marty::BaseRule < Marty::Base
   end
 
   before_create do
-    self.class.guard_info.each do |k,v|
+    self.class.guard_info.each do |k, v|
       next if !v.include?(:default) || self.simple_guards.include?(k)
       self.simple_guards[k] = v[:default]
     end

@@ -70,9 +70,9 @@ describe Marty::JobController, slow: true do
     slp = 5
 
     exp_res = {"d"=>[
-                     {"z"=>slp,"a"=>{"b"=>{"e"=>1-slp}}},
-                     {"z"=>slp,"a"=>{"b"=>{"e"=>2-slp}}},
-                     {"z"=>slp,"a"=>{"b"=>{"e"=>3-slp}}},
+                     {"z"=>slp, "a"=>{"b"=>{"e"=>1-slp}}},
+                     {"z"=>slp, "a"=>{"b"=>{"e"=>2-slp}}},
+                     {"z"=>slp, "a"=>{"b"=>{"e"=>3-slp}}},
                     ]}
 
     bench = Benchmark.measure {
@@ -196,7 +196,7 @@ describe Marty::JobController, slow: true do
     promise = Marty::Promise.find_by_title(NAME_B)
 
     expect(promise.result).to eq({
-      "result"=>[{"a"=>1, "b"=>1},{"a"=>2, "b"=>4},{"a"=>3, "b"=>9}],
+      "result"=>[{"a"=>1, "b"=>1}, {"a"=>2, "b"=>4}, {"a"=>3, "b"=>9}],
       "format"=>"csv",
       "title"=>"PromiseB",
     })

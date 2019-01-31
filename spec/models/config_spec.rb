@@ -23,10 +23,10 @@ module Marty
       it "should handle various structures correctly" do
         testval("[1,2,3]")
         testval("[1,\"2,3\"]")
-        testval([1,2,3])
-        testval([1,"2,3"])
+        testval([1, 2, 3])
+        testval([1, "2,3"])
 
-        testval({ "key1" => [1,2,3], "keystr" => { "val" => "val"}})
+        testval({ "key1" => [1, 2, 3], "keystr" => { "val" => "val"}})
         testval(%Q({ "key1" : [1,2,3], "keystr" : { "val" : "val"}}))
 
         testval("123456.1234")

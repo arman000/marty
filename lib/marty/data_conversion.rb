@@ -153,7 +153,7 @@ class Marty::DataConversion
 
     raise "no key_attrs for #{klass}" unless key_attrs
 
-    find_options = options.select { |k,v| key_attrs.member? k.to_sym }
+    find_options = options.select { |k, v| key_attrs.member? k.to_sym }
 
     raise "no keys for #{klass} -- #{options}" if find_options.empty?
 
@@ -184,7 +184,7 @@ class Marty::DataConversion
     # user can't import empty strings -- Perhaps, mapping "" -> nil
     # should be optional?
     row = row.each_with_object({}) {
-      |(k,v), h|
+      |(k, v), h|
       h[k.to_s] = v == '' ? nil : v
     }
     key_groups.each_with_object({}) do

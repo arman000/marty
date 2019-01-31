@@ -149,7 +149,7 @@ class Marty::Api::Base
           )
 
           msg = "Error(s) validating: #{errors}"
-          res = config[:strict_validate] ? {error: msg ,data: res} : res
+          res = config[:strict_validate] ? {error: msg , data: res} : res
         end
       end
 
@@ -236,7 +236,7 @@ class Marty::Api::Base
           fa, fragment, message, errors = errs.values_at(:failed_attribute,
                                                          :fragment,
                                                          :message, :errors)
-          ((['AllOf','AnyOf','Not'].include?(fa) && fragment =='#/') ?
+          ((['AllOf', 'AnyOf', 'Not'].include?(fa) && fragment =='#/') ?
              [] : [massage_message(message)]) + _get_errors(errors || {})
         end
       end

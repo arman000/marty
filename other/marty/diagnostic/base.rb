@@ -13,7 +13,7 @@ module Marty::Diagnostic; class Base < Request
                   find_template("marty/diagnostic/diag").identifier
 
   def self.diagnostic_fn opts={}
-    opts.each do |k,v|
+    opts.each do |k, v|
       send("#{k}=", v)
     end
     class << self

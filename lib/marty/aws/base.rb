@@ -52,7 +52,7 @@ class Marty::Aws::Base
   end
 
   def sym obj
-    obj.each_with_object({}){|(k,v),h| h[k.underscore.to_sym] = v}
+    obj.each_with_object({}){|(k, v), h| h[k.underscore.to_sym] = v}
   end
 
   def get_credentials

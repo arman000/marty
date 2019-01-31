@@ -74,7 +74,7 @@ class Marty::ReportSelect < Marty::Form
       rescue
         [node, node]
       end
-    }.compact.sort{ |a,b| a[1] <=> b[1]}
+    }.compact.sort{ |a, b| a[1] <=> b[1]}
   end
 
   endpoint :get_combobox_options do |params|

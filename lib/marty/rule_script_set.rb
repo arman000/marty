@@ -126,7 +126,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     line = exc.line ? exc.line - self.class.body_lines : 0
     errs = code_section_counts(ruleh)
     line_count = 0
-    errs.each do |k,v|
+    errs.each do |k, v|
       line_count += v
       return k if line <= line_count
     end

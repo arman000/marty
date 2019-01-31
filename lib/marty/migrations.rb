@@ -149,7 +149,7 @@ module Marty::Migrations
           tn_alias = "#{table_name}#{jointabs[table_name]}"
           joins.push "left join #{table_name} #{tn_alias} on main.#{c} " +
                      "= #{tn_alias}.id"
-          target_name = c.gsub(/_id$/,'_name')
+          target_name = c.gsub(/_id$/, '_name')
           columns.push "#{tn_alias}.name as #{target_name}"
           extras.each do |(table, column, new_colname)|
             columns.push "#{tn_alias}.#{column} as #{new_colname}" if
@@ -311,9 +311,9 @@ OUT
       next [:ret, $1]  if %r(\A// RETURN[:] (.*)$).match(line)
       [:body, line]
     end.group_by(&:first)
-    args = parts[:param].map{ |(_,l)| l}.join(",\n")
+    args = parts[:param].map{ |(_, l)| l}.join(",\n")
     ret =  parts[:ret][0][1]
-    body = parts[:body].map{ |(_,l)| l}.join
+    body = parts[:body].map{ |(_, l)| l}.join
     <<EOT
 CREATE OR REPLACE FUNCTION #{fnname} (
 #{args}

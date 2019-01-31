@@ -31,7 +31,7 @@ class Marty::ReportForm < Marty::Form
 
   def self.get_report_engine(params)
     d_params = ActiveSupport::JSON.decode(params[:data] || "{}")
-    d_params.each_pair do |k,v|
+    d_params.each_pair do |k, v|
       d_params[k] = nil if v.blank? || v == "null"
     end
 

@@ -475,8 +475,8 @@ describe Marty::RpcController do
                        }, Date.today + 3.minute)
 
     @p2 = Marty::Posting.do_create("BASE", Date.today + 4.minute, 'a comment')
-    @data = [["some data",7,[1,2,3],{foo: "bar", baz: "quz"},5,"string"],
-             ["some more data",[1,2,3],5,{foo: "bar", baz: "quz"},5,"string"]]
+    @data = [["some data", 7, [1, 2, 3], {foo: "bar", baz: "quz"}, 5, "string"],
+             ["some more data", [1, 2, 3], 5, {foo: "bar", baz: "quz"}, 5, "string"]]
     @data_json = @data.to_json
   }
 
@@ -992,7 +992,7 @@ describe Marty::RpcController do
     VALUES=Set['Apple', 'Banana', 'Orange']
   end
   class CondEnum
-    VALUES=Set['no opts','opt1','opt2','opttf']
+    VALUES=Set['no opts', 'opt1', 'opt2', 'opttf']
   end
 
   it "validates schema with a pg_enum (Positive)" do

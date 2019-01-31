@@ -406,9 +406,9 @@ EOS
                                   "state" => "HI",
                                  },
                                 )
-        expect(res).to eq [1.655,"G3"]
+        expect(res).to eq [1.655, "G3"]
 
-        [3,4].each {
+        [3, 4].each {
           |units|
           res = lookup_grid_helper('infinity',
                                    "G2",
@@ -418,7 +418,7 @@ EOS
                                     "cltv" => 110.1,
                                    },
                                   )
-          expect(res).to eq [5.6,"G2"]
+          expect(res).to eq [5.6, "G2"]
         }
 
         dg = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: "G1")
@@ -430,12 +430,12 @@ EOS
         }
 
         res = lookup_grid_helper('infinity', "G1", h)
-        expect(res).to eq [11,"G1"]
+        expect(res).to eq [11, "G1"]
 
         dg.update_from_import("G1", G1.sub(/11/, "111"))
 
         res = lookup_grid_helper('infinity', "G1", h)
-        expect(res).to eq [111,"G1"]
+        expect(res).to eq [111, "G1"]
       end
 
       it "should result in error when there are multiple cell hits" do
@@ -458,7 +458,7 @@ EOS
                                   "ltv" => 81,
                                  },
                                 )
-        expect(res).to eq [nil,"G1"]
+        expect(res).to eq [nil, "G1"]
       end
 
       it "should handle string wildcards" do
@@ -469,7 +469,7 @@ EOS
                                   "ltv" => 80,
                                  },
                                 )
-        expect(res).to eq [22,"G1"]
+        expect(res).to eq [22, "G1"]
       end
 
       it "should handle matches which also have a wildcard match" do
@@ -486,7 +486,7 @@ EOS
                                  "G9",
                                  {"state" => "GU", "ltv" => 81},
                                 )
-        expect(res).to eq [456,"G9"]
+        expect(res).to eq [456, "G9"]
       end
 
       it "should raise on nil attr values" do
@@ -508,7 +508,7 @@ EOS
                                  {"state" => nil, "ltv" => 81},
                                  false, false)
 
-        expect(res).to eq [456,"G9"]
+        expect(res).to eq [456, "G9"]
       end
 
       it "should handle boolean keys" do
@@ -518,7 +518,7 @@ EOS
                                   "cltv" => 80,
                                  },
                                 )
-        expect(res).to eq [-1.5,"G4"]
+        expect(res).to eq [-1.5, "G4"]
 
         res = lookup_grid_helper('infinity',
                                  "G4",
@@ -526,7 +526,7 @@ EOS
                                   "cltv" => 80,
                                  },
                                 )
-        expect(res).to eq [nil,"G4"]
+        expect(res).to eq [nil, "G4"]
       end
 
       it "should handle vertical-only grids" do
@@ -534,7 +534,7 @@ EOS
                                  "G5",
                                  {"ltv" => 80},
                                 )
-        expect(res).to eq [-0.375,"G5"]
+        expect(res).to eq [-0.375, "G5"]
       end
 
       it "should handle horiz-only grids" do
@@ -542,7 +542,7 @@ EOS
                                  "G6",
                                  {"ltv" => 80, "conforming" => true},
                                 )
-        expect(res).to eq [-0.375,"G6"]
+        expect(res).to eq [-0.375, "G6"]
       end
 
       it "should handle string typed data grids" do
@@ -554,7 +554,7 @@ EOS
                                   "cltv" => 80,
                                  },
                                 )
-        expect(res).to eq ["test","G7"]
+        expect(res).to eq ["test", "G7"]
       end
 
       it "should handle DataGrid typed data grids" do
@@ -567,7 +567,7 @@ EOS
                                  {"ltv" => 80,
                                  },
                                 )
-        expect(res).to eq [g1,"G8"]
+        expect(res).to eq [g1, "G8"]
       end
 
       it "should handle multi DataGrid lookups" do
@@ -581,11 +581,11 @@ EOS
         }
 
         g1_res = lookup_grid_helper('infinity', "G1", h)
-        expect(g1_res).to eq [11,"G1"]
+        expect(g1_res).to eq [11, "G1"]
 
         res = lookup_grid_helper('infinity',
                                        "G8",
-                                       h,true
+                                       h, true
                                       )
         expect(g1_res).to eq res
       end
@@ -598,7 +598,7 @@ EOS
                                  {"dg" => g1,
                                  },
                                 )
-        expect(res).to eq [7,"Ga"]
+        expect(res).to eq [7, "Ga"]
 
         # should be able to lookup bu name as well
         res = lookup_grid_helper('infinity',
@@ -606,7 +606,7 @@ EOS
                                  {"dg" => "G2",
                                  },
                                 )
-        expect(res).to eq [7,"Ga"]
+        expect(res).to eq [7, "Ga"]
       end
 
       it "should handle DataGrid typed data grids -- non mcfly" do
@@ -617,7 +617,7 @@ EOS
                                  {"property_state" => ca,
                                  },
                                 )
-        expect(res).to eq [70,"Gb"]
+        expect(res).to eq [70, "Gb"]
 
         # should be able to lookup bu name as well
         res = lookup_grid_helper('infinity',
@@ -625,7 +625,7 @@ EOS
                                  {"property_state" => "CA",
                                  },
                                 )
-        expect(res).to eq [70,"Gb"]
+        expect(res).to eq [70, "Gb"]
       end
 
       it "should handle typed (enum) data lookup_grid" do
@@ -666,8 +666,8 @@ EOS
       end
 
       it "should return grid data and metadata multi (following)" do
-        expected_data =  [[1.1, 2.2, 3.3],[4.4, 5.5, 6.6],[1.2, 2.3, 3.4],
-                          [4.5, 5.6, nil],[11.0, 22.0, 33.0]]
+        expected_data =  [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], [1.2, 2.3, 3.4],
+                          [4.5, 5.6, nil], [11.0, 22.0, 33.0]]
         expected_metadata = [{"dir"=>"v",
                               "attr"=>"state",
                               "keys"=>[["CA"], ["HI", "TX"], ["NM"], ["MA"], nil],
@@ -756,7 +756,7 @@ EOS
         dgb.update_from_import("Gb", Gb.sub(/70/, "444"), '1/1/2016')
 
         dgch = dgc.attributes.
-               slice("id","group_id","created_dt",  "metadata", "data_type")
+               slice("id", "group_id", "created_dt",  "metadata", "data_type")
         res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2014',
                                              {"property_state" => "CA"}, dgch)
         expect(res["result"]).to eq(70)

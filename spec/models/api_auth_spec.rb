@@ -130,7 +130,7 @@ module Marty
     describe "authorization" do
       it "should pass when script is not secured" do
         # Script is not secured by any entries
-        params = create_params('SomeScript','SomeKey')
+        params = create_params('SomeScript', 'SomeKey')
         expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
       end
 

@@ -32,7 +32,7 @@ class Marty::SchemaHelper
     |var_array, *conds_array|
     {"anyOf"=>[{"not"=>{"allOf"=> conds_array}},
                {"properties"=> var_array.each_with_object({}) do
-                  |v,h|
+                  |v, h|
                   h[v] = { "not" => {} }
                 end
                }]}
@@ -44,7 +44,7 @@ class Marty::SchemaHelper
     |dep_column, *var_array|
     dep_check(dep_column,
               {"properties"=> var_array.each_with_object({}) do
-                 |v,h|
+                 |v, h|
                  h[v] = { "not" => {} }
                end
               })
@@ -62,7 +62,7 @@ class Marty::SchemaHelper
     { "anyOf" => [
         {"required" => [dep_column] },
         {"properties"=> var_array.each_with_object({}) do
-           |v,h|
+           |v, h|
            h[v] = { "not" => {} }
          end
         }]}

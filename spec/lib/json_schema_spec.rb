@@ -1,11 +1,11 @@
 require 'spec_helper'
 
 class MammalEnum
-  VALUES=Set['Dog','Cat','Human','Cow','Bear']
+  VALUES=Set['Dog', 'Cat', 'Human', 'Cow', 'Bear']
 end
 
 class ElectronicsEnum
-  VALUES=Set['Phone','Keyboard','Terminator']
+  VALUES=Set['Phone', 'Keyboard', 'Terminator']
 end
 
 class NotAnEnum

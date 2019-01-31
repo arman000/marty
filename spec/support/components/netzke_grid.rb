@@ -114,7 +114,7 @@ module Marty; module RSpec; module Components
     end
 
     def set_row_vals row, fields
-      js_set_fields = fields.each_pair.map do |k,v|
+      js_set_fields = fields.each_pair.map do |k, v|
         "r.set('#{k}', '#{v}');"
       end.join
 
@@ -131,7 +131,7 @@ module Marty; module RSpec; module Components
         JS
       temp = JSON.parse(res)
       parsed = temp.merge(temp.delete('association_values') || {})
-      fields ? fields.each_with_object({}).each{|k,h| h[k] = parsed[k]} :
+      fields ? fields.each_with_object({}).each{|k, h| h[k] = parsed[k]} :
         parsed
     end
 

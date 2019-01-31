@@ -1,7 +1,7 @@
 module Marty::RSpec::StructureCompare
   def self.struct_compare_all(v1raw, v2raw, key=nil, cmp_opts={}, path=[], errs=[])
     pathstr = path.map(&:to_s).join
-    v1,v2 = [v1raw, v2raw].map { |v| v.class == ActiveSupport::TimeWithZone ?
+    v1, v2 = [v1raw, v2raw].map { |v| v.class == ActiveSupport::TimeWithZone ?
                                    DateTime.parse(v.to_s) : v }
 
     return errs + [v1["error"]] if
@@ -13,7 +13,7 @@ module Marty::RSpec::StructureCompare
     return errs + ["path=#{pathstr} class mismatch #{v1.class} #{v2.class}"] unless
       v1.class == v2.class ||
       (!cmp_opts["float_int_nomatch"] &&
-       [v1,v2].map(&:class).to_set == Set.new([Integer, Float]))
+       [v1, v2].map(&:class).to_set == Set.new([Integer, Float]))
 
     override = (cmp_opts["ignore"]||[]).include?(key)
     case v1
@@ -42,7 +42,7 @@ module Marty::RSpec::StructureCompare
       errs.append(
         "path=#{pathstr} array size mismatch #{v1.size} != #{v2.size}") if
         v1.size != v2.size
-      return errs + v1.each_with_index.map do |childval,index|
+      return errs + v1.each_with_index.map do |childval, index|
         struct_compare_all(childval, v2[index], nil, cmp_opts, path + [[index]],
                            [])
       end.flatten

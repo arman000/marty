@@ -17,9 +17,9 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
 
     to_delete.each{|k| env.delete(k)}
 
-    to_obfus.each{|k| env[k] = env[k][0,4] if env[k]}
+    to_obfus.each{|k| env[k] = env[k][0, 4] if env[k]}
 
-    env.sort.each_with_object({}){|(k,v),h|
+    env.sort.each_with_object({}){|(k, v), h|
       h[k] = v if to_block.all?{|b| !k.include?(b)} && k.include?(filter)}
   end
 

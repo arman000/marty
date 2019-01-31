@@ -25,9 +25,9 @@ describe Marty::Event do
     # add events
     [['testcl1',  123, @time, nil,            nil,     'AVM',     'a comment',
       nil],
-     ['testcl1',  123, @time + 2.second, nil,nil,     'CRA',     'b comment',
+     ['testcl1',  123, @time + 2.second, nil, nil,     'CRA',     'b comment',
       nil],
-     ['testcl1',  123, @time + 4.seconds, nil,10000,     'PRICING', 'c comment',
+     ['testcl1',  123, @time + 4.seconds, nil, 10000,     'PRICING', 'c comment',
       nil],
      ['testcl1',  234, @time - 5.seconds, @time, nil,    'PRICING', 'c comment',
       false],
