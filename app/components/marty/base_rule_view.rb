@@ -183,7 +183,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def form_items_guards
-    klass.guard_info.reject{|_, h| h[:hidden]}.keys.map{|x|x.to_sym}
+    klass.guard_info.reject{|_, h| h[:hidden]}.keys.map{|x| x.to_sym}
   end
 
   def form_items_grids

@@ -145,9 +145,9 @@ class Marty::DeloreanRule < Marty::BaseRule
     ensure
       if ruleh['fixed_results']['log__']
         resh = result.to_h
-        [:res_keys, :res_vals].each {|k|resh.delete(k)} if
+        [:res_keys, :res_vals].each {|k| resh.delete(k)} if
           result.res_hash.present? || result.res_keys.blank?
-        [:cg_keys, :cg_vals].each {|k|resh.delete(k)} if
+        [:cg_keys, :cg_vals].each {|k| resh.delete(k)} if
           result.cg_hash.present? ||  result.cg_keys.blank?
         resh.delete(:gr_keys) if result.gr_hash.present? || result.gr_keys.blank?
         estack_full = resh.delete(:err_stack)

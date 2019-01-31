@@ -37,7 +37,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def paramify_h(h)
-    "{" + h.keys.reject{|k|k.ends_with?("__")}.
+    "{" + h.keys.reject{|k| k.ends_with?("__")}.
                          map {|k| %Q("#{k}": #{k}) }.join(",\n") + "}"
   end
 
@@ -89,7 +89,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def grid_init(ruleh)
     if ruleh["grids"].present? ||
-       ruleh["results"].keys.any?{|k|k.ends_with?("_grid")}
+       ruleh["results"].keys.any?{|k| k.ends_with?("_grid")}
       write_code({ "pt" => :parameter,
                    "dgparams__" => :parameter,
                  })

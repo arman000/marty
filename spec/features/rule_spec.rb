@@ -308,7 +308,7 @@ computed_value = if paramb
                  else (grid2_grid_result||1) / param1
 EOL
     names = mrv.get_col_vals(:name, 9, 0)
-    idx = names.index{|n|n=='Rule3'}+1
+    idx = names.index{|n| n=='Rule3'}+1
     mrv.select_row(idx)
     press("Edit")
     expect(find_field(:results).value).to eq(exp.chomp)

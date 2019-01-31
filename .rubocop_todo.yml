@@ -400,21 +400,6 @@ Layout/SpaceAfterColon:
 Layout/SpaceAfterComma:
   Enabled: false
 
-# Offense count: 13
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleInsidePipes.
-# SupportedStylesInsidePipes: space, no_space
-Layout/SpaceAroundBlockParameters:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/models/marty/delorean_rule.rb'
-    - 'lib/marty/rule_script_set.rb'
-    - 'spec/dummy/app/models/gemini/xyz_rule.rb'
-    - 'spec/dummy/lib/gemini/xyz_rule_script_set.rb'
-    - 'spec/features/rule_spec.rb'
-    - 'spec/models/rule_spec.rb'
-    - 'spec/support/custom_matchers.rb'
-
 # Offense count: 108
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
