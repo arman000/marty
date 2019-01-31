@@ -11,7 +11,6 @@ module Mcfly::Model
     end
 
     def base_mcfly_lookup(meth, name, options = {}, &block)
-
       priv = options[:private]
 
       send(meth, name, options) do |ts, *args|

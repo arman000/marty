@@ -11,7 +11,6 @@ class Marty::Aws::Base
               :creds,
               :version,
               :host,
-
   def self.get url
     uri = URI.parse(url)
     req = Net::HTTP.new(uri.host, uri.port)

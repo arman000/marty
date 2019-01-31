@@ -40,5 +40,4 @@ module Marty; module RSpec; module Chromedriver
   Capybara.default_driver    = :chrome
   Capybara.javascript_driver = ENV['HEADLESS'] == 'true' ?
                                  :headless_chrome : :chrome
-
 end end end

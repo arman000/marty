@@ -72,10 +72,8 @@ class Marty::ScriptTester < Marty::Form
 
       client.netzke_notify "done"
       client.set_result result.join("<br/>")
-
     rescue SystemStackError
       return client.netzke_notify "System Stack Error"
-
     rescue => exc
       res = Delorean::Engine.grok_runtime_exception(exc)
 

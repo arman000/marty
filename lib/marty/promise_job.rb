@@ -17,7 +17,6 @@ class Delorean::BaseModule::NodeCall
   # Monkey-patch '|' method for Delorean NodeCall to create promise
   # jobs and return promise proxy objects.
   def |(args)
-
     if args.is_a?(String)
       attr = args
       args = [attr]

@@ -155,7 +155,6 @@ class Marty::Api::Base
 
       # if attr is an array, return result as an array
       return retval = params[:return_array] ? [res] : res
-
     rescue => e
       msg = Delorean::Engine.grok_runtime_exception(e).symbolize_keys
       Marty::Logger.info "Evaluation error: #{msg}"

@@ -375,7 +375,6 @@ class Marty::Xl
   end
 
   def apply_relative_worksheet_ops(ws, ops)
-
     non_pos = ops.select {|opl| opl[0] != "pos" }
     ops_pos = ops.select {|opl| opl[0] == "pos" }
     ops_brd = ops.select {|opl| opl[0] == "border" }

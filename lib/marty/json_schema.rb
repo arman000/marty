@@ -1,7 +1,6 @@
 require 'json-schema'
 
 module Marty
-
   private
   class PgEnumAttribute < JSON::Schema::Attribute
     def self.validate(curr_schema, data, frag, pro, validator, opt={})
@@ -56,7 +55,6 @@ module Marty
     end
 
     def self.fix_numbers(json, numbers)
-
       # follow path to drill into json
       drill = lambda {|tree, path|
         return unless tree

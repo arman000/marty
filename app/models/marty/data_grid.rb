@@ -14,7 +14,6 @@ class Marty::DataGrid < Marty::Base
 
   class DataGridValidator < ActiveModel::Validator
     def validate(dg)
-
       dg.errors.add(:base, "'#{dg.data_type}' not a defined type or class") unless
         Marty::DataGrid.convert_data_type(dg.data_type)
 

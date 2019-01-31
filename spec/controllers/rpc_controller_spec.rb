@@ -1289,7 +1289,6 @@ describe Marty::RpcController do
             attrs: attr,
             params: params
           }
-
     end
 
     it "does conditional" do

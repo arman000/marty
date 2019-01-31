@@ -13,7 +13,6 @@ class NotAnEnum
 end
 
 module Marty
-
   describe JsonSchema do
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     ###                      Generic, simple data               ###
@@ -765,5 +764,4 @@ module Marty
       expect(JSON::Validator.validate(bound_ceiling_schema, data)).to be false
     end
   end
-
 end

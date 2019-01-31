@@ -91,7 +91,6 @@ class Marty::BaseRule < Marty::Base
   end
 
   def self.get_matches_(pt, attrs, params)
-
     q = select("DISTINCT ON (name) *").where(attrs)
 
     params.each do |k, vraw|
