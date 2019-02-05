@@ -98,7 +98,7 @@ module Marty; class DataGridView < McflyGridPanel
       DataGrid.create_from_import(data["name"], data["export"])
       client.success = true
       client.netzke_on_submit_success
-    rescue => exc
+    rescue StandardError => exc
       client.netzke_notify(exc.to_s)
     end
   end
@@ -112,7 +112,7 @@ module Marty; class DataGridView < McflyGridPanel
       dg.update_from_import(data["name"], data["export"])
       client.success = true
       client.netzke_on_submit_success
-    rescue => exc
+    rescue StandardError => exc
       client.netzke_notify(exc.to_s)
     end
   end

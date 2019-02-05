@@ -217,7 +217,7 @@ class ActiveRecord::Base
       # associations attrs.  If so, convert them to symbols for joins
       # to work properly.
       new_args = args.map do |a|
-        reflections.has_key?(a) ? a.to_sym : a
+        reflections.key?(a) ? a.to_sym : a
       end
       old_joins(*new_args)
     end

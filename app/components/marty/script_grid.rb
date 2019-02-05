@@ -19,7 +19,7 @@ class Marty::ScriptGrid < Marty::Grid
     begin
       ts = Marty::Tag.map_to_tag(root_sess[:selected_tag_id]).created_dt
       ts = Mcfly.normalize_infinity(ts)
-    rescue
+    rescue StandardError
       # if there are no non-DEV tags we get an exception above
       ts = 'infinity'
     end

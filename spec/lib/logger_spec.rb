@@ -50,7 +50,7 @@ module Marty
         Marty::Logger.with_logging(bd, data) do
           raise the_error
         end
-      rescue => e
+      rescue StandardError => e
         raised = e.message
       end
       expect(raised).to eq("#{bd}: #{the_error}")

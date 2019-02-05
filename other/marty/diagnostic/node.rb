@@ -1,7 +1,7 @@
 module Marty::Diagnostic::Node
   def self.my_ip
       Socket.ip_address_list.detect(&:ipv4_private?).ip_address
-  rescue => e
+  rescue StandardError => e
       e.message
   end
 

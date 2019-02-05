@@ -75,7 +75,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
         end
       rescue DupKeyError => e
         raise
-      rescue => e
+      rescue StandardError => e
         raise "syntax error on line #{idx}"
       end
     end
@@ -112,7 +112,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
 
       begin
         final = Marty::BaseRuleView.simple_to_hash(v)
-      rescue => e
+      rescue StandardError => e
         final = { "~~ERROR~~": e.message }
       end
 

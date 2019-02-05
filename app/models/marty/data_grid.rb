@@ -475,7 +475,8 @@ class Marty::DataGrid < Marty::Base
       data_type = dts.first
     end
 
-    metadata = rows[(data_type || lenient ? 1 : 0)...blank_index].map do |attr, type, dir, rs_keep, key|
+    rows_for_metadata = rows[(data_type || lenient ? 1 : 0)...blank_index]
+    metadata = rows_for_metadata.map do |attr, type, dir, rs_keep, key|
       raise "metadata elements must include attr/type/dir" unless
         attr && type && dir
       raise "bad dir #{dir}" unless ["h", "v"].member? dir
@@ -572,7 +573,8 @@ class Marty::DataGrid < Marty::Base
     self.data       = data
     self.data_type  = data_type
     self.lenient    = !!lenient
-    self.metadata   = new_metadata unless metadata == new_metadata # Otherwise changed will depend on order in hashes
+    # Otherwise changed will depend on order in hashes
+    self.metadata   = new_metadata unless metadata == new_metadata
     self.created_dt = created_dt if created_dt
     save!
   end

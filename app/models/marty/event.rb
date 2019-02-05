@@ -311,7 +311,7 @@ SQL
 
   def self.cleanup
       where('start_dt < ?', Time.zone.now - 48.hours).delete_all
-  rescue => exc
+  rescue StandardError => exc
       Marty::Util.logger.error("event GC error: #{exc}")
   end
 end

@@ -77,7 +77,7 @@ module Marty
 
             Marty::DataConversion.create_or_update(klass, row, dt)
           end
-        rescue => exc
+        rescue StandardError => exc
           # to find problems with the importer, comment out the rescue block
           raise Error.new(exc.to_s, [eline])
         end
@@ -96,7 +96,7 @@ module Marty
           # Validate affected rows if necessary
           klass.send(validation_function.to_sym, ids.keys) if
             validation_function
-        rescue => exc
+        rescue StandardError => exc
           raise Error.new(exc.to_s, [])
         end
 

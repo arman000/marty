@@ -40,7 +40,7 @@ module Marty::Diagnostic; class Reporter < Request
     diagnostics.each_with_object({}) do |d, h|
       begin
         h[d.name.demodulize] = d.generate
-      rescue => e
+      rescue StandardError => e
         h.deep_merge!(Fatal.message(e.message, type: d.name.demodulize))
       end
     end
@@ -98,7 +98,7 @@ module Marty::Diagnostic; class Reporter < Request
           next JSON.parse(response.body) if response.code == "200"
 
           Fatal.message(response.body, type: response.message, node: uri.host)
-        rescue => e
+        rescue StandardError => e
           Fatal.message(e.message, type: e.class, node: uri.host)
         end
       end

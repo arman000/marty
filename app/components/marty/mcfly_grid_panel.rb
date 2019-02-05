@@ -34,7 +34,7 @@ class Marty::McflyGridPanel < Marty::Grid
       assoc_name, assoc_method = c[:name].split('__')
       begin
         aklass = model.reflect_on_association(assoc_name.to_sym).klass
-      rescue
+      rescue StandardError
         raise "trouble finding #{assoc_name} assoc class on #{model}"
       end
       c[:scope] = Mcfly.has_mcfly?(aklass) ?

@@ -1064,22 +1064,6 @@ Style/PerlBackrefs:
   Exclude:
     - 'lib/marty/migrations.rb'
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: short, verbose
-Style/PreferredHashMethods:
-  Exclude:
-    - 'app/models/marty/script.rb'
-    - 'lib/marty/data_conversion.rb'
-    - 'lib/marty/monkey.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/Proc:
-  Exclude:
-    - 'app/models/marty/delorean_rule.rb'
-
 # Offense count: 6
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
@@ -1089,12 +1073,6 @@ Style/RaiseArgs:
     - 'other/marty/diagnostic/reporter.rb'
     - 'spec/dummy/public/extjs/classic/theme-base/sass/overrides.rb'
     - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/RandomWithOffset:
-  Exclude:
-    - 'spec/models/data_grid_spec.rb'
 
 # Offense count: 6
 # Cop supports --auto-correct.
@@ -1112,13 +1090,6 @@ Style/RegexpLiteral:
 # Offense count: 33
 # Cop supports --auto-correct.
 Style/RescueModifier:
-  Enabled: false
-
-# Offense count: 61
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: implicit, explicit
-Style/RescueStandardError:
   Enabled: false
 
 # Offense count: 6
@@ -1223,7 +1194,7 @@ Style/WordArray:
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
 Metrics/LineLength:
-  Max: 275
+  Max: 100
 
 Style/FrozenStringLiteralComment:
   Enabled: false

@@ -701,7 +701,7 @@ describe "lookups for infinity" do
   it "should handle all characters in grid inputs" do
     dgh = Marty::DataGrid.lookup_h(pt, 'G1')
     5000.times do
-      st = 30.times.map { rand(224) + 32 }.pack('U*')
+      st = 30.times.map { rand(32..255) }.pack('U*')
       res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
                                                          { "ltv" => 10,
                                                            "fico" => 690,

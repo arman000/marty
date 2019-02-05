@@ -11,7 +11,7 @@ module Marty
         cs = curr_schema.schema["pg_enum"]
         enum = cs.constantize
         values = enum::VALUES
-      rescue => e
+      rescue StandardError => e
         msg = "The property '#{path}': '#{cs}' is not a pg_enum class"
         validation_error(pro, msg, frag, curr_schema, self, opt[:record_errors])
       end
@@ -86,7 +86,7 @@ module Marty
     def self.get_schema(tag, sname, node, attr)
         Marty::ScriptSet.new(tag).get_engine(sname + 'Schemas').
           evaluate(node, attr, {})
-    rescue => e
+    rescue StandardError => e
         id = "#{sname}/#{node} attrs=#{attr}"
 
         # the schema DL might not exist at all, or might not define the attr

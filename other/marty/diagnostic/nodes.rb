@@ -4,7 +4,7 @@ module Marty::Diagnostic; class Nodes < Base
   diagnostic_fn aggregatable: false do
     begin
       pg_nodes = Node.get_nodes.sort
-    rescue => e
+    rescue StandardError => e
       next error(e.message)
     end
 
@@ -13,7 +13,7 @@ module Marty::Diagnostic; class Nodes < Base
 
     begin
       instance_data = Marty::Diagnostic::Aws::Ec2Instance.new
-    rescue => e
+    rescue StandardError => e
       next error(pg_nodes.join("\n") +
                  "\nAws Communication Error: #{e.message}")
     end
@@ -36,7 +36,7 @@ module Marty::Diagnostic; class Nodes < Base
        'stopping'      => error_if(instances.stopping),
        'stopped'       => error_if(instances.stopped),
       }.delete_if { |k, v| v.empty? }
-    rescue => e
+    rescue StandardError => e
       error(e.message)
     end
   end
