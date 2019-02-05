@@ -59,11 +59,11 @@ describe "Blame Report", slow: true do
   it "should generate Data Blame report" do
     engine = Marty::ScriptSet.new.get_engine("BlameReport")
     ws = engine.evaluate(
-      "DataBlameReport", "result", {
-        # "class_list" param, defaults to all
-        "pt_name1" => @pt_name,
-        "pt_name2" => "NOW",
-      })
+      "DataBlameReport", "result",
+      # "class_list" param, defaults to all
+      "pt_name1" => @pt_name,
+      "pt_name2" => "NOW",
+    )
 
     sp = Marty::Xl.spreadsheet(ws)
     file = Tempfile.new('file.xlsx')
@@ -76,7 +76,7 @@ describe "Blame Report", slow: true do
     expect(sp.workbook.worksheets[0].rows.count).to eq 5
 
     @res0.each_with_index do |rec, i|
-      cells = sp.workbook.worksheets[0].rows[i+1].cells.map(&:value)
+      cells = sp.workbook.worksheets[0].rows[i + 1].cells.map(&:value)
       expect(Set.new(cells[1..-1])).to eq Set.new(rec)
     end
   end

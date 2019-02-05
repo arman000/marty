@@ -23,6 +23,7 @@ class Marty::Helper
 
   delorean_fn :constantize, sig: 1 do |class_name|
     raise 'bad class_name' unless class_name.is_a?(String)
+
     class_name.constantize
   end
 

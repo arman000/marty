@@ -2,9 +2,9 @@ require 'spec_helper'
 
 describe "Blame Report", slow: true do
   RES0 = [
-     ["bud_category", "note_rate", "settlement_mm", "settlement_yy", "buy_up"],
-     ["Govt Fixed 30", "2.25", "22", "2010", "12.123"],
-     ["Conv Fixed 30", "2.25", "12", "2012", "1.127"]
+    ["bud_category", "note_rate", "settlement_mm", "settlement_yy", "buy_up"],
+    ["Govt Fixed 30", "2.25", "22", "2010", "12.123"],
+    ["Conv Fixed 30", "2.25", "12", "2012", "1.127"]
   ].freeze
 
   RES1 = [
@@ -63,27 +63,26 @@ describe "Blame Report", slow: true do
     fannie_bup1.update!(buy_up: 1.125, created_dt: time2)
     fannie_bup1.update!(buy_up: 1.126, created_dt: time4)
     fannie_bup1.update!(buy_up: 1.127, created_dt: time5)
-
   end
 
   it "should generate Table report" do
     engine = Marty::ScriptSet.new.get_engine("TableReport")
     ws = engine.evaluate(
-      "TableReport", "result", {
-        "pt_name" => 'NOW',
-        "class_name" => "Gemini::FannieBup",
-        "exclude_attrs" => ["entity_id", "buy_down"],
-        "sort_field" => "settlement_yy"
-      })
+      "TableReport", "result",
+      "pt_name"       => 'NOW',
+      "class_name"    => "Gemini::FannieBup",
+      "exclude_attrs" => ["entity_id", "buy_down"],
+      "sort_field"    => "settlement_yy"
+    )
 
     parsed_csv = CSV.parse(ws)
     expect(parsed_csv).to eq RES0
 
     ws = engine.evaluate(
-      "TableReport", "result", {
-        "pt_name" => @pt_name,
-        "class_name" => "Gemini::FannieBup",
-      })
+      "TableReport", "result",
+      "pt_name"    => @pt_name,
+      "class_name" => "Gemini::FannieBup",
+    )
 
     parsed_csv = CSV.parse(ws)
     expect(parsed_csv).to eq RES1
