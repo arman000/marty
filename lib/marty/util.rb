@@ -89,7 +89,7 @@ module Marty::Util
       sql = 'select pg_is_in_recovery();'
       result = ActiveRecord::Base.connection.execute(sql)
       status = result[0]['pg_is_in_recovery'] == 't' if result && result[0]
-    rescue => e
+    rescue StandardError => e
       Marty::Util.logger.error 'unable to determine recovery status'
     end
     status

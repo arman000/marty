@@ -88,7 +88,7 @@ class Marty::Script < Marty::Base
     paths.each do |path|
       Dir.glob("#{path}/*.dl").each do |filename|
         basename = File.basename(filename)
-        filenames[basename] = filename unless filenames.has_key?(basename)
+        filenames[basename] = filename unless filenames.key?(basename)
       end
     end
 

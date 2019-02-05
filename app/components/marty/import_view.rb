@@ -91,7 +91,7 @@ class Marty::ImportView < Marty::Form
       ]
 
       client.set_result '<font color="red">' + result.join("<br/>") + "</font>"
-    rescue => e
+    rescue StandardError => e
       client.set_result e.message
     end
   end

@@ -34,7 +34,7 @@ module Marty::ContentHandler
       else
         res, format = { error: "Unknown format: #{format}" }.to_json, "json"
       end
-    rescue => exc
+    rescue StandardError => exc
       res, format =
         { error: "Failed conversion #{format}: #{exc}" }.to_json, "json"
     end

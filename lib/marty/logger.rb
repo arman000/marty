@@ -15,7 +15,7 @@ class Marty::Logger
 
   def self.with_logging(error_message, error_data)
       yield
-  rescue => e
+  rescue StandardError => e
       error(error_message,  "message" => e.message,
                              "data" => error_data)
       raise "#{error_message}: #{e.message}"

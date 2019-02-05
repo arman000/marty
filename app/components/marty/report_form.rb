@@ -61,7 +61,7 @@ class Marty::ReportForm < Marty::Form
 
     begin
       engine.evaluate(node, "result", d_params)
-    rescue => exc
+    rescue StandardError => exc
       Marty::Util.logger.error "run_eval failed: #{exc.backtrace}"
 
       res = Delorean::Engine.grok_runtime_exception(exc)
@@ -156,7 +156,7 @@ class Marty::ReportForm < Marty::Form
       raise "bad form items" unless items.is_a?(Array)
       raise "bad format" unless
         Marty::ContentHandler::GEN_FORMATS.member?(format)
-    rescue => exc
+    rescue StandardError => exc
       c.title = "ERROR"
       c.items =
         [

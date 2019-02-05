@@ -9,7 +9,7 @@ class Marty::Log < Marty::Base
               message: message,
               details: details,
               timestamp: Time.zone.now)
-    rescue => e
+    rescue StandardError => e
       Marty::Util.logger.error("Marty::Logger failure: #{e.message}")
     end
     true

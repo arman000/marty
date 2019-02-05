@@ -44,7 +44,7 @@ class Marty::Promise < Marty::Base
   def self.cleanup(all = false)
       where('start_dt < ? AND parent_id IS NULL',
             DateTime.now - (all ? 0.hours : 4.hours)).destroy_all
-  rescue => exc
+  rescue StandardError => exc
       Marty::Util.logger.error("promise GC error: #{exc}")
   end
 
@@ -147,7 +147,8 @@ class Marty::Promise < Marty::Base
       if !last.start_dt
         job = Marty::Promise.job_by_id(last.job_id)
 
-        # FIXME: this block is needed since a lot of specs rely on delayed job being runned in the same thread as promise
+        # FIXME: this block is needed since a lot of specs rely on
+        # delayed job being runned in the same thread as promise
         # Can be deleted later and replaces with simple timeout below
         if !job || job.locked_at
           # job has been locked, so it looks like it started already
@@ -159,7 +160,7 @@ class Marty::Promise < Marty::Base
           # log "OFF0 #{Process.pid} #{last}"
           begin
             work_off_job(job)
-          rescue => exc
+          rescue StandardError => exc
             # log "OFFERR #{exc}"
             res = Delorean::Engine.grok_runtime_exception(exc)
             last.set_result(res)

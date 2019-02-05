@@ -1236,7 +1236,7 @@ describe Marty::RpcController do
     f = "%s/%s" % [p, "rpc_controller.json"]
     begin
       tests = JSON.parse(File.read(f))
-    rescue => e
+    rescue StandardError => e
       puts "Error parsing #{f}: #{e.message}"
       raise
     end

@@ -71,7 +71,7 @@ class Marty::ReportSelect < Marty::Form
       begin
         title, format = engine.evaluate(node, ["title", "format"])
         format ? [node, "#{title} (#{format})"] : nil
-      rescue
+      rescue StandardError
         [node, node]
       end
     end.compact.sort { |a, b| a[1] <=> b[1] }

@@ -30,7 +30,7 @@ class Delorean::BaseModule::NodeCall
     begin
       # make sure params is serialzable before starting a Job
       JSON.dump(params)
-    rescue => exc
+    rescue StandardError => exc
       raise "non-serializable parameters: #{params} #{exc}"
     end
 
@@ -48,7 +48,7 @@ class Delorean::BaseModule::NodeCall
     begin
       job = Delayed::Job.enqueue Marty::PromiseJob.
         new(promise, title, script, tag, nn, params, args, hook)
-    rescue => exc
+    rescue StandardError => exc
       # log "CALLERR #{exc}"
       res = Delorean::Engine.grok_runtime_exception(exc)
       promise.set_start
@@ -136,7 +136,7 @@ class Marty::PromiseJob < Struct.new(:promise,
       end
 
       # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
-    rescue => exc
+    rescue StandardError => exc
       res = Delorean::Engine.grok_runtime_exception(exc)
       # log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
     end
@@ -144,7 +144,7 @@ class Marty::PromiseJob < Struct.new(:promise,
 
     begin
       hook.run(res) if hook
-    rescue => exc
+    rescue StandardError => exc
       Marty::Util.logger.error "promise hook failed: #{exc}"
     end
   end

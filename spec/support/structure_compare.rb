@@ -58,13 +58,13 @@ end
 def struct_compare(v1raw, v2raw, cmp_opts = {})
     res = Marty::RSpec::StructureCompare.struct_compare_all(v1raw, v2raw, nil,
                                                             cmp_opts).first
-rescue => e
+rescue StandardError => e
     e.message
 end
 
 def struct_compare_all(v1raw, v2raw, cmp_opts = {})
     Marty::RSpec::StructureCompare.struct_compare_all(v1raw, v2raw, nil,
                                                       cmp_opts)
-rescue => e
+rescue StandardError => e
     e.message
 end

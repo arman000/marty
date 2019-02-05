@@ -58,13 +58,13 @@ class Marty::DataConversion
       begin
         v =~ FLOAT_PAT ? EXCEL_START_DATE + v.to_f :
           Mcfly.is_infinity(v) ? 'infinity' : v.to_date
-      rescue => exc
+      rescue StandardError => exc
         raise "date conversion failed for #{v.inspect}}"
       end
     when :datetime
       begin
         Mcfly.is_infinity(v) ? 'infinity' : v.to_datetime
-      rescue => exc
+      rescue StandardError => exc
         raise "datetime conversion failed for #{v.inspect}}"
       end
     when :numrange, :int4range, :int8range
@@ -175,7 +175,7 @@ class Marty::DataConversion
     ctypes = col_types(klass)
     assoc  = associations(klass)
 
-    raise "bad row (extra columns?) -- #{row}" if row.has_key?(nil)
+    raise "bad row (extra columns?) -- #{row}" if row.key?(nil)
 
     key_groups = row.keys.group_by { |x| x.to_s.split('__').first }
 

@@ -13,7 +13,7 @@ describe Marty::Diagnostic::Reporter do
 
   def git
       message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
-  rescue
+  rescue StandardError
       message = error("Failed accessing git")
   end
 

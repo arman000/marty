@@ -108,9 +108,10 @@ describe DataImporter do
           do_import_summary(Gemini::Simple,
                             [{ "some_name" => "hello" }])
     res.should == { create: 1 }
-    res = Marty::DataImporter.
-          do_import_summary(Gemini::Simple,
-                            [{ "group_id" => Gemini::Simple.first.group_id, "some_name" => "hello" }])
+    res = Marty::DataImporter.do_import_summary(
+      Gemini::Simple,
+      [{ "group_id" => Gemini::Simple.first.group_id, "some_name" => "hello" }]
+    )
     res.should == { same: 1 }
   end
 

@@ -12,7 +12,7 @@ class Marty::DeloreanRule < Marty::BaseRule
       begin
         eclass = engine && engine.constantize || Marty::RuleScriptSet
         eng = eclass.new('infinity').get_engine(self_as_hash)
-      rescue => e
+      rescue StandardError => e
         return errors[:computed] << "- " + e.message
       end
     end
@@ -89,7 +89,7 @@ class Marty::DeloreanRule < Marty::BaseRule
         begin
           result.cg_vals = engine.evaluate(eclass.node_name, result.cg_keys,
                                            params.clone)
-        rescue => e
+        rescue StandardError => e
           result.err_message = e.message
           result.err_stack   = e.backtrace
           result.err_section = 'computed_guards'
@@ -116,7 +116,7 @@ class Marty::DeloreanRule < Marty::BaseRule
               "dgparams__" => dgparams,
             })
           grids_computed = true
-        rescue => e
+        rescue StandardError => e
           result.err_message = e.message
           result.err_stack   = e.backtrace
           result.err_section = 'results'
@@ -199,7 +199,7 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def self.get_grid_rename_handler(klass)
-    Proc.new do |old, new|
+    proc do |old, new|
       klass.where(obsoleted_dt: 'infinity').each do |r|
         r.grids.each { |k, v| r.grids[k] = new if v == old }
         r.results.each do |k, v|

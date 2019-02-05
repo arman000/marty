@@ -61,7 +61,7 @@ class Marty::Api::Base
       # or a string with the error
       input_schema = @@schemas[schema_key] ||=
                        Marty::JsonSchema.get_schema(*schema_key)
-    rescue => e
+    rescue StandardError => e
       return { error: e.message }
     end
 
@@ -75,7 +75,7 @@ class Marty::Api::Base
         res = SchemaValidator::validate_schema(input_schema, params[:params])
       rescue NameError
         return { error: "Unrecognized PgEnum for attribute #{params[:attr]}" }
-      rescue => e
+      rescue StandardError => e
         return { error: "#{params[:attr]}: #{e.message}" }
       end
 
@@ -100,7 +100,7 @@ class Marty::Api::Base
     # get script engine
     begin
       engine = Marty::ScriptSet.new(params[:tag]).get_engine(params[:script])
-    rescue => e
+    rescue StandardError => e
       error = "Can't get engine: #{params[:script] || 'nil'} with tag: " +
                 "#{params[:tag] || 'nil'}; message: #{e.message}"
       Marty::Logger.info error
@@ -128,7 +128,7 @@ class Marty::Api::Base
         begin
           output_schema_params = params + { attr: params[:attr] + '_' }
           schema = SchemaValidator::get_schema(output_schema_params)
-        rescue => e
+        rescue StandardError => e
           return { error: e.message }
         end
 
@@ -136,7 +136,7 @@ class Marty::Api::Base
           schema_errors = SchemaValidator::validate_schema(schema, res)
         rescue NameError
           return { error: "Unrecognized PgEnum for attribute #{attr}" }
-        rescue => e
+        rescue StandardError => e
           return { error: "#{attr}: #{e.message}" }
         end
 
@@ -155,7 +155,7 @@ class Marty::Api::Base
 
       # if attr is an array, return result as an array
       return retval = params[:return_array] ? [res] : res
-    rescue => e
+    rescue StandardError => e
       msg = Delorean::Engine.grok_runtime_exception(e).symbolize_keys
       Marty::Logger.info "Evaluation error: #{msg}"
       return retval = msg
@@ -199,7 +199,7 @@ class Marty::Api::Base
     def self.get_schema params
         Marty::ScriptSet.new(params[:tag]).get_engine(params[:script] + 'Schemas').
           evaluate(params[:node], params[:attr], {})
-    rescue => e
+    rescue StandardError => e
         msg = e.message == 'No such script' ? 'Schema not defined' :
                 'Problem with schema: ' + e.message
 

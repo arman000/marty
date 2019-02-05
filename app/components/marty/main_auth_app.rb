@@ -327,7 +327,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   endpoint :log_cleanup do |params|
     begin
       Marty::Log.cleanup(params)
-    rescue => e
+    rescue StandardError => e
       res = e.message
       client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Log Cleanup'
     end

@@ -14,7 +14,7 @@ class Marty::RpcCall
                     }).to_json
     begin
       response = http.request(request)
-    rescue => e
+    rescue StandardError => e
       raise "#{e.message} during RPC call to #{host}:#{port}"
     end
 
@@ -34,7 +34,7 @@ class Marty::RpcCall
 
     begin
       http.request(request)
-    rescue => e
+    rescue StandardError => e
       raise "#{e.message} during download call to #{host}:#{port}"
     end
   end
@@ -50,7 +50,7 @@ class Marty::RpcCall
     begin
       response = http.request(request)
       raise "got #{response} during XML call" if response.class != Net::HTTPOK
-    rescue => e
+    rescue StandardError => e
       raise "#{e.message} during RPC call to #{host}:#{port}#{path}"
     end
 

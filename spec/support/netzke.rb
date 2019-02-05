@@ -25,7 +25,7 @@ module Marty; module RSpec; module Netzke
         log_out
         wait_for_ajax
       end
-    rescue
+    rescue StandardError
       # ignore error
     end
 
@@ -57,7 +57,7 @@ module Marty; module RSpec; module Netzke
         cmp ||= find(:btn, button_name, match: :first)
         cmp.click
         true
-      rescue
+      rescue StandardError
         find_by_id(ext_button_id(button_name, index_of), visible: :all).click
         true
       end
@@ -104,7 +104,7 @@ module Marty; module RSpec; module Netzke
     while !res && current_time - start_time < seconds_to_wait
       begin
         res = yield
-      rescue
+      rescue StandardError
       ensure
         sleep sleeptime
         current_time = Time.now

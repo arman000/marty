@@ -120,7 +120,7 @@ class Marty::ScriptForm < Marty::Form
                                          "PrettyScript",
                                          rep_params)
       client.get_report(path)
-    rescue => exc
+    rescue StandardError => exc
       return client.netzke_notify "ERROR: #{exc}"
     end
   end

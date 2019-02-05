@@ -31,7 +31,7 @@ class Marty::RpcController < ActionController::Base
       api.before_evaluate(api_params)
       result = api.evaluate(api_params, request, api_config)
       api.after_evaluate(api_params, result)
-  rescue => e
+  rescue StandardError => e
       # log unexpected failures in rpc controller and respond with
       # generic server error
       Marty::Logger.log('rpc_controller', 'failure', e.message)
