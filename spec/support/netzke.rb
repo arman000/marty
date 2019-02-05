@@ -224,13 +224,12 @@ module Marty; module RSpec; module Netzke
       gsub(/"/, '\"')
   end
 
-  def type_in(type_s, el_id)
+  def type_in(type_s, el_id, enter: false)
     el = find_by_id(el_id.to_s)
-    el.native.clear()
     type_s.each_char do |key|
       el.native.send_keys(key)
     end
-    el.send_keys(:enter)
+    el.send_keys(:enter) if enter
   end
 
   private
