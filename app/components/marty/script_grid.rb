@@ -8,10 +8,10 @@ class Marty::ScriptGrid < Marty::Grid
   def configure(c)
     super
 
-    c.model                  = "Marty::Script"
+    c.model                  = 'Marty::Script'
     c.multi_select           = false
     c.attributes ||= [:name, :created_dt, :tag]
-    c.title ||= I18n.t('scripts', default: "Scripts")
+    c.title ||= I18n.t('scripts', default: 'Scripts')
     c.store_config.merge!(sorters: [{ property: :name, direction: 'ASC' }])
   end
 
@@ -32,19 +32,19 @@ class Marty::ScriptGrid < Marty::Grid
   end
 
   action :delete do |a|
-    a.text     = I18n.t("script_grid.delete")
-    a.tooltip  = I18n.t("script_grid.delete")
-    a.icon_cls = "fa fa-trash glyph"
+    a.text     = I18n.t('script_grid.delete')
+    a.tooltip  = I18n.t('script_grid.delete')
+    a.icon_cls = 'fa fa-trash glyph'
     a.disabled = config[:prohibit_delete]
   end
 
   endpoint :destroy do |params|
-    return client.netzke_notify("Permission Denied") if
+    return client.netzke_notify('Permission Denied') if
       !config[:permissions][:delete]
 
     tag = Marty::Tag.map_to_tag(root_sess[:selected_tag_id])
 
-    return client.netzke_notify("Can only delete in DEV tag") unless
+    return client.netzke_notify('Can only delete in DEV tag') unless
       tag && tag.isdev?
 
     super(params)
@@ -55,15 +55,15 @@ class Marty::ScriptGrid < Marty::Grid
   endpoint :add_window__add_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    return client.netzke_notify("Permission Denied") if
+    return client.netzke_notify('Permission Denied') if
       !config[:permissions][:create]
 
     tag = Marty::Tag.map_to_tag(root_sess[:selected_tag_id])
 
-    return client.netzke_notify("Can only add in DEV tag") unless
+    return client.netzke_notify('Can only add in DEV tag') unless
       tag && tag.isdev?
 
-    name = data["name"]
+    name = data['name']
     script = Marty::Script.create_script(name, "# Script #{name}")
 
     if script.valid?
@@ -75,9 +75,9 @@ class Marty::ScriptGrid < Marty::Grid
   end
 
   action :add_in_form do |a|
-    a.text     = I18n.t("script_grid.new")
-    a.tooltip  = I18n.t("script_grid.new")
-    a.icon_cls = "fa fa-plus glyph"
+    a.text     = I18n.t('script_grid.new')
+    a.tooltip  = I18n.t('script_grid.new')
+    a.icon_cls = 'fa fa-plus glyph'
     a.disabled = !config[:permissions][:create]
   end
 
@@ -95,17 +95,17 @@ class Marty::ScriptGrid < Marty::Grid
 
   attribute :name do |c|
     c.flex      = 1
-    c.text      = I18n.t("script_grid.name")
+    c.text      = I18n.t('script_grid.name')
   end
 
   attribute :created_dt do |c|
-    c.text      = I18n.t("script_grid.created_dt")
-    c.format    = "Y-m-d H:i"
+    c.text      = I18n.t('script_grid.created_dt')
+    c.format    = 'Y-m-d H:i'
     c.read_only = true
   end
 
   attribute :tag do |c|
-    c.text      = I18n.t("script_grid.tag")
+    c.text      = I18n.t('script_grid.tag')
     c.flex      = 1
     c.getter    = lambda { |r| r.find_tag.try(:name) }
   end

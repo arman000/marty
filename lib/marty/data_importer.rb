@@ -63,7 +63,7 @@ module Marty
         cleaner_ids = cleaner_function ? klass.send(cleaner_function.to_sym) :
           []
 
-        raise "bad cleaner function result" unless
+        raise 'bad cleaner function result' unless
           cleaner_ids.all? { |id| id.is_a?(Integer) }
 
         eline = 0
@@ -86,7 +86,7 @@ module Marty
         # raise an error if record referenced more than once.
         res.each_with_index do |(op, id), line|
           raise Error.
-            new("record referenced more than once", [ids[id], line]) if
+            new('record referenced more than once', [ids[id], line]) if
             op != :blank && ids.member?(id) && !allow_dups
 
           ids[id] = line
@@ -103,8 +103,8 @@ module Marty
         remainder_ids = cleaner_ids - ids.keys
 
         raise Error.
-          new("Missing import data. " +
-              "Please provide header line and at least one data line.", [1]) if
+          new('Missing import data. ' +
+              'Please provide header line and at least one data line.', [1]) if
           ids.keys.compact.count == 0
 
         klass.delete(remainder_ids)

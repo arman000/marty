@@ -6,13 +6,13 @@ class Marty::Scripting < Netzke::Base
       [
         :script_form,
         {
-          xtype: "tabpanel",
+          xtype: 'tabpanel',
           active_tab: 0,
           region: :center,
           split: true,
           items: [
             {
-              title: I18n.t("script.selection"),
+              title: I18n.t('script.selection'),
               layout: {
                 type: :vbox,
                 align: :stretch,
@@ -48,19 +48,19 @@ class Marty::Scripting < Netzke::Base
     c.width            = 400
     c.height           = 300
     c.load_inline_data = false
-    c.title            = I18n.t("script.selection_history")
+    c.title            = I18n.t('script.selection_history')
   end
 
   component :script_grid do |c|
     c.width            = 400
     c.klass            = Marty::ScriptGrid
-    c.title            = I18n.t("script.selection_list")
+    c.title            = I18n.t('script.selection_list')
     c.flex             = 1
   end
 
   component :script_form do |c|
     c.klass            = Marty::ScriptForm
-    c.title            = I18n.t("script.detail")
+    c.title            = I18n.t('script.detail')
     c.flex             = 1
     c.split            = true
     c.region           = :west
@@ -68,7 +68,7 @@ class Marty::Scripting < Netzke::Base
 
   component :script_tester do |c|
     c.klass            = Marty::ScriptTester
-    c.title            = I18n.t("script.tester")
+    c.title            = I18n.t('script.tester')
     c.flex             = 1
   end
 end

@@ -1,7 +1,7 @@
 class Marty::Event < Marty::Base
   class EventValidator < ActiveModel::Validator
     def validate(event)
-      event.errors[:base] << "Must have promise_id or start_dt" unless
+      event.errors[:base] << 'Must have promise_id or start_dt' unless
         event.promise_id || event.start_dt
     end
   end
@@ -53,8 +53,8 @@ SQL
 
   def self.op_is_running?(klass, subject_id, operation)
     all_running.detect do |pm|
-      pm["klass"] == klass && pm["subject_id"].to_i == subject_id.to_i &&
-        pm["enum_event_operation"] == operation
+      pm['klass'] == klass && pm['subject_id'].to_i == subject_id.to_i &&
+        pm['enum_event_operation'] == operation
     end
   end
 
@@ -68,10 +68,10 @@ SQL
     # use lookup_event instead of all_running which is throttled
     evs = lookup_event(klass, subject_id, operation)
     running = evs.detect do |ev|
-      next if ev["end_dt"]
-      next true unless ev["expire_secs"]
+      next if ev['end_dt']
+      next true unless ev['expire_secs']
 
-      (Time.zone.now - ev["start_dt"]).truncate < ev["expire_secs"]
+      (Time.zone.now - ev['start_dt']).truncate < ev['expire_secs']
     end
 
     raise "#{operation} is already running for #{klass}/#{subject_id}" if
@@ -98,18 +98,18 @@ SQL
   end
 
   def self.finish_event(klass, subject_id, operation, error = false, comment = nil)
-    raise "error must be true or false" unless [true, false].include?(error)
+    raise 'error must be true or false' unless [true, false].include?(error)
 
     time_now_s = Time.zone.now.strftime('%Y-%m-%d %H:%M:%S.%6N')
 
     event = get_data(running_query(time_now_s)).detect do |ev|
-      ev["klass"] == klass && ev["subject_id"] == subject_id.to_i &&
-        ev["enum_event_operation"] == operation
+      ev['klass'] == klass && ev['subject_id'] == subject_id.to_i &&
+        ev['enum_event_operation'] == operation
     end
     raise "event #{klass}/#{subject_id}/#{operation} not found" unless
       event
 
-    ev = Marty::Event.find_by_id(event["id"])
+    ev = Marty::Event.find_by_id(event['id'])
     raise "can't explicitly finish a promise event" if ev.promise_id
 
     ev.end_dt = Time.zone.now
@@ -120,8 +120,8 @@ SQL
 
   def self.last_event(klass, subject_id, operation = nil)
     hash = all_running.select do |pm|
-      pm["klass"] == klass && pm["subject_id"] == subject_id.to_i &&
-        (operation.nil? || pm["enum_event_operation"] == operation)
+      pm['klass'] == klass && pm['subject_id'] == subject_id.to_i &&
+        (operation.nil? || pm['enum_event_operation'] == operation)
     end.last
 
     return hash if hash
@@ -138,10 +138,10 @@ SQL
   def self.last_event_multi(klass, subject_ids_arg, operation = nil)
     subject_ids = subject_ids_arg.map(&:to_i)
     events = all_running.select do |pm|
-      pm["klass"] == klass && subject_ids.include?(pm["subject_id"]) &&
-        (operation.nil? || pm["enum_event_operation"] == operation)
-    end.group_by { |ev| ev["subject_id"] }.each_with_object({}) do |(id, evs), h|
-      h[id] = evs.sort { |a, b| a["start_dt"] <=> b["start_dt"] }.first
+      pm['klass'] == klass && subject_ids.include?(pm['subject_id']) &&
+        (operation.nil? || pm['enum_event_operation'] == operation)
+    end.group_by { |ev| ev['subject_id'] }.each_with_object({}) do |(id, evs), h|
+      h[id] = evs.sort { |a, b| a['start_dt'] <=> b['start_dt'] }.first
     end
 
     running_ids = events.keys
@@ -149,7 +149,7 @@ SQL
 
     if check_fin.present?
       op_filt = "AND enum_event_operation = '#{operation}'" if operation
-      op_col = ", enum_event_operation" if operation
+      op_col = ', enum_event_operation' if operation
 
       fins = get_data("SELECT klass,
                               subject_id,
@@ -179,7 +179,7 @@ SQL
                        WHERE rnum = 1")
 
       fins.each do |fin|
-        events[fin["subject_id"]] = fin
+        events[fin['subject_id']] = fin
       end
     end
     events
@@ -187,16 +187,16 @@ SQL
 
   def self.currently_running(klass, subject_id)
     all_running.select do |pm|
-      pm["klass"] == klass && pm["subject_id"] == subject_id.to_i
-    end.map { |e| e["enum_event_operation"] }
+      pm['klass'] == klass && pm['subject_id'] == subject_id.to_i
+    end.map { |e| e['enum_event_operation'] }
   end
 
   def self.currently_running_multi(klass, subject_id_raw)
     subject_ids = [subject_id_raw].flatten.map(&:to_i)
     all_running.select do |pm|
-      pm["klass"] == klass && subject_ids.include?(pm["subject_id"])
+      pm['klass'] == klass && subject_ids.include?(pm['subject_id'])
     end.each_with_object({}) do |e, h|
-      (h[e["subject_id"]] ||= []) << e["enum_event_operation"]
+      (h[e['subject_id']] ||= []) << e['enum_event_operation']
     end
   end
 
@@ -215,7 +215,7 @@ SQL
   end
 
   def self.compact_end_dt(hash)
-    hash['end_dt'] ? hash['end_dt'].strftime("%H:%M") : '---'
+    hash['end_dt'] ? hash['end_dt'].strftime('%H:%M') : '---'
   end
 
   def self.update_start_and_end
@@ -224,13 +224,13 @@ SQL
 
   def self.get_data(sql)
     ActiveRecord::Base.connection.execute(sql).to_a.map do |h|
-      h["id"]          = h["id"].to_i
-      h["subject_id"]  = h["subject_id"].to_i
-      h["start_dt"]    = Time.zone.parse(h["start_dt"]) if h["start_dt"]
-      h["end_dt"]      = Time.zone.parse(h["end_dt"]) if h["end_dt"]
-      h["expire_secs"] = h["expire_secs"].to_i if h["expire_secs"]
-      h["comment"]     = h["comment"]
-      h["error"]       = h["error"]
+      h['id']          = h['id'].to_i
+      h['subject_id']  = h['subject_id'].to_i
+      h['start_dt']    = Time.zone.parse(h['start_dt']) if h['start_dt']
+      h['end_dt']      = Time.zone.parse(h['end_dt']) if h['end_dt']
+      h['expire_secs'] = h['expire_secs'].to_i if h['expire_secs']
+      h['comment']     = h['comment']
+      h['error']       = h['error']
       h
     end
   end
@@ -289,17 +289,17 @@ SQL
         WHERE row_num = 1")
       @all_finished[:timestamp] = time_now_i
       raw.each_with_object(@all_finished[:data]) do |ev, hash|
-        if ev["end_dt"] && ev["error"].nil?
-          real_ev = Marty::Event.where(id: ev["id"]).first
-          promise = Marty::Promise.where(id: real_ev["promise_id"]).first
-          maybe_error = promise.result["error"]
-          ev["error"] = real_ev.error = !!maybe_error
+        if ev['end_dt'] && ev['error'].nil?
+          real_ev = Marty::Event.where(id: ev['id']).first
+          promise = Marty::Promise.where(id: real_ev['promise_id']).first
+          maybe_error = promise.result['error']
+          ev['error'] = real_ev.error = !!maybe_error
           real_ev.comment = maybe_error
           real_ev.save!
         end
-        subhash = hash[[ev["klass"], ev["subject_id"]]] ||= {}
-        subhash[ev["enum_event_operation"]] =
-          ev["end_dt"].strftime("%Y-%m-%d %H:%M:%S")
+        subhash = hash[[ev['klass'], ev['subject_id']]] ||= {}
+        subhash[ev['enum_event_operation']] =
+          ev['end_dt'].strftime('%Y-%m-%d %H:%M:%S')
       end
     end
     @all_finished[:data]

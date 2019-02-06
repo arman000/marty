@@ -8,8 +8,8 @@ class Marty::ImportTypeView < Marty::Grid
   def configure(c)
     super
 
-    c.title   = I18n.t('import_type', default: "ImportType")
-    c.model   = "Marty::ImportType"
+    c.title   = I18n.t('import_type', default: 'ImportType')
+    c.model   = 'Marty::ImportType'
     c.attributes =
       [
         :name,

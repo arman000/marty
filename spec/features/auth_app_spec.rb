@@ -55,7 +55,7 @@ feature 'Posting workflows', js: true do
     end
 
     and_by 'can see that we are time warped' do
-      expect(page).to have_content "TIME WARPED"
+      expect(page).to have_content 'TIME WARPED'
     end
   end
 

@@ -14,7 +14,7 @@ feature 'under Sytem menu, User Management worflows', js: true do
       expect(page).not_to have_content 'User Management'
     end
 
-    ensure_on("/#userView")
+    ensure_on('/#userView')
   end
 
   # Checkbox Helpers
@@ -78,25 +78,25 @@ feature 'under Sytem menu, User Management worflows', js: true do
     and_by 'check row got edited' do
       wait_for_ajax
       expect(user_view.get_row_vals(2)).to netzke_include(
-        :login => "new_login",
-        :firstname => "new_fname",
-        :lastname => "new_lname",
+        :login => 'new_login',
+        :firstname => 'new_fname',
+        :lastname => 'new_lname',
         :active => true,
-        :roles => "User Manager,Viewer",
+        :roles => 'User Manager,Viewer',
       )
     end
 
     and_by 'delete user fails' do
       user_view.select_row(2)
-      press("Delete")
-      press("Yes")
-      expect(find(:msg)).to have_content("Users cannot be deleted - set " +
+      press('Delete')
+      press('Yes')
+      expect(find(:msg)).to have_content('Users cannot be deleted - set ' +
                                          "'Active' to false to disable the " +
-                                         "account")
+                                         'account')
       user_view.select_row(1)
-      press("Delete")
-      press("Yes")
-      expect(find(:msg)).to have_content("You cannot delete your own account")
+      press('Delete')
+      press('Yes')
+      expect(find(:msg)).to have_content('You cannot delete your own account')
 
       expect(user_view.row_count).to eq 2
     end

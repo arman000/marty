@@ -33,13 +33,13 @@ class Marty::Promise < Marty::Base
 
   has_many :children,
            foreign_key: 'parent_id',
-           class_name: "Marty::Promise",
+           class_name: 'Marty::Promise',
            dependent: :destroy
 
   validates_presence_of :title
 
-  belongs_to :parent, class_name: "Marty::Promise"
-  belongs_to :user, class_name: "Marty::User"
+  belongs_to :parent, class_name: 'Marty::Promise'
+  belongs_to :user, class_name: 'Marty::User'
 
   def self.cleanup(all = false)
       where('start_dt < ? AND parent_id IS NULL',
@@ -77,14 +77,14 @@ class Marty::Promise < Marty::Base
       return
     end
 
-    raise "bad result" unless res.is_a?(Hash)
+    raise 'bad result' unless res.is_a?(Hash)
 
-    self.status = res["error"].nil?
+    self.status = res['error'].nil?
     self.result = res
 
     # update title/format from result hash (somewhat hacky)
-    self.title   = res["title"].to_s  if res["title"]
-    self.cformat = res["format"].to_s if res["format"]
+    self.title   = res['title'].to_s  if res['title']
+    self.cformat = res['format'].to_s if res['format']
 
     # mark promise as ended
     self.end_dt = DateTime.now
@@ -127,7 +127,7 @@ class Marty::Promise < Marty::Base
   def work_off_job(job)
     # Create a temporary worker to work off the job
     Delayed::Job.where(id: job.id).
-      update_all(locked_at: Delayed::Job.db_time_now, locked_by: "Temp")
+      update_all(locked_at: Delayed::Job.db_time_now, locked_by: 'Temp')
     w = Delayed::Worker.new
     w.run(job)
   end
@@ -177,7 +177,7 @@ class Marty::Promise < Marty::Base
         # timeout error.
         if !last.start_dt
           # log "TO11 #{Process.pid} #{last}"
-          return { "error" => "promise #{last.id} timed out (never started)" }
+          return { 'error' => "promise #{last.id} timed out (never started)" }
         end
       end
 
@@ -190,7 +190,7 @@ class Marty::Promise < Marty::Base
         last = latest
 
         if !last.end_dt
-          return { "error" => "promise #{last.id} timed out (didn't end)" }
+          return { 'error' => "promise #{last.id} timed out (didn't end)" }
         end
       end
 

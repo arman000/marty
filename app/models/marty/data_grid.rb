@@ -1,13 +1,13 @@
 class Marty::DataGrid < Marty::Base
   # If data_type is nil, assume float
-  DEFAULT_DATA_TYPE = "float"
+  DEFAULT_DATA_TYPE = 'float'
 
   INDEX_MAP = {
-    "numrange"  => Marty::GridIndexNumrange,
-    "int4range" => Marty::GridIndexInt4range,
-    "integer"   => Marty::GridIndexInteger,
-    "string"    => Marty::GridIndexString,
-    "boolean"   => Marty::GridIndexBoolean,
+    'numrange'  => Marty::GridIndexNumrange,
+    'int4range' => Marty::GridIndexInt4range,
+    'integer'   => Marty::GridIndexInteger,
+    'string'    => Marty::GridIndexString,
+    'boolean'   => Marty::GridIndexBoolean,
   }
 
   ARRSEP = '|'
@@ -17,21 +17,21 @@ class Marty::DataGrid < Marty::Base
       dg.errors.add(:base, "'#{dg.data_type}' not a defined type or class") unless
         Marty::DataGrid.convert_data_type(dg.data_type)
 
-      dg.errors.add(:base, "data must be array of arrays") unless
+      dg.errors.add(:base, 'data must be array of arrays') unless
         dg.data.is_a?(Array) && dg.data.all? { |a| a.is_a? Array }
 
-      dg.errors.add(:base, "metadata must be an array of hashes") unless
+      dg.errors.add(:base, 'metadata must be an array of hashes') unless
         dg.metadata.is_a?(Array) && dg.metadata.all? { |a| a.is_a? Hash }
 
-      dg.errors.add(:base, "metadata must contain only h/v dirs") unless
-        dg.metadata.all? { |h| ["h", "v"].member? h["dir"] }
+      dg.errors.add(:base, 'metadata must contain only h/v dirs') unless
+        dg.metadata.all? { |h| ['h', 'v'].member? h['dir'] }
 
-      dg.errors.add(:base, "metadata item attrs must be unique") unless
-        dg.metadata.map { |h| h["attr"] }.uniq.length == dg.metadata.length
+      dg.errors.add(:base, 'metadata item attrs must be unique') unless
+        dg.metadata.map { |h| h['attr'] }.uniq.length == dg.metadata.length
 
       dg.metadata.each do |inf|
         attr, type, keys, rs_keep =
-          inf["attr"], inf["type"], inf["keys"], inf["rs_keep"]
+          inf['attr'], inf['type'], inf['keys'], inf['rs_keep']
 
         unless rs_keep.nil? || rs_keep.empty?
           m = /\A *(<|<=|>|>=)? *([a-z][a-z_0-9]+) *\z/.match(rs_keep)
@@ -41,7 +41,7 @@ class Marty::DataGrid < Marty::Base
           end
         end
 
-        dg.errors.add(:base, "metadata elements must have attr/type/keys") unless
+        dg.errors.add(:base, 'metadata elements must have attr/type/keys') unless
           attr && type && keys
 
         # enforce Delorean attr syntax (a bit Draconian)
@@ -51,7 +51,7 @@ class Marty::DataGrid < Marty::Base
         dg.errors.add(:base, "unknown metadata type #{type}") unless
           Marty::DataGrid.type_to_index(type)
 
-        dg.errors.add(:base, "bad metadata keys") unless
+        dg.errors.add(:base, 'bad metadata keys') unless
           keys.is_a?(Array) && !keys.empty?
       end
 
@@ -59,16 +59,16 @@ class Marty::DataGrid < Marty::Base
       # combinations. FIXME: ideally, we should also check for
       # array/range key subsumption.  Those will result in runtime
       # errors anyway when multiple hits are produced.
-      v_keys = dg.dir_infos("v").map { |inf| inf["keys"] }
-      h_keys = dg.dir_infos("h").map { |inf| inf["keys"] }
+      v_keys = dg.dir_infos('v').map { |inf| inf['keys'] }
+      h_keys = dg.dir_infos('h').map { |inf| inf['keys'] }
 
       v_zip_keys = v_keys.empty? ? [] : v_keys[0].zip(*v_keys[1..-1])
       h_zip_keys = h_keys.empty? ? [] : h_keys[0].zip(*h_keys[1..-1])
 
-      dg.errors.add(:base, "duplicate horiz. key combination") unless
+      dg.errors.add(:base, 'duplicate horiz. key combination') unless
         h_zip_keys.uniq.length == h_zip_keys.length
 
-      dg.errors.add(:base, "duplicate vertical key combination") unless
+      dg.errors.add(:base, 'duplicate vertical key combination') unless
         v_zip_keys.uniq.length == v_zip_keys.length
     end
   end
@@ -102,7 +102,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.get_struct_attrs
-    self.struct_attrs ||= super + ["id", "group_id", "created_dt", "name"]
+    self.struct_attrs ||= super + ['id', 'group_id', 'created_dt', 'name']
   end
 
   def to_s
@@ -150,7 +150,7 @@ class Marty::DataGrid < Marty::Base
     # for ruby classes.
     return INDEX_MAP[type] if INDEX_MAP[type]
 
-    INDEX_MAP["string"] if (type.constantize rescue nil)
+    INDEX_MAP['string'] if (type.constantize rescue nil)
   end
 
   def self.convert_data_type(data_type)
@@ -168,21 +168,21 @@ class Marty::DataGrid < Marty::Base
     @@dtcache = {}
   end
 
-  PLV_DT_FMT = "%Y-%m-%d %H:%M:%S.%N6"
+  PLV_DT_FMT = '%Y-%m-%d %H:%M:%S.%N6'
 
   def self.plv_lookup_grid_distinct(h_passed, dgh, ret_grid_data = false,
                                     distinct = true)
-    cd = dgh["created_dt"]
+    cd = dgh['created_dt']
     @@dtcache ||= {}
     @@dtcache[cd] ||= cd.strftime(PLV_DT_FMT)
     row_info = {
-      "id"         => dgh["id"],
-      "group_id"   => dgh["group_id"],
-      "created_dt" => @@dtcache[cd]
+      'id'         => dgh['id'],
+      'group_id'   => dgh['group_id'],
+      'created_dt' => @@dtcache[cd]
     }
 
-    h = dgh["metadata"].each_with_object({}) do |m, h|
-      attr = m["attr"]
+    h = dgh['metadata'].each_with_object({}) do |m, h|
+      attr = m['attr']
       inc = h_passed.fetch(attr, :__nf__)
       next if inc == :__nf__
 
@@ -191,7 +191,7 @@ class Marty::DataGrid < Marty::Base
                   ActiveRecord::Base.connection.quote(val)[1..-2] : val
     end
 
-    fn     = "lookup_grid_distinct"
+    fn     = 'lookup_grid_distinct'
     hjson  = "'#{h.to_json}'::JSONB"
     rijson = "'#{row_info.to_json}'::JSONB"
     params = "#{hjson}, #{rijson}, #{ret_grid_data}, #{distinct}"
@@ -199,24 +199,24 @@ class Marty::DataGrid < Marty::Base
     raw    = ActiveRecord::Base.connection.execute(sql)[0][fn]
     res    = JSON.parse(raw)
 
-    if res["error"]
-      msg = res["error"]
-      parms, sqls, ress, dg = res["error_extra"].values_at(
-        "params", "sql", "results", "dg")
+    if res['error']
+      msg = res['error']
+      parms, sqls, ress, dg = res['error_extra'].values_at(
+        'params', 'sql', 'results', 'dg')
 
       raise "DG #{name}: Error in PLV8 call: #{msg}\n"\
             "params: #{parms}\n"\
             "sqls: #{sqls}\n"\
             "results: #{ress}\n"\
             "dg: #{dg}\n"\
-            "ri: #{row_info}" if res["error"]
+            "ri: #{row_info}" if res['error']
     end
 
     if ret_grid_data
-      dg = find(dgh["id"])
+      dg = find(dgh['id'])
       md, mmd = modify_grid(h_passed, dg.metadata, dg.data)
-      res["data"] = md
-      res["metadata"] = mmd
+      res['data'] = md
+      res['metadata'] = mmd
     end
     res
   end
@@ -231,7 +231,7 @@ class Marty::DataGrid < Marty::Base
     dgh = dg_is_os ? dg.to_h.stringify_keys :
             dg.attributes.slice('id', 'group_id', 'created_dt', 'metadata')
     res = plv_lookup_grid_distinct(h, dgh, false, distinct)
-    res["result"]
+    res['result']
   end
 
   cached_delorean_fn :lookup_grid_h, sig: 4 do |pt, dgn, h, distinct|
@@ -240,7 +240,7 @@ class Marty::DataGrid < Marty::Base
     raise "non-hash arg #{h}" unless Hash === h
 
     res = lookup_grid_distinct_entry_h(pt, h, dgh, nil, true, false, distinct)
-    res["result"]
+    res['result']
   end
 
   # FIXME: using cached_delorean_fn just for the caching -- this is
@@ -250,7 +250,7 @@ class Marty::DataGrid < Marty::Base
       klass.find_by_name(v)
     else
       # FIXME: very hacky -- hard-coded name
-      Marty::DataConversion.find_row(klass, { "name" => v }, pt)
+      Marty::DataConversion.find_row(klass, { 'name' => v }, pt)
     end
   end
 
@@ -269,13 +269,13 @@ class Marty::DataGrid < Marty::Base
     #   "metadata" => <grid's metadata (array of hashes)>
     vhash = plv_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
 
-    return vhash if vhash["result"].nil? || !dgh['data_type']
+    return vhash if vhash['result'].nil? || !dgh['data_type']
 
     c_data_type = Marty::DataGrid.convert_data_type(dgh['data_type'])
 
     return vhash if String === c_data_type
 
-    res = vhash["result"]
+    res = vhash['result']
 
     v = case
              when Marty::PgEnum === res
@@ -285,10 +285,10 @@ class Marty::DataGrid < Marty::Base
                  Marty::DataGrid.lookup_h(pt, res) :
                  Marty::DataGrid.lookup(pt, res)
              else
-               Marty::DataConversion.find_row(c_data_type, { "name" => res }, pt)
+               Marty::DataConversion.find_row(c_data_type, { 'name' => res }, pt)
          end
 
-    return vhash.merge("result" => v) unless (Marty::DataGrid == c_data_type &&
+    return vhash.merge('result' => v) unless (Marty::DataGrid == c_data_type &&
                                               follow)
 
     visited ||= []
@@ -303,22 +303,22 @@ class Marty::DataGrid < Marty::Base
   end
 
   def dir_infos(dir)
-    metadata.select { |inf| inf["dir"] == dir }
+    metadata.select { |inf| inf['dir'] == dir }
   end
 
   def self.export_keys(inf)
     # should unify this with Marty::DataConversion.convert
 
-    type = inf["type"]
+    type = inf['type']
     klass = type.constantize unless INDEX_MAP[type]
 
-    inf["keys"].map do |v|
+    inf['keys'].map do |v|
       case type
-      when "numrange", "int4range"
+      when 'numrange', 'int4range'
         Marty::Util.pg_range_to_human(v)
-      when "boolean"
+      when 'boolean'
         v.to_s
-      when "string", "integer"
+      when 'string', 'integer'
         v.map(&:to_s).join(ARRSEP) if v
       else
         # assume it's an AR class
@@ -342,16 +342,16 @@ class Marty::DataGrid < Marty::Base
 
   def export_array
     # add data type metadata row if not default
-    dt_row = lenient ? ["lenient"] : []
+    dt_row = lenient ? ['lenient'] : []
     dt_row << data_type unless [nil, DEFAULT_DATA_TYPE].member?(data_type)
 
     meta_rows = dt_row.empty? ? [] : [[dt_row.join(' ')]]
 
     meta_rows += metadata.map do |inf|
-      [inf["attr"], inf["type"], inf["dir"], inf["rs_keep"] || ""]
+      [inf['attr'], inf['type'], inf['dir'], inf['rs_keep'] || '']
     end
 
-    v_infos, h_infos = dir_infos("v"), dir_infos("h")
+    v_infos, h_infos = dir_infos('v'), dir_infos('h')
 
     h_key_rows = h_infos.map do |inf|
       [nil] * v_infos.count + self.class.export_keys(inf)
@@ -369,13 +369,13 @@ class Marty::DataGrid < Marty::Base
 
   def export
      # return null string when called from Netzke on add_in_form
-     return "" if metadata.nil? && data.nil?
+     return '' if metadata.nil? && data.nil?
 
      meta_rows, h_key_rows, data_rows = export_array
 
      Marty::DataExporter.
        to_csv(meta_rows + [[]] + h_key_rows + data_rows,
-              "col_sep" => "\t",
+              'col_sep' => "\t",
              ).
        gsub(/\"\"/, '') # remove "" to beautify output
   end
@@ -389,28 +389,28 @@ class Marty::DataGrid < Marty::Base
     return unless v
 
     case type
-    when "numrange", "int4range"
+    when 'numrange', 'int4range'
       Marty::Util.human_to_pg_range(v)
-    when "integer"
+    when 'integer'
       v.split(ARRSEP).map do |val|
         Integer(val) rescue raise "invalid integer: #{val}"
       end.uniq.sort
-    when "float"
+    when 'float'
       v.split(ARRSEP).map do |val|
         Float(val) rescue raise "invalid float: #{val}"
       end.uniq.sort
-    when "string"
+    when 'string'
       res = v.split(ARRSEP).uniq.sort
-      raise "leading/trailing spaces in elements not allowed" if
+      raise 'leading/trailing spaces in elements not allowed' if
         res.any? { |x| x != x.strip }
-      raise "0-length string not allowed" if res.any?(&:empty?)
+      raise '0-length string not allowed' if res.any?(&:empty?)
 
       res
-    when "boolean"
+    when 'boolean'
       case v.downcase
-      when "true", "t"
+      when 'true', 't'
         true
-      when "false", "f"
+      when 'false', 'f'
         false
       else
         raise "bad boolean #{v}"
@@ -433,7 +433,7 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.maybe_get_klass(type)
-      type.constantize unless INDEX_MAP[type] || type == "float"
+      type.constantize unless INDEX_MAP[type] || type == 'float'
   rescue NameError
       raise "unknown header type/klass: #{type}"
   end
@@ -455,7 +455,7 @@ class Marty::DataGrid < Marty::Base
     rows = CSV.new(grid_text, options).to_a
     blank_index = rows.find_index { |x| x.all?(&:nil?) }
 
-    raise "must have a blank row separating metadata" unless
+    raise 'must have a blank row separating metadata' unless
       blank_index
 
     raise "can't import grid with trailing blank column" if
@@ -471,30 +471,30 @@ class Marty::DataGrid < Marty::Base
       dts = dt.split
       raise "bad data type '#{dt}'" if dts.count > 2
 
-      lenient = dts.delete "lenient"
+      lenient = dts.delete 'lenient'
       data_type = dts.first
     end
 
     rows_for_metadata = rows[(data_type || lenient ? 1 : 0)...blank_index]
     metadata = rows_for_metadata.map do |attr, type, dir, rs_keep, key|
-      raise "metadata elements must include attr/type/dir" unless
+      raise 'metadata elements must include attr/type/dir' unless
         attr && type && dir
-      raise "bad dir #{dir}" unless ["h", "v"].member? dir
+      raise "bad dir #{dir}" unless ['h', 'v'].member? dir
       raise "unknown metadata type #{type}" unless
         Marty::DataGrid.type_to_index(type)
 
       res = {
-        "attr" => attr,
-        "type" => type,
-        "dir"  => dir,
-        "keys" => key && parse_keys(pt, [key], type),
+        'attr' => attr,
+        'type' => type,
+        'dir'  => dir,
+        'keys' => key && parse_keys(pt, [key], type),
       }
-      res["rs_keep"] = rs_keep if rs_keep
+      res['rs_keep'] = rs_keep if rs_keep
       res
     end
 
-    v_infos = metadata.select { |inf| inf["dir"] == "v" }
-    h_infos = metadata.select { |inf| inf["dir"] == "h" }
+    v_infos = metadata.select { |inf| inf['dir'] == 'v' }
+    h_infos = metadata.select { |inf| inf['dir'] == 'h' }
 
     # keys+data start right after blank_index
     data_index = blank_index + 1
@@ -506,11 +506,11 @@ class Marty::DataGrid < Marty::Base
       raise "horiz. key row #{data_index + i} must include nil starting cells" if
         row[0, v_infos.count].any?
 
-      inf["keys"] = parse_keys(pt, row[v_infos.count, row.count], inf["type"])
+      inf['keys'] = parse_keys(pt, row[v_infos.count, row.count], inf['type'])
     end
 
-    raise "horiz. info keys length mismatch!" unless
-      h_infos.map { |inf| inf["keys"].length }.uniq.count <= 1
+    raise 'horiz. info keys length mismatch!' unless
+      h_infos.map { |inf| inf['keys'].length }.uniq.count <= 1
 
     data_rows = rows[data_index + h_infos.count, rows.count]
 
@@ -518,11 +518,11 @@ class Marty::DataGrid < Marty::Base
     v_key_cols = data_rows.map { |r| r[0, v_infos.count] }.transpose
 
     v_infos.each_with_index do |inf, i|
-      inf["keys"] = parse_keys(pt, v_key_cols[i], inf["type"])
+      inf['keys'] = parse_keys(pt, v_key_cols[i], inf['type'])
     end
 
-    raise "vert. info keys length mismatch!" unless
-      v_infos.map { |inf| inf["keys"].length }.uniq.count <= 1
+    raise 'vert. info keys length mismatch!' unless
+      v_infos.map { |inf| inf['keys'].length }.uniq.count <= 1
 
     c_data_type = Marty::DataGrid.convert_data_type(data_type)
 
@@ -583,7 +583,7 @@ class Marty::DataGrid < Marty::Base
   def build_index
     # create indices for the metadata
     metadata.each do |inf|
-      attr, type, keys = inf["attr"], inf["type"], inf["keys"]
+      attr, type, keys = inf['attr'], inf['type'], inf['keys']
 
       # find index class
       idx_class = Marty::DataGrid.type_to_index(type)
@@ -601,16 +601,16 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.modify_grid(params, metadata, data)
-    removes = ["h", "v"].each_with_object({}) { |dir, hash| hash[dir] = Set.new }
+    removes = ['h', 'v'].each_with_object({}) { |dir, hash| hash[dir] = Set.new }
 
     metadata_copy, data_copy = metadata.deep_dup, data.deep_dup
 
     metadata_copy.each do |meta|
       dir, keys, type, rs_keep = meta.values_at(
-        "dir", "keys", "type", "rs_keep")
+        'dir', 'keys', 'type', 'rs_keep')
       next unless rs_keep
 
-      if type == "numrange" || type == "int4range"
+      if type == 'numrange' || type == 'int4range'
         modop, modvalparm = parse_bounds(rs_keep)
         modval = params[modvalparm]
         if modval
@@ -631,16 +631,16 @@ class Marty::DataGrid < Marty::Base
     removes.reject! { |dir, set| set.empty? }
 
     removes.each do |dir, set|
-      metadata_copy.select { |m| m["dir"] == dir }.each do |meta|
-        meta["keys"] = remove_indices(meta["keys"], removes[dir])
+      metadata_copy.select { |m| m['dir'] == dir }.each do |meta|
+        meta['keys'] = remove_indices(meta['keys'], removes[dir])
       end
     end
 
-    data_copy = remove_indices(data_copy, removes["v"]) if removes["v"]
+    data_copy = remove_indices(data_copy, removes['v']) if removes['v']
 
     data_copy.each_index do |index|
-      data_copy[index] = remove_indices(data_copy[index], removes["h"])
-    end if removes["h"]
+      data_copy[index] = remove_indices(data_copy[index], removes['h'])
+    end if removes['h']
 
     [data_copy, metadata_copy]
   end

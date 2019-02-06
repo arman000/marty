@@ -17,8 +17,8 @@ class Marty::PromiseView < Netzke::Tree::Base
 
   def configure(config)
     super
-    config.title = I18n.t("jobs.promise_view")
-    config.model = "Marty::VwPromise"
+    config.title = I18n.t('jobs.promise_view')
+    config.model = 'Marty::VwPromise'
     config.attributes = [
       { name: :title, xtype: :treecolumn },
       :user__login,
@@ -48,20 +48,20 @@ class Marty::PromiseView < Netzke::Tree::Base
   action :clear do |a|
     a.text     = a.tooltip = 'Clear'
     a.disabled = false
-    a.icon_cls = "fa fa-minus glyph"
+    a.icon_cls = 'fa fa-minus glyph'
     a.hidden   = !self.class.has_admin_perm?
   end
 
   action :download do |a|
     a.text     = a.tooltip = 'Download'
     a.disabled = true
-    a.icon_cls = "fa fa-download glyph"
+    a.icon_cls = 'fa fa-download glyph'
   end
 
   action :refresh do |a|
     a.text     = a.tooltip = 'Refresh'
     a.disabled = false
-    a.icon_cls = "fa fa-sync-alt glyph"
+    a.icon_cls = 'fa fa-sync-alt glyph'
   end
 
   endpoint :clear do |params|

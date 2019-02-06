@@ -24,7 +24,7 @@ module Marty; module RSpec; module Users
 
     # also create an anon user
     user = Marty::User.new
-    user.login = user.firstname = user.lastname = "anon"
+    user.login = user.firstname = user.lastname = 'anon'
     user.active = true
     user.save
   end

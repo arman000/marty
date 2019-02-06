@@ -1,5 +1,5 @@
 class Marty::Base < ActiveRecord::Base
-  self.table_name_prefix = "marty_"
+  self.table_name_prefix = 'marty_'
   self.abstract_class = true
 
   def self.mcfly_pt(pt)
@@ -54,7 +54,7 @@ class Marty::Base < ActiveRecord::Base
     if self == Marty::DataGrid
       def os.lookup_grid_distinct_entry(pt, params)
         dgh = to_h.stringify_keys.slice(
-          "id", "group_id", "created_dt", "metadata", "data_type")
+          'id', 'group_id', 'created_dt', 'metadata', 'data_type')
         Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh)
       end
     end

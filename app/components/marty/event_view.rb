@@ -7,8 +7,8 @@ class Marty::EventView < Marty::Grid
   def configure(c)
     super
 
-    c.title ||= I18n.t('events', default: "Events")
-    c.model                  = "Marty::Event"
+    c.title ||= I18n.t('events', default: 'Events')
+    c.model                  = 'Marty::Event'
     c.paging                 = :buffered
     c.editing                = :in_form
     c.attributes             = [
@@ -38,48 +38,48 @@ class Marty::EventView < Marty::Grid
   end
 
   attribute :klass do |c|
-    c.text = I18n.t("event_grid.klass")
+    c.text = I18n.t('event_grid.klass')
     c.width = 100
     c.read_only = true
   end
 
   attribute :subject_id do |c|
-    c.text = I18n.t("event_grid.subject_id")
+    c.text = I18n.t('event_grid.subject_id')
     c.width = 50
     c.read_only = true
   end
 
   attribute :enum_event_operation do |c|
-    c.text = I18n.t("event_grid.enum_event_operation")
+    c.text = I18n.t('event_grid.enum_event_operation')
     c.width = 100
     c.read_only = true
   end
 
   attribute :start_dt_dt do |c|
-    c.text = I18n.t("event_grid.start_dt")
-    c.format = "Y-m-d H:i:s"
+    c.text = I18n.t('event_grid.start_dt')
+    c.format = 'Y-m-d H:i:s'
   end
 
   attribute :end_dt_dt do |c|
-    c.text = I18n.t("event_grid.end_dt")
-    c.format = "Y-m-d H:i:s"
+    c.text = I18n.t('event_grid.end_dt')
+    c.format = 'Y-m-d H:i:s'
   end
 
   attribute :error do |c|
     error_map = {
-      nil   => "",
-      true  => "Error",
-      false => "Success",
+      nil   => '',
+      true  => 'Error',
+      false => 'Success',
     }
     map_error = error_map.each_with_object({}) { |(k, v), h| h[v] = k }
     editor_config = {
       trigger_action: :all,
       xtype:          :combo,
-      store:          ["Success", "Error", ""],
+      store:          ['Success', 'Error', ''],
     }
     c.column_config = { editor: editor_config }
     c.field_config  = editor_config
-    c.text   = I18n.t("event_grid.error")
+    c.text   = I18n.t('event_grid.error')
     c.type   = :string
     c.width  = 150
     c.getter = lambda { |r| error_map[r.error] }
@@ -87,7 +87,7 @@ class Marty::EventView < Marty::Grid
   end
 
   attribute :comment do |c|
-    c.text = I18n.t("event_grid.comment")
+    c.text = I18n.t('event_grid.comment')
     c.width = 400
   end
 
@@ -100,27 +100,27 @@ class Marty::EventView < Marty::Grid
     }
   end
   attribute :promise_job_id do |c|
-    c.text = I18n.t("event_grid.promise_job_id")
+    c.text = I18n.t('event_grid.promise_job_id')
     c.getter = promise_getter(:job_id)
     c.read_only = true
   end
 
   attribute :promise_start_dt do |c|
-    c.text = I18n.t("event_grid.promise_start_dt")
+    c.text = I18n.t('event_grid.promise_start_dt')
     c.width = 150
     c.getter = promise_getter(:start_dt)
     c.read_only = true
   end
 
   attribute :promise_end_dt do |c|
-    c.text = I18n.t("event_grid.promise_end_dt")
+    c.text = I18n.t('event_grid.promise_end_dt')
     c.width = 150
     c.getter = promise_getter(:end_dt)
     c.read_only = true
   end
 
   attribute :promise_status do |c|
-    c.text = I18n.t("event_grid.promise_status")
+    c.text = I18n.t('event_grid.promise_status')
     c.getter = promise_getter(:status)
     c.read_only = true
   end

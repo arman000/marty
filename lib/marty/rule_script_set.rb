@@ -8,7 +8,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   clear_cache
 
   def self.node_name
-    "Node"
+    'Node'
   end
 
   def self.body_start
@@ -33,18 +33,18 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def write_attr(k, v)
-    equals, rhs = v == :parameter ? [" =?", ""] :
-                    [" =", "\n" + v.lines.map { |l| " " * 8 + l }.join("\n")]
+    equals, rhs = v == :parameter ? [' =?', ''] :
+                    [' =', "\n" + v.lines.map { |l| ' ' * 8 + l }.join("\n")]
     k + equals + rhs
   end
 
   def paramify_h(h)
-    "{" + h.keys.reject { |k| k.ends_with?("__") }.
-                         map { |k| %Q("#{k}": #{k}) }.join(",\n") + "}"
+    '{' + h.keys.reject { |k| k.ends_with?('__') }.
+                         map { |k| %Q("#{k}": #{k}) }.join(",\n") + '}'
   end
 
   def self.grid_final_name(dgid)
-    dgid.ends_with?("_grid") ? dgid + "_result" : dgid + "_grid_result"
+    dgid.ends_with?('_grid') ? dgid + '_result' : dgid + '_grid_result'
   end
 
   def expand_grid_code(h, dgid, dgname, cache, extra_params)
@@ -54,7 +54,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     else
       h[dgid] = dgname
       h["#{dgid}_dgp__"] = "dgparams__ + \n" + self.class.indent(paramify_h(h))
-      lgde = "lookup_grid_h"
+      lgde = 'lookup_grid_h'
       h[final_name] = "Marty::DataGrid.#{lgde}(pt,#{dgid},#{dgid}_dgp__,true)"
       cache[dgname] = final_name
     end
@@ -64,7 +64,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     return '' if attrs.blank?
 
     newh = attrs.each_with_object({}) do |(k, v), h|
-      if k.ends_with?("_grid")
+      if k.ends_with?('_grid')
         expand_grid_code(h, k, v, {}, h)
       else
         h[k] = v
@@ -76,7 +76,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   def grid_code(ruleh)
     dgcache = {}
     h = {}
-    ruleh["grids"].each do |k, v|
+    ruleh['grids'].each do |k, v|
       expand_grid_code(h, k.ends_with?('_grid') ? k : k + '_grid', %Q("#{v}"),
                        dgcache, {})
     end
@@ -84,18 +84,18 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def guard_code(ruleh)
-    write_code(ruleh["computed_guards"])
+    write_code(ruleh['computed_guards'])
   end
 
   def result_code(ruleh)
-    write_code(ruleh["results"])
+    write_code(ruleh['results'])
   end
 
   def grid_init(ruleh)
-    if ruleh["grids"].present? ||
-       ruleh["results"].keys.any? { |k| k.ends_with?("_grid") }
-      write_code("pt" => :parameter,
-                   "dgparams__" => :parameter,
+    if ruleh['grids'].present? ||
+       ruleh['results'].keys.any? { |k| k.ends_with?('_grid') }
+      write_code('pt' => :parameter,
+                   'dgparams__' => :parameter,
                 )
     else
       ''
@@ -145,16 +145,16 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
       # on create rule doesn't have an id => don't cache
       return sset.parse_check("New RULE #{ruleh['name']}", get_code(ruleh)) unless
-        ruleh["id"]
+        ruleh['id']
 
-      rule_pfx = ruleh["classname"].demodulize
+      rule_pfx = ruleh['classname'].demodulize
 
       # unique name for specific version of rule
       sname = "#{rule_pfx}_#{ruleh['group_id']}_#{ruleh['created_dt'].to_f}"
 
       # is it a dev posting?
       if Mcfly.is_infinity(pt)
-        max_dt = ruleh["classname"].constantize.order("created_dt DESC").
+        max_dt = ruleh['classname'].constantize.order('created_dt DESC').
                  limit(1).pluck(:created_dt).first
 
         @@dengines_dt ||= max_dt

@@ -2,8 +2,8 @@ class Marty::ImportView < Marty::Form
   include Marty::Extras::Layout
 
   action :apply do |a|
-    a.text    = I18n.t("data_import_view.import")
-    a.tooltip = I18n.t("data_import_view.import")
+    a.text    = I18n.t('data_import_view.import')
+    a.tooltip = I18n.t('data_import_view.import')
     a.icon_cls = 'fa fa-database glyph'
   end
 
@@ -28,7 +28,7 @@ class Marty::ImportView < Marty::Form
   ######################################################################
 
   def validate
-    return client.netzke_notify("Must provide import data.") if
+    return client.netzke_notify('Must provide import data.') if
       @import_data.empty?
   end
 
@@ -60,16 +60,16 @@ class Marty::ImportView < Marty::Form
   end
 
   endpoint :submit do |params|
-    return client.netzke_notify "No Model View defined" unless @model_view
+    return client.netzke_notify 'No Model View defined' unless @model_view
 
-    return client.netzke_notify "Permission denied" unless
+    return client.netzke_notify 'Permission denied' unless
       @model_view.can_perform_action?(:update)
 
     return client.netzke_notify "Can't import when time-warped" if
       Marty::Util.warped?
 
     @data        = ActiveSupport::JSON.decode(params[:data])
-    @import_data = @data["import_data"] || ""
+    @import_data = @data['import_data'] || ''
     @record      = @parent_model.try(:find_by_id, client_config['parent_id'])
 
     validate                  and return
@@ -83,14 +83,14 @@ class Marty::ImportView < Marty::Form
       messages  = post_import
       result << messages if messages
 
-      client.set_result result.join("<br/>")
+      client.set_result result.join('<br/>')
     rescue Marty::DataImporter::Error => exc
       result = [
         "Import failed on line(s): #{exc.lines.join(', ')}",
         "Error: #{exc.to_s}",
       ]
 
-      client.set_result '<font color="red">' + result.join("<br/>") + "</font>"
+      client.set_result '<font color="red">' + result.join('<br/>') + '</font>'
     rescue StandardError => e
       client.set_result e.message
     end
@@ -112,8 +112,8 @@ class Marty::ImportView < Marty::Form
 
   component :result do |c|
     c.klass       = Marty::Panel
-    c.title       = I18n.t("data_import_view.results")
-    c.html        = ""
+    c.title       = I18n.t('data_import_view.results')
+    c.html        = ''
     c.flex        = 1
     c.min_height  = 150
     c.scrollable = true

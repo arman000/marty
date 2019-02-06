@@ -7,7 +7,7 @@ module Marty::RSpec::DownloadHelper
   extend self
 
   def downloads
-    Dir[PATH.join("*")]
+    Dir[PATH.join('*')]
   end
 
   def download

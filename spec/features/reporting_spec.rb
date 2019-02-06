@@ -2,8 +2,8 @@ require 'spec_helper'
 
 feature 'under Applications menu, Reports workflows', js: true do
   before(:all) do
-    SOME_DATE = "20130520"
-    SOME_TIME = "1200"
+    SOME_DATE = '20130520'
+    SOME_TIME = '1200'
     SOME_DT   = "#{SOME_DATE} #{SOME_TIME} PST8PDT"
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
@@ -76,15 +76,15 @@ DD: BB
     result = 444
 DELOREAN
 
-    with_user("dev1") do |u|
+    with_user('dev1') do |u|
       Marty::Posting.do_create('BASE', SOME_DT, 'a comment')
 
       Marty::Script.
-        load_script_bodies({ "SomeReport" => a_report, },
+        load_script_bodies({ 'SomeReport' => a_report, },
                            Date.today)
 
       Marty::Script.
-        load_script_bodies({ "SomeReport" =>
+        load_script_bodies({ 'SomeReport' =>
                              a_report +
                              "CC: BB\n    title=\"CC\"\n    result = 123" },
                            Date.today + 1.minute)
@@ -202,7 +202,7 @@ DELOREAN
       # hidden field that causes results to be inlined
       set_field_value('true', 'textfield', 'selected_testing')
 
-      press("Generate Report")
+      press('Generate Report')
     end
 
     wait_for_element do
@@ -284,7 +284,7 @@ DELOREAN
       wait_for_ajax
       set_field_value('XYZ', '', 'pt_name')
       set_field_value('true', 'textfield', 'selected_testing')
-      press("Generate URL")
+      press('Generate URL')
       wait_for_ajax
 
       within_window(switch_to_window(windows.last)) do

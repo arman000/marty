@@ -92,7 +92,7 @@ class Marty::Api::Base
 
       # modify params in place
       Marty::JsonSchema.fix_numbers(params[:params], numbers)
-    elsif !input_schema.include?("Schema not defined")
+    elsif !input_schema.include?('Schema not defined')
       # else if some error besides schema not defined, fail
       return { error: input_schema }
     end
@@ -116,7 +116,7 @@ class Marty::Api::Base
                                      params[:params],
                                      params[:attr])
 
-        return retval = { "job_id" => res.__promise__.id }
+        return retval = { 'job_id' => res.__promise__.id }
       end
 
       res = engine.evaluate(params[:node],

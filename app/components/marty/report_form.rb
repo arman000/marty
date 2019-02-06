@@ -1,21 +1,21 @@
 class Marty::ReportForm < Marty::Form
   # override apply for background generation
   action :apply do |a|
-    a.text     = a.tooltip = I18n.t("reporting.background")
+    a.text     = a.tooltip = I18n.t('reporting.background')
     a.handler  = :netzke_on_apply
-    a.icon_cls = "fa fa-cloud glyph"
+    a.icon_cls = 'fa fa-cloud glyph'
     a.disabled = false
   end
 
   action :foreground do |a|
-    a.text     = a.tooltip = I18n.t("reporting.generate")
-    a.icon_cls = "fa fa-download glyph"
+    a.text     = a.tooltip = I18n.t('reporting.generate')
+    a.icon_cls = 'fa fa-download glyph'
     a.disabled = false
   end
 
   action :link do |a|
-    a.text     = a.tooltip = I18n.t("reporting.link")
-    a.icon_cls = "fa fa-link glyph"
+    a.text     = a.tooltip = I18n.t('reporting.link')
+    a.icon_cls = 'fa fa-link glyph'
     a.disabled = false
   end
 
@@ -30,25 +30,25 @@ class Marty::ReportForm < Marty::Form
   ######################################################################
 
   def self.get_report_engine(params)
-    d_params = ActiveSupport::JSON.decode(params[:data] || "{}")
+    d_params = ActiveSupport::JSON.decode(params[:data] || '{}')
     d_params.each_pair do |k, v|
-      d_params[k] = nil if v.blank? || v == "null"
+      d_params[k] = nil if v.blank? || v == 'null'
     end
 
-    tag_id      = d_params.delete("selected_tag_id")
-    script_name = d_params.delete("selected_script_name")
-    node        = d_params.delete("selected_node")
+    tag_id      = d_params.delete('selected_tag_id')
+    script_name = d_params.delete('selected_script_name')
+    node        = d_params.delete('selected_node')
 
     engine = Marty::ScriptSet.new(tag_id).get_engine(script_name)
 
-    roles = engine.evaluate(node, "roles", {}) rescue nil
+    roles = engine.evaluate(node, 'roles', {}) rescue nil
 
     if roles && !roles.any? { |r| Marty::User.has_role(r) }
       # insufficient permissions
       return []
     end
 
-    d_params["p_title"] ||= engine.evaluate(node, "title", {}).to_s
+    d_params['p_title'] ||= engine.evaluate(node, 'title', {}).to_s
 
     [engine, d_params, node]
   end
@@ -56,17 +56,17 @@ class Marty::ReportForm < Marty::Form
   def self.run_eval(params)
     engine, d_params, node = get_report_engine(params)
 
-    raise "Insufficient permissions" unless engine
-    raise "no selected report node" unless String === node
+    raise 'Insufficient permissions' unless engine
+    raise 'no selected report node' unless String === node
 
     begin
-      engine.evaluate(node, "result", d_params)
+      engine.evaluate(node, 'result', d_params)
     rescue StandardError => exc
       Marty::Util.logger.error "run_eval failed: #{exc.backtrace}"
 
       res = Delorean::Engine.grok_runtime_exception(exc)
-      res["backtrace"] =
-        res["backtrace"].map { |m, line, fn| "#{m}:#{line} #{fn}" }.join('\n')
+      res['backtrace'] =
+        res['backtrace'].map { |m, line, fn| "#{m}:#{line} #{fn}" }.join('\n')
       res
     end
   end
@@ -76,16 +76,16 @@ class Marty::ReportForm < Marty::Form
 
     engine, d_params, node = self.class.get_report_engine(params)
 
-    return client.netzke_notify "Insufficient permissions to run report!" unless
+    return client.netzke_notify 'Insufficient permissions to run report!' unless
       engine
 
     # start background promise to get report result
     engine.background_eval(node,
                            d_params,
-                           ["result", "title", "format"],
+                           ['result', 'title', 'format'],
                           )
 
-    client.netzke_notify "Report can be accessed from the Jobs Dashboard ..."
+    client.netzke_notify 'Report can be accessed from the Jobs Dashboard ...'
   end
 
   ######################################################################
@@ -137,7 +137,7 @@ class Marty::ReportForm < Marty::Form
     super
 
     unless root_sess[:selected_script_name] && root_sess[:selected_node]
-      c.title = "No Report selected."
+      c.title = 'No Report selected.'
       return
     end
 
@@ -149,15 +149,15 @@ class Marty::ReportForm < Marty::Form
 
       items, title, format = engine.
         evaluate(root_sess[:selected_node],
-                 ["form", "title", "format"],
+                 ['form', 'title', 'format'],
                  {},
                 )
 
-      raise "bad form items" unless items.is_a?(Array)
-      raise "bad format" unless
+      raise 'bad form items' unless items.is_a?(Array)
+      raise 'bad format' unless
         Marty::ContentHandler::GEN_FORMATS.member?(format)
     rescue StandardError => exc
-      c.title = "ERROR"
+      c.title = 'ERROR'
       c.items =
         [
           {
@@ -172,11 +172,11 @@ class Marty::ReportForm < Marty::Form
 
     # if there's a background_only flag, we disable the foreground submit
     background_only =
-      engine.evaluate(root_sess[:selected_node], "background_only") rescue nil
+      engine.evaluate(root_sess[:selected_node], 'background_only') rescue nil
 
     items = Marty::Xl.symbolize_keys(eval_form_items(engine, items), ':')
 
-    items = [{ html: "<br><b>No input is needed for this report.</b>" }] if
+    items = [{ html: '<br><b>No input is needed for this report.</b>' }] if
       items.empty?
 
     # add hidden fields for selected tag/script/node

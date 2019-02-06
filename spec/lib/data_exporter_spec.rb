@@ -1,4 +1,4 @@
-require "spec_helper"
+require 'spec_helper'
 
 module Marty
 groupings = <<EOF
@@ -32,7 +32,7 @@ g3	h3	base
 EOF
 
 describe DataExporter do
-  it "be able to import and export nested keys" do
+  it 'be able to import and export nested keys' do
     res = Marty::DataImporter.do_import_summary(Gemini::Grouping, groupings)
     expect(res).to eq(create: 3)
     Gemini::Grouping.count.should == 3
@@ -52,11 +52,11 @@ describe DataExporter do
     res = Marty::DataExporter.do_export('infinity', Gemini::GroupingHeadVersion)
 
     expect(res).to eq [
-      ["grouping", "head_version__head", "head_version__version"],
-      ["g1", "h1", "base"],
-      ["g1", "h1", "600"],
-      ["g2", "h2", "base"],
-      ["g3", "h3", "base"]
+      ['grouping', 'head_version__head', 'head_version__version'],
+      ['g1', 'h1', 'base'],
+      ['g1', 'h1', '600'],
+      ['g2', 'h2', 'base'],
+      ['g3', 'h3', 'base']
     ]
 
     csv = Marty::DataExporter.to_csv(res, col_sep: "\t")

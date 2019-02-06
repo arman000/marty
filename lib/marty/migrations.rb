@@ -1,13 +1,13 @@
 module Marty::Migrations
   def tb_prefix
-    "marty_"
+    'marty_'
   end
 
   def new_enum(klass, prefix_override = nil)
     raise "bad class arg #{klass}" unless
       klass.is_a?(Class) && klass < ActiveRecord::Base
 
-    raise "model class needs VALUES (as Set)" unless
+    raise 'model class needs VALUES (as Set)' unless
       klass.const_defined?(:VALUES)
 
     values = klass::VALUES
@@ -28,7 +28,7 @@ module Marty::Migrations
     raise "bad class arg #{klass}" unless
       klass.is_a?(Class) && klass < ActiveRecord::Base
 
-    raise "model class needs VALUES (as Set)" unless
+    raise 'model class needs VALUES (as Set)' unless
       klass.const_defined?(:VALUES)
 
     # hacky way to get name
@@ -63,7 +63,7 @@ module Marty::Migrations
     # FIXME: so hacky to specifically check for "marty_"
     to_table = "#{tb_prefix}#{to_table}" unless
       to_table.to_s.start_with?(tb_prefix) ||
-      to_table.to_s.start_with?("marty_")
+      to_table.to_s.start_with?('marty_')
 
     add_foreign_key(from_table,
                     to_table,
@@ -123,11 +123,11 @@ module Marty::Migrations
 
   def self.write_view(target_dir, target_view, klass, jsons, excludes, extras)
     colnames = klass.columns_hash.keys
-    excludes += ["user_id", "o_user_id"]
-    joins = ["join marty_users u on main.user_id = u.id",
-             "left join marty_users ou on main.o_user_id = ou.id"]
-    columns = ["u.login AS user_name",
-               "ou.login AS obsoleted_user"]
+    excludes += ['user_id', 'o_user_id']
+    joins = ['join marty_users u on main.user_id = u.id',
+             'left join marty_users ou on main.o_user_id = ou.id']
+    columns = ['u.login AS user_name',
+               'ou.login AS obsoleted_user']
     jointabs = {}
     colnames.each do |c|
       if jsons[c]
@@ -142,7 +142,7 @@ module Marty::Migrations
         end
       elsif !excludes.include?(c)
         assoc = klass.reflections.find { |(n, h)| h.foreign_key == c }
-        if assoc && assoc[1].klass.columns_hash["name"]
+        if assoc && assoc[1].klass.columns_hash['name']
           table_name = assoc[1].table_name
           jointabs[table_name] ||= 0
           jointabs[table_name] += 1
@@ -160,7 +160,7 @@ module Marty::Migrations
         end
       end
     end
-    File.open(File.join(target_dir, "#{target_view}.sql"), "w") do |f|
+    File.open(File.join(target_dir, "#{target_view}.sql"), 'w') do |f|
       f.puts <<EOSQL
 create or replace function f_fixfalse(s text) returns text as $$
 begin
@@ -205,14 +205,14 @@ EOSQL
     gen_count = 0
 
     sql_files.each do |sql|
-      base = File.basename(sql, ".sql")
+      base = File.basename(sql, '.sql')
       existing = mig_files[base].first rescue nil
       # must ensure CRLF line endings or SQL Server keep asking about line
       # endings whenever you generating script
-      sql_lines = lines_to_crlf(File.open(sql, "r").readlines)
+      sql_lines = lines_to_crlf(File.open(sql, 'r').readlines)
       next if existing && sql_lines == File.open(existing[:raw_sql]).readlines
 
-      timestamp = (time_now + gen_count.seconds).strftime("%Y%m%d%H%M%S")
+      timestamp = (time_now + gen_count.seconds).strftime('%Y%m%d%H%M%S')
       v = existing && existing[:version] + 1 || 1
       klass = "v#{v}_sql_#{base}"
       newbase = "#{timestamp}_#{klass}"
@@ -221,14 +221,14 @@ EOSQL
       sql_snap_call =
         "Rails.root.join('#{migrations_dir}', 'sql', '#{newbase}.sql')"
 
-      File.open(sql_snap_literal, "w") do |f|
+      File.open(sql_snap_literal, 'w') do |f|
         f.print sql_lines.join
       end
       puts "creating #{newbase}.rb"
 
       # only split on "GO" at the start of a line with optional whitespace
       # before EOL.  GO in comments could trigger this and will cause an error
-      File.open(mig_name, "w") do |f|
+      File.open(mig_name, 'w') do |f|
         f.print <<OUT
 class #{klass.camelcase} < ActiveRecord::Migration[4.2]
 
@@ -281,7 +281,7 @@ OUT
   def add_mcfly_attrs_index(tb, *attrs)
     attrs.each do |a|
       options = index_opts(tb, a)
-      options[:order] = { a.to_sym => "NULLS LAST" }
+      options[:order] = { a.to_sym => 'NULLS LAST' }
       add_index tb.to_sym, a, options
     end
   end

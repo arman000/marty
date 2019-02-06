@@ -6,18 +6,18 @@ module Marty::RSpec::StructureCompare
                                    DateTime.parse(v.to_s) : v
     end
 
-    return errs + [v1["error"]] if
-      v1.class != v2.class && v1.class == Hash && v1["error"]
+    return errs + [v1['error']] if
+      v1.class != v2.class && v1.class == Hash && v1['error']
 
-    return errs + [v2["error"]] if
-      v1.class != v2.class && v2.class == Hash && v2["error"]
+    return errs + [v2['error']] if
+      v1.class != v2.class && v2.class == Hash && v2['error']
 
     return errs + ["path=#{pathstr} class mismatch #{v1.class} #{v2.class}"] unless
       v1.class == v2.class ||
-      (!cmp_opts["float_int_nomatch"] &&
+      (!cmp_opts['float_int_nomatch'] &&
        [v1, v2].map(&:class).to_set == Set.new([Integer, Float]))
 
-    override = (cmp_opts["ignore"] || []).include?(key)
+    override = (cmp_opts['ignore'] || []).include?(key)
     case v1
     when String
       return errs + ["path=#{pathstr} #{v1} != #{v2}"] unless

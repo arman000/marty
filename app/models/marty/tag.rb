@@ -4,10 +4,10 @@ class Marty::Tag < Marty::Base
   mcfly_validates_uniqueness_of :name
   validates_presence_of :name, :comment
 
-  belongs_to :user, class_name: "Marty::User"
+  belongs_to :user, class_name: 'Marty::User'
 
   def self.get_struct_attrs
-    self.struct_attrs ||= super + ["id", "created_dt"]
+    self.struct_attrs ||= super + ['id', 'created_dt']
   end
 
   def self.make_name(dt)
@@ -70,11 +70,11 @@ class Marty::Tag < Marty::Base
   end
 
   def self.get_latest1
-    order("created_dt DESC").find_by("created_dt <> 'infinity'")
+    order('created_dt DESC').find_by("created_dt <> 'infinity'")
   end
 
   def self.find_match(dt)
-    order("created_dt DESC").find_by("created_dt <= ?", dt)
+    order('created_dt DESC').find_by('created_dt <= ?', dt)
   end
 
   # Performance hack for script sets -- FIXME: making find_mtach

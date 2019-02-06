@@ -58,9 +58,9 @@ class Marty::User < Marty::Base
 
     auth_source = cf.auth_source.to_s
 
-    if auth_source == "local"
+    if auth_source == 'local'
       ok = password == cf.local_password
-    elsif auth_source == "ldap"
+    elsif auth_source == 'ldap'
       # IMPORTANT NOTE: if server allows anonymous LDAP access, empty
       # passwords will succeed!  i.e. if a valid user with empty
       # password is sent in, ldap.bind will return OK.
@@ -71,7 +71,7 @@ class Marty::User < Marty::Base
                            encryption: cf.encryption,
                            auth: {
                              method: :simple,
-                             username: cf.domain + "\\" + login,
+                             username: cf.domain + '\\' + login,
                              password: password,
                            })
       ok = ldap.bind
@@ -107,16 +107,16 @@ class Marty::User < Marty::Base
       system_id = system_user.id if system_user
 
       if id == Mcfly.whodunnit.id
-        roles.each { |r| roles.delete r unless r.name == "user_manager" }
-        errors.add :base, "User Managers cannot edit "\
-          "or add additional roles to their own accounts"
+        roles.each { |r| roles.delete r unless r.name == 'user_manager' }
+        errors.add :base, 'User Managers cannot edit '\
+          'or add additional roles to their own accounts'
       elsif id == system_id
         errors.add :base,
-                   "User Managers cannot edit the application system account"
+                   'User Managers cannot edit the application system account'
       end
     end
 
-    errors.add :base, "The application system account cannot be deactivated" if
+    errors.add :base, 'The application system account cannot be deactivated' if
       login == Rails.configuration.marty.system_account.to_s &&
       !active
 
@@ -124,14 +124,14 @@ class Marty::User < Marty::Base
   end
 
   def user_manager_only
-    Marty::User.has_role("user_manager") && !Marty::User.has_role("admin")
+    Marty::User.has_role('user_manager') && !Marty::User.has_role('admin')
   end
 
   def destroy_user
-    errors.add :base, "You cannot delete your own account" if
+    errors.add :base, 'You cannot delete your own account' if
       login == Mcfly.whodunnit.login
 
-    errors.add :base, "You cannot delete the system account" if
+    errors.add :base, 'You cannot delete the system account' if
       login == Rails.configuration.marty.system_account.to_s
     # Default to disallowing any deletions for now
 

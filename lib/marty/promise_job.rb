@@ -21,7 +21,7 @@ class Delorean::BaseModule::NodeCall
       attr = args
       args = [attr]
     else
-      raise "bad arg to %" unless args.is_a?(Array)
+      raise 'bad arg to %' unless args.is_a?(Array)
 
       attr = nil
     end
@@ -36,9 +36,9 @@ class Delorean::BaseModule::NodeCall
 
     # log "||||| #{args.inspect} #{params.inspect}"
 
-    title   = params["p_title"]   || "#{script}::#{nn.demodulize}"
-    timeout = params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
-    hook    = params["p_hook"]
+    title   = params['p_title']   || "#{script}::#{nn.demodulize}"
+    timeout = params['p_timeout'] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
+    hook    = params['p_hook']
     promise = Marty::Promise.
       create(title:     title,
              user_id:   params[:_user_id],
@@ -63,10 +63,10 @@ class Delorean::BaseModule::NodeCall
     promise.job_id = job.id
     promise.save!
 
-    evh = params["p_event"]
+    evh = params['p_event']
     if evh
-      event, klass, subject_id, operation = evh.values_at("event", "klass",
-                                                          "id", "operation")
+      event, klass, subject_id, operation = evh.values_at('event', 'klass',
+                                                          'id', 'operation')
       if event
         event.promise_id = promise.id
         event.save!
@@ -84,9 +84,9 @@ end
 
 class Delorean::Engine
   def background_eval(node, params, attrs, event = {})
-    raise "background_eval bad params" unless params.is_a?(Hash)
+    raise 'background_eval bad params' unless params.is_a?(Hash)
 
-    params["p_event"] = event.each_with_object({}) do |(k, v), h|
+    params['p_event'] = event.each_with_object({}) do |(k, v), h|
       h[k.to_s] = v
     end unless event.empty?
     nc = Delorean::BaseModule::NodeCall.new({}, self, node, params)

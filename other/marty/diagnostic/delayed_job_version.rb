@@ -22,7 +22,7 @@ module Marty::Diagnostic; class DelayedJobVersion < Base
     # excess use of delayed job time
     total_workers = (total_workers / 2).zero? ? 1 : total_workers / 2
 
-    d_engine = Marty::ScriptSet.new.get_engine("Diagnostics")
+    d_engine = Marty::ScriptSet.new.get_engine('Diagnostics')
     res = d_engine.
             evaluate('VersionDelay', 'result', 'count' => total_workers - 1)
 

@@ -14,7 +14,7 @@ module Marty
       self.use_transactional_tests = true
     end
 
-    it "log has its own connection" do
+    it 'log has its own connection' do
       log_conn     = Marty::Log.connection.raw_connection
       posting_conn = Marty::Posting.connection.raw_connection
       script_conn  = Marty::Script.connection.raw_connection
@@ -23,10 +23,10 @@ module Marty
       expect(posting_conn).to equal(script_conn)
     end
 
-    it "logs" do
+    it 'logs' do
       info_s = { 'info' => 'message' }
       error_s = [1, 2, 3, { 'error' => 'message' }]
-      fatal_s = ["string", 123, { 'fatal' => "message",
+      fatal_s = ['string', 123, { 'fatal' => 'message',
                                  'another_key' => 'value' }]
       Marty::Logger.info('info message', info_s)
       Marty::Logger.error('error message', error_s)
@@ -34,15 +34,15 @@ module Marty
       log = Marty::Log.all
       log_detail = log.map { |l| [l[:message_type], l[:message], l[:details]] }
       log_ts = log.map { |l| l[:timestamp] }
-      expect(log_detail[0]).to eq(["info", "info message", info_s])
-      expect(log_detail[1]).to eq(["error", "error message", error_s])
-      expect(log_detail[2]).to eq(["fatal", "fatal message", fatal_s])
+      expect(log_detail[0]).to eq(['info', 'info message', info_s])
+      expect(log_detail[1]).to eq(['error', 'error message', error_s])
+      expect(log_detail[2]).to eq(['fatal', 'fatal message', fatal_s])
       log_ts.each do |ts|
         expect(ts.to_i).to be_within(5).of(Time.zone.now.to_i)
       end
     end
 
-    it "with_logging" do
+    it 'with_logging' do
       bd = 'block description'
       the_error = 'error during my block'
       data = [1, 2, 3, Marty::User.first]
@@ -57,12 +57,12 @@ module Marty
       log = Marty::Log.first
       expect(log.message_type).to eq('error')
       expect(log.message).to eq(bd)
-      expect(log.details).to eq("message" => the_error,
-                                  "data" => JSON.parse(data.to_json))
+      expect(log.details).to eq('message' => the_error,
+                                  'data' => JSON.parse(data.to_json))
     end
   end
 
-  describe "Exercise" do
+  describe 'Exercise' do
     before(:all) do
       @clean_file = "/tmp/clean_#{Process.pid}.psql"
       save_clean_db(@clean_file)
@@ -81,24 +81,24 @@ module Marty
     after(:all) do
       restore_clean_db(@clean_file)
       stop_delayed_job
-      File.unlink("/tmp/logaction.txt")
+      File.unlink('/tmp/logaction.txt')
       Marty::Log.cleanup(0)
       self.use_transactional_tests = true
     end
 
-    it "handles heavy load" do
-      File.open(Rails.root.join("log/test.log")) do |f|
+    it 'handles heavy load' do
+      File.open(Rails.root.join('log/test.log')) do |f|
         f.seek(0, IO::SEEK_END)
         engine = Marty::ScriptSet.new.get_engine(NAME_K)
 
         res = (1..1000).map do |i|
-          engine.background_eval("LOGGER", { "msgid" => i }, ["result"])
+          engine.background_eval('LOGGER', { 'msgid' => i }, ['result'])
         end
 
         # wait for all the jobs to finish; collect/check their result
-        expect(res.map { |x| x["result"] }.sort).to eq (1..1000).to_a
+        expect(res.map { |x| x['result'] }.sort).to eq (1..1000).to_a
 
-        line_count = File.readlines("/tmp/logaction.txt").count
+        line_count = File.readlines('/tmp/logaction.txt').count
 
         log_count = Marty::Log.all.count
         failed_count = f.readlines.select do |l|

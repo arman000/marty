@@ -40,8 +40,8 @@ class Marty::DataConversion
     case type
     when :boolean
       case v.to_s.downcase
-      when "true",  "1", "y", "t" then true
-      when "false", "0", "n", "f" then false
+      when 'true',  '1', 'y', 't' then true
+      when 'false', '0', 'n', 'f' then false
       else raise "unknown boolean: #{v.inspect}"
       end
     when :string, :text, :enum
@@ -86,7 +86,7 @@ class Marty::DataConversion
     # key for regular (non-mcfly) AR models which don't have
     # MARTY_IMPORT_UNIQUENESS.
     klass.const_get(:MARTY_IMPORT_UNIQUENESS) rescue [
-      klass.column_names.reject { |x| x == "id" }.first.to_sym
+      klass.column_names.reject { |x| x == 'id' }.first.to_sym
     ]
   end
 
@@ -157,7 +157,7 @@ class Marty::DataConversion
     raise "no keys for #{klass} -- #{options}" if find_options.empty?
 
     q = klass.where(find_options)
-    q = q.where("obsoleted_dt >= ? AND created_dt < ?", dt, dt) if
+    q = q.where('obsoleted_dt >= ? AND created_dt < ?', dt, dt) if
        dt && Mcfly.has_mcfly?(klass)
 
     # q.count is almost always 0 or 1 => hopefully it's not too slow on PG.

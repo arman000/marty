@@ -32,14 +32,14 @@ class Marty::Helper
   end
 
   delorean_fn :parse_csv_to_hash, sig: 3 do |txt, comma_sep, types|
-    txt ||= ""
+    txt ||= ''
     headers, *rows = CSV.parse(txt.strip,
                                headers: true,
-                               col_sep: (comma_sep ? "," : "\t")).to_a
+                               col_sep: (comma_sep ? ',' : "\t")).to_a
     rows.map do |row|
       headers.zip(row).each_with_object({}) do |(h, v), res|
         res[h] = v.blank? ? nil :
-                   Marty::DataConversion.convert(v, (types[h] || "text").to_sym)
+                   Marty::DataConversion.convert(v, (types[h] || 'text').to_sym)
       end
     end
   end

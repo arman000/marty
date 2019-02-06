@@ -17,14 +17,14 @@ module Marty
 
     before(:each) do
       @import = ImportType.new
-      @import.name = "Test1"
-      @import.db_model_name = "Marty::ARTestModel"
+      @import.name = 'Test1'
+      @import.db_model_name = 'Marty::ARTestModel'
       @import.role_id = role_id
       @import.save!
     end
 
-    describe "validations" do
-      it "require name, db_model and role" do
+    describe 'validations' do
+      it 'require name, db_model and role' do
         it = ImportType.new
         expect(it).to_not be_valid
         expect(it.errors[:name].any?).to be true
@@ -32,28 +32,28 @@ module Marty
         expect(it.errors[:role_id].any?).to be true
       end
 
-      it "require a unique name" do
+      it 'require a unique name' do
         it = ImportType.new
-        it.name = "Test1"
-        it.db_model_name = "Marty::ARTestModel"
+        it.name = 'Test1'
+        it.db_model_name = 'Marty::ARTestModel'
         it.role_id = role_id
         expect(it).to_not be_valid
         expect(it.errors[:name].any?).to be true
       end
 
-      it "require an ActiveRecord model for the db_model_name" do
+      it 'require an ActiveRecord model for the db_model_name' do
         it = ImportType.new
-        it.name = "Test1"
-        it.db_model_name = "Marty::TestModel"
+        it.name = 'Test1'
+        it.db_model_name = 'Marty::TestModel'
         it.role_id = role_id
         expect(it).to_not be_valid
-        expect(it.errors[:base][0]).to eq "bad model name"
+        expect(it.errors[:base][0]).to eq 'bad model name'
       end
 
-      it "do not fail on blank strings for functions" do
-        @import.cleaner_function = ""
-        @import.validation_function = " "
-        @import.preprocess_function = "  "
+      it 'do not fail on blank strings for functions' do
+        @import.cleaner_function = ''
+        @import.validation_function = ' '
+        @import.preprocess_function = '  '
 
         expect(@import).to be_valid
         @import.save!
@@ -62,15 +62,15 @@ module Marty
         expect(@import.preprocess_function).to be nil
       end
 
-      it "require valid functions for cleaner/validation/preprocess" do
-        @import.cleaner_function = "import_cleaner"
-        @import.validation_function = "import_validator"
+      it 'require valid functions for cleaner/validation/preprocess' do
+        @import.cleaner_function = 'import_cleaner'
+        @import.validation_function = 'import_validator'
         expect(@import).to be_valid
 
-        @import.preprocess_function = "missing_func"
+        @import.preprocess_function = 'missing_func'
         expect(@import).to_not be_valid
         expect(@import.errors[:base][0]).
-          to eq "unknown class method missing_func"
+          to eq 'unknown class method missing_func'
       end
     end
   end

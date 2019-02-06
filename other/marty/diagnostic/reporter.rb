@@ -95,7 +95,7 @@ module Marty::Diagnostic; class Reporter < Request
 
         begin
           response = req.start { |http| http.get(uri.to_s) }
-          next JSON.parse(response.body) if response.code == "200"
+          next JSON.parse(response.body) if response.code == '200'
 
           Fatal.message(response.body, type: response.message, node: uri.host)
         rescue StandardError => e

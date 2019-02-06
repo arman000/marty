@@ -9,8 +9,8 @@ class Marty::ConfigView < Marty::Grid
   def configure(c)
     super
 
-    c.title      = I18n.t('config', default: "Config")
-    c.model      = "Marty::Config"
+    c.title      = I18n.t('config', default: 'Config')
+    c.model      = 'Marty::Config'
     c.attributes = [:key, :value, :description]
     c.editing    = :both
     c.store_config.merge!(sorters: [{ property: :key, direction: 'ASC' }])

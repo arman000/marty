@@ -54,7 +54,7 @@ class Marty::PromiseProxy < BasicObject
         if @result.equal?(NOT_SET)
           begin
             @result = @promise.wait_for_result(@timeout)
-            @result = @result[@attr] if @attr && !@result["error"]
+            @result = @result[@attr] if @attr && !@result['error']
           rescue ::Exception => exc
             @result = ::Delorean::Engine.grok_runtime_exception(exc)
           end
@@ -65,7 +65,7 @@ class Marty::PromiseProxy < BasicObject
     # FIXME: the logic for shape of exceptions from Delorean is spread
     # all over the place.
     @result.is_a?(::Hash) &&
-      @result["error"] ? ::Kernel.raise(@result["error"]) : @result
+      @result['error'] ? ::Kernel.raise(@result['error']) : @result
   end
 
   alias_method :force, :__force__

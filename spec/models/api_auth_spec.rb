@@ -4,8 +4,8 @@ module Marty
   describe ApiAuth do
     before(:each) do
       Marty::Script.load_script_bodies({
-                           "Script1" => "A:\n    a = 1\n",
-                           "NewScript1" => "B:\n    b = 0\n",
+                           'Script1' => "A:\n    a = 1\n",
+                           'NewScript1' => "B:\n    b = 0\n",
                          }, Date.today)
 
       @api = ApiAuth.new
@@ -19,8 +19,8 @@ module Marty
       { script: script, api_key: key }
     end
 
-    describe "validations" do
-      it "should require app name, api key and script name" do
+    describe 'validations' do
+      it 'should require app name, api key and script name' do
         api = ApiAuth.new
         expect(api).to_not be_valid
         expect(api.errors[:app_name].any?).to be_truthy
@@ -28,7 +28,7 @@ module Marty
         expect(api.errors[:script_name].any?).to be_truthy
       end
 
-      it "should require unique app name/script name" do
+      it 'should require unique app name/script name' do
         api = @api.dup
         expect(api).to_not be_valid
         expect(api.errors[:app_name].to_s).to include('already been taken')
@@ -36,7 +36,7 @@ module Marty
         expect(api).to be_valid
       end
 
-      it "should require unique api key/script name" do
+      it 'should require unique api key/script name' do
         api = @api.dup
         expect(api).to_not be_valid
         expect(api.errors[:api_key].to_s).to include('must be unique')
@@ -44,7 +44,7 @@ module Marty
         expect(api).to be_valid
       end
 
-      it "should require a valid associated script name" do
+      it 'should require a valid associated script name' do
         api = ApiAuth.new
         api.app_name = 'NewApp'
         api.script_name = @api.script_name + 'Bad'
@@ -52,8 +52,8 @@ module Marty
         expect(api.errors[:base].to_s).to include('reference a valid script')
       end
 
-      it "should allow a tagged script version to be associated when a DEV " +
-        "version of that script also exists" do
+      it 'should allow a tagged script version to be associated when a DEV ' +
+        'version of that script also exists' do
         s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: 'Script1')
         s.body = "A:\n    a = 3\n"
         s.save!
@@ -64,8 +64,8 @@ module Marty
         expect(api).to be_valid
       end
 
-      it "should not allow a DEV script to be associated if there is no " +
-        "tagged version of that script" do
+      it 'should not allow a DEV script to be associated if there is no ' +
+        'tagged version of that script' do
         s = Marty::Script.new
         s.name = 'TestScript'
         s.body = '-- Test3'
@@ -81,16 +81,16 @@ module Marty
       end
     end
 
-    describe "key management" do
-      it "should require a 38 character key" do
+    describe 'key management' do
+      it 'should require a 38 character key' do
         expect(@api.api_key.length).to eq(38)
 
-        @api.api_key = "123456789"
+        @api.api_key = '123456789'
         expect(@api).to_not be_valid
         expect(@api.errors[:base].to_s).to include('length must be 38')
       end
 
-      it "should create the api key if necessary when the record is created" do
+      it 'should create the api key if necessary when the record is created' do
         a = ApiAuth.new
         a.app_name = 'MyApp'
         a.script_name = 'NewScript1'
@@ -99,7 +99,7 @@ module Marty
         expect(a.api_key).to_not be_nil
       end
 
-      it "should allow api key to be updated for an existing record" do
+      it 'should allow api key to be updated for an existing record' do
         old = @api.api_key
         @api.api_key = ApiAuth.generate_key
         new = @api.api_key
@@ -110,7 +110,7 @@ module Marty
         expect(@api.api_key).to eq(new)
       end
 
-      it "should generate new api key if old one is cleared" do
+      it 'should generate new api key if old one is cleared' do
         old = @api.api_key
         @api.api_key = ''
         @api.app_name += 'x'
@@ -118,7 +118,7 @@ module Marty
         expect(@api.api_key).to_not eq(old)
       end
 
-      it "should generate new api key if old one is cleared (2)" do
+      it 'should generate new api key if old one is cleared (2)' do
         old = @api.api_key
         @api.api_key = nil
         @api.app_name += 'x'
@@ -127,21 +127,21 @@ module Marty
       end
     end
 
-    describe "authorization" do
-      it "should pass when script is not secured" do
+    describe 'authorization' do
+      it 'should pass when script is not secured' do
         # Script is not secured by any entries
         params = create_params('SomeScript', 'SomeKey')
         expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
       end
 
-      it "should pass when script is secured and key is valid" do
+      it 'should pass when script is secured and key is valid' do
         expect(@api.script_name).to include('Script1')
 
         params = create_params(@api.script_name, @api.api_key)
         expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
       end
 
-      it "should pass when script is secured and key is valid 2" do
+      it 'should pass when script is secured and key is valid 2' do
         a = ApiAuth.new
         a.app_name = @api.app_name + 'x'
         a.script_name = 'NewScript1'
@@ -151,7 +151,7 @@ module Marty
         expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
       end
 
-      it "should match on exact script name" do
+      it 'should match on exact script name' do
         a = ApiAuth.new
         a.app_name = @api.app_name + 'x'
         a.script_name = 'NewScript1'
@@ -161,12 +161,12 @@ module Marty
         expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
       end
 
-      it "should fail when script is secured and key is invalid" do
+      it 'should fail when script is secured and key is invalid' do
         params = create_params('Script1', 'SomeKey')
         expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
       end
 
-      it "should fail when script is secured and key is invalid (2)" do
+      it 'should fail when script is secured and key is invalid (2)' do
         a = ApiAuth.new
         a.app_name = @api.app_name + 'x'
         a.script_name = 'NewScript1'
@@ -176,7 +176,7 @@ module Marty
         expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
       end
 
-      it "should fail when script is secured and key is not specified" do
+      it 'should fail when script is secured and key is not specified' do
         params = create_params('Script1', nil)
         expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
 
@@ -184,7 +184,7 @@ module Marty
         expect(Marty::Api::Base.is_authorized?(params)).to be_falsey
       end
 
-      it "should pass when api_auth is deleted and no other auths exist" do
+      it 'should pass when api_auth is deleted and no other auths exist' do
         params = create_params(@api.script_name, @api.api_key)
         expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
         @api.delete
@@ -192,7 +192,7 @@ module Marty
         expect(Marty::Api::Base.is_authorized?(params)).to be_truthy
       end
 
-      it "should fail when api_auth is deleted and another auth exists" do
+      it 'should fail when api_auth is deleted and another auth exists' do
         api = @api.dup
         api.app_name += 'x'
         api.api_key = nil

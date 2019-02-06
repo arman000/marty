@@ -4,7 +4,7 @@ class Marty::ImportType < Marty::Base
       klass = entry.get_model_class
 
       unless klass.is_a?(Class) && klass < ActiveRecord::Base
-        entry.errors.add :base, "bad model name"
+        entry.errors.add :base, 'bad model name'
         return
       end
 

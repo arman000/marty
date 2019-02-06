@@ -1,5 +1,5 @@
-ENV["RAILS_ENV"] ||= "test"
-ENV["TZ"] ||= "America/Los_Angeles"
+ENV['RAILS_ENV'] ||= 'test'
+ENV['TZ'] ||= 'America/Los_Angeles'
 
 require 'dummy/config/application'
 require 'rspec/rails'
@@ -11,8 +11,8 @@ require "#{support}/shared_connection"
 
 Dummy::Application.initialize! unless Dummy::Application.initialized?
 
-ActiveRecord::Migrator.migrate File.expand_path("../../db/migrate/", __FILE__)
-ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
+ActiveRecord::Migrator.migrate File.expand_path('../../db/migrate/', __FILE__)
+ActiveRecord::Migrator.migrate File.expand_path('../dummy/db/migrate/', __FILE__)
 
 RSpec.configure do |config|
   config.include Marty::RSpec::Suite

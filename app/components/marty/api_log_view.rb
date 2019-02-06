@@ -94,7 +94,7 @@ class Marty::ApiLogView < Marty::Grid
 
   # copied from log_view.rb
   attribute :timestamp_custom do |c|
-    c.text         = I18n.t("log_grid.timestamp")
+    c.text         = I18n.t('log_grid.timestamp')
     c.width        = 200
     c.read_only    = true
     c.filterable = true
@@ -104,7 +104,7 @@ class Marty::ApiLogView < Marty::Grid
       xtype: :displayfield,
     }
     c.getter = lambda { |r| Time.at(r.timestamp) }
-    c.sorting_scope = lambda { |r, dir| r.order("timestamp " + dir.to_s) }
+    c.sorting_scope = lambda { |r, dir| r.order('timestamp ' + dir.to_s) }
 
     # FIXME?: The UI AR/PG DateTime workaround requires the timestamp to be cast
     # to text in order to compare filter input using the LIKE operator.

@@ -6,35 +6,35 @@ describe Marty::RpcController do
   before(:each) do
     @tags = []
     @tags << Marty::Script.load_script_bodies({
-                         "A" => "A:\n    a = 1\n",
-                         "B" => "B:\n    b = 0\n",
+                         'A' => "A:\n    a = 1\n",
+                         'B' => "B:\n    b = 0\n",
                        }, Date.today)
 
     @tags << Marty::Script.load_script_bodies({
-                         "B" => "import A\nB:\n    b = A::A().a\n",
+                         'B' => "import A\nB:\n    b = A::A().a\n",
                        }, Date.today + 1.minute)
 
     @tags << Marty::Script.load_script_bodies({
-                         "A" => "A:\n    a = 2\n",
+                         'A' => "A:\n    a = 2\n",
                        }, Date.today + 2.minute)
 
     # create an untagged version for DEV
-    s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: "A")
+    s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: 'A')
     s.body = "A:\n    a = 3\n"
     s.save!
   end
 
   let(:tags) { @tags }
 
-  it "should properly import different versions of a script" do
+  it 'should properly import different versions of a script' do
     # try the test 3 times for fun
     (0..2).each do
       tags.each_with_index do |t, i|
         get 'evaluate', params: {
               format: :json,
-              script: "B",
-              node: "B",
-              attrs: "b",
+              script: 'B',
+              node: 'B',
+              attrs: 'b',
               tag: t.name,
             }
         response.body.should == i.to_json

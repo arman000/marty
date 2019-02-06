@@ -29,31 +29,31 @@ module Marty; module RSpec; module Netzke
       # ignore error
     end
 
-    find(:xpath, "//span", text: 'Sign in', match: :first, wait: 5).click
-    fill_in("login", :with => username)
-    fill_in("password", :with => password)
-    press("OK")
+    find(:xpath, '//span', text: 'Sign in', match: :first, wait: 5).click
+    fill_in('login', :with => username)
+    fill_in('password', :with => password)
+    press('OK')
     wait_for_ajax
   end
 
   def log_in_as(username)
     Rails.configuration.marty.auth_source = 'local'
 
-    ensure_on("/")
+    ensure_on('/')
     log_in(username, Rails.configuration.marty.local_password)
-    ensure_on("/")
+    ensure_on('/')
   end
 
   def log_out
-    press("Current user")
-    press("Sign out")
+    press('Current user')
+    press('Sign out')
   end
 
   def press button_name, index_of = 0
     wait_for_element do
       begin
         cmp = first("a[data-qtip='#{button_name}']")
-        cmp ||= first(:xpath, ".//a", text: button_name.to_s)
+        cmp ||= first(:xpath, './/a', text: button_name.to_s)
         cmp ||= find(:btn, button_name, match: :first)
         cmp.click
         true
@@ -153,8 +153,8 @@ module Marty; module RSpec; module Netzke
   end
 
   def set_field_value value, field_type = 'textfield', name = ''
-    args1 = name.empty? ? "" : "[fieldLabel='#{name}']"
-    args2 = name.empty? ? "" : "[name='#{name}']"
+    args1 = name.empty? ? '' : "[fieldLabel='#{name}']"
+    args2 = name.empty? ? '' : "[name='#{name}']"
     run_js <<-JS
       var field = Ext.ComponentQuery.query("#{field_type}#{args1}")[0];
       field = field || Ext.ComponentQuery.query("#{field_type}#{args2}")[0];
@@ -214,13 +214,13 @@ module Marty; module RSpec; module Netzke
   end
 
   def simple_escape! text
-    text.gsub!(/(\r\n|\n)/, "\\n")
-    text.gsub!(/\t/, "\\t")
+    text.gsub!(/(\r\n|\n)/, '\\n')
+    text.gsub!(/\t/, '\\t')
   end
 
   def simple_escape text
-    text.gsub(/(\r\n|\n)/, "\\n").
-      gsub(/\t/, "\\t").
+    text.gsub(/(\r\n|\n)/, '\\n').
+      gsub(/\t/, '\\t').
       gsub(/"/, '\"')
   end
 

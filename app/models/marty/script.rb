@@ -7,7 +7,7 @@ class Marty::Script < Marty::Base
                       with: /\A[A-Z][a-zA-Z0-9]*\z/,
                       message: I18n.t('script.save_error')
 
-  belongs_to :user, class_name: "Marty::User"
+  belongs_to :user, class_name: 'Marty::User'
 
   gen_mcfly_lookup :lookup, [:name], cache: true
 
@@ -19,7 +19,7 @@ class Marty::Script < Marty::Base
 
   def find_tag
     # find the first tag created after this script.
-    Marty::Tag.where("created_dt >= ?", created_dt).order(:created_dt).first
+    Marty::Tag.where('created_dt >= ?', created_dt).order(:created_dt).first
   end
 
   def self.create_script(name, body)
@@ -53,14 +53,14 @@ class Marty::Script < Marty::Base
 
     # Create a new tag if scripts were modified after the last tag
     tag = Marty::Tag.get_latest1
-    latest = Marty::Script.order("created_dt DESC").first
+    latest = Marty::Script.order('created_dt DESC').first
 
     tag_time = (dt || [latest.try(:created_dt), Time.now].compact.max) +
       1.second
 
     # If no tag_time is provided, the tag created_dt will be the same
     # as the scripts.
-    tag = Marty::Tag.do_create(tag_time, "tagged from load scripts") if
+    tag = Marty::Tag.do_create(tag_time, 'tagged from load scripts') if
       !(tag && latest) || tag.created_dt <= latest.created_dt
 
     tag
@@ -112,10 +112,10 @@ class Marty::Script < Marty::Base
 
   def self.delete_scripts
     ActiveRecord::Base.connection.
-      execute("ALTER TABLE marty_scripts DISABLE TRIGGER USER;")
+      execute('ALTER TABLE marty_scripts DISABLE TRIGGER USER;')
     Marty::Script.delete_all
     ActiveRecord::Base.connection.
-      execute("ALTER TABLE marty_scripts ENABLE TRIGGER USER;")
+      execute('ALTER TABLE marty_scripts ENABLE TRIGGER USER;')
   end
 
   delorean_fn :eval_to_hash, sig: 5 do |dt, script, node, attrs, params|

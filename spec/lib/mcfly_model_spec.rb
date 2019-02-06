@@ -1,4 +1,4 @@
-require "spec_helper"
+require 'spec_helper'
 
 module Marty
 entities = <<EOF
@@ -81,7 +81,7 @@ describe 'McflyModel' do
     Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup)
     Marty::Script.load_script_bodies(
       {
-        "AA" => script,
+        'AA' => script,
       }, dt)
     @errs = ['E1', 'lookup_p',
              'E2', 'clookup_p',
@@ -98,20 +98,20 @@ describe 'McflyModel' do
     Marty::Script.load_script_bodies({ 'E5' => (errscript2 % 'a_func_p') }, dt)
     Marty::Script.load_script_bodies({ 'E6' => (errscript3 % 'b_func_p') }, dt)
 
-    @engine = Marty::ScriptSet.new.get_engine("AA")
+    @engine = Marty::ScriptSet.new.get_engine('AA')
   end
   after(:all) do
     restore_clean_db(@clean_file)
     Marty::ScriptSet.clear_cache
   end
   let(:params) do
-    { "pt" => 'infinity',
-                 "entity"    => Gemini::Entity.all.first,
-                 "note_rate" => 2.875 }
+    { 'pt' => 'infinity',
+                 'entity'    => Gemini::Entity.all.first,
+                 'note_rate' => 2.875 }
   end
-  it "lookup mode default" do
-    a1 = @engine.evaluate("A", "lookup", params)
-    a2 = @engine.evaluate("A", "clookup", params)
+  it 'lookup mode default' do
+    a1 = @engine.evaluate('A', 'lookup', params)
+    a2 = @engine.evaluate('A', 'clookup', params)
     expect(a1).to eq(a2)                            # cache/non return same
     expect(a1.class).to eq(OpenStruct)              # mode default so return OS
     expect(a2.class).to eq(OpenStruct)
@@ -120,14 +120,14 @@ describe 'McflyModel' do
     expect(a1.to_h.keys.to_set).to eq(Set[:buy_up, :buy_down])
   end
 
-  it "lookup non generated" do
+  it 'lookup non generated' do
     # a1 will be AR Relations
     # b1 will be OpenStructs because the b fns return #first
-    e_id = Gemini::Entity.where(name: "PLS").first.id
-    bc_id = Gemini::BudCategory.where(name: "Conv Fixed 20").first.id
-    p = { "e_id" => e_id, "bc_id" => bc_id }
-    a1 = @engine.evaluate("A", "a_func", p)
-    b1 = @engine.evaluate("A", "b_func", p)
+    e_id = Gemini::Entity.where(name: 'PLS').first.id
+    bc_id = Gemini::BudCategory.where(name: 'Conv Fixed 20').first.id
+    p = { 'e_id' => e_id, 'bc_id' => bc_id }
+    a1 = @engine.evaluate('A', 'a_func', p)
+    b1 = @engine.evaluate('A', 'b_func', p)
 
     # all return relations
     expect(ActiveRecord::Relation === a1).to be_truthy
@@ -136,7 +136,7 @@ describe 'McflyModel' do
     expect(a1.to_a.count).to eq(2)
 
     # a1 lookup did not include extra attrs
-    expect(a1.first.attributes.keys.to_set).to eq(Set["id", "buy_up", "buy_down"])
+    expect(a1.first.attributes.keys.to_set).to eq(Set['id', 'buy_up', 'buy_down'])
 
     # a1 is AR but still missing the FK entity_id so will raise
     expect { a1.first.entity }.to raise_error(/missing attribute: entity_id/)
@@ -147,10 +147,10 @@ describe 'McflyModel' do
     expect(b1.to_h.keys.to_set).to eq(Set[:buy_up, :buy_down])
   end
 
-  it "lookup mode nil" do
+  it 'lookup mode nil' do
     # make sure ARs are returned
-    a1 = @engine.evaluate("A", "lookupn", params)
-    a2 = @engine.evaluate("A", "clookupn", params)
+    a1 = @engine.evaluate('A', 'lookupn', params)
+    a2 = @engine.evaluate('A', 'clookupn', params)
     expect(a1).to eq(a2)
     expect(ActiveRecord::Relation === a1).to be_truthy
     expect(a1.to_a.count).to eq(4)
@@ -158,7 +158,7 @@ describe 'McflyModel' do
 
   it "private methods can't be called by delorean" do
     # generated methods
-    aggregate_failures "errors" do
+    aggregate_failures 'errors' do
       @errs.in_groups_of(2) do |name, fn|
         err = /Too many args to #{fn}/
 
@@ -171,7 +171,7 @@ describe 'McflyModel' do
 
   it "private methods can't be called by delorean (2)" do
     # non-generated
-    aggregate_failures "errors" do
+    aggregate_failures 'errors' do
       ['E5', 'a_func_p', 'E6', 'b_func_p'].in_groups_of(2) do |scr, fn|
         err = /Too many args to #{fn}/
         expect { Marty::ScriptSet.new.get_engine(scr) }.to raise_error(
@@ -180,7 +180,7 @@ describe 'McflyModel' do
     end
   end
 
-  it "caching times" do
+  it 'caching times' do
     ts = DateTime.now
     x = Benchmark.measure do
         10000.times do
