@@ -27,3 +27,7 @@ spec/dummy/.sass-cache
 /spec/dummy/public/extjs
 .rspec
 .rspec-results
+
+# Files with command history for docker
+.bash_history.docker
+.pry_history.docker

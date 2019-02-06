@@ -22,9 +22,8 @@ services:
       - "postgres"
     volumes:
       - .:/opt/app:delegated
-
-      # - '~/.bash_history:/root/.bash_history'
-      # - '~/.pry_history:/root/.pry_history'
+      - '.bash_history.docker:/root/.bash_history'
+      - '.pry_history.docker:/root/.pry_history'
     volumes_from:
       - bundle_box
     tty: true
