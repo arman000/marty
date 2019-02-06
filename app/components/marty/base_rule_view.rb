@@ -51,50 +51,80 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     end
   end
 
-  def self.simple_to_hash(s)
+  def self.ruletext_to_hash(s)
+    # states are
+    #  :start   - before any attr is defined
+    #  :in_attr - defining an attr
+    #  :end     - end of input
+    state = :start
     result = {}
-    save_linenos = {}
-    last_key = nil
-    s.lines.each.with_index(1) do |line, idx|
-      next if /\A\s*\z/.match(line)
+    cur_attr = nil
+    idx = 0
+    input = s.lines
+
+    # events are
+    #  :attr    - starting with <identifier>\s*=
+    #  :normal  - line not starting with ident =
+    #  :end     - no more lines
+    # get_event returns [event, data]
+    get_event = lambda {
+      line = input.try(&:shift)
+      next [:end] unless line
 
       line.chomp!
-      begin
-        m = /\A\s*([a-z][a-z0-9_]*)\s*=\s*(.*)\s*\z/.match(line)
-        if m
-          k, v = m[1], m[2]
-          raise DupKeyError.new(k, idx) if result.keys.include?(k)
+      idx += 1
+      m = /\A\s*([a-z][a-z0-9_]*)\s* = ?(.*)\z/.match(line)
+      next [:attr, m[1..-1]] if m
 
-          save_linenos[k] = idx
-          result[k] = v
-          last_key = k
-        else
-          raise unless last_key
+      [:normal, line]
+    }
 
-          result[last_key] += "\n" + line.strip
+    # start a new attribute
+    # data is [ attr_name, everything after = ]
+    new_attr = lambda { |data|
+      cur_attr = data.shift
+      raise DupKeyError.new(cur_attr, idx) if result[cur_attr]
+
+      result[cur_attr] = data[0]
+    }
+
+    begin
+      while state != :end
+        event, extra = get_event.call
+        case state
+        when :start
+          case event
+          when :attr
+            new_attr.call(extra)
+            state = :in_attr
+          when :normal
+            raise
+          when :end
+            state = :end
+          end
+        when :in_attr
+          case event
+          when :attr
+            new_attr.call(extra)
+          when :normal
+            result[cur_attr] += "\n" + extra
+          when :end
+            state = :end
+          end
         end
-      rescue DupKeyError => e
-        raise
-      rescue StandardError => e
-        raise "syntax error on line #{idx}"
       end
+    rescue DupKeyError => e
+      raise
+    rescue StandardError => e
+      raise "syntax error on line #{idx}"
     end
     result
   end
 
-  def self.hash_to_simple(h)
-    return unless h && h.present?
-
-    lhs_wid = h.keys.map(&:length).max
-    fmt = "%-#{lhs_wid}s = %s"
-    result = []
-    h.map do |k, vstr|
-      vlines = vstr.lines.map(&:chomp)
-      fst = vlines.shift
-      result << fmt % [k, fst]
-      vlines.each { |l| result << ' ' * (lhs_wid + 3) + l }
+  def self.hash_to_ruletext(h)
+    h.each_with_object('') do |(k, v), out|
+      out << k + ' = ' + v + "\n"
     end
-    result.join("\n")
   end
 
   def jsonb_getter(c)
@@ -102,7 +132,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def jsonb_simple_getter(c)
-    lambda { |r| Marty::BaseRuleView.hash_to_simple(r.send(c)) }
+    lambda { |r| Marty::BaseRuleView.hash_to_ruletext(r.send(c)) }
   end
 
   def jsonb_simple_setter(c)
@@ -111,7 +141,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       return r.send(msg, nil) if v.blank?
 
       begin
-        final = Marty::BaseRuleView.simple_to_hash(v)
+        final = Marty::BaseRuleView.ruletext_to_hash(v)
       rescue StandardError => e
         final = { "~~ERROR~~": e.message }
       end

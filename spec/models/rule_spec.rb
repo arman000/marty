@@ -376,9 +376,9 @@ module Marty::RuleSpec
         rescue Marty::DeloreanRule::ComputeError => e
           exp = 'no implicit conversion of Integer into String'
           expect(e.message).to include(exp)
-          expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
-                    /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
-                    /DELOREAN__XyzRule_\d+_1483228800.0:27:in .bv__D'/]
+          expres = [/DELOREAN__XyzRule_\d+_1483228800.0:22:in .+'/,
+                    /DELOREAN__XyzRule_\d+_1483228800.0:22:in .tmp_var4__D'/,
+                    /DELOREAN__XyzRule_\d+_1483228800.0:26:in .bv__D'/]
           expres.each_with_index do |expre, i|
             expect(e.backtrace[i]).to match(expre)
           end
@@ -429,9 +429,9 @@ module Marty::RuleSpec
                'err_section' => 'results',
                'err_message' => 'no implicit conversion of Integer into String' }
         expect(log_ents[1].details.except('err_stack')).to eq(exp)
-        expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
-                  /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
-                  /DELOREAN__XyzRule_\d+_1483228800.0:27:in .bv__D'/]
+        expres = [/DELOREAN__XyzRule_\d+_1483228800.0:22:in .+'/,
+                  /DELOREAN__XyzRule_\d+_1483228800.0:22:in .tmp_var4__D'/,
+                  /DELOREAN__XyzRule_\d+_1483228800.0:26:in .bv__D'/]
         expres.each_with_index do |expre, i|
           expect(log_ents[1].details['err_stack'][i]).to match(expre)
         end
