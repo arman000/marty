@@ -7,10 +7,10 @@ class Marty::RpcCall
     request = Net::HTTP::Post.new(path)
     request.add_field('Content-Type', 'application/json')
     request.body = (options + {
-                      "script" => script,
-                      "node"   => node,
-                      "attrs"  => attrs.to_json,
-                      "params" => params.to_json,
+                      'script' => script,
+                      'node'   => node,
+                      'attrs'  => attrs.to_json,
+                      'params' => params.to_json,
                     }).to_json
     begin
       response = http.request(request)
@@ -19,7 +19,7 @@ class Marty::RpcCall
     end
 
     res = JSON.parse(response.body)
-    raise res["error"] if res.is_a?(Hash) && !res["error"].blank?
+    raise res['error'] if res.is_a?(Hash) && !res['error'].blank?
 
     res
   end

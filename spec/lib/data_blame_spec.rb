@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Blame Report", slow: true do
+describe 'Blame Report', slow: true do
   U = 'marty marty'
   BC = 'Conv Fixed 30'
 
@@ -15,7 +15,7 @@ describe "Blame Report", slow: true do
     time4 = Time.zone.parse '2019-01-26 05:14:50 -0800'
     time5 = Time.zone.parse '2019-01-27 05:14:50 -0800'
 
-    posting = Marty::Posting.do_create("BASE", time3 - 2.hours, 'base posting')
+    posting = Marty::Posting.do_create('BASE', time3 - 2.hours, 'base posting')
     @pt_name = Marty::Posting.find_by_name(posting.name).name
 
     bc = Gemini::BudCategory.create(name: 'Conv Fixed 30', created_dt: time1)
@@ -48,21 +48,21 @@ describe "Blame Report", slow: true do
     fannie_bup1.update!(buy_up: 1.127, created_dt: time5)
 
     @res0 = [
-      [time2.to_s, U, "", "", nil, BC, 2.25, 12, 2012, 1.125, 2.345],
-      [time4.to_s, U, "", "", nil, BC, 2.25, 12, 2012, 1.126, 2.345],
-      [time5.to_s, U, "", "", nil, BC, 2.25, 12, 2012, 1.127, 2.345],
-      [time4.to_s, U, o_dt, U, nil, "Govt Fixed 30", 2.25, 22, 2014,
+      [time2.to_s, U, '', '', nil, BC, 2.25, 12, 2012, 1.125, 2.345],
+      [time4.to_s, U, '', '', nil, BC, 2.25, 12, 2012, 1.126, 2.345],
+      [time5.to_s, U, '', '', nil, BC, 2.25, 12, 2012, 1.127, 2.345],
+      [time4.to_s, U, o_dt, U, nil, 'Govt Fixed 30', 2.25, 22, 2014,
        2.123, 3.345]
     ].freeze
   end
 
-  it "should generate Data Blame report" do
-    engine = Marty::ScriptSet.new.get_engine("BlameReport")
+  it 'should generate Data Blame report' do
+    engine = Marty::ScriptSet.new.get_engine('BlameReport')
     ws = engine.evaluate(
-      "DataBlameReport", "result",
+      'DataBlameReport', 'result',
       # "class_list" param, defaults to all
-      "pt_name1" => @pt_name,
-      "pt_name2" => "NOW",
+      'pt_name1' => @pt_name,
+      'pt_name2' => 'NOW',
     )
 
     sp = Marty::Xl.spreadsheet(ws)
@@ -70,7 +70,7 @@ describe "Blame Report", slow: true do
     expect { sp.serialize(file) }.to_not raise_error
 
     expect(sp.workbook.worksheets.map(&:name)).
-      to eq(["GeminiFannieBup"])
+      to eq(['GeminiFannieBup'])
 
     expect(sp.workbook.worksheets.count).to eq 1
     expect(sp.workbook.worksheets[0].rows.count).to eq 5

@@ -31,11 +31,11 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   def posting_menu
     {
-      text:  warped ? Marty::Util.get_posting.name.to_s : I18n.t("postings"),
-      name:  "posting",
-      tooltip: "Postings",
-      icon_cls: "fa fa-clock glyph",
-      style: (warped ? "background-color: lightGrey;" : ""),
+      text:  warped ? Marty::Util.get_posting.name.to_s : I18n.t('postings'),
+      name:  'posting',
+      tooltip: 'Postings',
+      icon_cls: 'fa fa-clock glyph',
+      style: (warped ? 'background-color: lightGrey;' : ''),
       menu:  [
         :new_posting,
         :select_posting,
@@ -48,7 +48,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     [
       {
         text: 'Log Maintenance',
-        icon_cls: "fa fa-wrench glyph",
+        icon_cls: 'fa fa-wrench glyph',
         disabled: !self.class.has_admin_perm?,
         menu: [
           :log_view,
@@ -62,7 +62,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     [
       {
         text: 'API Management',
-        icon_cls: "fa fa-fighter-jet glyph",
+        icon_cls: 'fa fa-fighter-jet glyph',
         disabled: !self.class.has_admin_perm?,
         menu: [
           :api_auth_view,
@@ -75,9 +75,9 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   def system_menu
     {
-      text:  I18n.t("system"),
-      icon_cls: "fa fa-wrench glyph",
-      style: "",
+      text:  I18n.t('system'),
+      icon_cls: 'fa fa-wrench glyph',
+      style: '',
       menu:  [
         :import_type_view,
         :user_view,
@@ -91,8 +91,8 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   def applications_menu
     {
-      text: I18n.t("applications"),
-        icon_cls: "fa fa-window-restore glyph",
+      text: I18n.t('applications'),
+        icon_cls: 'fa fa-window-restore glyph',
       menu: [
         :data_grid_view,
         :reporting,
@@ -106,7 +106,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     [
       {
         text: 'Background Jobs',
-        icon_cls: "fa fa-user-clock glyph",
+        icon_cls: 'fa fa-user-clock glyph',
         disabled: !self.class.has_admin_perm?,
         menu: [
           :bg_status,
@@ -161,52 +161,52 @@ class Marty::MainAuthApp < Marty::AuthApp
   ######################################################################
 
   action :import_type_view do |a|
-    a.text      = I18n.t("import_type")
+    a.text      = I18n.t('import_type')
     a.handler   = :netzke_load_component_by_action
     a.disabled  = !self.class.has_admin_perm?
-    a.icon_cls = "fa fa-file-import glyph"
+    a.icon_cls = 'fa fa-file-import glyph'
   end
 
   action :scripting do |a|
-    a.text      = I18n.t("scripting")
+    a.text      = I18n.t('scripting')
     a.handler   = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-code glyph"
+    a.icon_cls = 'fa fa-code glyph'
     a.disabled  = !self.class.has_any_perm?
   end
 
   action :reporting do |a|
-    a.text      = I18n.t("reports")
+    a.text      = I18n.t('reports')
     a.handler   = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-file-alt glyph"
+    a.icon_cls = 'fa fa-file-alt glyph'
     a.disabled  = !self.class.has_any_perm?
   end
 
   action :promise_view do |a|
-    a.text      = I18n.t("jobs.promise_view")
+    a.text      = I18n.t('jobs.promise_view')
     a.handler   = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-search glyph"
+    a.icon_cls = 'fa fa-search glyph'
     a.disabled  = !self.class.has_any_perm?
   end
 
   action :user_view do |a|
-    a.text      = I18n.t("user_view")
+    a.text      = I18n.t('user_view')
     a.handler   = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-users glyph"
+    a.icon_cls = 'fa fa-users glyph'
     a.disabled  = !self.class.has_admin_perm? &&
       !self.class.has_user_manager_perm?
   end
 
   action :event_view do |a|
-    a.text      = I18n.t("event_view")
+    a.text      = I18n.t('event_view')
     a.handler   = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-bolt glyph"
+    a.icon_cls = 'fa fa-bolt glyph'
     a.disabled  = !self.class.has_admin_perm?
   end
 
   action :config_view do |a|
-    a.text      = I18n.t("config_view")
+    a.text      = I18n.t('config_view')
     a.handler   = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-cog glyph"
+    a.icon_cls = 'fa fa-cog glyph'
     a.disabled  = !self.class.has_admin_perm? &&
       !self.class.has_user_manager_perm?
   end
@@ -214,7 +214,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   action :api_auth_view do |a|
     a.text      = 'API Auth Management'
     a.handler   = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-key glyph"
+    a.icon_cls = 'fa fa-key glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
@@ -222,7 +222,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text     = 'API Config Management'
     a.tooltip  = 'Manage API behavior and settings'
     a.handler  = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-sliders-h glyph"
+    a.icon_cls = 'fa fa-sliders-h glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
@@ -230,49 +230,49 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text     = 'API Log View'
     a.tooltip  = 'View API logs'
     a.handler  = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-pencil-alt glyph"
+    a.icon_cls = 'fa fa-pencil-alt glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
   action :data_grid_view do |a|
-    a.text      = I18n.t("data_grid_view", default: "Data Grids")
+    a.text      = I18n.t('data_grid_view', default: 'Data Grids')
     a.handler   = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-table glyph"
+    a.icon_cls = 'fa fa-table glyph'
     a.disabled = !self.class.has_any_perm?
   end
 
   action :reload_scripts do |a|
     a.text     = 'Reload Scripts'
     a.tooltip  = 'Reload and tag Delorean scripts'
-    a.icon_cls = "fa fa-sync-alt glyph"
+    a.icon_cls = 'fa fa-sync-alt glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
   action :load_seed do |a|
     a.text     = 'Load Seeds'
     a.tooltip  = 'Load Seeds'
-    a.icon_cls = "fa fa-retweet glyph"
+    a.icon_cls = 'fa fa-retweet glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
   action :bg_status do |a|
     a.text     = 'Show Delayed Jobs Status'
     a.tooltip  = 'Run delayed_job status script'
-    a.icon_cls = "fa fa-desktop glyph"
+    a.icon_cls = 'fa fa-desktop glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
   action :bg_stop do |a|
     a.text     = 'Stop Delayed Jobs'
     a.tooltip  = 'Run delayed_job stop script'
-    a.icon_cls = "fa fa-skull glyph"
+    a.icon_cls = 'fa fa-skull glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
   action :bg_restart do |a|
     a.text     = 'Restart Delayed Jobs'
     a.tooltip  = 'Run delayed_job restart script using DELAYED_JOB_PARAMS'
-    a.icon_cls = "fa fa-power-off glyph"
+    a.icon_cls = 'fa fa-power-off glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
@@ -280,22 +280,22 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text     = 'View Log'
     a.tooltip  = 'View Log'
     a.handler  = :netzke_load_component_by_action
-    a.icon_cls = "fa fa-cog glyph"
+    a.icon_cls = 'fa fa-cog glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
   action :log_cleanup do |a|
     a.text     = 'Cleanup Log Table'
     a.tooltip  = 'Delete old log records'
-    a.icon_cls = "fa fa-cog glyph"
+    a.icon_cls = 'fa fa-cog glyph'
     a.disabled = !self.class.has_admin_perm?
   end
 
   ######################################################################
 
   def bg_command(param)
-    e, root, p = ENV['RAILS_ENV'], Rails.root, Marty::Config["RUBY_PATH"]
-    dj_path = Marty::Config["DELAYED_JOB_PATH"] || 'bin/delayed_job'
+    e, root, p = ENV['RAILS_ENV'], Rails.root, Marty::Config['RUBY_PATH']
+    dj_path = Marty::Config['DELAYED_JOB_PATH'] || 'bin/delayed_job'
     cmd = "export RAILS_ENV=#{e};"
     # FIXME: Environment looks to be setup incorrectly - this is a hack
     cmd += "export PATH=#{p}:$PATH;" if p
@@ -307,21 +307,21 @@ class Marty::MainAuthApp < Marty::AuthApp
   endpoint :bg_status do |params|
     cmd = bg_command('status')
     res = `#{cmd}`
-    client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Delayed Job Status'
+    client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Status'
   end
 
   endpoint :bg_stop do |params|
-    cmd = bg_command("stop")
+    cmd = bg_command('stop')
     res = `#{cmd}`
-    res = "delayed_job: no instances running. Nothing to stop." if res.empty?
-    client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Delayed Job Stop'
+    res = 'delayed_job: no instances running. Nothing to stop.' if res.empty?
+    client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Stop'
   end
 
   endpoint :bg_restart do |params|
-    params = Marty::Config["DELAYED_JOB_PARAMS"] || ""
+    params = Marty::Config['DELAYED_JOB_PARAMS'] || ''
     cmd = bg_command("restart #{params}")
     res = `#{cmd}`
-    client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Delayed Job Restart'
+    client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Restart'
   end
 
   endpoint :log_cleanup do |params|
@@ -329,7 +329,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       Marty::Log.cleanup(params)
     rescue StandardError => e
       res = e.message
-      client.show_detail res.html_safe.gsub("\n", "<br/>"), 'Log Cleanup'
+      client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Log Cleanup'
     end
   end
 
@@ -339,14 +339,14 @@ class Marty::MainAuthApp < Marty::AuthApp
   action :new_posting do |a|
     a.text      = I18n.t('new_posting')
     a.tooltip   = I18n.t('new_posting')
-    a.icon_cls = "fa fa-plus glyph"
+    a.icon_cls = 'fa fa-plus glyph'
     a.disabled  = Marty::Util.warped? || !self.class.has_posting_perm?
   end
 
   action :select_posting do |a|
     a.text      = I18n.t('select_posting')
     a.tooltip   = I18n.t('select_posting')
-    a.icon_cls = "fa fa-history glyph"
+    a.icon_cls = 'fa fa-history glyph'
   end
 
   endpoint :select_posting do |params|
@@ -360,7 +360,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   action :select_now do |a|
     a.text = I18n.t('go_to_now')
-    a.icon_cls = "fa fa-globe glyph"
+    a.icon_cls = 'fa fa-globe glyph'
     a.disabled = Marty::Util.get_posting_time == Float::INFINITY
   end
 

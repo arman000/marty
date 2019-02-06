@@ -7,18 +7,18 @@ feature 'logger view', js: true, capybara: true do
 
     info_s = { info: 'message' }
     error_s = [1, 2, 3, { error: 'message' }]
-    fatal_s = ["string", 123, { fatal: "message", another_key: 'value' }]
+    fatal_s = ['string', 123, { fatal: 'message', another_key: 'value' }]
     Marty::Logger.info('info message', nil)
     Marty::Logger.error('error message', error_s)
     Marty::Logger.fatal('fatal message', fatal_s)
 
-    Marty::Log.create!(message_type: "debug",
-                       message: "hi mom",
-                       details: ["one", "two", 3, 4.0],
+    Marty::Log.create!(message_type: 'debug',
+                       message: 'hi mom',
+                       details: ['one', 'two', 3, 4.0],
                        timestamp: Time.zone.now - 5.days)
 
-    Marty::Log.create!(message_type: "warn",
-                       message: "all your base",
+    Marty::Log.create!(message_type: 'warn',
+                       message: 'all your base',
                        details: [5],
                        timestamp: Time.zone.now - 10.days)
 
@@ -38,17 +38,17 @@ feature 'logger view', js: true, capybara: true do
   end
 
   let(:logview) { netzke_find('log_view') }
-  it "updates views correctly" do
+  it 'updates views correctly' do
     log_in_as('marty')
     press('System')
     show_submenu('Log Maintenance')
     press('View Log')
     wait_for_ajax
 
-    exp_types = ["fatal", "error", "info", "debug", "warn"]
-    exp_messages = ["fatal message", "error message",
-                    "info message", "hi mom", "all your base"]
-    exp_details = ["[\"string\", 123, {\"fatal\"=>\"message\", "\
+    exp_types = ['fatal', 'error', 'info', 'debug', 'warn']
+    exp_messages = ['fatal message', 'error message',
+                    'info message', 'hi mom', 'all your base']
+    exp_details = ['["string", 123, {"fatal"=>"message", '\
                      "\"another_key\"=>\"value\"}]\n",
                    "[1, 2, 3, {\"error\"=>\"message\"}]\n",
                    "nil\n",

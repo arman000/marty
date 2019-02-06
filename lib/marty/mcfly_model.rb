@@ -14,7 +14,7 @@ module Mcfly::Model
       priv = options[:private]
 
       send(meth, name, options) do |ts, *args|
-        raise "time cannot be nil" if ts.nil?
+        raise 'time cannot be nil' if ts.nil?
 
         ts = Mcfly.normalize_infinity(ts)
         q = where("#{table_name}.obsoleted_dt >= ? AND " +
@@ -57,17 +57,17 @@ module Mcfly::Model
         k = "#{k}_id" if assoc.member?(k)
 
         v ? "(#{k} = ? OR #{k} IS NULL)" : "(#{k} = ?)"
-      end.join(" AND ")
+      end.join(' AND ')
 
       if Hash === attrs
         order = attrs.select { |k, v| v }.keys.reverse.map do |k|
           k = "#{k}_id" if assoc.member?(k)
 
           "#{k} NULLS LAST"
-        end.join(", ")
+        end.join(', ')
         attrs = attrs.keys
       else
-        raise "bad attrs" unless Array === attrs
+        raise 'bad attrs' unless Array === attrs
       end
 
       fn = cache ? :cached_delorean_fn : :delorean_fn

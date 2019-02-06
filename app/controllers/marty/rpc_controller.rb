@@ -25,7 +25,7 @@ class Marty::RpcController < ActionController::Base
 
       api_params = api.process_params(massaged_params)
       auth       = api.is_authorized?(api_params)
-      return result = { error: "Permission denied" } unless auth
+      return result = { error: 'Permission denied' } unless auth
 
       start_time = Time.zone.now
       api.before_evaluate(api_params)
@@ -76,7 +76,7 @@ class Marty::RpcController < ActionController::Base
     # FIXME: small patch to allow for single attr array
     attr = ActiveSupport::JSON.decode(attr) rescue attr
 
-    return { error: "Malformed attrs" } unless
+    return { error: 'Malformed attrs' } unless
       attr.is_a?(String) || (attr.is_a?(Array) && attr.count == 1)
 
     # if attr is a single attr array, remember to return as an array
@@ -85,7 +85,7 @@ class Marty::RpcController < ActionController::Base
       ret_arr = true
     end
 
-    return { error: "Malformed attrs" } unless attr =~ /\A[a-z][a-zA-Z0-9_]*\z/
+    return { error: 'Malformed attrs' } unless attr =~ /\A[a-z][a-zA-Z0-9_]*\z/
 
     begin
       case params
@@ -96,13 +96,13 @@ class Marty::RpcController < ActionController::Base
       when ActionController::Parameters
         params = process_active_params(params)
       else
-        return { error: "Bad params" }
+        return { error: 'Bad params' }
       end
     rescue JSON::ParserError => e
-      return { error: "Malformed params" }
+      return { error: 'Malformed params' }
     end
 
-    return { error: "Malformed params" } unless params.is_a?(Hash)
+    return { error: 'Malformed params' } unless params.is_a?(Hash)
 
     # permit request params and convert to hash
     process_active_params(request_params.except(:rpc)).symbolize_keys + {

@@ -8,7 +8,7 @@ module Marty
       values = nil
       path = '#/' + frag.join('/')
       begin
-        cs = curr_schema.schema["pg_enum"]
+        cs = curr_schema.schema['pg_enum']
         enum = cs.constantize
         values = enum::VALUES
       rescue StandardError => e
@@ -23,15 +23,15 @@ module Marty
   end
 
   class JsonSchema < JSON::Schema::Draft4
-    RAW_URI = "http://json-schema.org/marty-draft/schema#"
+    RAW_URI = 'http://json-schema.org/marty-draft/schema#'
 
     def initialize
       super
-      @attributes["pg_enum"] = PgEnumAttribute
-      @formats["date-time"]  = JSON::Schema::DateTimeFormat
-      @formats["date"]       = JSON::Schema::DateFormat
+      @attributes['pg_enum'] = PgEnumAttribute
+      @formats['date-time']  = JSON::Schema::DateTimeFormat
+      @formats['date']       = JSON::Schema::DateFormat
       @uri                   = JSON::Util::URI.parse(RAW_URI)
-      @names                 = ["marty-draft", RAW_URI]
+      @names                 = ['marty-draft', RAW_URI]
     end
 
     JSON::Validator.register_validator(new)
@@ -50,8 +50,8 @@ module Marty
 
       # convert the array stuff [ie. "items", "properties"] to :array
       numbers.map do |num|
-        num.delete("properties")
-        num.map { |n| n == "items" ? :array : n }
+        num.delete('properties')
+        num.map { |n| n == 'items' ? :array : n }
       end
     end
 

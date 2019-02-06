@@ -92,7 +92,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       vlines = vstr.lines.map(&:chomp)
       fst = vlines.shift
       result << fmt % [k, fst]
-      vlines.each { |l| result << " " * (lhs_wid + 3) + l }
+      vlines.each { |l| result << ' ' * (lhs_wid + 3) + l }
     end
     result.join("\n")
   end
@@ -128,7 +128,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       rv = r.send(j)[c]
       v = nullbool ? (rv == true ? 'True' :
                         rv == false ? 'False' : rv) : rv
-      v || ""
+      v || ''
     end
   end
 
@@ -221,7 +221,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
         vbox(*form_items_attrs +
              form_items_guards,
              border: false,
-             width: "40%",
+             width: '40%',
             ),
         vbox(width: '2%', border: false),
         vbox(

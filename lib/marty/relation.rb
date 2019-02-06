@@ -2,7 +2,7 @@ class Marty::Relation
   # Given a Mcfly class (klass) and a list of classes which can
   # reference klass, returns instaces of klass which have no references.
   def self.not_referenced(klass, ref_classes)
-    col = (klass.name.split('::').last.snakecase + "_id").to_sym
+    col = (klass.name.split('::').last.snakecase + '_id').to_sym
 
     ids = klass.where(obsoleted_dt: 'infinity').pluck(:group_id)
 

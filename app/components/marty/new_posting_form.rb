@@ -9,8 +9,8 @@ class Marty::NewPostingForm < Marty::Form
   end
 
   action :apply do |a|
-    a.text     = I18n.t("create_posting")
-    a.tooltip  = I18n.t("create_posting")
+    a.text     = I18n.t('create_posting')
+    a.tooltip  = I18n.t('create_posting')
     a.icon_cls = 'fa fa-clock glyph'
   end
 
@@ -25,7 +25,7 @@ class Marty::NewPostingForm < Marty::Form
   def configure(c)
     super
 
-    c.model = "Marty::Posting"
+    c.model = 'Marty::Posting'
     c.items = [
       {
         name: :posting_type__name,

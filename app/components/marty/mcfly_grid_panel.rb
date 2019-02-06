@@ -49,13 +49,13 @@ class Marty::McflyGridPanel < Marty::Grid
 
   action :dup_in_form do |a|
     a.hidden   = !config[:permissions][:create]
-    a.icon_cls = "fa fa-copy glyph"
+    a.icon_cls = 'fa fa-copy glyph'
     a.disabled = true
   end
 
   # edit-in-form submit with dup support
   endpoint :edit_window__edit_form__submit do |params|
-    if params["dup"]
+    if params['dup']
       # FIXME: copied from basepack grid endpoint
       # :add_window__add_form__netzke_submit
 
@@ -84,7 +84,7 @@ class Marty::McflyGridPanel < Marty::Grid
   def self.mcfly_scope(sort_column)
     lambda { |r|
       ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
-      r.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).
+      r.where('obsoleted_dt >= ? AND created_dt < ?', ts, ts).
       order(sort_column.to_sym)
     }
   end

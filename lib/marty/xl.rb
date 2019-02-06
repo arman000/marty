@@ -69,7 +69,7 @@ class Marty::Xl
     new_row, new_style = rows[r_number], styles[r_number]
 
     (0...column_offset).each do |t|
-      new_row[t] ||= ""
+      new_row[t] ||= ''
       new_style[t] ||= {}
     end
 
@@ -77,9 +77,9 @@ class Marty::Xl
       new_row[c_index + column_offset] = d[1][c_index]
     end if d[1].kind_of?(Array)
 
-    if (d.length > 2) && d[2].kind_of?(Hash) && d[2]["style"].kind_of?(Array)
-      d[2]["style"].each_index do |c_index|
-        new_style[c_index + column_offset] = d[2]["style"][c_index]
+    if (d.length > 2) && d[2].kind_of?(Hash) && d[2]['style'].kind_of?(Array)
+      d[2]['style'].each_index do |c_index|
+        new_style[c_index + column_offset] = d[2]['style'][c_index]
       end
     end
 
@@ -107,15 +107,15 @@ class Marty::Xl
     x1, y1, x2, y2, w, h = d[1]
     column_offset, row_offset = offset
 
-    y_coords = y2.is_a?(Integer) || d[0] != "image" ? [y1, y2] : [y1]
-    x_coords = x2.is_a?(Integer) || d[0] != "image" ? [x1, x2] : [x1]
+    y_coords = y2.is_a?(Integer) || d[0] != 'image' ? [y1, y2] : [y1]
+    x_coords = x2.is_a?(Integer) || d[0] != 'image' ? [x1, x2] : [x1]
 
     # add the row offset:
     y1, y2 = y_coords.map do |y|
       if y.is_a?(Integer)
         row_offset + y
-      elsif y.is_a?(Hash) && y["off"].is_a?(Integer)
-        last_row + y["off"]
+      elsif y.is_a?(Hash) && y['off'].is_a?(Integer)
+        last_row + y['off']
       else
         raise "bad offset #{y}"
       end
@@ -129,16 +129,16 @@ class Marty::Xl
     end
 
     el[last_row] = [] unless
-      el[last_row] || ["border", "image"].member?(d[0])
+      el[last_row] || ['border', 'image'].member?(d[0])
 
     case d[0]
-    when "conditional_formatting"
+    when 'conditional_formatting'
       el[last_row] << [d[0], [x1, y1, x2, y2], d[2]]
-    when "merge"
+    when 'merge'
       el[last_row] << [d[0], [x1, y1, x2, y2]]
-    when "border"
+    when 'border'
       el << [d[0], [x1, y1, x2, y2], d[2]]
-    when "image"
+    when 'image'
       el << [d[0], [x1, y1, x2, y2, w, h], d[2]]
     end
   end
@@ -169,16 +169,16 @@ class Marty::Xl
       if col0 == colw
         # vertical line
         edge_h[tro], edge_h[mro], edge_h[bro] =
-          ["left"], ["left"], ["left"]
+          ['left'], ['left'], ['left']
       elsif row0 == rowh
         # horizontal line
         edge_h[tro], edge_h[mro], edge_h[bro] =
-          ["top"] * 3, ["top"] * 3, ["top"] * 3
+          ['top'] * 3, ['top'] * 3, ['top'] * 3
       else
         # box
-        edge_h[tro] = ["top_left", "top_right", "top"]
-        edge_h[mro] = ["left", "right", "nil"]
-        edge_h[bro] = ["bottom_left", "bottom_right", "bottom"]
+        edge_h[tro] = ['top_left', 'top_right', 'top']
+        edge_h[mro] = ['left', 'right', 'nil']
+        edge_h[bro] = ['bottom_left', 'bottom_right', 'bottom']
       end
 
       [top_row, middle_row, bottom_row].each do |r|
@@ -235,37 +235,37 @@ class Marty::Xl
 
       if rlen < rlenmax
         rows[index] ||= []
-        rows[index] += [""] * (rlenmax - rlen)
+        rows[index] += [''] * (rlenmax - rlen)
       end
 
       row_styles[index] ||= {}
 
       rsi = row_styles[index]
 
-      rsi["style"] = styles[index].kind_of?(Array) ? styles[index] : []
+      rsi['style'] = styles[index].kind_of?(Array) ? styles[index] : []
 
       if b_styles[index].kind_of?(Array) && b_styles[index].count > 0
-        len = [rsi["style"].count, b_styles[index].count].max
+        len = [rsi['style'].count, b_styles[index].count].max
 
         len.times do |ind|
           b_styles[index][ind] ||= {}
-          rsi["style"][ind] ||= {}
+          rsi['style'][ind] ||= {}
 
-          rsi["style"][ind] =
-            rsi["style"][ind].merge(b_styles[index][ind])
+          rsi['style'][ind] =
+            rsi['style'][ind].merge(b_styles[index][ind])
         end
 
-        rsi["style"] = rsi["style"].map { |x| x || {} }
+        rsi['style'] = rsi['style'].map { |x| x || {} }
       end
 
-      wsrows << ["row", rows[index], rsi]
+      wsrows << ['row', rows[index], rsi]
 
       if format[index] && format[index].kind_of?(Array)
         format[index].each do |f|
           raise "wrong number of arguments for #{f[0]}" unless
             [
-              ["conditional_formatting", 3],
-              ["merge", 2]
+              ['conditional_formatting', 3],
+              ['merge', 2]
             ].member?([f[0], f.length])
 
           wsrows << f
@@ -285,16 +285,16 @@ class Marty::Xl
 
     # We got some sort of error if the worksheets is an array
     if worksheets.is_a? Hash
-      ws = wb.add_worksheet(name: "EXCEPTION")
-      ws.add_row ["error", worksheets["error"]]
-      ws.add_row ["backtrace", worksheets["backtrace"]]
+      ws = wb.add_worksheet(name: 'EXCEPTION')
+      ws.add_row ['error', worksheets['error']]
+      ws.add_row ['backtrace', worksheets['backtrace']]
       return
     end
 
     raise "expected worksheets array, got: #{worksheets}" unless
       worksheets.is_a?(Array)
 
-    worksheets << ["No data", []] if worksheets.count == 0
+    worksheets << ['No data', []] if worksheets.count == 0
 
     worksheets.each do |opl|
       name, ops, opts = opl
@@ -323,7 +323,7 @@ class Marty::Xl
   end
 
   def add_style(style)
-    raise "bad style" unless style.is_a?(Hash) || style.is_a?(Array)
+    raise 'bad style' unless style.is_a?(Hash) || style.is_a?(Array)
 
     if style.is_a?(Array)
       style.map do |s|
@@ -342,15 +342,15 @@ class Marty::Xl
 
     y1, y2 = [y1, y2].map do |y|
       next y unless y.is_a?(Hash)
-      raise "bad offset #{y}" unless y["off"].is_a?(Integer)
+      raise "bad offset #{y}" unless y['off'].is_a?(Integer)
 
-      ws.rows.last.row_index + y["off"]
+      ws.rows.last.row_index + y['off']
     end
 
     [x1, y1, x2, y2].each do |x|
       raise "bad range point #{x}" unless x.is_a? Integer
     end
-    Axlsx.cell_r(x1, y1) + ":" + Axlsx.cell_r(x2, y2)
+    Axlsx.cell_r(x1, y1) + ':' + Axlsx.cell_r(x2, y2)
   end
 
   def recalc_offsets(ops_pos)
@@ -358,19 +358,19 @@ class Marty::Xl
     # precalculate the offsets of pos options embedded in another pos opt:
     ops_pos.each do |d|
       new_ops1 += d[2].select do |inner_ops|
-        inner_ops if inner_ops[0] == "pos"
+        inner_ops if inner_ops[0] == 'pos'
       end.map do |inner|
         [inner[0], d[1].zip(inner[1]).map { |x, y| x + y }, inner[2]]
       end
     end
     # keep the offsets of non-pos options embedded in pos opt:
     new_ops2 = ops_pos.map do |d|
-      [d[0], d[1], d[2].select { |inner| inner if inner[0] != "pos" }]
+      [d[0], d[1], d[2].select { |inner| inner if inner[0] != 'pos' }]
     end
     new_ops = new_ops1 + new_ops2
     count = new_ops.select do |d|
       d[2].select do |inner_ops|
-        inner_ops if inner_ops[0] == "pos"
+        inner_ops if inner_ops[0] == 'pos'
       end.count > 0
     end.count
 
@@ -378,18 +378,18 @@ class Marty::Xl
   end
 
   def apply_relative_worksheet_ops(ws, ops)
-    non_pos = ops.select { |opl| opl[0] != "pos" }
-    ops_pos = ops.select { |opl| opl[0] == "pos" }
-    ops_brd = ops.select { |opl| opl[0] == "border" }
+    non_pos = ops.select { |opl| opl[0] != 'pos' }
+    ops_pos = ops.select { |opl| opl[0] == 'pos' }
+    ops_brd = ops.select { |opl| opl[0] == 'border' }
 
     if (ops_pos.count > 0)
       # Wrap all non-pos options in a pos option with offset 0, 0:
-      pos_00_ops = non_pos.count > 0 ? [["pos", [0, 0], non_pos]] : []
+      pos_00_ops = non_pos.count > 0 ? [['pos', [0, 0], non_pos]] : []
       # Recalculate the offsets of embedded pos opts:
       ops = pos_00_ops + recalc_offsets(ops_pos)
     elsif (ops_brd.count > 0)
       # Wrap the non-pos options in a pos opt with offset 0, 0:
-      pos_00_ops = [["pos", [0, 0], non_pos]]
+      pos_00_ops = [['pos', [0, 0], non_pos]]
       ops = pos_00_ops
     end
 
@@ -398,7 +398,7 @@ class Marty::Xl
       raise "bad op #{opl}" unless opl.length > 1
 
       case opl[0]
-      when "pos"
+      when 'pos'
         op, offset, data = opl
         raise "bad offset #{offset}" unless
           offset.is_a?(Array) && offset.length == 2 &&
@@ -414,22 +414,22 @@ class Marty::Xl
             [NilClass, Hash, String, Array].member? d[2].class
 
           case d[0]
-          when "row"
+          when 'row'
             position_row(d, column_offset, r_number, rows, styles, row_styles)
             last_row = r_number
             r_number += 1
-          when "conditional_formatting", "merge"
+          when 'conditional_formatting', 'merge'
             position_elem(d, offset, last_row, format)
-          when "border"
+          when 'border'
             position_elem(d, offset, last_row, borders)
-          when "image"
+          when 'image'
             position_elem(d, offset, last_row, images)
           else
             raise "unknown op #{d[0]} embedded in 'position' option"
           end
         end
 
-      when "row"
+      when 'row'
         op, data, options = opl
 
         raise "bad row op #{opl}" unless data.is_a?(Array) || opl.length > 3
@@ -442,11 +442,11 @@ class Marty::Xl
 
         ws.add_row data, options
 
-      when "row_style"
+      when 'row_style'
         op, row_num, style = opl
 
         # FIXME: need to handle Array?
-        raise "non hash arg for row_style" unless style.is_a?(Hash)
+        raise 'non hash arg for row_style' unless style.is_a?(Hash)
         raise "bad row num #{opl}" unless row_num.is_a?(Integer)
 
         style = self.class.symbolize_keys(style, ':')
@@ -456,7 +456,7 @@ class Marty::Xl
 
         row.style = style_id
 
-      when "merge"
+      when 'merge'
         op, range = opl
 
         raise "bad merge op #{opl}" unless opl.length == 2
@@ -464,10 +464,10 @@ class Marty::Xl
         range = intern_range(ws, range)
 
         ws.merge_cells range
-      when "conditional_formatting"
+      when 'conditional_formatting'
         op, range, format = opl
 
-        raise "non hash arg for format" unless format.is_a?(Hash)
+        raise 'non hash arg for format' unless format.is_a?(Hash)
 
         range = intern_range(ws, range)
 
@@ -476,10 +476,10 @@ class Marty::Xl
         color_scale_a = format[:color_scale]
 
         if color_scale_a
-          raise "color_scale must be an array" unless
+          raise 'color_scale must be an array' unless
             color_scale_a.is_a?(Array)
 
-          raise "non-hash color_scale element" unless
+          raise 'non-hash color_scale element' unless
             color_scale_a.all? { |x| x.is_a?(Hash) }
 
           format[:color_scale] = Axlsx::ColorScale.new(*color_scale_a)
@@ -489,7 +489,7 @@ class Marty::Xl
         format[:dxfId] = add_style(dxfid) if dxfid.is_a?(Hash)
 
         ws.add_conditional_formatting(range, format)
-      when "image"
+      when 'image'
         op, range, img = opl
         raise "bad image params #{range}" unless
           range.is_a?(Array) && range.length == 6

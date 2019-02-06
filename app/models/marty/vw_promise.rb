@@ -1,11 +1,11 @@
 class Marty::VwPromise < Marty::Base
   has_many :children,
            foreign_key: 'parent_id',
-           class_name: "Marty::VwPromise",
+           class_name: 'Marty::VwPromise',
            dependent: :destroy
 
-  belongs_to :parent, class_name: "Marty::VwPromise"
-  belongs_to :user, class_name: "Marty::User"
+  belongs_to :parent, class_name: 'Marty::VwPromise'
+  belongs_to :user, class_name: 'Marty::User'
 
   self.table_name = 'marty_vw_promises'
   self.primary_key = 'id'
@@ -57,10 +57,10 @@ class Marty::VwPromise < Marty::Base
 
     # Searches user login/firstname/lastname
     query = [
-      "marty_users.login ILIKE ?",
-      "marty_users.firstname ILIKE ?",
-      "marty_users.lastname ILIKE ?",
-      "marty_roles.name ILIKE ?",
+      'marty_users.login ILIKE ?',
+      'marty_users.firstname ILIKE ?',
+      'marty_users.lastname ILIKE ?',
+      'marty_roles.name ILIKE ?',
     ].join(' OR ')
 
     st = "%#{search_text}%"

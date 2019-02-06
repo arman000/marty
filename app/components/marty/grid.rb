@@ -45,8 +45,8 @@ class Marty::Grid < ::Netzke::Grid::Base
   end
 
   action :clear_filters do |a|
-    a.text    = "X"
-    a.tooltip = "Clear filters"
+    a.text    = 'X'
+    a.tooltip = 'Clear filters'
     a.handler = :clear_filters
   end
 
@@ -57,8 +57,8 @@ class Marty::Grid < ::Netzke::Grid::Base
   end
 
   action :clear_filters do |a|
-    a.text     = "X"
-    a.tooltip  = "Clear filters"
+    a.text     = 'X'
+    a.tooltip  = 'Clear filters'
     a.handler  = :clear_filters
   end
 
@@ -67,37 +67,37 @@ class Marty::Grid < ::Netzke::Grid::Base
   action :add do |a|
     super(a)
     a.icon     = nil
-    a.icon_cls = "fa fa-plus glyph"
+    a.icon_cls = 'fa fa-plus glyph'
   end
 
   action :add_in_form do |a|
     super(a)
     a.icon     = nil
-    a.icon_cls = "fa fa-plus-square glyph"
+    a.icon_cls = 'fa fa-plus-square glyph'
   end
 
   action :edit do |a|
     super(a)
     a.icon     = nil
-    a.icon_cls = "fa fa-edit glyph"
+    a.icon_cls = 'fa fa-edit glyph'
   end
 
   action :edit_in_form do |a|
     super(a)
     a.icon     = nil
-    a.icon_cls = "fa fa-pen-square glyph"
+    a.icon_cls = 'fa fa-pen-square glyph'
   end
 
   action :delete do |a|
     super(a)
     a.icon     = nil
-    a.icon_cls = "fa fa-trash glyph"
+    a.icon_cls = 'fa fa-trash glyph'
   end
 
   action :apply do |a|
     super(a)
     a.icon     = nil
-    a.icon_cls = "fa fa-check glyph"
+    a.icon_cls = 'fa fa-check glyph'
   end
 
   def child_components

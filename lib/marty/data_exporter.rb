@@ -39,12 +39,12 @@ class Marty::DataExporter
     config ||= {}
 
     # if all array items are hashes, we merge them
-    obj = hash_array_merge(obj, config["transpose"]) if
+    obj = hash_array_merge(obj, config['transpose']) if
       obj.is_a?(Array) && obj.all? { |x| x.is_a? Hash }
 
     # symbolize config keys as expected by CSV.generate
     conf = config.each_with_object({}) do |(k, v), h|
-      h[k.to_sym] = v unless k.to_s == "transpose"
+      h[k.to_sym] = v unless k.to_s == 'transpose'
     end
 
     # FIXME: very hacky to default row_sep to CRLF
@@ -147,7 +147,7 @@ class Marty::DataExporter
 
     if Mcfly.has_mcfly?(klass)
       ts = Mcfly.normalize_infinity(ts)
-      query = query.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts)
+      query = query.where('obsoleted_dt >= ? AND created_dt < ?', ts, ts)
     end
 
     do_export_query_result(klass, query.order(sort_field || :id), exclude_attrs)

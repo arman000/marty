@@ -22,7 +22,7 @@ describe Marty::Script do
     end
 
     it "doesn't create a new script entry if it already exists and is the " +
-      "same as the existing" do
+      'same as the existing' do
       Marty::Script.load_a_script('TestExistsAndSame', s1)
       expect { Marty::Script.load_a_script('TestExistsAndSame', s1) }.
         not_to change(Marty::Script, :count)
@@ -103,7 +103,7 @@ describe Marty::Script do
     end
 
     it "doesn't create a new tag if one is present and the script wasn't" +
-      "modified" do
+      'modified' do
       Marty::Script.create!(name: 'Test1', body: s1, created_dt: now)
       Marty::Tag.do_create(now + 1.second, 'tag created by test')
       expect { Marty::Script.load_script_bodies('Test1' => s1) }.

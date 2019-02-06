@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Marty::RuleSpec
-  describe "Rule" do
+  describe 'Rule' do
     before(:all) do
       @save_file = "/tmp/save_#{Process.pid}.psql"
       save_clean_db(@save_file)
@@ -18,21 +18,21 @@ module Marty::RuleSpec
       dt = DateTime.parse('2017-1-1')
       p = File.expand_path('../../fixtures/csv/rule', __FILE__)
       [Marty::DataGrid, Gemini::XyzRule, Gemini::MyRule].each do |klass|
-        f = "%s/%s.csv" % [p, klass.to_s.sub(/(Gemini|Marty)::/, '')]
-        Marty::DataImporter.do_import(klass, File.read(f), dt, nil, nil, ",")
+        f = '%s/%s.csv' % [p, klass.to_s.sub(/(Gemini|Marty)::/, '')]
+        Marty::DataImporter.do_import(klass, File.read(f), dt, nil, nil, ',')
       end
       Marty::Tag.do_create('2017-01-01', 'tag')
     end
-    context "validation" do
+    context 'validation' do
       subject do
-        guards = (@g_array   ? { "g_array" => @g_array } : {}) +
-                 (@g_single  ? { "g_single" => @g_single }  : {}) +
-                 (@g_string  ? { "g_string" => @g_string }  : {}) +
-                 (@g_bool.nil?     ? {} : { "g_bool"     => @g_bool })     +
-                 (@g_nullbool.nil? ? {} : { "g_nullbool" => @g_nullbool }) +
-                 (@g_range   ? { "g_range" => @g_range } : {}) +
-                 (@g_integer ? { "g_integer" => @g_integer } : {})
-        Gemini::MyRule.create!(name: "testrule",
+        guards = (@g_array   ? { 'g_array' => @g_array } : {}) +
+                 (@g_single  ? { 'g_single' => @g_single }  : {}) +
+                 (@g_string  ? { 'g_string' => @g_string }  : {}) +
+                 (@g_bool.nil?     ? {} : { 'g_bool'     => @g_bool })     +
+                 (@g_nullbool.nil? ? {} : { 'g_nullbool' => @g_nullbool }) +
+                 (@g_range   ? { 'g_range' => @g_range } : {}) +
+                 (@g_integer ? { 'g_integer' => @g_integer } : {})
+        Gemini::MyRule.create!(name: 'testrule',
                                rule_type: @rule_type,
                                start_dt: @start_dt || '2013-1-1',
                                end_dt:   @end_dt,
@@ -42,84 +42,84 @@ module Marty::RuleSpec
                                results: @results || {}
                               )
       end
-      it "detects type errors" do
+      it 'detects type errors' do
         @rule_type = 'SimpleRule'
-        @g_integer = "abc"
+        @g_integer = 'abc'
         expect { subject }.to raise_error(/Guards - Wrong type for 'g_integer'/)
       end
-      it "detects value errors 1" do
-        @rule_type = "SimpleRule"
-        @g_array = ["G1V1", "abcd"]
+      it 'detects value errors 1' do
+        @rule_type = 'SimpleRule'
+        @g_array = ['G1V1', 'abcd']
         expect { subject }.to raise_error(/Guards - Bad value 'abcd' for 'g_array'/)
       end
-      it "detects value errors 2" do
-        @rule_type = "SimpleRule"
-        @g_array = ["G1V1", "xyz", "abc"]
+      it 'detects value errors 2' do
+        @rule_type = 'SimpleRule'
+        @g_array = ['G1V1', 'xyz', 'abc']
         exp = /Guards - Bad values 'xyz', 'abc' for 'g_array'/
         expect { subject }.to raise_error(exp)
       end
-      it "detects arity errors 1" do
-        @rule_type = "SimpleRule"
-        @g_single = ["G2V1", "G2V2"]
+      it 'detects arity errors 1' do
+        @rule_type = 'SimpleRule'
+        @g_single = ['G2V1', 'G2V2']
         exp = /Guards - Wrong arity for 'g_single' .expected single got multi./
         expect { subject }.to raise_error(exp)
       end
-      it "detects arity errors 2" do
-        @rule_type = "SimpleRule"
-        @g_array = "G1V1"
+      it 'detects arity errors 2' do
+        @rule_type = 'SimpleRule'
+        @g_array = 'G1V1'
         exp = /Guards - Wrong arity for 'g_array' .expected multi got single./
         expect { subject }.to raise_error(exp)
       end
-      it "detects errors in computed guards" do
-        @rule_type = "SimpleRule"
-        @computed_guards = { "guard1" => "zvjsdf12.z8*" }
+      it 'detects errors in computed guards' do
+        @rule_type = 'SimpleRule'
+        @computed_guards = { 'guard1' => 'zvjsdf12.z8*' }
         exp = /Computed - Error in rule 'testrule' field 'computed_guards': Syntax error/
         expect { subject }.to raise_error(exp)
       end
-      it "detects errors in computed results" do
-        @rule_type = "SimpleRule"
-        @results = { "does_not_compute" => "zvjsdf12.z8*" }
-        @grids = { "grid1" => "DataGrid1", "grid2" => "DataGrid2" }
+      it 'detects errors in computed results' do
+        @rule_type = 'SimpleRule'
+        @results = { 'does_not_compute' => 'zvjsdf12.z8*' }
+        @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid2' }
         exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect { subject }.to raise_error(exp)
       end
-      it "detects errors in computed results 2" do
-        @rule_type = "SimpleRule"
-        @results = { "does_not_compute" => "zvjsdf12.z8*" }
-        @grids = { "grid1" => "DataGrid1", "grid2" => "DataGrid1", "grid3" => "DataGrid3" }
+      it 'detects errors in computed results 2' do
+        @rule_type = 'SimpleRule'
+        @results = { 'does_not_compute' => 'zvjsdf12.z8*' }
+        @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid1', 'grid3' => 'DataGrid3' }
         exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect { subject }.to raise_error(exp)
       end
-      it "detects errors in computed results 3" do
-        @rule_type = "SimpleRule"
-        @results = { "does_not_compute" => "zvjsdf12.z8*" }
-        @grids = { "grid1" => "DataGrid1", "grid2" => "DataGrid1", "grid3" => "DataGrid1" }
+      it 'detects errors in computed results 3' do
+        @rule_type = 'SimpleRule'
+        @results = { 'does_not_compute' => 'zvjsdf12.z8*' }
+        @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid1', 'grid3' => 'DataGrid1' }
         exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect { subject }.to raise_error(exp)
       end
-      it "reports bad grid names" do
-        @rule_type = "SimpleRule"
-        @grids = { "grid1" => "xyz", "grid2" => "DataGrid2", "grid3" => "DataGrid1" }
+      it 'reports bad grid names' do
+        @rule_type = 'SimpleRule'
+        @grids = { 'grid1' => 'xyz', 'grid2' => 'DataGrid2', 'grid3' => 'DataGrid1' }
         exp = /Grids - Bad grid name 'xyz' for 'grid1'/
         expect { subject }.to raise_error(exp)
       end
-      it "sets guard defaults correctly" do
+      it 'sets guard defaults correctly' do
         vals = Gemini::MyRule.all.map do |r|
-          [r.name, r.simple_guards["g_has_default"]]
+          [r.name, r.simple_guards['g_has_default']]
         end
-        expect(vals.sort).to eq([["Rule1", "different"],
-                                 ["Rule2", "string default"],
-                                 ["Rule2a", "string default"],
-                                 ["Rule2b", "string default"],
-                                 ["Rule2c", "string default"],
-                                 ["Rule3", "string default"],
-                                 ["Rule4", "string default"],
-                                 ["Rule5", "foo"]].sort)
+        expect(vals.sort).to eq([['Rule1', 'different'],
+                                 ['Rule2', 'string default'],
+                                 ['Rule2a', 'string default'],
+                                 ['Rule2b', 'string default'],
+                                 ['Rule2c', 'string default'],
+                                 ['Rule3', 'string default'],
+                                 ['Rule4', 'string default'],
+                                 ['Rule5', 'foo']].sort)
       end
     end
-    context "validation (xyz type)" do
+    context 'validation (xyz type)' do
       subject do
-        r = Gemini::XyzRule.create!(name: "testrule",
+        r = Gemini::XyzRule.create!(name: 'testrule',
                                 rule_type: @rule_type,
                                 start_dt: @start_dt || '2013-1-1',
                                 end_dt: @end_dt,
@@ -130,131 +130,131 @@ module Marty::RuleSpec
                                    )
         r.reload
       end
-      it "detects script errors" do
+      it 'detects script errors' do
         @rule_type = 'XRule'
-        @results = { "x" => "zx sdf wer" }
+        @results = { 'x' => 'zx sdf wer' }
         exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
         expect { subject }.to raise_error(exp)
       end
-      it "rule script stuff overrides 1" do
+      it 'rule script stuff overrides 1' do
         @rule_type = 'XRule'
-        @computed_guards = { "abc" => "true", "xyz_guard" => "err err err" }
+        @computed_guards = { 'abc' => 'true', 'xyz_guard' => 'err err err' }
         exp = /Computed - Error in rule 'testrule' field 'xyz': Syntax error/
         expect { subject }.to raise_error(exp)
       end
-      it "rule script stuff overrides 2" do
+      it 'rule script stuff overrides 2' do
         @rule_type = 'XRule'
-        @computed_guards = { "abc" => "err err err", "xyz_guard" => "xyz_param" }
+        @computed_guards = { 'abc' => 'err err err', 'xyz_guard' => 'xyz_param' }
         exp = /Computed - Error in rule 'testrule' field 'computed_guards': Syntax error/
         expect { subject }.to raise_error(exp)
       end
-      it "rule script stuff overrides 3" do
+      it 'rule script stuff overrides 3' do
         @rule_type = 'XRule'
-        @computed_guards = { "abc" => "true", "xyz_guard" => "!xyz_param" }
+        @computed_guards = { 'abc' => 'true', 'xyz_guard' => '!xyz_param' }
         rule = subject
         expect(rule.compute_xyz('infinity', true)).to be false
         expect(rule.compute_xyz('infinity', false)).to be true
       end
-      it "no error" do
+      it 'no error' do
         @rule_type = 'XRule'
-        @results = { "x" => "1" }
+        @results = { 'x' => '1' }
         expect { subject }.not_to raise_error
       end
     end
 
-    context "lookups" do
-      it "matches" do
+    context 'lookups' do
+      it 'matches' do
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
                                             'g_array' => 'G1V3')
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule1")
+        expect(lookup.first.name).to eq('Rule1')
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule',
 
                                             'other_flag' => true },
                                             {})
         expect(lookup.to_a.count).to eq(4)
-        expect(lookup.map(&:name).to_set).to eq(Set["Rule2", "Rule2a",
-                                                    "Rule2b", "Rule2c"])
+        expect(lookup.map(&:name).to_set).to eq(Set['Rule2', 'Rule2a',
+                                                    'Rule2b', 'Rule2c'])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'ComplexRule',
                                             'other_flag' => false },
                                             {})
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule3")
+        expect(lookup.first.name).to eq('Rule3')
         # bool false matches bool nil
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'ComplexRule',
                                             'other_flag' => false },
                                             'g_bool' => false)
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule3")
+        expect(lookup.first.name).to eq('Rule3')
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'ComplexRule' },
                                             'g_string' => 'def')
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule3")
+        expect(lookup.first.name).to eq('Rule3')
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'ComplexRule' },
                                             'g_string' => 'abc')
         expect(lookup).to eq([])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            'g_bool' => true, "g_range" => 25,
+                                            'g_bool' => true, 'g_range' => 25,
                                             'g_integer' => 99)
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule2a")
+        expect(lookup.first.name).to eq('Rule2a')
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            'g_bool' => true, "g_range" => 75)
+                                            'g_bool' => true, 'g_range' => 75)
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule1")
+        expect(lookup.first.name).to eq('Rule1')
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            'g_bool' => true, "g_range" => 75,
+                                            'g_bool' => true, 'g_range' => 75,
                                             'g_integer' => 11)
         expect(lookup).to eq([])
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            'g_bool' => true, "g_range" => 75,
+                                            'g_bool' => true, 'g_range' => 75,
                                             'g_integer' => 10)
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule1")
+        expect(lookup.first.name).to eq('Rule1')
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' },
-                                            'g_bool' => false, "g_range" => 25,
+                                            'g_bool' => false, 'g_range' => 25,
                                             'g_integer' => 10)
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.first.name).to eq("Rule2c")
+        expect(lookup.first.name).to eq('Rule2c')
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' }, {})
         expect(lookup.to_a.count).to eq(5)
         lookup = Gemini::MyRule.get_matches('infinity',
-                                            { 'rule_dt' => "2017-3-1 02:00:00" },
+                                            { 'rule_dt' => '2017-3-1 02:00:00' },
                                             {})
         expect(lookup.to_a.count).to eq(6)
-        expect(lookup.pluck(:name).to_set).to eq(Set["Rule1", "Rule2", "Rule2a",
-                                                     "Rule2b", "Rule2c", "Rule3"])
+        expect(lookup.pluck(:name).to_set).to eq(Set['Rule1', 'Rule2', 'Rule2a',
+                                                     'Rule2b', 'Rule2c', 'Rule3'])
         lookup = Gemini::MyRule.get_matches('infinity',
-                                            { 'rule_dt' => "2017-4-1 16:00:00" },
+                                            { 'rule_dt' => '2017-4-1 16:00:00' },
                                             {})
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.pluck(:name).first).to eq("Rule4")
+        expect(lookup.pluck(:name).first).to eq('Rule4')
         lookup = Gemini::MyRule.get_matches('infinity',
-                                            { 'rule_dt' => "2016-12-31" }, {})
+                                            { 'rule_dt' => '2016-12-31' }, {})
         expect(lookup.to_a).to eq([])
         lookup = Gemini::MyRule.get_matches('infinity',
-                                            { 'rule_dt' => "2017-5-1 00:00:01" }, {})
+                                            { 'rule_dt' => '2017-5-1 00:00:01' }, {})
         expect(lookup.to_a).to eq([])
         lookup = Gemini::MyRule.get_matches('infinity', {},
-                                            "g_bool_def" => false,
-                                            "g_nbool_def" => true)
+                                            'g_bool_def' => false,
+                                            'g_nbool_def' => true)
         expect(lookup.to_a.count).to eq(1)
-        expect(lookup.pluck(:name).first).to eq("Rule1")
+        expect(lookup.pluck(:name).first).to eq('Rule1')
       end
     end
-    context "rule compute" do
+    context 'rule compute' do
       let(:complex) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'ComplexRule' },
@@ -268,108 +268,108 @@ module Marty::RuleSpec
       let(:simple) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'SimpleRule' },
-                                   'g_bool' => true, "g_range" => 25).first
+                                   'g_bool' => true, 'g_range' => 25).first
       end
       let(:simple2a) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'SimpleRule' },
-                                   'g_bool' => true, "g_integer" => 99).first
+                                   'g_bool' => true, 'g_integer' => 99).first
       end
       let(:simple2b) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'SimpleRule' },
-                                   'g_bool' => true, "g_integer" => 999).first
+                                   'g_bool' => true, 'g_integer' => 999).first
       end
       let(:altgridmethod) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'ComplexRule' },
-                                   "g_integer" => 3757).first
+                                   'g_integer' => 3757).first
       end
       let(:gridcomputedname) do
         Gemini::MyRule.get_matches('infinity',
                                    { 'rule_type' => 'ComplexRule' },
-                                   "g_string" => "Hi Mom",
-                                   "g_integer" => 11).first
+                                   'g_string' => 'Hi Mom',
+                                   'g_integer' => 11).first
       end
-      it "computed guards work" do
-        c = complex.compute(@ruleopts_myrule,  "pt" => Time.zone.now,
+      it 'computed guards work' do
+        c = complex.compute(@ruleopts_myrule,  'pt' => Time.zone.now,
                                                'param2' => 'def')
-        expect(c).to eq("cguard2" => [false, "a string"])
+        expect(c).to eq('cguard2' => [false, 'a string'])
       end
-      it "returns simple results via #fixed_results" do
-        expect(simple.fixed_results["simple_result"]).to eq("b value")
-        expect(simple.fixed_results["sr2"]).to eq(true)
-        expect(simple.fixed_results["sr3"]).to eq(123)
-        ssq = "string with single quotes"
-        expect(simple.fixed_results["single_quote"]).to eq(ssq)
-        swh = " string that contains a # character"
-        expect(simple.fixed_results["stringwithhash"]).to eq(swh)
+      it 'returns simple results via #fixed_results' do
+        expect(simple.fixed_results['simple_result']).to eq('b value')
+        expect(simple.fixed_results['sr2']).to eq(true)
+        expect(simple.fixed_results['sr3']).to eq(123)
+        ssq = 'string with single quotes'
+        expect(simple.fixed_results['single_quote']).to eq(ssq)
+        swh = ' string that contains a # character'
+        expect(simple.fixed_results['stringwithhash']).to eq(swh)
         expect(simple.fixed_results.count).to eq(5)
         allow_any_instance_of(Delorean::Engine).
           to receive(:evaluate).and_raise('hi mom')
         expect do
           simple.compute(@ruleopts_myrule,
-                         "pt" => Time.now)
+                         'pt' => Time.now)
         end        .to raise_error(/hi mom/)
         # simple2a should return results without evaluation (they are all fixed)
-        expect(simple2a.compute(@ruleopts_myrule, "pt" => Time.zone.now)).to eq(
-          "simple_result" => "b value",
-          "sr2" => true,
+        expect(simple2a.compute(@ruleopts_myrule, 'pt' => Time.zone.now)).to eq(
+          'simple_result' => 'b value',
+          'sr2' => true,
         )
         # simple2b should return grid results without evaluation
         expect(simple2b.compute(@ruleopts_myrule,
-                                "pt" => Time.zone.now,
+                                'pt' => Time.zone.now,
                                 'param1' => 66,
                                 'param2' => 'abc',
                                 'paramb' => false)).
-          to eq("grid1_grid_result" => 3,
-                 "grid2_grid_result" => 1300)
+          to eq('grid1_grid_result' => 3,
+                 'grid2_grid_result' => 1300)
       end
-      it "returns computed results" do
-        c = complex.compute(@ruleopts_myrule,  "pt" => Time.zone.now,
+      it 'returns computed results' do
+        c = complex.compute(@ruleopts_myrule,  'pt' => Time.zone.now,
                                                'param1' => 66,
                                                'param2' => 'abc',
                                                'paramb' => false)
-        expect(c).to eq("simple_result" => "c value",
-                         "computed_value" => 19, "grid1_grid_result" => 3,
-                         "grid2_grid_result" => 1300)
+        expect(c).to eq('simple_result' => 'c value',
+                         'computed_value' => 19, 'grid1_grid_result' => 3,
+                         'grid2_grid_result' => 1300)
       end
-      it "returns computed results (with delorean import)" do
-        c = xyz.compute(@ruleopts_xyz,  "pt" => Time.zone.now + 1,
-                                        "p1" => 12,
-                                        "p2" => 3,
-                                        "flavor" => "cherry")
-        expect(c).to eq("bvlength" => 13, "bv" => "cherry --> 36",
-                         "grid1_grid_result" => 19)
+      it 'returns computed results (with delorean import)' do
+        c = xyz.compute(@ruleopts_xyz,  'pt' => Time.zone.now + 1,
+                                        'p1' => 12,
+                                        'p2' => 3,
+                                        'flavor' => 'cherry')
+        expect(c).to eq('bvlength' => 13, 'bv' => 'cherry --> 36',
+                         'grid1_grid_result' => 19)
       end
-      it "reports bad grid name" do
+      it 'reports bad grid name' do
         exp = Regexp.new("Error .results. in rule '\\d+:Rule4': "\
-                         "DataGridX grid not found")
+                         'DataGridX grid not found')
         expect do
           gridcomputedname.compute(@ruleopts_myrule,
-                                   "pt" => Time.zone.now,
+                                   'pt' => Time.zone.now,
                                    'param1' => 66,
                                    'param2' => 'abc',
                                    'paramb' => false)
         end        .to raise_error(exp)
       end
-      it "grids embedded in result work properly and receive prior attrs" do
-        v = altgridmethod.compute(@ruleopts_myrule,  "pt" => Time.zone.now,
+      it 'grids embedded in result work properly and receive prior attrs' do
+        v = altgridmethod.compute(@ruleopts_myrule,  'pt' => Time.zone.now,
                                                      'param1' => 45,
                                                      'param2' => 1)
-        expect(v["final_value"]).to eq(15)
+        expect(v['final_value']).to eq(15)
       end
-      it "exceptions/logging" do
+      it 'exceptions/logging' do
         r6, r7, r8 = [6, 7, 8].map do |i|
           Gemini::XyzRule.get_matches('infinity',
                                       { 'rule_type' => 'ZRule' },
                                       'g_integer' => i).first
         end
         pt = Time.zone.now + 1
-        input = { "pt" => pt,
-                 "p1" => 12,
-                 "p2" => 3,
-                 "flavor" => "cherry" }
+        input = { 'pt' => pt,
+                 'p1' => 12,
+                 'p2' => 3,
+                 'flavor' => 'cherry' }
         v1 = r6.compute(@ruleopts_xyz, input)
         begin
           v2 = r7.compute(@ruleopts_xyz, input)
@@ -403,31 +403,31 @@ module Marty::RuleSpec
                                                'Rule Log ZRule7',
                                                'Rule Log ZRule8'])
         ptjson = pt.as_json
-        exp = { "input" => { "p1" => 12, "p2" => 3,
-                         "pt" => ptjson,
-                         "flavor" => "cherry" },
-               "dgparams" => { "p1" => 12, "p2" => 3,
-                            "pt" => ptjson,
-                            "flavor" => "cherry" },
-               "gr_keys" => ["grid1_grid_result"],
-               "res_hash" =>
-               { "bv" => "a stringa stringa stringa stringa stringa stringa stringa "\
-                "stringa stringa stringa stringa stringa stringa stringa "\
-                "stringa stringa stringa stringa stringa stringa stringa "\
-                "stringa stringa stringa stringa string",
-                "grid1_grid_result" => 19 } }
+        exp = { 'input' => { 'p1' => 12, 'p2' => 3,
+                         'pt' => ptjson,
+                         'flavor' => 'cherry' },
+               'dgparams' => { 'p1' => 12, 'p2' => 3,
+                            'pt' => ptjson,
+                            'flavor' => 'cherry' },
+               'gr_keys' => ['grid1_grid_result'],
+               'res_hash' =>
+               { 'bv' => 'a stringa stringa stringa stringa stringa stringa stringa '\
+                'stringa stringa stringa stringa stringa stringa stringa '\
+                'stringa stringa stringa stringa stringa stringa stringa '\
+                'stringa stringa stringa stringa string',
+                'grid1_grid_result' => 19 } }
         expect(log_ents[0].details).to eq(exp)
-        exp = { "input" => { "p1" => 12, "p2" => 3,
-                         "pt" => ptjson,
-                         "flavor" => "cherry" },
-               "cg_hash" => { "some_guard" => true },
-               "gr_keys" => ["grid1_grid_result"],
-               "dgparams" => { "p1" => 12, "p2" => 3,
-                            "pt" => ptjson,
-                            "flavor" => "cherry" },
-               "res_keys" => ["bv", "grid1_grid_result"],
-               "err_section" => "results",
-               "err_message" => "no implicit conversion of Integer into String" }
+        exp = { 'input' => { 'p1' => 12, 'p2' => 3,
+                         'pt' => ptjson,
+                         'flavor' => 'cherry' },
+               'cg_hash' => { 'some_guard' => true },
+               'gr_keys' => ['grid1_grid_result'],
+               'dgparams' => { 'p1' => 12, 'p2' => 3,
+                            'pt' => ptjson,
+                            'flavor' => 'cherry' },
+               'res_keys' => ['bv', 'grid1_grid_result'],
+               'err_section' => 'results',
+               'err_message' => 'no implicit conversion of Integer into String' }
         expect(log_ents[1].details.except('err_stack')).to eq(exp)
         expres = [/DELOREAN__XyzRule_\d+_1483228800.0:23:in .+'/,
                   /DELOREAN__XyzRule_\d+_1483228800.0:23:in .tmp_var4__D'/,
@@ -435,15 +435,15 @@ module Marty::RuleSpec
         expres.each_with_index do |expre, i|
           expect(log_ents[1].details['err_stack'][i]).to match(expre)
         end
-        exp = { "input" => { "p1" => 12, "p2" => 3,
-                         "pt" => ptjson,
-                         "flavor" => "cherry" },
-               "cg_keys" => ["cg1"],
-               "dgparams" => { "p1" => 12, "p2" => 3,
-                            "pt" => ptjson,
-                            "flavor" => "cherry" },
-               "err_section" => "computed_guards",
-               "err_message" => "divided by 0" }
+        exp = { 'input' => { 'p1' => 12, 'p2' => 3,
+                         'pt' => ptjson,
+                         'flavor' => 'cherry' },
+               'cg_keys' => ['cg1'],
+               'dgparams' => { 'p1' => 12, 'p2' => 3,
+                            'pt' => ptjson,
+                            'flavor' => 'cherry' },
+               'err_section' => 'computed_guards',
+               'err_message' => 'divided by 0' }
         expect(log_ents[2].details.except('err_stack')).to eq(exp)
         expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:5:in ./'),
                   /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]

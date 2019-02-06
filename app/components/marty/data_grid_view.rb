@@ -71,7 +71,7 @@ module Marty; class DataGridView < McflyGridPanel
     super
 
     c.title   = I18n.t('data_grid')
-    c.model   = "Marty::DataGrid"
+    c.model   = 'Marty::DataGrid'
     c.attributes =
       [
         :name,
@@ -91,11 +91,11 @@ module Marty; class DataGridView < McflyGridPanel
   endpoint :add_window__add_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    return client.netzke_notify("Permission Denied") if
+    return client.netzke_notify('Permission Denied') if
       !config[:permissions][:create]
 
     begin
-      DataGrid.create_from_import(data["name"], data["export"])
+      DataGrid.create_from_import(data['name'], data['export'])
       client.success = true
       client.netzke_on_submit_success
     rescue StandardError => exc
@@ -106,10 +106,10 @@ module Marty; class DataGridView < McflyGridPanel
   endpoint :edit_window__edit_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    dg = DataGrid.find_by_id(data["id"])
+    dg = DataGrid.find_by_id(data['id'])
 
     begin
-      dg.update_from_import(data["name"], data["export"])
+      dg.update_from_import(data['name'], data['export'])
       client.success = true
       client.netzke_on_submit_success
     rescue StandardError => exc
@@ -118,8 +118,8 @@ module Marty; class DataGridView < McflyGridPanel
   end
 
   action :show_grid do |a|
-    a.text     = "Show Grid"
-    a.icon_cls = "fa fa-th-large glyph"
+    a.text     = 'Show Grid'
+    a.icon_cls = 'fa fa-th-large glyph'
     a.handler  = :netzke_show_grid
   end
 
@@ -128,7 +128,7 @@ module Marty; class DataGridView < McflyGridPanel
 
     dg = DataGrid.find_by_id(record_id)
 
-    return client.netzke_notify("No data grid.") unless dg
+    return client.netzke_notify('No data grid.') unless dg
 
     meta_rows_raw, h_key_rows, data_rows = dg.export_array
     meta_rows = meta_rows_raw.map do |row|
@@ -173,18 +173,18 @@ module Marty; class DataGridView < McflyGridPanel
   end
 
   attribute :hcols do |c|
-    c.label  = "Horizontal Attrs"
+    c.label  = 'Horizontal Attrs'
     c.width  = 200
     c.getter = lambda { |r|
-      r.dir_infos("h").map { |inf| inf["attr"] }.join(', ')
+      r.dir_infos('h').map { |inf| inf['attr'] }.join(', ')
     }
   end
 
   attribute :vcols do |c|
-    c.label  = "Vertical Attrs"
+    c.label  = 'Vertical Attrs'
     c.width  = 200
     c.getter = lambda { |r|
-      r.dir_infos("v").map { |inf| inf["attr"] }.join(', ')
+      r.dir_infos('v').map { |inf| inf['attr'] }.join(', ')
     }
   end
 
@@ -193,13 +193,13 @@ module Marty; class DataGridView < McflyGridPanel
   end
 
   attribute :data_type do |c|
-    c.label  = "Data Type"
+    c.label  = 'Data Type'
     c.width  = 200
   end
 
   attribute :created_dt do |c|
     c.label     = I18n.t('updated_at')
-    c.format    = "Y-m-d H:i"
+    c.format    = 'Y-m-d H:i'
     c.read_only = true
   end
 end; end

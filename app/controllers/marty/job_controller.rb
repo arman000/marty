@@ -1,6 +1,6 @@
 class Marty::JobController < ActionController::Base
   def download
-    job_id = params["job_id"]
+    job_id = params['job_id']
 
     promise = Marty::Promise.find_by_id(job_id)
 
@@ -12,12 +12,12 @@ class Marty::JobController < ActionController::Base
 
       # somewhat hacky: if result has "result" key, it's used as the
       # content.
-      data = data["result"] || data
+      data = data['result'] || data
       title = promise.title
     else
-      format = "json"
+      format = 'json'
       data = { error: "Job not found: #{job_id}" }
-      title = "error"
+      title = 'error'
     end
 
     res, type, disposition, filename =

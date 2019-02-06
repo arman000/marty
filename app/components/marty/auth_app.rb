@@ -12,14 +12,14 @@ class Marty::AuthApp < Marty::SimpleApp
     [].tap do |menu|
       user = Mcfly.whodunnit
       if !user.nil?
-        menu << "->" << {
+        menu << '->' << {
           text: user.name,
           tooltip: 'Current user',
           menu: user_menu,
-          name: "sign_out",
+          name: 'sign_out',
         }
       else
-        menu << "->" << :sign_in
+        menu << '->' << :sign_in
       end
     end
   end
@@ -29,18 +29,18 @@ class Marty::AuthApp < Marty::SimpleApp
   end
 
   action :sign_in do |c|
-    c.icon_cls = "fa fa-sign-in-alt gylph"
+    c.icon_cls = 'fa fa-sign-in-alt gylph'
   end
 
   action :sign_out do |c|
-    c.icon_cls = "fa fa-sign-out-alt gylph"
+    c.icon_cls = 'fa fa-sign-out-alt gylph'
     c.text     = "Sign out #{Mcfly.whodunnit.name}" if Mcfly.whodunnit
   end
 
   endpoint :sign_in do |params|
     user = Marty::User.try_to_login(params[:login], params[:password])
     user ? Netzke::Base.controller.set_user(user) :
-      client.netzke_notify("Wrong credentials")
+      client.netzke_notify('Wrong credentials')
 
     !!user
   end

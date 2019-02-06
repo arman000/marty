@@ -41,10 +41,10 @@
 # this.mainPanel, this.statusBar, and this.menuBar.
 class Marty::SimpleApp < Netzke::Base
   client_class do |c|
-    c.extend = "Ext.container.Viewport"
+    c.extend = 'Ext.container.Viewport'
     c.layout = :border
     c.require(
-      Netzke::Core.ext_path.join("packages/ux/classic/src/statusbar/StatusBar.js"),
+      Netzke::Core.ext_path.join('packages/ux/classic/src/statusbar/StatusBar.js'),
       :statusbar_ext
     )
 
@@ -58,7 +58,7 @@ class Marty::SimpleApp < Netzke::Base
 
   # In Ext 4.1 calling `render` on a viewport causes an error
   def js_component_render
-    ""
+    ''
   end
 
   # Override for custom menu
@@ -83,8 +83,8 @@ class Marty::SimpleApp < Netzke::Base
       :region => 'south',
       :statusAlign => 'right',
       :busyText => 'Busy...',
-      :default_text => "Ready",
-      :default_icon_cls => ""
+      :default_text => 'Ready',
+      :default_icon_cls => ''
     }.merge(overrides)
   end
 

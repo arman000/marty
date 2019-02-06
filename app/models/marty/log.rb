@@ -19,6 +19,6 @@ class Marty::Log < Marty::Base
     raise "Must give numeric value. (Got '#{days_to_keep}')" unless
       (Float(days_to_keep) rescue false)
 
-    where("timestamp <= ?", Time.zone.now - days_to_keep.to_i.days).delete_all
+    where('timestamp <= ?', Time.zone.now - days_to_keep.to_i.days).delete_all
   end
 end

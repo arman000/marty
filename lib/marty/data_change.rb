@@ -19,36 +19,36 @@ class Marty::DataChange
 
     changes.each_with_object({}) do |(group_id, ol), h|
       h[group_id] = ol.each_with_index.map do |o, i|
-        profile = { "obj" => o.attributes }
+        profile = { 'obj' => o.attributes }
 
         # Create a profile hash for each object in the group.
         # "status" tells us if the object is old/new/mod.  If
         # status=="mod" then "changes" will provide the list of
         # columns which changed.  If the object was deleted during
         # t0-t1 then we set the deleted flag in the profile.
-        profile["deleted"] = (group_id == o.id &&
+        profile['deleted'] = (group_id == o.id &&
                               o.obsoleted_dt != Float::INFINITY &&
                               (t1 == 'infinity' || o.obsoleted_dt < t1)
                              )
         if i == 0
-          profile["status"] = o.created_dt < t0 ? "old" : "new"
+          profile['status'] = o.created_dt < t0 ? 'old' : 'new'
           prev = nil
         else
-          profile["status"], prev = "mod", prev = ol[i - 1]
+          profile['status'], prev = 'mod', prev = ol[i - 1]
         end
 
         exp_attrs = Marty::DataExporter.export_attrs(klass, o).flatten(1)
 
         # assumes cols order is same as that returned by export_attrs
 
-        profile["attrs"] = cols_model.each_with_index.with_object([]) do |(col, i), a|
+        profile['attrs'] = cols_model.each_with_index.with_object([]) do |(col, i), a|
           header_current = cols_header[i]
           valcount = Array === header_current ? header_current.count : 1
           changed = o.send(col.to_sym) != prev.send(col.to_sym) if prev
           valcount.times do
             a.push(
-              "value"     => exp_attrs.shift,
-              "changed"   => changed
+              'value'     => exp_attrs.shift,
+              'changed'   => changed
             )
           end
         end
@@ -128,9 +128,9 @@ class Marty::DataChange
 
     # find all changes from t0 to t1 -- orders by id to get the lower
     # ones since those are the original version in Mcfly.
-    changes = klass.select("DISTINCT ON (group_id) *").
+    changes = klass.select('DISTINCT ON (group_id) *').
       where(change_q, t0, t1, t0, t1).
-      order("group_id, id").
+      order('group_id, id').
       to_a
 
     # update/adds, deletes
@@ -142,7 +142,7 @@ class Marty::DataChange
       else
         # if a version of row existed before t0 => add it to del list
         del << o if klass.
-          where("group_id = ? AND created_dt < ?", o.group_id, t0).exists?
+          where('group_id = ? AND created_dt < ?', o.group_id, t0).exists?
       end
     end
 
@@ -169,7 +169,7 @@ class Marty::DataChange
 
     raise "Change count exceeds limit #{MAX_COUNT}" if countq.count > MAX_COUNT
 
-    dataq.order("group_id, created_dt").group_by(&:group_id)
+    dataq.order('group_id, created_dt').group_by(&:group_id)
   end
 
   ######################################################################
@@ -205,7 +205,7 @@ class Marty::DataChange
     input_data.each do |input|
       input_keys = input.keys
 
-      raise "non-String keys in input data" unless
+      raise 'non-String keys in input data' unless
         input_keys.all? { |x| String === x }
 
       begin
@@ -245,24 +245,24 @@ class Marty::DataChange
       source_export = Marty::DataExporter.export_obj(source) % input_keys
 
       different << [
-        { "_origin_" => "source" } + source_export,
-        { "_origin_" => "input" } + input,
+        { '_origin_' => 'source' } + source_export,
+        { '_origin_' => 'input' } + input,
       ]
     end
 
     # now find any live source object which have not been visited
     query = klass
 
-    query = query.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts) if
+    query = query.where('obsoleted_dt >= ? AND created_dt < ?', ts, ts) if
       Mcfly.has_mcfly?(klass)
 
     query = query.where.not(id: found_sources.map(&:id))
 
     {
-      "different"   => different,
-      "same"        => same,
-      "only_input"  => only_input,
-      "only_source" => Marty::DataExporter.
+      'different'   => different,
+      'same'        => same,
+      'only_input'  => only_input,
+      'only_source' => Marty::DataExporter.
                       do_export_query_result(klass, query),
     }
   end

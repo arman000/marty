@@ -5,7 +5,7 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   def validate
     super
-    return errors[:base] << "Start date must be before end date" if
+    return errors[:base] << 'Start date must be before end date' if
       start_dt && end_dt && start_dt >= end_dt
 
     if computed_guards.present? || results.present?
@@ -13,18 +13,18 @@ class Marty::DeloreanRule < Marty::BaseRule
         eclass = engine && engine.constantize || Marty::RuleScriptSet
         eng = eclass.new('infinity').get_engine(self_as_hash)
       rescue StandardError => e
-        return errors[:computed] << "- " + e.message
+        return errors[:computed] << '- ' + e.message
       end
     end
   end
 
   def self_as_hash
-    attributes + { "classname" => self.class.name }
+    attributes + { 'classname' => self.class.name }
   end
 
   def self.find_fixed(results)
     results.each_with_object({}) do |(k, v), h|
-      v_wo_comment = /\A([^#]+)/.match(v)[1] if v.include?("#")
+      v_wo_comment = /\A([^#]+)/.match(v)[1] if v.include?('#')
       # if v contains a #, try cut it there and attempt parse that way first
       jp = (v_wo_comment && JSON.parse("[#{v_wo_comment}]") rescue nil) ||
            (JSON.parse("[#{v}]") rescue nil)
@@ -44,7 +44,7 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def self.results_cfg_var
-    "NOT DEFINED"
+    'NOT DEFINED'
   end
 
   def self.compg_keys(computed_guards)
@@ -54,7 +54,7 @@ class Marty::DeloreanRule < Marty::BaseRule
   def self.comp_res_keys(results, grids, ecl, pcfg)
     # FIXME in May 2019: remove this check (use as passed)
     defkeys = pcfg.is_a?(Hash) ? pcfg.keys : pcfg
-    results.keys.map { |k| k.ends_with?("_grid") ? ecl.grid_final_name(k) : k }.
+    results.keys.map { |k| k.ends_with?('_grid') ? ecl.grid_final_name(k) : k }.
        select { |k| defkeys.include?(k) } + grid_keys(grids, ecl)
   end
 
@@ -75,12 +75,12 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   def self.base_compute2(ruleh, metadata_opts, params, dgparams = params)
       id, name, eclassname, computed_guards, grids, results, fixed_results =
-        ruleh.values_at("id", "name", "engine", "computed_guards", "grids",
-                        "results", "fixed_results")
+        ruleh.values_at('id', 'name', 'engine', 'computed_guards', 'grids',
+                        'results', 'fixed_results')
       raise "Error in rule '#{id}:#{name}': bad metadata_opts" if !metadata_opts
 
       eclass = eclassname && eclassname.constantize || Marty::RuleScriptSet
-      engine = eclass.new(params["pt"]).get_engine(ruleh) if
+      engine = eclass.new(params['pt']).get_engine(ruleh) if
         computed_guards.present? || results.present?
 
       result = OpenStruct.new(cg_keys: compg_keys(computed_guards))
@@ -113,7 +113,7 @@ class Marty::DeloreanRule < Marty::BaseRule
             eclass.node_name,
             result.res_keys,
             params + {
-              "dgparams__" => dgparams,
+              'dgparams__' => dgparams,
             })
           grids_computed = true
         rescue StandardError => e
@@ -124,7 +124,7 @@ class Marty::DeloreanRule < Marty::BaseRule
             "Error (results) in rule '#{id}:#{name}': #{result.err_message}",
             result.err_stack,
             params + {
-              "dgparams__" => dgparams,
+              'dgparams__' => dgparams,
             },
             result.err_section)
         end
@@ -143,7 +143,7 @@ class Marty::DeloreanRule < Marty::BaseRule
           dg = Marty::DataGrid.lookup_h(pt, gname)
           dgr = dg && Marty::DataGrid.lookup_grid_distinct_entry_h(pt, dgparams,
                                                                    dg)
-          h[usename] = gres[gname] = dgr["result"] if dgr
+          h[usename] = gres[gname] = dgr['result'] if dgr
         end
       end
       (result.res_hash || {}) + (result.gr_hash || {})
@@ -165,23 +165,23 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   delorean_fn :route_compute, sig: 4 do |ruleh, pt, params, grid_names_p|
-    kl = ruleh["classname"].constantize
+    kl = ruleh['classname'].constantize
     kl.compute(ruleh, nil, pt, params, grid_names_p)
   end
   delorean_fn :route_compute2, sig: 5 do |ruleh, metadata_opts, pt, params, grid_names_p|
-    kl = ruleh["classname"].constantize
+    kl = ruleh['classname'].constantize
     kl.compute(ruleh, metadata_opts, pt, params, grid_names_p)
   end
   delorean_fn :route_compute_rs, sig: 3 do |ruleh, pt, features|
-    kl = ruleh["classname"].constantize
+    kl = ruleh['classname'].constantize
     kl.compute_rs(ruleh, pt, features)
   end
   delorean_fn :route_validate_results, sig: [1, 2] do |ruleh, reqchk = false|
-    kl = ruleh["classname"].constantize
+    kl = ruleh['classname'].constantize
     kl.validate_results(ruleh, reqchk)
   end
   delorean_fn :route_validate_grid_attrs, sig: [2, 3] do |ruleh, gridname, addl_attrs = nil|
-    kl = ruleh["classname"].constantize
+    kl = ruleh['classname'].constantize
     kl.validate_grid_attrs(ruleh, gridname, addl_attrs)
   end
 
@@ -190,10 +190,10 @@ class Marty::DeloreanRule < Marty::BaseRule
   end
 
   def self.get_matches_(pt, attrs, params)
-    q = super(pt, attrs.except("rule_dt"), params)
-    rule_dt = attrs["rule_dt"]
-    q = q.where("start_dt <= ?", rule_dt).
-       where("end_dt >= ? OR end_dt IS NULL", rule_dt) if rule_dt
+    q = super(pt, attrs.except('rule_dt'), params)
+    rule_dt = attrs['rule_dt']
+    q = q.where('start_dt <= ?', rule_dt).
+       where('end_dt >= ? OR end_dt IS NULL', rule_dt) if rule_dt
     # puts q.to_sql
     q
   end
@@ -204,7 +204,7 @@ class Marty::DeloreanRule < Marty::BaseRule
         r.grids.each { |k, v| r.grids[k] = new if v == old }
         r.results.each do |k, v|
           r.results[k] = %Q("#{new}") if
-                         k.ends_with?("_grid") && r.fixed_results[k] == old
+                         k.ends_with?('_grid') && r.fixed_results[k] == old
         end
         r.save! if r.changed?
       end

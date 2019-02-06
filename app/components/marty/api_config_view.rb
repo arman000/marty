@@ -45,7 +45,7 @@ class Marty::ApiConfigView < Marty::Grid
       type:          :string,
     )
     c.width = 200
-    c.label = "API Class"
+    c.label = 'API Class'
   end
 
   attribute :script do |c|

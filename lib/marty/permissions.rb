@@ -12,8 +12,8 @@ module Marty::Permissions
   #
   # :any gives permission to the action if user belongs to at least 1 role
   def has_marty_permissions(attrs)
-    raise "bad attrs" unless attrs.is_a?(Hash)
-    raise "unknown role" unless
+    raise 'bad attrs' unless attrs.is_a?(Hash)
+    raise 'unknown role' unless
       attrs.values.flatten.to_set.subset? (ALL_ROLES << :any)
 
     define_singleton_method(:marty_permissions) { attrs }

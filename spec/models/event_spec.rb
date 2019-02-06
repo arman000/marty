@@ -16,7 +16,7 @@ describe Marty::Event do
 
     Marty::Script.load_script_bodies(promise_bodies, Date.today)
     start_delayed_job
-    Marty::Config["MARTY_EVENT_POLL_SECS"] = 1
+    Marty::Config['MARTY_EVENT_POLL_SECS'] = 1
 
     @time = Time.zone.now
     @date_string = @time.strftime('%Y-%m-%d')
@@ -48,14 +48,14 @@ describe Marty::Event do
     end
 
     engine = Marty::ScriptSet.new.get_engine(NAME_I)
-    res = engine.background_eval("SLEEPER", { "secs" => 5 }, ["a"],
-                                 klass: "testcl3",
+    res = engine.background_eval('SLEEPER', { 'secs' => 5 }, ['a'],
+                                 klass: 'testcl3',
                                  id: 987,
                                  operation: 'PRICING')
     res.force
     engine = Marty::ScriptSet.new.get_engine(NAME_J)
-    res = engine.background_eval("FAILER", { "dummy" => "dummy" }, ["a"],
-                                 klass: "testcl3",
+    res = engine.background_eval('FAILER', { 'dummy' => 'dummy' }, ['a'],
+                                 klass: 'testcl3',
                                  id: 654,
                                  operation: 'PRICING')
     res.force rescue nil
@@ -74,30 +74,30 @@ describe Marty::Event do
     Marty::Event.clear_cache
   end
 
-  it "reports currently running" do
+  it 'reports currently running' do
     expect(Marty::Event.currently_running('testcl1', 123)).
       to eq(['AVM', 'CRA', 'PRICING'])
     expect(Marty::Event.currently_running('testcl2', 123)).to eq([])
     expect(Marty::Event.currently_running('testcl3', 987)).to eq([])
     expect(Marty::Event.last_event('testcl1', 123)).
       to include(
-        "klass" => "testcl1",
-        "subject_id" => 123,
-        "enum_event_operation" => "PRICING",
-        "comment" => "c comment", "expire_secs" => 10000)
+        'klass' => 'testcl1',
+        'subject_id' => 123,
+        'enum_event_operation' => 'PRICING',
+        'comment' => 'c comment', 'expire_secs' => 10000)
     expect(Marty::Event.last_event('testcl2', 123)).
       to include(
-        "klass" => "testcl2",
-        "subject_id" => 123,
-        "enum_event_operation" => "PRICING",
-        "comment" => "old event")
+        'klass' => 'testcl2',
+        'subject_id' => 123,
+        'enum_event_operation' => 'PRICING',
+        'comment' => 'old event')
     expect(Marty::Event.last_event('testcl3', 987)).
       to include(
-        "klass" => "testcl3",
-        "subject_id" => 987,
-        "enum_event_operation" => "PRICING",
-        "comment" => nil,
-        "expire_secs" => nil)
+        'klass' => 'testcl3',
+        'subject_id' => 987,
+        'enum_event_operation' => 'PRICING',
+        'comment' => nil,
+        'expire_secs' => nil)
 
     Timecop.freeze(@time + 1.second)
     Marty::Event.clear_cache
@@ -118,7 +118,7 @@ describe Marty::Event do
     Timecop.return
   end
 
-  it "misc API tests" do
+  it 'misc API tests' do
     ev1 = Marty::Event.where(klass: 'testcl3', subject_id: 987).first
     ev2 = Marty::Event.where(klass: 'testcl3', subject_id: 654).first
     af = Marty::Event.all_finished
@@ -164,32 +164,32 @@ describe Marty::Event do
 
     ev = Marty::Event.lookup_event('testcl1', 123, 'AVM')
     expect(ev.length).to eq(1)
-    expect(ev.first).to include("klass" => "testcl1",
-                                 "subject_id" => 123,
-                                 "enum_event_operation" => "AVM",
-                                 "comment" => "wassup",
-                                 "expire_secs" => nil,
-                                 "error" => false)
-    Marty::Event.update_comment(ev.first, "updated")
+    expect(ev.first).to include('klass' => 'testcl1',
+                                 'subject_id' => 123,
+                                 'enum_event_operation' => 'AVM',
+                                 'comment' => 'wassup',
+                                 'expire_secs' => nil,
+                                 'error' => false)
+    Marty::Event.update_comment(ev.first, 'updated')
     ev = Marty::Event.lookup_event('testcl1', 123, 'AVM')
-    expect(ev.first).to include("comment" => "updated")
+    expect(ev.first).to include('comment' => 'updated')
     expect(Marty::Event.compact_end_dt(ev.first)).to match(/\d\d:\d\d/)
     expect(Marty::Event.pretty_op(ev.first)).to eq('Avm')
     ev = Marty::Event.lookup_event('testcl1', 123, 'PRICING').first
     expect(Marty::Event.pretty_op(ev)).to eq('Pricing')
     evs = Marty::Event.last_event_multi('testcl1', [123, 234])
-    expect(evs[123]).to include("klass" => "testcl1",
-                                 "subject_id" => 123,
-                                 "enum_event_operation" => "CRA",
-                                 "comment" => "b comment",
-                                 "expire_secs" => nil,
-                                 "error" => nil)
-    expect(evs[234]).to include("klass" => "testcl1",
-                                 "subject_id" => 234,
-                                 "enum_event_operation" => "PRICING",
-                                 "comment" => "c comment",
-                                 "expire_secs" => nil,
-                                 "error" => false)
+    expect(evs[123]).to include('klass' => 'testcl1',
+                                 'subject_id' => 123,
+                                 'enum_event_operation' => 'CRA',
+                                 'comment' => 'b comment',
+                                 'expire_secs' => nil,
+                                 'error' => nil)
+    expect(evs[234]).to include('klass' => 'testcl1',
+                                 'subject_id' => 234,
+                                 'enum_event_operation' => 'PRICING',
+                                 'comment' => 'c comment',
+                                 'expire_secs' => nil,
+                                 'error' => false)
 
     af = Marty::Event.all_finished
     expect(af.count).to eq(4)
@@ -198,29 +198,29 @@ describe Marty::Event do
     expect(af[['testcl1', 123]]['AVM']).to start_with(@date_string)
   end
 
-  it "raises on error" do
+  it 'raises on error' do
     expect do
       Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
-                                "the comment")
+                                'the comment')
     end    .not_to raise_error
 
     expect do
       Marty::Event.create_event('testcl', 1234, 'AVM', Time.zone.now, 600,
-                                "the comment")
+                                'the comment')
     end.
       to raise_error(%r!AVM is already running for testcl/1234!)
     expect do
       Marty::Event.create_event('testcl', 2345, 'AVM', Time.zone.now, 600,
-                                "the comment")
+                                'the comment')
     end    .not_to raise_error
     expect do
       Marty::Event.finish_event('testcl', 1234, 'AVM', false,
-                                "new comment")
+                                'new comment')
     end.
       not_to raise_error
     expect do
       Marty::Event.finish_event('testcl', 1234, 'AVM', false,
-                                "new comment")
+                                'new comment')
     end.
       to raise_error(%r!event testcl/1234/AVM not found!)
     expect { Marty::Event.finish_event('testcl', 2345, 'AVM', false, 'foobar') }.
@@ -231,7 +231,7 @@ describe Marty::Event do
       to raise_error(/error must be true or false/)
     expect do
       Marty::Event.create_event('testcl', 1234, 'AMV', Time.zone.now, 600,
-                                "the comment")
+                                'the comment')
     end.
       to raise_error(%r!PG::.*invalid input value for enum.*"AMV"!)
     Marty::Event.clear_cache
@@ -245,8 +245,8 @@ describe Marty::Event do
     expect(af[['testcl', 2345]]['AVM']).to start_with(@date_string)
   end
 
-  it "truncates long comment" do
-    long_comment = "comment string abcdefg" * 100
+  it 'truncates long comment' do
+    long_comment = 'comment string abcdefg' * 100
     long_comment_truncated = long_comment.truncate(255)
     Marty::Event.create_event('testcl', 123, 'PRICING', Time.zone.now, 600,
                               long_comment)
@@ -258,15 +258,15 @@ describe Marty::Event do
                          comment: long_comment)
 
     Marty::Event.create_event('testcl', 789, 'AVM', Time.zone.now, 600,
-                              "comment")
+                              'comment')
     Marty::Event.finish_event('testcl', 789, 'AVM', false, long_comment)
 
     e1 = Marty::Event.lookup_event('testcl', 123, 'PRICING').first
     e2 = Marty::Event.lookup_event('testcl', 456, 'CRA').first
     e3 = Marty::Event.lookup_event('testcl', 789, 'AVM').first
 
-    expect(e1["comment"]).to eq(long_comment_truncated)
-    expect(e2["comment"]).to eq(long_comment_truncated)
-    expect(e3["comment"]).to eq(long_comment_truncated)
+    expect(e1['comment']).to eq(long_comment_truncated)
+    expect(e2['comment']).to eq(long_comment_truncated)
+    expect(e3['comment']).to eq(long_comment_truncated)
   end
 end

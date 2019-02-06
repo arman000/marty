@@ -17,7 +17,7 @@ module Marty; module RSpec; module PerformanceHelper
     ub = opts.delete(:upper_bound) || 5.0
 
     post_run_log '  ' + '-' * 45,
-                 "   baseline: %.2f, result: %.2f, factor: %.2f" %
+                 '   baseline: %.2f, result: %.2f, factor: %.2f' %
                  [baseline.total, result_time, factor],
                  '  ' + '-' * 45
 

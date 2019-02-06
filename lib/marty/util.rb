@@ -35,21 +35,21 @@ module Marty::Util
   end
 
   def self.pg_range_to_human(r)
-    return r if r == "empty" || r.nil?
+    return r if r == 'empty' || r.nil?
 
     m = pg_range_match(r)
 
     raise "bad PG range #{r}" unless m
 
-    if m[:start] == ""
-      res = ""
+    if m[:start] == ''
+      res = ''
     else
-      op = m[:open] == "(" ? ">" : ">="
+      op = m[:open] == '(' ? '>' : '>='
       res = "#{op}#{m[:start]}"
     end
 
-    if m[:end] != ""
-      op = m[:close] == ")" ? "<" : "<="
+    if m[:end] != ''
+      op = m[:close] == ')' ? '<' : '<='
       res += "#{op}#{m[:end]}"
     end
 
@@ -57,7 +57,7 @@ module Marty::Util
   end
 
   def self.human_to_pg_range(r)
-    return r if r == "empty"
+    return r if r == 'empty'
 
     m = /\A
     ((?<op0>\>|\>=)(?<start>[^\<\>\=]*?))?
@@ -67,17 +67,17 @@ module Marty::Util
     raise "bad range #{r}" unless m
 
     if m[:op0]
-      open = m[:op0] == ">" ? "(" : "["
+      open = m[:op0] == '>' ? '(' : '['
       start = "#{open}#{m[:start]}"
     else
-      start = "["
+      start = '['
     end
 
     if m[:op1]
-      close = m[:op1] == "<" ? ")" : "]"
+      close = m[:op1] == '<' ? ')' : ']'
       ends = "#{m[:end]}#{close}"
     else
-      ends = "]"
+      ends = ']'
     end
 
     "#{start},#{ends}"
@@ -114,7 +114,7 @@ module Marty::Util
     engine = Marty::ScriptSet.new.get_engine(script_name)
     res = engine.background_eval(node_name,
                                  params,
-                                 ["result", "title", "format"],
+                                 ['result', 'title', 'format'],
                                 )
 
     promise_id = res.__promise__.id

@@ -71,10 +71,10 @@ describe Marty::Diagnostic::Base do
     end
 
     expected = {
-      "Base" => {
-        "description" => "E",
-        "status" => false,
-        "consistent" => nil }
+      'Base' => {
+        'description' => 'E',
+        'status' => false,
+        'consistent' => nil }
     }
 
     expect(test).to eq(expected)

@@ -4,7 +4,7 @@ class StringIO
   end
 end
 
-NAME_A   = "PromiseA2"
+NAME_A   = 'PromiseA2'
 SCRIPT_A = <<EOS
 Y:
     q =? nil
@@ -18,7 +18,7 @@ Y:
     f = Y(s=s) | ["d"]
 EOS
 
-NAME_B   = "PromiseB"
+NAME_B   = 'PromiseB'
 SCRIPT_B = <<EOS
 Y:
     result = [{"a": i, "b": i*i} for i in [1,2,3]]
@@ -30,7 +30,7 @@ Z:
     title  = "Root#{NAME_B}"
 EOS
 
-NAME_C   = "PromiseC"
+NAME_C   = 'PromiseC'
 SCRIPT_C = <<EOS
 Y:
     node =?
@@ -40,7 +40,7 @@ Z:
     title  = "#{NAME_C}"
 EOS
 
-NAME_D   = "PromiseD"
+NAME_D   = 'PromiseD'
 SCRIPT_D = <<EOS
 Y:
     arg =?
@@ -52,7 +52,7 @@ Z:
     title  = "#{NAME_D}"
 EOS
 
-NAME_E   = "PromiseE"
+NAME_E   = 'PromiseE'
 SCRIPT_E = <<EOS
 X:
     x = 'x'*10
@@ -60,14 +60,14 @@ Z:
     result = [X() | "x" for i in [1,2,3,4,5,6]]
 EOS
 
-NAME_F   = "PromiseF"
+NAME_F   = 'PromiseF'
 SCRIPT_F = <<EOS
 import #{NAME_E}
 Z:
     result = #{NAME_E}::X() | "x"
 EOS
 
-NAME_G   = "PromiseG"
+NAME_G   = 'PromiseG'
 SCRIPT_G = <<EOS
 U:
     result  = [123]
@@ -79,7 +79,7 @@ V:
     result = A(p_title="#{NAME_G}") | "result"
 EOS
 
-NAME_H   = "PromiseH"
+NAME_H   = 'PromiseH'
 SCRIPT_H = <<EOS
 Y:
     q =? nil
@@ -87,21 +87,21 @@ Y:
     d = [Y(q=i) | ['a'] for i in [1, 2]]
 EOS
 
-NAME_I = "PromiseI"
+NAME_I = 'PromiseI'
 SCRIPT_I = <<EOS
 SLEEPER:
     secs =? nil
     a = Gemini::Helper.sleep(secs) && secs
 EOS
 
-NAME_J = "PromiseJ"
+NAME_J = 'PromiseJ'
 SCRIPT_J = <<EOS
 FAILER:
     dummy =? nil
     a = ERR('I had an error')
 EOS
 
-NAME_K = "PromiseK"
+NAME_K = 'PromiseK'
 SCRIPT_K = <<EOS
 LOGGER:
     msgid =? nil

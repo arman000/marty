@@ -13,3 +13,6 @@ AllCops:
 Layout/DotPosition:
   EnforcedStyle: 'trailing'
 
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: single_quotes

@@ -14,7 +14,7 @@ describe Marty::Diagnostic::Reporter do
   def git
       message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
   rescue StandardError
-      message = error("Failed accessing git")
+      message = error('Failed accessing git')
   end
 
   def aggregate_data opts = {}
@@ -95,16 +95,16 @@ describe Marty::Diagnostic::Reporter do
   def version_data consistent = true
     Marty::Diagnostic::Base.pack(include_ip = false) do
       {
-        "Marty"    => info(Marty::VERSION, true, consistent),
-        "Delorean" => info(Delorean::VERSION, true, true),
-        "Mcfly"    => info(Mcfly::VERSION, true, true),
-        "Git"      => info(git, true, true),
+        'Marty'    => info(Marty::VERSION, true, consistent),
+        'Delorean' => info(Delorean::VERSION, true, true),
+        'Mcfly'    => info(Mcfly::VERSION, true, true),
+        'Git'      => info(git, true, true),
       }
     end
   end
 
   def minimize(str)
-    str.gsub(/\s+/, "")
+    str.gsub(/\s+/, '')
   end
 
   describe 'display mechanism for version diagnostic' do

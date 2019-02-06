@@ -5,7 +5,7 @@ class Marty::ReportSelect < Marty::Form
     c.klass            = Marty::TagGrid
     c.height           = 200
     c.load_inline_data = false
-    c.title            = I18n.t("script.selection_history")
+    c.title            = I18n.t('script.selection_history')
     c.attributes = [:name, :created_dt, :comment]
     c.bbar             = []
   end
@@ -13,7 +13,7 @@ class Marty::ReportSelect < Marty::Form
   component :script_grid do |c|
     c.height           = 350
     c.klass            = Marty::ScriptGrid
-    c.title            = I18n.t("script.selection_list")
+    c.title            = I18n.t('script.selection_list')
     c.bbar             = []
     c.attributes = [:name, :tag]
     c.scope = lambda { |r|
@@ -30,10 +30,10 @@ class Marty::ReportSelect < Marty::Form
       [
         :tag_grid,
         :script_grid,
-        fieldset(I18n.t("reporting.report_select"),
+        fieldset(I18n.t('reporting.report_select'),
                  {
                    xtype:        :netzkeremotecombo,
-                   name:         "nodename",
+                   name:         'nodename',
                    attr_type:    :string,
                    virtual:      true,
                    hide_label:   true,
@@ -51,7 +51,7 @@ class Marty::ReportSelect < Marty::Form
   end
 
   # FIXME: should be in a library
-  REPORT_ATTR_SET = Set["title", "form", "result", "format"]
+  REPORT_ATTR_SET = Set['title', 'form', 'result', 'format']
 
   def node_list
     sset = Marty::ScriptSet.new root_sess[:selected_tag_id]
@@ -65,11 +65,11 @@ class Marty::ReportSelect < Marty::Form
     end
 
     nodes.map do |node|
-      roles = engine.evaluate(node, "roles") rescue nil
+      roles = engine.evaluate(node, 'roles') rescue nil
       next if roles && !roles.any? { |r| Marty::User.has_role(r) }
 
       begin
-        title, format = engine.evaluate(node, ["title", "format"])
+        title, format = engine.evaluate(node, ['title', 'format'])
         format ? [node, "#{title} (#{format})"] : nil
       rescue StandardError
         [node, node]
@@ -78,7 +78,7 @@ class Marty::ReportSelect < Marty::Form
   end
 
   endpoint :get_combobox_options do |params|
-    client.data = node_list if params["attr"] == "nodename"
+    client.data = node_list if params['attr'] == 'nodename'
   end
 
   ######################################################################

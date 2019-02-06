@@ -6,7 +6,7 @@ class Marty::PostingGrid < Marty::Grid
     super
 
     c.header             = false
-    c.model              = "Marty::Posting"
+    c.model              = 'Marty::Posting'
     c.attributes = [:name, :created_dt, :user__name, :comment]
     c.multi_select = false
     c.store_config.merge!(sorters: [{ property: :created_dt, direction: 'DESC' }],
@@ -19,9 +19,9 @@ class Marty::PostingGrid < Marty::Grid
 
   # hijacking delete button
   action :delete do |a|
-    a.text      = "Select"
-    a.tooltip   = "Select"
-    a.icon_cls  = "fa fa-clock glyph"
+    a.text      = 'Select'
+    a.tooltip   = 'Select'
+    a.icon_cls  = 'fa fa-clock glyph'
     a.disabled  = true
   end
 
@@ -30,8 +30,8 @@ class Marty::PostingGrid < Marty::Grid
   end
 
   action :detail do |a|
-    a.text      = "Detail"
-    a.icon_cls  = "fa fa-th-large glyph"
+    a.text      = 'Detail'
+    a.icon_cls  = 'fa fa-th-large glyph'
     a.handler   = :detail
     a.disabled  = true
   end
@@ -61,8 +61,8 @@ class Marty::PostingGrid < Marty::Grid
   end
 
   attribute :created_dt do |c|
-    c.text      = "Date/Time"
-    c.format    = "Y-m-d H:i"
+    c.text      = 'Date/Time'
+    c.format    = 'Y-m-d H:i'
     c.hidden    = true
   end
 

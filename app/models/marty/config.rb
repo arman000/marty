@@ -2,7 +2,7 @@ class Marty::Config < Marty::Base
   class ConfigValidator < ActiveModel::Validator
     def validate(entry)
       v = entry.get_value
-      entry.errors[:base] << "bad JSON value" if v.nil?
+      entry.errors[:base] << 'bad JSON value' if v.nil?
       v
     end
   end

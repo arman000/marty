@@ -42,7 +42,7 @@ module Layout
   def textarea_field(name, options = {})
     {
       name:        name,
-      width:       "100%",
+      width:       '100%',
       height:      150,
       xtype:       :textareafield,
       auto_scroll: true,
@@ -57,7 +57,7 @@ module Layout
   def jsonb_field(name, options = {})
     {
         name:        name,
-        width:       "100%",
+        width:       '100%',
         height:      150,
         xtype:       :textareafield,
         auto_scroll: true,
@@ -123,16 +123,16 @@ module Layout
   # Netzke 8.x.
 
   BOOL_MAP = {
-    nil   => "---",
-    true  => "True",
-    false => "False",
+    nil   => '---',
+    true  => 'True',
+    false => 'False',
   }
 
   MAP_BOOL = {
-    "---"   => nil,
-    ""      => nil,
-    "True"  => true,
-    "False" => false,
+    '---'   => nil,
+    ''      => nil,
+    'True'  => true,
+    'False' => false,
   }
 
   def bool_getter(name)
@@ -147,7 +147,7 @@ module Layout
     editor_config = {
       trigger_action: :all,
       xtype:          :combo,
-      store:          ["True", "False", "---"],
+      store:          ['True', 'False', '---'],
     }
     {
       column_config: { editor: editor_config },

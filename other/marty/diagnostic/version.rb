@@ -3,7 +3,7 @@ module Marty::Diagnostic; class Version < Base
     begin
       message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
     rescue StandardError
-      message = error("Failed accessing git")
+      message = error('Failed accessing git')
     end
     rbv = "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
     {

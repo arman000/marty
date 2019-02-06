@@ -120,8 +120,8 @@ module Netzke::Basepack::DataAdapters
         arel_table = assoc ? Arel::Table.new(assoc.klass.table_name.to_sym) :
                        @model.arel_table
 
-        value = q["value"]
-        op = q["operator"]
+        value = q['value']
+        op = q['operator']
 
         attr_type = attr_type(attr)
 
@@ -147,7 +147,7 @@ module Netzke::Basepack::DataAdapters
     end
 
     def update_predecate_for_enum(table, op, value)
-      col = Arel::Nodes::NamedFunction.new("CAST", [table.as("TEXT")])
+      col = Arel::Nodes::NamedFunction.new('CAST', [table.as('TEXT')])
       col.matches "%#{value}%"
     end
   end

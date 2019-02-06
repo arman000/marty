@@ -65,7 +65,7 @@ module Marty; module RSpec; module Components
           return #{ext_find(ext_arg('gridcolumn', text: col), 'grid')}.id
         JS
 
-      find("#" + el).click
+      find('#' + el).click
     end
 
     def get_col_vals(col, cnt = row_count, init = 0)
