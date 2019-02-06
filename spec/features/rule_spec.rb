@@ -248,48 +248,54 @@ feature 'rule view', js: true do
 
     fill_in(:results,
             with: %Q(abc = "def"\ndef = "abc"\nklm = "3"\nabc = "xyz"))
-    exp = "Computed - Error in rule 'abc' field 'results': Keyword 'abc' specified more"\
-          ' than once (line 4)'
+
+    exp = "Computed - Error in rule 'abc' field 'results': Keyword 'abc' "\
+          'specified more than once (line 4)'
     press('OK')
     wait_for_ajax
     expect(page).to have_content(exp)
     sleep 2
 
+    klm = "    3 +    \n\n# hi mom\n     4 +\n    if true then 5 else 0\n\n"
+    bogus = <<-EOL
+
+# comment line
+
+EOL
+
     multi_line = <<-EOL
 abc = "def"
 def = "abc"
-klm = 3 +
-     4 +
-if true then 5 else 0
+klm = #{klm}
 EOL
-    multi_line_fixed = <<-EOL
-abc = "def"
-def = "abc"
-klm = 3 +
-      4 +
-      if true then 5 else 0
-EOL
+
+    fill_in(:results, with: bogus + multi_line)
+    press('OK')
+    wait_for_ajax
+    exp = "Computed - Error in rule 'abc' field 'results': "\
+          'Syntax error on line 1'
+    expect(page).to have_content(exp)
 
     fill_in(:results, with: multi_line)
     press('OK')
     wait_for_ajax
 
-    # re-edit twice to make sure re-indentation and stripping are correct
+    # re-edit twice to make sure identation and comments are preserved
     press('Edit')
     wait_for_ajax
-    expect(find_field(:results).value).to eq(multi_line_fixed.chomp)
+    expect(find_field(:results).value).to eq(multi_line)
     press('OK')
     wait_for_ajax
 
     press('Edit')
     wait_for_ajax
-    expect(find_field(:results).value).to eq(multi_line_fixed.chomp)
+    expect(find_field(:results).value).to eq(multi_line)
     press('OK')
     wait_for_ajax
 
     # when stored in rule, all lines of a multi line value s/b stripped
     r = Gemini::MyRule.where(name: 'abc', obsoleted_dt: 'infinity').first
-    expect(r.results['klm']).to eq("3 +\n4 +\nif true then 5 else 0")
+    expect(r.results['klm']).to eq(klm)
 
     # make sure change of key/value order is recognized as a change
     press('Edit')
@@ -302,22 +308,23 @@ EOL
     wait_for_ajax
     press('Edit')
     wait_for_ajax
-    val = find_field(:results).value + "\n"
+    val = find_field(:results).value
     expect(val).to eq(newval)
     press('OK')
     wait_for_ajax
 
-    exp = <<EOL
-simple_result  = "c value"
+    exp = <<-EOL
+simple_result = "c value"
 computed_value = if paramb
-                 then param1 / (grid1_grid_result||1)
-                 else (grid2_grid_result||1) / param1
+    then param1 / (grid1_grid_result||1)
+     else (grid2_grid_result||1) / param1
 EOL
+
     names = mrv.get_col_vals(:name, 9, 0)
     idx = names.index { |n| n == 'Rule3' } + 1
     mrv.select_row(idx)
     press('Edit')
-    expect(find_field(:results).value).to eq(exp.chomp)
+    expect(find_field(:results).value).to eq(exp)
     press('OK')
     wait_for_ajax
 

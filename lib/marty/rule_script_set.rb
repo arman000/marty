@@ -34,7 +34,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def write_attr(k, v)
     equals, rhs = v == :parameter ? [' =?', ''] :
-                    [' =', "\n" + v.lines.map { |l| ' ' * 8 + l }.join("\n")]
+                    [' =', "\n" + v.lines.map { |l| ' ' * 8 + l }.join]
     k + equals + rhs
   end
 
