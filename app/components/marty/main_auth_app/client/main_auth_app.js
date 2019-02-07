@@ -79,7 +79,7 @@
       prompt: true,
       fn: function (btn, value) {
         if (btn == "ok" && value == "STOP") {
-          me.showLoadmask('Stopping delayed job...');
+          me.showLoadMask('Stopping delayed job...');
           me.server.bgStop({});
         }
       }
@@ -96,7 +96,7 @@
       prompt: true,
       fn: function (btn, value) {
         if (btn == "ok" && value == "RESTART") {
-          me.showLoadmask('Restarting delayed job...');
+          me.showLoadMask('Restarting delayed job...');
           me.server.bgRestart({});
         }
       }
@@ -104,7 +104,7 @@
   },
 
   netzkeOnBgStatus: function () {
-    this.showLoadmask('Checking delayed job status...');
+    this.showLoadMask('Checking delayed job status...');
     this.server.bgStatus({});
   },
 
