@@ -424,12 +424,11 @@ describe DataImporter do
     Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
     p = Marty::Posting.do_create('BASE', DateTime.tomorrow, '?')
 
-    engine = Marty::ScriptSet.new.get_engine('DataReport')
-    res = engine.evaluate('TableReport',
-                          'result_raw',
-                          'pt_name'    => p.name,
-                          'class_name' => 'Gemini::FannieBup',
-                         )
+    res = Marty::Script.evaluate(
+      nil, 'DataReport', 'TableReport', 'result_raw',
+      'pt_name'    => p.name,
+      'class_name' => 'Gemini::FannieBup',
+    )
     res[0].should == fannie_bup1_export[0]
     res[1..-1].sort.should == fannie_bup1_export[1..-1].sort
   end
@@ -448,12 +447,12 @@ describe 'Blame Report without yml translations' do
     Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
     Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
     p2 = Marty::Posting.do_create('BASE', DateTime.now, 'now is the time')
-    engine = Marty::ScriptSet.new.get_engine('BlameReport')
-    @res = engine.evaluate('DataBlameReport',
-                           'result',
-                           'pt_name1'    => p.name,
-                           'pt_name2'    => p2.name
-                          )
+
+    @res = Marty::Script.evaluate(
+      nil, 'BlameReport', 'DataBlameReport', 'result',
+      'pt_name1' => p.name,
+      'pt_name2' => p2.name
+    )
   end
 
   context 'when exporting' do
@@ -466,23 +465,20 @@ end
 
 describe 'Blame Report with yml translations' do
   before(:each) do
-    I18n.backend.store_translations(:en,
-                                    attributes: {
-                                      note_rate: 'Note Rate'
-                                    }
-                                   )
+    I18n.backend.store_translations(:en, attributes: { note_rate: 'Note Rate' })
+
     Marty::Script.load_scripts(nil, Date.today)
     Marty::ScriptSet.clear_cache
     p = Marty::Posting.do_create('BASE', DateTime.yesterday, 'yesterday')
     Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
     Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
     p2 = Marty::Posting.do_create('BASE', DateTime.now, 'now is the time')
-    engine = Marty::ScriptSet.new.get_engine('BlameReport')
-    @res = engine.evaluate('DataBlameReport',
-                           'result',
-                           'pt_name1'    => p.name,
-                           'pt_name2'    => p2.name
-                          )
+
+    @res = Marty::Script.evaluate(
+      nil, 'BlameReport', 'DataBlameReport', 'result',
+      'pt_name1' => p.name,
+      'pt_name2' => p2.name,
+    )
   end
 
   context 'when exporting' do
