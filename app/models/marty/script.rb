@@ -119,7 +119,9 @@ class Marty::Script < Marty::Base
   end
 
   delorean_fn :eval_to_hash, sig: 5 do |dt, script, node, attrs, params|
-    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
+    if dt
+      tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
+    end
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
@@ -131,10 +133,17 @@ class Marty::Script < Marty::Base
     # current tag can caused problems.
   end
 
+  # evaluate script's node attribute (attr) with the given params.  dt
+  # is used to determine which script tag to use.  The latest tag is
+  # used if dt is nil.
   delorean_fn :evaluate, sig: 5 do |dt, script, node, attr, params|
-    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
+    if dt
+      tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
+    end
 
+    # nil tag, uses the latest one
     engine = Marty::ScriptSet.new(tag).get_engine(script)
+
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
     # params, but it is possible that we may be passing in
     # a frozen hash. To avoid performance impacts, we should first check if
