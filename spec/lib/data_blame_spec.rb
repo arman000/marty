@@ -22,21 +22,21 @@ describe 'Blame Report', slow: true do
     bc2 = Gemini::BudCategory.create(name: 'Govt Fixed 30', created_dt: time1)
 
     fannie_bup1 = Gemini::FannieBup.create(bud_category: bc,
-                             note_rate: 2.250,
-                             buy_up: 1.123,
-                             buy_down: 2.345,
-                             settlement_mm: 12,
-                             settlement_yy: 2012,
-                             created_dt: time1
+                                           note_rate: 2.250,
+                                           buy_up: 1.123,
+                                           buy_down: 2.345,
+                                           settlement_mm: 12,
+                                           settlement_yy: 2012,
+                                           created_dt: time1
                                           )
 
     fannie_bup2 = Gemini::FannieBup.create(bud_category: bc2,
-                             note_rate: 2.250,
-                             buy_up: 2.123,
-                             buy_down: 3.345,
-                             settlement_mm: 22,
-                             settlement_yy: 2014,
-                             created_dt: time4
+                                           note_rate: 2.250,
+                                           buy_up: 2.123,
+                                           buy_down: 3.345,
+                                           settlement_mm: 22,
+                                           settlement_yy: 2014,
+                                           created_dt: time4
                                           )
 
     fannie_bup2.destroy!
@@ -58,11 +58,11 @@ describe 'Blame Report', slow: true do
 
   it 'should generate Data Blame report' do
     ws = Marty::Script.evaluate(
-      nil, 'BlameReport', 'DataBlameReport', 'result', {
-        # "class_list" param, defaults to all
-        'pt_name1' => @pt_name,
-        'pt_name2' => 'NOW',
-      })
+      nil, 'BlameReport', 'DataBlameReport', 'result',
+      # "class_list" param, defaults to all
+      'pt_name1' => @pt_name,
+      'pt_name2' => 'NOW',
+    )
 
     sp = Marty::Xl.spreadsheet(ws)
     file = Tempfile.new('file.xlsx')

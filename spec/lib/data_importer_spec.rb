@@ -465,8 +465,7 @@ end
 
 describe 'Blame Report with yml translations' do
   before(:each) do
-    I18n.backend.store_translations(
-      :en, attributes: {note_rate: 'Note Rate'})
+    I18n.backend.store_translations(:en, attributes: { note_rate: 'Note Rate' })
 
     Marty::Script.load_scripts(nil, Date.today)
     Marty::ScriptSet.clear_cache

@@ -119,9 +119,7 @@ class Marty::Script < Marty::Base
   end
 
   delorean_fn :eval_to_hash, sig: 5 do |dt, script, node, attrs, params|
-    if dt
-      tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
-    end
+    tag = dt ? Marty::Tag.find_match(dt) || raise("no tag for #{dt}") : nil
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
@@ -137,9 +135,7 @@ class Marty::Script < Marty::Base
   # is used to determine which script tag to use.  The latest tag is
   # used if dt is nil.
   delorean_fn :evaluate, sig: 5 do |dt, script, node, attr, params|
-    if dt
-      tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
-    end
+    tag = dt ? Marty::Tag.find_match(dt) || raise("no tag for #{dt}") : nil
 
     # nil tag, uses the latest one
     engine = Marty::ScriptSet.new(tag).get_engine(script)
