@@ -57,13 +57,12 @@ describe 'Blame Report', slow: true do
   end
 
   it 'should generate Data Blame report' do
-    engine = Marty::ScriptSet.new.get_engine('BlameReport')
-    ws = engine.evaluate(
-      'DataBlameReport', 'result',
-      # "class_list" param, defaults to all
-      'pt_name1' => @pt_name,
-      'pt_name2' => 'NOW',
-    )
+    ws = Marty::Script.evaluate(
+      nil, 'BlameReport', 'DataBlameReport', 'result', {
+        # "class_list" param, defaults to all
+        'pt_name1' => @pt_name,
+        'pt_name2' => 'NOW',
+      })
 
     sp = Marty::Xl.spreadsheet(ws)
     file = Tempfile.new('file.xlsx')
