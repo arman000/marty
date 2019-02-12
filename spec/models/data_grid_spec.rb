@@ -558,10 +558,7 @@ describe 'lookups for infinity' do
       to eq 'Marty::DataGrid'
     g1 = Marty::DataGrid.lookup('infinity', 'G1')
 
-    res = lookup_grid_helper('infinity',
-                             'G8',
-                             'ltv' => 80,
-                            )
+    res = lookup_grid_helper('infinity', 'G8', 'ltv' => 80)
     expect(res).to eq [g1, 'G8']
   end
 
@@ -578,44 +575,31 @@ describe 'lookups for infinity' do
     g1_res = lookup_grid_helper('infinity', 'G1', h)
     expect(g1_res).to eq [11, 'G1']
 
-    res = lookup_grid_helper('infinity',
-                             'G8',
-                             h, true
-                           )
+    res = lookup_grid_helper('infinity', 'G8', h, true)
+
     expect(g1_res).to eq res
   end
 
   it 'should handle DataGrid typed data grids' do
     g1 = Marty::DataGrid.find_by(obsoleted_dt: 'infinity', name: 'G1')
 
-    res = lookup_grid_helper('infinity',
-                             'Ga',
-                             'dg' => g1,
-                            )
+    res = lookup_grid_helper('infinity', 'Ga', 'dg' => g1)
     expect(res).to eq [7, 'Ga']
 
     # should be able to lookup bu name as well
-    res = lookup_grid_helper('infinity',
-                             'Ga',
-                             'dg' => 'G2',
-                            )
+    res = lookup_grid_helper('infinity', 'Ga', 'dg' => 'G2')
+
     expect(res).to eq [7, 'Ga']
   end
 
   it 'should handle DataGrid typed data grids -- non mcfly' do
     ca = Gemini::State.find_by_name('CA')
 
-    res = lookup_grid_helper('infinity',
-                             'Gb',
-                             'property_state' => ca,
-                            )
+    res = lookup_grid_helper('infinity', 'Gb', 'property_state' => ca)
     expect(res).to eq [70, 'Gb']
 
     # should be able to lookup bu name as well
-    res = lookup_grid_helper('infinity',
-                             'Gb',
-                             'property_state' => 'CA',
-                            )
+    res = lookup_grid_helper('infinity', 'Gb', 'property_state' => 'CA')
     expect(res).to eq [70, 'Gb']
   end
 
@@ -748,18 +732,16 @@ describe 'updates' do
 
     dgch = dgc.attributes.
            slice('id', 'group_id', 'created_dt',  'metadata', 'data_type')
-    res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2014',
-                                                       { 'property_state' => 'CA' }, dgch)
+    res = Marty::DataGrid.lookup_grid_distinct_entry_h(
+      '2/2/2014', { 'property_state' => 'CA' }, dgch)
     expect(res['result']).to eq(70)
 
-    res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2015',
-                                                       { 'property_state' => 'CA' }, dgch)
-
+    res = Marty::DataGrid.lookup_grid_distinct_entry_h(
+      '2/2/2015', { 'property_state' => 'CA' }, dgch)
     expect(res['result']).to eq(333)
 
-    res = Marty::DataGrid.lookup_grid_distinct_entry_h('2/2/2016',
-                                                       { 'property_state' => 'CA' }, dgch)
-
+    res = Marty::DataGrid.lookup_grid_distinct_entry_h(
+      '2/2/2016', { 'property_state' => 'CA' }, dgch)
     expect(res['result']).to eq(444)
   end
 
