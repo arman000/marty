@@ -25,7 +25,11 @@ class Marty::RpcController < ActionController::Base
 
       api_params = api.process_params(massaged_params)
       auth       = api.is_authorized?(api_params)
+
       return result = { error: 'Permission denied' } unless auth
+
+      # allow api classes to return hashes with error key for custom responses
+      return result = auth if auth.is_a?(Hash) && auth[:error]
 
       start_time = Time.zone.now
       api.before_evaluate(api_params)
