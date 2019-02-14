@@ -293,33 +293,33 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   ######################################################################
 
-  def bg_command(param)
+  def bg_command(subcmd)
+    params = Marty::Config['DELAYED_JOB_PARAMS'] || ''
     e, root, p = ENV['RAILS_ENV'], Rails.root, Marty::Config['RUBY_PATH']
     dj_path = Marty::Config['DELAYED_JOB_PATH'] || 'bin/delayed_job'
     cmd = "export RAILS_ENV=#{e};"
     # FIXME: Environment looks to be setup incorrectly - this is a hack
     cmd += "export PATH=#{p}:$PATH;" if p
     # 2>&1 redirects STDERR to STDOUT since backticks only captures STDOUT
-    cmd += "#{root}/#{dj_path} #{param} 2>&1"
+    cmd += "#{root}/#{dj_path} #{subcmd} #{params} 2>&1"
     cmd
   end
 
-  endpoint :bg_status do |params|
+  endpoint :bg_status do |_|
     cmd = bg_command('status')
     res = `#{cmd}`
     client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Status'
   end
 
-  endpoint :bg_stop do |params|
+  endpoint :bg_stop do |_|
     cmd = bg_command('stop')
     res = `#{cmd}`
     res = 'delayed_job: no instances running. Nothing to stop.' if res.empty?
     client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Stop'
   end
 
-  endpoint :bg_restart do |params|
-    params = Marty::Config['DELAYED_JOB_PARAMS'] || ''
-    cmd = bg_command("restart #{params}")
+  endpoint :bg_restart do |_|
+    cmd = bg_command('restart')
     res = `#{cmd}`
     client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Restart'
   end
