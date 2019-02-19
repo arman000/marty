@@ -12,7 +12,7 @@ gem 'rails', '~> 5.1.4'
 gem 'sqlite3'
 
 group :development, :test do
-  gem 'capybara'
+  gem 'capybara', '~> 2.18.0'
   gem 'chromedriver-helper'
   gem 'connection_pool'
   gem 'database_cleaner'

@@ -51,6 +51,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     end
   end
 
+  # FSM to parse rule text into json
   def self.ruletext_to_hash(s)
     # states are
     #  :start   - before any attr is defined
@@ -73,7 +74,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
 
       line.chomp!
       idx += 1
-      m = /\A\s*([a-z][a-z0-9_]*)\s* = ?(.*)\z/.match(line)
+      m = /\A\s*([a-z][a-z0-9_]*)\s* = (.*)\z/.match(line)
       next [:attr, m[1..-1]] if m
 
       [:normal, line]
@@ -235,14 +236,14 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     [jsonb_field(:computed_guards,
                  getter: jsonb_simple_getter(:computed_guards),
                  setter: jsonb_simple_setter(:computed_guards),
-                 height: 150)]
+                 height: 100)]
   end
 
   def form_items_results
     [jsonb_field(:results,
                  getter: jsonb_simple_getter(:results),
                  setter: jsonb_simple_setter(:results),
-                 height: 150)]
+                 height: 225)]
   end
 
   def default_form_items

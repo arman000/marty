@@ -73,33 +73,44 @@ module Marty::RuleSpec
       it 'detects errors in computed guards' do
         @rule_type = 'SimpleRule'
         @computed_guards = { 'guard1' => 'zvjsdf12.z8*' }
-        exp = /Computed - Error in rule 'testrule' field 'computed_guards': Syntax error/
+        exp = Regexp.new("Computed - Error in rule 'testrule' field "\
+                         "'computed_guards' .line 1.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'detects errors in computed results' do
         @rule_type = 'SimpleRule'
-        @results = { 'does_not_compute' => 'zvjsdf12.z8*' }
+        @results = { 'does_compute' => '1+2',
+                     'does_not_compute' => 'zvjsdf12.z8*' }
         @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid2' }
-        exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
+        exp = Regexp.new("Computed - Error in rule 'testrule' field "\
+                         "'results' .line 2.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'detects errors in computed results 2' do
         @rule_type = 'SimpleRule'
         @results = { 'does_not_compute' => 'zvjsdf12.z8*' }
-        @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid1', 'grid3' => 'DataGrid3' }
-        exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
+        @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid1',
+                   'grid3' => 'DataGrid3' }
+        exp = Regexp.new("Computed - Error in rule 'testrule' field "\
+                         "'results' .line 1.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'detects errors in computed results 3' do
         @rule_type = 'SimpleRule'
-        @results = { 'does_not_compute' => 'zvjsdf12.z8*' }
-        @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid1', 'grid3' => 'DataGrid1' }
-        exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
+        @results = { 'does_compute' => '1+2',
+                     'does_compute2' => '"string".length',
+                     'does_not_compute' => 'zvjsdf12.z8*',
+                     'does_compute3' => '[does_compute].sum' }
+        @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid1',
+                   'grid3' => 'DataGrid1' }
+        exp = Regexp.new("Computed - Error in rule 'testrule' field "\
+                         "'results' .line 3.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'reports bad grid names' do
         @rule_type = 'SimpleRule'
-        @grids = { 'grid1' => 'xyz', 'grid2' => 'DataGrid2', 'grid3' => 'DataGrid1' }
+        @grids = { 'grid1' => 'xyz', 'grid2' => 'DataGrid2',
+                   'grid3' => 'DataGrid1' }
         exp = /Grids - Bad grid name 'xyz' for 'grid1'/
         expect { subject }.to raise_error(exp)
       end
@@ -133,19 +144,22 @@ module Marty::RuleSpec
       it 'detects script errors' do
         @rule_type = 'XRule'
         @results = { 'x' => 'zx sdf wer' }
-        exp = /Computed - Error in rule 'testrule' field 'results': Syntax error/
+        exp = Regexp.new("Computed - Error in rule 'testrule' field "\
+                         "'results' .line 1.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'rule script stuff overrides 1' do
         @rule_type = 'XRule'
         @computed_guards = { 'abc' => 'true', 'xyz_guard' => 'err err err' }
-        exp = /Computed - Error in rule 'testrule' field 'xyz': Syntax error/
+        exp = Regexp.new("Computed - Error in rule 'testrule' field "\
+                         "'xyz' .line 1.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'rule script stuff overrides 2' do
         @rule_type = 'XRule'
         @computed_guards = { 'abc' => 'err err err', 'xyz_guard' => 'xyz_param' }
-        exp = /Computed - Error in rule 'testrule' field 'computed_guards': Syntax error/
+        exp = Regexp.new("Computed - Error in rule 'testrule' field "\
+                         "'computed_guards' .line 1.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'rule script stuff overrides 3' do
@@ -376,9 +390,9 @@ module Marty::RuleSpec
         rescue Marty::DeloreanRule::ComputeError => e
           exp = 'no implicit conversion of Integer into String'
           expect(e.message).to include(exp)
-          expres = [/DELOREAN__XyzRule_\d+_1483228800.0:22:in .+'/,
-                    /DELOREAN__XyzRule_\d+_1483228800.0:22:in .tmp_var4__D'/,
-                    /DELOREAN__XyzRule_\d+_1483228800.0:26:in .bv__D'/]
+          expres = [/DELOREAN__XyzRule_\d+_1483228800.0:\d+:in .+'/,
+                    /DELOREAN__XyzRule_\d+_1483228800.0:\d+:in .tmp_var4__D'/,
+                    /DELOREAN__XyzRule_\d+_1483228800.0:\d+:in .bv__D'/]
           expres.each_with_index do |expre, i|
             expect(e.backtrace[i]).to match(expre)
           end
@@ -390,8 +404,8 @@ module Marty::RuleSpec
         rescue Marty::DeloreanRule::ComputeError => e
           exp = 'divided by 0'
           expect(e.message).to include(exp)
-          expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:5:in ./'),
-                    /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]
+          expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:\d+:in ./'),
+                    /DELOREAN__XyzRule_\d+_1483228800.0:\d+:in .cg1__D'/]
           expres.each_with_index do |expre, i|
             expect(e.backtrace[i]).to match(expre)
           end
@@ -429,9 +443,9 @@ module Marty::RuleSpec
                'err_section' => 'results',
                'err_message' => 'no implicit conversion of Integer into String' }
         expect(log_ents[1].details.except('err_stack')).to eq(exp)
-        expres = [/DELOREAN__XyzRule_\d+_1483228800.0:22:in .+'/,
-                  /DELOREAN__XyzRule_\d+_1483228800.0:22:in .tmp_var4__D'/,
-                  /DELOREAN__XyzRule_\d+_1483228800.0:26:in .bv__D'/]
+        expres = [/DELOREAN__XyzRule_\d+_1483228800.0:\d+:in .+'/,
+                  /DELOREAN__XyzRule_\d+_1483228800.0:\d+:in .tmp_var4__D'/,
+                  /DELOREAN__XyzRule_\d+_1483228800.0:\d+:in .bv__D'/]
         expres.each_with_index do |expre, i|
           expect(log_ents[1].details['err_stack'][i]).to match(expre)
         end
@@ -445,8 +459,8 @@ module Marty::RuleSpec
                'err_section' => 'computed_guards',
                'err_message' => 'divided by 0' }
         expect(log_ents[2].details.except('err_stack')).to eq(exp)
-        expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:5:in ./'),
-                  /DELOREAN__XyzRule_\d+_1483228800.0:5:in .cg1__D'/]
+        expres = [%r(DELOREAN__XyzRule_\d+_1483228800.0:\d+:in ./'),
+                  /DELOREAN__XyzRule_\d+_1483228800.0:\d+:in .cg1__D'/]
         expres.each_with_index do |expre, i|
           expect(log_ents[2].details['err_stack'][i]).to match(expre)
         end

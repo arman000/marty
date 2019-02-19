@@ -203,7 +203,8 @@ feature 'rule view', js: true do
     fill_in(:computed_guards, with: 'sadf asdf ljsf')
     press('OK')
     wait_for_ajax
-    exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error on line 1"
+    exp = "Computed - Error in rule 'abc' field 'computed_guards': "\
+          'Syntax error on line 1'
     expect(page).to have_content(exp)
     sleep 2  # sleep needed for message to clear, otherwise failing tests could
     # pass due to prior messages
@@ -212,37 +213,41 @@ feature 'rule view', js: true do
     fill_in(:computed_guards, with: '0sadf = 123j')
     press('OK')
     wait_for_ajax
-    exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error on line 1"
+    exp = "Computed - Error in rule 'abc' field 'computed_guards': "\
+          'Syntax error on line 1'
     expect(page).to have_content(exp)
     sleep 2
 
     # bad rhs - delorean compile will raise
-    fill_in(:computed_guards, with: 'var = 123j')
+    fill_in(:computed_guards, with: "x = true\ny = false\nvar = 123j\nz = true")
     press('OK')
     wait_for_ajax
-    exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error"
+    exp = "Computed - Error in rule 'abc' field 'computed_guards' (line 3): "\
+          'Syntax error'
     expect(page).to have_content(exp)
     sleep 2
 
     fill_in(:computed_guards, with: %Q(var1 = "good"\nvar2 = 123\nvar3 = 123j))
     press('OK')
     wait_for_ajax
-    exp = "Computed - Error in rule 'abc' field 'computed_guards': Syntax error"
+    exp = "Computed - Error in rule 'abc' field 'computed_guards' (line 3): "\
+          'Syntax error'
     expect(page).to have_content(exp)
     sleep 2
 
     fill_in(:computed_guards, with: '')
-    fill_in(:results, with: %Q(var1 = "good"\nvar2 = 123\nvar3 = 123j))
+    fill_in(:results, with: %Q(var3 = 123j\nvar1 = "good"\nvar2 = 123))
     press('OK')
     wait_for_ajax
-    exp = "Computed - Error in rule 'abc' field 'results': Syntax error"
+    exp = "Computed - Error in rule 'abc' field 'results' (line 1): "\
+          'Syntax error'
     expect(page).to have_content(exp)
     sleep 2
 
-    fill_in(:results, with: %Q(abc = "def"\ndef = 5\nxyz=def+10\nsadf asdf lsf))
+    fill_in(:results, with: %Q(abc = "def"\ndef = 5\nxyz = def+10\nsadf asdf lsf))
     press('OK')
     wait_for_ajax
-    exp = "Computed - Error in rule 'abc' field 'results': Syntax error"
+    exp = "Computed - Error in rule 'abc' field 'results' (line 4): Syntax error"
     expect(page).to have_content(exp)
     sleep 2
 
