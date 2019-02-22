@@ -37,7 +37,7 @@ class Marty::RpcController < ActionController::Base
         result
       rescue StandardError => e
         Marty::Logger.log('rpc_controller', 'failure', e.message)
-        next INTERNAL_SERVER_ERROR
+        INTERNAL_SERVER_ERROR
       end
     end
   end
