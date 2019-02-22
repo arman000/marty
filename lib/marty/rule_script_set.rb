@@ -34,7 +34,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def write_attr(k, v)
     equals, rhs = v == :parameter ? [' =?', ''] :
-                    [' =', "\n" + v.lines.map { |l| ' ' * 8 + l }.join("\n")]
+                    [' =', v.lines.map { |l| ' ' * 8 + l }.join]
     k + equals + rhs
   end
 
@@ -129,14 +129,23 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def get_parse_error_field(ruleh, exc)
-    line = exc.line ? exc.line - self.class.body_lines : 0
-    errs = code_section_counts(ruleh)
-    line_count = 0
-    errs.each do |k, v|
-      line_count += v
-      return k if line <= line_count
+    line = (exc.line || 1) - 1
+    errs = { class_body: self.class.body_lines } + code_section_counts(ruleh)
+    ranges0 = errs.values.reduce([0]) do |acc, len|
+      acc + [acc.last + len]
     end
-    errs.keys.last
+    ranges = errs.keys.zip(ranges0.each_cons(2).to_a)
+    secnm, (st, en) = ranges.detect do |sec, (st, en)|
+      line.between?(st, en - 1)
+    end
+    [secnm, line - st + 1]
+  rescue StandardError => e
+    Marty::Logger.error('RuleScriptSet#get_parse_error_field',
+                        error: e.message,
+                        backtrace: e.backtrace,
+                        ruleh: ruleh,
+                        line: line)
+    ['Unknown', 0]
   end
 
   def get_engine(ruleh)
@@ -175,9 +184,10 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
         @@engines[[pt, sname]] = sset.parse_check(sname, get_code(ruleh))
       end
   rescue Delorean::ParseError => e
-      f = get_parse_error_field(ruleh, e)
+      secnm, line = get_parse_error_field(ruleh, e)
       msg = e.message.capitalize
-      raise "Error in rule '#{ruleh['name']}' field '#{f}': #{msg}"
+      raise "Error in rule '#{ruleh['name']}' field '#{secnm}' "\
+            "(line #{line}): #{msg}"
   end
 
   def self.indent(s)
