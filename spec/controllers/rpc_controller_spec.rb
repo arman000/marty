@@ -524,6 +524,41 @@ describe Marty::RpcController do
     Delayed::Worker.delay_jobs = true
   end
 
+  it 'should be able to get background job status' do
+    Delayed::Worker.delay_jobs = false
+
+    post 'evaluate', params: {
+           format: :json,
+           script: 'M1',
+           node: 'B',
+           attrs: 'e',
+           tag: t1.name,
+           params: { a: 333, d: 5 }.to_json,
+           background: true,
+         }
+
+    res = ActiveSupport::JSON.decode response.body
+    expect(res).to include('job_id')
+    job_id = res['job_id']
+
+    marty_whodunnit
+    Marty::Script.load_scripts(File.join(Rails.root, '../../delorean'), Date.today)
+
+    post 'evaluate', params: {
+           format: :json,
+           script: 'Promises',
+           node: 'Status',
+           attrs: 'result',
+           params: { promise_id: job_id }.to_json
+         }
+
+    res = ActiveSupport::JSON.decode response.body
+    expect(res['completed']).to be true
+    expect(res['result']).to eq('e' => 4)
+
+    Delayed::Worker.delay_jobs = true
+  end
+
   it 'should be able to post background job with non-array attr' do
     Delayed::Worker.delay_jobs = false
     post 'evaluate', params: {
