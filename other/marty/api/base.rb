@@ -174,22 +174,20 @@ class Marty::Api::Base
   def self.log_hash result, params, request
     ret_arr = params[:return_array]
 
-    # filter input as well as output
-    res     = result.is_a?(Hash) ?
-                filter_hash(result.stringify_keys, engine_params_filter) :
-                result
-
+    # filter sensitive information from input/output
+    is_hash = result.is_a?(Hash)
+    res     = is_hash ? filter_hash(result, engine_params_filter) : result
     input   = filter_hash(params[:params], engine_params_filter)
+    error   = res['error'] if is_hash && res.include?('error')
 
-    {
-      script:     params[:script],
+    { script:     params[:script],
       node:       params[:node],
       attrs:      ret_arr ? [params[:attr]] : params[:attr],
       input:      input,
-      output:     res.is_a?(Hash) && res.include?('error') ? nil : res,
+      output:     error ? nil : res,
       start_time: params[:start_time],
       end_time:   Time.zone.now,
-      error:      res.is_a?(Hash) && res.include?('error') ? res['error'] : nil,
+      error:      error,
       remote_ip:  request.remote_ip,
       auth_name:  params[:auth]
     }
