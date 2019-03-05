@@ -53,6 +53,23 @@ class Marty::User < Marty::Base
     authenticate_with?(login, password) || nil
   end
 
+  def self.ldap_login(login, password)
+    # IMPORTANT NOTE: if server allows anonymous LDAP access, empty
+    # passwords will succeed!  i.e. if a valid user with empty
+    # password is sent in, ldap.bind will return OK.
+    cf = Rails.configuration.marty.ldap
+    ldap = Net::LDAP.new(host: cf.host,
+                         port: cf.port,
+                         base: cf.base_dn,
+                         encryption: cf.encryption,
+                         auth: {
+                           method: :simple,
+                           username: cf.domain + '\\' + login,
+                           password: password,
+                         })
+    ldap.bind
+  end
+
   def self.authenticate_with?(login, password)
     cf = Rails.configuration.marty
 
@@ -61,20 +78,7 @@ class Marty::User < Marty::Base
     if auth_source == 'local'
       ok = password == cf.local_password
     elsif auth_source == 'ldap'
-      # IMPORTANT NOTE: if server allows anonymous LDAP access, empty
-      # passwords will succeed!  i.e. if a valid user with empty
-      # password is sent in, ldap.bind will return OK.
-      cf = Rails.configuration.marty.ldap
-      ldap = Net::LDAP.new(host: cf.host,
-                           port: cf.port,
-                           base: cf.base_dn,
-                           encryption: cf.encryption,
-                           auth: {
-                             method: :simple,
-                             username: cf.domain + '\\' + login,
-                             password: password,
-                           })
-      ok = ldap.bind
+      ok = ldap_login(login, password)
     else
       raise "bad auth_source: #{auth_source.inspect}"
     end
