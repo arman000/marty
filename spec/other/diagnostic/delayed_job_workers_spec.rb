@@ -8,7 +8,7 @@ describe Marty::Diagnostic::DelayedJobWorkers do
       ip || Marty::Helper.my_ip => {
         'Delayed Workers / Node' => {
           'description' => error ? '3' : '4',
-          'status'      => status,
+          'status'      => status || true,
           'consistent'  => nil
         },
       }
