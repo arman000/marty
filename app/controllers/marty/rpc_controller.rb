@@ -1,55 +1,53 @@
 class Marty::RpcController < ActionController::Base
+  INTERNAL_SERVER_ERROR   = { error: 'internal server error' }
+  PERMISSION_DENIED_ERROR = { error: 'Permission denied' }
+
   def evaluate
-      # set default result and params in case of unexpected errors
-      # to ensure logging capabilities
-      result          = nil
-      api_params      = {}
-      start_time      = nil
-      auth            = nil
+    massaged_params = massage_params(params)
 
-      # massage request params
-      massaged_params = massage_params(params)
+    # resolve api config in order to determine api class and settings
+    api_config = get_api_config(massaged_params) || {}
 
-      # resolve api config in order to determine api class and settings
-      api_config = Marty::ApiConfig.lookup(*massaged_params.values_at(
-        :script,
-        :node,
-        :attr)
-                                          ) || {}
+    # default to base class if no config is present
+    api = api_config[:api_class].try(:constantize) || Marty::Api::Base
 
-      # default to base class if no config is present
-      api = api_config.present? ? api_config[:api_class].constantize :
-              Marty::Api::Base
+    api.respond_to(self) do
+      begin
+        next massaged_params if massaged_params.include?(:error)
 
-      return result = massaged_params if massaged_params.include?(:error)
+        api_params = api.process_params(massaged_params)
+        auth       = api.is_authorized?(api_params)
 
-      api_params = api.process_params(massaged_params)
-      auth       = api.is_authorized?(api_params)
-      return result = { error: 'Permission denied' } unless auth
+        next PERMISSION_DENIED_ERROR unless auth
 
-      start_time = Time.zone.now
-      api.before_evaluate(api_params)
-      result = api.evaluate(api_params, request, api_config)
-      api.after_evaluate(api_params, result)
-  rescue StandardError => e
-      # log unexpected failures in rpc controller and respond with
-      # generic server error
-      Marty::Logger.log('rpc_controller', 'failure', e.message)
-      result = { error: 'internal server error' }
-  ensure
-      # if logging is enabled, always log the result even on error
-      if api_config && api_config[:logged] && api
-        api.log(result,
-                api_params + { start_time: start_time, auth: auth },
-                request)
+        # allow api classes to return hashes with error key for custom responses
+        next auth if auth.is_a?(Hash) && auth[:error]
+
+        start_time = Time.zone.now
+        api.before_evaluate(api_params)
+
+        result = api.evaluate(api_params, request, api_config)
+        api.after_evaluate(api_params, result)
+
+        if api_config[:logged]
+          log_params = api_params + { start_time: start_time, auth: auth }
+          api.log(result, log_params, request)
+        end
+
+        result
+      rescue StandardError => e
+        Marty::Logger.log('rpc_controller', 'failure', e.message)
+        INTERNAL_SERVER_ERROR
       end
-
-      api.respond_to(self) do
-        result || { 'error' => 'internal server error' }
-      end
+    end
   end
 
   private
+
+  def get_api_config params
+    config_attrs = params.values_at(:script, :node, :attr)
+    Marty::ApiConfig.lookup(*config_attrs)
+  end
 
   def process_active_params params
     # must permit params before conversion to_h
