@@ -16,3 +16,9 @@ Layout/DotPosition:
 Style/StringLiterals:
   Enabled: true
   EnforcedStyle: single_quotes
+
+Metrics/BlockLength:
+  Max: 400
+  Exclude:
+    - 'spec/**/*'
+

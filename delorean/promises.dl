@@ -1,0 +1,5 @@
+Status:
+    promise_id =? nil
+
+    result = Marty::Promise.result_and_status(promise_id)
+

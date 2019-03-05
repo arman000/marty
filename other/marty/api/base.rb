@@ -168,25 +168,28 @@ class Marty::Api::Base
     return unless hash
 
     pf = ActionDispatch::Http::ParameterFilter.new(filter_params)
-    pf.filter(hash)
+    pf.filter(hash.stringify_keys)
   end
 
   def self.log_hash result, params, request
-    res     = result.is_a?(Hash) ? result.stringify_keys : result
     ret_arr = params[:return_array]
+
+    # filter sensitive information from input/output
+    is_hash = result.is_a?(Hash)
+    res     = is_hash ? filter_hash(result, engine_params_filter) : result
     input   = filter_hash(params[:params], engine_params_filter)
+    error   = res['error'] if is_hash && res.include?('error')
+
     { script:     params[:script],
-     node:       params[:node],
-     attrs:      ret_arr ? [params[:attr]] : params[:attr],
-     input:      input,
-     output:     (res.is_a?(Hash) &&
-                  res.include?('error')) ? nil : res,
-     start_time: params[:start_time],
-     end_time:   Time.zone.now,
-     error:      (res.is_a?(Hash) &&
-                  res.include?('error')) ? res['error'] : nil,
-     remote_ip:  request.remote_ip,
-     auth_name:  params[:auth]
+      node:       params[:node],
+      attrs:      ret_arr ? [params[:attr]] : params[:attr],
+      input:      input,
+      output:     error ? nil : res,
+      start_time: params[:start_time],
+      end_time:   Time.zone.now,
+      error:      error,
+      remote_ip:  request.remote_ip,
+      auth_name:  params[:auth]
     }
   end
 

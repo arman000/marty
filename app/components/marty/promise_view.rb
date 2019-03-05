@@ -1,5 +1,6 @@
 class Marty::PromiseView < Netzke::Tree::Base
   extend ::Marty::Permissions
+  has_marty_permissions read: :any
 
   client_styles do |config|
     config.require :promise_view
@@ -15,11 +16,17 @@ class Marty::PromiseView < Netzke::Tree::Base
     c.include :promise_view
   end
 
-  def configure(config)
+  ######################################################################
+
+  def class_can?(op)
+    self.class.can_perform_action?(op)
+  end
+
+  def configure(c)
     super
-    config.title = I18n.t('jobs.promise_view')
-    config.model = 'Marty::VwPromise'
-    config.attributes = [
+    c.title = I18n.t('jobs.promise_view')
+    c.model = 'Marty::VwPromise'
+    c.attributes = [
       { name: :title, xtype: :treecolumn },
       :user__login,
       :job_id,
@@ -29,14 +36,17 @@ class Marty::PromiseView < Netzke::Tree::Base
       :cformat,
       :error,
     ]
-    config.root_visible = false
-    config.paging = :none
-    config.bbar = bbar
-    config.read_only = true
-    config.permissions = { update: false,
-                           create: false,
-                           delete: false,
-                         }
+    c.root_visible = false
+    c.paging = :none
+    c.bbar = bbar
+    c.read_only = true
+    c.permissions = {
+      create: class_can?(:create),
+      read:   class_can?(:read),
+      update: class_can?(:update),
+      delete: class_can?(:delete)
+    }
+
     # garbage collect old promises (hacky to do this here)
     Marty::Promise.cleanup(false)
   end
