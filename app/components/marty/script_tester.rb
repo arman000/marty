@@ -52,7 +52,7 @@ class Marty::ScriptTester < Marty::Form
 
     begin
       phash = ActiveSupport::JSON.decode("{ #{pjson} }")
-    rescue MultiJson::DecodeError
+    rescue JSON::ParserError
       client.netzke_notify 'Malformed input parameters'
       return
     end

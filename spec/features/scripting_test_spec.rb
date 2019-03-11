@@ -119,6 +119,13 @@ DELOREAN
       expect(page).to have_content 'undefined parameter p0'
     end
 
+    and_by 'see malformed params error' do
+      fill_in('params', with: 'a = Wrong::Class.last')
+      press('Compute')
+      wait_for_ajax
+      expect(page).to have_content 'Malformed input parameters'
+    end
+
     and_by 'compute attrs with good params' do
       fill_in('params', with: "a = 1.1\nc = 2.2\np0 = 3.3\n")
       press('Compute')
