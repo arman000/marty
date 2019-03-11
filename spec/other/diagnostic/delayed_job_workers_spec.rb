@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'job_helper'
 
 describe Marty::Diagnostic::DelayedJobWorkers do
-  def sample_data opts={}
+  def sample_data opts = {}
     ip, error, status = opts.values_at(:ip, :error, :status)
     {
       ip || Marty::Helper.my_ip => {

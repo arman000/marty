@@ -16,6 +16,7 @@ group :development, :test do
   gem 'chromedriver-helper'
   gem 'connection_pool'
   gem 'database_cleaner'
+  gem 'pry-byebug'
   gem 'pry-rails'
   gem 'rails-controller-testing'
   gem 'rspec-instafail', require: false
