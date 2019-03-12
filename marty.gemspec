@@ -40,7 +40,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'net-ldap', '~> 0.16.1'
   s.add_dependency 'rubyzip'
   s.add_dependency 'sqlite3'
-  s.add_dependency 'json-schema'
   s.add_dependency 'parse-cron'
   s.add_dependency 'cronex'
 

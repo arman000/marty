@@ -120,5 +120,39 @@
         btn == "ok" && me.server.logCleanup(value);
       }
     });
+  },
+
+  netzkeOnBgSchedulerRestart: function (params) {
+    var me = this;
+    Ext.Msg.show({
+      title: 'Restart Delayed Scheduler',
+      msg: 'Enter RESTART and press OK to force a restart of delayed_job',
+      width: 375,
+      buttons: Ext.Msg.OKCANCEL,
+      prompt: true,
+      fn: function (btn, value) {
+        if (btn == "ok" && value == "RESTART") {
+          me.showLoadMask('Restarting delayed scheduler...');
+          me.server.bgRestart({});
+        }
+      }
+    });
+  },
+
+  netzkeOnBgSchedulerStop: function (params) {
+    var me = this;
+    Ext.Msg.show({
+      title: 'Stop Delayed Scheduler',
+      msg: 'Enter STOP and press OK to force a restart of delayed_job',
+      width: 375,
+      buttons: Ext.Msg.OKCANCEL,
+      prompt: true,
+      fn: function (btn, value) {
+        if (btn == "ok" && value == "STOP") {
+          me.showLoadMask('Stopping delayed scheduler...');
+          me.server.bgRestart({});
+        }
+      }
+    });
   }
 }

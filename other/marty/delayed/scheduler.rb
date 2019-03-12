@@ -51,7 +51,9 @@ class Marty::Delayed::Scheduler
           # timeout so we can produce heartbeat
           listener.wait_for_notify([sleep_time, time_to_next_job].min)
         end
-      end
+        end
+    rescue => e
+      Marty::Logger.log('scheduler', 'fatal', e.message)
     ensure
       # unlisten and close raw pg connection
       if listener

@@ -349,18 +349,25 @@ class Marty::MainAuthApp < Marty::AuthApp
     client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Restart'
   end
 
-  endpoint :bg_scheduler_stop do |params|
-    res = "#{Marty::SchedulerLife.delete_all} SchedulerLive(s) deleted."
-    client.show_detail res.html_safe.gsub("\n","<br/>"), 'Scheduler Stop'
+  endpoint :bg_scheduler_stop do |_|
+    begin
+      res = "#{Marty::SchedulerLife.delete_all} SchedulerLive(s) deleted."
+    rescue => e
+      res = e.message
+    end
+    client.show_detail(res.html_safe.gsub("\n","<br/>"), 'Scheduler Stop')
   end
 
-  endpoint :bg_scheduler_restart do |params|
-    d_msg = "#{Marty::SchedulerLife.delete_all} SchedulerLive(s) deleted."
-    Marty::Delayed::Scheduler.deploy
-    c_msg = "#{Marty::SchedulerLife.count} Scheduler deployed."
+  endpoint :bg_scheduler_restart do |_|
+    begin
+      res = "#{Marty::SchedulerLife.delete_all} SchedulerLive(s) deleted."
+      Marty::Delayed::Scheduler.deploy
+      res += "\n#{Marty::SchedulerLife.count} Scheduler deployed."
 
-    client.show_detail (d_msg + "\n" + c_msg).html_safe.gsub("\n","<br/>"),
-                       'Scheduler Restart'
+    rescue => e
+      res = e.message
+    end
+    client.show_detail(res.html_safe.gsub("\n","<br/>"), 'Scheduler Restart')
   end
 
   endpoint :log_cleanup do |params|
