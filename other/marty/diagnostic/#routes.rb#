@@ -1,0 +1,30 @@
+class Marty::Diagnostic::Routes
+  Marty::DiagnosticController = Marty::Diagnostic::Controller
+
+  def self.paths
+    [Marty::Engine.root.join('other/marty/diagnostic')]
+  end
+
+  # TODO: move these to specific directory
+  def self.ignore
+    ['request', 'fatal', 'database', 'connections', 'routes'].to_set
+  end
+
+  def self.diagnostics
+    Dir[Marty::Engine.root.join('other/marty/diagnostic/*.rb')].map do |p|
+      name = p.split('/')[-1].chomp('.rb')
+      next if ignore.member?(name)
+      name
+    end.compact
+  end
+
+  def self.routes module_name='marty'
+    Marty::Engine.routes.draw do
+      resource :diagnostic, controller: 'diagnostic', only: [] do
+        Marty::Diagnostic::Routes.diagnostics.each do |d|
+          get d,  to: redirect("marty/diag?op=#{d}")
+        end
+      end
+    end
+  end
+end

@@ -55,8 +55,12 @@ class Marty::Delayed::Scheduler
     ensure
       # unlisten and close raw pg connection
       if listener
-        listener.exec("UNLISTEN *")
-        listener.close
+        begin
+          listener.exec("UNLISTEN *")
+          listener.close
+        rescue => e
+          Marty::Logger.log('scheduler', 'fatal', e.message)
+        end
       end
     end
   end
