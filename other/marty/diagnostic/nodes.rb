@@ -4,7 +4,7 @@ module Marty::Diagnostic; class Nodes < Base
   diagnostic_fn aggregatable: false do
     begin
       pg_nodes = Node.get_nodes.sort
-    rescue => e
+    rescue StandardError => e
       next error(e.message)
     end
 
@@ -13,7 +13,7 @@ module Marty::Diagnostic; class Nodes < Base
 
     begin
       instance_data = Marty::Diagnostic::Aws::Ec2Instance.new
-    rescue => e
+    rescue StandardError => e
       next error(pg_nodes.join("\n") +
                  "\nAws Communication Error: #{e.message}")
     end
@@ -25,7 +25,7 @@ module Marty::Diagnostic; class Nodes < Base
       # generate instance information when there is an issue
       # between aws and postgres
       instances = instance_data.instances
-      {'nodes' => error("There is a discrepancy between nodes connected to "\
+      { 'nodes' => error('There is a discrepancy between nodes connected to '\
                         "Postgres and those discovered through AWS EC2.\n"\
                         "Postgres: \n#{pg_nodes.join("\n")}\n"\
                         "AWS: \n#{a_nodes.join("\n")}"),
@@ -35,19 +35,21 @@ module Marty::Diagnostic; class Nodes < Base
        'terminated'    => error_if(instances.terminated),
        'stopping'      => error_if(instances.stopping),
        'stopped'       => error_if(instances.stopped),
-      }.delete_if{|k,v| v.empty?}
-    rescue => e
+      }.delete_if { |k, v| v.empty? }
+    rescue StandardError => e
       error(e.message)
     end
   end
 
   def self.valid_if arr
     return arr.join("\n") unless arr.empty?
+
     error('---')
   end
 
   def self.error_if arr
     return arr if arr.empty?
+
     error(arr.join("\n"))
   end
 end

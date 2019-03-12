@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'Posting workflows', js: true do
-
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
@@ -56,7 +55,7 @@ feature 'Posting workflows', js: true do
     end
 
     and_by 'can see that we are time warped' do
-      expect(page).to have_content "TIME WARPED"
+      expect(page).to have_content 'TIME WARPED'
     end
   end
 

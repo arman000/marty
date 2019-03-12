@@ -6,16 +6,16 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
                                     firstname: 'other',
                                     lastname: 'other',
                                     active: true)
-    Marty::Promise.create title: "Test Job 1",
+    Marty::Promise.create title: 'Test Job 1',
       user: Marty::User.find_by(login: 'marty'),
       cformat: 'csv',
       start_dt: Time.now
-    Marty::Promise.create title: "Test Job 2",
+    Marty::Promise.create title: 'Test Job 2',
       user: other_user,
       cformat: 'csv',
       start_dt: Time.now
 
-    visit "/"
+    visit '/'
     all 'span', text: 'Sign in', minimum: 1
     find(ext_button_id('Sign in')).click
     fill_in 'Login', with: 'marty'
@@ -25,29 +25,35 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
 
     find(ext_button_id('Applications')).click
     find(ext_menuitem_id('Jobs Dashboard')).click
-    page_title = I18n.t("jobs.promise_view")
+    page_title = I18n.t('jobs.promise_view')
     expect(page).to have_content(page_title)
 
     sleep 1
 
     expect(tree_row_count(page_title)).to eq(2)
 
-    fill_in "live_search_text", with: 'marty'
+    fill_in 'live_search_text', with: 'marty'
     sleep 1
     expect(tree_row_count(page_title)).to eq(1)
   end
 
   def ext_button_id title
-    id = page.evaluate_script("Ext.ComponentQuery.query(\"button{isVisible(true)}[text='#{title}']\")[0].id")
+    id = page.evaluate_script(
+      "Ext.ComponentQuery.query(\"button{isVisible(true)}[text='#{title}']\")[0].id"
+    )
     "##{id}"
   end
 
   def ext_menuitem_id title
-    id = page.evaluate_script("Ext.ComponentQuery.query(\"menuitem[text='#{title}']\")[0].id")
+    id = page.evaluate_script(
+      "Ext.ComponentQuery.query(\"menuitem[text='#{title}']\")[0].id"
+    )
     "##{id}"
   end
 
   def tree_row_count name
-    page.evaluate_script("Ext.ComponentQuery.query('treepanel[title=\"#{name}\"]')[0].getStore().getCount()")
+    page.evaluate_script(
+      "Ext.ComponentQuery.query('treepanel[title=\"#{name}\"]')[0].getStore().getCount()"
+    )
   end
 end

@@ -2,7 +2,7 @@ class Marty::Config < Marty::Base
   class ConfigValidator < ActiveModel::Validator
     def validate(entry)
       v = entry.get_value
-      entry.errors[:base] << "bad JSON value" if v.nil?
+      entry.errors[:base] << 'bad JSON value' if v.nil?
       v
     end
   end
@@ -11,13 +11,12 @@ class Marty::Config < Marty::Base
   validates_uniqueness_of :key
   validates_with ConfigValidator
 
-  delorean_fn :lookup, sig: 1 do
-    |key|
+  delorean_fn :lookup, sig: 1 do |key|
     self[key]
   end
 
   def get_value
-    self.value[0]
+    value[0]
   end
 
   def set_value(v)
@@ -27,7 +26,7 @@ class Marty::Config < Marty::Base
   def self.[]=(key, value)
     entry = find_by_key(key)
     if !entry
-      entry = self.new
+      entry = new
       entry.key = key
     end
     entry.set_value(value)

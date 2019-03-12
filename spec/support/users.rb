@@ -1,7 +1,7 @@
 module Marty; module RSpec; module Users
   def populate_test_users
-    (1..2).each { |i|
-      Rails.configuration.marty.roles.each { |role_name|
+    (1..2).each do |i|
+      Rails.configuration.marty.roles.each do |role_name|
         username = "#{role_name}#{i}"
         next if Marty::User.find_by_login(username)
 
@@ -19,12 +19,12 @@ module Marty; module RSpec; module Users
         user_role.user = user
         user_role.role = role
         user_role.save!
-      }
-    }
+      end
+    end
 
     # also create an anon user
     user = Marty::User.new
-    user.login = user.firstname = user.lastname = "anon"
+    user.login = user.firstname = user.lastname = 'anon'
     user.active = true
     user.save
   end
@@ -38,6 +38,5 @@ module Marty; module RSpec; module Users
                                    firstname: name,
                                    lastname: 'test',
                                    active: true)
-
   end
 end end end

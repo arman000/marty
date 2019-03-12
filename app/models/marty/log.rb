@@ -9,7 +9,7 @@ class Marty::Log < Marty::Base
               message: message,
               details: details,
               timestamp: Time.zone.now)
-    rescue => e
+    rescue StandardError => e
       Marty::Util.logger.error("Marty::Logger failure: #{e.message}")
     end
     true
@@ -18,6 +18,7 @@ class Marty::Log < Marty::Base
   def self.cleanup(days_to_keep)
     raise "Must give numeric value. (Got '#{days_to_keep}')" unless
       (Float(days_to_keep) rescue false)
-    where("timestamp <= ?", Time.zone.now - days_to_keep.to_i.days).delete_all
+
+    where('timestamp <= ?', Time.zone.now - days_to_keep.to_i.days).delete_all
   end
 end

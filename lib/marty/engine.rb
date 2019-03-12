@@ -3,8 +3,7 @@ module Marty
     isolate_namespace Marty
 
     # eager load paths instead of autoload paths
-    config.eager_load_paths += ['lib', 'other'].map do
-      |dir|
+    config.eager_load_paths += ['lib', 'other'].map do |dir|
       File.expand_path("../../../#{dir}", __FILE__)
     end
 

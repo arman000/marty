@@ -20,21 +20,21 @@ module Marty
                                col_sep             = "\t",
                                allow_dups          = false,
                                preprocess_function = nil
-                               )
+                              )
 
-      recs = self.do_import(klass,
-                            data,
-                            dt,
-                            cleaner_function,
-                            validation_function,
-                            col_sep,
-                            allow_dups,
-                            preprocess_function,
-                            )
+      recs = do_import(klass,
+                       data,
+                       dt,
+                       cleaner_function,
+                       validation_function,
+                       col_sep,
+                       allow_dups,
+                       preprocess_function,
+                      )
 
-      recs.each_with_object(Hash.new(0)) {|(op, id), h|
+      recs.each_with_object(Hash.new(0)) do |(op, id), h|
         h[op] += 1
-      }
+      end
     end
 
     # Given a Mcfly klass and CSV data, import data into the database
@@ -50,7 +50,7 @@ module Marty
                        col_sep             = "\t",
                        allow_dups          = false,
                        preprocess_function = nil
-                       )
+                      )
 
       parsed = data.is_a?(Array) ? data :
         CSV.new(data, headers: true, col_sep: col_sep)
@@ -63,14 +63,13 @@ module Marty
         cleaner_ids = cleaner_function ? klass.send(cleaner_function.to_sym) :
           []
 
-        raise "bad cleaner function result" unless
-          cleaner_ids.all? {|id| id.is_a?(Integer) }
+        raise 'bad cleaner function result' unless
+          cleaner_ids.all? { |id| id.is_a?(Integer) }
 
         eline = 0
 
         begin
-          res = parsed.each_with_index.map do
-            |row, line|
+          res = parsed.each_with_index.map do |row, line|
             eline = line
 
             # skip lines which are all nil
@@ -78,17 +77,16 @@ module Marty
 
             Marty::DataConversion.create_or_update(klass, row, dt)
           end
-        rescue => exc
+        rescue StandardError => exc
           # to find problems with the importer, comment out the rescue block
           raise Error.new(exc.to_s, [eline])
         end
 
         ids = {}
         # raise an error if record referenced more than once.
-        res.each_with_index do
-          |(op, id), line|
+        res.each_with_index do |(op, id), line|
           raise Error.
-            new("record referenced more than once", [ids[id], line]) if
+            new('record referenced more than once', [ids[id], line]) if
             op != :blank && ids.member?(id) && !allow_dups
 
           ids[id] = line
@@ -98,19 +96,19 @@ module Marty
           # Validate affected rows if necessary
           klass.send(validation_function.to_sym, ids.keys) if
             validation_function
-        rescue => exc
+        rescue StandardError => exc
           raise Error.new(exc.to_s, [])
         end
 
         remainder_ids = cleaner_ids - ids.keys
 
         raise Error.
-          new("Missing import data. " +
-              "Please provide header line and at least one data line.", [1]) if
+          new('Missing import data. ' +
+              'Please provide header line and at least one data line.', [1]) if
           ids.keys.compact.count == 0
 
         klass.delete(remainder_ids)
-        res + remainder_ids.map {|id| [:clean, id]}
+        res + remainder_ids.map { |id| [:clean, id] }
       end
     end
   end

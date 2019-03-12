@@ -9,11 +9,11 @@ class Marty::ConfigView < Marty::Grid
   def configure(c)
     super
 
-    c.title      = I18n.t('config', default: "Config")
-    c.model      = "Marty::Config"
+    c.title      = I18n.t('config', default: 'Config')
+    c.model      = 'Marty::Config'
     c.attributes = [:key, :value, :description]
     c.editing    = :both
-    c.store_config.merge!(sorters: [{property: :key, direction: 'ASC'}])
+    c.store_config.merge!(sorters: [{ property: :key, direction: 'ASC' }])
   end
 
   def my_jsonb_getter
@@ -21,13 +21,16 @@ class Marty::ConfigView < Marty::Grid
   end
 
   def my_jsonb_pretty_getter
-    lambda { |r| v = Marty::Config[r.key]
-      !v.nil? && (JSON.pretty_generate(v) rescue v.to_json) || '' }
+    lambda { |r|
+      v = Marty::Config[r.key]
+      !v.nil? && (JSON.pretty_generate(v) rescue v.to_json) || ''
+    }
   end
 
   def my_jsonb_setter
     lambda { |r, v|
       return r.set_value(nil) if v.blank?
+
       decoded = ActiveSupport::JSON.decode(v) rescue nil
       r.set_value(decoded)
     }
@@ -36,10 +39,10 @@ class Marty::ConfigView < Marty::Grid
   def default_form_items
     [
       :key,
-      jsonb_field(:value, {
-                    getter: my_jsonb_pretty_getter,
-                    setter: my_jsonb_setter,
-                  }),
+      jsonb_field(:value,
+                  getter: my_jsonb_pretty_getter,
+                  setter: my_jsonb_setter,
+                 ),
       textarea_field(:description),
     ]
   end

@@ -12,7 +12,7 @@ module Marty; module RSpec; module PostRunLogger
     def self.store_data(name, line)
       data << "  #{test_number}) #{name}"
       data << Array(line).map { |string| "     #{string}" }
-      data << ""
+      data << ''
     end
 
     def self.dump_data
@@ -21,7 +21,6 @@ module Marty; module RSpec; module PostRunLogger
         puts data
       end
     end
-
   end
 
   def post_run_log(*log_string)

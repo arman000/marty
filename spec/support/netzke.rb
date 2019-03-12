@@ -1,7 +1,7 @@
 module Marty; module RSpec; module Netzke
   MAX_WAIT_TIME = 5.0
 
-  def by message, level=0
+  def by message, level = 0
     wait_for_ready(10)
     pending(message) unless block_given?
     yield
@@ -25,39 +25,39 @@ module Marty; module RSpec; module Netzke
         log_out
         wait_for_ajax
       end
-    rescue
+    rescue StandardError
       # ignore error
     end
 
-    find(:xpath, "//span", text: 'Sign in', match: :first, wait: 5).click
-    fill_in("login", :with => username)
-    fill_in("password", :with => password)
-    press("OK")
+    find(:xpath, '//span', text: 'Sign in', match: :first, wait: 5).click
+    fill_in('login', :with => username)
+    fill_in('password', :with => password)
+    press('OK')
     wait_for_ajax
   end
 
   def log_in_as(username)
     Rails.configuration.marty.auth_source = 'local'
 
-    ensure_on("/")
+    ensure_on('/')
     log_in(username, Rails.configuration.marty.local_password)
-    ensure_on("/")
+    ensure_on('/')
   end
 
   def log_out
-    press("Current user")
-    press("Sign out")
+    press('Current user')
+    press('Sign out')
   end
 
   def press button_name, index_of = 0
     wait_for_element do
       begin
         cmp = first("a[data-qtip='#{button_name}']")
-        cmp ||= first(:xpath, ".//a", text: "#{button_name}")
+        cmp ||= first(:xpath, './/a', text: button_name.to_s)
         cmp ||= find(:btn, button_name, match: :first)
         cmp.click
         true
-      rescue
+      rescue StandardError
         find_by_id(ext_button_id(button_name, index_of), visible: :all).click
         true
       end
@@ -104,7 +104,7 @@ module Marty; module RSpec; module Netzke
     while !res && current_time - start_time < seconds_to_wait
       begin
         res = yield
-      rescue
+      rescue StandardError
       ensure
         sleep sleeptime
         current_time = Time.now
@@ -152,9 +152,9 @@ module Marty; module RSpec; module Netzke
     JS
   end
 
-  def set_field_value value, field_type='textfield', name=''
-    args1 = name.empty? ? "" : "[fieldLabel='#{name}']"
-    args2 = name.empty? ? "" : "[name='#{name}']"
+  def set_field_value value, field_type = 'textfield', name = ''
+    args1 = name.empty? ? '' : "[fieldLabel='#{name}']"
+    args2 = name.empty? ? '' : "[name='#{name}']"
     run_js <<-JS
       var field = Ext.ComponentQuery.query("#{field_type}#{args1}")[0];
       field = field || Ext.ComponentQuery.query("#{field_type}#{args2}")[0];
@@ -209,31 +209,31 @@ module Marty; module RSpec; module Netzke
   def press_key_in(key, el_id)
     kd = key.downcase
     use_key = ['enter', 'return'].include?(kd) ? kd.to_sym : key
-    el = find_by_id("#{el_id}")
+    el = find_by_id(el_id.to_s)
     el.native.send_keys(use_key)
   end
 
   def simple_escape! text
-    text.gsub!(/(\r\n|\n)/, "\\n")
-    text.gsub!(/\t/, "\\t")
+    text.gsub!(/(\r\n|\n)/, '\\n')
+    text.gsub!(/\t/, '\\t')
   end
 
   def simple_escape text
-    text.gsub(/(\r\n|\n)/, "\\n")
-      .gsub(/\t/, "\\t")
-      .gsub(/"/, '\"')
+    text.gsub(/(\r\n|\n)/, '\\n').
+      gsub(/\t/, '\\t').
+      gsub(/"/, '\"')
   end
 
-  def type_in(type_s, el_id)
-    el = find_by_id("#{el_id}")
-    el.native.clear()
+  def type_in(type_s, el_id, enter: false)
+    el = find_by_id(el_id.to_s)
     type_s.each_char do |key|
       el.native.send_keys(key)
     end
-    el.send_keys(:enter)
+    el.send_keys(:enter) if enter
   end
 
   private
+
   ############################################################################
   # ExtJS/Netzke helper javascripts:
   #   Netzke component lookups, arguments for helper methods
@@ -255,7 +255,7 @@ module Marty; module RSpec; module Netzke
     JS
   end
 
-  def ext_var(ext_find_str, var_name='ext_c')
+  def ext_var(ext_find_str, var_name = 'ext_c')
     <<-JS
       var #{var_name} = #{ext_find_str};
     JS
@@ -267,7 +267,7 @@ module Marty; module RSpec; module Netzke
     JS
   end
 
-  def ext_combo combo_label, c_name='combo'
+  def ext_combo combo_label, c_name = 'combo'
     <<-JS
       #{ext_var(ext_find(ext_arg('combobox', fieldLabel: combo_label)), c_name)}
       #{c_name} = #{c_name} ||
@@ -275,19 +275,19 @@ module Marty; module RSpec; module Netzke
     JS
   end
 
-  def ext_celleditor(grid_name='grid')
+  def ext_celleditor(grid_name = 'grid')
     <<-JS
       #{grid_name}.getPlugin('celleditor')
     JS
   end
 
-  def ext_row(row, grid_name='grid')
+  def ext_row(row, grid_name = 'grid')
     <<-JS
       #{grid_name}.getStore().getAt(#{row})
     JS
   end
 
-  def ext_col(col, grid_name='grid')
+  def ext_col(col, grid_name = 'grid')
     <<-JS
       #{ext_find(ext_arg('gridcolumn', name: "\"#{col}\""), grid_name)}
     JS

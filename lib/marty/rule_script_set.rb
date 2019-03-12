@@ -8,13 +8,15 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   clear_cache
 
   def self.node_name
-    "Node"
+    'Node'
   end
+
   def self.body_start
     "#{node_name}:\n"
   end
+
   def self.body_lines
-    self.body_start.count("\n")
+    body_start.count("\n")
   end
 
   def initialize(pt)
@@ -31,27 +33,28 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   end
 
   def write_attr(k, v)
-    equals, rhs = v == :parameter ? [" =?", ""] :
-                    [" =", "\n" + v.lines.map{|l| " "*8 + l}.join("\n")]
+    equals, rhs = v == :parameter ? [' =?', ''] :
+                    [' =', v.lines.map { |l| ' ' * 8 + l }.join]
     k + equals + rhs
   end
 
   def paramify_h(h)
-    "{" + h.keys.reject{|k|k.ends_with?("__")}.
-                         map {|k| %Q("#{k}": #{k}) }.join(",\n") + "}"
+    '{' + h.keys.reject { |k| k.ends_with?('__') }.
+                         map { |k| %Q("#{k}": #{k}) }.join(",\n") + '}'
   end
 
   def self.grid_final_name(dgid)
-    dgid.ends_with?("_grid") ?  dgid + "_result" : dgid + "_grid_result"
+    dgid.ends_with?('_grid') ? dgid + '_result' : dgid + '_grid_result'
   end
+
   def expand_grid_code(h, dgid, dgname, cache, extra_params)
     final_name = self.class.grid_final_name(dgid)
     if cache[dgname]
-      h[final_name] = "#{cache[dgname]}"
+      h[final_name] = (cache[dgname]).to_s
     else
       h[dgid] = dgname
       h["#{dgid}_dgp__"] = "dgparams__ + \n" + self.class.indent(paramify_h(h))
-      lgde = "lookup_grid_h"
+      lgde = 'lookup_grid_h'
       h[final_name] = "Marty::DataGrid.#{lgde}(pt,#{dgid},#{dgid}_dgp__,true)"
       cache[dgname] = final_name
     end
@@ -59,8 +62,9 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def write_code(attrs)
     return '' if attrs.blank?
+
     newh = attrs.each_with_object({}) do |(k, v), h|
-      if k.ends_with?("_grid")
+      if k.ends_with?('_grid')
         expand_grid_code(h, k, v, {}, h)
       else
         h[k] = v
@@ -72,31 +76,32 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   def grid_code(ruleh)
     dgcache = {}
     h = {}
-    ruleh["grids"].each do |k, v|
-      expand_grid_code(h, k.ends_with?('_grid')?k:k+'_grid', %Q("#{v}"),
-                                                dgcache, {})
+    ruleh['grids'].each do |k, v|
+      expand_grid_code(h, k.ends_with?('_grid') ? k : k + '_grid', %Q("#{v}"),
+                       dgcache, {})
     end
     h.map { |k, v| write_attr(k, v) }.join("\n") + "\n"
   end
 
   def guard_code(ruleh)
-    write_code(ruleh["computed_guards"])
+    write_code(ruleh['computed_guards'])
   end
 
   def result_code(ruleh)
-    write_code(ruleh["results"])
+    write_code(ruleh['results'])
   end
 
   def grid_init(ruleh)
-    if ruleh["grids"].present? ||
-       ruleh["results"].keys.any?{|k|k.ends_with?("_grid")}
-      write_code({ "pt" => :parameter,
-                   "dgparams__" => :parameter,
-                 })
+    if ruleh['grids'].present? ||
+       ruleh['results'].keys.any? { |k| k.ends_with?('_grid') }
+      write_code('pt' => :parameter,
+                   'dgparams__' => :parameter,
+                )
     else
       ''
     end
   end
+
   def get_code(ruleh)
     grid_i = grid_init(ruleh)
     grid_c = grid_code(ruleh)
@@ -122,34 +127,43 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     errs[:results] = result_code(ruleh).count("\n")
     errs
   end
+
   def get_parse_error_field(ruleh, exc)
-    line = exc.line ? exc.line - self.class.body_lines : 0
-    errs = code_section_counts(ruleh)
-    line_count = 0
-    errs.each do |k,v|
-      line_count += v
-      return k if line <= line_count
+    line = (exc.line || 1) - 1
+    errs = { class_body: self.class.body_lines } + code_section_counts(ruleh)
+    ranges0 = errs.values.reduce([0]) do |acc, len|
+      acc + [acc.last + len]
     end
-    errs.keys.last
+    ranges = errs.keys.zip(ranges0.each_cons(2).to_a)
+    secnm, (st, en) = ranges.detect do |sec, (st, en)|
+      line.between?(st, en - 1)
+    end
+    [secnm, line - st + 1]
+  rescue StandardError => e
+    Marty::Logger.error('RuleScriptSet#get_parse_error_field',
+                        error: e.message,
+                        backtrace: e.backtrace,
+                        ruleh: ruleh,
+                        line: line)
+    ['Unknown', 0]
   end
 
   def get_engine(ruleh)
-    begin
       # if rule is a str => importing a regular Script (i.e. not rule)
       return sset.get_engine(ruleh) if ruleh.is_a? String
 
       # on create rule doesn't have an id => don't cache
       return sset.parse_check("New RULE #{ruleh['name']}", get_code(ruleh)) unless
-        ruleh["id"]
+        ruleh['id']
 
-      rule_pfx = ruleh["classname"].demodulize
+      rule_pfx = ruleh['classname'].demodulize
 
       # unique name for specific version of rule
       sname = "#{rule_pfx}_#{ruleh['group_id']}_#{ruleh['created_dt'].to_f}"
 
       # is it a dev posting?
       if Mcfly.is_infinity(pt)
-        max_dt = ruleh["classname"].constantize.order("created_dt DESC").
+        max_dt = ruleh['classname'].constantize.order('created_dt DESC').
                  limit(1).pluck(:created_dt).first
 
         @@dengines_dt ||= max_dt
@@ -169,14 +183,14 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
         @@engines[[pt, sname]] = sset.parse_check(sname, get_code(ruleh))
       end
-    rescue Delorean::ParseError => e
-      f = get_parse_error_field(ruleh, e)
+  rescue Delorean::ParseError => e
+      secnm, line = get_parse_error_field(ruleh, e)
       msg = e.message.capitalize
-      raise "Error in rule '#{ruleh['name']}' field '#{f}': #{msg}"
-    end
+      raise "Error in rule '#{ruleh['name']}' field '#{secnm}' "\
+            "(line #{line}): #{msg}"
   end
 
   def self.indent(s)
-    s.gsub(/^/, ' '*4)
+    s.gsub(/^/, ' ' * 4)
   end
 end

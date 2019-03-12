@@ -1,30 +1,31 @@
 class Marty::RpcCall
   # POST to a remote marty
-  def self.marty_post(host, port, path, script, node, attrs, params, options={},
-                      ssl=false)
+  def self.marty_post(host, port, path, script, node, attrs, params, options = {},
+                      ssl = false)
     http = Net::HTTP.new(host, port)
     http.use_ssl = ssl
     request = Net::HTTP::Post.new(path)
     request.add_field('Content-Type', 'application/json')
     request.body = (options + {
-                      "script" => script,
-                      "node"   => node,
-                      "attrs"  => attrs.to_json,
-                      "params" => params.to_json,
+                      'script' => script,
+                      'node'   => node,
+                      'attrs'  => attrs.to_json,
+                      'params' => params.to_json,
                     }).to_json
     begin
       response = http.request(request)
-    rescue => e
+    rescue StandardError => e
       raise "#{e.message} during RPC call to #{host}:#{port}"
     end
 
     res = JSON.parse(response.body)
-    raise res["error"] if res.is_a?(Hash) && !res["error"].blank?
+    raise res['error'] if res.is_a?(Hash) && !res['error'].blank?
+
     res
   end
 
-  def self.marty_download(host, port, path, job_id, ssl=false)
-    params = {job_id: job_id}
+  def self.marty_download(host, port, path, job_id, ssl = false)
+    params = { job_id: job_id }
     url = path + '?' + URI.encode(URI.encode_www_form(params))
 
     http = Net::HTTP.new(host, port)
@@ -33,7 +34,7 @@ class Marty::RpcCall
 
     begin
       http.request(request)
-    rescue => e
+    rescue StandardError => e
       raise "#{e.message} during download call to #{host}:#{port}"
     end
   end
@@ -49,7 +50,7 @@ class Marty::RpcCall
     begin
       response = http.request(request)
       raise "got #{response} during XML call" if response.class != Net::HTTPOK
-    rescue => e
+    rescue StandardError => e
       raise "#{e.message} during RPC call to #{host}:#{port}#{path}"
     end
 

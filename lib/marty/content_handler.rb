@@ -1,11 +1,11 @@
 module Marty::ContentHandler
   GEN_FORMATS = {
-    "csv"  => ['text/csv',                 'download'],
-    "zip"  => ['application/zip',          'download'],
-    "xlsx" => ['application/vnd.ms-excel', 'download'],
-    "html" => ['text/html',                'download'],
-    "txt"  => ['text/plain',               'inline'],
-    "json" => ['application/json',         'download'],
+    'csv'  => ['text/csv',                 'download'],
+    'zip'  => ['application/zip',          'download'],
+    'xlsx' => ['application/vnd.ms-excel', 'download'],
+    'html' => ['text/html',                'download'],
+    'txt'  => ['text/plain',               'inline'],
+    'json' => ['application/json',         'download'],
 
     # hacky: default format is JSON
     nil    => ['application/json',         'download'],
@@ -19,29 +19,29 @@ module Marty::ContentHandler
   def self.export(data, format, name)
     begin
       case format
-      when "csv"
+      when 'csv'
         # Somewhat hacky, if data is string => pass through as CSV.
         # Should generalize to other data types, not just CSV.
         res = data.is_a?(String) ? data : Marty::DataExporter.to_csv(data)
-      when "xlsx"
+      when 'xlsx'
         res = Marty::Xl.spreadsheet(data).to_stream.read
-      when "zip"
+      when 'zip'
         res = to_zip(data)
-      when nil, "json"
-        res, format = data.to_json, "json"
-      when "html"
+      when nil, 'json'
+        res, format = data.to_json, 'json'
+      when 'html'
         res = data.to_s
       else
-        res, format = {error: "Unknown format: #{format}"}.to_json, "json"
+        res, format = { error: "Unknown format: #{format}" }.to_json, 'json'
       end
-    rescue => exc
+    rescue StandardError => exc
       res, format =
-        {error: "Failed conversion #{format}: #{exc}"}.to_json, "json"
+        { error: "Failed conversion #{format}: #{exc}" }.to_json, 'json'
     end
 
     type, disposition = GEN_FORMATS[format]
 
-    return [res, type, disposition, "#{name}.#{format}"]
+    [res, type, disposition, "#{name}.#{format}"]
   end
 
   private
@@ -53,24 +53,24 @@ module Marty::ContentHandler
   end
 
   def self.uniq_filename(filename, fset)
-    (0..1000).each { |i|
-      post = i==0 ? "" : " (#{i})"
+    (0..1000).each do |i|
+      post = i == 0 ? '' : " (#{i})"
       fn = filename + post
       return fn unless fset.member? fn
-    }
+    end
     filename
   end
 
   def self.to_zip_stream(stream, path, data)
     fset = Set.new
 
-    data.each { |r|
-      title, format, result = r["title"], r["format"], r["result"]
+    data.each do |r|
+      title, format, result = r['title'], r['format'], r['result']
 
-      log_and_raise "Result has no title" unless title
-      log_and_raise "Result has no result" unless result
+      log_and_raise 'Result has no title' unless title
+      log_and_raise 'Result has no result' unless result
 
-      if format == "zip"
+      if format == 'zip'
         to_zip_stream(stream, path + [title], result)
         next
       end
@@ -82,7 +82,7 @@ module Marty::ContentHandler
 
       stream.put_next_entry((path + [filename]).join('/'))
       stream.write res_data
-    }
+    end
   end
 
   def self.to_zip(data)

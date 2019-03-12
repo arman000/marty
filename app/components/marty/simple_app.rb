@@ -6,13 +6,23 @@
 # * AJAX activity indicator
 #
 # == Extending SimpleApp
-# You may want to extend SimpleApp to provide a custom layout. Make sure you create three regions with predefined itemId's that will be used by SimpleApp. You can use the following methods defined by SimpleApp: main_panel_config, status_bar_config, and menu_bar_config, e.g.:
+# You may want to extend SimpleApp to provide a custom layout.
+# Make sure you create three regions with predefined itemId's
+# that will be used by SimpleApp.
+# You can use the following methods defined by SimpleApp:
+# main_panel_config, status_bar_config, and menu_bar_config,
+# e.g.:
 #
 #     class MySimpleApp < Netzke::Basepack::SimpleApp
 #
 #       def configuration
 #         super.merge(
-#           :items => [my_custom_navigation_config, main_panel_config, menu_bar_config, status_bar_config]
+#           :items => [
+#             my_custom_navigation_config,
+#             main_panel_config,
+#             menu_bar_config,
+#             status_bar_config
+#           ]
 #         )
 #       end
 #
@@ -27,12 +37,17 @@
 #       ...
 #     end
 #
-# The JS side of the component will have those regions referenced as this.mainPanel, this.statusBar, and this.menuBar.
+# The JS side of the component will have those regions referenced as
+# this.mainPanel, this.statusBar, and this.menuBar.
 class Marty::SimpleApp < Netzke::Base
   client_class do |c|
-    c.extend = "Ext.container.Viewport"
+    c.extend = 'Ext.container.Viewport'
     c.layout = :border
-    c.require Netzke::Core.ext_path.join("packages/ux/classic/src/statusbar/StatusBar.js"), :statusbar_ext
+    c.require(
+      Netzke::Core.ext_path.join('packages/ux/classic/src/statusbar/StatusBar.js'),
+      :statusbar_ext
+    )
+
     c.include :simple_app
   end
 
@@ -43,7 +58,7 @@ class Marty::SimpleApp < Netzke::Base
 
   # In Ext 4.1 calling `render` on a viewport causes an error
   def js_component_render
-    ""
+    ''
   end
 
   # Override for custom menu
@@ -68,8 +83,8 @@ class Marty::SimpleApp < Netzke::Base
       :region => 'south',
       :statusAlign => 'right',
       :busyText => 'Busy...',
-      :default_text => "Ready",
-      :default_icon_cls => ""
+      :default_text => 'Ready',
+      :default_icon_cls => ''
     }.merge(overrides)
   end
 
@@ -77,7 +92,7 @@ class Marty::SimpleApp < Netzke::Base
   def menu_bar_config(overrides = {})
     {
       :itemId => 'menu_bar',
-      :layout => {overflow_handler: 'Menu'},
+      :layout => { overflow_handler: 'Menu' },
       :xtype => 'toolbar',
       :region => 'north',
       :items => menu

@@ -1,0 +1,53 @@
+image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image:2.4.2-20190129
+
+services:
+  - "clkao/postgres-plv8:9.6-2.0"
+
+before_script:
+  - time bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
+  - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
+  - RAILS_ENV=test bundle exec rails db:create db:migrate
+
+.base-test:
+  stage: test
+  # Use only the following CI runners
+  tags:
+    - cf-gitlabci-runner-eks-shared-dev
+
+rubocop:
+  extends: .base-test
+  script:
+    - bundle exec rubocop
+
+rspec-without-features:
+  extends: .base-test
+  script:
+    - bundle exec rspec --exclude-pattern "spec/features/**/*_spec.rb"
+
+rspec-features:
+  extends: .base-test
+  script:
+    - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
+    # - bundle exec rspec --pattern "spec/features/**/*_spec.rb"
+    # FIXME: rule_spec is excluded, because chrome doesn't work with big window size in docker
+    # And test fails with 1400/1400 resolution
+    - bundle exec rspec --pattern "spec/features/**/*_spec.rb" --exclude-pattern "spec/features/rule_spec.rb"
+
+cache:
+  key: 'marty_bundler_cache'
+  paths:
+    - vendor/ruby
+
+variables:
+  GIT_SSL_NO_VERIFY: "true"
+  BUNDLER_VERSION: "2.0.1"
+  POSTGRES_USER: "runner"
+  POSTGRES_PASSWORD: ""
+  RAILS_ENV: "test"
+  RAILS_DUMP_SCHEMA: "false"
+  PGTZ: "America/Los_Angeles"
+  HEADLESS: "true"
+  HEADLESS_WINDOW_SIZE: "1400,1400"
+  REPOSITORY_URL: '415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image'
+  DOCKER_AUTH_CONFIG: '{ "credsStore": "ecr-login" }'
+

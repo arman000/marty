@@ -1,10 +1,10 @@
 class Marty::Base < ActiveRecord::Base
-  self.table_name_prefix = "marty_"
+  self.table_name_prefix = 'marty_'
   self.abstract_class = true
 
   def self.mcfly_pt(pt)
-    tb = self.table_name
-    self.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
+    tb = table_name
+    where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?", pt, pt)
   end
 
   class << self
@@ -13,9 +13,9 @@ class Marty::Base < ActiveRecord::Base
 
   def self.get_struct_attrs
     self.struct_attrs ||=
-      self.attribute_names - Mcfly::COLUMNS.to_a -
-      (self.const_defined?('MCFLY_UNIQUENESS') &&
-       self.const_get('MCFLY_UNIQUENESS') || []).map(&:to_s)
+      attribute_names - Mcfly::COLUMNS.to_a -
+      (const_defined?('MCFLY_UNIQUENESS') &&
+       const_get('MCFLY_UNIQUENESS') || []).map(&:to_s)
   end
 
   def self.get_final_attrs
@@ -48,12 +48,13 @@ class Marty::Base < ActiveRecord::Base
 
   def self.make_openstruct(inst)
     return nil unless inst
+
     fa = get_final_attrs
     os = OpenStruct.new(inst.attributes.slice(*fa))
     if self == Marty::DataGrid
       def os.lookup_grid_distinct_entry(pt, params)
-        dgh = self.to_h.stringify_keys.slice(
-          "id", "group_id", "created_dt", "metadata", "data_type")
+        dgh = to_h.stringify_keys.slice(
+          'id', 'group_id', 'created_dt', 'metadata', 'data_type')
         Marty::DataGrid.lookup_grid_distinct_entry_h(pt, params, dgh)
       end
     end

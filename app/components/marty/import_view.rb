@@ -2,13 +2,15 @@ class Marty::ImportView < Marty::Form
   include Marty::Extras::Layout
 
   action :apply do |a|
-    a.text    = I18n.t("data_import_view.import")
-    a.tooltip = I18n.t("data_import_view.import")
+    a.text    = I18n.t('data_import_view.import')
+    a.tooltip = I18n.t('data_import_view.import')
     a.icon_cls = 'fa fa-database glyph'
   end
 
   def parent_model; end
+
   def import_model; end
+
   def model_view;   end
 
   def initialize args, kwargs
@@ -20,44 +22,13 @@ class Marty::ImportView < Marty::Form
   end
 
   client_class do |c|
-    c.set_result = l(<<-JS)
-    function(html) {
-      var result = this.netzkeGetComponent('result');
-      result.updateBodyHtml(html);
-
-      var window      = this.netzkeGetParentComponent();
-      var parent_view = window.netzkeGetParentComponent();
-
-      if (parent_view && parent_view.reload) { parent_view.reload() }
-    }
-    JS
-
-    c.init_component = l(<<-JS)
-    function() {
-      var me = this;
-      me.callParent();
-      var form = me.getForm();
-
-      var window      = this.netzkeGetParentComponent();
-      var parent_view = window.netzkeGetParentComponent();
-
-      this.serverConfig.parent_id = parent_view.serverConfig.parent_id ||
-                                    parent_view.serverConfig.selected;
-
-      var textname = form.findField('import_data');
-      var importbutton = me.actions["apply"].items[0];
-
-      importbutton.on('click', function(t, e, ops) {
-        me.netzkeGetComponent('result').updateBodyHtml('');
-      });
-    }
-    JS
+    c.include :import_view
   end
 
   ######################################################################
 
   def validate
-    return client.netzke_notify("Must provide import data.") if
+    return client.netzke_notify('Must provide import data.') if
       @import_data.empty?
   end
 
@@ -89,16 +60,16 @@ class Marty::ImportView < Marty::Form
   end
 
   endpoint :submit do |params|
-    return client.netzke_notify "No Model View defined" unless @model_view
+    return client.netzke_notify 'No Model View defined' unless @model_view
 
-    return client.netzke_notify "Permission denied" unless
+    return client.netzke_notify 'Permission denied' unless
       @model_view.can_perform_action?(:update)
 
     return client.netzke_notify "Can't import when time-warped" if
       Marty::Util.warped?
 
     @data        = ActiveSupport::JSON.decode(params[:data])
-    @import_data = @data["import_data"] || ""
+    @import_data = @data['import_data'] || ''
     @record      = @parent_model.try(:find_by_id, client_config['parent_id'])
 
     validate                  and return
@@ -107,21 +78,20 @@ class Marty::ImportView < Marty::Form
     begin
       processed = process_import_data
       res       = import(processed)
-      result    = res.map{|k,v| format_message(k,v)}
+      result    = res.map { |k, v| format_message(k, v) }
 
       messages  = post_import
       result << messages if messages
 
-      client.set_result result.join("<br/>")
-
+      client.set_result result.join('<br/>')
     rescue Marty::DataImporter::Error => exc
       result = [
-                "Import failed on line(s): #{exc.lines.join(', ')}",
-                "Error: #{exc.to_s}",
-               ]
+        "Import failed on line(s): #{exc.lines.join(', ')}",
+        "Error: #{exc.to_s}",
+      ]
 
-      client.set_result '<font color="red">' + result.join("<br/>") + "</font>"
-    rescue => e
+      client.set_result '<font color="red">' + result.join('<br/>') + '</font>'
+    rescue StandardError => e
       client.set_result e.message
     end
   end
@@ -142,8 +112,8 @@ class Marty::ImportView < Marty::Form
 
   component :result do |c|
     c.klass       = Marty::Panel
-    c.title       = I18n.t("data_import_view.results")
-    c.html        = ""
+    c.title       = I18n.t('data_import_view.results')
+    c.html        = ''
     c.flex        = 1
     c.min_height  = 150
     c.scrollable = true

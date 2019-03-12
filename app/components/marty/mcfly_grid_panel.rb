@@ -4,14 +4,14 @@ class Marty::McflyGridPanel < Marty::Grid
 
     warped = Marty::Util.warped?
 
-    c.editing  = !warped && c.editing || :none
+    c.editing = !warped && c.editing || :none
 
     [:update, :delete, :create].each do |perm|
       c.permissions[perm] = false if warped
     end
 
     # default sort all Mcfly grids with id
-    c.store_config.merge!({sorters: [{property: :id, direction: 'ASC'}]})
+    c.store_config.merge!(sorters: [{ property: :id, direction: 'ASC' }])
   end
 
   def get_records(params)
@@ -19,9 +19,9 @@ class Marty::McflyGridPanel < Marty::Grid
    tb = model.table_name
 
    model.where("#{tb}.obsoleted_dt >= ? AND #{tb}.created_dt < ?",
-                     ts, ts).scoping do
+               ts, ts).scoping do
       super
-    end
+   end
   end
 
   ######################################################################
@@ -34,7 +34,7 @@ class Marty::McflyGridPanel < Marty::Grid
       assoc_name, assoc_method = c[:name].split('__')
       begin
         aklass = model.reflect_on_association(assoc_name.to_sym).klass
-      rescue
+      rescue StandardError
         raise "trouble finding #{assoc_name} assoc class on #{model}"
       end
       c[:scope] = Mcfly.has_mcfly?(aklass) ?
@@ -44,35 +44,18 @@ class Marty::McflyGridPanel < Marty::Grid
   end
 
   client_class do |c|
-    c.init_component = l(<<-JS)
-      function() {
-         this.callParent();
-
-         // dup is a non standard button, so we have to explicitly manage
-         // its clickability
-         this.getSelectionModel().on('selectionchange', function(selModel) {
-            this.actions.dupInForm &&
-                this.actions.dupInForm.setDisabled(!selModel.hasSelection() ||
-                                                   !this.permissions.create);
-         }, this);
-      }
-   JS
-  end
-
-  client_class do |c|
-    c.include :dup_in_form
+    c.include :mcfly_grid_panel
   end
 
   action :dup_in_form do |a|
     a.hidden   = !config[:permissions][:create]
-    a.icon_cls = "fa fa-copy glyph"
+    a.icon_cls = 'fa fa-copy glyph'
     a.disabled = true
   end
 
   # edit-in-form submit with dup support
   endpoint :edit_window__edit_form__submit do |params|
-
-    if params["dup"]
+    if params['dup']
       # FIXME: copied from basepack grid endpoint
       # :add_window__add_form__netzke_submit
 
@@ -96,11 +79,12 @@ class Marty::McflyGridPanel < Marty::Grid
     end
   end
 
-private
+  private
+
   def self.mcfly_scope(sort_column)
     lambda { |r|
       ts = Mcfly.normalize_infinity(Marty::Util.get_posting_time)
-      r.where("obsoleted_dt >= ? AND created_dt < ?", ts, ts).
+      r.where('obsoleted_dt >= ? AND created_dt < ?', ts, ts).
       order(sort_column.to_sym)
     }
   end

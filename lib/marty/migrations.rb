@@ -1,20 +1,20 @@
 module Marty::Migrations
   def tb_prefix
-    "marty_"
+    'marty_'
   end
 
   def new_enum(klass, prefix_override = nil)
     raise "bad class arg #{klass}" unless
       klass.is_a?(Class) && klass < ActiveRecord::Base
 
-    raise "model class needs VALUES (as Set)" unless
+    raise 'model class needs VALUES (as Set)' unless
       klass.const_defined?(:VALUES)
 
     values = klass::VALUES
     str_values =
-      values.map {|v| ActiveRecord::Base.connection.quote v}.join ','
+      values.map { |v| ActiveRecord::Base.connection.quote v }.join ','
 
-    #hacky way to get name
+    # hacky way to get name
     prefix = prefix_override || tb_prefix
     enum_name = klass.table_name.sub(/^#{prefix}_*/, '')
 
@@ -28,14 +28,14 @@ module Marty::Migrations
     raise "bad class arg #{klass}" unless
       klass.is_a?(Class) && klass < ActiveRecord::Base
 
-    raise "model class needs VALUES (as Set)" unless
+    raise 'model class needs VALUES (as Set)' unless
       klass.const_defined?(:VALUES)
 
-    #hacky way to get name
+    # hacky way to get name
     prefix = prefix_override || tb_prefix
     enum_name = klass.table_name.sub(/^#{prefix}/, '')
 
-    #check values against underlying values
+    # check values against underlying values
     res = execute <<-SQL
       SELECT ENUM_RANGE(null::#{enum_name});
     SQL
@@ -63,7 +63,7 @@ module Marty::Migrations
     # FIXME: so hacky to specifically check for "marty_"
     to_table = "#{tb_prefix}#{to_table}" unless
       to_table.to_s.start_with?(tb_prefix) ||
-      to_table.to_s.start_with?("marty_")
+      to_table.to_s.start_with?('marty_')
 
     add_foreign_key(from_table,
                     to_table,
@@ -86,9 +86,9 @@ module Marty::Migrations
 
     add_mcfly_attrs_index(tb, *attrs)
 
-    MCFLY_INDEX_COLUMNS.each { |a|
+    MCFLY_INDEX_COLUMNS.each do |a|
       add_index tb.to_sym, a, index_opts(tb, a)
-    }
+    end
   end
 
   def add_mcfly_unique_index(klass)
@@ -115,19 +115,19 @@ module Marty::Migrations
 
     remove_index(klass.table_name.to_sym,
                  name: unique_index_name(klass)
-                 ) if index_exists?(klass.table_name.to_sym,
-                                    attrs,
-                                    name: unique_index_name(klass),
-                                    unique: true)
+                ) if index_exists?(klass.table_name.to_sym,
+                                   attrs,
+                                   name: unique_index_name(klass),
+                                   unique: true)
   end
 
   def self.write_view(target_dir, target_view, klass, jsons, excludes, extras)
     colnames = klass.columns_hash.keys
-    excludes += ["user_id", "o_user_id"]
-    joins = ["join marty_users u on main.user_id = u.id",
-             "left join marty_users ou on main.o_user_id = ou.id"]
-    columns = ["u.login AS user_name",
-               "ou.login AS obsoleted_user"]
+    excludes += ['user_id', 'o_user_id']
+    joins = ['join marty_users u on main.user_id = u.id',
+             'left join marty_users ou on main.o_user_id = ou.id']
+    columns = ['u.login AS user_name',
+               'ou.login AS obsoleted_user']
     jointabs = {}
     colnames.each do |c|
       if jsons[c]
@@ -142,14 +142,14 @@ module Marty::Migrations
         end
       elsif !excludes.include?(c)
         assoc = klass.reflections.find { |(n, h)| h.foreign_key == c }
-        if assoc && assoc[1].klass.columns_hash["name"]
+        if assoc && assoc[1].klass.columns_hash['name']
           table_name = assoc[1].table_name
           jointabs[table_name] ||= 0
           jointabs[table_name] += 1
           tn_alias = "#{table_name}#{jointabs[table_name]}"
           joins.push "left join #{table_name} #{tn_alias} on main.#{c} " +
                      "= #{tn_alias}.id"
-          target_name = c.gsub(/_id$/,'_name')
+          target_name = c.gsub(/_id$/, '_name')
           columns.push "#{tn_alias}.name as #{target_name}"
           extras.each do |(table, column, new_colname)|
             columns.push "#{tn_alias}.#{column} as #{new_colname}" if
@@ -160,7 +160,7 @@ module Marty::Migrations
         end
       end
     end
-    File.open(File.join(target_dir, "#{target_view}.sql"), "w") do |f|
+    File.open(File.join(target_dir, "#{target_view}.sql"), 'w') do |f|
       f.puts <<EOSQL
 create or replace function f_fixfalse(s text) returns text as $$
 begin
@@ -205,14 +205,14 @@ EOSQL
     gen_count = 0
 
     sql_files.each do |sql|
-      base = File.basename(sql, ".sql")
+      base = File.basename(sql, '.sql')
       existing = mig_files[base].first rescue nil
       # must ensure CRLF line endings or SQL Server keep asking about line
       # endings whenever you generating script
-      sql_lines = lines_to_crlf(File.open(sql, "r").readlines)
+      sql_lines = lines_to_crlf(File.open(sql, 'r').readlines)
       next if existing && sql_lines == File.open(existing[:raw_sql]).readlines
 
-      timestamp = (time_now + gen_count.seconds).strftime("%Y%m%d%H%M%S")
+      timestamp = (time_now + gen_count.seconds).strftime('%Y%m%d%H%M%S')
       v = existing && existing[:version] + 1 || 1
       klass = "v#{v}_sql_#{base}"
       newbase = "#{timestamp}_#{klass}"
@@ -221,14 +221,14 @@ EOSQL
       sql_snap_call =
         "Rails.root.join('#{migrations_dir}', 'sql', '#{newbase}.sql')"
 
-      File.open(sql_snap_literal, "w") do |f|
+      File.open(sql_snap_literal, 'w') do |f|
         f.print sql_lines.join
       end
       puts "creating #{newbase}.rb"
 
       # only split on "GO" at the start of a line with optional whitespace
       # before EOL.  GO in comments could trigger this and will cause an error
-      File.open(mig_name, "w") do |f|
+      File.open(mig_name, 'w') do |f|
         f.print <<OUT
 class #{klass.camelcase} < ActiveRecord::Migration[4.2]
 
@@ -254,20 +254,21 @@ OUT
   # we have to get it from the database
   def get_old_enum_id(klass, name)
     ActiveRecord::Base.
-               connection.execute(<<-SQL).to_a.first.try{|v| v['id']}
+               connection.execute(<<-SQL).to_a.first.try { |v| v['id'] }
       select id from #{klass.table_name} where name =
          #{ActiveRecord::Base.connection.quote(name)}
     SQL
   end
 
   private
+
   def fk_opts(from, to, column)
     name = "fk_#{from}_#{to}_#{column}"
     if name.length > 63
       s = Digest::MD5.hexdigest("#{to}_#{column}").slice(0..9)
       name = "fk_#{from}_#{s}"
     end
-    {name: name}
+    { name: name }
   end
 
   def index_opts(tb, a)
@@ -278,11 +279,11 @@ OUT
   end
 
   def add_mcfly_attrs_index(tb, *attrs)
-    attrs.each { |a|
+    attrs.each do |a|
       options = index_opts(tb, a)
-      options[:order] = {a.to_sym => "NULLS LAST"}
+      options[:order] = { a.to_sym => 'NULLS LAST' }
       add_index tb.to_sym, a, options
-    }
+    end
   end
 
   def unique_index_name(klass)
@@ -305,15 +306,16 @@ OUT
 
   def self.get_plv8_migration(file)
     fnname = %r(/([^/]+)_v[0-9]+\.js\z).match(file)[1]
-    lines=File.readlines(file)
+    lines = File.readlines(file)
     parts = lines.map do |line|
       next [:param, $1] if %r(\A// PARAM[:] (.*)$).match(line)
       next [:ret, $1]  if %r(\A// RETURN[:] (.*)$).match(line)
+
       [:body, line]
     end.group_by(&:first)
-    args = parts[:param].map{ |(_,l)| l}.join(",\n")
+    args = parts[:param].map { |(_, l)| l }.join(",\n")
     ret =  parts[:ret][0][1]
-    body = parts[:body].map{ |(_,l)| l}.join
+    body = parts[:body].map { |(_, l)| l }.join
     <<EOT
 CREATE OR REPLACE FUNCTION #{fnname} (
 #{args}

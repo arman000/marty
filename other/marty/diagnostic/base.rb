@@ -10,10 +10,10 @@ module Marty::Diagnostic; class Base < Request
 
   @@read_only = Marty::Util.db_in_recovery?
   @@template  = ActionController::Base.new.lookup_context.
-                  find_template("marty/diagnostic/diag").identifier
+                  find_template('marty/diagnostic/diag').identifier
 
-  def self.diagnostic_fn opts={}
-    opts.each do |k,v|
+  def self.diagnostic_fn opts = {}
+    opts.each do |k, v|
       send("#{k}=", v)
     end
     class << self
@@ -35,26 +35,24 @@ module Marty::Diagnostic; class Base < Request
 
   def self.process_status_only infos
     return infos unless status_only
-    infos.map{|info| info.map{|test, result| [test, result['status']]}.to_h}
+
+    infos.map { |info| info.map { |test, result| [test, result['status']] }.to_h }
   end
 
   def self.get_difference data
     values = process_status_only(data.values)
-    Marty::DataExporter.hash_array_merge(values, true).map{
-      |test, values|
+    Marty::DataExporter.hash_array_merge(values, true).map do |test, values|
       test if values.uniq.count > 1
-    }.compact
+    end.compact
   end
 
   def self.apply_consistency data
     diff = get_difference(data)
-    data.each_with_object({}){
-      |(node, diagnostic), new_data|
-      new_data[node] = diagnostic.each_with_object({}){
-        |(test, info), new_diagnostic|
-        new_diagnostic[test] = info + {'consistent' => !diff.include?(test)}
-      }
-    }
+    data.each_with_object({}) do |(node, diagnostic), new_data|
+      new_data[node] = diagnostic.each_with_object({}) do |(test, info), new_diagnostic|
+        new_diagnostic[test] = info + { 'consistent' => !diff.include?(test) }
+      end
+    end
   end
 
   def self.consistent? data
@@ -71,6 +69,7 @@ module Marty::Diagnostic; class Base < Request
     return 'inconsistent' if info.nil? || (info['status'] &&
                                            info['consistent'] == false)
     return 'error' unless info['status']
+
     'passed'
   end
 

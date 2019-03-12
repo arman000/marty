@@ -1,22 +1,21 @@
 class Marty::ReportForm < Marty::Form
-
   # override apply for background generation
   action :apply do |a|
-    a.text     = a.tooltip = I18n.t("reporting.background")
+    a.text     = a.tooltip = I18n.t('reporting.background')
     a.handler  = :netzke_on_apply
-    a.icon_cls = "fa fa-cloud glyph"
+    a.icon_cls = 'fa fa-cloud glyph'
     a.disabled = false
   end
 
   action :foreground do |a|
-    a.text     = a.tooltip = I18n.t("reporting.generate")
-    a.icon_cls = "fa fa-download glyph"
+    a.text     = a.tooltip = I18n.t('reporting.generate')
+    a.icon_cls = 'fa fa-download glyph'
     a.disabled = false
   end
 
   action :link do |a|
-    a.text     = a.tooltip = I18n.t("reporting.link")
-    a.icon_cls = "fa fa-link glyph"
+    a.text     = a.tooltip = I18n.t('reporting.link')
+    a.icon_cls = 'fa fa-link glyph'
     a.disabled = false
   end
 
@@ -31,25 +30,25 @@ class Marty::ReportForm < Marty::Form
   ######################################################################
 
   def self.get_report_engine(params)
-    d_params = ActiveSupport::JSON.decode(params[:data] || "{}")
-    d_params.each_pair do |k,v|
-      d_params[k] = nil if v.blank? || v == "null"
+    d_params = ActiveSupport::JSON.decode(params[:data] || '{}')
+    d_params.each_pair do |k, v|
+      d_params[k] = nil if v.blank? || v == 'null'
     end
 
-    tag_id      = d_params.delete("selected_tag_id")
-    script_name = d_params.delete("selected_script_name")
-    node        = d_params.delete("selected_node")
+    tag_id      = d_params.delete('selected_tag_id')
+    script_name = d_params.delete('selected_script_name')
+    node        = d_params.delete('selected_node')
 
     engine = Marty::ScriptSet.new(tag_id).get_engine(script_name)
 
-    roles = engine.evaluate(node, "roles", {}) rescue nil
+    roles = engine.evaluate(node, 'roles', {}) rescue nil
 
-    if roles && !roles.any?{ |r| Marty::User.has_role(r) }
+    if roles && !roles.any? { |r| Marty::User.has_role(r) }
       # insufficient permissions
       return []
     end
 
-    d_params["p_title"] ||= engine.evaluate(node, "title", {}).to_s
+    d_params['p_title'] ||= engine.evaluate(node, 'title', {}).to_s
 
     [engine, d_params, node]
   end
@@ -57,17 +56,17 @@ class Marty::ReportForm < Marty::Form
   def self.run_eval(params)
     engine, d_params, node = get_report_engine(params)
 
-    raise "Insufficient permissions" unless engine
-    raise "no selected report node" unless String === node
+    raise 'Insufficient permissions' unless engine
+    raise 'no selected report node' unless String === node
 
     begin
-      engine.evaluate(node, "result", d_params)
-    rescue => exc
+      engine.evaluate(node, 'result', d_params)
+    rescue StandardError => exc
       Marty::Util.logger.error "run_eval failed: #{exc.backtrace}"
 
       res = Delorean::Engine.grok_runtime_exception(exc)
-      res["backtrace"] =
-        res["backtrace"].map {|m, line, fn| "#{m}:#{line} #{fn}"}.join('\n')
+      res['backtrace'] =
+        res['backtrace'].map { |m, line, fn| "#{m}:#{line} #{fn}" }.join('\n')
       res
     end
   end
@@ -77,16 +76,16 @@ class Marty::ReportForm < Marty::Form
 
     engine, d_params, node = self.class.get_report_engine(params)
 
-    return client.netzke_notify "Insufficient permissions to run report!" unless
+    return client.netzke_notify 'Insufficient permissions to run report!' unless
       engine
 
     # start background promise to get report result
     engine.background_eval(node,
                            d_params,
-                           ["result", "title", "format"],
-                           )
+                           ['result', 'title', 'format'],
+                          )
 
-    client.netzke_notify "Report can be accessed from the Jobs Dashboard ..."
+    client.netzke_notify 'Report can be accessed from the Jobs Dashboard ...'
   end
 
   ######################################################################
@@ -94,83 +93,17 @@ class Marty::ReportForm < Marty::Form
   client_class do |c|
     # Find the mount path for the Marty engine. FIXME: this is likely
     # very brittle.
-    @@mount_path = Rails.application.routes.routes.detect {
-      |r| r.app.app == Marty::Engine
-    }.format({})
+    @@mount_path = Rails.application.routes.routes.detect do |r|
+                     r.app.app == Marty::Engine
+    end.format({})
 
-    c.netzke_on_foreground = l(<<-JS)
+    c.mount_path = l(<<-JS)
     function() {
-       var values = this.getForm().getValues();
-       var data = Ext.encode(values);
-
-       var params = {data: data, reptitle: this.reptitle};
-
-       // very hacky -- when selected_testing is set, we assume we're
-       // testing and try to inline the result.
-       if (values["selected_testing"]) {
-          this.repformat = "txt";
-          params["disposition"] = "inline";
-       }
-
-       var form = document.createElement("form");
-
-       form.setAttribute("method", "post");
-       form.setAttribute("action", "#{@@mount_path}/report."+this.repformat);
-
-       // set authenticity token
-       var hiddenField = document.createElement("input");
-       hiddenField.setAttribute("type", "hidden");
-       hiddenField.setAttribute("name", "authenticity_token");
-       hiddenField.setAttribute("value", this.authenticityToken);
-       form.appendChild(hiddenField);
-
-       for (var key in params) {
-          if (params.hasOwnProperty(key)) {
-             var hiddenField = document.createElement("input");
-             hiddenField.setAttribute("type", "hidden");
-             hiddenField.setAttribute("name", key);
-             hiddenField.setAttribute("value", params[key]);
-
-            form.appendChild(hiddenField);
-          }
-       }
-
-       document.body.appendChild(form);
-       form.submit();
-       document.body.removeChild(form);
+      return "#{@@mount_path}"
     }
     JS
 
-    c.netzke_on_link = l(<<-JS)
-    function() {
-       var values = this.getForm().getValues();
-
-       // check for early url generation and exit with error message
-       if (values['selected_script_name'] == null) {
-         alert("Please select a report before generating url.");
-         return;
-       }
-
-       params = {
-         "format": this.repformat,
-         "reptitle": this.reptitle
-       }
-
-       for (var key in values) {if (values[key] == "") {delete values[key]}}
-       data = Ext.encode(values)
-
-       // construct url
-       var proto_host = location.protocol + '//' + location.host
-       var url  = proto_host + '/report?data=' + data
-       for (var key in params) {
-         if (params[key] == "") continue;
-         url += '&' + key + '=' + params[key];
-       }
-       url = encodeURI(url)
-       var win = window.open('');
-       win.document.write(url.link(url));
-     }
-    JS
+    c.include :report_form
   end
 
   endpoint :netzke_load do |params|
@@ -179,11 +112,11 @@ class Marty::ReportForm < Marty::Form
   def eval_form_items(engine, items)
     case items
     when Array
-      items.map {|x| eval_form_items(engine, x)}
+      items.map { |x| eval_form_items(engine, x) }
     when Hash
-      items.each_with_object({}) { |(key, value), result|
+      items.each_with_object({}) do |(key, value), result|
         result[key] = eval_form_items(engine, value)
-      }
+      end
     when String
       items.starts_with?(':') ? items[1..-1].to_sym : items
     when Class
@@ -204,7 +137,7 @@ class Marty::ReportForm < Marty::Form
     super
 
     unless root_sess[:selected_script_name] && root_sess[:selected_node]
-      c.title = "No Report selected."
+      c.title = 'No Report selected.'
       return
     end
 
@@ -216,35 +149,34 @@ class Marty::ReportForm < Marty::Form
 
       items, title, format = engine.
         evaluate(root_sess[:selected_node],
-                       ["form", "title", "format"],
-                       {},
-                       )
+                 ['form', 'title', 'format'],
+                 {},
+                )
 
-      raise "bad form items" unless items.is_a?(Array)
-      raise "bad format" unless
+      raise 'bad form items' unless items.is_a?(Array)
+      raise 'bad format' unless
         Marty::ContentHandler::GEN_FORMATS.member?(format)
-
-    rescue => exc
-      c.title = "ERROR"
+    rescue StandardError => exc
+      c.title = 'ERROR'
       c.items =
         [
-         {
-           field_label: 'Exception',
-           xtype:       :displayfield,
-           name:        'displayfield1',
-           value:       "<span style=\"color:red;\">#{exc}</span>"
-         },
+          {
+            field_label: 'Exception',
+            xtype:       :displayfield,
+            name:        'displayfield1',
+            value:       "<span style=\"color:red;\">#{exc}</span>"
+          },
         ]
       return
     end
 
     # if there's a background_only flag, we disable the foreground submit
     background_only =
-      engine.evaluate(root_sess[:selected_node], "background_only") rescue nil
+      engine.evaluate(root_sess[:selected_node], 'background_only') rescue nil
 
     items = Marty::Xl.symbolize_keys(eval_form_items(engine, items), ':')
 
-    items = [{html: "<br><b>No input is needed for this report.</b>"}] if
+    items = [{ html: '<br><b>No input is needed for this report.</b>' }] if
       items.empty?
 
     # add hidden fields for selected tag/script/node
@@ -252,15 +184,14 @@ class Marty::ReportForm < Marty::Form
               :selected_script_name,
               :selected_node,
               # just for testing
-              :selected_testing,
-             ].map { |f|
+              :selected_testing,].map do |f|
       {
         name:   f,
         xtype:  :textfield,
         hidden: true,
         value:  root_sess[f],
       }
-    }
+    end
 
     c.items              = items
     c.repformat          = format
@@ -268,7 +199,7 @@ class Marty::ReportForm < Marty::Form
     c.reptitle           = title
     c.authenticity_token = controller.send(:form_authenticity_token)
 
-    [:foreground, :link].each{|a| actions[a].disabled = !!background_only}
+    [:foreground, :link].each { |a| actions[a].disabled = !!background_only }
   end
 end
 

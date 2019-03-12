@@ -2,8 +2,8 @@ require 'spec_helper'
 
 feature 'under Applications menu, Reports workflows', js: true do
   before(:all) do
-    SOME_DATE = "20130520"
-    SOME_TIME = "1200"
+    SOME_DATE = '20130520'
+    SOME_TIME = '1200'
     SOME_DT   = "#{SOME_DATE} #{SOME_TIME} PST8PDT"
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
@@ -32,7 +32,7 @@ feature 'under Applications menu, Reports workflows', js: true do
   end
 
   def populate_sample_reports
-    a_report  = <<DELOREAN
+    a_report = <<DELOREAN
 PostingField:
     field_label = "Posting"
     xtype       = ":combo"
@@ -76,24 +76,24 @@ DD: BB
     result = 444
 DELOREAN
 
-    with_user("dev1") { |u|
+    with_user('dev1') do |u|
       Marty::Posting.do_create('BASE', SOME_DT, 'a comment')
 
       Marty::Script.
-        load_script_bodies({ "SomeReport" => a_report, },
+        load_script_bodies({ 'SomeReport' => a_report, },
                            Date.today)
 
       Marty::Script.
-        load_script_bodies({ "SomeReport" =>
+        load_script_bodies({ 'SomeReport' =>
                              a_report +
                              "CC: BB\n    title=\"CC\"\n    result = 123" },
                            Date.today + 1.minute)
-    }
+    end
   end
 
   def select_node node_name
     wait_for_ajax
-    #hacky: assumes only 1 combobox without label
+    # hacky: assumes only 1 combobox without label
     within(:gridpanel, 'report_select', match: :first) do
       # hacky, hardcoding netzkecombobox dropdown arrow name
       arrow = find(:input, 'nodename')['data-componentid'] + '-trigger-picker'
@@ -131,12 +131,12 @@ DELOREAN
       select_node('CC (csv)')
     end
 
-     and_by 'fill form' do
-      wait_for_ajax
+    and_by 'fill form' do
+     wait_for_ajax
 
-      within(:gridpanel, 'report_form', match: :first) do
-        fill_in('Note Rate', with: '3.00')
-      end
+     within(:gridpanel, 'report_form', match: :first) do
+       fill_in('Note Rate', with: '3.00')
+     end
     end
 
     and_by 'do Background Report with delayed jobs' do
@@ -201,7 +201,8 @@ DELOREAN
       set_field_value('XYZ', '', 'pt_name')
       # hidden field that causes results to be inlined
       set_field_value('true', 'textfield', 'selected_testing')
-      press("Generate Report")
+
+      press('Generate Report')
     end
 
     wait_for_element do
@@ -283,7 +284,7 @@ DELOREAN
       wait_for_ajax
       set_field_value('XYZ', '', 'pt_name')
       set_field_value('true', 'textfield', 'selected_testing')
-      press("Generate URL")
+      press('Generate URL')
       wait_for_ajax
 
       within_window(switch_to_window(windows.last)) do

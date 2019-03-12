@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'under Applications menu, Scripting workflows', js: true do
-
   before(:all) do
     self.use_transactional_tests = false
 
@@ -41,27 +40,26 @@ feature 'under Applications menu, Scripting workflows', js: true do
   def populate_test_scripts
     lastid = nil
 
-    with_user("dev2") {
-
+    with_user('dev2') do
       Marty::Script.
         load_script_bodies({
-                             "A1" => "#1\n",
-                             "A2" => "#2\n",
-                             "A3" => "#3\n",
-                             "A4" => "#4\n",
-                             "A5" => "#5\n",
+                             'A1' => "#1\n",
+                             'A2' => "#2\n",
+                             'A3' => "#3\n",
+                             'A4' => "#4\n",
+                             'A5' => "#5\n",
                            }, Date.today)
 
       # create 3 additional tags and modify A5 in the process
-      (1..3).each { |i|
-        body = Marty::Script.find_by(name: "A5").body
+      (1..3).each do |i|
+        body = Marty::Script.find_by(name: 'A5').body
 
         Marty::Script.
           load_script_bodies({
-                               "A5" => body + "##{i}\n"
+                               'A5' => body + "##{i}\n"
                              }, Date.today + i.minute)
-      }
-    }
+      end
+    end
   end
 
   it 'adding scripts and tags & ensure proper validations' do
@@ -87,7 +85,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
     and_by 'select the new script' do
       wait_for_ajax
       within(:gridpanel, 'script_grid', match: :first) do
-        expect(script_grid.get_row_vals(6)).to netzke_include({:name=>"Xyz", :tag=>"DEV"})
+        expect(script_grid.get_row_vals(6)).to netzke_include(:name => 'Xyz', :tag => 'DEV')
         script_grid.select_row(6)
       end
     end
@@ -211,7 +209,6 @@ feature 'under Applications menu, Scripting workflows', js: true do
     script_grid = netzke_find('script_grid')
     tag_grid = netzke_find('tag_grid')
 
-
     by 'select tag row 2' do
       wait_for_ajax
       tag_grid.select_row(2)
@@ -224,7 +221,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
     and_by 'form displays correct body' do
       wait_for_ajax
-      expect(page).to have_content "#5\n#1\n#2\n#3\n"
+      expect(page).to have_content '1 #5 2 #1 3 #2 4 #3'
     end
 
     and_by 'select different tag' do
@@ -238,7 +235,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
 
     and_by 'form displays updated body' do
       wait_for_ajax
-      expect(page).to have_content "#5\n#1\n"
+      expect(page).to have_content '1 #5 2 #1'
     end
   end
 
@@ -274,7 +271,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
       script_grid.select_row(1)
       script_grid.select_row(5)
       wait_for_ajax
-      expect(page).not_to have_content "#123\n#456\n"
+      expect(page).not_to have_content '1 #123 2 #456'
       script_grid.select_row(1)
     end
 
@@ -291,8 +288,8 @@ feature 'under Applications menu, Scripting workflows', js: true do
       tag_grid.select_row(2)
       wait_for_ajax
       script_grid.select_row(5)
-      expect(page).to have_content "#123\n#456\n"
-      expect(tag_grid.get_row_vals(2)).to netzke_include({:comment=>"ABCD"})
+      expect(page).to have_content '1 #123 2 #456'
+      expect(tag_grid.get_row_vals(2)).to netzke_include(:comment => 'ABCD')
     end
   end
 

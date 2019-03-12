@@ -7,12 +7,12 @@ module Marty
         system_user.login
     end
 
-    let (:tuser) {
+    let (:tuser) do
       create_user('other_user')
-    }
+    end
 
-    describe "validations" do
-      it "should require login, firstname and lastname" do
+    describe 'validations' do
+      it 'should require login, firstname and lastname' do
         user = User.new
         expect(user).to_not be_valid
         expect(user.errors[:login].any?).to be true
@@ -20,7 +20,7 @@ module Marty
         expect(user.errors[:lastname].any?).to be true
       end
 
-      it "should require unique login" do
+      it 'should require unique login' do
         expect(Mcfly.whodunnit).to_not be_nil
         user = system_user.dup
         expect(user).to_not be_valid
@@ -29,7 +29,7 @@ module Marty
         expect(user).to be_valid
       end
 
-      it "should not allow Gemini account to be de-activated" do
+      it 'should not allow Gemini account to be de-activated' do
         user = system_user
         user.active = false
         expect(user).to_not be_valid
@@ -37,13 +37,13 @@ module Marty
           to include('application system account cannot be deactivated')
       end
 
-      it "should not allow accounts to be deleted" do
+      it 'should not allow accounts to be deleted' do
         user = system_user
         user.destroy
         expect(user.destroyed?).to be false
       end
 
-      it "should not allow user managers to edit the Gemini account" do
+      it 'should not allow user managers to edit the Gemini account' do
         Mcfly.whodunnit = tuser
         user = system_user
         allow_any_instance_of(Marty::User).to receive(:user_manager_only).
@@ -54,7 +54,7 @@ module Marty
           to include('cannot edit the application system account')
       end
 
-      it "should not allow user managers to edit their own account" do
+      it 'should not allow user managers to edit their own account' do
         Mcfly.whodunnit = tuser
         allow_any_instance_of(Marty::User).to receive(:user_manager_only).
           and_return(true)

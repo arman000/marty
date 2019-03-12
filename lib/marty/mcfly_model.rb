@@ -6,65 +6,18 @@ module Mcfly::Model
   end
 
   module ClassMethods
-    def clear_lookup_cache!
-      @LOOKUP_CACHE.clear if @LOOKUP_CACHE
-    end
-
-    # FIXME IDEA: we just make :cache an argument to delorean_fn.
-    # That way, we don't need the cached_ flavors.  It'll make all
-    # this code a lot simpler.  We should also just add the :private
-    # mechanism here.
-
-    # Implements a VERY HACKY class-based (per process) caching
-    # mechanism for database lookup results.  Issues include: cached
-    # values are ActiveRecord objects.  Query results can be very
-    # large lists which we count as one item in the cache.  Caching
-    # mechanism will result in large processes.
-    def cached_delorean_fn(name, options = {}, &block)
-      @LOOKUP_CACHE ||= {}
-
-      delorean_fn(name, options) do |ts, *args|
-        cache_key = [name, ts] + args.map{ |a|
-          a.is_a?(ActiveRecord::Base) ? a.id : a
-        } unless Mcfly.is_infinity(ts)
-        next @LOOKUP_CACHE[cache_key] if
-          cache_key && @LOOKUP_CACHE.has_key?(cache_key)
-
-        res = block.call(ts, *args)
-
-        if cache_key
-          # Cache has >1000 items, clear out the oldest 200.  FIXME:
-          # hard-coded, should be configurable.  Cache
-          # size/invalidation should be per lookup and not class.
-          # We're invalidating cache items simply based on age and
-          # not usage.  This is faster but not as fair.
-          if @LOOKUP_CACHE.count > 1000
-            @LOOKUP_CACHE.keys[0..200].each{|k| @LOOKUP_CACHE.delete(k)}
-          end
-          @LOOKUP_CACHE[cache_key] = res
-
-          # Since we're caching this object and don't want anyone
-          # changing it.  FIXME: ideally should freeze this object
-          # recursively.
-          res.freeze unless res.is_a?(ActiveRecord::Relation)
-        end
-        res
-      end
-    end
-
     def hash_if_necessary(q, private)
       !private && q.is_a?(ActiveRecord::Base) ? make_openstruct(q) : q
     end
 
     def base_mcfly_lookup(meth, name, options = {}, &block)
-
       priv = options[:private]
 
       send(meth, name, options) do |ts, *args|
-        raise "time cannot be nil" if ts.nil?
+        raise 'time cannot be nil' if ts.nil?
 
         ts = Mcfly.normalize_infinity(ts)
-        q = self.where("#{table_name}.obsoleted_dt >= ? AND " +
+        q = where("#{table_name}.obsoleted_dt >= ? AND " +
                    "#{table_name}.created_dt < ?", ts, ts).scoping do
           block.call(ts, *args)
         end
@@ -86,7 +39,7 @@ module Mcfly::Model
       base_mcfly_lookup(:delorean_fn, name, options, &block)
     end
 
-    def gen_mcfly_lookup(name, attrs, options={})
+    def gen_mcfly_lookup(name, attrs, options = {})
       raise "bad options #{options.keys}" unless
         (options.keys - [:mode, :cache, :private]).empty?
 
@@ -98,36 +51,35 @@ module Mcfly::Model
       # the older mode=:all is not supported (it's bogus)
       raise "bad mode #{mode}" unless [nil, :first].member?(mode)
 
-      assoc = Set.new(self.reflect_on_all_associations.map(&:name))
+      assoc = Set.new(reflect_on_all_associations.map(&:name))
 
-      qstr = attrs.map {|k, v|
+      qstr = attrs.map do |k, v|
         k = "#{k}_id" if assoc.member?(k)
 
         v ? "(#{k} = ? OR #{k} IS NULL)" : "(#{k} = ?)"
-      }.join(" AND ")
+      end.join(' AND ')
 
       if Hash === attrs
-        order = attrs.select {|k, v| v}.keys.reverse.map { |k|
+        order = attrs.select { |k, v| v }.keys.reverse.map do |k|
           k = "#{k}_id" if assoc.member?(k)
 
           "#{k} NULLS LAST"
-        }.join(", ")
+        end.join(', ')
         attrs = attrs.keys
       else
-        raise "bad attrs" unless Array === attrs
+        raise 'bad attrs' unless Array === attrs
       end
 
       fn = cache ? :cached_delorean_fn : :delorean_fn
-      base_mcfly_lookup(fn, name, options + {sig:  attrs.length+1,
-                                             mode: mode}) do
-        |t, *attr_list|
+      base_mcfly_lookup(fn, name, options + { sig:  attrs.length + 1,
+                                             mode: mode }) do |t, *attr_list|
 
-        attr_list_ids = attr_list.each_with_index.map {|x, i|
+        attr_list_ids = attr_list.each_with_index.map do |x, i|
           assoc.member?(attrs[i]) ?
             (attr_list[i] && attr_list[i].id) : attr_list[i]
-        }
+        end
 
-        q = self.where(qstr, *attr_list_ids)
+        q = where(qstr, *attr_list_ids)
         q = q.order(order) if order
         q
       end
@@ -155,7 +107,7 @@ module Mcfly::Model
     # pc_name         = :pc_lookup_q
     # pc_attrs        = {entity: true, security_instrument: true, coupon: true}
 
-    def gen_mcfly_lookup_cat(name, catrel, attrs, options={})
+    def gen_mcfly_lookup_cat(name, catrel, attrs, options = {})
       rel_attr, cat_assoc_name, cat_attr = catrel
 
       raise "#{rel_attr} should be mapped in attrs" if attrs[rel_attr].nil?
@@ -164,13 +116,13 @@ module Mcfly::Model
       cat_attr_id = "#{cat_attr}_id"
 
       # replace rel_attr with cat_attr in attrs
-      pc_attrs = attrs.each_with_object({}) {|(k, v), h|
+      pc_attrs = attrs.each_with_object({}) do |(k, v), h|
         h[k == rel_attr ? cat_attr_id : k] = v
-      }
+      end
 
       pc_name = "pc_#{name}".to_sym
 
-      gen_mcfly_lookup(pc_name, pc_attrs, options + {private: true})
+      gen_mcfly_lookup(pc_name, pc_attrs, options + { private: true })
 
       lpi = attrs.keys.index rel_attr
 
@@ -181,9 +133,7 @@ module Mcfly::Model
       fn = options.fetch(:mode, :first) ? :cached_delorean_fn : :delorean_fn
       priv = options[:private]
 
-      send(fn, name, sig: attrs.length+1) do
-        |ts, *args|
-
+      send(fn, name, sig: attrs.length + 1) do |ts, *args|
         # Example: rel is a Gemini::SecurityInstrument instance.
         rel = args[lpi]
         raise "#{rel_attr} can't be nil" unless rel
@@ -194,7 +144,7 @@ module Mcfly::Model
                       find_by(rel_attr => rel).
                       send(cat_attr_id)
 
-        q = self.send(pc_name, ts, *args)
+        q = send(pc_name, ts, *args)
         hash_if_necessary(q, priv)
       end
     end

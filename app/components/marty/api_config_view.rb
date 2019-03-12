@@ -23,11 +23,12 @@ class Marty::ApiConfigView < Marty::Grid
     c.paging = :pagination
     c.editing = :in_form
     c.store_config.merge!(
-      sorters: [{ property: :script, direction: :ASC},
-                { property: :node,      direction: :ASC},
-                { property: :attr,      direction: :ASC},
-                { property: :api_class, direction: :ASC},
-               ])
+      sorters: [
+        { property: :script,    direction: :ASC },
+        { property: :node,      direction: :ASC },
+        { property: :attr,      direction: :ASC },
+        { property: :api_class, direction: :ASC },
+      ])
     @model = c.model
   end
 
@@ -44,7 +45,7 @@ class Marty::ApiConfigView < Marty::Grid
       type:          :string,
     )
     c.width = 200
-    c.label = "API Class"
+    c.label = 'API Class'
   end
 
   attribute :script do |c|
@@ -70,8 +71,7 @@ class Marty::ApiConfigView < Marty::Grid
     end
   end
 
-  [:logged, :input_validated, :output_validated, :strict_validate].each do
-    |a|
+  [:logged, :input_validated, :output_validated, :strict_validate].each do |a|
     attribute a do |c|
       c.width = 110
     end

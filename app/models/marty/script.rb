@@ -3,24 +3,23 @@ class Marty::Script < Marty::Base
 
   validates_presence_of :name, :body
   mcfly_validates_uniqueness_of :name
-  validates_format_of :name, {
-    with: /\A[A-Z][a-zA-Z0-9]*\z/,
-    message: I18n.t('script.save_error'),
-  }
+  validates_format_of :name,
+                      with: /\A[A-Z][a-zA-Z0-9]*\z/,
+                      message: I18n.t('script.save_error')
 
-  belongs_to :user, class_name: "Marty::User"
+  belongs_to :user, class_name: 'Marty::User'
 
   gen_mcfly_lookup :lookup, [:name], cache: true
 
   # find script by name/tag (not cached)
-  def self.find_script(sname, tag=nil)
+  def self.find_script(sname, tag = nil)
     tag = Marty::Tag.map_to_tag(tag)
     Marty::Script.mcfly_pt(tag.created_dt).find_by(name: sname)
   end
 
   def find_tag
     # find the first tag created after this script.
-    Marty::Tag.where("created_dt >= ?", created_dt).order(:created_dt).first
+    Marty::Tag.where('created_dt >= ?', created_dt).order(:created_dt).first
   end
 
   def self.create_script(name, body)
@@ -31,7 +30,7 @@ class Marty::Script < Marty::Base
     script
   end
 
-  def self.load_a_script(sname, body, dt=nil)
+  def self.load_a_script(sname, body, dt = nil)
     s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: sname)
 
     if !s
@@ -47,28 +46,27 @@ class Marty::Script < Marty::Base
     end
   end
 
-  def self.load_script_bodies(bodies, dt=nil)
-    bodies.each {
-      |sname, body|
+  def self.load_script_bodies(bodies, dt = nil)
+    bodies.each do |sname, body|
       load_a_script(sname, body, dt)
-    }
+    end
 
     # Create a new tag if scripts were modified after the last tag
     tag = Marty::Tag.get_latest1
-    latest = Marty::Script.order("created_dt DESC").first
+    latest = Marty::Script.order('created_dt DESC').first
 
     tag_time = (dt || [latest.try(:created_dt), Time.now].compact.max) +
       1.second
 
     # If no tag_time is provided, the tag created_dt will be the same
     # as the scripts.
-    tag = Marty::Tag.do_create(tag_time, "tagged from load scripts") if
+    tag = Marty::Tag.do_create(tag_time, 'tagged from load scripts') if
       !(tag && latest) || tag.created_dt <= latest.created_dt
 
     tag
   end
 
-  def self.load_scripts(path=nil, dt=nil)
+  def self.load_scripts(path = nil, dt = nil)
     files = get_script_filenames(path)
 
     bodies = read_script_files(files)
@@ -77,10 +75,10 @@ class Marty::Script < Marty::Base
   end
 
   def self.read_script_files(files)
-    files.collect { |fpath|
+    files.collect do |fpath|
       fname = File.basename(fpath)[0..-4].camelize
       [fname, File.read(fpath)]
-    }
+    end
   end
 
   def self.get_script_filenames(paths = nil)
@@ -90,7 +88,7 @@ class Marty::Script < Marty::Base
     paths.each do |path|
       Dir.glob("#{path}/*.dl").each do |filename|
         basename = File.basename(filename)
-        filenames[basename] = filename unless filenames.has_key?(basename)
+        filenames[basename] = filename unless filenames.key?(basename)
       end
     end
 
@@ -114,15 +112,15 @@ class Marty::Script < Marty::Base
 
   def self.delete_scripts
     ActiveRecord::Base.connection.
-      execute("ALTER TABLE marty_scripts DISABLE TRIGGER USER;")
+      execute('ALTER TABLE marty_scripts DISABLE TRIGGER USER;')
     Marty::Script.delete_all
     ActiveRecord::Base.connection.
-      execute("ALTER TABLE marty_scripts ENABLE TRIGGER USER;")
+      execute('ALTER TABLE marty_scripts ENABLE TRIGGER USER;')
   end
 
-  delorean_fn :eval_to_hash, sig: 5 do
-    |dt, script, node, attrs, params|
-    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
+  delorean_fn :eval_to_hash, sig: 5 do |dt, script, node, attrs, params|
+    tag = Marty::Tag.find_match(dt) if dt.present?
+    raise("no tag for #{dt}") if tag.nil? && dt.present?
 
     engine = Marty::ScriptSet.new(tag).get_engine(script)
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
@@ -134,11 +132,16 @@ class Marty::Script < Marty::Base
     # current tag can caused problems.
   end
 
-  delorean_fn :evaluate, sig: 5 do
-    |dt, script, node, attr, params|
-    tag = Marty::Tag.find_match(dt) || raise("no tag found for #{dt}")
+  # evaluate script's node attribute (attr) with the given params.  dt
+  # is used to determine which script tag to use.  The latest tag is
+  # used if dt is nil.
+  delorean_fn :evaluate, sig: 5 do |dt, script, node, attr, params|
+    tag = Marty::Tag.find_match(dt) if dt.present?
+    raise("no tag for #{dt}") if tag.nil? && dt.present?
 
+    # nil tag, uses the latest one
     engine = Marty::ScriptSet.new(tag).get_engine(script)
+
     # IMPORTANT: engine evals (e.g. eval_to_hash) modify the
     # params, but it is possible that we may be passing in
     # a frozen hash. To avoid performance impacts, we should first check if
@@ -146,8 +149,7 @@ class Marty::Script < Marty::Base
     engine.evaluate(node, attr, params.frozen? ? params.dup : params.clone)
   end
 
-  delorean_fn :pretty_print, sig: 1 do
-    |id|
+  delorean_fn :pretty_print, sig: 1 do |id|
     script = find_by_id id
 
     next "unknown script #{id}" unless script

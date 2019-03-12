@@ -5,17 +5,12 @@ class Marty::NewPostingForm < Marty::Form
   has_marty_permissions read: :any
 
   client_class do |c|
-    c.close_me = l(<<-JS)
-    function() {
-      // assume we're embedded in a window
-      this.netzkeGetParentComponent().close();
-    }
-    JS
+    c.include :new_posting_form
   end
 
   action :apply do |a|
-    a.text     = I18n.t("create_posting")
-    a.tooltip  = I18n.t("create_posting")
+    a.text     = I18n.t('create_posting')
+    a.tooltip  = I18n.t('create_posting')
     a.icon_cls = 'fa fa-clock glyph'
   end
 
@@ -30,16 +25,16 @@ class Marty::NewPostingForm < Marty::Form
   def configure(c)
     super
 
-    c.model = "Marty::Posting"
+    c.model = 'Marty::Posting'
     c.items = [
-               {
-                 name: :posting_type__name,
-                 scope: lambda { |r|
-                   r.where(name: Marty::NewPostingForm.can_perform_actions)
-                 },
-               },
-               :comment,
-              ]
+      {
+        name: :posting_type__name,
+        scope: lambda { |r|
+          r.where(name: Marty::NewPostingForm.can_perform_actions)
+        },
+      },
+      :comment,
+    ]
   end
 end
 

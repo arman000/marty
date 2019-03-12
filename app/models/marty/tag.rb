@@ -4,10 +4,10 @@ class Marty::Tag < Marty::Base
   mcfly_validates_uniqueness_of :name
   validates_presence_of :name, :comment
 
-  belongs_to :user, class_name: "Marty::User"
+  belongs_to :user, class_name: 'Marty::User'
 
   def self.get_struct_attrs
-    self.struct_attrs ||= super + ["id", "created_dt"]
+    self.struct_attrs ||= super + ['id', 'created_dt']
   end
 
   def self.make_name(dt)
@@ -23,7 +23,7 @@ class Marty::Tag < Marty::Base
 
   before_validation :set_tag_name
   def set_tag_name
-    self.name = self.class.make_name(self.created_dt)
+    self.name = self.class.make_name(created_dt)
     true
   end
 
@@ -60,21 +60,21 @@ class Marty::Tag < Marty::Base
       tag = tag_id
     end
     raise "bad tag identifier #{tag_id.inspect}" unless tag.is_a?(Marty::Tag)
+
     tag
   end
 
-  cached_delorean_fn :lookup, sig: 1 do
-    |name|
-    t = self.find_by_name(name).select(get_struct_attrs)
+  cached_delorean_fn :lookup, sig: 1 do |name|
+    t = find_by_name(name).select(get_struct_attrs)
     t && t.attributes
   end
 
   def self.get_latest1
-    order("created_dt DESC").find_by("created_dt <> 'infinity'")
+    order('created_dt DESC').find_by("created_dt <> 'infinity'")
   end
 
   def self.find_match(dt)
-    order("created_dt DESC").find_by("created_dt <= ?", dt)
+    order('created_dt DESC').find_by('created_dt <= ?', dt)
   end
 
   # Performance hack for script sets -- FIXME: making find_mtach

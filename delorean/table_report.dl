@@ -1,0 +1,34 @@
+import MartyFields
+import Styles
+
+ReadableField: MartyFields::CheckboxField
+    name        = "readable"
+    field_label = "Disable Encoding"
+
+TableReport:
+    readable    =? nil
+    pt_name     =? nil
+    posting     = Marty::Posting.lookup(pt_name)
+    pt          = posting.created_dt
+    module_name =? nil
+    class_name  =? nil
+    title       =? (class_name || "Table Report") + (
+        if pt_name then "_" + pt_name else "")
+    sort_field  =? nil
+    exclude_attrs =? nil
+
+    result_raw  = Marty::DataChange.do_export(
+        pt,
+        if module_name then module_name + '::' + class_name else class_name,
+        sort_field,
+        exclude_attrs || [],
+        )
+    row_count   = result_raw.length
+    result      = Marty::Helper.to_csv(result_raw, {'readable' : readable})
+    form        = [
+        MartyFields::PostingField,
+        MartyFields::ClassField,
+        ReadableField,
+        ]
+    format      = "csv"
+

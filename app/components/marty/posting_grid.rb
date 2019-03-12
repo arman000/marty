@@ -6,74 +6,23 @@ class Marty::PostingGrid < Marty::Grid
     super
 
     c.header             = false
-    c.model              = "Marty::Posting"
-    c.attributes            = [:name, :created_dt, :user__name, :comment]
-    c.multi_select       = false
-    c.store_config.merge!({sorters: [{property: :created_dt, direction: 'DESC'}],
-                           page_size: 12})
+    c.model              = 'Marty::Posting'
+    c.attributes = [:name, :created_dt, :user__name, :comment]
+    c.multi_select = false
+    c.store_config.merge!(sorters: [{ property: :created_dt, direction: 'DESC' }],
+                           page_size: 12)
+  end
+
+  client_class do |c|
+    c.include :posting_grid
   end
 
   # hijacking delete button
   action :delete do |a|
-    a.text      = "Select"
-    a.tooltip   = "Select"
-    a.icon_cls  = "fa fa-clock glyph"
+    a.text      = 'Select'
+    a.tooltip   = 'Select'
+    a.icon_cls  = 'fa fa-clock glyph'
     a.disabled  = true
-  end
-
-  client_class do |c|
-    c.init_component = l(<<-JS)
-    function() {
-       this.callParent();
-
-       this.getSelectionModel().on('selectionchange', function(selModel) {
-          this.actions.detail &&
-          this.actions.detail.setDisabled(!selModel.hasSelection());
-       }, this);
-    }
-    JS
-
-    c.detail = l(<<-JS)
-    function() {
-       record_id = this.getSelectionModel().getSelection()[0].getId();
-       this.server.detail({record_id: record_id});
-    }
-    JS
-
-    c.netzke_show_detail = l(<<-JS)
-    function(details) {
-      Ext.create('Ext.Window', {
-        height:         150,
-        minWidth:       250,
-        autoWidth:      true,
-        modal:          true,
-        autoScroll:     true,
-        html:           details,
-        title:          "Posting Details"
-     }).show();
-    }
-    JS
-
-    c.netzke_on_delete = l(<<-JS)
-      function() {
-        var records = [];
-        var me = this;
-        me.getSelectionModel().selected.each(function(r) {
-           records.push(r.getId());
-        }, me);
-
-        // find the root component (main application)
-        var main_app = me;
-        while (1) {
-          var p = main_app.netzkeGetParentComponent();
-          if (!p) { break; }
-          main_app = p;
-        }
-
-        // assumes main_app has serverSelectPosting method
-        main_app.server.selectPosting(records);
-      }
-      JS
   end
 
   def default_bbar
@@ -81,8 +30,8 @@ class Marty::PostingGrid < Marty::Grid
   end
 
   action :detail do |a|
-    a.text      = "Detail"
-    a.icon_cls  = "fa fa-th-large glyph"
+    a.text      = 'Detail'
+    a.icon_cls  = 'fa fa-th-large glyph'
     a.handler   = :detail
     a.disabled  = true
   end
@@ -112,8 +61,8 @@ class Marty::PostingGrid < Marty::Grid
   end
 
   attribute :created_dt do |c|
-    c.text      = "Date/Time"
-    c.format    = "Y-m-d H:i"
+    c.text      = 'Date/Time'
+    c.format    = 'Y-m-d H:i'
     c.hidden    = true
   end
 
@@ -124,7 +73,6 @@ class Marty::PostingGrid < Marty::Grid
   attribute :comment do |c|
     c.width     = 100
   end
-
 end
 
 PostingGrid = Marty::PostingGrid

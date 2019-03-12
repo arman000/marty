@@ -1,37 +1,60 @@
 class Marty::RpcController < ActionController::Base
+  INTERNAL_SERVER_ERROR   = { error: 'internal server error' }
+  PERMISSION_DENIED_ERROR = { error: 'Permission denied' }
+
   def evaluate
     massaged_params = massage_params(params)
-    api_config = Marty::ApiConfig.lookup(*massaged_params.values_at(
-                                           :script,
-                                           :node,
-                                           :attr)
-                                        ) || {}
 
-    api = api_config.present? ? api_config[:api_class].constantize :
-            Marty::Api::Base
+    # resolve api config in order to determine api class and settings
+    api_config = get_api_config(massaged_params) || {}
+
+    # default to base class if no config is present
+    api = api_config[:api_class].try(:constantize) || Marty::Api::Base
 
     api.respond_to(self) do
-      next massaged_params if massaged_params.include?(:error)
+      begin
+        next massaged_params if massaged_params.include?(:error)
 
-      auth = api.is_authorized?(massaged_params)
-      next {error: "Permission denied"} unless auth
+        api_params = api.process_params(massaged_params)
+        auth       = api.is_authorized?(api_params)
 
-      start_time = Time.zone.now
+        next PERMISSION_DENIED_ERROR unless auth
 
-      api_params = api.process_params(massaged_params)
-      api.before_evaluate(api_params)
-      result = api.evaluate(api_params, request, api_config)
-      api.after_evaluate(api_params, result)
+        # allow api classes to return hashes with error key for custom responses
+        next auth if auth.is_a?(Hash) && auth[:error]
 
-      log_params = {start_time: start_time, auth: auth}
-      api.log(result, api_params + log_params, request) if
-        api_config[:logged]
+        start_time = Time.zone.now
+        api.before_evaluate(api_params)
 
-      result
+        result = api.evaluate(api_params, request, api_config)
+        api.after_evaluate(api_params, result)
+
+        if api_config[:logged]
+          log_params = api_params + { start_time: start_time, auth: auth }
+          api.log(result, log_params, request)
+        end
+
+        result
+      rescue StandardError => e
+        Marty::Logger.log('rpc_controller', 'failure', e.message)
+        INTERNAL_SERVER_ERROR
+      end
     end
   end
 
   private
+
+  def get_api_config params
+    config_attrs = params.values_at(:script, :node, :attr)
+    Marty::ApiConfig.lookup(*config_attrs)
+  end
+
+  def process_active_params params
+    # must permit params before conversion to_h
+    # convert hash to json and parse to get expected hash (not indifferent)
+    params.permit!
+    JSON.parse(params.to_h.to_json)
+  end
 
   def massage_params request_params
     sname,
@@ -51,7 +74,7 @@ class Marty::RpcController < ActionController::Base
     # FIXME: small patch to allow for single attr array
     attr = ActiveSupport::JSON.decode(attr) rescue attr
 
-    return {error: "Malformed attrs"} unless
+    return { error: 'Malformed attrs' } unless
       attr.is_a?(String) || (attr.is_a?(Array) && attr.count == 1)
 
     # if attr is a single attr array, remember to return as an array
@@ -60,36 +83,29 @@ class Marty::RpcController < ActionController::Base
       ret_arr = true
     end
 
-    return {error: "Malformed attrs"} unless attr =~ /\A[a-z][a-zA-Z0-9_]*\z/
+    return { error: 'Malformed attrs' } unless attr =~ /\A[a-z][a-zA-Z0-9_]*\z/
 
     begin
       case params
       when String
         params = ActiveSupport::JSON.decode(params)
-      when ActionController::Parameters
-        # must permit params before conversion to_h
-        # convert hash to json and parse to get expected hash (not indifferent)
-        params.permit!
-        params = JSON.parse(params.to_h.to_json)
       when nil
         params = {}
+      when ActionController::Parameters
+        params = process_active_params(params)
       else
-        return {error: "Bad params"}
+        return { error: 'Bad params' }
       end
     rescue JSON::ParserError => e
-      return {error: "Malformed params"}
+      return { error: 'Malformed params' }
     end
 
-    return {error: "Malformed params"} unless params.is_a?(Hash)
+    return { error: 'Malformed params' } unless params.is_a?(Hash)
 
-    {
-      script:       sname,
-      tag:          tag,
-      node:         node,
+    # permit request params and convert to hash
+    process_active_params(request_params.except(:rpc)).symbolize_keys + {
       attr:         attr,
       params:       params,
-      api_key:      api_key,
-      background:   background,
       return_array: ret_arr
     }
   end

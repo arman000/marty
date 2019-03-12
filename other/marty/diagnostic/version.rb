@@ -2,8 +2,8 @@ module Marty::Diagnostic; class Version < Base
   diagnostic_fn do
     begin
       message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
-    rescue
-      message = error("Failed accessing git")
+    rescue StandardError
+      message = error('Failed accessing git')
     end
     rbv = "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
     {
@@ -22,11 +22,9 @@ module Marty::Diagnostic; class Version < Base
   end
 
   def self.db_schema
-    begin
       Database.db_schema
-    rescue => e
+  rescue StandardError => e
       error(e.message)
-    end
   end
 end
 end

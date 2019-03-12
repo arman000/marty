@@ -2,8 +2,7 @@ require 'spec_helper'
 require 'marty'
 require 'delorean_lang'
 
-
-STYLE_CODE =<<EOS
+STYLE_CODE = <<EOS
 S:
     data =
         [
@@ -35,18 +34,17 @@ S:
 EOS
 
 describe Marty::Xl do
-
-  let(:engine) {
-    Delorean::Engine.new "YYY"
-  }
+  let(:engine) do
+    Delorean::Engine.new 'YYY'
+  end
 
   before(:each) do
     code = STYLE_CODE.clone
     engine.parse(code)
-    @ws =  engine.evaluate("S", ["result"]).flatten(1)
+    @ws = engine.evaluate('S', ['result']).flatten(1)
   end
 
-  it "should be able to create a spreadsheet with overlapping border styles" do
+  it 'should be able to create a spreadsheet with overlapping border styles' do
     sp = Marty::Xl.spreadsheet(@ws)
     wb = sp.workbook
 
@@ -58,17 +56,17 @@ describe Marty::Xl do
       b.prs.each do |pr|
         edges << [pr.name, pr.style, pr.color.rgb]
       end
-      edges.sort_by{ |k| k[0] }
+      edges.sort_by { |k| k[0] }
     end
 
-    sp.workbook.worksheets[0].rows[0].cells[0..1].map { |c| c.value }.should ==
-      ["", ""]
+    sp.workbook.worksheets[0].rows[0].cells[0..1].map(&:value).should ==
+      ['', '']
 
-    sp.workbook.worksheets[0].rows[1].cells[0..2].map { |c| c.value }.should ==
-      ["", 1, 2]
+    sp.workbook.worksheets[0].rows[1].cells[0..2].map(&:value).should ==
+      ['', 1, 2]
 
-    sp.workbook.worksheets[0].rows[2].cells[0..2].map { |c| c.value }.should ==
-      ["", 3, 4]
+    sp.workbook.worksheets[0].rows[2].cells[0..2].map(&:value).should ==
+      ['', 3, 4]
 
     wb.worksheets[0].styles.borders.count.should >= 4
 
@@ -79,11 +77,11 @@ describe Marty::Xl do
       when 0
         b.should == []
       when 2
-        b.should == [[:left, :thin, "FF000000"]]
+        b.should == [[:left, :thin, 'FF000000']]
       when 3
-        b.should == [[:top, :thick, "FFFF0000"]]
+        b.should == [[:top, :thick, 'FFFF0000']]
       when 4
-        b.should == [[:left, :thin, "FF000000"], [:top, :thick, "FFFF0000"]]
+        b.should == [[:left, :thin, 'FF000000'], [:top, :thick, 'FFFF0000']]
       else
         next
       end
@@ -110,6 +108,5 @@ describe Marty::Xl do
         next
       end
     end
-
   end
 end

@@ -8,7 +8,7 @@ class Marty::ComponentsController < Marty::ApplicationController
 
     return redirect_to root_path unless component
 
-    cname = component.gsub("::", "_").underscore
+    cname = component.gsub('::', '_').underscore
     render layout: true,
     inline: "<%= netzke :#{cname}, class_name: '#{component}', height: 650 %>"
   end

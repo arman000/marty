@@ -1,16 +1,15 @@
 module Marty::PgEnum
-
-  def [](i0, i1=nil)
+  def [](i0, i1 = nil)
     # if i1 is provided, then i0 is a pt and we ignore it.
     index = (i1 || i0).to_s
 
-    raise "no such #{self.name}: '#{index}'" unless
+    raise "no such #{name}: '#{index}'" unless
       self::VALUES.include?(index)
 
     index
   end
 
-  def get_all(pt=nil)
+  def get_all(pt = nil)
     self::VALUES.map(&:to_s)
   end
 

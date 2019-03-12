@@ -11,6 +11,7 @@
 require 'marty/engine'
 require 'marty/railtie'
 require 'marty/mcfly_model'
+require 'marty/cache_adapters'
 require 'marty/monkey'
 require 'marty/promise_job'
 require 'marty/json_schema'

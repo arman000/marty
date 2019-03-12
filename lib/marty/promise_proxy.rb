@@ -14,9 +14,9 @@ class Marty::PromiseProxy < BasicObject
                    :as_json,
                   ]
 
-  instance_methods.each {|m| undef_method m unless m =~ /^(__.*|object_id)$/}
+  instance_methods.each { |m| undef_method m unless m =~ /^(__.*|object_id)$/ }
 
-  def initialize(promise_id, timeout, attr=nil)
+  def initialize(promise_id, timeout, attr = nil)
     promise_id, @timeout, @attr = promise_id, timeout, attr
     @promise = ::Marty::Promise.find(promise_id)
     @mutex   = ::Mutex.new
@@ -24,7 +24,7 @@ class Marty::PromiseProxy < BasicObject
   end
 
   def as_json(*)
-    {'__promise__' => [@promise.id, @timeout, @attr]}
+    { '__promise__' => [@promise.id, @timeout, @attr] }
   end
 
   def __promise__
@@ -54,7 +54,7 @@ class Marty::PromiseProxy < BasicObject
         if @result.equal?(NOT_SET)
           begin
             @result = @promise.wait_for_result(@timeout)
-            @result = @result[@attr] if @attr && !@result["error"]
+            @result = @result[@attr] if @attr && !@result['error']
           rescue ::Exception => exc
             @result = ::Delorean::Engine.grok_runtime_exception(exc)
           end
@@ -65,7 +65,7 @@ class Marty::PromiseProxy < BasicObject
     # FIXME: the logic for shape of exceptions from Delorean is spread
     # all over the place.
     @result.is_a?(::Hash) &&
-      @result["error"] ? ::Kernel.raise(@result["error"]) : @result
+      @result['error'] ? ::Kernel.raise(@result['error']) : @result
   end
 
   alias_method :force, :__force__
@@ -75,7 +75,7 @@ class Marty::PromiseProxy < BasicObject
   #
   # @param  [Symbol]
   # @return [Boolean]
-  def respond_to?(method, include_all=false)
+  def respond_to?(method, include_all = false)
     METH_SET.member?(method) || __force__.respond_to?(method, include_all)
   end
 

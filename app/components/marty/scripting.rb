@@ -1,92 +1,37 @@
 class Marty::Scripting < Netzke::Base
-
   def configure(c)
     super
 
     c.items =
       [
-       :script_form,
-       {
-         xtype: "tabpanel",
-         active_tab: 0,
-         region: :center,
-         split: true,
-         items: [
-                 {
-                   title: I18n.t("script.selection"),
-                   layout: {
-                     type: :vbox,
-                     align: :stretch,
-                   },
-                   items: [
-                           :tag_grid,
-                           :script_grid,
-                          ],
-                 },
-                 :script_tester,
-                ],
-       },
+        :script_form,
+        {
+          xtype: 'tabpanel',
+          active_tab: 0,
+          region: :center,
+          split: true,
+          items: [
+            {
+              title: I18n.t('script.selection'),
+              layout: {
+                type: :vbox,
+                align: :stretch,
+              },
+              items: [
+                :tag_grid,
+                :script_grid,
+              ],
+            },
+            :script_tester,
+          ],
+        },
       ]
   end
 
   client_class do |c|
-
     c.header = false
     c.layout = :border
-
-    c.init_component = l(<<-JS)
-    function() {
-       var me = this;
-       me.callParent();
-
-       var tag_grid      = me.netzkeGetComponent('tag_grid').getView();
-       var script_grid   = me.netzkeGetComponent('script_grid').getView();
-       var script_form   = me.netzkeGetComponent('script_form');
-
-       tag_grid.getSelectionModel().on('selectionchange',
-          function(self, records) {
-
-          if(records[0] == null)
-             return;
-
-          var tag_id = records[0].get('id');
-          me.server.selectTag({tag_id: tag_id});
-          script_grid.getStore().load();
-          var script_name = null;
-          script_form.server.netzkeLoad({script_name: script_name});
-          }, me);
-
-       script_grid.getSelectionModel().on('selectionchange',
-          function(self, records) {
-
-          if(script_grid.getStore().isLoading() == true)
-             return;
-
-          if(records[0] == null)
-             return;
-
-          var script_name = records[0].get('name');
-          me.server.selectScript({script_name: script_name});
-          script_form.server.netzkeLoad({script_name: script_name});
-          }, me);
-    }
-    JS
-
-    c.script_refresh = l(<<-JS)
-    function(script_name) {
-       if (!script_name) {
-          this.server.selectScript({});
-          this.netzkeReload();
-       }
-       else {
-          this.server.selectScript({script_name: script_name});
-          this.netzkeGetComponent('tag_grid').getStore().load();
-          this.netzkeGetComponent('script_grid').getStore().load();
-          this.netzkeGetComponent('script_form').server.netzkeLoad(
-             {script_name: script_name});
-       }
-    }
-    JS
+    c.include :scripting
   end
 
   endpoint :select_tag do |params|
@@ -103,19 +48,19 @@ class Marty::Scripting < Netzke::Base
     c.width            = 400
     c.height           = 300
     c.load_inline_data = false
-    c.title            = I18n.t("script.selection_history")
+    c.title            = I18n.t('script.selection_history')
   end
 
   component :script_grid do |c|
     c.width            = 400
     c.klass            = Marty::ScriptGrid
-    c.title            = I18n.t("script.selection_list")
+    c.title            = I18n.t('script.selection_list')
     c.flex             = 1
   end
 
   component :script_form do |c|
     c.klass            = Marty::ScriptForm
-    c.title            = I18n.t("script.detail")
+    c.title            = I18n.t('script.detail')
     c.flex             = 1
     c.split            = true
     c.region           = :west
@@ -123,10 +68,9 @@ class Marty::Scripting < Netzke::Base
 
   component :script_tester do |c|
     c.klass            = Marty::ScriptTester
-    c.title            = I18n.t("script.tester")
+    c.title            = I18n.t('script.tester')
     c.flex             = 1
   end
-
 end
 
 Scripting = Marty::Scripting

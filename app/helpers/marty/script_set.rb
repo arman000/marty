@@ -10,7 +10,7 @@ class Marty::ScriptSet < Delorean::AbstractContainer
 
   clear_cache
 
-  def initialize(tag=nil)
+  def initialize(tag = nil)
     @tag = Marty::Tag.map_to_tag(tag)
     super()
   end
@@ -30,7 +30,7 @@ class Marty::ScriptSet < Delorean::AbstractContainer
       # hacky/rare anyway.  So, don't bother for now.
 
       max_dt = Marty::Script.
-        order("created_dt DESC").limit(1).pluck(:created_dt).first
+        order('created_dt DESC').limit(1).pluck(:created_dt).first
 
       @@dengines_dt ||= max_dt
 
@@ -41,7 +41,7 @@ class Marty::ScriptSet < Delorean::AbstractContainer
 
       return engine if engine
 
-      script = Marty::Script.find_script(sname, tag) || raise("No such script")
+      script = Marty::Script.find_script(sname, tag) || raise('No such script')
 
       @@dengines[sname] = parse_check(sname, script.body)
     else
@@ -49,7 +49,7 @@ class Marty::ScriptSet < Delorean::AbstractContainer
 
       return engine if engine
 
-      script = Marty::Script.find_script(sname, tag) || raise("No such script")
+      script = Marty::Script.find_script(sname, tag) || raise('No such script')
 
       @@engines[[tag.id, sname]] = parse_check(sname, script.body)
     end

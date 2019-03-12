@@ -6,7 +6,11 @@ module Marty; class DataGridView < McflyGridPanel
 
   include Extras::Layout
 
-  def self.show_grid_js(options={})
+  # show_grid_js and client_show_grid_js have specific
+  # handles so they can be used by various other components
+  # FIXME: add the ability to pull specific functions
+  # from other component javascripts or add a base to pull from
+  def self.show_grid_js(options = {})
     dg        = options[:data_grid] || 'data_grid'
     title_str = options[:title_str] || 'Data Grid'
 
@@ -67,18 +71,18 @@ module Marty; class DataGridView < McflyGridPanel
     super
 
     c.title   = I18n.t('data_grid')
-    c.model   = "Marty::DataGrid"
+    c.model   = 'Marty::DataGrid'
     c.attributes =
       [
-       :name,
-       :vcols,
-       :hcols,
-       :lenient,
-       :data_type,
-       :created_dt,
+        :name,
+        :vcols,
+        :hcols,
+        :lenient,
+        :data_type,
+        :created_dt,
       ]
 
-    c.store_config.merge!({sorters:  [{property: :name, direction: 'ASC'}]})
+    c.store_config.merge!(sorters:  [{ property: :name, direction: 'ASC' }])
     c.editing      = :in_form
     c.paging       = :pagination
     c.multi_select = false
@@ -87,14 +91,14 @@ module Marty; class DataGridView < McflyGridPanel
   endpoint :add_window__add_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    return client.netzke_notify("Permission Denied") if
+    return client.netzke_notify('Permission Denied') if
       !config[:permissions][:create]
 
     begin
-      DataGrid.create_from_import(data["name"], data["export"])
+      DataGrid.create_from_import(data['name'], data['export'])
       client.success = true
       client.netzke_on_submit_success
-    rescue => exc
+    rescue StandardError => exc
       client.netzke_notify(exc.to_s)
     end
   end
@@ -102,20 +106,20 @@ module Marty; class DataGridView < McflyGridPanel
   endpoint :edit_window__edit_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    dg = DataGrid.find_by_id(data["id"])
+    dg = DataGrid.find_by_id(data['id'])
 
     begin
-      dg.update_from_import(data["name"], data["export"])
+      dg.update_from_import(data['name'], data['export'])
       client.success = true
       client.netzke_on_submit_success
-    rescue => exc
+    rescue StandardError => exc
       client.netzke_notify(exc.to_s)
     end
   end
 
   action :show_grid do |a|
-    a.text     = "Show Grid"
-    a.icon_cls = "fa fa-th-large glyph"
+    a.text     = 'Show Grid'
+    a.icon_cls = 'fa fa-th-large glyph'
     a.handler  = :netzke_show_grid
   end
 
@@ -124,7 +128,7 @@ module Marty; class DataGridView < McflyGridPanel
 
     dg = DataGrid.find_by_id(record_id)
 
-    return client.netzke_notify("No data grid.") unless dg
+    return client.netzke_notify('No data grid.') unless dg
 
     meta_rows_raw, h_key_rows, data_rows = dg.export_array
     meta_rows = meta_rows_raw.map do |row|
@@ -149,8 +153,8 @@ module Marty; class DataGridView < McflyGridPanel
 
   def default_form_items
     [
-     :name,
-     textarea_field(:export, height: 300, hide_label: true),
+      :name,
+      textarea_field(:export, height: 300, hide_label: true),
     ]
   end
 
@@ -169,18 +173,18 @@ module Marty; class DataGridView < McflyGridPanel
   end
 
   attribute :hcols do |c|
-    c.label  = "Horizontal Attrs"
+    c.label  = 'Horizontal Attrs'
     c.width  = 200
     c.getter = lambda { |r|
-      r.dir_infos("h").map {|inf| inf["attr"]}.join(', ')
+      r.dir_infos('h').map { |inf| inf['attr'] }.join(', ')
     }
   end
 
   attribute :vcols do |c|
-    c.label  = "Vertical Attrs"
+    c.label  = 'Vertical Attrs'
     c.width  = 200
     c.getter = lambda { |r|
-      r.dir_infos("v").map {|inf| inf["attr"]}.join(', ')
+      r.dir_infos('v').map { |inf| inf['attr'] }.join(', ')
     }
   end
 
@@ -189,13 +193,13 @@ module Marty; class DataGridView < McflyGridPanel
   end
 
   attribute :data_type do |c|
-    c.label  = "Data Type"
+    c.label  = 'Data Type'
     c.width  = 200
   end
 
   attribute :created_dt do |c|
     c.label     = I18n.t('updated_at')
-    c.format    = "Y-m-d H:i"
+    c.format    = 'Y-m-d H:i'
     c.read_only = true
   end
 end; end

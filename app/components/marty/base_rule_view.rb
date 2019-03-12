@@ -5,6 +5,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   def self.klass
     Marty::BaseRule
   end
+
   def klass
     self.class.klass
   end
@@ -12,19 +13,21 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   def self.base_fields
     [:name]
   end
+
   def self.computed_fields
     [:computed_guards, :grids, :results]
   end
+
   def configure(c)
     super
     c.model = self.class.klass
     c.title = I18n.t('rule')
     c.attributes = self.class.base_fields +
                    klass.guard_info.
-                     sort_by{|_, h| h[:order] || 0}.
-                     reject{|_, h| h[:hidden]}.
+                     sort_by { |_, h| h[:order] || 0 }.
+                     reject { |_, h| h[:hidden] }.
                      map { |name, _| name.to_sym } + self.class.computed_fields
-    c.store_config.merge!(sorters: [{property: :name, direction: 'ASC'}])
+    c.store_config.merge!(sorters: [{ property: :name, direction: 'ASC' }])
     c.editing      = :in_form
     c.paging       = :pagination
     c.multi_select = false
@@ -43,51 +46,87 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       @key    = key
       @lineno = lineno
     end
+
     def message
       "keyword '#{@key}' specified more than once (line #{@lineno})"
     end
   end
 
-  def self.simple_to_hash(s)
+  # FSM to parse rule text into json
+  def self.ruletext_to_hash(s)
+    # states are
+    #  :start   - before any attr is defined
+    #  :in_attr - defining an attr
+    #  :end     - end of input
+    state = :start
     result = {}
-    save_linenos = {}
-    last_key = nil
-    s.lines.each.with_index(1) do |line, idx|
-      next if /\A\s*\z/.match(line)
+    cur_attr = nil
+    idx = 0
+    input = s.lines
+
+    # events are
+    #  :attr    - starting with <identifier>\s*=
+    #  :normal  - line not starting with ident =
+    #  :end     - no more lines
+    # get_event returns [event, data]
+    get_event = lambda {
+      line = input.try(&:shift)
+      next [:end] unless line
+
       line.chomp!
-      begin
-        m = /\A\s*([a-z][a-z0-9_]*)\s*=\s*(.*)\s*\z/.match(line)
-        if m
-          k, v = m[1], m[2]
-          raise DupKeyError.new(k, idx) if result.keys.include?(k)
-          save_linenos[k] = idx
-          result[k] = v
-          last_key = k
-        else
-          raise unless last_key
-          result[last_key] += "\n" + line.strip
+      idx += 1
+      m = /\A\s*([a-z][a-z0-9_]*)\s* = (.*)\z/.match(line)
+      next [:attr, m[1..-1]] if m
+
+      [:normal, line]
+    }
+
+    # start a new attribute
+    # data is [ attr_name, everything after = ]
+    new_attr = lambda { |data|
+      cur_attr = data.shift
+      raise DupKeyError.new(cur_attr, idx) if result[cur_attr]
+
+      result[cur_attr] = data[0]
+    }
+
+    begin
+      while state != :end
+        event, extra = get_event.call
+        case state
+        when :start
+          case event
+          when :attr
+            new_attr.call(extra)
+            state = :in_attr
+          when :normal
+            raise
+          when :end
+            state = :end
+          end
+        when :in_attr
+          case event
+          when :attr
+            new_attr.call(extra)
+          when :normal
+            result[cur_attr] += "\n" + extra
+          when :end
+            state = :end
+          end
         end
-      rescue DupKeyError => e
-        raise
-      rescue => e
-        raise "syntax error on line #{idx}"
       end
+    rescue DupKeyError => e
+      raise
+    rescue StandardError => e
+      raise "syntax error on line #{idx}"
     end
     result
   end
 
-  def self.hash_to_simple(h)
-    return unless h && h.present?
-    lhs_wid = h.keys.map(&:length).max
-    fmt = "%-#{lhs_wid}s = %s"
-    result = []
-    h.map do |k, vstr|
-      vlines = vstr.lines.map(&:chomp)
-      fst = vlines.shift
-      result << fmt % [k, fst]
-      vlines.each {|l| result << " "*(lhs_wid+3) + l}
+  def self.hash_to_ruletext(h)
+    h.each_with_object('') do |(k, v), out|
+      out << k + ' = ' + v + "\n"
     end
-    result.join("\n")
   end
 
   def jsonb_getter(c)
@@ -95,7 +134,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def jsonb_simple_getter(c)
-    lambda {|r| Marty::BaseRuleView.hash_to_simple(r.send(c)) }
+    lambda { |r| Marty::BaseRuleView.hash_to_ruletext(r.send(c)) }
   end
 
   def jsonb_simple_setter(c)
@@ -104,8 +143,8 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       return r.send(msg, nil) if v.blank?
 
       begin
-        final = Marty::BaseRuleView.simple_to_hash(v)
-      rescue => e
+        final = Marty::BaseRuleView.ruletext_to_hash(v)
+      rescue StandardError => e
         final = { "~~ERROR~~": e.message }
       end
 
@@ -116,16 +155,16 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     }
   end
 
-  def self.jsonb_field_getter(j, c, nullbool=nil)
+  def self.jsonb_field_getter(j, c, nullbool = nil)
     lambda do |r|
       rv = r.send(j)[c]
       v = nullbool ? (rv == true ? 'True' :
                         rv == false ? 'False' : rv) : rv
-      v || ""
+      v || ''
     end
   end
 
-  def self.jsonb_field_setter(j, c, bool=nil)
+  def self.jsonb_field_setter(j, c, bool = nil)
     lambda do |r, rv|
       v = bool ? rv.to_s.downcase == 'true' : rv
       rv == '' || rv == '---' ? r.send(j).delete(c) : r.send(j)[c] = v
@@ -154,7 +193,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     c.width = 150
   end
 
-  def self.grid_column(c, label=nil)
+  def self.grid_column(c, label = nil)
     editor_config = {
       trigger_action: :all,
       xtype:          :combo,
@@ -170,8 +209,8 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       type:          :string,
       getter: jsonb_field_getter(:grids, c.to_s),
       setter: jsonb_field_setter(:grids, c.to_s),
-#      getter: lambda { |r| r.grids[c.to_s] },
-#      setter: lambda { |r, v| r.grids[c.to_s] = v },
+      #      getter: lambda { |r| r.grids[c.to_s] },
+      #      setter: lambda { |r, v| r.grids[c.to_s] = v },
     }
   end
 
@@ -180,7 +219,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def form_items_guards
-    klass.guard_info.reject{|_, h| h[:hidden]}.keys.map{|x|x.to_sym}
+    klass.guard_info.reject { |_, h| h[:hidden] }.keys.map(&:to_sym)
   end
 
   def form_items_grids
@@ -188,11 +227,17 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def form_items_computed_guards
-    [jsonb_field(:computed_guards, height: 150)]
+    [jsonb_field(:computed_guards,
+                 getter: jsonb_simple_getter(:computed_guards),
+                 setter: jsonb_simple_setter(:computed_guards),
+                 height: 100)]
   end
 
   def form_items_results
-    [jsonb_field(:results, height: 150)]
+    [jsonb_field(:results,
+                 getter: jsonb_simple_getter(:results),
+                 setter: jsonb_simple_setter(:results),
+                 height: 225)]
   end
 
   def default_form_items
@@ -201,11 +246,11 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
         vbox(*form_items_attrs +
              form_items_guards,
              border: false,
-             width: "40%",
-        ),
+             width: '40%',
+            ),
         vbox(width: '2%', border: false),
         vbox(
-             width: '55%', border: false),
+          width: '55%', border: false),
         height: '40%',
         border: false,
       ),
@@ -215,7 +260,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
              form_items_results,
              width: '99%',
              border: false
-        ),
+            ),
         height: '40%',
        border: false
       )
@@ -252,7 +297,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       if h[:type] != :range
         c.getter = Marty::BaseRuleView.jsonb_field_getter(meth, namestr, nullbool)
         c.setter = Marty::BaseRuleView.jsonb_field_setter(meth, namestr,
-                                                          h[:type]==:boolean)
+                                                          h[:type] == :boolean)
         c.filter_with = lambda do |rel, value, op|
           v = ActiveRecord::Base.connection.quote(value)[1..-2]
           rel.where("#{meth}->>'#{namestr}' like '%#{v}%'")

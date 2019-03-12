@@ -16,28 +16,27 @@ module Marty::Diagnostic
 
     def git
       `cd #{Rails.root.to_s}; git describe --tags --always;`.
-        strip rescue "Failed accessing git"
+        strip rescue 'Failed accessing git'
     end
 
     describe 'GET #op' do
       it 'returns http success' do
-        get :op, params: {format: :json, op: 'version'}
+        get :op, params: { format: :json, op: 'version' }
         expect(response).to have_http_status(:success)
       end
 
       it 'a request injects the request object into Diagnostic classes' do
-        get :op, params: {format: :json, op: 'version'}
+        get :op, params: { format: :json, op: 'version' }
         expect(Reporter.request).not_to eq(nil)
       end
 
       it 'returns the current version JSON' do
-        get :op, params: {format: :json, op: 'version', data: 'true'}
+        get :op, params: { format: :json, op: 'version', data: 'true' }
 
         # generate version data and declare all values consistent
-        versions = Version.generate.each_with_object({}){
-          |(n, v),h|
-          h[n] = v.each{|t, r| r['consistent'] = true}
-        }
+        versions = Version.generate.each_with_object({}) do |(n, v), h|
+          h[n] = v.each { |t, r| r['consistent'] = true }
+        end
 
         expected = {
           'data' => {
@@ -50,77 +49,77 @@ module Marty::Diagnostic
 
       it 'returns the expected cummulative diagnostic' do
         expected = {
-          "data" => {
-            "Version" => {
+          'data' => {
+            'Version' => {
               my_ip => {
-                "Marty" => {
-                  "description" => Marty::VERSION,
-                  "status"      => true,
-                  "consistent"  => true
+                'Marty' => {
+                  'description' => Marty::VERSION,
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "Delorean" => {
-                  "description" => Delorean::VERSION,
-                  "status"      => true,
-                  "consistent"  => true
+                'Delorean' => {
+                  'description' => Delorean::VERSION,
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "Mcfly" => {
-                  "description" => Mcfly::VERSION,
-                  "status"      => true,
-                  "consistent"  => true
+                'Mcfly' => {
+                  'description' => Mcfly::VERSION,
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "Git" => {
-                  "description" => git,
-                  "status"      => true,
-                  "consistent"  => true
+                'Git' => {
+                  'description' => git,
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "Rails" => {
-                  "description" => Rails.version,
-                  "status"      => true,
-                  "consistent"  => true
+                'Rails' => {
+                  'description' => Rails.version,
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "Netzke Core" => {
-                  "description" => Netzke::Core::VERSION,
-                  "status"      => true,
-                  "consistent"  => true
+                'Netzke Core' => {
+                  'description' => Netzke::Core::VERSION,
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "Netzke Basepack" => {
-                  "description" => Netzke::Basepack::VERSION,
-                  "status"      => true,
-                  "consistent"  => true
+                'Netzke Basepack' => {
+                  'description' => Netzke::Basepack::VERSION,
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "Ruby" => {
-                  "description" => "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} "\
+                'Ruby' => {
+                  'description' => "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} "\
                                    "(#{RUBY_PLATFORM})",
-                  "status"      => true,
-                  "consistent"  => true
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "RubyGems" => {
-                  "description" => Gem::VERSION,
-                  "status"      => true,
-                  "consistent"  => true
+                'RubyGems' => {
+                  'description' => Gem::VERSION,
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "Database Schema Version" => {
-                  "description" => Database.db_schema,
-                  "status"      => true,
-                  "consistent"  => true
+                'Database Schema Version' => {
+                  'description' => Database.db_schema,
+                  'status'      => true,
+                  'consistent'  => true
                 },
-                "Environment" => {
-                  "description" => Rails.env,
-                  "status"      => true,
-                  "consistent"  => true
+                'Environment' => {
+                  'description' => Rails.env,
+                  'status'      => true,
+                  'consistent'  => true
                 }
               }
             },
-            "EnvironmentVariables" => {
+            'EnvironmentVariables' => {
               my_ip => {
               }
             },
-            "Nodes" => {
+            'Nodes' => {
               my_ip => {
-                "Nodes"=> {
-                  "description" => my_ip,
-                  "status"      => true,
-                  "consistent"  => true
+                'Nodes' => {
+                  'description' => my_ip,
+                  'status'      => true,
+                  'consistent'  => true
                 }
               }
             }

@@ -1,50 +1,33 @@
 class Marty::PromiseView < Netzke::Tree::Base
   extend ::Marty::Permissions
+  has_marty_permissions read: :any
 
   client_styles do |config|
     config.require :promise_view
   end
 
-  client_class do |config|
-    config.default_get_row_class = l(<<-JS)
-    function(record, index, rowParams, ds) {
-       var status = record.get('status');
-       if (status === false) return "red-row";
-       if (status === true)  return "green-row";
-       return "orange-row";
+  client_class do |c|
+    c.job_path = l(<<-JS)
+    function(jid) {
+      return '#{Marty::Util.marty_path}/job/download?job_id=' + jid;
     }
     JS
 
-    config.listen_fn = l(<<-JS)
-    function(obj, search_text) {
-        var lg = this.ownerCt.ownerCt;
-        lg.getStore().getProxy().extraParams.live_search = search_text;
-        lg.getStore().load();
-    }
-    JS
-
-    # Live search box -- direct copy from Marty::LiveSearchGridPanel
-    config.tbar = ['->', {
-                name:  'live_search_text',
-                xtype: 'textfield',
-                enable_key_events: true,
-                ref: '../live_search_field',
-                empty_text: 'Search',
-                listeners: {
-                  change: {
-                    fn: config.listen_fn,
-                    buffer: 500,
-                  }
-                }
-              }]
+    c.include :promise_view
   end
 
-  def configure(config)
+  ######################################################################
+
+  def class_can?(op)
+    self.class.can_perform_action?(op)
+  end
+
+  def configure(c)
     super
-    config.title = I18n.t("jobs.promise_view")
-    config.model = "Marty::VwPromise"
-    config.attributes = [
-      {name: :title, xtype: :treecolumn},
+    c.title = I18n.t('jobs.promise_view')
+    c.model = 'Marty::VwPromise'
+    c.attributes = [
+      { name: :title, xtype: :treecolumn },
       :user__login,
       :job_id,
       :start_dt,
@@ -54,14 +37,17 @@ class Marty::PromiseView < Netzke::Tree::Base
       :error,
       :queue,
     ]
-    config.root_visible = false
-    config.paging = :none
-    config.bbar = bbar
-    config.read_only = true
-    config.permissions = { update: false,
-                           create: false,
-                           delete: false,
-                         }
+    c.root_visible = false
+    c.paging = :none
+    c.bbar = bbar
+    c.read_only = true
+    c.permissions = {
+      create: class_can?(:create),
+      read:   class_can?(:read),
+      update: class_can?(:update),
+      delete: class_can?(:delete)
+    }
+
     # garbage collect old promises (hacky to do this here)
     Marty::Promise.cleanup(false)
   end
@@ -70,66 +56,23 @@ class Marty::PromiseView < Netzke::Tree::Base
     [:clear, '->', :refresh, :download]
   end
 
-  client_class do |config|
-    config.init_component = l(<<-JS)
-    function() {
-       this.callParent();
-       this.getSelectionModel().on('selectionchange', function(selModel) {
-          this.actions.download &&
-          this.actions.download.setDisabled(!selModel.hasSelection());
-       }, this);
-       this.getView().getRowClass = this.defaultGetRowClass;
-    }
-    JS
-
-    config.netzke_on_download = l(<<-JS)
-    function() {
-       var jid = this.getSelectionModel().getSelection()[0].getId();
-       // FIXME: seems pretty hacky
-       window.location = "#{Marty::Util.marty_path}/job/download?job_id=" + jid;
-    }
-    JS
-
-    config.netzke_on_refresh = l(<<-JS)
-    function() {
-       this.store.load();
-    }
-    JS
-
-    config.netzke_on_clear = l(<<-JS)
-    function(params) {
-       var me = this;
-       Ext.Msg.show({
-         title: 'Clear All Jobs',
-         msg: 'Enter CLEAR and press OK to clear all previous jobs',
-         width: 375,
-         buttons: Ext.Msg.OKCANCEL,
-         prompt: true,
-         fn: function (btn, value) {
-          (btn == "ok" && value == "CLEAR") && me.server.clear({});
-         }
-       });
-    }
-    JS
-  end
-
   action :clear do |a|
     a.text     = a.tooltip = 'Clear'
     a.disabled = false
-    a.icon_cls = "fa fa-minus glyph"
+    a.icon_cls = 'fa fa-minus glyph'
     a.hidden   = !self.class.has_admin_perm?
   end
 
   action :download do |a|
     a.text     = a.tooltip = 'Download'
     a.disabled = true
-    a.icon_cls = "fa fa-download glyph"
+    a.icon_cls = 'fa fa-download glyph'
   end
 
   action :refresh do |a|
     a.text     = a.tooltip = 'Refresh'
     a.disabled = false
-    a.icon_cls = "fa fa-sync-alt glyph"
+    a.icon_cls = 'fa fa-sync-alt glyph'
   end
 
   endpoint :clear do |params|

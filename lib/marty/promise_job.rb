@@ -17,12 +17,12 @@ class Delorean::BaseModule::NodeCall
   # Monkey-patch '|' method for Delorean NodeCall to create promise
   # jobs and return promise proxy objects.
   def |(args)
-
     if args.is_a?(String)
       attr = args
       args = [attr]
     else
-      raise "bad arg to %" unless args.is_a?(Array)
+      raise 'bad arg to %' unless args.is_a?(Array)
+
       attr = nil
     end
     script, tag = engine.module_name, engine.sset.tag
@@ -30,25 +30,25 @@ class Delorean::BaseModule::NodeCall
     begin
       # make sure params is serialzable before starting a Job
       JSON.dump(params)
-    rescue => exc
+    rescue StandardError => exc
       raise "non-serializable parameters: #{params} #{exc}"
     end
 
     # log "||||| #{args.inspect} #{params.inspect}"
 
-    title   = params["p_title"]   || "#{script}::#{nn.demodulize}"
-    timeout = params["p_timeout"] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
-    hook    = params["p_hook"]
+    title   = params['p_title']   || "#{script}::#{nn.demodulize}"
+    timeout = params['p_timeout'] || Marty::Promise::DEFAULT_PROMISE_TIMEOUT
+    hook    = params['p_hook']
     promise = Marty::Promise.
       create(title:     title,
              user_id:   params[:_user_id],
              parent_id: params[:_parent_id],
-             )
+            )
     params[:_promise_id] = promise.id
     begin
       job = Delayed::Job.enqueue Marty::PromiseJob.
         new(promise, title, script, tag, nn, params, args, hook)
-    rescue => exc
+    rescue StandardError => exc
       # log "CALLERR #{exc}"
       res = Delorean::Engine.grok_runtime_exception(exc)
       promise.set_start
@@ -63,10 +63,10 @@ class Delorean::BaseModule::NodeCall
     promise.job_id = job.id
     promise.save!
 
-    evh = params["p_event"]
+    evh = params['p_event']
     if evh
-      event, klass, subject_id, operation = evh.values_at("event", "klass",
-                                                          "id", "operation")
+      event, klass, subject_id, operation = evh.values_at('event', 'klass',
+                                                          'id', 'operation')
       if event
         event.promise_id = promise.id
         event.save!
@@ -82,11 +82,11 @@ class Delorean::BaseModule::NodeCall
   end
 end
 
-
 class Delorean::Engine
   def background_eval(node, params, attrs, event = {})
-    raise "background_eval bad params" unless params.is_a?(Hash)
-    params["p_event"] = event.each_with_object({}) do |(k, v), h|
+    raise 'background_eval bad params' unless params.is_a?(Hash)
+
+    params['p_event'] = event.each_with_object({}) do |(k, v), h|
       h[k.to_s] = v
     end unless event.empty?
     nc = Delorean::BaseModule::NodeCall.new({}, self, node, params)
@@ -103,10 +103,21 @@ class Marty::PromiseJob < Struct.new(:promise,
                                      :params,
                                      :attrs,
                                      :hook,
-                                     )
+                                    )
   # def log(msg)
   #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
   # end
+  #
+  def enqueue(job)
+    config = Rails.configuration.marty
+    hooks = config.promise_job_enqueue_hooks
+
+    return if hooks.blank?
+
+    hooks.each do |hook|
+      hook.call(job)
+    end
+  end
 
   def perform
     # log "PERF #{Process.pid} #{title}"
@@ -125,7 +136,7 @@ class Marty::PromiseJob < Struct.new(:promise,
       end
 
       # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
-    rescue => exc
+    rescue StandardError => exc
       res = Delorean::Engine.grok_runtime_exception(exc)
       # log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
     end
@@ -133,7 +144,7 @@ class Marty::PromiseJob < Struct.new(:promise,
 
     begin
       hook.run(res) if hook
-    rescue => exc
+    rescue StandardError => exc
       Marty::Util.logger.error "promise hook failed: #{exc}"
     end
   end

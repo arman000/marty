@@ -1,30 +1,30 @@
 class Marty::TagGrid < Marty::Grid
   has_marty_permissions \
-  read:   :any,
-  create: :dev
+    read:   :any,
+    create: :dev
 
   def configure(c)
     super
 
     c.header       = false
-    c.model        = "Marty::Tag"
+    c.model        = 'Marty::Tag'
     c.multi_select = false
 
     c.attributes ||= [:name, :created_dt, :user__name, :comment]
 
-    c.store_config.merge!({sorters: [{property: :created_dt,
-                                      direction: 'DESC'}]})
+    c.store_config.merge!(sorters: [{ property: :created_dt,
+                                      direction: 'DESC' }])
   end
 
   endpoint :add_window__add_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    return client.netzke_notify("Permission Denied") if
+    return client.netzke_notify('Permission Denied') if
       !config[:permissions][:create]
 
     # FIXME: disallow tag creation when no script has been modified?
 
-    tag = Marty::Tag.do_create(nil, data["comment"])
+    tag = Marty::Tag.do_create(nil, data['comment'])
 
     if tag.valid?
       client.success = true
@@ -36,9 +36,9 @@ class Marty::TagGrid < Marty::Grid
   end
 
   action :add_in_form do |a|
-    a.text     = I18n.t("tag_grid.new")
-    a.tooltip  = I18n.t("tag_grid.new")
-    a.icon_cls = "fa fa-clock glyph"
+    a.text     = I18n.t('tag_grid.new')
+    a.tooltip  = I18n.t('tag_grid.new')
+    a.icon_cls = 'fa fa-clock glyph'
     a.disabled = !config[:permissions][:create]
   end
 
@@ -58,8 +58,8 @@ class Marty::TagGrid < Marty::Grid
   end
 
   attribute :created_dt do |c|
-    c.text   = "Date/Time"
-    c.format = "Y-m-d H:i"
+    c.text   = 'Date/Time'
+    c.format = 'Y-m-d H:i'
     c.hidden = true
   end
 
@@ -71,7 +71,6 @@ class Marty::TagGrid < Marty::Grid
     c.width  = 100
     c.flex   = 1
   end
-
 end
 
 TagGrid = Marty::TagGrid

@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 feature 'under Applications menu, Scripting (debug) workflows', js: true do
-
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
@@ -46,18 +45,18 @@ C:
     a = 456.0 + p0
 DELOREAN
 
-    with_user("dev1") { |u|
+    with_user('dev1') do |u|
       Marty::Script.
         load_script_bodies({
-                             "M1" => sample_script,
-                             "M2" => sample_script.gsub(/a/, "aa").gsub(/b/, "bb"),
+                             'M1' => sample_script,
+                             'M2' => sample_script.gsub(/a/, 'aa').gsub(/b/, 'bb'),
                            }, Date.today)
 
       # add a DEV version of M1.
-      s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: "M1")
-      s.body = sample_script.gsub(/A/, "AA") + '    e =? "hello"'
+      s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: 'M1')
+      s.body = sample_script.gsub(/A/, 'AA') + '    e =? "hello"'
       s.save!
-    }
+    end
   end
 
   def populate_sample_scripts2
@@ -75,16 +74,16 @@ B: A
     p =? 5
 DELOREAN
 
-    with_user("dev1") { |u|
+    with_user('dev1') do |u|
       Marty::Script.
         load_script_bodies({
-                             "M3" => sample_script2,
+                             'M3' => sample_script2,
                            }, Date.today + 2.minute)
-    }
+    end
   end
 
   def tab_press tab_text
-    #we need a separate method for tab clicks
+    # we need a separate method for tab clicks
     wait_for_element do
         find_by_id(ext_button_id(tab_text), visible: :all).click
         true
@@ -108,7 +107,7 @@ DELOREAN
     and_by 'compute attrs with bad params' do
       wait_for_ajax
       wait_for_element do
-        fill_in('attrs', with: "A.a; A.b; B.a; C.a")
+        fill_in('attrs', with: 'A.a; A.b; B.a; C.a')
         true
       end
       fill_in('params', with: "a = 1.1\nc = 2.2")
@@ -118,6 +117,13 @@ DELOREAN
     and_by 'see errors' do
       wait_for_ajax
       expect(page).to have_content 'undefined parameter p0'
+    end
+
+    and_by 'see malformed params error' do
+      fill_in('params', with: 'a = Wrong::Class.last')
+      press('Compute')
+      wait_for_ajax
+      expect(page).to have_content 'Malformed input parameters'
     end
 
     and_by 'compute attrs with good params' do
@@ -135,7 +141,7 @@ DELOREAN
     end
 
     and_by 'compute new attrs & bad params (div by 0)' do
-      fill_in('attrs', with: "B.e")
+      fill_in('attrs', with: 'B.e')
       fill_in('params', with: "a = 0\n")
       press('Compute')
     end
@@ -160,8 +166,8 @@ DELOREAN
 
     and_by 'compute attrs with empty params' do
       wait_for_ajax
-      fill_in('attrs', with: "A.a")
-      fill_in('params', with: "")
+      fill_in('attrs', with: 'A.a')
+      fill_in('params', with: '')
       press('Compute')
     end
 
@@ -172,7 +178,7 @@ DELOREAN
     end
 
     and_by 'compute attrs that without necessary params' do
-      fill_in('attrs', with: "C.e")
+      fill_in('attrs', with: 'C.e')
       press('Compute')
     end
 
@@ -191,8 +197,8 @@ DELOREAN
 
     and_by 'compute attrs with good params' do
       wait_for_ajax
-      fill_in('attrs', with: "B.aa")
-      fill_in('params', with: "aa = 111")
+      fill_in('attrs', with: 'B.aa')
+      fill_in('params', with: 'aa = 111')
       press('Compute')
     end
 
@@ -219,7 +225,7 @@ DELOREAN
     and_by 'use bad attributes' do
       wait_for_ajax
       wait_for_element do
-        fill_in('attrs', with: "A; y; >")
+        fill_in('attrs', with: 'A; y; >')
         true
       end
       press('Compute')
@@ -233,7 +239,7 @@ DELOREAN
 
     and_by 'use bad node' do
       wait_for_ajax
-      fill_in('attrs', with: ">.<")
+      fill_in('attrs', with: '>.<')
       press('Compute')
     end
 
@@ -245,7 +251,7 @@ DELOREAN
 
     and_by 'use good attr' do
       wait_for_ajax
-      fill_in('attrs', with: "A.a")
+      fill_in('attrs', with: 'A.a')
       press('Compute')
     end
 
@@ -257,7 +263,7 @@ DELOREAN
 
     and_by 'use undefined attr' do
       wait_for_ajax
-      fill_in('attrs', with: "A.new")
+      fill_in('attrs', with: 'A.new')
       press('Compute')
     end
 
@@ -284,7 +290,7 @@ DELOREAN
     and_by 'use good attr' do
       wait_for_ajax
       wait_for_element do
-        fill_in('attrs', with: "C.p; B.p")
+        fill_in('attrs', with: 'C.p; B.p')
         true
       end
       press('Compute')
@@ -299,7 +305,7 @@ DELOREAN
 
     and_by 'add a good param' do
       wait_for_ajax
-      fill_in('params', with: "p = 7")
+      fill_in('params', with: 'p = 7')
       press('Compute')
     end
 
@@ -312,8 +318,8 @@ DELOREAN
 
     and_by 'use good attr' do
       wait_for_ajax
-      fill_in('attrs', with: "C.pc; B.pc")
-      fill_in('params', with: "")
+      fill_in('attrs', with: 'C.pc; B.pc')
+      fill_in('params', with: '')
       press('Compute')
     end
 
@@ -324,11 +330,11 @@ DELOREAN
       expect(result).to have_content 'B.pc = 9'
     end
 
-     and_by 'use bad attr' do
-      wait_for_ajax
-      fill_in('attrs', with: "C.pc; B.pc; A.pc;")
-      fill_in('params', with: "")
-      press('Compute')
+    and_by 'use bad attr' do
+     wait_for_ajax
+     fill_in('attrs', with: 'C.pc; B.pc; A.pc;')
+     fill_in('params', with: '')
+     press('Compute')
     end
 
     and_by 'see error' do
@@ -339,8 +345,8 @@ DELOREAN
 
     and_by 'use good attr & params' do
       wait_for_ajax
-      fill_in('attrs', with: "C.pc; B.pc")
-      fill_in('params', with: "p = 123.0")
+      fill_in('attrs', with: 'C.pc; B.pc')
+      fill_in('params', with: 'p = 123.0')
       press('Compute')
     end
 

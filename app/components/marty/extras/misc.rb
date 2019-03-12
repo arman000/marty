@@ -3,7 +3,7 @@ module Marty::Extras::Misc
     editor_config: {
       trigger_action: :all,
       xtype: :combo,
-      store: (1..12).map {|x| [x, "%02d" % x]},
+      store: (1..12).map { |x| [x, '%02d' % x] },
       # FIXME: for some reason, with Netzke 0.8.2, the label show
       # up in the grid editor.  This hack seems to fix the
       # problem.  However, the label in the add-in-form now looks
@@ -17,7 +17,7 @@ module Marty::Extras::Misc
   }
   def self.numberfield_cfg(decimal_places)
     {
-      format: "0." + "0"*decimal_places,
+      format: '0.' + '0' * decimal_places,
       xtype: 'numbercolumn',
       editor_config: { hide_trigger: true,
                        decimal_precision: decimal_places },
