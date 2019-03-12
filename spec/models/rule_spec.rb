@@ -74,7 +74,7 @@ module Marty::RuleSpec
         @rule_type = 'SimpleRule'
         @computed_guards = { 'guard1' => 'zvjsdf12.z8*' }
         exp = Regexp.new("Computed - Error in rule 'testrule' field "\
-                         "'computed_guards' .line 1.: Syntax error")
+                         "'computed_guards' .attribute guard1.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'detects errors in computed results' do
@@ -83,7 +83,7 @@ module Marty::RuleSpec
                      'does_not_compute' => 'zvjsdf12.z8*' }
         @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid2' }
         exp = Regexp.new("Computed - Error in rule 'testrule' field "\
-                         "'results' .line 2.: Syntax error")
+                         "'results' .attribute does_not_compute.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'detects errors in computed results 2' do
@@ -92,8 +92,15 @@ module Marty::RuleSpec
         @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid1',
                    'grid3' => 'DataGrid3' }
         exp = Regexp.new("Computed - Error in rule 'testrule' field "\
-                         "'results' .line 1.: Syntax error")
+                         "'results' .attribute does_not_compute.: Syntax error")
         expect { subject }.to raise_error(exp)
+      end
+      it 'avoids delorean parse bug (redline 168745)' do
+        @rule_type = 'SimpleRule'
+        @results = { 'parse_bug' => "true\n&& false" }
+        @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid1',
+                   'grid3' => 'DataGrid3' }
+        expect { subject }.to_not raise_error
       end
       it 'detects errors in computed results 3' do
         @rule_type = 'SimpleRule'
@@ -104,7 +111,7 @@ module Marty::RuleSpec
         @grids = { 'grid1' => 'DataGrid1', 'grid2' => 'DataGrid1',
                    'grid3' => 'DataGrid1' }
         exp = Regexp.new("Computed - Error in rule 'testrule' field "\
-                         "'results' .line 3.: Syntax error")
+                         "'results' .attribute does_not_compute.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'reports bad grid names' do
@@ -145,7 +152,7 @@ module Marty::RuleSpec
         @rule_type = 'XRule'
         @results = { 'x' => 'zx sdf wer' }
         exp = Regexp.new("Computed - Error in rule 'testrule' field "\
-                         "'results' .line 1.: Syntax error")
+                         "'results' .attribute x.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'rule script stuff overrides 1' do
@@ -159,7 +166,7 @@ module Marty::RuleSpec
         @rule_type = 'XRule'
         @computed_guards = { 'abc' => 'err err err', 'xyz_guard' => 'xyz_param' }
         exp = Regexp.new("Computed - Error in rule 'testrule' field "\
-                         "'computed_guards' .line 1.: Syntax error")
+                         "'computed_guards' .attribute abc.: Syntax error")
         expect { subject }.to raise_error(exp)
       end
       it 'rule script stuff overrides 3' do
