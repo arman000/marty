@@ -34,7 +34,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
   def write_attr(k, v)
     equals, rhs = v == :parameter ? [' =?', ''] :
-                    [' =', v.lines.map { |l| ' ' * 8 + l }.join]
+                    [" =\n", v.lines.map { |l| ' ' * 8 + l }.join]
     k + equals + rhs
   end
 
@@ -128,24 +128,33 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     errs
   end
 
-  def get_parse_error_field(ruleh, exc)
-    line = (exc.line || 1) - 1
-    errs = { class_body: self.class.body_lines } + code_section_counts(ruleh)
-    ranges0 = errs.values.reduce([0]) do |acc, len|
+  def search_ranges(oh, line)
+    ranges0 = oh.values.reduce([0]) do |acc, len|
       acc + [acc.last + len]
     end
-    ranges = errs.keys.zip(ranges0.each_cons(2).to_a)
+    ranges = oh.keys.zip(ranges0.each_cons(2).to_a)
     secnm, (st, en) = ranges.detect do |sec, (st, en)|
       line.between?(st, en - 1)
     end
     [secnm, line - st + 1]
+  end
+
+  def get_parse_error_field(ruleh, exc)
+    line = (exc.line || 1) - 1
+    errs = { class_body: self.class.body_lines } + code_section_counts(ruleh)
+    secnm, line_in_sec = search_ranges(errs, line)
+    if [:computed_guards, :results].include?(secnm)
+      h = Hash[ruleh[secnm.to_s].map { |k, v| [k, v.lines.count + 1] }]
+      attrnm, = search_ranges(h, line_in_sec)
+    end
+    [secnm, attrnm || line_in_sec]
   rescue StandardError => e
     Marty::Logger.error('RuleScriptSet#get_parse_error_field',
                         error: e.message,
                         backtrace: e.backtrace,
                         ruleh: ruleh,
                         line: line)
-    ['Unknown', 0]
+    [nil, nil]
   end
 
   def get_engine(ruleh)
@@ -184,10 +193,16 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
         @@engines[[pt, sname]] = sset.parse_check(sname, get_code(ruleh))
       end
   rescue Delorean::ParseError => e
-      secnm, line = get_parse_error_field(ruleh, e)
+      secnm, attr_or_line = get_parse_error_field(ruleh, e)
       msg = e.message.capitalize
-      raise "Error in rule '#{ruleh['name']}' field '#{secnm}' "\
-            "(line #{line}): #{msg}"
+      field = secnm ? "field '#{secnm}'" : ''
+      where = if attr_or_line.is_a?(String)
+              then "(attribute #{attr_or_line})"
+              elsif attr_or_line.is_a?(Integer)
+              then "(line #{attr_or_line})"
+              else ''
+              end
+      raise "Error in rule '#{ruleh['name']}' #{field} #{where}: #{msg}"
   end
 
   def self.indent(s)
