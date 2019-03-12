@@ -133,7 +133,7 @@
       fn: function (btn, value) {
         if (btn == "ok" && value == "RESTART") {
           me.showLoadMask('Restarting delayed scheduler...');
-          me.server.bgRestart({});
+          me.server.bgSchedulerRestart({});
         }
       }
     });
@@ -150,7 +150,7 @@
       fn: function (btn, value) {
         if (btn == "ok" && value == "STOP") {
           me.showLoadMask('Stopping delayed scheduler...');
-          me.server.bgRestart({});
+          me.server.bgSchedulerStop({});
         }
       }
     });
