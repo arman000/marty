@@ -144,8 +144,8 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     errs = { class_body: self.class.body_lines } + code_section_counts(ruleh)
     secnm, line_in_sec = search_ranges(errs, line)
     if [:computed_guards, :results].include?(secnm)
-      h = Hash[ruleh[secnm.to_s].map{|k, v| [k, v.lines.count + 1]}]
-      attrnm, _ = search_ranges(h, line_in_sec)
+      h = Hash[ruleh[secnm.to_s].map { |k, v| [k, v.lines.count + 1] }]
+      attrnm, = search_ranges(h, line_in_sec)
     end
     [secnm, attrnm || line_in_sec]
   rescue StandardError => e
@@ -195,10 +195,13 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
   rescue Delorean::ParseError => e
       secnm, attr_or_line = get_parse_error_field(ruleh, e)
       msg = e.message.capitalize
-      field = secnm ? "field '#{secnm}'" : ""
-      where = attr_or_line.is_a?(String) ? "(attribute #{attr_or_line})" :
-                attr_or_line.is_a?(Integer) ? "(line #{attr_or_line})" :
-                  ""
+      field = secnm ? "field '#{secnm}'" : ''
+      where = if attr_or_line.is_a?(String)
+              then "(attribute #{attr_or_line})"
+              elsif attr_or_line.is_a?(Integer)
+              then "(line #{attr_or_line})"
+              else ''
+              end
       raise "Error in rule '#{ruleh['name']}' #{field} #{where}: #{msg}"
   end
 
