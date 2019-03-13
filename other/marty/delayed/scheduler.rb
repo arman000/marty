@@ -22,8 +22,14 @@ class Marty::Delayed::Scheduler
   def perform
     begin
       # create a raw postgres connection to listen to table changes
+      db_cfg   = Rails.configuration.database_configuration[Rails.env]
       listener = PG::Connection.open(
-        dbname: ActiveRecord::Base.connection.current_database)
+        dbname:   db_cfg['database'],
+        user:     db_cfg['username'],
+        host:     db_cfg['host'],
+        password: db_cfg['password']
+      )
+
       listener.exec("SET application_name = 'marty_scheduler_listener';")
       listener.exec("LISTEN marty_scheduled_jobs")
 
