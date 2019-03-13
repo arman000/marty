@@ -182,59 +182,63 @@ class Marty::Delayed::Scheduler
     end
 
     def perform
-      Marty::ScheduledJob.where(id: job.id).update_all(status: 'Deployed')
-      Marty::Promise.where(id: promise.id).update_all(start_dt: DateTime.now)
-
-      script, node, attrs = ['script', 'node', 'attrs'].map do
-        |m|
-        job.delorean_descriptor[m]
-      end
-
-      res = nil
       begin
-        Timeout::timeout(scheduler_max_job_time) do
-          engine = Marty::ScriptSet.new.get_engine(script)
+        Marty::ScheduledJob.where(id: job.id).update_all(status: 'Deployed')
+        Marty::Promise.where(id: promise.id).update_all(start_dt: DateTime.now)
 
-          Mcfly.whodunnit = promise.user
-          begin
-            attrs_eval = engine.evaluate(node, attrs, job.params)
-            attrs      = [attrs] unless attrs.is_a?(Array)
-            attrs_eval = [attrs_eval] unless attrs_eval.is_a?(Array)
-            res        = Hash[attrs.zip(attrs_eval)]
-
-          rescue => exc
-            res = Delorean::Engine.grok_runtime_exception(exc)
-          end
+        script, node, attrs = ['script', 'node', 'attrs'].map do
+          |m|
+          job.delorean_descriptor[m]
         end
+
+        res = nil
+        begin
+          Timeout::timeout(scheduler_max_job_time) do
+            engine = Marty::ScriptSet.new.get_engine(script)
+
+            Mcfly.whodunnit = promise.user
+            begin
+              attrs_eval = engine.evaluate(node, attrs, job.params)
+              attrs      = [attrs] unless attrs.is_a?(Array)
+              attrs_eval = [attrs_eval] unless attrs_eval.is_a?(Array)
+              res        = Hash[attrs.zip(attrs_eval)]
+
+            rescue => exc
+              res = Delorean::Engine.grok_runtime_exception(exc)
+            end
+          end
+        rescue => e
+          res = {'error' => e.message}
+        end
+
+        Marty::Promise.where(id: promise.id).update_all(
+          end_dt: DateTime.now,
+          result: res,
+          status: res["error"].nil?,
+        )
+
+        # determine appropriate status to return
+        limit      = job.max_attempts
+        got_result = !res.values.include?(nil)
+        status     = res['error'] ? "Error" :
+                       (limit.nil? || got_result ? "Completed" :
+                          (job.processed + 1 == limit ? 'Failed' : "Polling"))
+
+        # update scheduled job with results
+        job_update = {
+          got_result:        got_result,
+          last_completed_dt: DateTime.now,
+          processed:         job.processed + 1,
+          promise_id:        nil,
+          status:            status,
+        }
+
+        Marty::ScheduledJob.where(id: job.id).update_all(
+          job_update + {scheduled_run_dt: job.get_next_run(job_update)}
+        )
       rescue => e
-        res = {'error' => e.message}
+        Marty::Logger.log('scheduler', 'fatal', e.message)
       end
-
-      Marty::Promise.where(id: promise.id).update_all(
-        end_dt: DateTime.now,
-        result: res,
-        status: res["error"].nil?,
-      )
-
-      # determine appropriate status to return
-      limit      = job.max_attempts
-      got_result = !res.values.include?(nil)
-      status     = res['error'] ? "Error" :
-                     (limit.nil? || got_result ? "Completed" :
-                        (job.processed + 1 == limit ? 'Failed' : "Polling"))
-
-      # update scheduled job with results
-      job_update = {
-        got_result:        got_result,
-        last_completed_dt: DateTime.now,
-        processed:         job.processed + 1,
-        promise_id:        nil,
-        status:            status,
-      }
-
-      Marty::ScheduledJob.where(id: job.id).update_all(
-        job_update + {scheduled_run_dt: job.get_next_run(job_update)}
-      )
     end
 
     def scheduler_max_job_time
