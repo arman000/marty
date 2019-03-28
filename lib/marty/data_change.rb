@@ -114,7 +114,9 @@ class Marty::DataChange
 
   delorean_fn :do_pg_enum_export, sig: 1 do |k|
     klass = k.constantize
-    next (klass.is_a? Marty::PgEnum) ? klass.get_all : []
+    next klass.get_all if ::Marty::EnumHelper.pg_enum?(klass: klass)
+
+    []
   end
 
   delorean_fn :export_changes, sig: 3 do |t0, t1, class_name|
