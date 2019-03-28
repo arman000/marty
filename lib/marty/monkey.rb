@@ -11,7 +11,7 @@ class Delorean::BaseModule::BaseClass
 
     def _get_attr(obj, attr, _e)
       if (Marty::Enum === obj ||
-          Marty::PgEnum === obj) && !obj.respond_to?(attr)
+          ::Marty::EnumHelper.pg_enum?(klass: obj)) && !obj.respond_to?(attr)
         obj[attr]
       else
         old_get_attr(obj, attr, _e)

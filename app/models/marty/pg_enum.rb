@@ -24,6 +24,10 @@ module Marty::PgEnum
   def seed
   end
 
+  def _pg_enum?
+    true
+  end
+
   alias_method :find_by_name, :[]
   alias_method :lookup, :[]
 end
