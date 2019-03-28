@@ -92,11 +92,6 @@ class Marty::DataGrid < Marty::Base
     dga && Hash[fields.zip(dga)]
   end
 
-  # deprecated - remove 2018-Oct
-  cached_mcfly_lookup :lookup_id, sig: 2 do |pt, group_id|
-    find_by_group_id group_id
-  end
-
   cached_delorean_fn :exists, sig: 2 do |pt, name|
     Marty::DataGrid.mcfly_pt(pt).where(name: name).exists?
   end
@@ -221,19 +216,6 @@ class Marty::DataGrid < Marty::Base
     res
   end
 
-  # deprecated - remove 2018-Oct
-  cached_delorean_fn :lookup_grid, sig: 4 do |pt, dg, h, distinct|
-    dg_is_grid = Marty::DataGrid === dg
-    dg_is_os = dg.is_a?(OpenStruct)
-    raise "bad DataGrid #{dg}" unless dg_is_grid || dg_is_os
-    raise "non-hash arg #{h}" unless Hash === h
-
-    dgh = dg_is_os ? dg.to_h.stringify_keys :
-            dg.attributes.slice('id', 'group_id', 'created_dt', 'metadata')
-    res = plv_lookup_grid_distinct(h, dgh, false, distinct)
-    res['result']
-  end
-
   cached_delorean_fn :lookup_grid_h, sig: 4 do |pt, dgn, h, distinct|
     dgh = lookup_h(pt, dgn)
     raise "#{dgn} grid not found" unless dgh
@@ -278,18 +260,18 @@ class Marty::DataGrid < Marty::Base
     res = vhash['result']
 
     v = case
-             when Marty::PgEnum === res
-               c_data_type.find_by_name(res)
-             when Marty::DataGrid == c_data_type
-               follow ?
-                 Marty::DataGrid.lookup_h(pt, res) :
-                 Marty::DataGrid.lookup(pt, res)
-             else
-               Marty::DataConversion.find_row(c_data_type, { 'name' => res }, pt)
-         end
+        when Marty::PgEnum === res
+          c_data_type.find_by_name(res)
+        when Marty::DataGrid == c_data_type
+          follow ?
+            Marty::DataGrid.lookup_h(pt, res) :
+            Marty::DataGrid.lookup(pt, res)
+        else
+          Marty::DataConversion.find_row(c_data_type, { 'name' => res }, pt)
+        end
 
-    return vhash.merge('result' => v) unless (Marty::DataGrid == c_data_type &&
-                                              follow)
+    return vhash.merge('result' => v) unless
+      Marty::DataGrid == c_data_type && follow
 
     visited ||= []
 
