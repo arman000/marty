@@ -228,7 +228,7 @@ class Marty::DataGrid < Marty::Base
   # FIXME: using cached_delorean_fn just for the caching -- this is
   # not expected to be called from Delorean.
   cached_delorean_fn :find_class_instance, sig: 3 do |pt, klass, v|
-    if Marty::PgEnum === klass
+    if ::Marty::EnumHelper.pg_enum?(klass: klass)
       klass.find_by_name(v)
     else
       # FIXME: very hacky -- hard-coded name
@@ -236,8 +236,9 @@ class Marty::DataGrid < Marty::Base
     end
   end
 
-  def self.lookup_grid_distinct_entry_h(pt, h, dgh, visited = nil, follow = true,
-                                        return_grid_data = false, distinct = true)
+  def self.lookup_grid_distinct_entry_h(
+        pt, h, dgh, visited = nil, follow = true,
+        return_grid_data = false, distinct = true)
 
     # Perform grid lookup, if result is another data_grid, and follow is true,
     # then perform lookup on the resulting grid.  Allows grids to be nested
@@ -260,7 +261,7 @@ class Marty::DataGrid < Marty::Base
     res = vhash['result']
 
     v = case
-        when Marty::PgEnum === res
+        when ::Marty::EnumHelper.pg_enum?(klass: res)
           c_data_type.find_by_name(res)
         when Marty::DataGrid == c_data_type
           follow ?
@@ -280,8 +281,8 @@ class Marty::DataGrid < Marty::Base
     raise "#{self.class} recursion loop detected -- #{visited}" if
       visited.member?(v['group_id'])
 
-    lookup_grid_distinct_entry_h(pt, h, v, visited, follow, return_grid_data,
-                                 distinct)
+    lookup_grid_distinct_entry_h(
+      pt, h, v, visited, follow, return_grid_data, distinct)
   end
 
   def dir_infos(dir)

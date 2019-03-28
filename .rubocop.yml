@@ -22,3 +22,14 @@ Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
 
+Style/CaseEquality:
+  Exclude:
+    - 'app/components/marty/report_form.rb'
+    - 'app/models/marty/data_grid.rb'
+    - 'app/helpers/marty/enum_helper.rb'
+    - 'lib/marty/data_change.rb'
+    - 'lib/marty/data_conversion.rb'
+    - 'lib/marty/mcfly_model.rb'
+    - 'lib/marty/monkey.rb'
+    - 'other/marty/api/base.rb'
+    - 'spec/lib/mcfly_model_spec.rb'
