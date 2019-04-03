@@ -1,3 +1,5 @@
+require 'pathname'
+
 class Marty::Script < Marty::Base
   has_mcfly
 
@@ -67,7 +69,7 @@ class Marty::Script < Marty::Base
   end
 
   def self.load_scripts(path = nil, dt = nil)
-    files = get_script_filenames(path)
+    files = get_script_file_paths(path)
 
     bodies = read_script_files(files)
 
@@ -75,24 +77,30 @@ class Marty::Script < Marty::Base
   end
 
   def self.read_script_files(files)
-    files.collect do |fpath|
-      fname = File.basename(fpath)[0..-4].camelize
-      [fname, File.read(fpath)]
+    files.map do |fname, fpath|
+      script_name = fname.camelize.gsub('::', '')
+      [script_name, File.read(fpath)]
     end
   end
 
   def self.get_script_filenames(paths = nil)
+    get_script_file_paths(paths).values
+  end
+
+  def self.get_script_file_paths(paths = nil)
     paths = get_script_paths(paths)
 
-    filenames = {}
-    paths.each do |path|
-      Dir.glob("#{path}/*.dl").each do |filename|
-        basename = File.basename(filename)
-        filenames[basename] = filename unless filenames.key?(basename)
+    paths.each_with_object({}) do |path, filenames|
+      Dir.glob("#{path}/**/*.dl").each do |filename|
+        base_pathname = Pathname.new(path)
+        pathname = Pathname.new(filename).relative_path_from(base_pathname)
+        relative_file_name = pathname.sub_ext('').to_s
+
+        next if filenames.key?(relative_file_name)
+
+        filenames[relative_file_name] = filename
       end
     end
-
-    filenames.values
   end
 
   def self.get_script_paths(paths)
