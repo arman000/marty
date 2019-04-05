@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    marty (2.5.9)
+    marty (2.6.0)
       aws-sigv4 (~> 1.0, >= 1.0.2)
       axlsx (= 3.0.0pre)
       coderay
@@ -63,7 +63,9 @@ GEM
       io-like (~> 0.3.0)
     arel (8.0.0)
     ast (2.4.0)
-    aws-sigv4 (1.0.3)
+    aws-eventstream (1.0.2)
+    aws-sigv4 (1.1.0)
+      aws-eventstream (~> 1.0, >= 1.0.2)
     axlsx (3.0.0.pre)
       htmlentities (~> 4.3, >= 4.3.4)
       mimemagic (~> 0.3)
