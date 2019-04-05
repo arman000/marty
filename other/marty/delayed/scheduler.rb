@@ -90,55 +90,53 @@ class Marty::Delayed::Scheduler
     sl.update(opts)
   end
 
+  def scheduler_restart_job_name
+    'Marty Restart Scheduler'
+  end
+
   def schedule_restart
     begin
-      result = Marty::ScheduledJob.where(
+      Marty::ScheduledJob.where(
         "last_completed_dt IS NULL AND "\
         "promise_id IS NULL AND "\
-        "description = 'Marty Restart Scheduler' AND "\
+        "description = '#{scheduler_restart_job_name}' AND "\
         "halt IS FALSE"\
-      ).to_a
-
-      # get latest restart job and halt all other restart jobs that
-      # haven't been processed.
-      restart_job = result.pop
-      result.each{|j| j.update(halt: true)}
+      ).delete_all
 
       # restart 1 hour before worker max run time to play it safe
       cron = Marty::ScheduledJob.get_cron_hash_from_time(
         Time.now + Delayed::Worker.max_run_time - 1.hours)
 
-      # reschedule latest restart job or create a restart job
-      if restart_job
-        restart_job.update(cron)
-      else
-        Marty::ScheduledJob.create!(
-          {
-            max_attempts: 1,
-            delorean_descriptor: {
-              'script' => 'Scheduler',
-              'node'   => 'Restart',
-              'attrs'  => 'perform',
-            },
-          } + cron
-        )
-      end
+      Marty::ScheduledJob.create!(
+        {
+          max_attempts: 1,
+          delorean_descriptor: {
+            'script' => 'Scheduler',
+            'node'   => 'Restart',
+            'attrs'  => 'perform',
+          },
+        } + cron
+      )
     rescue => e
       Marty::Util.logger.error("failed to schedule restart: "\
                                "#{e.message}")
     end
   end
 
+  def self.transaction_lock_sql
+    <<-SQL
+    LOCK marty_scheduler_lives IN ACCESS EXCLUSIVE MODE NOWAIT;
+    SQL
+  end
+
   def self.with_transaction_lock
     ActiveRecord::Base.transaction do
       begin
         conn = ActiveRecord::Base.connection
-        conn.execute("LOCK marty_scheduler_lives "\
-                     "IN ACCESS EXCLUSIVE MODE "\
-                     "NOWAIT;")
+        conn.execute(transaction_lock_sql)
         yield conn
-      rescue => e
-        return if e.message.include? "not obtain lock"
+      rescue ActiveRecord::StatementInvalid => e
+        return if e.message['PG::LockNotAvailable']
         raise e
       end
     end
