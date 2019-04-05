@@ -6,7 +6,7 @@ class Marty::Script < Marty::Base
   validates_presence_of :name, :body
   mcfly_validates_uniqueness_of :name
   validates_format_of :name,
-                      with: /\A[A-Z][a-zA-Z0-9]*\z/,
+                      with: /\A[A-Z][a-zA-Z0-9]*(__[A-Z][a-zA-Z0-9]*)*\z/,
                       message: I18n.t('script.save_error')
 
   belongs_to :user, class_name: 'Marty::User'
@@ -119,7 +119,7 @@ class Marty::Script < Marty::Base
 
     def read_script_files(files)
       files.map do |fname, fpath|
-        script_name = fname.camelize.gsub('::', '')
+        script_name = fname.camelize.gsub('::', '__')
         [script_name, File.read(fpath)]
       end
     end
