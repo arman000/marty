@@ -129,7 +129,7 @@ describe Marty::Script do
       expected_args = match_array([
                                     ['Script1', ls1],
                                     ['Script2', ls2],
-                                    ['Namespace__NestedNamespace__Script3', ls3]
+                                    ['Namespace::NestedNamespace::Script3', ls3]
                                   ])
 
       expect(Marty::Script).to have_received(:load_script_bodies).
@@ -137,7 +137,7 @@ describe Marty::Script do
 
       loaded_script_names = Marty::Script.pluck(:name).sort
       expect(loaded_script_names).to eq [
-        'Namespace__NestedNamespace__Script3',
+        'Namespace::NestedNamespace::Script3',
         'Script1',
         'Script2'
       ]
