@@ -1,12 +1,12 @@
 image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image:2.4.2-20190129
 
 services:
-  - "clkao/postgres-plv8:9.6-2.0"
+  - postgres:latest
 
 before_script:
   - time bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
   - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
-  - RAILS_ENV=test bundle exec rails db:create db:migrate
+  - RAILS_ENV=test bundle exec rails db:migrate
 
 .base-test:
   stage: test
@@ -41,6 +41,7 @@ cache:
 variables:
   GIT_SSL_NO_VERIFY: "true"
   BUNDLER_VERSION: "2.0.1"
+  POSTGRES_DB:   "marty_test"
   POSTGRES_USER: "runner"
   POSTGRES_PASSWORD: ""
   RAILS_ENV: "test"
