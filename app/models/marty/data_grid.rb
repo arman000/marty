@@ -238,7 +238,8 @@ class Marty::DataGrid < Marty::Base
 
   def self.lookup_grid_distinct_entry_h(
         pt, h, dgh, visited = nil, follow = true,
-        return_grid_data = false, distinct = true)
+        return_grid_data = false, distinct = true
+      )
 
     # Perform grid lookup, if result is another data_grid, and follow is true,
     # then perform lookup on the resulting grid.  Allows grids to be nested
