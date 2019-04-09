@@ -1,5 +1,3 @@
-require 'pathname'
-
 class Marty::Script < Marty::Base
   has_mcfly
 

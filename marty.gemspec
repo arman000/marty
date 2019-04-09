@@ -5,6 +5,7 @@ require 'digest/md5'
 require 'base64'
 require 'zlib'
 require 'csv'
+require 'pathname'
 
 Gem::Specification.new do |s|
   s.name        = 'marty'
