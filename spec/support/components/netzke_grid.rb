@@ -68,15 +68,49 @@ module Marty; module RSpec; module Components
       find('#' + el).click
     end
 
-    def get_col_vals(col, cnt = row_count, init = 0)
+    # filter_col and filter_col_toggle expect sortable column
+    #   might need to allow to specify the number of :down to send.
+    #   for now, four :downs to get to the filter, :right opens it
+    #    then enter value and press return
+    def filter_col(col, value)
+      el = run_js <<-JS
+          #{ext_var(grid, 'grid')}
+          return #{ext_find(ext_arg('gridcolumn', text: col), 'grid')}.id
+        JS
+
+      c = find('#' + el)
+      c.send_keys([:down, :down, :down, :down, :right, value, :return])
+      sleep 1.0
+      c.click
+    end
+
+    def filter_col_toggle(col)
+      el = run_js <<-JS
+          #{ext_var(grid, 'grid')}
+          return #{ext_find(ext_arg('gridcolumn', text: col), 'grid')}.id
+        JS
+
+      c = find('#' + el)
+      c.send_keys([:down, :down, :down, :down, ' ', :escape])
+      sleep 1.0
+    end
+
+    def get_col_vals(col, cnt = row_count, init = 0, date_only = true)
       # NOTE: does not validate the # of rows
       run_js <<-JS
           var result = [];
           for (var i = #{init}; i < #{init.to_i + cnt.to_i}; i++) {
             #{ext_cell_val('i', col, grid)}
-            if(value instanceof Date){
-              result.push(value.toISOString().substring(0,value.toISOString().indexOf('T')));
-            } else {
+            if(value instanceof Date) {
+                if (#{date_only}){
+                  result.push(value.toISOString().split('T')[0]);
+                }
+                else
+                {
+                  result.push(value.toISOString());
+                }
+            }
+            else {
               result.push(value);
             };
           };
@@ -111,6 +145,14 @@ module Marty; module RSpec; module Components
       el.click if click_after
       wait_for_ajax
       el
+    end
+
+    def select_row_range(st, en)
+      resid = run_js(<<-JS, 10.0)
+          #{ext_var(grid, 'grid')}
+          grid.getSelectionModel().selectRange(#{st-1}, #{en-1});
+        JS
+      wait_for_ajax
     end
 
     def set_row_vals row, fields
