@@ -1,15 +1,13 @@
 image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image:2.4.2-20190129
 
-services:
-  - postgres:latest
-
-before_script:
-  - time bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
-  - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
-  - RAILS_ENV=test bundle exec rails db:migrate
-
 .base-test:
   stage: test
+  before_script:
+    - time bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
+    - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
+    - RAILS_ENV=test bundle exec rails db:migrate
+  services:
+  - postgres:latest
   # Use only the following CI runners
   tags:
     - cf-gitlabci-runner-eks-shared-dev
@@ -51,4 +49,3 @@ variables:
   HEADLESS_WINDOW_SIZE: "1400,1400"
   REPOSITORY_URL: '415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image'
   DOCKER_AUTH_CONFIG: '{ "credsStore": "ecr-login" }'
-

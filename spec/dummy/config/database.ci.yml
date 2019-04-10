@@ -2,12 +2,11 @@ common: &common
   adapter: postgresql
   encoding: utf8
   database: marty_dev
-  host: 127.0.0.1
+  host: postgres
   pool: 5
 
 test:
   <<: *common
   database: marty_test
-  host: 127.0.0.1
-  username: runner
+  username: postgres
 
