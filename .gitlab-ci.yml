@@ -7,7 +7,7 @@ image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image
     - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
     - RAILS_ENV=test bundle exec rails db:migrate
   services:
-  - postgres:latest
+  - "clkao/postgres-plv8:9.6-2.0"
   variables:
     POSTGRES_DB:   "marty_test"
     POSTGRES_USER: "runner"
