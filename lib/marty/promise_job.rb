@@ -143,7 +143,7 @@ class Marty::PromiseJob < Struct.new(:promise,
     promise.set_result(res)
 
     begin
-      hook.run(res) if hook
+      hook.run(params: params, result: res) if hook
     rescue StandardError => exc
       Marty::Util.logger.error "promise hook failed: #{exc}"
     end
