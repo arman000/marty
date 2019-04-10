@@ -8,9 +8,14 @@ image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image
     - RAILS_ENV=test bundle exec rails db:migrate
   services:
   - postgres:latest
+  variables:
+    POSTGRES_DB:   "marty_test"
+    POSTGRES_USER: "runner"
+    POSTGRES_PASSWORD: ""
   # Use only the following CI runners
   tags:
     - cf-gitlabci-runner-eks-shared-dev
+
 
 rubocop:
   extends: .base-test
@@ -39,9 +44,6 @@ cache:
 variables:
   GIT_SSL_NO_VERIFY: "true"
   BUNDLER_VERSION: "2.0.1"
-  POSTGRES_DB:   "marty_test"
-  POSTGRES_USER: "runner"
-  POSTGRES_PASSWORD: ""
   RAILS_ENV: "test"
   RAILS_DUMP_SCHEMA: "false"
   PGTZ: "America/Los_Angeles"
