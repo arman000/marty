@@ -174,4 +174,4 @@ en:
   netzke:
     grid:
       base:
-        view_record: "%{model} (Locked)"
+        view_record: "%{model} (Read-only)"
