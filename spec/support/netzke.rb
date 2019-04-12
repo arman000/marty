@@ -25,7 +25,7 @@ module Marty; module RSpec; module Netzke
         log_out
         wait_for_ajax
       end
-    rescue StandardError
+    rescue
       # ignore error
     end
 
