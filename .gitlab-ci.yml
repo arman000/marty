@@ -12,7 +12,7 @@ before_script:
   stage: test
   # Use only the following CI runners
   tags:
-    - cf-gitlabci-runner-eks-shared-dev
+    - gitlabci-runner-eks-shared-dev
 
 rubocop:
   extends: .base-test

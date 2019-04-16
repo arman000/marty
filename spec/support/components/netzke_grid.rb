@@ -150,7 +150,7 @@ module Marty; module RSpec; module Components
     def select_row_range(st, en)
       resid = run_js(<<-JS, 10.0)
           #{ext_var(grid, 'grid')}
-          grid.getSelectionModel().selectRange(#{st-1}, #{en-1});
+          grid.getSelectionModel().selectRange(#{st - 1}, #{en - 1});
         JS
       wait_for_ajax
     end
