@@ -155,21 +155,5 @@
     {"attr": "v0",
      "request": {"f_bool":true},
      "result": {"f_bool":true}
-    },
-     {"attr": "v0",
-      "request": {"f4_number": "bad"},
-      "result": {"f4_number": "bad"}
-     },
-    {"attr": "v0",
-     "request": {"f7_array": [1,"bad",3]},
-      "result": {"f7_array": [1.0,"bad",3.0]}
-    },
-     {"attr": "v0",
-      "request": {"f4_number": true},
-      "result": {"f4_number": true}
-     },
-    {"attr": "v0",
-     "request": {"f7_array": [1,true,3]},
-      "result": {"f7_array": [1.0,true,3.0]}
     }
 ]
