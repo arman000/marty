@@ -65,6 +65,19 @@ class Marty::Api::Base
       return { error: e.message }
     end
 
+    # if schema was found
+    if input_schema.is_a?(Hash)
+      # fix numbers types
+      numbers = @@numbers[schema_key] ||=
+                  Marty::JsonSchema.get_numbers(input_schema)
+
+      # modify params in place
+      Marty::JsonSchema.fix_numbers(params[:params], numbers)
+    elsif !input_schema.include?('Schema not defined')
+      # else if some error besides schema not defined, fail
+      return { error: input_schema }
+    end
+
     # validate input schema
     if config[:input_validated]
 
@@ -82,19 +95,6 @@ class Marty::Api::Base
       schema_errors = SchemaValidator::get_errors(res) unless res.empty?
       return { error: "Error(s) validating: #{schema_errors}" } if
         schema_errors
-    end
-
-    # if schema was found
-    if input_schema.is_a?(Hash)
-      # fix numbers types
-      numbers = @@numbers[schema_key] ||=
-                  Marty::JsonSchema.get_numbers(input_schema)
-
-      # modify params in place
-      Marty::JsonSchema.fix_numbers(params[:params], numbers)
-    elsif !input_schema.include?('Schema not defined')
-      # else if some error besides schema not defined, fail
-      return { error: input_schema }
     end
 
     # get script engine

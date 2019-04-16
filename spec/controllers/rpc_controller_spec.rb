@@ -397,9 +397,8 @@ A:
                              "f15_number"  : {"type": "number", "minimum": 0 },
                              "f16_array": {
                                   "type"        : "array",
-                                  "uniqueItems" : true,
                                   "minItems"    : 0,
-                                  "maxItems"    : 1,
+                                  "maxItems"    : 5,
                                   "items": {
                                       "type"       : "number",
                                       "minimum"    : 0,
@@ -409,9 +408,8 @@ A:
                                       }}}}}},
        "f7_array": {
                "type"        : "array",
-               "uniqueItems" : true,
                "minItems"    : 0,
-               "maxItems"    : 1,
+               "maxItems"    : 5,
                "items": {
                    "type"       : "number",
                    "minimum"    : 0,
@@ -1267,6 +1265,14 @@ describe Marty::RpcController do
     api.app_name = 'TestApp'
     api.script_name = 'M11'
     api.save!
+    Marty::ApiConfig.create!(script: 'M11',
+                             node: 'A',
+                             attr: nil,
+                             logged: false,
+                             input_validated: true,
+                             output_validated: false,
+                             strict_validate: false)
+
     p = File.expand_path('../../fixtures/json', __FILE__)
     f = '%s/%s' % [p, 'rpc_controller.json']
     begin
