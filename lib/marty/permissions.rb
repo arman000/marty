@@ -59,4 +59,33 @@ module Marty::Permissions
   def has_any_perm?
     !(current_user_roles & ALL_ROLES).empty?
   end
+
+  # FIXME: for backwards compatibility returns true
+  # if permission is not specified in has_marty_permissions
+
+  NETZKE_ENDPOINTS = [:create, :read, :update, :delete].freeze
+
+  def can_call_endpoint?(endpoint)
+    # Netzke endpoints access is controlled by Netzke permissions
+    return true if NETZKE_ENDPOINTS.include?(endpoint.to_sym)
+
+    return true unless respond_to?(:marty_permissions)
+    return true unless marty_permissions.key?(endpoint.to_sym)
+
+    can_perform_action?(endpoint)
+  end
+
+  # FIXME: hack to override Netzke invoke endpoint
+  # for classes with Marty::Permissions
+  def self.extended(mod)
+    mod.class_exec do
+      def invoke_endpoint(endpoint, params, configs = [])
+        return super(endpoint, params, configs) if self.class.can_call_endpoint?(endpoint)
+
+        self.client = Netzke::Core::EndpointResponse.new
+        client.netzke_notify 'Permission Denied'
+        client
+      end
+    end
+  end
 end
