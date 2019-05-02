@@ -6,14 +6,20 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
                                     firstname: 'other',
                                     lastname: 'other',
                                     active: true)
-    Marty::Promise.create title: 'Test Job 1',
+    Marty::Promise.create!(
+      title: 'Test Job 1',
       user: Marty::User.find_by(login: 'marty'),
       cformat: 'csv',
-      start_dt: Time.now
-    Marty::Promise.create title: 'Test Job 2',
+      start_dt: Time.now,
+      promise_type: 'delorean'
+    )
+    Marty::Promise.create!(
+      title: 'Test Job 2',
       user: other_user,
       cformat: 'csv',
-      start_dt: Time.now
+      start_dt: Time.now,
+      promise_type: 'delorean'
+    )
 
     visit '/'
     all 'span', text: 'Sign in', minimum: 1

@@ -22,6 +22,70 @@ end
 
 ######################################################################
 
+# Patch Delorean to work with promises
+
+class Delorean::BaseModule::NodeCall
+  def initialize(_e, engine, node, params)
+    super
+
+    # If call has a promise_id (i.e. is from a promise) then that's
+    # our parent.  Otherwise, we use its parent as our parent.
+    params[:_parent_id] = _e[:_promise_id] || _e[:_parent_id]
+    params[:_user_id]   = _e[:_user_id]    || Mcfly.whodunnit.try(:id)
+  end
+
+  # def log(msg)
+  #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
+  # end
+
+  # Monkey-patch '|' method for Delorean NodeCall to create promise
+  # jobs and return promise proxy objects.
+  def |(args)
+    if args.is_a?(String)
+      attr = args
+      args = [attr]
+    else
+      raise 'bad arg to %' unless args.is_a?(Array)
+
+      attr = nil
+    end
+    script, tag = engine.module_name, engine.sset.tag
+    nn = node.is_a?(Class) ? node.name : node.to_s
+    begin
+      # make sure params is serialzable before starting a Job
+      JSON.dump(params)
+    rescue StandardError => exc
+      raise "non-serializable parameters: #{params} #{exc}"
+    end
+
+    Marty::Promises::Delorean::Create.call(
+      params: params,
+      script: script,
+      node_name: nn,
+      attr: attr,
+      args: args,
+      tag: tag
+    )
+  end
+end
+
+class Delorean::Engine
+  def background_eval(node, params, attrs, event = {})
+    raise 'background_eval bad params' unless params.is_a?(Hash)
+
+    unless event.empty?
+      params['p_event'] = event.each_with_object({}) do |(k, v), h|
+        h[k.to_s] = v
+      end
+    end
+    nc = Delorean::BaseModule::NodeCall.new({}, self, node, params)
+    # start the background promise
+    nc | attrs
+  end
+end
+
+######################################################################
+
 class Hash
   # define addition on hashes -- useful in Delorean code.
   def +(x)

@@ -28,6 +28,7 @@ describe Marty::Promise, slow: true do
   end
 
   after(:each) do
+    Marty::Log.delete_all
     Marty::Promise.where('parent_id IS NULL').destroy_all
     Timecop.return
   end
@@ -59,5 +60,150 @@ describe Marty::Promise, slow: true do
     expect(Marty::VwPromise.live_search('XXX').size).to eq(0)
     expect(Marty::VwPromise.live_search('marty').size).to eq(10)
     expect(Marty::VwPromise.live_search('Admin').size).to eq(10)
+  end
+
+  describe 'delorean' do
+    it 'processes result' do
+      expect(Marty::Promise.where(title: 'PromiseB').exists?).to be false
+
+      engine = Marty::ScriptSet.new.get_engine(NAME_B)
+      engine.background_eval(
+        'Y',
+        {
+          'p_title' => NAME_B,
+          'p_hook' => Gemini::PromiseHook::TestHook
+        },
+        ['result']
+      )
+
+      promise = Marty::Promise.find_by(title: 'PromiseB')
+      promise.wait_for_result(Marty::Promise::DEFAULT_PROMISE_TIMEOUT)
+      promise.reload
+
+      expected = [{ 'a' => 1, 'b' => 1 }, { 'a' => 2, 'b' => 4 }, { 'a' => 3, 'b' => 9 }]
+      expect(promise.status).to be true
+      expect(promise.promise_type).to eq 'delorean'
+      expect(promise.result['error']).to be nil
+      expect(promise.result['result']).to eq expected
+
+      sleep 0.1 # Wait while hooks are executed after Promise was updated
+      log = Marty::Log.find_by(message_type: 'TestHook')
+      expect(log.message).to eq 'was called'
+    end
+
+    it 'fails on exception' do
+      expect(Marty::Promise.where(title: 'PromiseJ').exists?).to be false
+
+      engine = Marty::ScriptSet.new.get_engine(NAME_J)
+      engine.background_eval('FAILER', { 'p_title' => NAME_J }, ['a'])
+
+      promise = Marty::Promise.find_by(title: 'PromiseJ')
+      promise.wait_for_result(Marty::Promise::DEFAULT_PROMISE_TIMEOUT)
+      promise.reload
+
+      expect(promise.status).to be false
+      expect(promise.promise_type).to eq 'delorean'
+      expect(promise.result['error']).to eq 'I had an error'
+    end
+  end
+
+  describe 'ruby' do
+    let(:user) { Marty::User.find_by(login: 'marty') }
+
+    it 'processes result with regular attrs' do
+      Marty::Promises::Ruby::Create.call(
+        module_name: 'Gemini::BudCategory',
+        method_name: 'create_from_promise_regular_attrs',
+        method_args: ['test name', 1],
+        params: {
+          p_title: 'test_title',
+          _user_id: user.id,
+          p_hook: Gemini::PromiseHook::TestHook
+        }
+      )
+
+      promise = Marty::Promise.where(promise_type: 'ruby').last
+      promise.wait_for_result(Marty::Promise::DEFAULT_PROMISE_TIMEOUT)
+
+      promise.reload
+
+      bud_category = Gemini::BudCategory.order(:id).last
+      expect(bud_category.name).to eq 'test name'
+
+      sleep 0.1 # Wait while hooks are executed after Promise was updated
+      log = Marty::Log.find_by(message_type: 'TestHook')
+
+      expect(promise.status).to be true
+      expect(promise.promise_type).to eq 'ruby'
+      expect(promise.result['result']).to eq bud_category.id
+      expect(log.message).to eq 'was called'
+    end
+
+    it 'processes result with keyword attrs' do
+      Marty::Promises::Ruby::Create.call(
+        module_name: 'Gemini::BudCategory',
+        method_name: 'create_from_promise_keyword_attrs',
+        method_args: [group_id: 1, name: 'test name 2'],
+        params: {
+          _user_id: user.id,
+        }
+      )
+
+      promise = Marty::Promise.where(promise_type: 'ruby').last
+      promise.wait_for_result(Marty::Promise::DEFAULT_PROMISE_TIMEOUT)
+
+      promise.reload
+
+      bud_category = Gemini::BudCategory.order(:id).last
+      expect(bud_category.name).to eq 'test name 2'
+
+      expect(promise.status).to be true
+      expect(promise.promise_type).to eq 'ruby'
+      expect(promise.result['result']).to eq bud_category.id
+    end
+
+    it 'processes result with mixed attrs' do
+      Marty::Promises::Ruby::Create.call(
+        module_name: 'Gemini::BudCategory',
+        method_name: 'create_from_promise_mixed_attrs',
+        method_args: ['test name 3', { group_id: 1 }],
+        params: {
+          _user_id: user.id,
+        }
+      )
+
+      promise = Marty::Promise.where(promise_type: 'ruby').last
+      promise.wait_for_result(Marty::Promise::DEFAULT_PROMISE_TIMEOUT)
+
+      promise.reload
+
+      bud_category = Gemini::BudCategory.order(:id).last
+      expect(bud_category.name).to eq 'test name 3'
+
+      expect(promise.status).to be true
+      expect(promise.promise_type).to eq 'ruby'
+      expect(promise.result['result']).to eq bud_category.id
+    end
+
+    it 'fails on exception' do
+      Marty::Promises::Ruby::Create.call(
+        module_name: 'Gemini::BudCategory',
+        method_name: 'create_from_promise_error',
+        method_args: [],
+        params: {
+          _user_id: user.id,
+        }
+      )
+
+      promise = Marty::Promise.where(promise_type: 'ruby').last
+      promise.wait_for_result(Marty::Promise::DEFAULT_PROMISE_TIMEOUT)
+
+      promise.reload
+
+      expect(promise.status).to be false
+      expect(promise.promise_type).to eq 'ruby'
+      expect(promise.result['error']).to eq 'Something went wrong'
+      expect(promise.result['backtrace']).to_not be_empty
+    end
   end
 end
