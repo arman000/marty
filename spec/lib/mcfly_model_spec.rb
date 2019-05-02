@@ -194,8 +194,9 @@ describe 'McflyModel' do
                                                     1, 2)
         end
     end
-    # x time should be 30x or more than y time
-    expect(x.real / y.real).to be > 30
+    # x time should be 25x or more than y time
+    # Used to be 30x, but 30x sometimes fails on CI
+    expect(x.real / y.real).to be > 25
   end
 end
 end

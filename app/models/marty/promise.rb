@@ -10,43 +10,15 @@ class Marty::Promise < Marty::Base
     Marty::Promise.load_result(res, force)
   end
 
-  def self.load_result(obj, force = false)
-    if force && obj.respond_to?(:__force__)
-      obj = obj.__force__
-    end
-
-    case obj
-    when Array
-      obj.map { |x| load_result(x, force) }
-    when Hash
-      p = obj['__promise__']
-
-      if p && obj.length == 1
-        load_result(Marty::PromiseProxy.new(*p), force)
-      else
-        obj.each_with_object({}) { |(k, v), h| h[k] = load_result(v, force) }
-      end
-    else
-      obj
-    end
-  end
-
   has_many :children,
            foreign_key: 'parent_id',
            class_name: 'Marty::Promise',
            dependent: :destroy
 
-  validates_presence_of :title
+  validates_presence_of :title, :promise_type
 
   belongs_to :parent, class_name: 'Marty::Promise'
   belongs_to :user, class_name: 'Marty::User'
-
-  def self.cleanup(all = false)
-      where('start_dt < ? AND parent_id IS NULL',
-            DateTime.now - (all ? 0.hours : 4.hours)).destroy_all
-  rescue StandardError => exc
-      Marty::Util.logger.error("promise GC error: #{exc}")
-  end
 
   def raw_conn
     self.class.connection.raw_connection
@@ -162,8 +134,8 @@ class Marty::Promise < Marty::Base
             work_off_job(job)
           rescue StandardError => exc
             # log "OFFERR #{exc}"
-            res = Delorean::Engine.grok_runtime_exception(exc)
-            last.set_result(res)
+            error = exception_to_result(exc)
+            last.set_result(error)
           end
           # log "OFF1 #{Process.pid} #{last}"
         end
@@ -210,5 +182,49 @@ class Marty::Promise < Marty::Base
       status: promise.status,
       result: promise.result
     }
+  end
+
+  def delorean?
+    promise_type == 'delorean'
+  end
+
+  class << self
+    def load_result(obj, force = false)
+      if force && obj.respond_to?(:__force__)
+        obj = obj.__force__
+      end
+
+      case obj
+      when Array
+        obj.map { |x| load_result(x, force) }
+      when Hash
+        p = obj['__promise__']
+
+        if p && obj.length == 1
+          load_result(Marty::PromiseProxy.new(*p), force)
+        else
+          obj.each_with_object({}) { |(k, v), h| h[k] = load_result(v, force) }
+        end
+      else
+        obj
+      end
+    end
+
+    def cleanup(all = false)
+      where(
+        'start_dt < ? AND parent_id IS NULL',
+        DateTime.now - (all ? 0.hours : 4.hours)
+      ).destroy_all
+    rescue StandardError => exc
+        Marty::Util.logger.error("promise GC error: #{exc}")
+    end
+
+    def exception_to_result(promise:, exception:)
+      if promise.delorean?
+        return Delorean::Engine.grok_runtime_exception(exception)
+       end
+
+      { 'error' => exception.message, 'backtrace' => exception.backtrace }
+    end
   end
 end

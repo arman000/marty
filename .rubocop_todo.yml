@@ -1122,6 +1122,7 @@ Style/StringLiteralsInInterpolation:
 Style/StructInheritance:
   Exclude:
     - 'lib/marty/promise_job.rb'
+    - 'lib/marty/promise_ruby_job.rb'
 
 # Offense count: 75
 # Cop supports --auto-correct.
