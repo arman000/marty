@@ -104,6 +104,7 @@ describe Marty::Promise, slow: true do
       expect(promise.status).to be false
       expect(promise.promise_type).to eq 'delorean'
       expect(promise.result['error']).to eq 'I had an error'
+      expect(promise.job_id).to be_present
     end
   end
 
@@ -136,6 +137,7 @@ describe Marty::Promise, slow: true do
       expect(promise.status).to be true
       expect(promise.promise_type).to eq 'ruby'
       expect(promise.result['result']).to eq bud_category.id
+      expect(promise.job_id).to be_present
       expect(log.message).to eq 'was called'
     end
 
