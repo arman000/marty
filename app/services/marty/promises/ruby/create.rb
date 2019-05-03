@@ -36,6 +36,12 @@ module Marty
             raise
           end
 
+          # keep a reference to the job. This is needed in case we want to
+          # work off a promise job that we're waiting for and which hasn't
+          # been reserved yet.
+          promise.job_id = job.id
+          promise.save!
+
           Marty::PromiseProxy.new(promise.id, timeout, 'result')
         end
       end
