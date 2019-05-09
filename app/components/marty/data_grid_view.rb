@@ -62,9 +62,27 @@ module Marty; class DataGridView < McflyGridPanel
     javascript
   end
 
+  def self.edit_grid_js(options = {})
+    dg        = options[:data_grid] || 'data_grid'
+    title_str = options[:title_str] || 'Data Grid'
+
+    javascript = l(<<-JS)
+    function() {
+       var sel = this.getSelectionModel().getSelection()[0];
+       var record_id = sel && sel.getId();
+       this.server.editGrid({record_id: record_id,
+                            data_grid: "#{dg}",
+                            title_str: "#{title_str}"});
+    }
+    JS
+    javascript
+  end
+
   client_class do |c|
+    c.include :data_grid_edit
     c.netzke_show_grid        = DataGridView.show_grid_js
     c.netzke_client_show_grid = DataGridView.client_show_grid_js
+    c.netzke_edit_grid        = DataGridView.edit_grid_js
   end
 
   def configure(c)
@@ -123,6 +141,12 @@ module Marty; class DataGridView < McflyGridPanel
     a.handler  = :netzke_show_grid
   end
 
+  action :edit_grid do |a|
+    a.text     = 'Edit Grid'
+    a.icon_cls = 'fa fa-th-large glyph'
+    a.handler  = :netzke_edit_grid
+  end
+
   endpoint :show_grid do |params|
     record_id = params[:record_id]
 
@@ -143,8 +167,58 @@ module Marty; class DataGridView < McflyGridPanel
     client.netzke_client_show_grid maxcount, res, 'Data Grid'
   end
 
+  # placeholder for grid editing permission logic.
+  # for now, this allows the rspec to control the permission
+  def self.get_edit_permission
+    'edit_all'
+  end
+
+  endpoint :edit_grid do |params|
+    record_id = params[:record_id]
+
+    dg = DataGrid.find_by_id(record_id)
+
+    return client.netzke_notify('No data grid.') unless dg
+
+    meta_rows_raw, h_key_rows, data_rows = dg.export_array
+    res = h_key_rows + data_rows
+
+    md = dg.metadata
+    hdim = md.map { |m| m['dir'] == 'h' && m['attr'] }.select { |v| v }
+    vdim = md.map { |m| m['dir'] == 'v' && m['attr'] }.select { |v| v }
+    hdim_en = hdim.map { |d| I18n.t('attributes.' + d, default: d) }
+    vdim_en = vdim.map { |d| I18n.t('attributes.' + d, default: d) }
+    name = "Editing Data Grid '#{dg.name}'"
+    permission = Marty::DataGridView.get_edit_permission
+    client.edit_grid(record_id, hdim_en, vdim_en, res, name, permission)
+  end
+
+  endpoint :save_grid do |params|
+    begin
+      rec_id = params['record_id']
+      data = params['data']
+      data_as_array = data.map do |row|
+        row.keys.map { |key| row[key] }
+      end
+      dg = Marty::DataGrid.mcfly_pt('infinity').find_by(group_id: rec_id)
+      vcnt = dg.metadata.select { |md| md['dir'] == 'v' }.count
+      hcnt = dg.metadata.select { |md| md['dir'] == 'h' }.count
+      exported = dg.export.lines
+      sep = exported.each_with_index.detect { |l, i| /^\s*$/.match(l) }.last
+      new_data = data_as_array.each_with_index.map do |line, idx|
+        line.join("\t") + "\r\n"
+      end.compact
+      to_import = (exported[0..sep] + new_data).join
+      dg.update_from_import(dg.name, to_import)
+      return false
+    rescue StandardError => e
+      # marty log
+      return e.message
+    end
+  end
+
   def default_bbar
-    [:show_grid] + super
+    [:show_grid, :edit_grid] + super
   end
 
   def default_context_menu
