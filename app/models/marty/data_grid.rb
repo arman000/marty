@@ -165,8 +165,8 @@ class Marty::DataGrid < Marty::Base
 
   PLV_DT_FMT = '%Y-%m-%d %H:%M:%S.%N6'
 
-  def self.plv_lookup_grid_distinct(h_passed, dgh, ret_grid_data = false,
-                                    distinct = true)
+  def self.plpg_lookup_grid_distinct(h_passed, dgh, ret_grid_data = false,
+                                     distinct = true)
     cd = dgh['created_dt']
     @@dtcache ||= {}
     @@dtcache[cd] ||= cd.strftime(PLV_DT_FMT)
@@ -199,7 +199,7 @@ class Marty::DataGrid < Marty::Base
       parms, sqls, ress, dg = res['error_extra'].values_at(
         'params', 'sql', 'results', 'dg')
 
-      raise "DG #{name}: Error in PLV8 call: #{msg}\n"\
+      raise "DG #{name}: Error in PLPG call: #{msg}\n"\
             "params: #{parms}\n"\
             "sqls: #{sqls}\n"\
             "results: #{ress}\n"\
@@ -251,7 +251,7 @@ class Marty::DataGrid < Marty::Base
     #   "name"     => <grid name>
     #   "data"     => <grid's data array>
     #   "metadata" => <grid's metadata (array of hashes)>
-    vhash = plv_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
+    vhash = plpg_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
 
     return vhash if vhash['result'].nil? || !dgh['data_type']
 
