@@ -175,17 +175,14 @@ module Marty; class DataGridView < McflyGridPanel
     return client.netzke_notify('No data grid.') unless dg
 
     meta_rows_raw, h_key_rows, data_rows = dg.export_array
-    meta_rows = meta_rows_raw.map do |row|
-      # need to escape for HTML, otherwise characters such as >, <,
-      # etc. not displayed properly.
-      row.map { |field| CGI::escapeHTML(field) }
-    end
-    res = meta_rows + [[]] + h_key_rows + data_rows
+    res = h_key_rows + data_rows
 
-    maxcount = res.map(&:length).max
+    md = dg.metadata
+    hdim = md.map { |m| m['dir'] == 'h' && m['attr'] }.select { |v| v }
+    vdim = md.map { |m| m['dir'] == 'v' && m['attr'] }.select { |v| v }
 
     name = "Editing Data Grid '#{dg.name}'"
-    client.edit_grid(record_id, maxcount, res, name)
+    client.edit_grid(record_id, hdim, vdim, res, name)
   end
 
   endpoint :save_grid do |params|
@@ -201,9 +198,14 @@ module Marty; class DataGridView < McflyGridPanel
       exported = dg.export.lines
       sep = exported.each_with_index.detect { |l, i| /^\s*$/.match(l) }.last
       new_data = data_as_array.each_with_index.map do |line, idx|
+        # if hcnt is zero, skip first line that was added as a label
+        next if idx == 0 && hcnt == 0
         line = Array.new(vcnt, nil) + line[vcnt..-1] if idx < hcnt
+
+        # if vcnt is zero, remove the leading field that was added as a label
+        line.shift if vcnt == 0
         line.join("\t") + "\r\n"
-      end
+      end.compact
       to_import = (exported[0..sep] + new_data).join
       dg.update_from_import(dg.name, to_import)
       return false

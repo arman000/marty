@@ -1,10 +1,6 @@
 {
     editGrid:
-    function(record_id, count, data, title_str, allow_ins_del) {
-        var hdim = [];
-        var vdim = [];
-        var start = 0;
-        var use_data = []
+    function(record_id, hdim, vdim, data, title_str) {
         var colors = [
             'background-color: #A1FFA1;',
             'background-color: #FFA1A1;',
@@ -27,37 +23,22 @@
         var vcol = []
         var me = this;
 
-        // get dim info
-        for (var i=0; i<data.length; i++)
-        {
-            if (data[i].length == 0)
-            {
-                start = i+1;
-                break;
-            }
-            if (data[i][2] == 'h') hdim.push(data[i][0]);
-            if (data[i][2] == 'v') vdim.push(data[i][0]);
-        }
-
-        // insert a blank row for labels if there no hdims
         if (hdim.length == 0) {
-            use_data.push(Array.apply(null, Array(4)).map(function () {}));
+            var vwid = vdim.length;
+            var newa = Array.apply(null, Array(vwid+1)).map(function () { return ""; });
+            data.unshift(newa);
         }
-
-        // copy actual data (non dim stuff) to new array
-        for (var i=0; i+start < data.length; i++) {
-            var row_to_copy = data[i+start];
-            if (vdim.length == 0) {
-                row_to_copy.unshift(nil);
+        if (vdim.length == 0) {
+            for (var i=0; i < data.length; ++i) {
+                data[i].unshift("");
             }
-            use_data.push(row_to_copy);
         }
         // setup colors and labels for hdims
         for (var i=0; i<hdim.length; i++)
         {
             hcol[i] = colors.pop()
-            var idx = vdim.length == 0 ? 0 : vdim.length - 1;
-            use_data[i][idx] = hdim[i];
+            var idx = Math.max(0, vdim.length - 1);
+            data[i][idx] = hdim[i];
         }
 
         // setup colors and labels for vdims
@@ -65,14 +46,14 @@
         {
             vcol[i] = colors.pop();
 
-            var idx = hdim.length == 0 ? 0 : hdim.length - 1;
-            cur = use_data[idx][i];
+            var idx = Math.max(0, hdim.length - 1);
+            cur = data[idx][i];
             if (cur)
-                use_data[idx][i] = vdim[i] + ' / ' + cur;
+                data[idx][i] = vdim[i] + ' / ' + cur;
             else
-                use_data[idx][i] = vdim[i];
+                data[idx][i] = vdim[i];
         }
-
+//        debugger;
         var createStoreAndColumns =
             function(data) {
                 var fields = [];
@@ -105,7 +86,7 @@
             };
 
         var columns, thestore;
-        [columns, thestore] = createStoreAndColumns(use_data);
+        [columns, thestore] = createStoreAndColumns(data);
 
         var dirty = false;
         var setDirty = function() { dirty = true; }
@@ -118,9 +99,16 @@
             modFunc(store_data, mod_data);
             [newcolumns, newstore] = createStoreAndColumns(mod_data);
             grid.reconfigure(newstore, newcolumns);
+            Ext.each(grid.getColumns(), function(column) {
+                column.autoSize();
+                column.setWidth(column.getWidth()+20);
+            });
             setDirty();
         }
-        var insertRow = function(inData, outData, rowIdx, up) {
+        var insertRow = (vdim.length == 0) ? 
+            function() {}
+            :
+            function(inData, outData, rowIdx, up) {
             var width = inData[0].fields.length -1
             var newa = Array.apply(null, Array(width)).map(function () { return ""; });
             var target = up ? rowIdx : rowIdx + 1;
@@ -137,22 +125,29 @@
                 }
             }
         }
-        var insertCol = function(inData, outData, colIdx, left) {
-            var target = left ? colIdx - 1 : colIdx
-            var row_width = inData[0].fields.length;
-            for (var i=0; i< inData.length; ++i) {
-                var row = [];
-                var idx = 0;
-                for (const [key, value] of Object.entries(inData[i].data)) {
-                    if (idx == target) row.push(null);
-                    if (key != 'id') row.push(value);
-                    ++idx;
+        var insertCol = (hdim.length == 0) ?
+            function() {}
+            :
+            function(inData, outData, colIdx, left) {
+                
+                var target = left ? colIdx - 1 : colIdx
+                var row_width = inData[0].fields.length;
+                for (var i=0; i< inData.length; ++i) {
+                    var row = [];
+                    var idx = 0;
+                    for (const [key, value] of Object.entries(inData[i].data)) {
+                        if (idx == target) row.push(null);
+                        if (key != 'id') row.push(value);
+                        ++idx;
+                    }
+                    if (target == row_width) row.push(null);
+                    outData.push(row);
                 }
-                if (target == row_width) row.push(null);
-                outData.push(row);
-            }
-        }
-        var deleteRow = function(inData, outData, rowIdx) {
+            };
+        var deleteRow = (vdim.length == 0) ?
+            function() {}
+            :
+            function(inData, outData, rowIdx) {
             for (var i=0; i< inData.length; ++i) {
                 if (i != rowIdx) {
                     var row = [];
@@ -165,7 +160,10 @@
                 }
             }
         }
-        var deleteCol = function(inData, outData, colIdx) {
+        var deleteCol = (hdim.length == 0) ? 
+            function() {}
+            :
+            function(inData, outData, colIdx) {
             for (var i=0; i< inData.length; ++i) {
                 var row = [];
                 var idx = 0;
@@ -180,7 +178,7 @@
         var insertRowAboveAction = Ext.create('Ext.Action', {
             text: 'Insert Row Above',
             handler: function(widget , event) {
-                if (widget.position.row < hdim.length) return;
+                if (widget.position.row < Math.max(1, hdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -193,7 +191,7 @@
         var insertRowBelowAction = Ext.create('Ext.Action', {
             text: 'Insert Row Below',
             handler: function(widget , event) {
-                if (widget.position.row < hdim.length) return;
+                if (widget.position.row < Math.max(1, hdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -205,7 +203,7 @@
         var insertColLeftAction = Ext.create('Ext.Action', {
             text: 'Insert Column Left',
             handler: function(widget , event) {
-                if (widget.position.col-1 < vdim.length) return;
+                if (widget.position.col-1 < Math.max(1, vdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -217,7 +215,7 @@
         var insertColRightAction = Ext.create('Ext.Action', {
             text: 'Insert Column Right',
             handler: function(widget , event) {
-                if (widget.position.col-1 < vdim.length) return;
+                if (widget.position.col-1 < Math.max(1, vdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -229,7 +227,7 @@
         var deleteRowAction = Ext.create('Ext.Action', {
             text: 'Delete Row',
             handler: function(widget , event) {
-                if (widget.position.row < hdim.length) return;
+                if (widget.position.row < Math.max(1, hdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -241,7 +239,7 @@
         var deleteColAction = Ext.create('Ext.Action', {
             text: 'Delete Column',
             handler: function(widget , event) {
-                if (widget.position.col-1 < vdim.length) return;
+                if (widget.position.col-1 < Math.max(1, vdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -270,8 +268,12 @@
             clicksToEdit: 2,
             listeners: {
                 beforeedit: function(editor, context, eOpts) {
-                    if (context.colIdx <= vdim.length &&
-                        context.rowIdx < hdim.length) {
+                    if ((context.colIdx <= vdim.length &&
+                         context.rowIdx < hdim.length) ||
+                        (context.rowIdx == 0 &&
+                         hdim.length == 0) ||
+                        (context.colIdx == 1 &&
+                         vdim.length == 0)) {
                         return false;
                     }
                 },
@@ -290,6 +292,7 @@
             columns:     columns,
             scrollable: true,
             anchor: '100% 100%',
+            forceFit: true,
             store:       thestore,
             plugins: [cellEditor,
                       {
@@ -416,5 +419,12 @@
                         win.doDestroy();
                     }}}]
         }).show();
+        var gridobj = Ext.ComponentQuery.query('grid').find(function(v) {
+            return v.name=='data_grid_edit_grid'
+        });
+        Ext.each(gridobj.getColumns(), function(column) {
+            column.autoSize();
+            column.setWidth(column.getWidth()+20);
+        });
     }
 }
