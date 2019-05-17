@@ -85,6 +85,7 @@ feature 'rule view', js: true do
   it 'rule workflow' do
     log_in_as('marty')
     go_to_my_rules
+    binding.pry
     mrv = netzke_find('my_rule_view')
     # test required field
     press('Add')

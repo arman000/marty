@@ -167,6 +167,11 @@
                 return v.name=='data_grid_edit_grid'
             });
         };
+        var lookup_win = function () {
+            return Ext.ComponentQuery.query('window').find(function(v) {
+                return v.name=='data_grid_edit_window'
+            });
+        };
         var insertRowAboveAction = Ext.create('Ext.Action', {
             text: 'Insert Row Above',
             handler: function(widget , event) {
@@ -388,10 +393,7 @@
                         }
                         else
                         {
-                            var win = grid = Ext.ComponentQuery.query('window').find(function(v) {
-                                return v.name=='data_grid_edit_window'
-                            });
-                            win.doDestroy();
+                            lookup_win().doDestroy();
                         }
                     });
                 }
@@ -405,20 +407,13 @@
                 }
             },
             closeAction: 'hide',
-            fbar: [{
-                text: 'Save',
-                handler: function () {
-                    this.up('window').submit();
-                }},
-                {
-                text: 'Cancel',
-                handler: function () {
-                    var win = Ext.ComponentQuery.query('window').find(function(v) {
-                        return v.name=='data_grid_edit_window'
-                    });
-                    var grid = Ext.ComponentQuery.query('grid').find(function(v) {
-                        return v.name=='data_grid_edit_grid'
-                    });
+            listeners: {
+                beforeclose: function (win) {
+                    if(win.closeMe) {
+                        win.closeMe = false;
+                        return true;
+                    }
+                    var grid = lookup_grid();
                     if (getDirty() || grid.getStore().getModifiedRecords().length > 0) {
                         Ext.MessageBox.show({
                             title:'Discard Changes?',
@@ -432,11 +427,31 @@
                                 if (btn == "yes"){
                                     win.doDestroy();
                                 }
+                            },
+                            callback: function(btn) {
+                                if('yes' === btn) {
+                                    win.closeMe = true;
+                                    win.close();
+                                }
                             }
                         });
-                    } else {
-                        win.doDestroy();
-                    }}}]
+                        return false;
+                    }
+                    return true;
+                }
+            },
+            fbar: [
+                {
+                    text: 'Save',
+                    handler: function () {
+                        this.up('window').submit();
+                    }},
+                {
+                    text: 'Cancel',
+                    handler: function () {
+                        this.up('window').close();
+                    }
+                }]
         }).show();
         var gridobj = Ext.ComponentQuery.query('grid').find(function(v) {
             return v.name=='data_grid_edit_grid'
