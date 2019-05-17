@@ -89,8 +89,8 @@
         [columns, thestore] = createStoreAndColumns(data);
 
         var dirty = false;
-        var setDirty = function() { dirty = true; }
-        var getDirty = function() { return dirty; }
+        var setDirty = function() { dirty = true; };
+        var getDirty = function() { return dirty; };
 
         var dataUpdate = function(grid, modFunc) {
             var store_data = grid.getStore().data.items;
@@ -104,11 +104,8 @@
                 column.setWidth(column.getWidth()+20);
             });
             setDirty();
-        }
-        var insertRow = (vdim.length == 0) ? 
-            function() {}
-            :
-            function(inData, outData, rowIdx, up) {
+        };
+        var insertRow = function(inData, outData, rowIdx, up) {
             var width = inData[0].fields.length -1
             var newa = Array.apply(null, Array(width)).map(function () { return ""; });
             var target = up ? rowIdx : rowIdx + 1;
@@ -124,30 +121,23 @@
                     outData.push(row);
                 }
             }
-        }
-        var insertCol = (hdim.length == 0) ?
-            function() {}
-            :
-            function(inData, outData, colIdx, left) {
-                
-                var target = left ? colIdx - 1 : colIdx
-                var row_width = inData[0].fields.length;
-                for (var i=0; i< inData.length; ++i) {
-                    var row = [];
-                    var idx = 0;
-                    for (const [key, value] of Object.entries(inData[i].data)) {
-                        if (idx == target) row.push(null);
-                        if (key != 'id') row.push(value);
-                        ++idx;
-                    }
-                    if (target == row_width) row.push(null);
-                    outData.push(row);
+        };
+        var insertCol = function(inData, outData, colIdx, left) {
+            var target = left ? colIdx - 1 : colIdx
+            var row_width = inData[0].fields.length;
+            for (var i=0; i< inData.length; ++i) {
+                var row = [];
+                var idx = 0;
+                for (const [key, value] of Object.entries(inData[i].data)) {
+                    if (idx == target) row.push(null);
+                    if (key != 'id') row.push(value);
+                    ++idx;
                 }
-            };
-        var deleteRow = (vdim.length == 0) ?
-            function() {}
-            :
-            function(inData, outData, rowIdx) {
+                if (target == row_width) row.push(null);
+                outData.push(row);
+            }
+        };
+        var deleteRow = function(inData, outData, rowIdx) {
             for (var i=0; i< inData.length; ++i) {
                 if (i != rowIdx) {
                     var row = [];
@@ -159,11 +149,8 @@
                         outData.push(row);
                 }
             }
-        }
-        var deleteCol = (hdim.length == 0) ? 
-            function() {}
-            :
-            function(inData, outData, colIdx) {
+        };
+        var deleteCol = function(inData, outData, colIdx) {
             for (var i=0; i< inData.length; ++i) {
                 var row = [];
                 var idx = 0;
@@ -174,14 +161,16 @@
                 }
                 outData.push(row);
             }
-        }
+        };
+        var lookup_grid = function () {
+            return Ext.ComponentQuery.query('grid').find(function(v) {
+                return v.name=='data_grid_edit_grid'
+            });
+        };
         var insertRowAboveAction = Ext.create('Ext.Action', {
             text: 'Insert Row Above',
             handler: function(widget , event) {
-                var grid = Ext.ComponentQuery.query('grid').find(function(v) {
-                    return v.name=='data_grid_edit_grid'
-                });
-                var gridx = Ext.ComponentQuery.query('grid');
+                var grid = lookup_grid();
                 dataUpdate(grid, function(data, mod_data) {
                     insertRow(data, mod_data, widget.position.row, true);
                 });
@@ -190,9 +179,7 @@
         var insertRowBelowAction = Ext.create('Ext.Action', {
             text: 'Insert Row Below',
             handler: function(widget , event) {
-                var grid = Ext.ComponentQuery.query('grid').find(function(v) {
-                    return v.name=='data_grid_edit_grid'
-                });
+                var grid = lookup_grid();
                 dataUpdate(grid, function(data, mod_data) {
                     insertRow(data, mod_data, widget.position.row, false);
                 });
@@ -201,9 +188,7 @@
         var insertColLeftAction = Ext.create('Ext.Action', {
             text: 'Insert Column Left',
             handler: function(widget , event) {
-                var grid = Ext.ComponentQuery.query('grid').find(function(v) {
-                    return v.name=='data_grid_edit_grid'
-                });
+                var grid = lookup_grid();
                 dataUpdate(grid, function(data, mod_data) {
                     insertCol(data, mod_data, widget.position.col, true);
                 });
@@ -212,9 +197,7 @@
         var insertColRightAction = Ext.create('Ext.Action', {
             text: 'Insert Column Right',
             handler: function(widget , event) {
-                var grid = Ext.ComponentQuery.query('grid').find(function(v) {
-                    return v.name=='data_grid_edit_grid'
-                });
+                var grid = lookup_grid();
                 dataUpdate(grid, function(data, mod_data) {
                     insertCol(data, mod_data, widget.position.col, false);
                 });
@@ -223,10 +206,7 @@
         var deleteRowAction = Ext.create('Ext.Action', {
             text: 'Delete Row',
             handler: function(widget , event) {
-                if (widget.position.row < Math.max(1, hdim.length)) return;
-                var grid = Ext.ComponentQuery.query('grid').find(function(v) {
-                    return v.name=='data_grid_edit_grid'
-                });
+                var grid = lookup_grid();
                 dataUpdate(grid, function(data, mod_data) {
                     deleteRow(data, mod_data, widget.position.row);
                 });
@@ -235,10 +215,7 @@
         var deleteColAction = Ext.create('Ext.Action', {
             text: 'Delete Column',
             handler: function(widget , event) {
-                if (widget.position.col-1 < Math.max(1, vdim.length)) return;
-                var grid = Ext.ComponentQuery.query('grid').find(function(v) {
-                    return v.name=='data_grid_edit_grid'
-                });
+                var grid = lookup_grid();
                 dataUpdate(grid, function(data, mod_data) {
                     deleteCol(data, mod_data, widget.position.col);
                 });
