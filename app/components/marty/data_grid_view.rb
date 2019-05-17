@@ -198,18 +198,14 @@ module Marty; class DataGridView < McflyGridPanel
       exported = dg.export.lines
       sep = exported.each_with_index.detect { |l, i| /^\s*$/.match(l) }.last
       new_data = data_as_array.each_with_index.map do |line, idx|
-        # if hcnt is zero, skip first line that was added as a label
-        next if idx == 0 && hcnt == 0
-        line = Array.new(vcnt, nil) + line[vcnt..-1] if idx < hcnt
-
-        # if vcnt is zero, remove the leading field that was added as a label
-        line.shift if vcnt == 0
+        
+      #  line = Array.new(vcnt, nil) + line[vcnt..-1] if idx < hcnt
         line.join("\t") + "\r\n"
       end.compact
       to_import = (exported[0..sep] + new_data).join
       dg.update_from_import(dg.name, to_import)
       return false
-    rescue => e
+    rescue StandardError => e
       # marty log
       return e.message
     end

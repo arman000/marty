@@ -178,7 +178,6 @@
         var insertRowAboveAction = Ext.create('Ext.Action', {
             text: 'Insert Row Above',
             handler: function(widget , event) {
-                if (widget.position.row < Math.max(1, hdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -191,7 +190,6 @@
         var insertRowBelowAction = Ext.create('Ext.Action', {
             text: 'Insert Row Below',
             handler: function(widget , event) {
-                if (widget.position.row < Math.max(1, hdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -203,7 +201,6 @@
         var insertColLeftAction = Ext.create('Ext.Action', {
             text: 'Insert Column Left',
             handler: function(widget , event) {
-                if (widget.position.col-1 < Math.max(1, vdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -215,7 +212,6 @@
         var insertColRightAction = Ext.create('Ext.Action', {
             text: 'Insert Column Right',
             handler: function(widget , event) {
-                if (widget.position.col-1 < Math.max(1, vdim.length)) return;
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -250,7 +246,8 @@
         });
         var itemContextMenu = Ext.create('Ext.menu.Menu' , {
             items: [insertRowAboveAction, insertRowBelowAction, insertColLeftAction,
-                    insertColRightAction, deleteRowAction, deleteColAction]});
+                    insertColRightAction, deleteRowAction, deleteColAction]
+        });
 
         // Selection Models
         var spSel = Ext.create("Ext.grid.selection.SpreadsheetModel", {
@@ -283,6 +280,29 @@
             }
         });
 
+        var context_disable_fn = function(menu, label, x, y, fn) {
+            var mi = menu.items.items.find(function (mi) {
+                return mi.text == label;
+            });
+            if (fn(x, y)) 
+                mi.disable();
+            else
+                mi.enable();
+        };
+        var row_menu_chk = function (ax, ay) {
+            return ay < Math.max(1, hdim.length) || vdim.length == 0
+        };
+        var col_menu_chk = function (ax, ay) {
+            return ax - 1 < Math.max(1, vdim.length) || hdim.length == 0;
+        };
+        var disable_conds = [
+            ['Insert Row Above',    row_menu_chk],
+            ['Insert Row Below',    row_menu_chk],
+            ['Delete Row',          row_menu_chk],
+            ['Insert Column Left',  col_menu_chk],
+            ['Insert Column Right', col_menu_chk],
+            ['Delete Column',       col_menu_chk]
+        ];
         var grid = {
             xtype:       'grid',
             name:        'data_grid_edit_grid',
@@ -322,11 +342,14 @@
                     e.stopEvent();
                     var items = itemContextMenu.items.items;
                     var ctn    = items.length;
+                    var x = e.position.colIdx;
+                    var y = e.position.rowIdx;
                     for (var i=0; i<ctn; ++i) {
-                        items[i].position = {col: e.position.colIdx,
-                                             row: e.position.rowIdx};
+                        items[i].position = {col: x, row: y};
                     }
-
+                    for (const [label, fn] of disable_conds) {
+                        context_disable_fn(itemContextMenu, label, x, y, fn);
+                    }
                     itemContextMenu.showAt(e.getXY());
                 },
 
@@ -352,10 +375,29 @@
                 if (getDirty() || grid.getStore().getModifiedRecords().length > 0) {
                     var store = grid.getStore().data.items;
                     var ret = [];
-                    for (var i=0; i < store.length; ++i) {
+
+                    // maybe remove label line at the top we added when hdim.length == 0
+                    var row_start = hdim.length == 0 ? 1 : 0;
+                    
+                    for (var i = row_start; i < store.length; ++i) {
                         var row = {};
+
+                        // maybe remove label col at the left we added when vdim.length == 0
+                        var col_idx = 0;
+                        var col0_skip = vdim.length == 0 ? true : false;
+
+                        // or remove label fields we added in top left
+                        var col_null = i < hdim.length ? vdim.length : 0;
+                        
                         for (const [key, value] of Object.entries(store[i].data)) {
-                            if (key != 'id') row[key] = value;
+                            if (key != 'id' && !col0_skip) {
+                                if (col_idx < col_null)
+                                    row[key] = "";
+                                else
+                                    row[key] = value;
+                            }
+                            col0_skip = false;
+                            col_idx++;
                         }
                         ret.push(row);
                     }
