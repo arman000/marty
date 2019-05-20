@@ -69,6 +69,35 @@ feature 'data grid view', js: true do
              map { |m| [m.text, :disabled]}
       Hash[en+dis]
     end
+    cell_edit = lambda do |col, row, text|
+      colx = colh[col][0]
+      colw = colh[col][1]
+      xpos = (colx + colw/2).to_i - gridx
+      ypos = (perr*row + perr/2).to_i
+      puts "#{xpos}/#{ypos}"
+      page.driver.browser.action.
+        move_to(grid.native, xpos, ypos).double_click.
+        send_keys([:control ,'a'], :delete, text, :enter).perform
+    end
+    grid_get = lambda do
+      run_js <<-JS
+         var grid = Ext.ComponentQuery.query('grid').find(function(v) {
+                return v.name=='data_grid_edit_grid'
+            });
+         var store = grid.getStore().data.items;
+         var ret = [];
+
+         for (var i = 0; i < store.length; ++i) {
+             var row = {};
+
+             for (const [key, value] of Object.entries(store[i].data)) {
+                 row[key] = value;
+             }
+             ret.push(row);
+         }
+         return ret;
+      JS
+    end
     binding.pry
   end
 end
