@@ -1,7 +1,7 @@
 image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image:2.4.2-20190129
 
 services:
-  - "clkao/postgres-plv8:9.6-2.0"
+  - "postgres:9.6"
 
 before_script:
   - time bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
