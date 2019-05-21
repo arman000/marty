@@ -8,10 +8,15 @@ feature 'data grid view', js: true do
     save_clean_db(@save_file)
     Marty::Script.load_scripts
     dt = DateTime.parse('2017-1-1')
-    p = File.expand_path('../../fixtures/csv/rule', __FILE__)
-    klass = Marty::DataGrid
-    f = '%s/%s.csv' % [p, klass.to_s.sub(/(Gemini|Marty)::/, '')]
-    Marty::DataImporter.do_import(klass, File.read(f), dt, nil, nil, ',')
+    p = File.expand_path('../../fixtures/misc', __FILE__)
+    Dir.glob(p + '/data_grid_*.txt').each do |path|
+      n = File.basename(path, '.txt').camelize
+      begin
+        Marty::DataGrid.create_from_import(n, File.read(path), dt)
+      rescue => e
+        binding.pry
+      end
+    end
   end
   after(:all) do
     restore_clean_db(@save_file)
@@ -22,42 +27,34 @@ feature 'data grid view', js: true do
     expect(page).to have_content 'Data Grids'
   end
 
-  it 'rule workflow' do
-    log_in_as('marty')
-    go_to_my_data_grids
-    mrv = netzke_find('data_grid_view')
-    mrv.select_row(4)
-    wait_for_ajax
-    press("Edit Grid")
-    wait_for_ajax
-    grid = page.all(:xpath,
+  def grid_setup
+    @grid = page.all(:xpath,
                     ".//div[contains(@class, 'x-grid-item-container')]").
              detect{ |e| e.text.include?('flavor / param') }
 
-    gridx = grid.native.rect.x
-    height = grid.native.size.height
-    perr = (height / 3).to_i
+    @gridx = @grid.native.rect.x
+    height = @grid.native.size.height
+    @perr = (height / 3).to_i
     cols=page.all(:xpath, ".//div[contains(@role, 'columnheader') and "\
                           "contains(@class, 'x-column-header')]").select do
       |c|
       (0..10).map(&:to_s).include?(c.text)
     end.map { |c| n=c.native; [n.text.to_i, [n.rect.x, n.rect.width]] }
-    colh = Hash[cols]
-
-    context_click2 = lambda do |col, row, menuidx, click=false|
-      colx = colh[col][0]
-      colw = colh[col][1]
-      xpos = (colx + colw/2).to_i - gridx
-      ypos = (perr*row + perr/2).to_i
-      mxpos = xpos + 20
-      mypos = ypos + (perr*menuidx+ perr/2).to_i
-      puts "#{xpos}/#{ypos}"
-      page.driver.browser.action.
-        move_to(grid.native, xpos, ypos).context_click.perform
-      page.driver.browser.action.move_to(grid.native, mxpos, mypos).click.
-        release.perform if click
-    end
-    menu_get = lambda do
+    @colh = Hash[cols]
+  end
+  def context_click(col, row, menuidx, click=false)
+    colx = @colh[col][0]
+    colw = @colh[col][1]
+    xpos = (colx + colw/2).to_i - @gridx
+    ypos = (@perr*row + @perr/2).to_i
+    mxpos = xpos + 20
+    mypos = ypos + (@perr*menuidx+ @perr/2).to_i
+    page.driver.browser.action.
+      move_to(@grid.native, xpos, ypos).context_click.perform
+    page.driver.browser.action.move_to(@grid.native, mxpos, mypos).click.
+      release.perform if click
+  end
+  def get_menu
       m=page.all(:xpath, ".//div[contains(@class, 'x-menu-item-default')]").to_a
       n=page.all(:xpath, ".//div[contains(@class, 'x-menu-item-disabled')]").to_a
       labels = ['Insert Row Above', 'Insert Row Below',
@@ -68,36 +65,136 @@ feature 'data grid view', js: true do
       dis = n.select { |m| labels.include?(m.text) }.
              map { |m| [m.text, :disabled]}
       Hash[en+dis]
-    end
-    cell_edit = lambda do |col, row, text|
-      colx = colh[col][0]
-      colw = colh[col][1]
-      xpos = (colx + colw/2).to_i - gridx
-      ypos = (perr*row + perr/2).to_i
-      puts "#{xpos}/#{ypos}"
-      page.driver.browser.action.
-        move_to(grid.native, xpos, ypos).double_click.
-        send_keys([:control ,'a'], :delete, text, :enter).perform
-    end
-    grid_get = lambda do
-      run_js <<-JS
+  end
+  def cell_edit(col, row, text)
+    colx = @colh[col][0]
+    colw = @colh[col][1]
+    xpos = (colx + colw/2).to_i - @gridx
+    ypos = (@perr*row + @perr/2).to_i
+    page.driver.browser.action.
+      move_to(@grid.native, xpos, ypos).double_click.
+      send_keys([:control ,'a'], :delete, text, :enter).perform
+  end
+  def get_grid(values=true)
+    get = values ? "row.push(value);" :
+            "row.push(grid.getView().getCell(i,j+1).style.backgroundColor);"
+    ret = run_js <<-JS
+
          var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                 return v.name=='data_grid_edit_grid'
             });
+/*
+         var grids = Ext.ComponentQuery.query('grid');
+         var grid = grids.find(function(v) {
+                return v.name=='data_grid_edit_grid'
+                });
+         grids.forEach(function(grid) {
+             console.log(grid.name);
+         });
+*/
          var store = grid.getStore().data.items;
          var ret = [];
-
          for (var i = 0; i < store.length; ++i) {
-             var row = {};
-
+             var row = [];
+             var j = 0;
              for (const [key, value] of Object.entries(store[i].data)) {
-                 row[key] = value;
+                 if (key != 'id')
+                    #{get}
+                 j++;
              }
              ret.push(row);
          }
          return ret;
       JS
+    ret
+    #
+  end
+  def check_grid(grid_name)
+    get_latest = lambda do
+      Marty::DataGrid.mcfly_pt('infinity').find_by(name: grid_name)
     end
-    binding.pry
+    grid = get_latest.call()
+    hdim = grid.metadata.select { |md| md['dir'] == 'h' }
+    vdim = grid.metadata.select { |md| md['dir'] == 'v' }
+    data = grid.data
+    ui_data = get_grid
+    row_cnt = ui_data.length
+    col_cnt = ui_data[0].length
+    # colors check
+    ui_colors = get_grid(false)
+
+    vdim_size = vdim.count == 0 ? 1 : vdim.count
+    hdim_size = hdim.count == 0 ? 1 : hdim.count
+    label_area = {ulx: 0, uly: 0, lrx: vdim_size, lry: hdim_size}
+    vdim_area =  {ulx: 0, uly: hdim_size, lrx: vdim_size, lry: row_cnt}
+    hdim_area =  {ulx: vdim_size, uly: 0, lrx: col_cnt, lry: hdim_size}
+    data_area =  {ulx: vdim_size, uly: hdim_size, lrx: col_cnt,
+                           lry: row_cnt}
+    iterate_area = lambda do |rect, a_of_a, &block|
+      ulx, uly, lrx, lry = rect.values
+      sub = []
+      a_of_a[uly...lry].each_with_index do |row, row_idx|
+        subrow = []
+        row[ulx...lrx].each_with_index do |cell, col_idx|
+          subrow << cell
+          block.call(cell, row_idx, col_idx) if block
+        end
+        sub << subrow
+      end
+      sub
+    end
+    # vertical dims
+    if vdim.count > 0
+      vert_color_sets = vdim_size.times.map { Set.new }
+      iterate_area.call(vdim_area, ui_colors) do |cell, row_idx, col_idx|
+        vert_color_sets[col_idx] << cell
+      end
+      vert_color_sets.each do |theset|
+        expect(theset.length).to eq(1)
+        expect(theset.to_a[0]).to match(/^rgb/)
+      end
+      all_set = vert_color_sets.map(&:to_a).reduce(&:+).to_set
+      expect(all_set.length).to eq(vert_color_sets.length)
+    end
+    # horizontal dims
+    if hdim.count > 0
+      horiz_color_sets = hdim_size.times.map { Set.new }
+      iterate_area.call(hdim_area, ui_colors) do |cell, row_idx, col_idx|
+        horiz_color_sets[row_idx] << cell
+      end
+      horiz_color_sets.each do |theset|
+        expect(theset.length).to eq(1)
+        expect(theset.to_a[0]).to match(/^rgb/)
+      end
+      all_set = horiz_color_sets.map(&:to_a).reduce(&:+).to_set
+      expect(all_set.length).to eq(horiz_color_sets.length)
+    end
+
+    # data and label section
+    [data_area, label_area].each do |area|
+      colors = Set.new
+      iterate_area.call(area, ui_colors) do |cell, row_idx, col_idx|
+        colors << cell
+      end
+      expect(colors.length).to eq(1)
+      expect(colors.to_a[0]).to eq('')
+    end
+
+  end
+
+  it 'dg editor' do
+    log_in_as('marty')
+    go_to_my_data_grids
+    dgv = netzke_find('data_grid_view')
+    grids = dgv.get_col_vals('name', 5)
+    grids.each do |grid|
+
+      pos = grids.index(grid) + 1
+      dgv.select_row(pos)
+      press('Edit Grid')
+      check_grid(grid)
+      press('Cancel')
+      wait_for_ajax
+    end
   end
 end

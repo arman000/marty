@@ -2,14 +2,14 @@
     editGrid:
     function(record_id, hdim, vdim, data, title_str) {
         var colors = [
-            'background-color: #A1FFA1;',
+
             'background-color: #FFA1A1;',
             'background-color: #FF9D5C;',
             'background-color: #A1A1FF;',
             'background-color: #FFFFA1;',
             'background-color: #A1FFFF;',
             'background-color: #FFA1FF;',
-            'background-color: #A1A197;',
+            'background-color: #A1A187;',
             'background-color: #D1FFD1;',
             'background-color: #FFD1D1;',
             'background-color: #FF9D7C;',
@@ -17,7 +17,7 @@
             'background-color: #FFFFD1;',
             'background-color: #D1FFFF;',
             'background-color: #FFD1FF;',
-            'background-color: #D1D1C7;',
+            'background-color: #D1D1B7;',
         ];
         var hcol = [];
         var vcol = []
@@ -64,13 +64,15 @@
                                   sortable: false,
                                   editor: 'textfield',
                                   renderer: function(value, meta) {
-                                      if(meta.rowIndex < hdim.length &&
-                                         meta.column.fullColumnIndex > vdim.length)
+                                      var hlen = Math.max(1, hdim.length);
+                                      var vlen = Math.max(1, vdim.length);
+                                      if (meta.rowIndex < hlen &&
+                                          meta.column.fullColumnIndex - 1 >= vlen)
                                       {
                                           meta.tdStyle = hcol[meta.rowIndex];
                                       }
-                                      if (meta.column.fullColumnIndex <= vdim.length  &&
-                                          meta.rowIndex >= hdim.length)
+                                  if (meta.column.fullColumnIndex - 1 <= vlen &&
+                                          meta.rowIndex >= hlen)
                                       {
                                           meta.tdStyle = vcol[meta.column.fullColumnIndex-1];
                                       }
@@ -393,8 +395,9 @@
                         }
                         else
                         {
-                            lookup_win().doDestroy();
+                            lookup_win().destroy();
                         }
+
                     });
                 }
                 else
@@ -409,25 +412,29 @@
             closeAction: 'hide',
             listeners: {
                 beforeclose: function (win) {
+                    var grid = lookup_grid();
                     if(win.closeMe) {
                         win.closeMe = false;
+                        grid.destroy();
                         return true;
                     }
-                    var grid = lookup_grid();
                     if (getDirty() || grid.getStore().getModifiedRecords().length > 0) {
                         Ext.MessageBox.show({
                             title:'Discard Changes?',
                             msg: 'You are closing a window that has unsaved changes. Are you sure?',
                             buttons: Ext.Msg.YESNO,
                             icon: Ext.Msg.QUESTION,
+                            /*
                             fn: function(btn){
                                 if (btn == "no"){
                                     //NO
                                 }
                                 if (btn == "yes"){
+                                    grid.destroy();
                                     win.doDestroy();
                                 }
                             },
+*/
                             callback: function(btn) {
                                 if('yes' === btn) {
                                     win.closeMe = true;
@@ -437,6 +444,7 @@
                         });
                         return false;
                     }
+                    grid.destroy();
                     return true;
                 }
             },
