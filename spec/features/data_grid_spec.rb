@@ -155,6 +155,16 @@ feature 'data grid view', js: true do
       end
       all_set = vert_color_sets.map(&:to_a).reduce(&:+).to_set
       expect(all_set.length).to eq(vert_color_sets.length)
+
+      vdim_data = iterate_area.call(vdim_area, ui_data)
+      keys = vdim.map { |d| Marty::DataGrid.export_keys(d) }
+
+      piv = keys.each_with_object([]) do |key_array, piv_array|
+        key_array.each_with_index do |v, idx|
+          (piv_array[idx] ||= []) << v
+        end
+      end
+      expect(piv.map(&:flatten)).to eq(vdim_data)
     end
     # horizontal dims
     if hdim.count > 0
@@ -168,6 +178,8 @@ feature 'data grid view', js: true do
       end
       all_set = horiz_color_sets.map(&:to_a).reduce(&:+).to_set
       expect(all_set.length).to eq(horiz_color_sets.length)
+
+      hdim_data = iterate_area.call(hdim_area, ui_data)
     end
 
     # data and label section
@@ -178,6 +190,8 @@ feature 'data grid view', js: true do
       end
       expect(colors.length).to eq(1)
       expect(colors.to_a[0]).to eq('')
+      data_data = iterate_area.call(data_area, ui_data)
+      label_data = iterate_area.call(label_area, ui_data)
     end
 
   end
