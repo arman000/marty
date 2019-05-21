@@ -30,7 +30,7 @@ services:
     stdin_open: true
 
   postgres:
-    image: "clkao/postgres-plv8:9.6-2.0"
+    image: "postgres:9.6"
     volumes:
       - postgresql-data:/var/lib/postgresql/data
 
