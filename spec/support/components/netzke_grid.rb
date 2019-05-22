@@ -347,9 +347,6 @@ module Marty; module RSpec; module Components
     def get_combobox_val(index, row, field)
       run_js <<-JS
           #{start_edit_combobox(row, field)}
-        JS
-
-      run_js <<-JS
           #{ext_var(grid, 'grid')}
           #{ext_var(ext_netzkecombo(field), 'combo')}
           #{ext_var(ext_celleditor, 'editor')}
