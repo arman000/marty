@@ -1,6 +1,44 @@
 {
+    createStoreAndColumns:
+    function(data, hdim, vdim, hcol, vcol) {
+        var fields = [];
+        var columns = [];
+        for (var i=0; i< data[0].length; i++) {
+            fields.push("a" + i);
+            columns.push({dataIndex: "a" + i, text: i,
+                          sortable: false,
+                          editor: 'textfield',
+                          renderer: function(value, meta) {
+                              var hlen = Math.max(1, hdim.length),
+                                  vlen = Math.max(1, vdim.length),
+                                  row = meta.rowIndex,
+                                  col = meta.column.fullColumnIndex - 1;
+                              
+                              if (row < hlen && col >= vlen)
+                              {
+                                  meta.tdStyle = hcol[row];
+                                  meta.tdAttr = Ext.String.format('data-qtip="{0}"',
+                                                                  hdim[row]);
+                              }
+                              if (col <= vlen && row >= hlen)
+                              {
+                                  meta.tdStyle = vcol[col];
+                                  meta.tdAttr = Ext.String.format('data-qtip="{0}"',
+                                                                  vdim[col]);
+                              }
+                              
+                              return value;
+                          },
+                          autoSizeColumn: true});
+        }
+        var thestore = Ext.create('Ext.data.ArrayStore', {
+            fields: fields,
+            data: data,
+        });
+        return [columns, thestore];
+    },
     editGrid:
-    function(record_id, hdim, vdim, data, title_str) {
+    function(record_id, hdim, vdim, data, title_str, permission) {
         var colors = [
 
             'background-color: #FFA1A1;',
@@ -22,7 +60,6 @@
         var hcol = [];
         var vcol = []
         var me = this;
-
         if (hdim.length == 0) {
             var vwid = vdim.length;
             var newa = Array.apply(null, Array(vwid+1)).map(function () { return ""; });
@@ -53,52 +90,20 @@
             else
                 data[idx][i] = vdim[i];
         }
-        var createStoreAndColumns =
-            function(data) {
-                var fields = [];
-                var columns = [];
-                for (var i=0; i< data[0].length; i++) {
-                    fields.push("a" + i);
-                    columns.push({dataIndex: "a" + i, text: i,
-                                  sortable: false,
-                                  editor: 'textfield',
-                                  renderer: function(value, meta) {
-                                      var hlen = Math.max(1, hdim.length);
-                                      var vlen = Math.max(1, vdim.length);
-                                      if (meta.rowIndex < hlen &&
-                                          meta.column.fullColumnIndex - 1 >= vlen)
-                                      {
-                                          meta.tdStyle = hcol[meta.rowIndex];
-                                      }
-                                  if (meta.column.fullColumnIndex - 1 <= vlen &&
-                                          meta.rowIndex >= hlen)
-                                      {
-                                          meta.tdStyle = vcol[meta.column.fullColumnIndex-1];
-                                      }
-                                      return value;
-                                  },
-                                  autoSizeColumn: true});
-                }
-                var thestore = Ext.create('Ext.data.ArrayStore', {
-                    fields: fields,
-                    data: data,
-                });
-                return [columns, thestore];
-            };
 
         var columns, thestore;
-        [columns, thestore] = createStoreAndColumns(data);
+        [columns, thestore] = this.createStoreAndColumns(data, hdim, vdim, hcol, vcol);
 
         var dirty = false;
         var setDirty = function() { dirty = true; };
         var getDirty = function() { return dirty; };
-
+        var me = this;
         var dataUpdate = function(grid, modFunc) {
             var store_data = grid.getStore().data.items;
             var newcolumns, newstore;
             var mod_data = [];
             modFunc(store_data, mod_data);
-            [newcolumns, newstore] = createStoreAndColumns(mod_data);
+            [newcolumns, newstore] = me.createStoreAndColumns(mod_data, hdim, vdim, hcol, vcol);
             grid.reconfigure(newstore, newcolumns);
             Ext.each(grid.getColumns(), function(column) {
                 column.autoSize();
@@ -286,12 +291,67 @@
             ['Insert Column Right', col_menu_chk],
             ['Delete Column',       col_menu_chk]
         ];
+        Ext.define('DGEdit.grid.plugin.Clipboard',{
+            override: 'Ext.grid.plugin.Clipboard',
+            beforepaste: Ext.emptyFn,
+            mixins: [
+                'Ext.mixin.Observable'
+            ],
+            constructor: function(config) {
+                var me = this;
+                
+                me.callParent([config]);
+                me.mixins.observable.constructor.call(me);
+            },
+            privates : {
+                onPaste: function (keyCode, event) {
+                    var me = this,
+                        sharedData = me.shared.data,
+                        source = me.getSource(),
+                        i, n, s,
+                        rowIdx = event.position.rowIdx,
+                        colIdx = event.position.colIdx;
+                    if (rowIdx <= Math.max(1, hdim.length) &&
+                        colIdx <= Math.max(1, vdim.length)) {
+                        return;
+                    }
+                    if (me.fireEvent('beforepaste',keyCode,event,me.cmp) !== false) {                            
+                        if (source) {
+                            for (i = 0, n = source.length; i < n; ++i) {
+                                s = source[i];
+                                if (s === 'system') {
+                                    // get the format used by the system clipboard. 
+                                    s = me.getSystem();
+                                    me.pasteClipboardData(s);
+                                    break;
+                                } else if (sharedData && (s in sharedData)) {
+                                    me.doPaste(s, sharedData[s]);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        Ext.define('DGEditController', {
+            extend : 'Ext.app.ViewController',
+            alias: 'controller.dataGridEdit',
+            onBeforePaste:function(keyCode,event,grid){
+                //Perform custom logic
+                console.log(grid)
+                return false;
+            }
+        });
+        Ext.tip.Tip.prototype.minWidth = void 0;
+        Ext.tip.QuickTipManager.init();
         var grid = {
             xtype:       'grid',
             name:        'data_grid_edit_grid',
             border:      false,
             hideHeaders: false,
             autoEncode: true,
+            controller: 'dataGridEdit',
             columns:     columns,
             scrollable: true,
             anchor: '100% 100%',
@@ -301,11 +361,9 @@
                       {
                           ptype: 'clipboard',
                           system: 'raw',
-                          listeners: {
-                              beforepaste: function(keycode, event, cmp) {
-                                  debugger;
-                              }
-                          }
+              //            listeners: {
+               //               beforepaste: 'onBeforePaste'
+                //          }
                       }],
             selModel: spSel,
             listeners: {
@@ -350,6 +408,7 @@
                     return v.name=='data_grid_edit_grid'
                 });
                 var server = me.server;
+                
                 if (getDirty() || grid.getStore().getModifiedRecords().length > 0) {
                     var store = grid.getStore().data.items;
                     var ret = [];

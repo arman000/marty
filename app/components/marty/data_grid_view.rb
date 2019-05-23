@@ -180,9 +180,11 @@ module Marty; class DataGridView < McflyGridPanel
     md = dg.metadata
     hdim = md.map { |m| m['dir'] == 'h' && m['attr'] }.select { |v| v }
     vdim = md.map { |m| m['dir'] == 'v' && m['attr'] }.select { |v| v }
-
+    hdim_en = hdim.map { |d| I18n.t('attributes.' + d, default: d) }
+    vdim_en = vdim.map { |d| I18n.t('attributes.' + d, default: d) }
     name = "Editing Data Grid '#{dg.name}'"
-    client.edit_grid(record_id, hdim, vdim, res, name)
+    permission = 'full'
+    client.edit_grid(record_id, hdim_en, vdim_en, res, name, permission)
   end
 
   endpoint :save_grid do |params|
