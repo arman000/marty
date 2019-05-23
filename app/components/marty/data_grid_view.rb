@@ -198,8 +198,6 @@ module Marty; class DataGridView < McflyGridPanel
       exported = dg.export.lines
       sep = exported.each_with_index.detect { |l, i| /^\s*$/.match(l) }.last
       new_data = data_as_array.each_with_index.map do |line, idx|
-
-      #  line = Array.new(vcnt, nil) + line[vcnt..-1] if idx < hcnt
         line.join("\t") + "\r\n"
       end.compact
       to_import = (exported[0..sep] + new_data).join

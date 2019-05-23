@@ -53,7 +53,6 @@
             else
                 data[idx][i] = vdim[i];
         }
-//        debugger;
         var createStoreAndColumns =
             function(data) {
                 var fields = [];
@@ -301,16 +300,10 @@
             plugins: [cellEditor,
                       {
                           ptype: 'clipboard',
-                          memory: 'raw',
-                          source: ['html', 'raw', 'text'],
-                          formats:  {
-                              text: {
-                                  get: 'getHtmlData',
-                                  put: 'putHtmlData'
-                              },
-                              html: {
-                                  get: 'getHtmlData',
-                                  put: 'putHtmlData'
+                          system: 'raw',
+                          listeners: {
+                              beforepaste: function(keycode, event, cmp) {
+                                  debugger;
                               }
                           }
                       }],
@@ -352,6 +345,7 @@
             layout: 'anchor',
             items: grid,
             submit: function() {
+                Ext.getBody().mask('Saving data...').setZIndex(99999).setStyle('cursor', 'wait');
                 var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                     return v.name=='data_grid_edit_grid'
                 });
@@ -395,9 +389,10 @@
                         }
                         else
                         {
-                            lookup_win().destroy();
+                            var win = lookup_win();
+                            win.destroy();
                         }
-
+                        Ext.getBody().unmask();
                     });
                 }
                 else
@@ -409,7 +404,7 @@
                     });
                 }
             },
-            closeAction: 'hide',
+            closeAction: 'destroy',
             listeners: {
                 beforeclose: function (win) {
                     var grid = lookup_grid();
