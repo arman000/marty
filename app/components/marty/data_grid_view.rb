@@ -183,7 +183,7 @@ module Marty; class DataGridView < McflyGridPanel
     hdim_en = hdim.map { |d| I18n.t('attributes.' + d, default: d) }
     vdim_en = vdim.map { |d| I18n.t('attributes.' + d, default: d) }
     name = "Editing Data Grid '#{dg.name}'"
-    permission = 'full'
+    permission = 'edit_all'
     client.edit_grid(record_id, hdim_en, vdim_en, res, name, permission)
   end
 

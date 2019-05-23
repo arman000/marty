@@ -70,25 +70,16 @@
                 data[i].unshift("");
             }
         }
-        // setup colors and labels for hdims
-        for (var i=0; i<hdim.length; i++)
-        {
+        // setup colors for hdims
+        for (var i=0; i<hdim.length; i++) {
             hcol[i] = colors.pop()
             var idx = Math.max(0, vdim.length - 1);
-            data[i][idx] = hdim[i];
         }
 
-        // setup colors and labels for vdims
-        for (var i=0; i<vdim.length; i++)
-        {
+        // setup colors for vdims
+        for (var i=0; i<vdim.length; i++) {
             vcol[i] = colors.pop();
-
             var idx = Math.max(0, hdim.length - 1);
-            cur = data[idx][i];
-            if (cur)
-                data[idx][i] = vdim[i] + ' / ' + cur;
-            else
-                data[idx][i] = vdim[i];
         }
 
         var columns, thestore;
@@ -107,7 +98,6 @@
             grid.reconfigure(newstore, newcolumns);
             Ext.each(grid.getColumns(), function(column) {
                 column.autoSize();
-                column.setWidth(column.getWidth()+20);
             });
             setDirty();
         };
@@ -248,23 +238,46 @@
             mode: "MULTI"
         });
 
+        var get_area = function(row, col) {
+            var row_hdim = row < Math.max(1, hdim.length),
+                row_vdim = col < Math.max(1, vdim.length);
+            console.log("rowcol", row, col)
+            console.log("rowcollen", Math.max(1, hdim.length), Math.max(1, vdim.length));
+            var a;
+            if (row_hdim && row_vdim)
+                a = 'blank_area';
+            else if (!row_hdim && !row_vdim)
+                a = 'data_area';
+            else if (row_hdim && !row_vdim)
+                a = 'hdim_area';
+            else a = 'vdim_area';
+            console.log(a)
+            return a;
+        };
+            
+        var can_edit  = function(row, col) {
+            var area = get_area(row, col);
+            console.log(area);
+            if (area == 'blank_area')
+                return false;
+            if (area == 'data_area')
+                return permission != 'view';
+            if (area == 'vdim_area' || area == 'hdim_area')
+                return permission == 'edit_all';
+        }
+
         // Plugins
         var cellEditor = Ext.create("Ext.grid.plugin.CellEditing", {
+
             clicksToEdit: 2,
             listeners: {
                 beforeedit: function(editor, context, eOpts) {
-                    if ((context.colIdx <= vdim.length &&
-                         context.rowIdx < hdim.length) ||
-                        (context.rowIdx == 0 &&
-                         hdim.length == 0) ||
-                        (context.colIdx == 1 &&
-                         vdim.length == 0)) {
+                    if (!can_edit(context.rowIdx, context.colIdx - 1))
                         return false;
-                    }
                 },
                 afteredit: function() {
                     setDirty();
-                },
+                }
             }
         });
 
@@ -278,10 +291,16 @@
                 mi.enable();
         };
         var row_menu_chk = function (ax, ay) {
-            return ay < Math.max(1, hdim.length) || vdim.length == 0
+            var area =  get_area(ax, ay - 1);
+            if (vdim.length == 0)
+                return true;
+            return !(area == 'vdim_area' || area == 'data_area');
         };
         var col_menu_chk = function (ax, ay) {
-            return ax - 1 < Math.max(1, vdim.length) || hdim.length == 0;
+            var area =  get_area(ax, ay - 1);
+            if (hdim.length == 0)
+                return true;
+            return !(area == 'hdim_area' || area == 'data_area');
         };
         var disable_conds = [
             ['Insert Row Above',    row_menu_chk],
@@ -310,9 +329,8 @@
                         source = me.getSource(),
                         i, n, s,
                         rowIdx = event.position.rowIdx,
-                        colIdx = event.position.colIdx;
-                    if (rowIdx <= Math.max(1, hdim.length) &&
-                        colIdx <= Math.max(1, vdim.length)) {
+                        colIdx = event.position.colIdx - 1;
+                    if (!can_edit(rowIdx, colIdx))  {
                         return;
                     }
                     if (me.fireEvent('beforepaste',keyCode,event,me.cmp) !== false) {                            
@@ -338,8 +356,6 @@
             extend : 'Ext.app.ViewController',
             alias: 'controller.dataGridEdit',
             onBeforePaste:function(keyCode,event,grid){
-                //Perform custom logic
-                console.log(grid)
                 return false;
             }
         });
@@ -377,10 +393,10 @@
                     e.stopEvent();
                     var items = itemContextMenu.items.items;
                     var ctn    = items.length;
-                    var x = e.position.colIdx;
-                    var y = e.position.rowIdx;
+                    var y = e.position.colIdx;
+                    var x = e.position.rowIdx;
                     for (var i=0; i<ctn; ++i) {
-                        items[i].position = {col: x, row: y};
+                        items[i].position = {col: y, row: x};
                     }
                     for (const [label, fn] of disable_conds) {
                         context_disable_fn(itemContextMenu, label, x, y, fn);
@@ -397,7 +413,7 @@
             x:             100,
             y:             100,
             autoWidth:     true,
-            modal:         true,
+             modal:         true,
             autoScroll:    true,
             title:         title_str,
             layout: 'anchor',
@@ -456,6 +472,7 @@
                 }
                 else
                 {
+                    Ext.getBody().unmask();
                     Ext.MessageBox.show({
                         title:'Nothing to Save',
                         msg: 'No changes made',

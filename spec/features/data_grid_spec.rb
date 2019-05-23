@@ -168,7 +168,6 @@ feature 'data grid view', js: true do
 
     vdim_size = vdim.count == 0 ? 1 : vdim.count
     hdim_size = hdim.count == 0 ? 1 : hdim.count
-    label_area = { ulx: 0, uly: 0, lrx: vdim_size, lry: hdim_size }
     vdim_area =  { ulx: 0, uly: hdim_size, lrx: vdim_size, lry: row_cnt }
     hdim_area =  { ulx: vdim_size, uly: 0, lrx: col_cnt, lry: hdim_size }
     data_area =  { ulx: vdim_size, uly: hdim_size, lrx: col_cnt,
@@ -177,33 +176,17 @@ feature 'data grid view', js: true do
     check_dim(vdim, vdim_size, vdim_area, ui_colors, ui_data)
     check_dim(hdim, hdim_size, hdim_area, ui_colors, ui_data, by_col: false)
 
-    # data and label section color check
-    [data_area, label_area].each do |area|
-      colors = Set.new
-      iterate_area(area, ui_colors) do |cell, row_idx, col_idx|
-        colors << cell
-      end
-      expect(colors.length).to eq(1)
-      expect(colors.to_a[0]).to eq('')
+    # data section color check
+    colors = Set.new
+    iterate_area(data_area, ui_colors) do |cell, row_idx, col_idx|
+      colors << cell
     end
+    expect(colors.length).to eq(1)
+    expect(colors.to_a[0]).to eq('')
 
     # check that data section matches actual grid data
     data_data = iterate_area(data_area, ui_data)
     expect(struct_compare(data_data, grid.data)).to be_falsey
-
-    # check that the label section looks right
-    label_data = iterate_area(label_area, ui_data)
-    label_exp = Array.new(hdim_size) { Array.new(vdim_size) }
-    hdim_labels = hdim.map { |d| d['attr'] }
-    vdim_labels = vdim.map { |d| d['attr'] }
-    hdim_labels.each_with_index do |label, idx|
-      label_exp[idx][-1] = label
-    end
-    vdim_labels.each_with_index do |label, idx|
-      cur = label_exp.last[idx]
-      label_exp.last[idx] = cur.is_a?(String) ? label + ' / ' + cur : label
-    end
-    expect(struct_compare(label_data, label_exp)).to be_falsey
 
     # check context menu for each area to make sure that inserts/deletes
     # are allowed only in the correct parts of the grid
@@ -238,7 +221,6 @@ feature 'data grid view', js: true do
                   all_enabled
                 end
     areas = [[data_area, data_menu],
-             [label_area, all_disabled],
              [vdim_area, vdim.count > 0 ? col_disabled : all_disabled],
              [hdim_area, hdim.count > 0 ? row_disabled : all_disabled]]
     areas.each do |area, menu_exp|
@@ -264,7 +246,7 @@ feature 'data grid view', js: true do
       check_grid(grid)
       press('Cancel')
       wait_for_ajax
-    end if false
+    end
 
     # now test some editing, saving, and cancel logic
     get_latest = lambda do
