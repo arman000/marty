@@ -156,27 +156,48 @@ describe 'McflyModel' do
     expect(a1.to_a.count).to eq(4)
   end
 
-  it "private methods can't be called by delorean" do
+  it 'raises exception when too many arguments passed' do
     # generated methods
     aggregate_failures 'errors' do
       @errs.in_groups_of(2) do |name, fn|
         err = /Too many args to #{fn}/
 
         expect do
-          Marty::ScriptSet.new.get_engine(name)
-        end.to raise_error(Delorean::BadCallError, err)
+          Marty::ScriptSet.new.get_engine(name).evaluate(
+            'Err',
+            ['result'],
+            'pt' => Time.zone.now, 'entity' => nil, 'note_rate' => nil
+          )
+        end.to raise_error(ArgumentError, err)
       end
     end
   end
 
-  it "private methods can't be called by delorean (2)" do
+  it 'raises exception when too many arguments passed (2)' do
     # non-generated
     aggregate_failures 'errors' do
-      ['E5', 'a_func_p', 'E6', 'b_func_p'].in_groups_of(2) do |scr, fn|
-        err = /Too many args to #{fn}/
-        expect { Marty::ScriptSet.new.get_engine(scr) }.to raise_error(
-          Delorean::BadCallError, err)
-      end
+      expect do
+        Marty::ScriptSet.new.get_engine('E5').evaluate(
+          'Err',
+          ['result'],
+          'pt' => Time.zone.now, 'e_id' => nil, 'bc_id' => nil
+        )
+      end.to raise_error(
+        ArgumentError,
+        /Too many args to a_func_p/
+      )
+
+      expect do
+        Marty::ScriptSet.new.get_engine('E6').evaluate(
+          'Err',
+          ['result'],
+          'pt' => Time.zone.now, 'e_id' => nil,
+           'bc_id' => nil, 'mm' => nil
+        )
+      end.to raise_error(
+        ArgumentError,
+        /Too many args to b_func_p/
+      )
     end
   end
 

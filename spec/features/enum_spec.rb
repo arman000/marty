@@ -175,11 +175,13 @@ feature 'test netzke + pg_enum compatibility', js: true do
 
     and_by 'filter form by state_enum ASCENDING' do
       press('Enum state')
+      wait_for_ajax
       expect(lp_grid.get_col_vals(:enum_state)).to eq(['AS', 'AZ', 'DC', 'WA'])
     end
 
     and_by 'filter form by state_enum DESCENDING' do
       press('Enum state')
+      wait_for_ajax
       expect(lp_grid.get_col_vals(:enum_state)).to eq(['WA', 'DC', 'AZ', 'AS'])
     end
   end

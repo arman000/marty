@@ -256,23 +256,6 @@ end
 require 'marty/cache_adapters'
 
 class ActiveRecord::Base
-  MCFLY_PT_SIG = [1, 1]
-
-  # FIXME: hacky signatures for AR queries on classes
-  COUNT_SIG    = [0, 0]
-  DISTINCT_SIG = [0, 100]
-  FIND_BY_SIG  = [0, 100]
-  FIRST_SIG    = [0, 1]
-  GROUP_SIG    = [1, 100]
-  JOINS_SIG    = [1, 100]
-  LAST_SIG     = [0, 1]
-  LIMIT_SIG    = [1, 1]
-  NOT_SIG      = [1, 100]
-  ORDER_SIG    = [1, 100]
-  PLUCK_SIG    = [1, 100]
-  SELECT_SIG   = [1, 100]
-  WHERE_SIG    = [0, 100]
-
   class << self
     alias_method :old_joins, :joins
 
@@ -290,19 +273,22 @@ end
 
 ar_instances = [ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]
 
-args_hack = [[Object, nil]] * 10
+args_hack = [[Object, nil]] * 30
 
 [
   [:distinct, args_hack],
+  [:count,    []],
   [:find_by,  args_hack],
+  [:first,    args_hack],
   [:group,    args_hack],
   [:joins,    args_hack],
   [:limit,    [Integer]],
+  [:last,     [[Integer, nil]]],
   [:not,      args_hack],
-  [:order,     args_hack],
-  [:pluck,     args_hack],
-  [:select,    args_hack],
-  [:where,     args_hack],
+  [:order,    args_hack],
+  [:pluck,    args_hack],
+  [:select,   args_hack],
+  [:where,    args_hack],
   [:mcfly_pt, [[Date, Time, ActiveSupport::TimeWithZone, String], [nil, Class]]]
 ].each do |meth, args|
   ::Delorean::Ruby.whitelist.add_method meth do |method|
@@ -310,12 +296,18 @@ args_hack = [[Object, nil]] * 10
       method.called_on ar, with: args
     end
   end
+
+  ::Delorean::Ruby.whitelist.add_class_method meth do |method|
+    method.called_on ActiveRecord::Base, with: args
+  end
 end
+
 ::Delorean::Ruby.whitelist.add_method :count do |method|
-    ar_instances.each do |ar|
-      method.called_on ar
-    end
+  ar_instances.each do |ar|
+    method.called_on ar
+  end
 end
+
 ::Delorean::Ruby.whitelist.add_method :lookup_grid_distinct_entry do |method|
   method.called_on OpenStruct, with: [[Date, Time,
                                        ActiveSupport::TimeWithZone, String],

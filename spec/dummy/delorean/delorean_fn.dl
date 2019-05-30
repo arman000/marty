@@ -1,0 +1,33 @@
+DeloreanFnTest:
+    get_all = Gemini::GuardOne.get_all
+    lookup = Gemini::GuardOne.lookup('G1V1')
+    find_by_name = Gemini::GuardOne.find_by_name('G1V1')
+    brackets = Gemini::GuardOne['G1V1']
+    result = Gemini::GuardOne.get_all()
+
+ActiveRecord:
+    time =?
+
+    distinct = Marty::Script.distinct
+    distinct_select = Marty::Script.distinct().select('name')
+    count = Marty::Script.count
+    find_by = Marty::Script.find_by({ 'name' : 'DeloreanFn' })
+    first = Marty::Script.first
+    first2 = Marty::Script.first(2)
+
+    group_count = Marty::Script.group('created_dt').count
+    joins = Marty::Script.joins('user')
+    limit3 = Marty::Script.limit(3)
+
+    last = Marty::Script.last
+    last3 = Marty::Script.last(3)
+
+    order = Marty::Script.order('name')
+
+    pluck = Marty::Script.pluck('name')
+    pluck2 = Marty::Script.pluck('name', 'user_id')
+
+    select = Marty::Script.select('name')
+    select2 = Marty::Script.select('name', 'user_id')
+    where_not = Marty::Script.where.not({ 'user_id' : nil })
+    mcfly_pt = Marty::Script.mcfly_pt(time)
