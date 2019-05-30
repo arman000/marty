@@ -11,9 +11,9 @@ NodeB:
 eof
 
 describe Marty::Script do
-  describe '.load_a_script' do
-    let(:now) { Time.zone.now - 1.minute }
+  let(:now) { Time.zone.now - 1.minute }
 
+  describe '.load_a_script' do
     it "creates a new script if it doesn't already exist" do
       expect { Marty::Script.load_a_script('TestNew', s1, now) }.
         to change(Marty::Script, :count).by(1)
@@ -53,8 +53,6 @@ describe Marty::Script do
     before(:each) do
       allow(Marty::Script).to receive(:load_a_script)
     end
-
-    let(:now) { Time.zone.now - 1.minute }
 
     it 'loads each script given a hash' do
       Marty::Script.load_script_bodies({ 'Test1' => s1, 'Test2' => s2 }, now)
@@ -119,7 +117,6 @@ describe Marty::Script do
     let(:scripts_path) do
       File.expand_path('../../fixtures/scripts/load_tests', __FILE__)
     end
-    let(:now) { Time.zone.now - 1.minute }
     let(:ls1) { File.read("#{scripts_path}/script1.dl") }
     let(:ls2) { File.read("#{scripts_path}/script2.dl") }
     let(:ls3) { File.read("#{scripts_path}/namespace/nested_namespace/script3.dl") }
@@ -206,6 +203,83 @@ describe Marty::Script do
 
       Marty::Script.delete_scripts
       expect(Marty::Script.count).to eq(0)
+    end
+  end
+
+  describe '.evaluate' do
+    let(:scripts_path) do
+      Rails.root.join('delorean')
+    end
+
+    def call_test(attr)
+      Marty::Script.evaluate(
+        Time.zone.now,
+        'DeloreanFn',
+        'DeloreanFnTest',
+        [attr],
+        {}
+      )
+    end
+
+    def call_ar(attr)
+      Marty::Script.evaluate(
+        Time.zone.now,
+        'DeloreanFn',
+        'ActiveRecord',
+        [attr],
+        'time' => Time.zone.now
+      )
+    end
+
+    before do
+      Marty::Script.load_scripts(scripts_path, now)
+    end
+
+    it 'calls ruby code from delorean' do
+      res = call_test('result')
+      expect(res.first).to eq ['G1V1', 'G1V2', 'G1V3']
+
+      res = call_test('get_all')
+      expect(res.first).to eq ['G1V1', 'G1V2', 'G1V3']
+
+      res = call_test('lookup')
+      expect(res.first).to eq 'G1V1'
+
+      res = call_test('find_by_name')
+      expect(res.first).to eq 'G1V1'
+
+      res = call_test('brackets')
+      expect(res.first).to eq 'G1V1'
+    end
+
+    let(:ar_methods) do
+      [
+        :distinct,
+        :distinct_select,
+        :count,
+        :find_by,
+        :first,
+        :first2,
+        :group_count,
+        :joins,
+        :limit3,
+        :last,
+        :last3,
+        :order,
+        :pluck,
+        :pluck2,
+        :select,
+        :select2,
+        :where_not,
+        :mcfly_pt
+      ]
+    end
+
+    it 'calls AR code from delorean' do
+      ar_methods.each do |method_name|
+        res = call_ar(method_name)
+        expect(res).to be_present
+      end
     end
   end
 end

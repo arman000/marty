@@ -16,6 +16,16 @@ module Mcfly::Model
       send(meth, name, options) do |ts, *args|
         raise 'time cannot be nil' if ts.nil?
 
+        # FIXME: sig is removed from delorean. We need to find a better way
+        # to control amount of arguments, instead of using *splat arguments.
+        max_args = Array(options[:sig]).max if options[:sig]
+        if max_args && (args.size + 1) > max_args
+          err = "Too many args to #{name}." \
+            "(given #{args.size + 1}, expected #{max_args})"
+
+          raise ArgumentError, err
+        end
+
         ts = Mcfly.normalize_infinity(ts)
         q = where("#{table_name}.obsoleted_dt >= ? AND " +
                    "#{table_name}.created_dt < ?", ts, ts).scoping do

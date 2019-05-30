@@ -9,15 +9,25 @@ module Marty::PgEnum
     index
   end
 
-  def get_all(pt = nil)
-    self::VALUES.map(&:to_s)
-  end
-
   def self.extended(base)
     base.class_eval do
-      const_set :GET_ALL_SIG,      [0, 1]
-      const_set :LOOKUP_SIG,       [1, 2]
-      const_set :FIND_BY_NAME_SIG, [1, 2]
+      extend ::Delorean::Functions unless respond_to?(:delorean_fn)
+
+      delorean_fn :get_all do |pt = nil|
+        self::VALUES.map(&:to_s)
+      end
+
+      delorean_fn :[] do |i0, i1 = nil|
+        super(i0, i1)
+      end
+
+      delorean_fn :lookup do |i0, i1 = nil|
+        send(:[], i0, i1)
+      end
+
+      delorean_fn :find_by_name do |i0, i1 = nil|
+        send(:[], i0, i1)
+      end
     end
   end
 
@@ -27,7 +37,4 @@ module Marty::PgEnum
   def _pg_enum?
     true
   end
-
-  alias_method :find_by_name, :[]
-  alias_method :lookup, :[]
 end
