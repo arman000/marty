@@ -28,10 +28,7 @@ rspec-features:
   extends: .base-test
   script:
     - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
-    # - bundle exec rspec --pattern "spec/features/**/*_spec.rb"
-    # FIXME: rule_spec is excluded, because chrome doesn't work with big window size in docker
-    # And test fails with 1400/1400 resolution
-    - bundle exec rspec --pattern "spec/features/**/*_spec.rb" --exclude-pattern "spec/features/rule_spec.rb"
+    - bundle exec rspec spec/features
 
 cache:
   key: 'marty_bundler_cache'

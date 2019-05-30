@@ -66,4 +66,23 @@ class Gemini::MyRuleView < Marty::DeloreanRuleView
     enum_column(c, Gemini::MyRuleType)
   end
 
+  # Override width, so it would fit in chrome window in tests
+  component :add_window do |c|
+    super(c)
+    c.width = 1200
+    c.height = 740
+  end
+
+  component :edit_window do |c|
+    super(c)
+    c.width = 1200
+    c.height = 740
+  end
+
+  component :view_window do |c|
+    super(c)
+    c.width = 1200
+    c.height = 740
+  end
+
 end

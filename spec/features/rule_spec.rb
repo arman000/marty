@@ -9,14 +9,17 @@ feature 'rule view', js: true do
     Marty::Script.load_scripts
     dt = DateTime.parse('2017-1-1')
     p = File.expand_path('../../fixtures/csv/rule', __FILE__)
+
     [Marty::DataGrid, Gemini::XyzRule, Gemini::MyRule].each do |klass|
       f = '%s/%s.csv' % [p, klass.to_s.sub(/(Gemini|Marty)::/, '')]
       Marty::DataImporter.do_import(klass, File.read(f), dt, nil, nil, ',')
     end
   end
+
   after(:all) do
     restore_clean_db(@save_file)
   end
+
   def go_to_my_rules
     press('Pricing Config.')
     press('My Rules')
@@ -57,8 +60,17 @@ feature 'rule view', js: true do
   end
 
   def column_filter(rv, name, value)
-    cid = col_id(rv, name)
-    c = find('#' + cid)
+    begin
+      cid = col_id(rv, name)
+      c = find('#' + cid)
+    rescue Capybara::ElementNotFound
+      # Scroll to the element
+      page.execute_script <<-JS
+        var element = document.getElementById('#{cid}')
+        element.scrollIntoView(true);
+      JS
+      c = find('#' + cid)
+    end
     c.send_keys([:down, :down, :down, :down, :right, value, :return])
     sleep 1.0
   end
@@ -82,6 +94,7 @@ feature 'rule view', js: true do
     tm.native.clear()
     tm.native.send_keys(value)
   end
+
   it 'rule workflow' do
     log_in_as('marty')
     go_to_my_rules
