@@ -1,3 +1,4 @@
+require 'webdrivers/chromedriver'
 require 'selenium-webdriver'
 require Pathname.new(__FILE__).parent.to_s + '/download_helper'
 
@@ -40,4 +41,6 @@ module Marty; module RSpec; module Chromedriver
   Capybara.default_driver    = :chrome
   Capybara.javascript_driver = ENV['HEADLESS'] == 'true' ?
                                  :headless_chrome : :chrome
+
+  Webdrivers.cache_time = 86_400 # check new drivers once per day
 end end end

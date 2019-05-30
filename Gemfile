@@ -13,7 +13,6 @@ gem 'sqlite3'
 
 group :development, :test do
   gem 'capybara', '~> 2.18.0'
-  gem 'chromedriver-helper'
   gem 'connection_pool'
   gem 'database_cleaner'
   gem 'pry-byebug'
@@ -24,6 +23,7 @@ group :development, :test do
   gem 'rubocop', require: false
   gem 'selenium-webdriver'
   gem 'timecop'
+  gem 'webdrivers'
 
   # gem 'mcfly', path: File.expand_path('../../mcfly', __FILE__)
   gem 'mcfly'
