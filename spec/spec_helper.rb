@@ -42,7 +42,7 @@ RSpec.configure do |config|
     marty_whodunnit
   end
 
-  config.after(:each, :js => true) do |example|
+  config.after(:each, js: true) do |example|
     # save a screenshot on js failures for CI server testing
     if example.exception
       meta = example.metadata

@@ -182,8 +182,8 @@ EOSQL
 
   def self.lines_to_crlf(lines)
     lines.map do |line|
-      line.encode(line.encoding, :universal_newline => true).
-        encode(line.encoding, :crlf_newline => true)
+      line.encode(line.encoding, universal_newline: true).
+        encode(line.encoding, crlf_newline: true)
     end
   end
 

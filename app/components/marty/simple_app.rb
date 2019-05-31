@@ -69,33 +69,33 @@ class Marty::SimpleApp < Netzke::Base
   # Config for the main panel, which will contain dynamically loaded components.
   def main_panel_config(overrides = {})
     {
-      :itemId => 'main_panel',
-      :region => 'center',
-      :layout => 'fit'
+      itemId: 'main_panel',
+      region: 'center',
+      layout: 'fit'
     }.merge(overrides)
   end
 
   # Config for the status bar
   def status_bar_config(overrides = {})
     {
-      :itemId => 'status_bar',
-      :xtype => 'statusbar',
-      :region => 'south',
-      :statusAlign => 'right',
-      :busyText => 'Busy...',
-      :default_text => 'Ready',
-      :default_icon_cls => ''
+      itemId: 'status_bar',
+      xtype: 'statusbar',
+      region: 'south',
+      statusAlign: 'right',
+      busyText: 'Busy...',
+      default_text: 'Ready',
+      default_icon_cls: ''
     }.merge(overrides)
   end
 
   # Config for the menu bar
   def menu_bar_config(overrides = {})
     {
-      :itemId => 'menu_bar',
-      :layout => { overflow_handler: 'Menu' },
-      :xtype => 'toolbar',
-      :region => 'north',
-      :items => menu
+      itemId: 'menu_bar',
+      layout: { overflow_handler: 'Menu' },
+      xtype: 'toolbar',
+      region: 'north',
+      items: menu
     }.merge(overrides)
   end
 

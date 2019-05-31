@@ -9,7 +9,7 @@ module Marty
 
     # generators add rspec tests
     config.generators do |g|
-      g.test_framework :rspec, :view_specs => false
+      g.test_framework :rspec, view_specs: false
     end
   end
 end

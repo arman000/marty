@@ -85,7 +85,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
     and_by 'select the new script' do
       wait_for_ajax
       within(:gridpanel, 'script_grid', match: :first) do
-        expect(script_grid.get_row_vals(6)).to netzke_include(:name => 'Xyz', :tag => 'DEV')
+        expect(script_grid.get_row_vals(6)).to netzke_include(name: 'Xyz', tag: 'DEV')
         script_grid.select_row(6)
       end
     end
@@ -289,7 +289,7 @@ feature 'under Applications menu, Scripting workflows', js: true do
       wait_for_ajax
       script_grid.select_row(5)
       expect(page).to have_content '1 #123 2 #456'
-      expect(tag_grid.get_row_vals(2)).to netzke_include(:comment => 'ABCD')
+      expect(tag_grid.get_row_vals(2)).to netzke_include(comment: 'ABCD')
     end
   end
 

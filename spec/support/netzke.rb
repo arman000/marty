@@ -30,8 +30,8 @@ module Marty; module RSpec; module Netzke
     end
 
     find(:xpath, '//span', text: 'Sign in', match: :first, wait: 5).click
-    fill_in('login', :with => username)
-    fill_in('password', :with => password)
+    fill_in('login', with: username)
+    fill_in('password', with: password)
     press('OK')
     wait_for_ajax
   end

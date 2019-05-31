@@ -26,9 +26,9 @@ module Marty
         },
       }
     }
-    opt = { :validate_schema => true,
-                :errors_as_objects  => false,
-                :version            => Marty::JsonSchema::RAW_URI }
+    opt = { validate_schema: true,
+                errors_as_objects: false,
+                version: Marty::JsonSchema::RAW_URI }
 
     it 'returns no error on correct simple data' do
       data = { 'a' => 5 }

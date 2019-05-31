@@ -20,12 +20,12 @@ module Marty; module RSpec; module SharedConnection
     def self.connection
       EXCL_LAMBDA.call.include?(model_name) ? orig_connection :
         @@shared_connection ||
-        ConnectionPool::Wrapper.new(:size => 1) { retrieve_connection }
+        ConnectionPool::Wrapper.new(size: 1) { retrieve_connection }
     end
 
     def self.reset_shared_connection
       @@shared_connection = ConnectionPool::Wrapper.
-                              new(:size => 1) { retrieve_connection }
+                              new(size: 1) { retrieve_connection }
     end
   end
 end end end

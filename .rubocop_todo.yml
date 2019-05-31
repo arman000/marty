@@ -630,14 +630,6 @@ Style/ConditionalAssignment:
     - 'spec/support/components/netzke_combobox.rb'
     - 'spec/support/components/netzke_grid.rb'
 
-# Offense count: 3
-# Cop supports --auto-correct.
-Style/DefWithParentheses:
-  Exclude:
-    - 'spec/dummy/db/migrate/20171221095312_create_gemini_my_rules.rb'
-    - 'spec/dummy/db/migrate/20171221095359_create_gemini_xyz_rules.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
-
 # Offense count: 181
 Style/Documentation:
   Enabled: false
@@ -747,25 +739,6 @@ Style/GuardClause:
     - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
     - 'spec/lib/json_schema_spec.rb'
     - 'spec/support/post_run_logger.rb'
-
-# Offense count: 43
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, UseHashRocketsWithSymbolValues, PreferHashRocketsForNonAlnumEndingSymbols.
-# SupportedStyles: ruby19, hash_rockets, no_mixed_keys, ruby19_no_mixed_keys
-Style/HashSyntax:
-  Exclude:
-    - 'app/components/marty/simple_app.rb'
-    - 'app/models/marty/user.rb'
-    - 'app/models/marty/vw_promise.rb'
-    - 'db/migrate/090_create_delayed_jobs.rb'
-    - 'lib/marty/engine.rb'
-    - 'lib/marty/migrations.rb'
-    - 'spec/features/scripting_spec.rb'
-    - 'spec/features/user_view_spec.rb'
-    - 'spec/lib/json_schema_spec.rb'
-    - 'spec/spec_helper.rb'
-    - 'spec/support/netzke.rb'
-    - 'spec/support/shared_connection.rb'
 
 # Offense count: 2
 Style/IdenticalConditionalBranches:
