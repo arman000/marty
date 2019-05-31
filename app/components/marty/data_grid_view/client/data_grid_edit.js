@@ -25,7 +25,7 @@
                                   meta.tdAttr = Ext.String.format('data-qtip="{0}"',
                                                                   vdim[col]);
                               }
-                              
+
                               return value;
                           },
                           autoSizeColumn: true});
@@ -214,8 +214,6 @@
             cellSelect: true,
             columnSelect: true,
             rowSelect: false,
-//            rowSelect: true,
-            dragSelect: true,
             extensible: true,
             mode: "MULTI"
         });
@@ -238,7 +236,7 @@
             else a = 'vdim_area';
             return a;
         };
-            
+
         var can_edit  = function(row, col) {
             var area = get_area(row, col);
             if (area == 'blank_area')
@@ -268,7 +266,7 @@
             var mi = menu.items.items.find(function (mi) {
                 return mi.text == label;
             });
-            if (fn(x, y)) 
+            if (fn(x, y))
                 mi.enable();
             else
                 mi.disable();
@@ -307,7 +305,7 @@
             ],
             constructor: function(config) {
                 var me = this;
-                
+
                 me.callParent([config]);
                 me.mixins.observable.constructor.call(me);
             },
@@ -322,12 +320,12 @@
                     if (!can_edit(rowIdx, colIdx))  {
                         return;
                     }
-                    if (me.fireEvent('beforepaste',keyCode,event,me.cmp) !== false) {                            
+                    if (me.fireEvent('beforepaste',keyCode,event,me.cmp) !== false) {
                         if (source) {
                             for (i = 0, n = source.length; i < n; ++i) {
                                 s = source[i];
                                 if (s === 'system') {
-                                    // get the format used by the system clipboard. 
+                                    // get the format used by the system clipboard.
                                     s = me.getSystem();
                                     me.pasteClipboardData(s);
                                     break;
@@ -397,6 +395,19 @@
 
             }
         };
+        var fbsave = {
+                    text: 'Save',
+                    handler: function () {
+                        this.up('window').submit();
+                    }};
+        var fbcancel = {
+                    text: 'Cancel',
+                    handler: function () {
+                        this.up('window').close();
+                    }};
+        var fbar = permission == 'view' ?
+            [fbcancel] : [fbsave, fbcancel];
+
         Ext.create('Ext.Window', {
             name: 'data_grid_edit_window',
             height:        "90%",
@@ -415,14 +426,14 @@
                     return v.name=='data_grid_edit_grid'
                 });
                 var server = me.server;
-                
+
                 if (getDirty() || grid.getStore().getModifiedRecords().length > 0) {
                     var store = grid.getStore().data.items;
                     var ret = [];
 
                     // maybe remove label line at the top we added when hdim.length == 0
                     var row_start = hdim.length == 0 ? 1 : 0;
-                    
+
                     for (var i = row_start; i < store.length; ++i) {
                         var row = {};
 
@@ -432,7 +443,7 @@
 
                         // or remove label fields we added in top left
                         var col_null = i < hdim.length ? vdim.length : 0;
-                        
+
                         for (const [key, value] of Object.entries(store[i].data)) {
                             if (key != 'id' && !col0_skip) {
                                 if (col_idx < col_null)
@@ -499,18 +510,7 @@
                     return true;
                 }
             },
-            fbar: [
-                {
-                    text: 'Save',
-                    handler: function () {
-                        this.up('window').submit();
-                    }},
-                {
-                    text: 'Cancel',
-                    handler: function () {
-                        this.up('window').close();
-                    }
-                }]
+            fbar: fbar
         }).show();
         var gridobj = Ext.ComponentQuery.query('grid').find(function(v) {
             return v.name=='data_grid_edit_grid'

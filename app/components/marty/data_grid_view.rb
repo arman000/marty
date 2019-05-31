@@ -167,10 +167,13 @@ module Marty; class DataGridView < McflyGridPanel
     client.netzke_client_show_grid maxcount, res, 'Data Grid'
   end
 
-  # placeholder for grid editing permission logic.
+  # placeholders for grid editing permission logic.
   # for now, this allows the rspec to control the permission
-  def self.get_edit_permission
-    'edit_all'
+  def self.get_edit_edit_permission
+    Marty::Config['grid_edit_edit_perm']
+  end
+  def self.get_edit_save_permission
+    Marty::Config['grid_edit_save_perm']
   end
 
   endpoint :edit_grid do |params|
@@ -189,30 +192,57 @@ module Marty; class DataGridView < McflyGridPanel
     hdim_en = hdim.map { |d| I18n.t('attributes.' + d, default: d) }
     vdim_en = vdim.map { |d| I18n.t('attributes.' + d, default: d) }
     name = "Editing Data Grid '#{dg.name}'"
-    permission = Marty::DataGridView.get_edit_permission
+    permission = Marty::DataGridView.get_edit_edit_permission
     client.edit_grid(record_id, hdim_en, vdim_en, res, name, permission)
+  end
+
+  class GridError < StandardError
+    attr_reader :data, :id
+    def initialize(msg, data, id)
+      @msg = msg
+      @data = data
+      @id = id
+    end
+
+    def message
+      "save_grid: #{@msg}"
+    end
   end
 
   endpoint :save_grid do |params|
     begin
+      user_perm = Marty::DataGridView.get_edit_save_permission
+
       rec_id = params['record_id']
       data = params['data']
+      raise GridError.new('entered with view permissions', data, rec_id) if
+        user_perm == 'view'
       data_as_array = data.map do |row|
         row.keys.map { |key| row[key] }
       end
       dg = Marty::DataGrid.mcfly_pt('infinity').find_by(group_id: rec_id)
       vcnt = dg.metadata.select { |md| md['dir'] == 'v' }.count
       hcnt = dg.metadata.select { |md| md['dir'] == 'h' }.count
+      cur_data_dim = [dg.data.length, dg.data[0].length]
       exported = dg.export.lines
       sep = exported.each_with_index.detect { |l, i| /^\s*$/.match(l) }.last
       new_data = data_as_array.each_with_index.map do |line, idx|
         line.join("\t") + "\r\n"
       end.compact
+      new_data_dim = [data_as_array.count - hcnt, data_as_array[0].count - vcnt]
+      raise GridError.new('grid modification not allowed', data_as_array,
+                          rec_id) if
+        cur_data_dim != new_data_dim && user_perm != 'edit_all'
       to_import = (exported[0..sep] + new_data).join
       dg.update_from_import(dg.name, to_import)
       return false
+    rescue GridError => e
+      Marty::Logger.error(e.message, {rec_id: e.id,
+                                      data: e.data,
+                                      perm: user_perm,
+                                     })
+      return e.message
     rescue StandardError => e
-      # marty log
       return e.message
     end
   end

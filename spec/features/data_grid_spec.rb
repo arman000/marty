@@ -84,6 +84,10 @@ feature 'data grid view', js: true do
     page.driver.browser.action.
       move_to(@grid.native, xpos, ypos).double_click.
       send_keys([:control, 'a'], :delete, text, :enter).perform
+    # for some reason sometimes this fails
+    page.driver.browser.action.
+      move_to(@grid.native, xpos, ypos).double_click.
+      send_keys([:control, 'a'], :delete, text, :enter).perform
   end
 
   def get_grid(to_get: :values)
@@ -271,19 +275,20 @@ feature 'data grid view', js: true do
      ['edit_data', false],
      ['view', false]].each do |perm, all_cells|
       grids.each do |grid|
-        allow(Marty::DataGridView).to receive(:get_edit_permission).
-                                        and_return(perm)
+        Marty::Config['grid_edit_edit_perm'] = perm
+        Marty::Config['grid_edit_save_perm'] = perm
         pos = grids.index(grid) + 1
         dgv.select_row(pos)
         press('Edit Grid')
         wait_for_ajax
         check_grid(grid, perm, all_cells)
+        expect(page).not_to have_content('Save') if perm == 'view'
         press('Cancel')
         wait_for_ajax
       end
     end
-    allow(Marty::DataGridView).to receive(:get_edit_permission).
-                                    and_call_original
+    Marty::Config['grid_edit_edit_perm'] = 'edit_all'
+    Marty::Config['grid_edit_save_perm'] = 'edit_all'
 
     # now test some editing, saving, and cancel logic
     get_latest = lambda do
@@ -358,11 +363,39 @@ feature 'data grid view', js: true do
     sleep 1
     grid = get_latest.call
     exp_data = JSON.parse(File.read('spec/fixtures/misc/grid_final_data.json'))
+    binding.pry if grid.data != exp_data
     expect(grid.data).to eq(exp_data)
     exp_meta = JSON.parse(File.read('spec/fixtures/misc/grid_final_meta.json'))
     grid_meta = grid.metadata.map do |md|
       [md['dir'], md['attr'], md['keys']]
     end.sort
     expect(grid_meta).to eq(exp_meta)
+
+    Marty::Config['grid_edit_save_perm'] = 'view'
+    count = 1
+    begin
+      press('Edit Grid')
+      wait_for_ajax
+      grid_setup
+      cell_edit(2, 3, '123.456')
+    rescue => e
+      if count > 0
+        sleep 1
+        retry
+      end
+      count -= 1
+    end
+    press('Save')
+    errexp = 'error: save_grid: entered with view permissions'
+    expect(page).to have_content(errexp)
+    press('OK')
+    wait_for_ajax
+    context_click(2, 4, 4, click: true)
+    Marty::Config['grid_edit_save_perm'] = 'edit_data'
+    press('Save')
+    errexp = 'error: save_grid: grid modification not allowed'
+    expect(page).to have_content(errexp)
+    exp_log = JSON.parse(File.read('spec/fixtures/misc/grid_log_errs.json'))
+    expect(Marty::Log.all.select(:message, :details).attributes).to eq(exp_log)
   end
 end
