@@ -625,7 +625,7 @@ module Marty
   ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
   class FloorOf8 < JSON::Schema::Attribute
-    def self.validate(curr_schema, data, frag, processor, validator, opt)
+    def self.validate(curr_schema, data, frag, processor, _validator, opt)
       if data < 8
         msg = 'Error at FloorOf8: Value is below 8'
         validation_error(processor,
@@ -639,7 +639,7 @@ module Marty
   end
 
   class CeilingOf20 < JSON::Schema::Attribute
-    def self.validate(curr_schema, data, frag, processor, validator, opt)
+    def self.validate(curr_schema, data, frag, processor, _validator, opt)
       if data > 20
         msg = 'Error at CeilingOf20: Value exceeds 20'
         validation_error(processor,

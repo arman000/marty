@@ -47,7 +47,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     dgid.ends_with?('_grid') ? dgid + '_result' : dgid + '_grid_result'
   end
 
-  def expand_grid_code(h, dgid, dgname, cache, extra_params)
+  def expand_grid_code(h, dgid, dgname, cache, _extra_params)
     final_name = self.class.grid_final_name(dgid)
     if cache[dgname]
       h[final_name] = (cache[dgname]).to_s
@@ -133,7 +133,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
       acc + [acc.last + len]
     end
     ranges = oh.keys.zip(ranges0.each_cons(2).to_a)
-    secnm, (st, en) = ranges.detect do |sec, (st, en)|
+    secnm, (st, en) = ranges.detect do |_sec, (st, en)|
       line.between?(st, en - 1)
     end
     [secnm, line - st + 1]

@@ -50,7 +50,7 @@ class Marty::Api::Base
     ).pluck(:app_name).first
   end
 
-  def self.evaluate params, request, config
+  def self.evaluate params, _request, config
     # prevent script evaluation from modifying passed in params
     params = params.deep_dup
 
@@ -234,7 +234,7 @@ class Marty::Api::Base
         errs.map { |err| _get_errors(err) }
       elsif errs.is_a?(Hash)
         if !errs.include?(:failed_attribute)
-          errs.map { |k, v| _get_errors(v) }
+          errs.map { |_k, v| _get_errors(v) }
         else
           fa, fragment, message, errors = errs.values_at(:failed_attribute,
                                                          :fragment,

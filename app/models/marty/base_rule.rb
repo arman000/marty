@@ -96,7 +96,7 @@ class Marty::BaseRule < Marty::Base
     "(#{field}#{arrow}'#{subfield}')#{fieldcast} #{op} #{value}"
   end
 
-  def self.get_matches_(pt, attrs, params)
+  def self.get_matches_(_pt, attrs, params)
     q = select('DISTINCT ON (name) *').where(attrs)
 
     params.each do |k, vraw|

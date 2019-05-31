@@ -4,7 +4,7 @@ module Marty
   private
 
   class PgEnumAttribute < JSON::Schema::Attribute
-    def self.validate(curr_schema, data, frag, pro, validator, opt = {})
+    def self.validate(curr_schema, data, frag, pro, _validator, opt = {})
       values = nil
       path = '#/' + frag.join('/')
       begin

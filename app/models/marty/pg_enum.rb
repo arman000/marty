@@ -13,7 +13,7 @@ module Marty::PgEnum
     base.class_eval do
       extend ::Delorean::Functions unless respond_to?(:delorean_fn)
 
-      delorean_fn :get_all do |pt = nil|
+      delorean_fn :get_all do |_pt = nil|
         self::VALUES.map(&:to_s)
       end
 

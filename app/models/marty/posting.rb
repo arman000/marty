@@ -67,7 +67,7 @@ class Marty::Posting < Marty::Base
     q.order('created_dt DESC').first.attributes
   end
 
-  def self.get_latest(limit, is_test = nil)
+  def self.get_latest(limit, _is_test = nil)
     # IMPORTANT: is_test arg is ignored (KEEP for backward compat.)
 
     q = where("created_dt <> 'infinity'").

@@ -390,12 +390,12 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.klass = Marty::LogView
   end
 
-  endpoint :reload_scripts do |params|
+  endpoint :reload_scripts do |_params|
     Marty::Script.load_scripts
     client.netzke_notify 'Scripts have been reloaded'
   end
 
-  endpoint :load_seed do |params|
+  endpoint :load_seed do |_params|
     Rails.application.load_seed
     client.netzke_notify 'Seeds have been loaded'
   end

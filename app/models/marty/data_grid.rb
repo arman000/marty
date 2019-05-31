@@ -612,9 +612,9 @@ class Marty::DataGrid < Marty::Base
       end
     end
 
-    removes.reject! { |dir, set| set.empty? }
+    removes.reject! { |_dir, set| set.empty? }
 
-    removes.each do |dir, set|
+    removes.each do |dir, _set|
       metadata_copy.select { |m| m['dir'] == dir }.each do |meta|
         meta['keys'] = remove_indices(meta['keys'], removes[dir])
       end

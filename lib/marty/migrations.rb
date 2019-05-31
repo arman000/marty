@@ -141,7 +141,7 @@ module Marty::Migrations
           end
         end
       elsif !excludes.include?(c)
-        assoc = klass.reflections.find { |(n, h)| h.foreign_key == c }
+        assoc = klass.reflections.find { |(_n, h)| h.foreign_key == c }
         if assoc && assoc[1].klass.columns_hash['name']
           table_name = assoc[1].table_name
           jointabs[table_name] ||= 0
@@ -198,7 +198,7 @@ EOSQL
         version: m[2].to_i,
         raw_sql: "#{md}/sql/#{m[1]}_v#{m[2]}_sql_#{m[3]}.sql"
       }
-    end.group_by { |a| a[:name] }.each do |k, v|
+    end.group_by { |a| a[:name] }.each do |_k, v|
       v.sort! { |a, b| b[:version] <=> a[:version] }
     end
     time_now = Time.now.utc

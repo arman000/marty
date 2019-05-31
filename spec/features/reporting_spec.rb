@@ -76,7 +76,7 @@ DD: BB
     result = 444
 DELOREAN
 
-    with_user('dev1') do |u|
+    with_user('dev1') do |_u|
       Marty::Posting.do_create('BASE', SOME_DT, 'a comment')
 
       Marty::Script.
