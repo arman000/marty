@@ -261,10 +261,9 @@ class Marty::DataGrid < Marty::Base
 
     res = vhash['result']
 
-    v = case
-        when ::Marty::EnumHelper.pg_enum?(klass: res)
+    v = if ::Marty::EnumHelper.pg_enum?(klass: res)
           c_data_type.find_by_name(res)
-        when Marty::DataGrid == c_data_type
+        elsif Marty::DataGrid == c_data_type
           follow ?
             Marty::DataGrid.lookup_h(pt, res) :
             Marty::DataGrid.lookup(pt, res)

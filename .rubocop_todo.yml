@@ -648,19 +648,6 @@ Style/EachForSimpleLoop:
   Exclude:
     - 'spec/controllers/rpc_import_spec.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/EmptyCaseCondition:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/models/marty/data_grid.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/EmptyLiteral:
-  Exclude:
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
-
 # Offense count: 8
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
@@ -1062,13 +1049,6 @@ Style/StructInheritance:
   Exclude:
     - 'lib/marty/promise_job.rb'
     - 'lib/marty/promise_ruby_job.rb'
-
-# Offense count: 75
-# Cop supports --auto-correct.
-# Configuration parameters: MinSize.
-# SupportedStyles: percent, brackets
-Style/SymbolArray:
-  EnforcedStyle: brackets
 
 # Offense count: 7
 # Cop supports --auto-correct.

@@ -278,12 +278,11 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     nullbool = h[:type] == :boolean && (h[:null] == true || !h.include?(:null))
     attribute name do |c|
       c.width = h[:width] || 150
-      case
-      when h[:type] == :datetime
+      if h[:type] == :datetime
         c.format = 'Y-m-d H:i'
-      when h[:type] == :date
+      elsif h[:type] == :date
         c.format = 'Y-m-d'
-      when nullbool
+      elsif nullbool
           c.type = :string
           enum_column(c, ['True', 'False'])
       else
