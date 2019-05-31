@@ -363,7 +363,6 @@ feature 'data grid view', js: true do
     sleep 1
     grid = get_latest.call
     exp_data = JSON.parse(File.read('spec/fixtures/misc/grid_final_data.json'))
-    binding.pry if grid.data != exp_data
     expect(grid.data).to eq(exp_data)
     exp_meta = JSON.parse(File.read('spec/fixtures/misc/grid_final_meta.json'))
     grid_meta = grid.metadata.map do |md|
@@ -378,7 +377,7 @@ feature 'data grid view', js: true do
       wait_for_ajax
       grid_setup
       cell_edit(2, 3, '123.456')
-    rescue => e
+    rescue StandardError => e
       if count > 0
         sleep 1
         retry

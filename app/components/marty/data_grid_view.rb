@@ -172,6 +172,7 @@ module Marty; class DataGridView < McflyGridPanel
   def self.get_edit_edit_permission
     Marty::Config['grid_edit_edit_perm']
   end
+
   def self.get_edit_save_permission
     Marty::Config['grid_edit_save_perm']
   end
@@ -212,11 +213,11 @@ module Marty; class DataGridView < McflyGridPanel
   endpoint :save_grid do |params|
     begin
       user_perm = Marty::DataGridView.get_edit_save_permission
-
       rec_id = params['record_id']
       data = params['data']
       raise GridError.new('entered with view permissions', data, rec_id) if
         user_perm == 'view'
+
       data_as_array = data.map do |row|
         row.keys.map { |key| row[key] }
       end
@@ -230,17 +231,17 @@ module Marty; class DataGridView < McflyGridPanel
         line.join("\t") + "\r\n"
       end.compact
       new_data_dim = [data_as_array.count - hcnt, data_as_array[0].count - vcnt]
-      raise GridError.new('grid modification not allowed', data_as_array,
-                          rec_id) if
-        cur_data_dim != new_data_dim && user_perm != 'edit_all'
+      if cur_data_dim != new_data_dim && user_perm != 'edit_all'
+        raise GridError.new('grid modification not allowed', data_as_array,
+                            rec_id)
+      end
       to_import = (exported[0..sep] + new_data).join
       dg.update_from_import(dg.name, to_import)
       return false
     rescue GridError => e
-      Marty::Logger.error(e.message, {rec_id: e.id,
-                                      data: e.data,
-                                      perm: user_perm,
-                                     })
+      Marty::Logger.error(e.message, rec_id: e.id,
+                          data: e.data,
+                          perm: user_perm)
       return e.message
     rescue StandardError => e
       return e.message
