@@ -650,13 +650,6 @@ Style/EachForSimpleLoop:
 
 # Offense count: 2
 # Cop supports --auto-correct.
-Style/EachWithObject:
-  Exclude:
-    - 'lib/marty/util.rb'
-    - 'lib/marty/xl.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
 Style/EmptyCaseCondition:
   Exclude:
     - 'app/components/marty/base_rule_view.rb'
