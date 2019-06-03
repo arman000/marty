@@ -1,6 +1,5 @@
 [
   {
-    "id": null,
     "message": "save_grid: entered with view permissions",
     "details": {
       "data": [
@@ -218,7 +217,6 @@
     }
   },
   {
-    "id": null,
     "message": "save_grid: grid modification not allowed",
     "details": {
       "data": [

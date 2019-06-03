@@ -395,6 +395,9 @@ feature 'data grid view', js: true do
     errexp = 'error: save_grid: grid modification not allowed'
     expect(page).to have_content(errexp)
     exp_log = JSON.parse(File.read('spec/fixtures/misc/grid_log_errs.json'))
-    expect(Marty::Log.all.select(:message, :details).attributes).to eq(exp_log)
+    got = Marty::Log.all.select(:message, :details).attributes.map do |l|
+      l.except('id')
+    end
+    expect(got).to eq(exp_log)
   end
 end
