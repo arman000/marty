@@ -1,6 +1,6 @@
 {
     createStoreAndColumns:
-    function(data, hdim, vdim, hcol, vcol) {
+    function(data, hdim, vdim, hcol, vcol, extra_attrs) {
         var fields = [];
         var columns = [];
         for (var i=0; i< data[0].length; i++) {
@@ -13,6 +13,11 @@
                                   vlen = vdim.length,
                                   row = meta.rowIndex,
                                   col = meta.column.fullColumnIndex;
+                              if (extra_attrs[row][col]) {
+                                  meta.tdStyle = extra_attrs[row][col][0]
+                                  meta.tdAttr = Ext.String.format('data-qtip="{0}"',
+                                                                  extra_attrs[row][col][1]);
+                              }
                               if (row < hlen && col >= vlen)
                               {
                                   meta.tdStyle = hcol[row];
@@ -57,7 +62,8 @@
             'background-color: #D1D1B7;',
         ];
         var hcol = [];
-        var vcol = []
+        var vcol = [];
+        
         var me = this;
         // setup colors for hdims
         for (var i=0; i<hdim.length; i++)
@@ -66,7 +72,22 @@
         for (var i=0; i<vdim.length; i++)
             vcol[i] = colors.pop();
         var columns, thestore;
-        [columns, thestore] = this.createStoreAndColumns(data, hdim, vdim, hcol, vcol);
+
+        var createArray = function (length) {
+            var arr = new Array(length || 0),
+                i = length;
+
+            if (arguments.length > 1) {
+                var args = Array.prototype.slice.call(arguments, 1);
+                while(i--) arr[length-1 - i] = createArray.apply(this, args);
+            }
+
+            return arr;
+        };
+        
+        var extra_attrs = createArray(data.length, data[0].length);
+
+        [columns, thestore] = this.createStoreAndColumns(data, hdim, vdim, hcol, vcol, extra_attrs);
 
         var dirty = false;
         var setDirty = function() { dirty = true; };
@@ -77,7 +98,8 @@
             var newcolumns, newstore;
             var mod_data = [];
             modFunc(store_data, mod_data);
-            [newcolumns, newstore] = me.createStoreAndColumns(mod_data, hdim, vdim, hcol, vcol);
+            var extra_attrs = createArray(mod_data.length, mod_data[0].length);
+            [newcolumns, newstore] = me.createStoreAndColumns(mod_data, hdim, vdim, hcol, vcol, extra_attrs);
             grid.reconfigure(newstore, newcolumns);
             Ext.each(grid.getColumns(), function(column) {
                 column.autoSize();
@@ -221,10 +243,6 @@
         var get_area = function(row, col) {
             var row_hdim = row < hdim.length,
                 row_vdim = col < vdim.length;
-            console.log('hdim.length=', hdim.length);
-            console.log('vdim.length=', vdim.length);
-            console.log('row_hdim=', row_hdim);
-            console.log('row_vdim=', row_vdim);
 
             var a;
             if (row_hdim && row_vdim)
@@ -281,9 +299,6 @@
         };
         var col_menu_chk = function (row, col) {
             var area =  get_area(row, col);
-            console.log('row=', row);
-            console.log('col=', col);
-            console.log('area=', area);
             if (hdim.length == 0)
                 return false;
             return (area == 'hdim_area' || area == 'data_area') &&
@@ -431,21 +446,16 @@
                     var store = grid.getStore().data.items;
                     var ret = [];
 
-                    // maybe remove label line at the top we added when hdim.length == 0
-                    var row_start = hdim.length == 0 ? 1 : 0;
-
-                    for (var i = row_start; i < store.length; ++i) {
+                    for (var i = 0; i < store.length; ++i) {
                         var row = {};
 
-                        // maybe remove label col at the left we added when vdim.length == 0
                         var col_idx = 0;
-                        var col0_skip = vdim.length == 0 ? true : false;
 
                         // or remove label fields we added in top left
                         var col_null = i < hdim.length ? vdim.length : 0;
 
                         for (const [key, value] of Object.entries(store[i].data)) {
-                            if (key != 'id' && !col0_skip) {
+                            if (key != 'id') {
                                 if (col_idx < col_null)
                                     row[key] = "";
                                 else
@@ -458,11 +468,17 @@
                     }
                     server.saveGrid({record_id: record_id, data: ret}, function(res) {
                         if (res) {
-                            Ext.MessageBox.show({
-                                title:'Error in data',
-                                msg: 'error: ' + res,
-                                buttons: Ext.Msg.OK
-                            });
+                            if (res['errorMessage']) {
+                                Ext.MessageBox.show({
+                                    title:'Error in data',
+                                    msg: 'error: ' + res['errorMessage'],
+                                    buttons: Ext.Msg.OK
+                                });
+                            } else if (res['problemArray']) {
+                                extra_attrs[2][2] = ['background-color: #FF8181;','hi mom'];
+                                grid.getView().refresh();
+                                console.log(res);
+                            }
                         }
                         else
                         {

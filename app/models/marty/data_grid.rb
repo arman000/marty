@@ -70,6 +70,21 @@ class Marty::DataGrid < Marty::Base
 
       dg.errors.add(:base, 'duplicate vertical key combination') unless
         v_zip_keys.uniq.length == v_zip_keys.length
+
+      con_chk = []
+      begin
+        con_chk = Marty::DataGrid.parse_constraint(dg.data_type, dg.constraint)
+      rescue StandardError => e
+        dg.errors.add(:base, "Error in constraint: #{e.message}")
+      end
+      data_check = Marty::DataGrid.check_data(dg.data_type, dg.data, con_chk)
+      return unless data_check.present?
+      data_check.each do |(err, x, y)|
+        dg.errors.add(:base, "cell #{x}, #{y} fails constraint check") if
+          err == :constraint
+        dg.errors.add(:base, "cell #{x}, #{y} incorrect type") if
+          err == :type
+      end
     end
   end
 
@@ -94,6 +109,70 @@ class Marty::DataGrid < Marty::Base
 
   delorean_fn :exists, cache: true, sig: 2 do |pt, name|
     Marty::DataGrid.mcfly_pt(pt).where(name: name).exists?
+  end
+
+  def self.parse_constraint(data_type, constraint)
+    return [] unless constraint
+    dt = Marty::DataGrid.convert_data_type(data_type)
+    chks = []
+    if constraint.include?('<') || constraint.include?('>')
+      raise "range constraint not allowed for type #{dt}" unless
+        ['integer', 'float'].include?(dt)
+      pgr = Marty::Util.human_to_pg_range(constraint)
+      r = Marty::DataGrid.parse_range(pgr)
+      [r[0,2], r[2..-1].reverse]
+    else
+      raw_vals = constraint.split('|')
+      return unless raw_vals.present?
+      raise "list constraint not allowed for type Float" if dt == 'float'
+      pt = 'infinity'
+      vals = raw_vals.map do |v|
+        parse_fvalue(pt, v, data_type, dt)
+      end
+      [[:in?, vals.flatten]]
+    end
+  end
+
+  def self.real_type(data_type)
+    types = case data_type
+            when nil
+              [DEFAULT_DATA_TYPE.capitalize.constantize]
+            when 'string', 'integer', 'float'
+              [data_type.capitalize.constantize]
+            when 'boolean'
+              [TrueClass, FalseClass]
+            else
+              [data_type]
+            end
+    types << Integer if types.include?(Float)
+  end
+
+  # if check_data is called from validation, data has already been converted
+  # if called directly from DataGridView, it is still array of array of string.
+  def self.check_data(data_type, data, chks, cvt: false)
+    dt = Marty::DataGrid.convert_data_type(data_type)
+    klass = dt.class == Class ? dt : maybe_get_klass(dt)
+    rt = real_type(data_type) # get real type for string, trueclass etc
+    res = []
+    pt = 'infinity'
+    (0...data.first.length).each do |x|
+      (0...data.length).each do |y|
+        data_v = data[y][x]
+        cvt_val = nil
+        err = nil
+        begin
+          cvt_val = cvt && !data_v.class.in?(rt) ?
+                      parse_fvalue(pt, data_v, dt, klass).first :
+                      data_v
+        rescue StandardError => e
+          err = e.message
+        end
+        next res << [:type, x, y] if err
+        res << [:constraint, x, y] unless
+          chks.map { |op, chk_val| cvt_val.send(op, chk_val) }.all? { |v| v }
+      end
+    end
+    res
   end
 
   def self.get_struct_attrs
@@ -342,10 +421,14 @@ class Marty::DataGrid < Marty::Base
 
   def export_array
     # add data type metadata row if not default
-    dt_row = lenient ? ['lenient'] : []
-    dt_row << data_type unless [nil, DEFAULT_DATA_TYPE].member?(data_type)
+    lenstr = 'lenient' if lenient
+    typestr = data_type unless [nil, DEFAULT_DATA_TYPE].member?(data_type) &&
+                               !constraint.present?
 
-    meta_rows = dt_row.empty? ? [] : [[dt_row.join(' ')]]
+    len_dt = [lenstr, typestr].compact.join(' ')
+
+    meta_rows = len_dt.present? || constraint.present? ?
+                  [[len_dt, constraint]] : []
 
     meta_rows += metadata.map do |inf|
       [inf['attr'], inf['type'], inf['dir'], inf['rs_keep'] || '']
@@ -466,7 +549,7 @@ class Marty::DataGrid < Marty::Base
     data_type, lenient = nil, false
 
     # check if there's a data_type definition
-    dt, *x = rows[0]
+    dt, constraint, *x = rows[0]
     if dt && x.all?(&:nil?)
       dts = dt.split
       raise "bad data type '#{dt}'" if dts.count > 2
@@ -474,9 +557,12 @@ class Marty::DataGrid < Marty::Base
       lenient = dts.delete 'lenient'
       data_type = dts.first
     end
+    constraint = nil if x.first.in?(['v', 'h'])
 
-    rows_for_metadata = rows[(data_type || lenient ? 1 : 0)...blank_index]
+    start_md = constraint || data_type || lenient ? 1 : 0
+    rows_for_metadata = rows[start_md...blank_index]
     metadata = rows_for_metadata.map do |attr, type, dir, rs_keep, key|
+      binding.pry  unless attr && type && dir
       raise 'metadata elements must include attr/type/dir' unless
         attr && type && dir
       raise "bad dir #{dir}" unless ['h', 'v'].member? dir
@@ -549,11 +635,12 @@ class Marty::DataGrid < Marty::Base
       end
     end
 
-    [metadata, data, data_type, lenient]
+    [metadata, data, data_type, lenient, constraint]
   end
 
   def self.create_from_import(name, import_text, created_dt = nil)
-    metadata, data, data_type, lenient = parse(created_dt, import_text, {})
+    metadata, data, data_type, lenient, constraint =
+                                        parse(created_dt, import_text, {})
     dg            = new
     dg.name       = name
     dg.data       = data
@@ -561,12 +648,13 @@ class Marty::DataGrid < Marty::Base
     dg.lenient    = !!lenient
     dg.metadata   = metadata
     dg.created_dt = created_dt if created_dt
+    dg.constraint = constraint
     dg.save!
     dg
   end
 
   def update_from_import(name, import_text, created_dt = nil)
-    new_metadata, data, data_type, lenient =
+    new_metadata, data, data_type, lenient, constraint =
       self.class.parse(created_dt, import_text, {})
 
     self.name       = name
@@ -575,6 +663,7 @@ class Marty::DataGrid < Marty::Base
     self.lenient    = !!lenient
     # Otherwise changed will depend on order in hashes
     self.metadata   = new_metadata unless metadata == new_metadata
+    self.constraint = constraint
     self.created_dt = created_dt if created_dt
     save!
   end

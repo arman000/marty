@@ -97,6 +97,7 @@ module Marty; class DataGridView < McflyGridPanel
         :hcols,
         :lenient,
         :data_type,
+        :constraint,
         :created_dt,
       ]
 
@@ -170,11 +171,11 @@ module Marty; class DataGridView < McflyGridPanel
   # placeholders for grid editing permission logic.
   # for now, this allows the rspec to control the permission
   def self.get_edit_edit_permission
-    Marty::Config['grid_edit_edit_perm']
+    Marty::Config['grid_edit_edit_perm'] || 'edit_all'
   end
 
   def self.get_edit_save_permission
-    Marty::Config['grid_edit_save_perm']
+    Marty::Config['grid_edit_save_perm'] || 'edit_all'
   end
 
   endpoint :edit_grid do |params|
@@ -235,6 +236,12 @@ module Marty; class DataGridView < McflyGridPanel
         raise GridError.new('grid modification not allowed', data_as_array,
                             rec_id)
       end
+      data_only = data_as_array[hcnt..-1].map do |a|
+        a[vcnt..-1]
+      end
+      chks = Marty::DataGrid.parse_constraint(dg.data_type, dg.constraint)
+      probs = Marty::DataGrid.check_data(dg.data_type, data_only, chks, cvt: true)
+      return {'problem_array' => probs} if probs.present?
       to_import = (exported[0..sep] + new_data).join
       dg.update_from_import(dg.name, to_import)
       return false
@@ -242,9 +249,9 @@ module Marty; class DataGridView < McflyGridPanel
       Marty::Logger.error(e.message, rec_id: e.id,
                           data: e.data,
                           perm: user_perm)
-      return e.message
+      return {'error_message' => e.message}
     rescue StandardError => e
-      return e.message
+      return {'error_messaage' => e.message}
     end
   end
 
@@ -275,6 +282,10 @@ module Marty; class DataGridView < McflyGridPanel
 
   attribute :name do |c|
     c.width = 120
+  end
+
+  attribute :constraint do |c|
+    c.width = 100
   end
 
   attribute :hcols do |c|
