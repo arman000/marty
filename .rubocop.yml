@@ -38,3 +38,5 @@ Lint/UnusedMethodArgument:
   AllowUnusedKeywordArguments: true
   IgnoreEmptyMethods: true
 
+Style/SymbolArray:
+  EnforcedStyle: brackets
