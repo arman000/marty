@@ -273,7 +273,7 @@ end
 
 ar_instances = [ActiveRecord::Relation, ActiveRecord::QueryMethods::WhereChain]
 
-args_hack = [[Object, nil]] * 30
+args_hack = Delorean::Ruby::Whitelists::Matchers::Arguments::ANYTHING
 
 [
   [:distinct, args_hack],
