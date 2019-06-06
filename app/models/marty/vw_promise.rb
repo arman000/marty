@@ -66,6 +66,6 @@ class Marty::VwPromise < Marty::Base
     st = "%#{search_text}%"
     # Convert "Role Name" or "Role name" to "role_name" (underscore is key)
     st2 = "%#{search_text.titleize.gsub(/\s/, '').underscore}%"
-    joins(:user => :roles).where(query, st, st, st, st2).distinct
+    joins(user: :roles).where(query, st, st, st, st2).distinct
   }
 end

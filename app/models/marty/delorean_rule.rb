@@ -100,7 +100,7 @@ class Marty::DeloreanRule < Marty::BaseRule
             result.err_section)
         end
         result.cg_hash = Hash[result.cg_keys.zip(result.cg_vals)]
-        fails = result.cg_hash.select { |k, v| ![v].flatten.first }
+        fails = result.cg_hash.select { |_k, v| ![v].flatten.first }
         return fails if fails.present?
       end
 
@@ -202,7 +202,7 @@ class Marty::DeloreanRule < Marty::BaseRule
     proc do |old, new|
       klass.where(obsoleted_dt: 'infinity').each do |r|
         r.grids.each { |k, v| r.grids[k] = new if v == old }
-        r.results.each do |k, v|
+        r.results.each do |k, _v|
           r.results[k] = %Q("#{new}") if
                          k.ends_with?('_grid') && r.fixed_results[k] == old
         end

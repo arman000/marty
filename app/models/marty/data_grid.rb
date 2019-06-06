@@ -261,10 +261,9 @@ class Marty::DataGrid < Marty::Base
 
     res = vhash['result']
 
-    v = case
-        when ::Marty::EnumHelper.pg_enum?(klass: res)
+    v = if ::Marty::EnumHelper.pg_enum?(klass: res)
           c_data_type.find_by_name(res)
-        when Marty::DataGrid == c_data_type
+        elsif Marty::DataGrid == c_data_type
           follow ?
             Marty::DataGrid.lookup_h(pt, res) :
             Marty::DataGrid.lookup(pt, res)
@@ -612,9 +611,9 @@ class Marty::DataGrid < Marty::Base
       end
     end
 
-    removes.reject! { |dir, set| set.empty? }
+    removes.reject! { |_dir, set| set.empty? }
 
-    removes.each do |dir, set|
+    removes.each do |dir, _set|
       metadata_copy.select { |m| m['dir'] == dir }.each do |meta|
         meta['keys'] = remove_indices(meta['keys'], removes[dir])
       end

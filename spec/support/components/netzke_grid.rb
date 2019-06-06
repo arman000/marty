@@ -265,7 +265,7 @@ module Marty; module RSpec; module Components
       res
     end
 
-    def end_edit(row, field)
+    def end_edit(_row, _field)
       run_js <<-JS
           #{ext_var(grid, 'grid')}
           #{ext_var(ext_celleditor, 'editor')}
@@ -383,7 +383,7 @@ module Marty; module RSpec; module Components
         JS
     end
 
-    def end_edit(row, field)
+    def end_edit(_row, _field)
       run_js <<-JS
           #{ext_var(grid, 'grid')}
           #{ext_var(ext_celleditor, 'editor')}

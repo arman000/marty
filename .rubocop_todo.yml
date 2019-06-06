@@ -272,33 +272,6 @@ Lint/UnderscorePrefixedVariableName:
     - 'lib/marty/monkey.rb'
     - 'lib/marty/promise_job.rb'
 
-# Offense count: 36
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoreEmptyBlocks, AllowUnusedKeywordArguments.
-Lint/UnusedBlockArgument:
-  Enabled: false
-
-# Offense count: 21
-# Cop supports --auto-correct.
-# Configuration parameters: AllowUnusedKeywordArguments, IgnoreEmptyMethods.
-Lint/UnusedMethodArgument:
-  Exclude:
-    - 'app/models/marty/base_rule.rb'
-    - 'app/models/marty/pg_enum.rb'
-    - 'app/models/marty/posting.rb'
-    - 'db/migrate/091_create_marty_promises.rb'
-    - 'db/migrate/201_create_marty_events.rb'
-    - 'lib/marty/cache_adapters/mcfly_ruby_cache.rb'
-    - 'lib/marty/json_schema.rb'
-    - 'lib/marty/monkey.rb'
-    - 'lib/marty/promise_proxy.rb'
-    - 'lib/marty/rule_script_set.rb'
-    - 'other/marty/api/base.rb'
-    - 'spec/lib/json_schema_spec.rb'
-    - 'spec/lib/xl_spec.rb'
-    - 'spec/support/components/netzke_grid.rb'
-    - 'spec/support/netzke.rb'
-
 # Offense count: 4
 Lint/UriEscapeUnescape:
   Exclude:
@@ -657,14 +630,6 @@ Style/ConditionalAssignment:
     - 'spec/support/components/netzke_combobox.rb'
     - 'spec/support/components/netzke_grid.rb'
 
-# Offense count: 3
-# Cop supports --auto-correct.
-Style/DefWithParentheses:
-  Exclude:
-    - 'spec/dummy/db/migrate/20171221095312_create_gemini_my_rules.rb'
-    - 'spec/dummy/db/migrate/20171221095359_create_gemini_xyz_rules.rb'
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
-
 # Offense count: 181
 Style/Documentation:
   Enabled: false
@@ -682,26 +647,6 @@ Style/DoubleNegation:
 Style/EachForSimpleLoop:
   Exclude:
     - 'spec/controllers/rpc_import_spec.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/EachWithObject:
-  Exclude:
-    - 'lib/marty/util.rb'
-    - 'lib/marty/xl.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/EmptyCaseCondition:
-  Exclude:
-    - 'app/components/marty/base_rule_view.rb'
-    - 'app/models/marty/data_grid.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/EmptyLiteral:
-  Exclude:
-    - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
 
 # Offense count: 8
 # Cop supports --auto-correct.
@@ -774,25 +719,6 @@ Style/GuardClause:
     - 'spec/dummy/public/extjs/classic/theme-base/sass/utils.rb'
     - 'spec/lib/json_schema_spec.rb'
     - 'spec/support/post_run_logger.rb'
-
-# Offense count: 43
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, UseHashRocketsWithSymbolValues, PreferHashRocketsForNonAlnumEndingSymbols.
-# SupportedStyles: ruby19, hash_rockets, no_mixed_keys, ruby19_no_mixed_keys
-Style/HashSyntax:
-  Exclude:
-    - 'app/components/marty/simple_app.rb'
-    - 'app/models/marty/user.rb'
-    - 'app/models/marty/vw_promise.rb'
-    - 'db/migrate/090_create_delayed_jobs.rb'
-    - 'lib/marty/engine.rb'
-    - 'lib/marty/migrations.rb'
-    - 'spec/features/scripting_spec.rb'
-    - 'spec/features/user_view_spec.rb'
-    - 'spec/lib/json_schema_spec.rb'
-    - 'spec/spec_helper.rb'
-    - 'spec/support/netzke.rb'
-    - 'spec/support/shared_connection.rb'
 
 # Offense count: 2
 Style/IdenticalConditionalBranches:
@@ -1123,13 +1049,6 @@ Style/StructInheritance:
   Exclude:
     - 'lib/marty/promise_job.rb'
     - 'lib/marty/promise_ruby_job.rb'
-
-# Offense count: 75
-# Cop supports --auto-correct.
-# Configuration parameters: MinSize.
-# SupportedStyles: percent, brackets
-Style/SymbolArray:
-  EnforcedStyle: brackets
 
 # Offense count: 7
 # Cop supports --auto-correct.

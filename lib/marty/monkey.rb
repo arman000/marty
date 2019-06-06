@@ -210,7 +210,7 @@ module Netzke::Basepack::DataAdapters
       predicates[1..-1].inject(predicates.first) { |r, p| r.and(p)  }
     end
 
-    def update_predecate_for_enum(table, op, value)
+    def update_predecate_for_enum(table, _op, value)
       col = Arel::Nodes::NamedFunction.new('CAST', [table.as('TEXT')])
       col.matches "%#{value}%"
     end

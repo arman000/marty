@@ -88,7 +88,7 @@ describe Marty::Xl do
     Delorean::Engine.new 'YYY'
   end
 
-  def worksheet(ind, c)
+  def worksheet(_ind, c)
     code = CODE.clone
     map = { 'C1' => c[0].to_s, 'C2' => c[1].to_s }
     map.each { |k, v| code.sub!(k, v)  }

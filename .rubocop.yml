@@ -33,3 +33,10 @@ Style/CaseEquality:
     - 'lib/marty/monkey.rb'
     - 'other/marty/api/base.rb'
     - 'spec/lib/mcfly_model_spec.rb'
+
+Lint/UnusedMethodArgument:
+  AllowUnusedKeywordArguments: true
+  IgnoreEmptyMethods: true
+
+Style/SymbolArray:
+  EnforcedStyle: brackets

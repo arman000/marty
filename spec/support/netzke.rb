@@ -1,7 +1,7 @@
 module Marty; module RSpec; module Netzke
   MAX_WAIT_TIME = 5.0
 
-  def by message, level = 0
+  def by message, _level = 0
     wait_for_ready(10)
     pending(message) unless block_given?
     yield
@@ -30,8 +30,8 @@ module Marty; module RSpec; module Netzke
     end
 
     find(:xpath, '//span', text: 'Sign in', match: :first, wait: 5).click
-    fill_in('login', :with => username)
-    fill_in('password', :with => password)
+    fill_in('login', with: username)
+    fill_in('password', with: password)
     press('OK')
     wait_for_ajax
   end
@@ -64,7 +64,7 @@ module Marty; module RSpec; module Netzke
     end
   end
 
-  def popup message = ''
+  def popup _message = ''
     wait_for_ready
     yield if block_given?
     close_window

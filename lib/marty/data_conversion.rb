@@ -152,7 +152,7 @@ class Marty::DataConversion
 
     raise "no key_attrs for #{klass}" unless key_attrs
 
-    find_options = options.select { |k, v| key_attrs.member? k.to_sym }
+    find_options = options.select { |k, _v| key_attrs.member? k.to_sym }
 
     raise "no keys for #{klass} -- #{options}" if find_options.empty?
 

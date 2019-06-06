@@ -70,7 +70,7 @@ module Mcfly::Model
       end.join(' AND ')
 
       if Hash === attrs
-        order = attrs.select { |k, v| v }.keys.reverse.map do |k|
+        order = attrs.select { |_k, v| v }.keys.reverse.map do |k|
           k = "#{k}_id" if assoc.member?(k)
 
           "#{k} NULLS LAST"
@@ -82,9 +82,9 @@ module Mcfly::Model
 
       fn = cache ? :cached_delorean_fn : :delorean_fn
       base_mcfly_lookup(fn, name, options + { sig:  attrs.length + 1,
-                                             mode: mode }) do |t, *attr_list|
+                                             mode: mode }) do |_t, *attr_list|
 
-        attr_list_ids = attr_list.each_with_index.map do |x, i|
+        attr_list_ids = attr_list.each_with_index.map do |_x, i|
           assoc.member?(attrs[i]) ?
             (attr_list[i] && attr_list[i].id) : attr_list[i]
         end

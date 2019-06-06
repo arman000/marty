@@ -32,7 +32,7 @@ module Marty
                        preprocess_function,
                       )
 
-      recs.each_with_object(Hash.new(0)) do |(op, id), h|
+      recs.each_with_object(Hash.new(0)) do |(op, _id), h|
         h[op] += 1
       end
     end

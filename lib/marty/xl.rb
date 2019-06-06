@@ -521,10 +521,9 @@ class Marty::Xl
     when Array
       obj.map { |x| symbolize_keys(x, sym_str) }
     when Hash
-      obj.inject({}) do |result, (key, value)|
+      obj.each_with_object({}) do |(key, value), result|
         key = key.to_sym if key.is_a?(String)
         result[key] = symbolize_keys(value, sym_str)
-        result
       end
     when String
       (sym_str && obj.starts_with?(sym_str)) ? obj[sym_str.length..-1].to_sym : obj

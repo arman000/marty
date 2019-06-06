@@ -278,12 +278,11 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     nullbool = h[:type] == :boolean && (h[:null] == true || !h.include?(:null))
     attribute name do |c|
       c.width = h[:width] || 150
-      case
-      when h[:type] == :datetime
+      if h[:type] == :datetime
         c.format = 'Y-m-d H:i'
-      when h[:type] == :date
+      elsif h[:type] == :date
         c.format = 'Y-m-d'
-      when nullbool
+      elsif nullbool
           c.type = :string
           enum_column(c, ['True', 'False'])
       else
@@ -304,7 +303,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
         c.getter = Marty::BaseRuleView.jsonb_field_getter(meth, namestr, nullbool)
         c.setter = Marty::BaseRuleView.jsonb_field_setter(meth, namestr,
                                                           h[:type] == :boolean)
-        c.filter_with = lambda do |rel, value, op|
+        c.filter_with = lambda do |rel, value, _op|
           v = ActiveRecord::Base.connection.quote(value)[1..-2]
           rel.where("#{meth}->>'#{namestr}' like '%#{v}%'")
         end
@@ -342,7 +341,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       c.flex   = 1
       c.getter = jsonb_getter(a.to_s)
       c.sorting_scope = json_sort_scope(a)
-      c.filter_with = lambda do |rel, value, op|
+      c.filter_with = lambda do |rel, value, _op|
         v = ActiveRecord::Base.connection.quote(value)[1..-2]
         rel.where("#{a}::text like '%#{v}%'")
       end

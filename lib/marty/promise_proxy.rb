@@ -31,7 +31,7 @@ class Marty::PromiseProxy < BasicObject
     @promise
   end
 
-  def is_a?(c)
+  def is_a?(_c)
     # Marty::PromiseProxy == c
     # {}.is_a? c
 

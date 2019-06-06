@@ -74,7 +74,7 @@ class Marty::PromiseView < Netzke::Tree::Base
     a.icon_cls = 'fa fa-sync-alt glyph'
   end
 
-  endpoint :clear do |params|
+  endpoint :clear do |_params|
     Marty::Promise.cleanup(true)
     client.netzke_on_refresh
   end

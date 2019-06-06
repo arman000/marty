@@ -224,7 +224,7 @@ class Marty::DataChange
         next
       end
 
-      key_hash = conv.reject { |k, v| !keys.member?(k) }
+      key_hash = conv.reject { |k, _v| !keys.member?(k) }
 
       source = Marty::DataConversion.find_row(klass, key_hash, ts)
 
@@ -236,7 +236,7 @@ class Marty::DataChange
 
       found_sources << source
 
-      non_key_hash = conv.reject { |k, v| keys.member?(k) }
+      non_key_hash = conv.reject { |k, _v| keys.member?(k) }
 
       # is source same as converted input?
       if non_key_hash.all? { |k, v| v == source.send(k) }
@@ -281,7 +281,7 @@ class Marty::DataChange
     ts = Mcfly.normalize_infinity(ts)
     col_types = Marty::DataConversion.col_types(klass)
 
-    mcfly_cols = col_types.map do |attr, h|
+    mcfly_cols = col_types.map do |_attr, h|
       Hash === h && Mcfly.has_mcfly?(h[:assoc_class]) && h || nil
     end.compact
 

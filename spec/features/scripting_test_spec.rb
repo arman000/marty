@@ -45,7 +45,7 @@ C:
     a = 456.0 + p0
 DELOREAN
 
-    with_user('dev1') do |u|
+    with_user('dev1') do |_u|
       Marty::Script.
         load_script_bodies({
                              'M1' => sample_script,
@@ -74,7 +74,7 @@ B: A
     p =? 5
 DELOREAN
 
-    with_user('dev1') do |u|
+    with_user('dev1') do |_u|
       Marty::Script.
         load_script_bodies({
                              'M3' => sample_script2,
