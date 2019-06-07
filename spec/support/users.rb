@@ -13,7 +13,7 @@ module Marty; module RSpec; module Users
 
         role = Marty::Role.find_by_name(role_name.to_s)
 
-        rails "Oops unknown role: #{role_name}. Was db seeded?" unless role
+        raise "Oops unknown role: #{role_name}. Was db seeded?" unless role
 
         user_role = Marty::UserRole.new
         user_role.user = user
