@@ -241,7 +241,8 @@ module Marty; class DataGridView < McflyGridPanel
       end
       chks = Marty::DataGrid.parse_constraint(dg.data_type, dg.constraint)
       probs = Marty::DataGrid.check_data(dg.data_type, data_only, chks, cvt: true)
-      return {'problem_array' => probs} if probs.present?
+      return { 'problem_array' => probs } if probs.present?
+
       to_import = (exported[0..sep] + new_data).join
       dg.update_from_import(dg.name, to_import)
       return false
@@ -249,9 +250,9 @@ module Marty; class DataGridView < McflyGridPanel
       Marty::Logger.error(e.message, rec_id: e.id,
                           data: e.data,
                           perm: user_perm)
-      return {'error_message' => e.message}
+      return { 'error_message' => e.message }
     rescue StandardError => e
-      return {'error_messaage' => e.message}
+      return { 'error_message' => e.message }
     end
   end
 

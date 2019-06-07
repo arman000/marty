@@ -212,8 +212,7 @@
           "a13": 100
         }
       ],
-      "perm": "view",
-      "rec_id": 2
+      "perm": "view"
     }
   },
   {
@@ -413,8 +412,7 @@
           100
         ]
       ],
-      "perm": "edit_data",
-      "rec_id": 2
+      "perm": "edit_data"
     }
   }
 ]

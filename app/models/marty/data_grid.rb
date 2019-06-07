@@ -1,4 +1,4 @@
-class Marty::DataGrid < Marty::Base
+class Marty::DataGrid < Marty::Base # rubocop:disable Metrics/ClassLength
   # If data_type is nil, assume float
   DEFAULT_DATA_TYPE = 'float'
 
@@ -79,6 +79,7 @@ class Marty::DataGrid < Marty::Base
       end
       data_check = Marty::DataGrid.check_data(dg.data_type, dg.data, con_chk)
       return unless data_check.present?
+
       data_check.each do |(err, x, y)|
         dg.errors.add(:base, "cell #{x}, #{y} fails constraint check") if
           err == :constraint
@@ -113,18 +114,21 @@ class Marty::DataGrid < Marty::Base
 
   def self.parse_constraint(data_type, constraint)
     return [] unless constraint
+
     dt = Marty::DataGrid.convert_data_type(data_type)
     chks = []
     if constraint.include?('<') || constraint.include?('>')
       raise "range constraint not allowed for type #{dt}" unless
         ['integer', 'float'].include?(dt)
+
       pgr = Marty::Util.human_to_pg_range(constraint)
       r = Marty::DataGrid.parse_range(pgr)
-      [r[0,2], r[2..-1].reverse]
+      [r[0, 2], r[2..-1].reverse]
     else
       raw_vals = constraint.split('|')
       return unless raw_vals.present?
-      raise "list constraint not allowed for type Float" if dt == 'float'
+      raise 'list constraint not allowed for type Float' if dt == 'float'
+
       pt = 'infinity'
       vals = raw_vals.map do |v|
         parse_fvalue(pt, v, data_type, dt)
@@ -168,6 +172,7 @@ class Marty::DataGrid < Marty::Base
           err = e.message
         end
         next res << [:type, x, y] if err
+
         res << [:constraint, x, y] unless
           chks.map { |op, chk_val| cvt_val.send(op, chk_val) }.all? { |v| v }
       end
@@ -562,7 +567,6 @@ class Marty::DataGrid < Marty::Base
     start_md = constraint || data_type || lenient ? 1 : 0
     rows_for_metadata = rows[start_md...blank_index]
     metadata = rows_for_metadata.map do |attr, type, dir, rs_keep, key|
-      binding.pry  unless attr && type && dir
       raise 'metadata elements must include attr/type/dir' unless
         attr && type && dir
       raise "bad dir #{dir}" unless ['h', 'v'].member? dir
@@ -639,8 +643,8 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.create_from_import(name, import_text, created_dt = nil)
-    metadata, data, data_type, lenient, constraint =
-                                        parse(created_dt, import_text, {})
+    metadata, data, data_type, lenient, constraint = parse(created_dt,
+                                                           import_text, {})
     dg            = new
     dg.name       = name
     dg.data       = data

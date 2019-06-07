@@ -24,7 +24,7 @@
                                   meta.tdAttr = Ext.String.format('data-qtip="{0}"',
                                                                   hdim[row]);
                               }
-                              if (col <= vlen && row >= hlen)
+                              if (col < vlen && row >= hlen)
                               {
                                   meta.tdStyle = vcol[col];
                                   meta.tdAttr = Ext.String.format('data-qtip="{0}"',
@@ -271,7 +271,7 @@
             clicksToEdit: 2,
             listeners: {
                 beforeedit: function(editor, context, eOpts) {
-                    if (!can_edit(context.rowIdx, context.colIdx - 1))
+                    if (!can_edit(context.rowIdx, context.colIdx))
                         return false;
                 },
                 afteredit: function() {
@@ -331,7 +331,7 @@
                         source = me.getSource(),
                         i, n, s,
                         rowIdx = event.position.rowIdx,
-                        colIdx = event.position.colIdx - 1;
+                        colIdx = event.position.colIdx;
                     if (!can_edit(rowIdx, colIdx))  {
                         return;
                     }
@@ -475,9 +475,20 @@
                                     buttons: Ext.Msg.OK
                                 });
                             } else if (res['problemArray']) {
-                                extra_attrs[2][2] = ['background-color: #FF8181;','hi mom'];
+                                Ext.MessageBox.show({
+                                    title:'Error in data',
+                                    msg: 'error: some entries failed constraint or data type check',
+                                    buttons: Ext.Msg.OK
+                                });
+                                for (const [type, x, y] of res['problemArray']) {
+                                    var real_x = vdim.length + x,
+                                        real_y = hdim.length + y;
+                                    if (type == 'constraint')
+                                        extra_attrs[real_y][real_x] = ['background-color: #FF8181;','failed constraint check'];
+                                    else if (type == 'type')
+                                        extra_attrs[real_y][real_x] = ['background-color: #FFB181;','failed type check'];
+                                }
                                 grid.getView().refresh();
-                                console.log(res);
                             }
                         }
                         else

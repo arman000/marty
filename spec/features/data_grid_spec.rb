@@ -93,22 +93,29 @@ feature 'data grid view', js: true do
   def get_grid(to_get: :values)
     get_expr = case to_get
                when :values
-                 'row.push(value);'
+                 'value'
                when :colors
-                 'row.push(grid.getView().getCell(i,j).style.backgroundColor);'
+                 'cell.style.backgroundColor'
+               when :qtips
+                 "('data-qtip' in cell.attributes) && "\
+                 "cell.attributes['data-qtip'].value"
                end
+    db = 'debugger;' if to_get == :qtips
     ret = run_js <<-JS
          var grid = Ext.ComponentQuery.query('grid').find(function(v) {
                 return v.name=='data_grid_edit_grid'
             });
          var store = grid.getStore().data.items;
+         var view = grid.getView();
          var ret = [];
          for (var i = 0; i < store.length; ++i) {
              var row = [];
              var j = 0;
              for (const [key, value] of Object.entries(store[i].data)) {
-                 if (key != 'id')
-                    #{get_expr}
+                 if (key != 'id') {
+                    var cell = view.getCell(i, j);
+                    row.push(#{get_expr});
+                 }
                  j++;
              }
              ret.push(row);
@@ -193,7 +200,7 @@ feature 'data grid view', js: true do
     vdim_area =  { ulx: 0, uly: hdim_size, lrx: vdim_size, lry: row_cnt }
     hdim_area =  { ulx: vdim_size, uly: 0, lrx: col_cnt, lry: hdim_size }
     data_area =  { ulx: vdim_size, uly: hdim_size, lrx: col_cnt,
-                           lry: row_cnt }
+                   lry: row_cnt }
     # check the dim areas
     check_dim(vdim, vdim_size, vdim_area, ui_colors, ui_data) if vdim_size > 0
     check_dim(hdim, hdim_size, hdim_area, ui_colors, ui_data, by_col: false) if
@@ -266,17 +273,15 @@ feature 'data grid view', js: true do
     end
   end
 
-  def check_grid(gn)
+  def validate_grid(gn)
     grid = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid' + gn)
     fix = 'spec/fixtures/misc'
     exp_data = JSON.parse(File.read("#{fix}/grid#{gn}_final_data.json"))
-    binding.pry if grid.data != exp_data
     expect(grid.data).to eq(exp_data)
     exp_meta = JSON.parse(File.read("#{fix}/grid#{gn}_final_meta.json"))
     grid_meta = grid.metadata.map do |md|
       [md['dir'], md['attr'], md['keys']]
     end.sort
-    binding.pry if grid_meta != exp_meta
     expect(grid_meta).to eq(exp_meta)
   end
 
@@ -300,7 +305,7 @@ feature 'data grid view', js: true do
         press('Cancel')
         wait_for_ajax
       end
-    end if false
+    end
     Marty::Config['grid_edit_edit_perm'] = 'edit_all'
     Marty::Config['grid_edit_save_perm'] = 'edit_all'
 
@@ -308,6 +313,9 @@ feature 'data grid view', js: true do
     get_latest = lambda do
       Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid5')
     end
+    grid = get_latest.call
+    grid.constraint = '>=0<200'
+    grid.save!
     pos = grids.index('DataGrid5') + 1
     dgv.select_row(pos)
     press('Edit Grid')
@@ -315,16 +323,60 @@ feature 'data grid view', js: true do
     # test saving and validation etc
     grid_setup
     cell_edit(2, 3, 'abc')
+    cell_edit(3, 3, '250')
     press('Save')
-    expect(page).to have_content('error: bad float "abc"')
+    expect(page).to have_content('error: some entries failed constraint or '\
+                                 'data type check')
     press('OK')
+    colors = get_grid(to_get: :colors)
+    qtips = get_grid(to_get: :qtips)
+    expect(colors[3][2]).to eq('rgb(255, 177, 129)')
+    expect(colors[3][3]).to eq('rgb(255, 129, 129)')
+    expect(qtips[3][2]).to eq('failed type check')
+    expect(qtips[3][3]).to eq('failed constraint check')
+    expect(qtips[0][0]).to eq(false)
+    expect(qtips[0][2]).to eq('mortgage_type')
+    expect(qtips[1][2]).to eq('PLST')
+    expect(qtips[3][0]).to eq('property_state')
+    expect(qtips[3][1]).to eq('property_county_name')
+
+    grid_setup
     cell_edit(2, 3, '123.456')
+    cell_edit(3, 3, '1.1')
+
+    cell_edit(2, 2, 'yo')
+    press('Save')
+    expect(page).to have_content('error: bad range yo')
+    press('OK')
+    cell_edit(2, 2, '>=1')
+
+    cell_edit(2, 0, 'xyz')
+    press('Save')
+    expect(page).to have_content('error: instance xyz of Gemini::MortgageType'\
+                                 ' not found')
+    press('OK')
+    cell_edit(2, 0, 'Conventional')
+
+    cell_edit(0, 3, 'xyz')
+    press('Save')
+    expect(page).to have_content("error: no such Gemini::EnumState: 'xyz'")
+    press('OK')
+    cell_edit(0, 3, 'AK')
+
     press('Save')
     wait_for_ajax
     grid = get_latest.call
     expect(grid.data[0][0]).to eq(123.456)
     press('Edit Grid')
     wait_for_ajax
+
+    colors = get_grid(to_get: :colors)
+    qtips = get_grid(to_get: :qtips)
+    expect(colors[3][2]).to eq('')
+    expect(colors[3][3]).to eq('')
+    expect(qtips[3][2]).to eq(false)
+    expect(qtips[3][2]).to eq(false)
+
     # each time we change the grid, grid_setup needs to ask
     # JS for the updated grid info
     grid_setup
@@ -375,18 +427,18 @@ feature 'data grid view', js: true do
     press('Save')
     wait_for_ajax
     sleep 1
-    check_grid('5')
+    validate_grid('5')
 
     pos = grids.index('DataGrid2') + 1
     dgv.select_row(pos)
     begin
       press('Edit Grid')
       press('Edit Grid')
-    rescue StandardError => e
+    rescue StandardError => e # rubocop:disable Lint/HandleExceptions
     end
     wait_for_ajax
     grid_setup
-    context_click(2,3,2, click: true)
+    context_click(2, 3, 2, click: true)
     grid_setup
     ['99', 'StrNew', 'StrNew2', 'Strnew3', 'StrNew4', 'StrNew5',
      '>10000000<11000000', '12345'].each_with_index do |v, idx|
@@ -394,14 +446,14 @@ feature 'data grid view', js: true do
     end
     press('Save')
     sleep 1
-    check_grid('2')
+    validate_grid('2')
 
     pos = grids.index('DataGrid1') + 1
     dgv.select_row(pos)
     begin
       press('Edit Grid')
       press('Edit Grid')
-    rescue StandardError => e
+    rescue StandardError => e # rubocop:disable Lint/HandleExceptions
     end
     wait_for_ajax
     grid_setup
@@ -413,7 +465,7 @@ feature 'data grid view', js: true do
     end
     press('Save')
     sleep 1
-    check_grid('1')
+    validate_grid('1')
 
     Marty::Config['grid_edit_save_perm'] = 'view'
     pos = grids.index('DataGrid5') + 1
@@ -443,8 +495,11 @@ feature 'data grid view', js: true do
     expect(page).to have_content(errexp)
     exp_log = JSON.parse(File.read('spec/fixtures/misc/grid_log_errs.json'))
     got = Marty::Log.all.select(:message, :details).attributes.map do |l|
-      l.except('id')
+      newl = l.except('id')
+      newl['details'].delete('rec_id')
+      newl
     end
-    expect(got).to eq(exp_log)
+    cmp = struct_compare(got, exp_log)
+    expect(cmp).to be_falsey
   end
 end

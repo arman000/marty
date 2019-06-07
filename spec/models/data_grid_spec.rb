@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Marty::DataGridSpec
+module Marty::DataGridSpec # rubocop:disable Metrics/ModuleLength
   describe DataGrid do
     G1 = <<EOS
 state\tstring\tv\t\t
@@ -812,22 +812,24 @@ EOS
     # or explicit declaration of type (for float which is the default)
     def type_grid(lenient, type, constraint, values3, explicit_float: false)
       lenient_str = lenient ? 'lenient' : nil
+      # rubocop:disable Style/NestedTernaryOperator
       type_str = type == 'float' ? (explicit_float ? 'float' : nil) : type
+      # rubocop:enable Style/NestedTernaryOperator
       top = [lenient_str, type_str].compact.join(' ') + "\t" + constraint + "\n"
-      (/\A\s*\z/.match(top) ? '' : top) +
-      <<~EOS
-       b\tboolean\tv
-       i\tinteger\tv
-       i4\tint4range\tv
-       n\tnumrange\tv
+      (top =~ /\A\s*\z/ ? '' : top) +
+        <<~EOS
+          b\tboolean\tv
+          i\tinteger\tv
+          i4\tint4range\tv
+          n\tnumrange\tv
 
-       true\t1\t<10\t<10.0\t#{values3[0]}
-       \t2\t\t\t#{values3[1]}
-       false\t\t>10\t\t#{values3[2]}
-      EOS
+          true\t1\t<10\t<10.0\t#{values3[0]}
+          \t2\t\t\t#{values3[1]}
+          false\t\t>10\t\t#{values3[2]}
+        EOS
     end
     describe 'constraint' do
-      it "constraint" do
+      it 'constraint' do
         Mcfly.whodunnit = system_user
         Gemini::BudCategory.create!(name: 'cat1')
         Gemini::BudCategory.create!(name: 'cat2')
@@ -853,11 +855,13 @@ EOS
                 end
                 ne = 'no error'
                 if error
+                  # rubocop:disable Lint/Debugger
                   binding.pry if ENV['PRY'] && !err_re.match(got)
                   expect(got).to match(err_re), tnam + ' failed: got ' +
                                                 got || ne
                 else
                   binding.pry if ENV['PRY'] && got
+                  # rubocop:enable Lint/Debugger
                   expect(got).to be_nil, tnam + ' failed: got ' + (got || '')
                 end
               end

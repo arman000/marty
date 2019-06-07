@@ -1,7 +1,7 @@
 lenient
-property_state	string	v	
+property_state	Gemini::EnumState	v	
 property_county_name	string	v	
-mortgage_type	string	h	
+mortgage_type	Gemini::MortgageType	h	
 project_legal_structure_type	string	h	
 financed_unit_count	int4range	h	
 
