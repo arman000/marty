@@ -578,6 +578,11 @@ describe 'lookups for infinity' do
     res = lookup_grid_helper('infinity', 'G8', h, true)
 
     expect(g1_res).to eq res
+
+    # make sure lookup_grid_h works too
+    res_h = Marty::DataGrid.lookup_grid_h('infinity', 'G8', h, true)
+
+    expect(g1_res[0]).to eq res_h
   end
 
   it 'should handle DataGrid typed data grids' do
