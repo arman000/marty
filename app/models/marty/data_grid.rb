@@ -222,11 +222,16 @@ class Marty::DataGrid < Marty::Base
     raise "#{dgn} grid not found" unless dgh
     raise "non-hash arg #{h}" unless Hash === h
 
-    attrs = dgh['metadata'].map { |a| a['attr'] }
+    if dgh['data_type'] != 'Marty::DataGrid'
+      # Narrow hash to needed attrs -- makes the cache work a lot
+      # better in case the hash includes items not in grid
+      # attrs. Can't do this for multi-grids since they pass down
+      # their params.
+      attrs = dgh['metadata'].map { |a| a['attr'] }
+      h = h.slice(*attrs)
+    end
 
-    # Narrow hash to needed attrs -- makes the cache work a lot better
-    # in case the hash includes items not in grid attrs.
-    lookup_grid_h_priv(pt, dgh, h.slice(*attrs), distinct)
+    lookup_grid_h_priv(pt, dgh, h, distinct)
   end
 
   # private method used to cache lookup_grid_distinct_entry_h result
