@@ -216,13 +216,25 @@ class Marty::DataGrid < Marty::Base
     res
   end
 
-  cached_delorean_fn :lookup_grid_h, sig: 4 do |pt, dgn, h, distinct|
+  # this function is cached through lookup_grid_h_priv
+  delorean_fn :lookup_grid_h, sig: 4 do |pt, dgn, h, distinct|
     dgh = lookup_h(pt, dgn)
     raise "#{dgn} grid not found" unless dgh
     raise "non-hash arg #{h}" unless Hash === h
 
-    res = lookup_grid_distinct_entry_h(pt, h, dgh, nil, true, false, distinct)
-    res['result']
+    attrs = dgh['metadata'].map { |a| a['attr'] }
+
+    # Narrow hash to needed attrs -- makes the cache work a lot better
+    # in case the hash includes items not in grid attrs.
+    lookup_grid_h_priv(pt, dgh, h.slice(*attrs), distinct)
+  end
+
+  # private method used to cache lookup_grid_distinct_entry_h result
+  cached_delorean_fn :lookup_grid_h_priv,
+                     private: true, sig: 4 do |pt, dgh, h, distinct|
+
+    lookup_grid_distinct_entry_h(
+      pt, h, dgh, nil, true, false, distinct)['result']
   end
 
   # FIXME: using cached_delorean_fn just for the caching -- this is
