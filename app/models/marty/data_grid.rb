@@ -222,7 +222,7 @@ class Marty::DataGrid < Marty::Base
     raise "#{dgn} grid not found" unless dgh
     raise "non-hash arg #{h}" unless Hash === h
 
-    attrs = dgh['metadata'].map {|a| a["attr"]}
+    attrs = dgh['metadata'].map { |a| a['attr'] }
 
     # Narrow hash to needed attrs -- makes the cache work a lot better
     # in case the hash includes items not in grid attrs.
@@ -230,8 +230,8 @@ class Marty::DataGrid < Marty::Base
   end
 
   # private method used to cache lookup_grid_distinct_entry_h result
-  cached_delorean_fn :lookup_grid_h_priv, private: true, sig: 4 do
-    |pt, dgh, h, distinct|
+  cached_delorean_fn :lookup_grid_h_priv,
+                     private: true, sig: 4 do |pt, dgh, h, distinct|
 
     lookup_grid_distinct_entry_h(
       pt, h, dgh, nil, true, false, distinct)['result']
