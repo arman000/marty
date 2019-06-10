@@ -12,10 +12,20 @@ module Marty; module RSpec; module Chromedriver
         pageLoadStrategy: 'none',
       }
 
+      options = ::Selenium::WebDriver::Chrome::Options.new
+
+      # Add arguments to the driver using the Options interface
+      if opts[:args]
+        opts[:args].each do |arg|
+          options.add_argument("--#{arg}")
+        end
+      end
+
       caps = Selenium::WebDriver::Remote::Capabilities.chrome(copts)
       driver = Capybara::Selenium::Driver.new(app,
                                               browser: :chrome,
-                                              desired_capabilities: caps)
+                                              desired_capabilities: caps,
+                                              options: options)
       yield driver if block_given?
       driver
     end
