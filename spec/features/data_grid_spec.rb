@@ -2,10 +2,8 @@ require 'spec_helper'
 require 'marty_rspec'
 
 feature 'data grid view', js: true do
-  before(:all) do
+  before(:each) do
     marty_whodunnit
-    @save_file = "/tmp/save_#{Process.pid}.psql"
-    save_clean_db(@save_file)
     Marty::Script.load_scripts
     dt = DateTime.parse('2017-1-1')
     p = File.expand_path('../../fixtures/misc', __FILE__)
@@ -13,10 +11,6 @@ feature 'data grid view', js: true do
       n = File.basename(path, '.txt').camelize
       Marty::DataGrid.create_from_import(n, File.read(path), dt)
     end
-  end
-
-  after(:all) do
-    restore_clean_db(@save_file)
   end
 
   def go_to_data_grids
@@ -208,7 +202,7 @@ feature 'data grid view', js: true do
 
     # data section color check
     colors = Set.new
-    iterate_area(data_area, ui_colors) do |cell, row_idx, col_idx|
+    iterate_area(data_area, ui_colors) do |cell, _row_idx, _col_idx|
       colors << cell
     end
     expect(colors.length).to eq(1)
@@ -237,7 +231,7 @@ feature 'data grid view', js: true do
       'Insert Column Right' => :enabled,
       'Delete Column'       => :enabled
     }
-    all_enabled = Hash[all_disabled.map { |k, v| [k, :enabled] }]
+    all_enabled = Hash[all_disabled.map { |k, _v| [k, :enabled] }]
 
     # in the data area, what is allowed depends on whether there
     # are only vdims, hdims, or both
@@ -290,7 +284,8 @@ feature 'data grid view', js: true do
     go_to_data_grids
     dgv = netzke_find('data_grid_view')
     grids = dgv.get_col_vals('name', 5)
-    [['edit_all', true],
+    context_test_all = ENV['DG_FEATURE_QUICK'] != 'true'
+    [['edit_all', context_test_all],
      ['edit_data', false],
      ['view', false]].each do |perm, all_cells|
       grids.each do |grid|

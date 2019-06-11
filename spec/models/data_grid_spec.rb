@@ -492,14 +492,15 @@ EOS
                              'G9',
                              'ltv' => 81,
                             )
-        end        .to raise_error(/matches > 1/)
+        end.to raise_error(/matches > 1/)
 
         err = /Data Grid lookup failed/
         expect do
           lookup_grid_helper('infinity',
                              'G9',
                              { 'state' => 'CA', 'ltv' => nil },
-                             false, false).to raise_error(err)
+                             false, false)
+        end.to raise_error(err)
 
         res = lookup_grid_helper('infinity',
                                  'G9',
@@ -756,9 +757,7 @@ EOS
       end
 
       it 'should be able to export and import back grids' do
-        [G1, G2, G3, G4, G5, G6, G7, G8, G9,
-         Ga, Gb].each_with_index do |grid, i|
-
+        [G1, G2, G3, G4, G5, G6, G7, G8, G9, Ga, Gb].each_with_index do |grid, i|
           dg = dg_from_import("G#{i}", grid)
           g1 = dg.export
           dg = dg_from_import("Gx#{i}", g1)
