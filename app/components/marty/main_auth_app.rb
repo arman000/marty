@@ -1,16 +1,17 @@
-require 'marty/scripting'
-require 'marty/reporting'
-require 'marty/posting_window'
-require 'marty/new_posting_window'
-require 'marty/import_type_view'
-require 'marty/user_view'
-require 'marty/event_view'
-require 'marty/promise_view'
 require 'marty/api_auth_view'
 require 'marty/api_config_view'
 require 'marty/api_log_view'
 require 'marty/config_view'
 require 'marty/data_grid_view'
+require 'marty/background_job_schedule_view'
+require 'marty/event_view'
+require 'marty/import_type_view'
+require 'marty/new_posting_window'
+require 'marty/posting_window'
+require 'marty/promise_view'
+require 'marty/reporting'
+require 'marty/scripting'
+require 'marty/user_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
@@ -112,6 +113,7 @@ class Marty::MainAuthApp < Marty::AuthApp
           :bg_status,
           :bg_stop,
           :bg_restart,
+          :background_job_schedule_view,
         ]
       },
     ]
@@ -276,6 +278,14 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_admin_perm?
   end
 
+  action :background_job_schedule_view do |a|
+    a.text     = 'Schedule Background Jobs'
+    a.tooltip  = 'Edit Delayed Jobs Cron schedules'
+    a.icon_cls = 'fa fa-cog glyph'
+    a.disabled = !self.class.has_admin_perm?
+    a.handler = :netzke_load_component_by_action
+  end
+
   action :log_view do |a|
     a.text     = 'View Log'
     a.tooltip  = 'View Log'
@@ -365,30 +375,43 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   ######################################################################
-
-  component :scripting do |c|
-    c.allow_edit = self.class.has_scripting_perm?
-  end
-  component :reporting
-  component :promise_view
-  component :posting_window
-  component :new_posting_window do |c|
-    c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?
-  end
-  component :import_type_view
-  component :user_view
-  component :event_view
-  component :config_view
-  component :data_grid_view
   component :api_auth_view do |c|
     c.disabled = Marty::Util.warped?
   end
+
   component :api_log_view
+
   component :api_config_view
+
+  component :background_job_schedule_view
+
+  component :config_view
+
+  component :data_grid_view
+
+  component :event_view
+
+  component :import_type_view
 
   component :log_view do |c|
     c.klass = Marty::LogView
   end
+
+  component :new_posting_window do |c|
+    c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?
+  end
+
+  component :posting_window
+
+  component :promise_view
+
+  component :reporting
+
+  component :scripting do |c|
+    c.allow_edit = self.class.has_scripting_perm?
+  end
+
+  component :user_view
 
   endpoint :reload_scripts do |_params|
     Marty::Script.load_scripts

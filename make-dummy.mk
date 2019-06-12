@@ -2,10 +2,12 @@ dummy-app-build:
 	docker-compose --file=docker-compose.dummy.yml build
 
 dummy-app:
-	docker-compose --file=docker-compose.dummy.yml up
+	docker-compose --file=docker-compose.dummy.yml up -d app
+	docker attach marty_app_1
 
 dummy-app-start:
-	docker-compose --file=docker-compose.dummy.yml up app
+	docker-compose --file=docker-compose.dummy.yml up -d app
+	docker attach marty_app_1
 
 dummy-app-stop:
 	docker-compose --file=docker-compose.dummy.yml stop

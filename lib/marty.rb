@@ -20,3 +20,4 @@ require 'marty/json_schema'
 # application's Gemfile. Requiring it here removes the need to add it
 # to the Gemfile
 require 'net-ldap'
+require 'delayed_cron_job'
