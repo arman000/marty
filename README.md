@@ -50,6 +50,13 @@ To delete scripts:
 ```
 $ rake marty:delete_scripts
 ```
+# Scheduled Job
+
+To use scheduled backgroud jobs, add to `config/application.rb`:
+
+```
+  config.active_job.queue_adapter = :delayed_job
+```
 
 # Dummy Application & Testing
 
