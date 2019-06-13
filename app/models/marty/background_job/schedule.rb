@@ -5,7 +5,7 @@ module Marty
 
       # Copied and adjusted:
       # https://github.com/javan/whenever/blob/e4507e2ed2158c603f0c334a8b0a957711db343a/lib/whenever/cron.rb
-      REGEX = %r{\A(((\*?[\d/,\-]*)\s){4}(\*?([\d/,\-])*\s)(\*?([\d/,\-])*))\z}i
+      REGEX = %r{\A(((\*?[\d/,\-]*)\s){3,4}(\*?([\d/,\-])*\s)(\*?([\d/,\-])*))\z}i
 
       validates :job_class, :cron, :state, presence: true
       validates :job_class, uniqueness: true
