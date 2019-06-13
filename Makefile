@@ -1,2 +1,2 @@
-include make-dummy.mk
+include make-app.mk
 

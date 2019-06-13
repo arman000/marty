@@ -24,8 +24,7 @@ services:
       - .:/opt/app:delegated
       - '.bash_history.docker:/root/.bash_history'
       - '.pry_history.docker:/root/.pry_history'
-    volumes_from:
-      - bundle_box
+      - bundle_box:/bundle_box
     tty: true
     stdin_open: true
 
@@ -41,4 +40,5 @@ services:
 
 volumes:
   postgresql-data:
+  bundle_box:
 
