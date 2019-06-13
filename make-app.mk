@@ -1,47 +1,46 @@
-dummy-app-build:
+app-build:
 	docker-compose --file=docker-compose.dummy.yml build
 
-dummy-app:
+app:
 	docker-compose --file=docker-compose.dummy.yml up -d app
 	docker attach marty_app_1
 
-dummy-app-start:
+app-start:
 	docker-compose --file=docker-compose.dummy.yml up -d app
 	docker attach marty_app_1
 
-dummy-app-stop:
+app-stop:
 	docker-compose --file=docker-compose.dummy.yml stop
 
-dummy-app-down:
+app-down:
 	docker-compose --file=docker-compose.dummy.yml down
 
-dummy-app-bash:
+app-bash:
 	docker-compose --file=docker-compose.dummy.yml run --rm app bash
 
-dummy-app-console:
+app-console:
 	docker-compose --file=docker-compose.dummy.yml run --rm app /bin/bash -c "cd spec/dummy && bin/rails c"
 
-dummy-app-initialise-docker:
+app-initialise-docker:
 	touch .bash_history.docker
 	touch .pry_history.docker
-	make dummy-app-install
-	make dummy-app-db-prepare
+	make app-install
+	make app-db-prepare
 
-dummy-app-install:
+app-install:
 	docker-compose --file=docker-compose.dummy.yml run --rm app gem install bundler
-	make dummy-app-install-bundle
+	make app-install-bundle
 
-dummy-app-install-bundle:
+app-install-bundle:
 	docker-compose --file=docker-compose.dummy.yml run --rm app bundle
 
-dummy-app-db-drop:
+app-db-drop:
 	docker-compose --file=docker-compose.dummy.yml run --rm app rake db:drop
 
-dummy-app-db-prepare:
+app-db-prepare:
 	cp spec/dummy/config/database.yml.example spec/dummy/config/database.yml
 	docker-compose --file=docker-compose.dummy.yml run --rm app bundle exec rake db:create db:migrate db:seed app:marty:load_scripts
 
-dummy-app-db-seed:
+app-db-seed:
 	docker-compose --file=docker-compose.dummy.yml run --rm app rake db:seed
-
 

@@ -72,15 +72,15 @@ $ cp -r PATH/TO/YOUR/EXTJS/FILES spec/dummy/public/extjs
 You can run it with docker:
 
 ```bash
-$ make dummy-app-initialise-docker
+$ make app-initialise-docker
 
-$ make dummy-app-start
+$ make app-start
 ```
 
 To run tests:
 
 ```bash
-$ make dummy-app-bash
+$ make app-bash
 
 $ HEADLESS=true rspec
 ```
