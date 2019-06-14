@@ -4,6 +4,7 @@ require 'marty/api_log_view'
 require 'marty/config_view'
 require 'marty/data_grid_view'
 require 'marty/schedule_jobs_dashboard'
+require 'marty/data_grid_user_view'
 require 'marty/event_view'
 require 'marty/import_type_view'
 require 'marty/new_posting_window'
@@ -96,6 +97,7 @@ class Marty::MainAuthApp < Marty::AuthApp
         icon_cls: 'fa fa-window-restore glyph',
       menu: [
         :data_grid_view,
+        :data_grid_user_view,
         :reporting,
         :scripting,
         :promise_view,
@@ -237,7 +239,14 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   action :data_grid_view do |a|
-    a.text      = I18n.t('data_grid_view', default: 'Data Grids')
+    a.text      = I18n.t('data_grid_view')
+    a.handler   = :netzke_load_component_by_action
+    a.icon_cls = 'fa fa-table glyph'
+    a.disabled = !self.class.has_any_perm?
+  end
+
+  action :data_grid_user_view do |a|
+    a.text      = I18n.t('data_grid_user_view')
     a.handler   = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-table glyph'
     a.disabled = !self.class.has_any_perm?
@@ -388,6 +397,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :config_view
 
   component :data_grid_view
+  component :data_grid_user_view
 
   component :event_view
 

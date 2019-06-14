@@ -17,8 +17,10 @@ en:
   create_posting: Create
   api_auth: API Authorization
   event_view: Event View
-  data_grid_view: Data Grids
-  data_grid: Data Grids
+  data_grid_view: Data Grids Admin
+  data_grid: Data Grids Admin
+  data_grid_user: Data Grids
+  data_grid_user_view: Data Grids
 
   data_import_view:
     import: Import
@@ -29,6 +31,7 @@ en:
     admin: Admin
     dev: Developer
     user_manager: User Manager
+    data_grid_editor: Data Grid Editor
 
   posting_types:
     BASE: BASE
@@ -175,3 +178,9 @@ en:
     grid:
       base:
         view_record: "%{model} (Read-only)"
+
+  data_grid_view_perms:
+    perm_view: Can View
+    perm_edit_data: Can Edit Data
+    perm_edit_all: Can Edit All
+    

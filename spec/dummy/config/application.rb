@@ -79,6 +79,7 @@ module Dummy
                           :dev,
                           :viewer,
                           :user_manager,
+                          :data_grid_editor,
                          ]
     #config.marty.default_posting_type = 'BASE'
     config.secret_key_base = "SECRET_KEY_BASE"

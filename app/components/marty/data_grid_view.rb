@@ -98,6 +98,9 @@ module Marty; class DataGridView < McflyGridPanel
         :lenient,
         :data_type,
         :constraint,
+        :perm_view,
+        :perm_edit_data,
+        :perm_edit_all,
         :created_dt,
       ]
 
@@ -115,6 +118,14 @@ module Marty; class DataGridView < McflyGridPanel
 
     begin
       DataGrid.create_from_import(data['name'], data['export'])
+      permstrs = %w[perm_view perm_edit_data perm_edit_all]
+      view, edit_data, edit_all = data.values_at(*permstrs)
+      dg.permissions = {
+        view: view.present? ? view : [],
+        edit_data: edit_data.present? ? edit_data : [],
+        edit_all: edit_all.present? ? edit_all : [],
+      }
+      dg.save!
       client.success = true
       client.netzke_on_submit_success
     rescue StandardError => exc
@@ -129,6 +140,14 @@ module Marty; class DataGridView < McflyGridPanel
 
     begin
       dg.update_from_import(data['name'], data['export'])
+      permstrs = %w[perm_view perm_edit_data perm_edit_all]
+      view, edit_data, edit_all = data.values_at(*permstrs)
+      dg.permissions = {
+        view: view.present? ? view : [],
+        edit_data: edit_data.present? ? edit_data : [],
+        edit_all: edit_all.present? ? edit_all : [],
+      }
+      dg.save!
       client.success = true
       client.netzke_on_submit_success
     rescue StandardError => exc
@@ -168,14 +187,8 @@ module Marty; class DataGridView < McflyGridPanel
     client.netzke_client_show_grid maxcount, res, 'Data Grid'
   end
 
-  # placeholders for grid editing permission logic.
-  # for now, this allows the rspec to control the permission
-  def self.get_edit_edit_permission
-    Marty::Config['grid_edit_edit_perm'] || 'edit_all'
-  end
-
-  def self.get_edit_save_permission
-    Marty::Config['grid_edit_save_perm'] || 'edit_all'
+  def self.get_edit_permission(_permissions)
+    'edit_all'
   end
 
   endpoint :edit_grid do |params|
@@ -193,9 +206,21 @@ module Marty; class DataGridView < McflyGridPanel
     vdim = md.map { |m| m['dir'] == 'v' && m['attr'] }.select { |v| v }
     hdim_en = hdim.map { |d| I18n.t('attributes.' + d, default: d) }
     vdim_en = vdim.map { |d| I18n.t('attributes.' + d, default: d) }
-    name = "Editing Data Grid '#{dg.name}'"
-    permission = Marty::DataGridView.get_edit_edit_permission
-    client.edit_grid(record_id, hdim_en, vdim_en, res, name, permission)
+    perm = self.class.get_edit_permission(dg.permissions)
+    # should never happen
+    return client.netzke_notify('No permission to edit/view grid.') unless perm
+
+    doing = case perm
+            when 'view'
+              'Viewing'
+            when 'edit_all'
+              'Editing (all)'
+            when 'edit_data'
+              'Editing (data only)'
+            end
+    name = "#{doing} Data Grid '#{dg.name}'"
+
+    client.edit_grid(record_id, hdim_en, vdim_en, res, name, perm)
   end
 
   endpoint :save_grid do |params|
@@ -213,8 +238,31 @@ module Marty; class DataGridView < McflyGridPanel
   def default_form_items
     [
       :name,
+      :perm_view, :perm_edit_data, :perm_edit_all,
       textarea_field(:export, height: 300, hide_label: true),
     ]
+  end
+
+  [:perm_view, :perm_edit_data, :perm_edit_all].each do |p|
+    perm = p.to_s.split('_')[1..-1].join('_')
+    attribute p do |c|
+      c.width   = 100
+      c.flex    = 1
+      c.label   = I18n.t("data_grid_view_perms.#{p}")
+      c.type    = :string
+      c.getter = lambda do |r|
+        r.permissions[perm].sort
+      end
+      c.setter = ->(r, v) { }
+
+      c.editor_config = {
+        multi_select: true,
+        empty_text:   I18n.t('user_grid.select_roles'),
+        store:        Role.pluck(:name).sort,
+        type:         :string,
+        xtype:        :combo,
+      }
+    end
   end
 
   component :edit_window do |c|
@@ -228,11 +276,11 @@ module Marty; class DataGridView < McflyGridPanel
   end
 
   attribute :name do |c|
-    c.width = 120
+    c.width = 400
   end
 
   attribute :constraint do |c|
-    c.width = 100
+    c.width = 150
   end
 
   attribute :hcols do |c|
@@ -265,6 +313,7 @@ module Marty; class DataGridView < McflyGridPanel
     c.format    = 'Y-m-d H:i'
     c.read_only = true
   end
+
 end; end
 
 DataGridView = Marty::DataGridView

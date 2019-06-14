@@ -15,8 +15,9 @@ module Marty
       end
 
       def self.call(params)
-        user_perm = Marty::DataGridView.get_edit_save_permission
         rec_id = params['record_id']
+        dg = Marty::DataGrid.mcfly_pt('infinity').find_by(group_id: rec_id)
+        user_perm = Marty::DataGridView.get_edit_permission(dg.permissions)
         data = params['data']
         raise GridError.new('entered with view permissions', data, rec_id) if
           user_perm == 'view'
@@ -24,7 +25,6 @@ module Marty
         data_as_array = data.map do |row|
           row.keys.map { |key| row[key] }
         end
-        dg = Marty::DataGrid.mcfly_pt('infinity').find_by(group_id: rec_id)
         vcnt = dg.metadata.select { |md| md['dir'] == 'v' }.count
         hcnt = dg.metadata.select { |md| md['dir'] == 'h' }.count
         cur_data_dim = [dg.data.length, dg.data[0].length]

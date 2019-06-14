@@ -2,6 +2,9 @@ require 'spec_helper'
 require 'marty_rspec'
 
 feature 'data grid view', js: true do
+  before(:all) do
+    self.use_transactional_tests = true
+  end
   before(:each) do
     marty_whodunnit
     Marty::Script.load_scripts
@@ -11,12 +14,23 @@ feature 'data grid view', js: true do
       n = File.basename(path, '.txt').camelize
       Marty::DataGrid.create_from_import(n, File.read(path), dt)
     end
+    u = Marty::User.create!(login: 'grid_user',
+                            firstname: 'grid',
+                            lastname: 'user',
+                            active: true)
+    r = Marty::Role.find_by(name: 'data_grid_editor')
+    Marty::UserRole.create!(user_id: u.id, role_id: r.id)
+    @no_perm = {'view' => [],
+                'edit_data' => [],
+                'edit_all' => []}
   end
 
-  def go_to_data_grids
+  def go_to_data_grids(admin: true)
+    log_in_as(admin ? 'marty' : 'grid_user')
     press('Applications')
-    press('Data Grids')
-    expect(page).to have_content 'Data Grids'
+    dest = 'Data Grids' + (admin ? ' Admin' : '')
+    press(dest)
+    expect(page).to have_content dest
   end
 
   # setup the info for the ext grid
@@ -24,7 +38,7 @@ feature 'data grid view', js: true do
     widths, rows = get_grid_info
     @grid = page.all(:xpath,
                      ".//div[contains(@class, 'x-grid-item-container')]").
-              reject { |e| e.text.include?('2016-12-31') }.first
+              reject { |e| e.text.include?('DataGrid1') }.first
     @gridx = @grid.native.rect.x
     @gridy = @grid.native.rect.y
     height = @grid.native.size.height
@@ -278,18 +292,70 @@ feature 'data grid view', js: true do
     expect(grid_meta).to eq(exp_meta)
   end
 
-  it 'dg editor' do
+  it "dg perms" do
     log_in_as('marty')
     go_to_data_grids
     dgv = netzke_find('data_grid_view')
     grids = dgv.get_col_vals('name', 5)
+    set_one = lambda do |grid, perms|
+      pos = grids.index(grid) + 1
+      dgv.select_row(pos)
+      press('Edit')
+      wait_for_ajax
+      view_combo = netzke_find('Can View', 'combobox')
+      edit_data_combo = netzke_find('Can Edit Data', 'combobox')
+      edit_all_combo = netzke_find('Can Edit All', 'combobox')
+      view_combo.select_values(perms['view'].join(', '))
+      edit_data_combo.select_values(perms['edit_data'].join(', '))
+      edit_all_combo.select_values(perms['edit_all'].join(', '))
+      press('OK')
+      wait_for_ajax
+    end
+    dg1p = {'view' => ['data_grid_editor'],
+            'edit_data' => ['data_grid_editor'],
+            'edit_all' => ['admin']}
+    dg2p = {'view' => ['data_grid_editor', 'user_manager'],
+            'edit_data' => ['data_grid_editor', 'user_manager'],
+            'edit_all' => ['data_grid_editor', 'admin']}
+    set_one.call('DataGrid1', dg1p)
+    set_one.call('DataGrid2', dg2p)
+    dg1 = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid1')
+    dg2 = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid2')
+    expect(dg1.permissions).to eq (dg1p)
+    expect(dg2.permissions).to eq (dg2p)
+
+    set_one.call('DataGrid1', @no_perm)
+    set_one.call('DataGrid2', @no_perm)
+    dg1 = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid1')
+    dg2 = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid2')
+    expect(dg1.permissions).to eq (@no_perm)
+    expect(dg2.permissions).to eq (@no_perm)
+  end
+
+  it 'dg editor' do
+    log_in_as('grid_user')
+    go_to_data_grids(admin: false)
+    dgv = netzke_find('data_grid_user_view')
     context_test_all = ENV['DG_FEATURE_QUICK'] != 'true'
-    [['edit_all', context_test_all],
+    set_perm = lambda do |perm|
+      Marty::DataGrid.mcfly_pt('infinity').each do |dg|
+        dg.permissions = @no_perm + {perm => ['data_grid_editor']}
+        dg.save!
+      end if perm
+    end
+    [[nil, nil],
+     ['edit_all', context_test_all],
      ['edit_data', false],
      ['view', false]].each do |perm, all_cells|
+
+      set_perm.call(perm)
+      press('Refresh')
+      grids = dgv.get_col_vals('name', 5)
+      if perm.nil?
+        expect(grids).to be_nil
+        next
+      end
       grids.each do |grid|
-        Marty::Config['grid_edit_edit_perm'] = perm
-        Marty::Config['grid_edit_save_perm'] = perm
         pos = grids.index(grid) + 1
         dgv.select_row(pos)
         press('Edit Grid')
@@ -300,8 +366,12 @@ feature 'data grid view', js: true do
         wait_for_ajax
       end
     end
-    Marty::Config['grid_edit_edit_perm'] = 'edit_all'
-    Marty::Config['grid_edit_save_perm'] = 'edit_all'
+
+    set_perm.call('edit_all')
+    log_in_as('grid_user')
+    go_to_data_grids(admin: false)
+    dgv = netzke_find('data_grid_user_view')
+    grids = dgv.get_col_vals('name', 5)
 
     # now test some editing, saving, and cancel logic
     get_latest = lambda do
@@ -460,40 +530,5 @@ feature 'data grid view', js: true do
     press('Save')
     sleep 1
     validate_grid('1')
-
-    Marty::Config['grid_edit_save_perm'] = 'view'
-    pos = grids.index('DataGrid5') + 1
-    dgv.select_row(pos)
-    count = 1
-    begin
-      press('Edit Grid')
-      wait_for_ajax
-      grid_setup
-      cell_edit(2, 3, '123.456')
-    rescue StandardError => e
-      if count > 0
-        sleep 1
-        retry
-      end
-      count -= 1
-    end
-    press('Save')
-    errexp = 'error: save_grid: entered with view permissions'
-    expect(page).to have_content(errexp)
-    press('OK')
-    wait_for_ajax
-    context_click(2, 4, 4, click: true)
-    Marty::Config['grid_edit_save_perm'] = 'edit_data'
-    press('Save')
-    errexp = 'error: save_grid: grid modification not allowed'
-    expect(page).to have_content(errexp)
-    exp_log = JSON.parse(File.read('spec/fixtures/misc/grid_log_errs.json'))
-    got = Marty::Log.all.select(:message, :details).attributes.map do |l|
-      newl = l.except('id')
-      newl['details'].delete('rec_id')
-      newl
-    end
-    cmp = struct_compare(got, exp_log)
-    expect(cmp).to be_falsey
   end
 end
