@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'under Sytem menu, User Management worflows', js: true do
+feature 'under System menu, User Management worflows', js: true do
   def go_to_user_view
     press('System')
     press('User Management')
@@ -114,6 +114,9 @@ feature 'under Sytem menu, User Management worflows', js: true do
       by 'check buttons' do
         find(:btn, 'New User', match: :first)
         user_view.select_row(1)
+        expect { find(:btn, 'New User') }.not_to raise_error
+        expect { find(:btn, 'Edit') }.not_to raise_error
+        expect { find(:btn, 'Delete') }.not_to raise_error
         expect(btn_disabled?('New User')).to be_falsy
         expect(btn_disabled?('Edit')).to be_falsy
         expect(btn_disabled?('Delete')).to be_falsy
@@ -127,6 +130,9 @@ feature 'under Sytem menu, User Management worflows', js: true do
       by 'check buttons' do
         find(:btn, 'New User', match: :first)
         user_view.select_row(1)
+        expect { find(:btn, 'New User') }.not_to raise_error
+        expect { find(:btn, 'Edit') }.not_to raise_error
+        expect { find(:btn, 'Delete') }.not_to raise_error
         expect(btn_disabled?('New User')).to be_falsy
         expect(btn_disabled?('Edit')).to be_falsy
         expect(btn_disabled?('Delete')).to be_falsy
@@ -140,9 +146,10 @@ feature 'under Sytem menu, User Management worflows', js: true do
       user_view = netzke_find('user_view')
       by 'check buttons' do
         user_view.select_row(1)
-        expect(page).not_to have_content('New User')
-        expect(page).not_to have_content('Edit')
-        expect(page).not_to have_content('Delete')
+        err = /Unable to find visible btn/
+        expect { find(:btn, 'New User') }.to raise_error(err)
+        expect { find(:btn, 'Edit') }.to raise_error(err)
+        expect { find(:btn, 'Delete') }.to raise_error(err)
       end
     end
 
@@ -153,9 +160,10 @@ feature 'under Sytem menu, User Management worflows', js: true do
       user_view = netzke_find('user_view')
       by 'check buttons' do
         user_view.select_row(1)
-        expect(page).not_to have_content('New User')
-        expect(page).not_to have_content('Edit')
-        expect(page).not_to have_content('Delete')
+        err = /Unable to find visible btn/
+        expect { find(:btn, 'New User') }.to raise_error(err)
+        expect { find(:btn, 'Edit') }.to raise_error(err)
+        expect { find(:btn, 'Delete') }.to raise_error(err)
       end
     end
   end

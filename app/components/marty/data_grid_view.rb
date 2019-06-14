@@ -253,7 +253,7 @@ module Marty; class DataGridView < McflyGridPanel
       c.getter = lambda do |r|
         r.permissions[perm].sort
       end
-      c.setter = ->(r, v) { }
+      c.setter = ->(r, v) {}
 
       c.editor_config = {
         multi_select: true,
@@ -313,7 +313,6 @@ module Marty; class DataGridView < McflyGridPanel
     c.format    = 'Y-m-d H:i'
     c.read_only = true
   end
-
 end; end
 
 DataGridView = Marty::DataGridView

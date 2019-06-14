@@ -20,9 +20,9 @@ feature 'data grid view', js: true do
                             active: true)
     r = Marty::Role.find_by(name: 'data_grid_editor')
     Marty::UserRole.create!(user_id: u.id, role_id: r.id)
-    @no_perm = {'view' => [],
-                'edit_data' => [],
-                'edit_all' => []}
+    @no_perm = { 'view' => [],
+                 'edit_data' => [],
+                 'edit_all' => [] }
   end
 
   def go_to_data_grids(admin: true)
@@ -292,7 +292,7 @@ feature 'data grid view', js: true do
     expect(grid_meta).to eq(exp_meta)
   end
 
-  it "dg perms" do
+  it 'dg perms' do
     log_in_as('marty')
     go_to_data_grids
     dgv = netzke_find('data_grid_view')
@@ -311,25 +311,25 @@ feature 'data grid view', js: true do
       press('OK')
       wait_for_ajax
     end
-    dg1p = {'view' => ['data_grid_editor'],
-            'edit_data' => ['data_grid_editor'],
-            'edit_all' => ['admin']}
-    dg2p = {'view' => ['data_grid_editor', 'user_manager'],
-            'edit_data' => ['data_grid_editor', 'user_manager'],
-            'edit_all' => ['data_grid_editor', 'admin']}
+    dg1p = { 'view' => ['data_grid_editor'],
+             'edit_data' => ['data_grid_editor'],
+             'edit_all' => ['admin'] }
+    dg2p = { 'view' => ['data_grid_editor', 'user_manager'],
+             'edit_data' => ['data_grid_editor', 'user_manager'],
+            'edit_all' => ['data_grid_editor', 'admin'] }
     set_one.call('DataGrid1', dg1p)
     set_one.call('DataGrid2', dg2p)
     dg1 = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid1')
     dg2 = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid2')
-    expect(dg1.permissions).to eq (dg1p)
-    expect(dg2.permissions).to eq (dg2p)
+    expect(dg1.permissions).to eq(dg1p)
+    expect(dg2.permissions).to eq(dg2p)
 
     set_one.call('DataGrid1', @no_perm)
     set_one.call('DataGrid2', @no_perm)
     dg1 = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid1')
     dg2 = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid2')
-    expect(dg1.permissions).to eq (@no_perm)
-    expect(dg2.permissions).to eq (@no_perm)
+    expect(dg1.permissions).to eq(@no_perm)
+    expect(dg2.permissions).to eq(@no_perm)
   end
 
   it 'dg editor' do
@@ -338,10 +338,12 @@ feature 'data grid view', js: true do
     dgv = netzke_find('data_grid_user_view')
     context_test_all = ENV['DG_FEATURE_QUICK'] != 'true'
     set_perm = lambda do |perm|
-      Marty::DataGrid.mcfly_pt('infinity').each do |dg|
-        dg.permissions = @no_perm + {perm => ['data_grid_editor']}
-        dg.save!
-      end if perm
+      if perm
+        Marty::DataGrid.mcfly_pt('infinity').each do |dg|
+          dg.permissions = @no_perm + { perm => ['data_grid_editor'] }
+          dg.save!
+        end
+      end
     end
     [[nil, nil],
      ['edit_all', context_test_all],

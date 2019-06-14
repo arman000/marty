@@ -54,7 +54,7 @@ module Marty; module RSpec; module Netzke
       begin
         cmp = first("a[data-qtip='#{button_name}']")
         cmp ||= all(:xpath, './/a', text: button_name.to_s).
-                  detect { |c| c.text == button_name.to_s}
+                  detect { |c| c.text == button_name.to_s }
         cmp ||= find(:btn, button_name, match: :first)
         cmp.click
         true
