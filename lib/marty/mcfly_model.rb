@@ -10,10 +10,8 @@ module Mcfly::Model
       !private && q.is_a?(ActiveRecord::Base) ? make_openstruct(q) : q
     end
 
-    def base_mcfly_lookup(meth, name, options = {}, &block)
-      priv = options[:private]
-
-      send(meth, name, options) do |ts, *args|
+    def base_mcfly_lookup(name, options = {}, &block)
+      delorean_fn name, options do |ts, *args|
         raise 'time cannot be nil' if ts.nil?
 
         # FIXME: sig is removed from delorean. We need to find a better way
@@ -37,16 +35,16 @@ module Mcfly::Model
 
         q = q.first if q.respond_to?(:first) && options[:mode] == :first
 
-        hash_if_necessary(q, priv)
+        hash_if_necessary(q, options[:private])
       end
     end
 
     def cached_mcfly_lookup(name, options = {}, &block)
-      base_mcfly_lookup(:cached_delorean_fn, name, options, &block)
+      base_mcfly_lookup(name, options.merge(cache: true), &block)
     end
 
     def mcfly_lookup(name, options = {}, &block)
-      base_mcfly_lookup(:delorean_fn, name, options, &block)
+      base_mcfly_lookup(name, options, &block)
     end
 
     def gen_mcfly_lookup(name, attrs, options = {})
@@ -80,8 +78,7 @@ module Mcfly::Model
         raise 'bad attrs' unless Array === attrs
       end
 
-      fn = cache ? :cached_delorean_fn : :delorean_fn
-      base_mcfly_lookup(fn, name, options + { sig:  attrs.length + 1,
+      base_mcfly_lookup(name, options + { sig:  attrs.length + 1,
                                              mode: mode }) do |_t, *attr_list|
 
         attr_list_ids = attr_list.each_with_index.map do |_x, i|
@@ -140,10 +137,15 @@ module Mcfly::Model
       raise "need #{rel_attr} argument" unless lpi
 
       # cache if mode is not nil
-      fn = options.fetch(:mode, :first) ? :cached_delorean_fn : :delorean_fn
       priv = options[:private]
 
-      send(fn, name, sig: attrs.length + 1) do |ts, *args|
+      delorean_options = {
+        private: options.fetch(:private, false),
+        cache: options.fetch(:cache, false),
+        sig: attrs.length + 1
+      }
+
+      delorean_fn name, delorean_options do |ts, *args|
         # Example: rel is a Gemini::SecurityInstrument instance.
         rel = args[lpi]
         raise "#{rel_attr} can't be nil" unless rel

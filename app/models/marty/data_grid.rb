@@ -86,13 +86,13 @@ class Marty::DataGrid < Marty::Base
 
   # FIXME: if the caller requests data as part of fields, there could
   # be memory concerns with caching since some data_grids have massive data
-  cached_delorean_fn :lookup_h, sig: [2, 3] do |pt, name, fields = nil|
+  delorean_fn :lookup_h, cache: true, sig: [2, 3] do |pt, name, fields = nil|
     fields ||= %w(id group_id created_dt metadata data_type name)
     dga = mcfly_pt(pt).where(name: name).pluck(*fields).first
     dga && Hash[fields.zip(dga)]
   end
 
-  cached_delorean_fn :exists, sig: 2 do |pt, name|
+  delorean_fn :exists, cache: true, sig: 2 do |pt, name|
     Marty::DataGrid.mcfly_pt(pt).where(name: name).exists?
   end
 
@@ -235,16 +235,16 @@ class Marty::DataGrid < Marty::Base
   end
 
   # private method used to cache lookup_grid_distinct_entry_h result
-  cached_delorean_fn :lookup_grid_h_priv,
-                     private: true, sig: 4 do |pt, dgh, h, distinct|
+  delorean_fn :lookup_grid_h_priv,
+              private: true, cache: true, sig: 4 do |pt, dgh, h, distinct|
 
     lookup_grid_distinct_entry_h(
       pt, h, dgh, nil, true, false, distinct)['result']
   end
 
-  # FIXME: using cached_delorean_fn just for the caching -- this is
+  # FIXME: using delorean_fn just for the caching -- this is
   # not expected to be called from Delorean.
-  cached_delorean_fn :find_class_instance, sig: 3 do |pt, klass, v|
+  delorean_fn :find_class_instance, cache: true, sig: 3 do |pt, klass, v|
     if ::Marty::EnumHelper.pg_enum?(klass: klass)
       klass.find_by_name(v)
     else
