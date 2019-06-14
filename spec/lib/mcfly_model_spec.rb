@@ -83,10 +83,10 @@ describe 'McflyModel' do
       {
         'AA' => script,
       }, dt)
-    @errs = ['E1', 'lookup_p',
-             'E2', 'clookup_p',
-             'E3', 'lookupn_p',
-             'E4', 'clookupn_p']
+    @errs = ['E1', 'lookup',
+             'E2', 'clookup',
+             'E3', 'lookupn',
+             'E4', 'clookupn']
 
     @errs.in_groups_of(2) do |name, fn|
       Marty::Script.load_script_bodies(
@@ -170,34 +170,6 @@ describe 'McflyModel' do
           )
         end.to raise_error(ArgumentError, err)
       end
-    end
-  end
-
-  it 'raises exception when too many arguments passed (2)' do
-    # non-generated
-    aggregate_failures 'errors' do
-      expect do
-        Marty::ScriptSet.new.get_engine('E5').evaluate(
-          'Err',
-          ['result'],
-          'pt' => Time.zone.now, 'e_id' => nil, 'bc_id' => nil
-        )
-      end.to raise_error(
-        ArgumentError,
-        /Too many args to a_func_p/
-      )
-
-      expect do
-        Marty::ScriptSet.new.get_engine('E6').evaluate(
-          'Err',
-          ['result'],
-          'pt' => Time.zone.now, 'e_id' => nil,
-           'bc_id' => nil, 'mm' => nil
-        )
-      end.to raise_error(
-        ArgumentError,
-        /Too many args to b_func_p/
-      )
     end
   end
 

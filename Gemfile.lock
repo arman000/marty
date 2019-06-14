@@ -1,14 +1,14 @@
 PATH
   remote: .
   specs:
-    marty (2.7.3)
+    marty (2.9.0)
       aws-sigv4 (~> 1.0, >= 1.0.2)
       axlsx (= 3.0.0pre)
       coderay
       daemons (~> 1.3.1)
       delayed_cron_job
       delayed_job_active_record
-      delorean_lang (~> 0.6)
+      delorean_lang (~> 1.0)
       json-schema
       mcfly (~> 0.0.20)
       net-ldap (~> 0.16.1)
@@ -97,9 +97,9 @@ GEM
     delayed_job_active_record (4.1.3)
       activerecord (>= 3.0, < 5.3)
       delayed_job (>= 3.0, < 5)
-    delorean_lang (0.6.1)
-      activerecord (>= 3.2)
-      treetop (~> 1.5)
+    delorean_lang (1.0.0)
+      activerecord
+      treetop
     diff-lcs (1.3)
     erubi (1.8.0)
     execjs (2.7.0)
