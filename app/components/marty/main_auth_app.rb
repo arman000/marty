@@ -3,7 +3,7 @@ require 'marty/api_config_view'
 require 'marty/api_log_view'
 require 'marty/config_view'
 require 'marty/data_grid_view'
-require 'marty/background_job_schedule_view'
+require 'marty/schedule_jobs_dashboard'
 require 'marty/event_view'
 require 'marty/import_type_view'
 require 'marty/new_posting_window'
@@ -113,7 +113,7 @@ class Marty::MainAuthApp < Marty::AuthApp
           :bg_status,
           :bg_stop,
           :bg_restart,
-          :background_job_schedule_view,
+          :schedule_jobs_dashboard,
         ]
       },
     ]
@@ -278,8 +278,8 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_admin_perm?
   end
 
-  action :background_job_schedule_view do |a|
-    a.text     = 'Schedule Background Jobs'
+  action :schedule_jobs_dashboard do |a|
+    a.text     = 'Schedule Jobs Dashboard'
     a.tooltip  = 'Edit Delayed Jobs Cron schedules'
     a.icon_cls = 'fa fa-cog glyph'
     a.disabled = !self.class.has_admin_perm?
@@ -383,7 +383,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   component :api_config_view
 
-  component :background_job_schedule_view
+  component :schedule_jobs_dashboard
 
   component :config_view
 
