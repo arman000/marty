@@ -20,6 +20,7 @@ group :development, :test do
   gem 'rails-controller-testing'
   gem 'rspec-instafail', require: false
   gem 'rspec-rails'
+  gem 'rspec-retry'
   gem 'rubocop', require: false
   gem 'selenium-webdriver'
   gem 'timecop'

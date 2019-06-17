@@ -14,6 +14,8 @@ Dummy::Application.initialize! unless Dummy::Application.initialized?
 ActiveRecord::Migrator.migrate File.expand_path('../../db/migrate/', __FILE__)
 ActiveRecord::Migrator.migrate File.expand_path('../dummy/db/migrate/', __FILE__)
 
+require 'rspec/retry'
+
 RSpec.configure do |config|
   config.include Marty::RSpec::Suite
   config.include Marty::RSpec::SharedConnection
@@ -58,4 +60,16 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
 
   Netzke::Testing.rspec_init(config)
+
+  config.verbose_retry = true
+  config.display_try_failure_messages = true
+
+  config.around :each, :js do |ex|
+    ex.run_with_retry retry: 3
+  end
+
+  config.retry_callback = proc do |ex|
+    # run some additional clean up task - can be filtered by example metadata
+    Capybara.reset! if ex.metadata[:js]
+  end
 end
