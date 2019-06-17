@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'Background jobs schedule view', js: true do
+feature 'Schedule Jobs Dashboard', js: true do
   before do
     Delayed::Job.delete_all
     populate_test_users
@@ -12,17 +12,17 @@ feature 'Background jobs schedule view', js: true do
       wait_for_ajax
       press('System')
       press('Background Jobs')
-      press('Schedule Background Jobs')
+      press('Schedule Jobs Dashboard')
       wait_for_ajax
     end
 
     it 'access denied' do
-      expect(page).to_not have_content 'Background Jobs Schedule'
+      expect(page).to_not have_content 'Schedule Jobs Dashboard'
     end
   end
 
   context 'as admin' do
-    let(:schedule_view) { netzke_find('background_job_schedule_view') }
+    let(:schedule_view) { netzke_find('schedule_jobs_dashboard') }
 
     let!(:schedule) do
       Marty::BackgroundJob::Schedule.create(
@@ -44,11 +44,11 @@ feature 'Background jobs schedule view', js: true do
       wait_for_ajax
       press('System')
       press('Background Jobs')
-      press('Schedule Background Jobs')
+      press('Schedule Jobs Dashboard')
 
       wait_for_ajax
 
-      expect(page).to have_content 'Background Jobs Schedule'
+      expect(page).to have_content 'Schedule Jobs Dashboard'
     end
 
     it 'creates new schedule' do

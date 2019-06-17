@@ -1,4 +1,4 @@
-class Marty::BackgroundJobScheduleView < Marty::Grid
+class Marty::ScheduleJobsDashboard < Marty::Grid
   ACCESSIBLE_BY = [:admin]
 
   has_marty_permissions(
@@ -14,10 +14,11 @@ class Marty::BackgroundJobScheduleView < Marty::Grid
   def configure(c)
     super
 
-    c.title ||= I18n.t('delayed_jobs_schedule_view_title', default: 'Background Jobs Schedule')
+    c.title ||= I18n.t('schedule_jobs_dashboard_view_title', default: 'Schedule Jobs Dashboard')
     c.model = 'Marty::BackgroundJob::Schedule'
     c.paging = :buffered
     c.editing = :in_form
+    c.multi_select = false
 
     c.attributes = [
       :job_class,
@@ -91,4 +92,4 @@ class Marty::BackgroundJobScheduleView < Marty::Grid
   end
 end
 
-BackgroundJobScheduleView = Marty::BackgroundJobScheduleView
+ScheduleJobsDashboard = Marty::ScheduleJobsDashboard
