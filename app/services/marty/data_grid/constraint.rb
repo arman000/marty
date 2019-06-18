@@ -5,7 +5,7 @@ module Marty
         return [] unless constraint
 
         dt = DataGrid.convert_data_type(data_type)
-        if /[><]/.match(constraint)
+        if constraint =~ /[><]/
           raise "range constraint not allowed for type #{dt}" unless
             ['integer', 'float'].include?(dt)
 
