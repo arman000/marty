@@ -7,7 +7,7 @@ module Mcfly::Model
 
   module ClassMethods
     def hash_if_necessary(q, private)
-      !private && q.is_a?(ActiveRecord::Base) ? make_openstruct(q) : q
+      !private && q.is_a?(ActiveRecord::Base) ? make_hash(q) : q
     end
 
     def base_mcfly_lookup(name, options = {}, &block)

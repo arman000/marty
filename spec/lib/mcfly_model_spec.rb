@@ -113,16 +113,16 @@ describe 'McflyModel' do
     a1 = @engine.evaluate('A', 'lookup', params)
     a2 = @engine.evaluate('A', 'clookup', params)
     expect(a1).to eq(a2)                            # cache/non return same
-    expect(a1.class).to eq(OpenStruct)              # mode default so return OS
-    expect(a2.class).to eq(OpenStruct)
+    expect(a1.class).to eq(Hash)              # mode default so return hash
+    expect(a2.class).to eq(Hash)
 
     # check that keys are non mcfly non uniqueness
-    expect(a1.to_h.keys.to_set).to eq(Set[:buy_up, :buy_down])
+    expect(a1.to_h.keys.to_set).to eq(Set['buy_up', 'buy_down'])
   end
 
   it 'lookup non generated' do
     # a1 will be AR Relations
-    # b1 will be OpenStructs because the b fns return #first
+    # b1 will be hash because the b fns return #first
     e_id = Gemini::Entity.where(name: 'PLS').first.id
     bc_id = Gemini::BudCategory.where(name: 'Conv Fixed 20').first.id
     p = { 'e_id' => e_id, 'bc_id' => bc_id }
@@ -141,10 +141,10 @@ describe 'McflyModel' do
     # a1 is AR but still missing the FK entity_id so will raise
     expect { a1.first.entity }.to raise_error(/missing attribute: entity_id/)
 
-    expect(b1.class).to eq(OpenStruct)
+    expect(b1.class).to eq(Hash)
 
     # make sure b1 has correct keys
-    expect(b1.to_h.keys.to_set).to eq(Set[:buy_up, :buy_down])
+    expect(b1.to_h.keys.to_set).to eq(Set['buy_up', 'buy_down'])
   end
 
   it 'lookup mode nil' do
