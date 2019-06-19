@@ -75,13 +75,12 @@ feature 'data grid view', js: true do
     colw = @colh[col][1]
     xpos = (colx + colw / 2).to_i - @gridx
     ypos = (@perr * row + @perr / 2).to_i
-    page.driver.browser.action.
-      move_to(@grid.native, xpos, ypos).double_click.
-      send_keys([:control, 'a'], :delete).perform
+    page.driver.browser.action.move_to(@grid.native, xpos, ypos).double_click.
+        send_keys("\x08\x08\x08\x08\x08\x08\x08\x08\x08\x08\x08").perform
     sleep 0.1
     page.driver.browser.action.
       move_to(@grid.native, xpos, ypos).double_click.
-      send_keys(text, :enter).perform
+      send_keys(text.to_s).perform
   end
 
   def get_grid(to_get: :values)
