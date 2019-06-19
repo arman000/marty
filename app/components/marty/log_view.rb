@@ -1,6 +1,6 @@
 class Marty::LogView < Marty::Grid
   include Marty::Extras::Layout
-  has_marty_permissions read: [:admin],
+  has_marty_permissions read: [:admin, :dev],
                         update: [:admin]
 
   def configure(c)
