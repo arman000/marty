@@ -253,7 +253,7 @@ class Marty::DataGrid < Marty::Base
 
   # private method used to cache lookup_grid_distinct_entry_h result
   delorean_fn :lookup_grid_h_priv,
-              private: true, cache: true, sig: 4 do |pt, dgh, h, distinct|
+              to_hash: false, private: true, cache: true, sig: 4 do |pt, dgh, h, distinct|
 
     lookup_grid_distinct_entry_h(
       pt, h, dgh, nil, true, false, distinct)['result']
