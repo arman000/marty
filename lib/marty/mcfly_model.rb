@@ -11,7 +11,13 @@ module Mcfly::Model
     end
 
     def base_mcfly_lookup(name, options = {}, &block)
-      delorean_fn name, options do |ts, *args|
+      delorean_options = {
+        # private: options.fetch(:private, false),
+        cache: options.fetch(:cache, false),
+        sig: options[:sig]
+      }
+
+      delorean_fn name, delorean_options do |ts, *args|
         raise 'time cannot be nil' if ts.nil?
 
         # FIXME: sig is removed from delorean. We need to find a better way
@@ -139,9 +145,12 @@ module Mcfly::Model
       # cache if mode is not nil
       priv = options[:private]
 
+      # cache if mode is not explicitly set to nil or cache is true
+      cache = options.fetch(:cache) { options.fetch(:mode, :first) }
+
       delorean_options = {
-        private: options.fetch(:private, false),
-        cache: options.fetch(:cache, false),
+        # private: options.fetch(:private, false),
+        cache: cache.present?, # convert to bool
         sig: attrs.length + 1
       }
 

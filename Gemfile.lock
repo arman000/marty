@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    marty (2.9.1)
+    marty (2.9.3)
       aws-sigv4 (~> 1.0, >= 1.0.2)
       axlsx (= 3.0.0pre)
       coderay
@@ -214,6 +214,8 @@ GEM
       rspec-expectations (~> 3.8.0)
       rspec-mocks (~> 3.8.0)
       rspec-support (~> 3.8.0)
+    rspec-retry (0.6.1)
+      rspec-core (> 3.3)
     rspec-support (3.8.0)
     rubocop (0.64.0)
       jaro_winkler (~> 1.5.1)
@@ -276,6 +278,7 @@ DEPENDENCIES
   rails-controller-testing
   rspec-instafail
   rspec-rails
+  rspec-retry
   rubocop
   selenium-webdriver
   sqlite3
