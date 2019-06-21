@@ -64,12 +64,14 @@ RSpec.configure do |config|
   config.verbose_retry = true
   config.display_try_failure_messages = true
 
-  config.around :each, :js do |ex|
-    ex.run_with_retry retry: 3
-  end
+  if ENV['RSPEC_AUTO_RETRY_JS'] == 'true'
+    config.around :each, :js do |ex|
+      ex.run_with_retry retry: 3
+    end
 
-  config.retry_callback = proc do |ex|
-    # run some additional clean up task - can be filtered by example metadata
-    Capybara.reset! if ex.metadata[:js]
+    config.retry_callback = proc do |ex|
+      # run some additional clean up task - can be filtered by example metadata
+      Capybara.reset! if ex.metadata[:js]
+    end
   end
 end

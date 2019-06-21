@@ -36,15 +36,16 @@ cache:
     - vendor/ruby
 
 variables:
-  GIT_SSL_NO_VERIFY: "true"
   BUNDLER_VERSION: "2.0.1"
+  DOCKER_AUTH_CONFIG: '{ "credsStore": "ecr-login" }'
+  GIT_SSL_NO_VERIFY: "true"
+  HEADLESS: "true"
+  HEADLESS_WINDOW_SIZE: "1400,1400"
+  PGTZ: "America/Los_Angeles"
   POSTGRES_USER: "runner"
   POSTGRES_PASSWORD: ""
   RAILS_ENV: "test"
   RAILS_DUMP_SCHEMA: "false"
-  PGTZ: "America/Los_Angeles"
-  HEADLESS: "true"
-  HEADLESS_WINDOW_SIZE: "1400,1400"
   REPOSITORY_URL: '415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image'
-  DOCKER_AUTH_CONFIG: '{ "credsStore": "ecr-login" }'
+  RSPEC_AUTO_RETRY_JS: "true"
 
