@@ -1,0 +1,15 @@
+lenient
+int_field	integer	v
+string_field1	string	v
+string_field2	string	v
+string_field3	string	v
+string_field4	string	v
+string_field5	string	v
+numrange_field1	numrange	v
+
+1	Str1|Str2	Hi	This	Is	Strings	>10<=100	123
+2	Str3	Some	String	Values	Here	>100<=200	456
+3	String	ABC	DEF|ghij	Klm	nopq	>200<=3000	99999
+4	Foo	Ventura	CA	USA	xyzzy	>3000<=4000	8888
+5	Bar	San Luis Obispo	CA	USA	Antwerp	>4000<=5000000	777
+6|7	Baz|Plugh	Primary	Refi	Address	Strings	>5000000<=5000010	6

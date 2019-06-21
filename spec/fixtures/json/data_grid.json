@@ -1,0 +1,210 @@
+[
+    {"id": "s1",
+     "type": "string",
+     "constraint": ">A<Z",
+     "values": ["A", "B", "C"],
+     "error": "range constraint not allowed for type string"
+    },
+    {"id": "s2",
+     "type": "string",
+     "constraint": "A|Z",
+     "values": ["A", "B", "C"],
+     "error": "cell 0, 1 fails constraint check, cell 0, 2 fails constraint check"
+    },
+    {"id": "s3",
+     "type": "string",
+     "constraint": "A|B|C",
+     "values": ["A", "B", "C"]
+    },
+    {"id": "s4",
+     "type": "string",
+     "constraint": "A|B|C|5",
+     "values": ["A", "B", "5"]
+    },
+    {"id": "s5",
+     "type": "string",
+     "constraint": "A|B|C|true",
+     "values": ["A", "B", "true"]
+    },
+    {"id": "s6",
+     "type": "string",
+     "constraint": "",
+     "values": ["A", "B", "5"]
+    },
+    {"id": "i1",
+     "type": "integer",
+     "constraint": ">0<5",
+     "values": ["1", "2", "3"]
+    },
+    {"id": "i2",
+     "type": "integer",
+     "constraint": ">0<5",
+     "values": ["1", "2", "8"],
+     "error": "cell 0, 2 fails constraint check"
+    },
+    {"id": "i3",
+     "type": "integer",
+     "constraint": "1|8",
+     "values": ["1", "2", "8"],
+     "error": "cell 0, 1 fails constraint check"
+    },
+    {"id": "i4",
+     "type": "integer",
+     "constraint": "1|2|8",
+     "values": ["1", "2", "8"]
+    },
+    {"id": "i5",
+     "type": "integer",
+     "constraint": "",
+     "values": ["1", "2", "8"]
+    },
+    {"id": "i6",
+     "type": "integer",
+     "constraint": "",
+     "values": ["1", "2", "hi"],
+     "error": "bad integer \"hi\""
+    },
+    {"id": "i7",
+     "type": "integer",
+     "constraint": "",
+     "values": ["1", "2", "8"]
+    },
+    {"id": "i8",
+     "type": "integer",
+     "constraint": "",
+     "values": ["1", "2", "2.2"],
+     "error": "bad integer \"2.2\""
+    },
+    {"id": "f1",
+     "type": "float",
+     "constraint": "",
+     "values": ["1", "2", "hi"],
+     "error": "bad float \"hi\""
+    },
+    {"id": "f2",
+     "type": "float",
+     "constraint": ">0<10",
+     "values": ["1", "2", "hi"],
+     "error": "bad float \"hi\""
+    },
+    {"id": "f3",
+     "type": "float",
+     "constraint": "1|2|3",
+     "values": ["1", "2", "3.3"],
+     "error": " list constraint not allowed for type Float"
+    },
+    {"id": "f4",
+     "type": "float",
+     "constraint": ">=1<4",
+     "values": ["1", "2", "3.3"]
+    },
+    {"id": "f7",
+     "type": "float",
+     "constraint": "",
+     "values": ["1", "2", "3.3"]
+    },
+    {"id": "b1",
+     "type": "boolean",
+     "constraint": ">true<false",
+     "values": ["A", "B", "C"],
+     "error": "unknown boolean: \"A\""
+    },
+    {"id": "b2",
+     "type": "boolean",
+     "constraint": "true",
+     "values": ["true", "true", "false"],
+     "error": "cell 0, 2 fails constraint check"
+    },
+    {"id": "b3",
+     "type": "boolean",
+     "constraint": "true|false",
+     "values": ["true", "true", "false"]
+    },
+    {"id": "b4",
+     "type": "boolean",
+     "constraint": "1|false",
+     "values": ["true", "true", "false"],
+     "error": "bad boolean 1"
+    },
+    {"id": "b5",
+     "type": "boolean",
+     "constraint": ">true<false",
+     "values": ["true", "true", "false"],
+     "error": "range constraint not allowed for type boolean"
+    },
+    {"id": "b6",
+     "type": "boolean",
+     "constraint": "",
+     "values": ["true", "true", "false"]
+    },
+    {"id": "b7",
+     "type": "boolean",
+     "constraint": "",
+     "values": ["true", "true", "x"],
+     "error": "unknown boolean: \"x\""
+    },
+    {"id": "e1",
+     "type": "Gemini::EnumState",
+     "constraint": "",
+     "values": ["CA", "TN", "xyz"],
+     "error": "no such Gemini::EnumState: 'xyz'"
+    },
+    {"id": "e2",
+     "type": "Gemini::EnumState",
+     "constraint": "",
+     "values": ["CA", "TN", "NY"]
+    },
+    {"id": "e3",
+     "type": "Gemini::EnumState",
+     "constraint": "CA|TN",
+     "values": ["CA", "TN", "NY"],
+     "error": "cell 0, 2 fails constraint check"
+    },
+    {"id": "e4",
+     "type": "Gemini::EnumState",
+     "constraint": "x|TN",
+     "values": ["CA", "TN", "NY"],
+     "error": "Error in constraint: no such Gemini::EnumState: 'x'"
+    },
+    {"id": "e5",
+     "type": "Gemini::EnumState",
+     "constraint": ">TN<=AK",
+     "values": ["CA", "TN", "NY"],
+     "error": "range constraint not allowed for type Gemini::EnumState"
+    },
+    {"id": "c1",
+     "type": "Gemini::BudCategory",
+     "constraint": "",
+     "values": ["cat1", "cat2", "xyz"],
+     "error": "can't find key 'xyz' for class Gemini::BudCategory"
+    },
+    {"id": "c2",
+     "type": "Gemini::BudCategory",
+     "constraint": "",
+     "values": ["cat1", "cat2", "cat2"]
+    },
+    {"id": "c3",
+     "type": "Gemini::BudCategory",
+     "constraint": "cat1|cat2",
+     "values": ["cat3", "cat2", "cat1"],
+     "error": "cell 0, 0 fails constraint check"
+    },
+    {"id": "c4",
+     "type": "Gemini::BudCategory",
+     "constraint": "x|cat1",
+     "values": ["cat1", "cat1", "cat1"],
+     "error": "Error in constraint: instance x of Gemini::BudCategory not found"
+    },
+    {"id": "c5",
+     "type": "Gemini::BudCategory",
+     "constraint": ">cat1<=cat3",
+     "values": ["cat1", "cat2", "cat3"],
+     "error": "range constraint not allowed for type Gemini::BudCategory"
+    },
+    {"id": "c6",
+     "type": "Gemini::BudCategory",
+     "constraint": "cat1",
+     "values": ["cat1", "cat1", "cat1"]
+    }
+    
+]
