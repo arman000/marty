@@ -1,0 +1,17 @@
+lenient
+int_field	integer	h
+string_field1	string	h
+string_field2	string	h
+string_field3	string	h
+string_field4	string	h
+string_field5	string	h
+numrange_field1	numrange	h
+
+1	2	3	4	5	6|7
+Str1|str2	Str3	String	Foo	Bar	Baz|Plugh
+Hi	Some	ABC	Ventura	San Luis Obispo	Primary
+This	String	DEF|ghij	CA	CA	Refi
+Is	Values	Klm	USA	USA	Address
+Strings	Here	nopq	xyzzy	Antwerp	Strings
+>10<=100	>100<=200	>200<=3000	>3000<=4000	>4000<=5000000	>5000000<=5000010
+123	456	99999	8888	777	6

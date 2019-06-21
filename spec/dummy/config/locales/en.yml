@@ -18,3 +18,4 @@ en:
     other_flag: "Other"
     g_bool_def: "Bool def Guard"
     g_nbool_def: "NBool def Guard"
+    project_legal_structure_type: "PLST"
