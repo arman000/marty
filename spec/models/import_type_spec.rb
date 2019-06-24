@@ -13,13 +13,13 @@ module Marty
   end
 
   describe ImportType do
-    let(:role_id) { Marty::Role.first.id }
+    let(:role) { Marty::RoleType.get_all.first }
 
     before(:each) do
       @import = ImportType.new
       @import.name = 'Test1'
       @import.db_model_name = 'Marty::ARTestModel'
-      @import.role_id = role_id
+      @import.role = role
       @import.save!
     end
 
@@ -29,14 +29,14 @@ module Marty
         expect(it).to_not be_valid
         expect(it.errors[:name].any?).to be true
         expect(it.errors[:db_model_name].any?).to be true
-        expect(it.errors[:role_id].any?).to be true
+        expect(it.errors[:role].any?).to be true
       end
 
       it 'require a unique name' do
         it = ImportType.new
         it.name = 'Test1'
         it.db_model_name = 'Marty::ARTestModel'
-        it.role_id = role_id
+        it.role = role
         expect(it).to_not be_valid
         expect(it.errors[:name].any?).to be true
       end
@@ -45,7 +45,7 @@ module Marty
         it = ImportType.new
         it.name = 'Test1'
         it.db_model_name = 'Marty::TestModel'
-        it.role_id = role_id
+        it.role = role
         expect(it).to_not be_valid
         expect(it.errors[:base][0]).to eq 'bad model name'
       end

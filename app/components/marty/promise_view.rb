@@ -59,7 +59,7 @@ class Marty::PromiseView < Netzke::Tree::Base
     a.text     = a.tooltip = 'Clear'
     a.disabled = false
     a.icon_cls = 'fa fa-minus glyph'
-    a.hidden   = !self.class.has_admin_perm?
+    a.hidden   = !self.class.has_perm?(:admin)
   end
 
   action :download do |a|

@@ -12,13 +12,8 @@ end
 # FIXME: hacky -- globally changes whodunnit
 Mcfly.whodunnit = Marty::User.find_by_login(system_login)
 
-# Create all Marty roles from configuration
-(Rails.configuration.marty.roles || []).each do |role|
-  Marty::Role.create(name: role.to_s)
-end
-
 # Give system account all roles
-Marty::Role.all.map { |role|
+Marty::RoleType.get_all.map { |role|
   ur = Marty::UserRole.new
   ur.user = Mcfly.whodunnit
   ur.role = role

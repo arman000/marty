@@ -60,12 +60,12 @@ class Marty::VwPromise < Marty::Base
       'marty_users.login ILIKE ?',
       'marty_users.firstname ILIKE ?',
       'marty_users.lastname ILIKE ?',
-      'marty_roles.name ILIKE ?',
+      'marty_user_roles.role::text ILIKE ?',
     ].join(' OR ')
 
     st = "%#{search_text}%"
     # Convert "Role Name" or "Role name" to "role_name" (underscore is key)
     st2 = "%#{search_text.titleize.gsub(/\s/, '').underscore}%"
-    joins(user: :roles).where(query, st, st, st, st2).distinct
+    joins(user: :user_roles).where(query, st, st, st, st2).distinct
   }
 end

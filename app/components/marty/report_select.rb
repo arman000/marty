@@ -66,6 +66,7 @@ class Marty::ReportSelect < Marty::Form
 
     nodes.map do |node|
       roles = engine.evaluate(node, 'roles') rescue nil
+
       next if roles && !roles.any? { |r| Marty::User.has_role(r) }
 
       begin

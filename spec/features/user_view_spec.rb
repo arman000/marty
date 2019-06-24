@@ -82,7 +82,7 @@ feature 'under Sytem menu, User Management worflows', js: true do
         firstname: 'new_fname',
         lastname: 'new_lname',
         active: true,
-        roles: 'User Manager,Viewer',
+        user_roles: 'User Manager,Viewer',
       )
     end
 

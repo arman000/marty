@@ -13,7 +13,7 @@ class Marty::ImportTypeView < Marty::Grid
     c.attributes =
       [
         :name,
-        :role__name,
+        :role,
         :db_model_name,
         :cleaner_function,
         :validation_function,
@@ -26,8 +26,17 @@ class Marty::ImportTypeView < Marty::Grid
     c.flex = 1
   end
 
-  attribute :role__name do |c|
+  attribute :role do |c|
     c.width = 150
+
+    store = ::Marty::RoleType.get_all.sort
+
+    c.editor_config = {
+      multi_select: false,
+      store:        store,
+      type:         :string,
+      xtype:        :combo,
+    }
   end
 
   attribute :db_model_name do |c|
