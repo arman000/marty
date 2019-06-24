@@ -39,7 +39,7 @@ class Marty::ScriptForm < Marty::Form
   end
 
   def can_save?(script)
-    script && self.class.has_dev_perm? && Mcfly.is_infinity(script.obsoleted_dt)
+    script && self.class.has_perm?(:dev) && Mcfly.is_infinity(script.obsoleted_dt)
   end
 
   ######################################################################

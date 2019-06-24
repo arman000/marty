@@ -27,7 +27,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def self.has_scripting_perm?
-    has_admin_perm?
+    has_perm?(:admin)
   end
 
   def posting_menu
@@ -50,7 +50,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       {
         text: 'Log Maintenance',
         icon_cls: 'fa fa-wrench glyph',
-        disabled: !self.class.has_admin_perm?,
+        disabled: !self.class.has_perm?(:admin),
         menu: [
           :log_view,
           :log_cleanup,
@@ -64,7 +64,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       {
         text: 'API Management',
         icon_cls: 'fa fa-fighter-jet glyph',
-        disabled: !self.class.has_admin_perm?,
+        disabled: !self.class.has_perm?(:admin),
         menu: [
           :api_auth_view,
           :api_config_view,
@@ -108,7 +108,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       {
         text: 'Background Jobs',
         icon_cls: 'fa fa-user-clock glyph',
-        disabled: !self.class.has_admin_perm?,
+        disabled: !self.class.has_perm?(:admin),
         menu: [
           :bg_status,
           :bg_stop,
@@ -151,8 +151,8 @@ class Marty::MainAuthApp < Marty::AuthApp
     return super unless self.class.has_any_perm?
 
     [ident_menu, sep] +
-      (self.class.has_admin_perm? ||
-       self.class.has_user_manager_perm? ? [system_menu, sep] : []) +
+      (self.class.has_perm?(:admin) ||
+       self.class.has_perm?(:user_manager) ? [system_menu, sep] : []) +
       data_menus +
       [
         applications_menu, sep,
@@ -165,7 +165,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   action :import_type_view do |a|
     a.text      = I18n.t('import_type')
     a.handler   = :netzke_load_component_by_action
-    a.disabled  = !self.class.has_admin_perm?
+    a.disabled  = !self.class.has_perm?(:admin)
     a.icon_cls = 'fa fa-file-import glyph'
   end
 
@@ -194,30 +194,30 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text      = I18n.t('user_view')
     a.handler   = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-users glyph'
-    a.disabled  = !self.class.has_admin_perm? &&
-      !self.class.has_user_manager_perm?
+    a.disabled  = !self.class.has_perm?(:admin) &&
+      !self.class.has_perm?(:user_manager)
   end
 
   action :event_view do |a|
     a.text      = I18n.t('event_view')
     a.handler   = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-bolt glyph'
-    a.disabled  = !self.class.has_admin_perm?
+    a.disabled  = !self.class.has_perm?(:admin)
   end
 
   action :config_view do |a|
     a.text      = I18n.t('config_view')
     a.handler   = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-cog glyph'
-    a.disabled  = !self.class.has_admin_perm? &&
-      !self.class.has_user_manager_perm?
+    a.disabled  = !self.class.has_perm?(:admin) &&
+      !self.class.has_perm?(:user_manager)
   end
 
   action :api_auth_view do |a|
     a.text      = 'API Auth Management'
     a.handler   = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-key glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   action :api_config_view do |a|
@@ -225,7 +225,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.tooltip  = 'Manage API behavior and settings'
     a.handler  = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-sliders-h glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   action :api_log_view do |a|
@@ -233,7 +233,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.tooltip  = 'View API logs'
     a.handler  = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-pencil-alt glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   action :data_grid_view do |a|
@@ -247,42 +247,42 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text     = 'Reload Scripts'
     a.tooltip  = 'Reload and tag Delorean scripts'
     a.icon_cls = 'fa fa-sync-alt glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   action :load_seed do |a|
     a.text     = 'Load Seeds'
     a.tooltip  = 'Load Seeds'
     a.icon_cls = 'fa fa-retweet glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   action :bg_status do |a|
     a.text     = 'Show Delayed Jobs Status'
     a.tooltip  = 'Run delayed_job status script'
     a.icon_cls = 'fa fa-desktop glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   action :bg_stop do |a|
     a.text     = 'Stop Delayed Jobs'
     a.tooltip  = 'Run delayed_job stop script'
     a.icon_cls = 'fa fa-skull glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   action :bg_restart do |a|
     a.text     = 'Restart Delayed Jobs'
     a.tooltip  = 'Run delayed_job restart script using DELAYED_JOB_PARAMS'
     a.icon_cls = 'fa fa-power-off glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   action :schedule_jobs_dashboard do |a|
     a.text     = 'Schedule Jobs Dashboard'
     a.tooltip  = 'Edit Delayed Jobs Cron schedules'
     a.icon_cls = 'fa fa-cog glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
     a.handler = :netzke_load_component_by_action
   end
 
@@ -291,14 +291,14 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.tooltip  = 'View Log'
     a.handler  = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-cog glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   action :log_cleanup do |a|
     a.text     = 'Cleanup Log Table'
     a.tooltip  = 'Delete old log records'
     a.icon_cls = 'fa fa-cog glyph'
-    a.disabled = !self.class.has_admin_perm?
+    a.disabled = !self.class.has_perm?(:admin)
   end
 
   ######################################################################

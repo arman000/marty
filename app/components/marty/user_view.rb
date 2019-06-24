@@ -11,7 +11,7 @@ module Marty; class UserView < Marty::Grid
       :firstname,
       :lastname,
       :active,
-      :roles,
+      :user_roles,
     ]
   end
 
@@ -27,21 +27,27 @@ module Marty; class UserView < Marty::Grid
     c.store_config.merge!(sorters: [{ property: :login,
                                      direction: 'ASC',
                                     }]) if c.attributes.include?(:login)
-    c.scope = ->(arel) { arel.includes(:roles) }
+    c.scope = ->(arel) { arel.includes(:user_roles) }
   end
 
   def self.set_roles(roles, user)
-    roles ||= []
+    roles = [] unless roles.present?
 
-    # Destroy old roles (must call destroy for auditing to work properly)
-    user.user_roles.each do |ur|
-      ur.destroy unless roles.include?(I18n.t("roles.#{ur.role.name}"))
+    roles = Marty::RoleType.get_all.select do |role|
+      roles.include?(I18n.t("roles.#{role}", default: role))
     end
 
-    # set new roles
-    user.roles = Role.select { |r|
-                   roles.include? I18n.t("roles.#{r.name}")
-    }
+    roles_in_user = user.user_roles.map(&:role)
+    roles_to_delete = roles_in_user - roles
+    roles_to_add = roles - roles_in_user
+
+    Marty::User.transaction do
+      user.user_roles.where(role: roles_to_delete).map(&:destroy!)
+
+      roles_to_add.each do |role|
+        user.user_roles.create!(role: role)
+      end
+    end
   end
 
   def self.create_edit_user(data)
@@ -49,12 +55,12 @@ module Marty; class UserView < Marty::Grid
     user = data['id'].nil? ? User.new : User.find(data['id'])
 
     user_columns.each do |c|
-      user.send("#{c}=", data[c.to_s]) unless c == :roles
+      user.send("#{c}=", data[c.to_s]) unless c == :user_roles
     end
 
     if user.valid?
       user.save
-      set_roles(data['roles'], user)
+      set_roles(data['user_roles'], user)
     end
 
     user
@@ -139,20 +145,26 @@ module Marty; class UserView < Marty::Grid
     c.label   = I18n.t('user_grid.active')
   end
 
-  attribute :roles do |c|
+  attribute :user_roles do |c|
     c.width   = 100
     c.flex    = 1
     c.label   = I18n.t('user_grid.roles')
-    c.type    = :string,
+    c.type    = :string
 
-                c.getter = lambda do |r|
-                  r.roles.map { |ur| I18n.t("roles.#{ur.name}") }.sort
-                end
+    c.getter = lambda do |r|
+      r.user_roles.map do |ur|
+        I18n.t("roles.#{ur.role}", default: ur.role)
+      end
+    end
+
+    store = ::Marty::RoleType.get_all.sort.map do |role|
+      I18n.t("roles.#{role}", default: role)
+    end
 
     c.editor_config = {
       multi_select: true,
       empty_text:   I18n.t('user_grid.select_roles'),
-      store:        Role.pluck(:name).map { |n| I18n.t("roles.#{n}") }.sort,
+      store:        store,
       type:         :string,
       xtype:        :combo,
     }

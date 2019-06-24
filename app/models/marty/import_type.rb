@@ -27,9 +27,7 @@ class Marty::ImportType < Marty::Base
     self.preprocess_function = nil if preprocess_function.blank?
   end
 
-  belongs_to :role
-
-  validates_presence_of :name, :db_model_name, :role_id
+  validates_presence_of :name, :db_model_name, :role
   validates_uniqueness_of :name
   validates_with ImportTypeValidator
 
@@ -38,6 +36,6 @@ class Marty::ImportType < Marty::Base
   end
 
   def allow_import?
-    Mcfly.whodunnit && Mcfly.whodunnit.roles.pluck(:id).include?(role_id)
+    Mcfly.whodunnit && Mcfly.whodunnit.roles.include?(role)
   end
 end
