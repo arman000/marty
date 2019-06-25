@@ -25,14 +25,17 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
   end
 
   def populate_import_type
-    Marty::ImportType.create(name: 'BC',
-                             db_model_name: 'Gemini::BudCategory',
-                             role_id: 1
-                            )
-    Marty::ImportType.create(name: 'FB',
-                             db_model_name: 'Gemini::FannieBup',
-                             role_id: 1
-                            )
+    Marty::ImportType.create(
+      name: 'BC',
+      db_model_name: 'Gemini::BudCategory',
+      role: 'admin'
+    )
+
+    Marty::ImportType.create(
+      name: 'FB',
+      db_model_name: 'Gemini::FannieBup',
+      role: 'admin'
+    )
   end
 
   def populate_bud_category_fannie_bup

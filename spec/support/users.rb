@@ -11,7 +11,7 @@ module Marty; module RSpec; module Users
         user.active = true
         user.save
 
-        role = Marty::Role.find_by_name(role_name.to_s)
+        role = Marty::RoleType[role_name.to_s]
 
         raise "Oops unknown role: #{role_name}. Was db seeded?" unless role
 

@@ -8,7 +8,6 @@ class Marty::User < Marty::Base
   MARTY_IMPORT_UNIQUENESS = [:login]
 
   has_many :user_roles, dependent: :destroy
-  has_many :roles, through: :user_roles
 
   scope :active, -> { where(active: true) }
 
@@ -21,6 +20,10 @@ class Marty::User < Marty::Base
 
   def to_s
     name
+  end
+
+  def roles
+    user_roles.map(&:role)
   end
 
   # Returns the user who matches the given autologin +key+ or nil
@@ -95,8 +98,8 @@ class Marty::User < Marty::Base
   end
 
   def self.has_role(role)
-     mr = Mcfly.whodunnit.roles rescue []
-     mr.any? { |attr| attr.name == role }
+     mr = Mcfly.whodunnit.user_roles rescue []
+     mr.any? { |ur| ur.role == role }
   end
 
   private
@@ -110,8 +113,10 @@ class Marty::User < Marty::Base
         Rails.configuration.marty.system_account.to_s)
       system_id = system_user.id if system_user
 
+      roles = user_roles.map(&:role)
+
       if id == Mcfly.whodunnit.id
-        roles.each { |r| roles.delete r unless r.name == 'user_manager' }
+        roles.each { |r| roles.delete r unless r == 'user_manager' }
         errors.add :base, 'User Managers cannot edit '\
           'or add additional roles to their own accounts'
       elsif id == system_id

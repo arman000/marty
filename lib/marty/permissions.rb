@@ -1,9 +1,4 @@
 module Marty::Permissions
-  # Make sure there are admin and user_manager roles,
-  # even if hosting app doesn't define them
-  REQ_ROLES = [:admin, :user_manager]
-  ALL_ROLES = Rails.configuration.marty.roles.to_set.merge(REQ_ROLES)
-
   # Call using following format
   #   has_marty_permissions   create: [:dev, :admin],
   #                           read: :any,
@@ -13,15 +8,13 @@ module Marty::Permissions
   # :any gives permission to the action if user belongs to at least 1 role
   def has_marty_permissions(attrs)
     raise 'bad attrs' unless attrs.is_a?(Hash)
-    raise 'unknown role' unless
-      attrs.values.flatten.to_set.subset? (ALL_ROLES << :any)
 
     define_singleton_method(:marty_permissions) { attrs }
   end
 
   def current_user_roles
-    roles = Mcfly.whodunnit.roles rescue []
-    roles.map { |r| r.name.to_sym }.to_set
+    user_roles = Mcfly.whodunnit.user_roles rescue []
+    user_roles.map { |r| r.role.to_sym }.to_set
   end
 
   def can_perform_action?(action)
@@ -49,15 +42,12 @@ module Marty::Permissions
     end.compact
   end
 
-  # generate has_xxx_perm? methods for all permissions.
-  Rails.configuration.marty.roles.each do |role|
-    define_method("has_#{role}_perm?") do
-      current_user_roles.member? role
-    end
+  def has_any_perm?
+    current_user_roles.any?
   end
 
-  def has_any_perm?
-    !(current_user_roles & ALL_ROLES).empty?
+  def has_perm?(role)
+    current_user_roles.member? role.to_sym
   end
 
   # FIXME: for backwards compatibility returns true
