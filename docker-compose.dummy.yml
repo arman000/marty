@@ -24,6 +24,7 @@ services:
       - .:/opt/app:delegated
       - '.bash_history.docker:/root/.bash_history'
       - '.pry_history.docker:/root/.pry_history'
+      - '.ssh-docker:/root/.ssh'
       - bundle_box:/bundle_box
     tty: true
     stdin_open: true
