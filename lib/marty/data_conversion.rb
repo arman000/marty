@@ -1,7 +1,7 @@
 class Marty::DataConversion
   EXCEL_START_DATE = Date.parse('1/1/1900') - 2
 
-  FLOAT_PAT = /^-?\d+(\.\d+)?$/
+  FLOAT_PAT = /\A-?\d+(\.?\d+)?([eE][-+]?[0-9]+)?\z/
 
   PATS = {
     integer: /^-?\d+(\.0+)?$/,
