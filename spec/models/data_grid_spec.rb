@@ -814,7 +814,8 @@ EOS
       # rubocop:disable Style/NestedTernaryOperator
       type_str = type == 'float' ? (explicit_float ? 'float' : nil) : type
       # rubocop:enable Style/NestedTernaryOperator
-      top = [lenient_str, type_str].compact.join(' ') + "\t" + constraint + "\n"
+      con_part = constraint.present? ? "\t" + constraint : ''
+      top = [lenient_str, type_str].compact.join(' ') + con_part + "\n"
       (top =~ /\A\s*\z/ ? '' : top) +
         <<~EOS
           b\tboolean\tv
@@ -836,8 +837,8 @@ EOS
         tests = JSON.parse(File.read('spec/fixtures/json/data_grid.json'))
         aggregate_failures do
           tests.each do |test|
-            keys = %w[id type constraint values error]
-            id, type, constraint, values, error = test.values_at(*keys)
+            keys = %w[id type constraint values error line1]
+            id, type, constraint, values, error, line1 = test.values_at(*keys)
             err_re = Regexp.new(error) if error
             # for float, do both ex- and implicit declaration
             exfls = type == 'float' ? [true, false] : [true]
@@ -848,7 +849,21 @@ EOS
                 got = nil
                 tnam = "Test #{id} lenient=#{lenient} exfl=#{exfl}"
                 begin
-                  dg_from_import(tnam, grid)
+                  dg = dg_from_import(tnam, grid)
+
+                  # make sure export of line1  works correctly
+                  # when dg is lenient and/or has constraint and/or
+                  # not float
+                  next unless lenient || constraint.present? ||
+                              type != 'float'
+
+                  # also skip grids where we included float explicitly
+                  # because export will convert back to implicit
+                  next if type == 'float' && exfl
+
+                  dga = dg.export_array
+                  line1 = dga.first.first.join("\t") + "\n"
+                  expect(line1).to eq(grid.lines.first)
                 rescue StandardError => e
                   got = e.message
                 end

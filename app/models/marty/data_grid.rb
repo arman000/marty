@@ -360,13 +360,19 @@ class Marty::DataGrid < Marty::Base
   def export_array
     # add data type metadata row if not default
     lenstr = 'lenient' if lenient
-    typestr = data_type unless [nil, DEFAULT_DATA_TYPE].member?(data_type) &&
-                               !constraint.present?
 
-    len_dt = [lenstr, typestr].compact.join(' ')
+    typestr = data_type unless [nil, DEFAULT_DATA_TYPE].member?(data_type)
+    len_type = [lenstr, typestr].compact.join(' ')
 
-    meta_rows = len_dt.present? || constraint.present? ?
-                  [[len_dt, constraint]] : []
+    meta_rows = if (lenient || typestr) && constraint
+                  [[len_type, constraint]]
+                elsif lenient || typestr
+                  [[len_type]]
+                elsif constraint
+                  [['', constraint]]
+                else
+                  []
+                end
 
     meta_rows += metadata.map do |inf|
       [inf['attr'], inf['type'], inf['dir'], inf['rs_keep'] || '']

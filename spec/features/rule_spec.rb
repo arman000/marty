@@ -419,7 +419,7 @@ EOL
                                                    %Q({"grid1":"DataGrid1"}),
                                                    %Q({"grid1":"DataGrid1"})])
     press('Applications')
-    press('Data Grids')
+    press('Data Grids Admin')
     dgv = netzke_find('data_grid_view')
     cvs = dgv.get_col_vals(:name, 4, 0)
     ind1 = cvs.index('DataGrid1') + 1

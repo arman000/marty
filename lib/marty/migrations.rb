@@ -41,7 +41,7 @@ module Marty::Migrations
     SQL
 
     db_values = res.first['enum_range'].gsub(/[{"}]/, '').split(',')
-    ex_values = klass::VALUES - db_values
+    ex_values = klass::VALUES.map(&:to_s) - db_values
 
     return if ex_values.empty?
 

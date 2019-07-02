@@ -33,9 +33,7 @@ module Marty; class UserView < Marty::Grid
   def self.set_roles(roles, user)
     roles = [] unless roles.present?
 
-    roles = Marty::RoleType.get_all.select do |role|
-      roles.include?(I18n.t("roles.#{role}", default: role))
-    end
+    roles = ::Marty::RoleType.from_nice_names(roles)
 
     roles_in_user = user.user_roles.map(&:role)
     roles_to_delete = roles_in_user - roles
@@ -152,14 +150,10 @@ module Marty; class UserView < Marty::Grid
     c.type    = :string
 
     c.getter = lambda do |r|
-      r.user_roles.map do |ur|
-        I18n.t("roles.#{ur.role}", default: ur.role)
-      end
+      Marty::RoleType.to_nice_names(r.user_roles.map(&:role))
     end
 
-    store = ::Marty::RoleType.get_all.sort.map do |role|
-      I18n.t("roles.#{role}", default: role)
-    end
+    store = ::Marty::RoleType.to_nice_names(::Marty::RoleType::VALUES.sort)
 
     c.editor_config = {
       multi_select: true,
