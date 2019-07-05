@@ -35,15 +35,30 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
 
   def ec2_request action, params = {}
     resp = request({ action: action }, params)
-    Hash.from_xml(resp)["#{action}Response"]
+    parsed = Hash.from_xml(resp)
+
+    # check AWS response for errors
+    error = parsed.dig('Response', 'Errors', 'Error')
+    raise Marty::Diagnostic::Aws::Error.new(action, error) if error
+
+    action_resp = parsed["#{action}Response"]
+    raise Marty::Diagnostic::Aws::Error.new(action, parsed) unless action_resp
+
+    action_resp
   end
 
   def get_tag
+    action = 'DescribeTags'
     params = { 'Filter.1.Name' => 'resource-id',
               'Filter.1.Value.1' => get_instance_id,
               'Filter.2.Name'    => 'key',
               'Filter.2.Value.1' => 'Name' }
-    ec2_request('DescribeTags', params)['tagSet']['item']['value']
+
+    action_resp = ec2_request(action, params)
+    tag = action_resp.dig('tagSet', 'item', 'value')
+    raise Marty::Diagnostic::Aws::Error.new(action, action_resp) unless tag
+
+    tag
   end
 
   def get_instances
