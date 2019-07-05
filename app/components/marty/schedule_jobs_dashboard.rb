@@ -8,7 +8,8 @@ class Marty::ScheduleJobsDashboard < Marty::Grid
     delete: ACCESSIBLE_BY,
     destroy: ACCESSIBLE_BY,
     edit_window__edit_form__submit: ACCESSIBLE_BY,
-    add_window__add_form__submit: ACCESSIBLE_BY
+    add_window__add_form__submit: ACCESSIBLE_BY,
+    reschedule: ACCESSIBLE_BY
   )
 
   def configure(c)
@@ -25,6 +26,10 @@ class Marty::ScheduleJobsDashboard < Marty::Grid
       :cron,
       :state
     ]
+  end
+
+  def default_bbar
+    super + [:reschedule]
   end
 
   def default_context_menu
@@ -89,6 +94,17 @@ class Marty::ScheduleJobsDashboard < Marty::Grid
     end
 
     res
+  end
+
+  action :reschedule do |a|
+    a.text     = 'Reschedule'
+    a.icon_cls = 'fa fa-redo glyph'
+    a.handler  = :netzke_reschedule
+  end
+
+  endpoint :reschedule do
+    result = system("RAILS_ENV=#{Rails.env} rake marty:jobs:schedule")
+    client.netzke_notify result ? 'Jobs scheduled' : 'Scheduling failed'
   end
 end
 
