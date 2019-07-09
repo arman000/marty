@@ -54,8 +54,8 @@ class Delorean::BaseModule::NodeCall
     begin
       # make sure params is serialzable before starting a Job
       JSON.dump(params)
-    rescue StandardError => exc
-      raise "non-serializable parameters: #{params} #{exc}"
+    rescue StandardError => e
+      raise "non-serializable parameters: #{params} #{e}"
     end
 
     Marty::Promises::Delorean::Create.call(

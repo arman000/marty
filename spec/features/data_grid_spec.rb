@@ -374,7 +374,6 @@ feature 'data grid view', js: true do
      ['edit_all', context_test_all],
      ['edit_data', false],
      ['view', false]].each do |perm, all_cells|
-
       set_perm(perm)
       press('Refresh')
       grids = dgv.get_col_vals('name', 5)

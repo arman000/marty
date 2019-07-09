@@ -206,8 +206,8 @@ DELOREAN
     end
 
     wait_for_element do
-      expect(page).to have_content('XYZ1,XYZ2,XYZ3,XYZ4 1,2,3,4 2,4,6,8 ' +
-                                   '3,6,9,12 4,8,12,16')
+      expect(page).to have_content("XYZ1,XYZ2,XYZ3,XYZ4\n1,2,3,4\n2,4,6,8\n" +
+                                   "3,6,9,12\n4,8,12,16")
     end
   end
 
@@ -263,8 +263,8 @@ DELOREAN
     url = generate_rep_url(format: 'txt') + URI.encode('&disposition=inline')
     visit url
     wait_for_element do
-      expect(page).to have_content('XYZ1,XYZ2,XYZ3,XYZ4 1,2,3,4 2,4,6,8 ' +
-                                   '3,6,9,12 4,8,12,16')
+      expect(page).to have_content("XYZ1,XYZ2,XYZ3,XYZ4\n1,2,3,4\n2,4,6,8\n" +
+                                   "3,6,9,12\n4,8,12,16")
     end
   end
 

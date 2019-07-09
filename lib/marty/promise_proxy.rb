@@ -55,8 +55,8 @@ class Marty::PromiseProxy < BasicObject
           begin
             @result = @promise.wait_for_result(@timeout)
             @result = @result[@attr] if @attr && !@result['error']
-          rescue ::Exception => exc
-            @result = ::Delorean::Engine.grok_runtime_exception(exc)
+          rescue ::Exception => e
+            @result = ::Delorean::Engine.grok_runtime_exception(e)
           end
         end
       end

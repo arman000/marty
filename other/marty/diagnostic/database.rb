@@ -20,9 +20,9 @@ module Marty::Diagnostic::Database
   end
 
   def self.db_schema
-    current = ActiveRecord::Migrator.current_version
+    current = ActiveRecord::Migration.current_version
     raise "Migration is needed.\nCurrent Version: #{current}" if
-      ActiveRecord::Migrator.needs_migration?
+      ActiveRecord::Base.connection.migration_context.needs_migration?
 
     current.to_s
   end

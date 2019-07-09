@@ -29,8 +29,8 @@ module Marty
             )
 
             job = Delayed::Job.enqueue(promise_job)
-          rescue StandardError => exc
-            res = { 'error' => exc.message }
+          rescue StandardError => e
+            res = { 'error' => e.message }
             promise.set_start
             promise.set_result(res)
             raise

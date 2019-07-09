@@ -219,7 +219,7 @@ class Marty::DataChange
         # "different".
         conv =
           Marty::DataConversion.convert_row(klass, input, ts)
-      rescue StandardError => exc
+      rescue StandardError => e
         only_input << input
         next
       end

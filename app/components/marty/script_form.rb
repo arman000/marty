@@ -83,10 +83,10 @@ class Marty::ScriptForm < Marty::Form
     begin
       dev = Marty::Tag.find_by_name('DEV')
       Marty::ScriptSet.new(dev).parse_check(script.name, data['body'])
-    rescue Delorean::ParseError => exc
-      client.netzke_notify exc.message
+    rescue Delorean::ParseError => e
+      client.netzke_notify e.message
       client.netzke_apply_form_errors({})
-      client.set_line_error(exc.line)
+      client.set_line_error(e.line)
       return
     end
 
@@ -120,8 +120,8 @@ class Marty::ScriptForm < Marty::Form
                                          'PrettyScript',
                                          rep_params)
       client.get_report(path)
-    rescue StandardError => exc
-      return client.netzke_notify "ERROR: #{exc}"
+    rescue StandardError => e
+      return client.netzke_notify "ERROR: #{e}"
     end
   end
 

@@ -36,3 +36,5 @@ spec/dummy/.sass-cache
 /.ssh-docker/*
 !/.ssh-docker/.keep
 
+# Ignore Gemfile.lock
+Gemfile.lock

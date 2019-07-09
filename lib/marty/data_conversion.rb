@@ -58,13 +58,13 @@ class Marty::DataConversion
       begin
         v =~ FLOAT_PAT ? EXCEL_START_DATE + v.to_f :
           Mcfly.is_infinity(v) ? 'infinity' : v.to_date
-      rescue StandardError => exc
+      rescue StandardError => e
         raise "date conversion failed for #{v.inspect}}"
       end
     when :datetime
       begin
         Mcfly.is_infinity(v) ? 'infinity' : v.to_datetime
-      rescue StandardError => exc
+      rescue StandardError => e
         raise "datetime conversion failed for #{v.inspect}}"
       end
     when :numrange, :int4range, :int8range
@@ -98,7 +98,6 @@ class Marty::DataConversion
 
     @@associations[klass] ||= klass.reflect_on_all_associations.
       each_with_object({}) do |assoc, h|
-
       h[assoc.name.to_s] = {
         assoc_keys:  assoc_keys(assoc.klass),
         assoc_class: assoc.klass,

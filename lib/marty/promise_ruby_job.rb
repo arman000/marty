@@ -25,8 +25,8 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
 
       mod = module_name.constantize
       res = { 'result' => mod.send(method_name, *method_args) }
-    rescue StandardError => exc
-      res = ::Marty::Promise.exception_to_result(promise: promise, exception: exc)
+    rescue StandardError => e
+      res = ::Marty::Promise.exception_to_result(promise: promise, exception: e)
     end
 
     promise.set_result(res)
@@ -37,8 +37,8 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
     return unless hook
 
     hook.run(params: method_args, result: res)
-  rescue StandardError => exc
-    Marty::Util.logger.error "promise hook failed: #{exc}"
+  rescue StandardError => e
+    Marty::Util.logger.error "promise hook failed: #{e}"
   end
 
   def max_attempts

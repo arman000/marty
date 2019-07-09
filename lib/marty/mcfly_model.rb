@@ -86,7 +86,6 @@ module Mcfly::Model
 
       base_mcfly_lookup(name, options + { sig:  attrs.length + 1,
                                              mode: mode }) do |_t, *attr_list|
-
         attr_list_ids = attr_list.each_with_index.map do |_x, i|
           assoc.member?(attrs[i]) ?
             (attr_list[i] && attr_list[i].id) : attr_list[i]

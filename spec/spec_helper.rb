@@ -11,8 +11,8 @@ require "#{support}/shared_connection"
 
 Dummy::Application.initialize! unless Dummy::Application.initialized?
 
-ActiveRecord::Migrator.migrate File.expand_path('../../db/migrate/', __FILE__)
-ActiveRecord::Migrator.migrate File.expand_path('../dummy/db/migrate/', __FILE__)
+ActiveRecord::Migration.migrate File.expand_path('../../db/migrate/', __FILE__)
+ActiveRecord::Migration.migrate File.expand_path('../dummy/db/migrate/', __FILE__)
 
 require 'rspec/retry'
 

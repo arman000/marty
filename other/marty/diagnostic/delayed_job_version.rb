@@ -31,7 +31,6 @@ module Marty::Diagnostic; class DelayedJobVersion < Base
       hash[r[0]] ||= []
       hash[r[0]] << r[1]
     end.map do |node, result|
-
       versions = result.uniq
       status = versions.count == 1 && versions[0] == ENV['DELAYED_VER']
 

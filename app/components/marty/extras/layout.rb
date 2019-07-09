@@ -115,7 +115,7 @@ module Layout
   end
 
   def get_sorter(col)
-    lambda { |rel, dir| rel.order("#{col}::text #{dir.to_s}") }
+    lambda { |rel, dir| rel.order(Arel.sql("#{col}::text #{dir}")) }
   end
 
   ######################################################################

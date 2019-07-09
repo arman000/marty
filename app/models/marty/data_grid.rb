@@ -254,7 +254,6 @@ class Marty::DataGrid < Marty::Base
   # private method used to cache lookup_grid_distinct_entry_h result
   delorean_fn :lookup_grid_h_priv,
               private: true, cache: true, sig: 4 do |pt, dgh, h, distinct|
-
     lookup_grid_distinct_entry_h(
       pt, h, dgh, nil, true, false, distinct)['result']
   end
@@ -271,9 +270,9 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.lookup_grid_distinct_entry_h(
-        pt, h, dgh, visited = nil, follow = true,
-        return_grid_data = false, distinct = true
-      )
+    pt, h, dgh, visited = nil, follow = true,
+    return_grid_data = false, distinct = true
+  )
 
     # Perform grid lookup, if result is another data_grid, and follow is true,
     # then perform lookup on the resulting grid.  Allows grids to be nested
