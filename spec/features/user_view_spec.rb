@@ -8,7 +8,7 @@ feature 'under System menu, User Management worflows', js: true do
   end
 
   def go_to_user_view_backdoor
-    sys_btn = first(:btn, 'System')
+    sys_btn = first(:btn, 'System') rescue nil
     if sys_btn
       sys_btn.click
       expect(page).not_to have_content 'User Management'
@@ -147,10 +147,10 @@ feature 'under System menu, User Management worflows', js: true do
       user_view = netzke_find('user_view')
       by 'check buttons' do
         user_view.select_row(1)
-        err = /Unable to find visible btn/
-        expect { find(:btn, 'New User') }.to raise_error(err)
-        expect { find(:btn, 'Edit') }.to raise_error(err)
-        expect { find(:btn, 'Delete') }.to raise_error(err)
+        err = /Unable to find btn/
+        ['New User', 'Edit', 'Delete'].each do |btn_name|
+          expect { find(:btn, btn_name) }.to raise_error(err)
+        end
       end
     end
 
@@ -161,10 +161,10 @@ feature 'under System menu, User Management worflows', js: true do
       user_view = netzke_find('user_view')
       by 'check buttons' do
         user_view.select_row(1)
-        err = /Unable to find visible btn/
-        expect { find(:btn, 'New User') }.to raise_error(err)
-        expect { find(:btn, 'Edit') }.to raise_error(err)
-        expect { find(:btn, 'Delete') }.to raise_error(err)
+        err = /Unable to find btn/
+        ['New User', 'Edit', 'Delete'].each do |btn_name|
+          expect { find(:btn, btn_name) }.to raise_error(err)
+        end
       end
     end
   end

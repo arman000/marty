@@ -18,7 +18,7 @@ module Marty; module RSpec; module Netzke
   end
 
   def log_in(username, password)
-    wait_for_ready(10)
+    wait_for_ready(25)
 
     begin
       if first("a[data-qtip='Current user']")
@@ -52,9 +52,9 @@ module Marty; module RSpec; module Netzke
   def press button_name, index_of = 0
     wait_for_element do
       begin
-        cmp = first("a[data-qtip='#{button_name}']")
+        cmp = first("a[data-qtip='#{button_name}']") rescue nil
         cmp ||= all(:xpath, './/a', text: button_name.to_s).
-                  detect { |c| c.text == button_name.to_s }
+                  detect { |c| c.text == button_name.to_s } rescue nil
         cmp ||= find(:btn, button_name, match: :first)
         cmp.click
         true

@@ -134,8 +134,8 @@ module Marty; class DataGridView < McflyGridPanel
       set_perms(dg, data)
       client.success = true
       client.netzke_on_submit_success
-    rescue StandardError => exc
-      client.netzke_notify(exc.to_s)
+    rescue StandardError => e
+      client.netzke_notify(e.to_s)
     end
   end
 
@@ -149,8 +149,8 @@ module Marty; class DataGridView < McflyGridPanel
       set_perms(dg, data)
       client.success = true
       client.netzke_on_submit_success
-    rescue StandardError => exc
-      client.netzke_notify(exc.to_s)
+    rescue StandardError => e
+      client.netzke_notify(e.to_s)
     end
   end
 

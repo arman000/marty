@@ -349,8 +349,8 @@ describe DataImporter do
 
     begin
       Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup4)
-    rescue Marty::DataImporter::Error => exc
-      exc.lines.should == [0]
+    rescue Marty::DataImporter::Error => e
+      e.lines.should == [0]
     else
       raise 'should have had an exception'
     end
@@ -390,9 +390,9 @@ describe DataImporter do
 
     begin
       Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup5)
-    rescue Marty::DataImporter::Error => exc
-      exc.lines.should == [1]
-      exc.message.should =~ /Conv Fixed XX/
+    rescue Marty::DataImporter::Error => e
+      e.lines.should == [1]
+      e.message.should =~ /Conv Fixed XX/
     else
       raise 'should have had an exception'
     end
@@ -409,9 +409,9 @@ describe DataImporter do
     begin
       res = Marty::DataImporter.
         do_import_summary(Gemini::FannieBup, fannie_bup6)
-    rescue Marty::DataImporter::Error => exc
-      exc.lines.should == [1]
-      exc.message.should =~ /bad float/
+    rescue Marty::DataImporter::Error => e
+      e.lines.should == [1]
+      e.message.should =~ /bad float/
     else
       raise 'should have had an exception'
     end

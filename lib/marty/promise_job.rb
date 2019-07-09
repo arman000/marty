@@ -41,9 +41,9 @@ class Marty::PromiseJob < Struct.new(:promise,
       end
 
       # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
-    rescue StandardError => exc
-      res = Delorean::Engine.grok_runtime_exception(exc)
-      # log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{exc}"
+    rescue StandardError => e
+      res = Delorean::Engine.grok_runtime_exception(e)
+      # log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{e}"
     end
     promise.set_result(res)
     process_hook(res)
@@ -53,8 +53,8 @@ class Marty::PromiseJob < Struct.new(:promise,
       return unless hook
 
       hook.run(params: params, result: res)
-  rescue StandardError => exc
-      Marty::Util.logger.error "promise hook failed: #{exc}"
+  rescue StandardError => e
+      Marty::Util.logger.error "promise hook failed: #{e}"
   end
 
   def max_attempts

@@ -34,9 +34,9 @@ module Marty::ContentHandler
       else
         res, format = { error: "Unknown format: #{format}" }.to_json, 'json'
       end
-    rescue StandardError => exc
+    rescue StandardError => e
       res, format =
-        { error: "Failed conversion #{format}: #{exc}" }.to_json, 'json'
+        { error: "Failed conversion #{format}: #{e}" }.to_json, 'json'
     end
 
     type, disposition = GEN_FORMATS[format]

@@ -132,9 +132,9 @@ class Marty::Promise < Marty::Base
           # log "OFF0 #{Process.pid} #{last}"
           begin
             work_off_job(job)
-          rescue StandardError => exc
+          rescue StandardError => e
             # log "OFFERR #{exc}"
-            error = exception_to_result(exc)
+            error = exception_to_result(e)
             last.set_result(error)
           end
           # log "OFF1 #{Process.pid} #{last}"
@@ -215,8 +215,8 @@ class Marty::Promise < Marty::Base
         'start_dt < ? AND parent_id IS NULL',
         DateTime.now - (all ? 0.hours : 4.hours)
       ).destroy_all
-    rescue StandardError => exc
-        Marty::Util.logger.error("promise GC error: #{exc}")
+    rescue StandardError => e
+        Marty::Util.logger.error("promise GC error: #{e}")
     end
 
     def exception_to_result(promise:, exception:)

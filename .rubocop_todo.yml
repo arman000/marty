@@ -48,7 +48,7 @@ Layout/ExtraSpacing:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, IndentationWidth.
 # SupportedStyles: special_inside_parentheses, consistent, align_braces
-Layout/IndentHash:
+Layout/IndentFirstHashElement:
   Exclude:
     - 'app/components/marty/extras/layout.rb'
     - 'lib/marty/data_change.rb'
@@ -508,7 +508,7 @@ Performance/TimesMap:
 
 # Offense count: 1
 # Cop supports --auto-correct.
-Performance/UnneededSort:
+Style/UnneededSort:
   Exclude:
     - 'app/models/marty/event.rb'
 
@@ -933,19 +933,6 @@ Style/Next:
 # Configuration parameters: Strict.
 Style/NumericLiterals:
   MinDigits: 15
-
-# Offense count: 10
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect, EnforcedStyle, IgnoredMethods.
-# SupportedStyles: predicate, comparison
-Style/NumericPredicate:
-  Exclude:
-    - 'spec/**/*'
-    - 'app/components/marty/main_auth_app.rb'
-    - 'lib/marty/content_handler.rb'
-    - 'lib/marty/data_change.rb'
-    - 'lib/marty/data_importer.rb'
-    - 'lib/marty/xl.rb'
 
 # Offense count: 42
 # Cop supports --auto-correct.

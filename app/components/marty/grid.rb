@@ -52,7 +52,7 @@ class Marty::Grid < ::Netzke::Grid::Base
 
   def get_json_sorter(json_col, field)
     lambda do |r, dir|
-      r.order("#{json_col} ->> '#{field}' " + dir.to_s)
+      r.order(Arel.sql("#{json_col} ->> '#{field}' " + dir.to_s))
     end
   end
 

@@ -31,9 +31,9 @@ module Marty
             )
 
             job = Delayed::Job.enqueue(promise_job)
-          rescue StandardError => exc
+          rescue StandardError => e
             # log "CALLERR #{exc}"
-            res = ::Delorean::Engine.grok_runtime_exception(exc)
+            res = ::Delorean::Engine.grok_runtime_exception(e)
             promise.set_start
             promise.set_result(res)
             # log "CALLERRSET #{res}"

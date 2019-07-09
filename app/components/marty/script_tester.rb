@@ -75,8 +75,8 @@ class Marty::ScriptTester < Marty::Form
       client.set_result result.join('<br/>')
     rescue SystemStackError
       return client.netzke_notify 'System Stack Error'
-    rescue StandardError => exc
-      res = Delorean::Engine.grok_runtime_exception(exc)
+    rescue StandardError => e
+      res = Delorean::Engine.grok_runtime_exception(e)
 
       result = ["Error: #{res['error']}", 'Backtrace:'] +
         res['backtrace'].map { |m, line, fn| "#{m}:#{line} #{fn}" }
