@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'marty_rspec'
 
 feature 'rule view', js: true do
   before(:all) do
@@ -39,7 +38,6 @@ feature 'rule view', js: true do
      JS
   end
 
-  # click_checkbox in marty_rspec not working here for some reason
   def click_checkbox(name)
     q = %Q(checkbox[fieldLabel="#{name}"])
     page.execute_script <<-JS
@@ -48,7 +46,6 @@ feature 'rule view', js: true do
     JS
   end
 
-  # click_col in marty_rspec is not reliable
   def click_column(rv, name)
     cid = col_id(rv, name)
     c = find('#' + cid)

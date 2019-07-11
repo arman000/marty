@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'marty_rspec'
 
 feature 'data grid view', js: true do
   before(:all) do
