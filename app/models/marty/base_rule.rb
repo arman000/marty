@@ -53,13 +53,16 @@ class Marty::BaseRule < Marty::Base
 
   def validate
     self.class.guard_info.each { |name, h| check(name, h) }
+
     grids.each do |vn, gn|
       return errors[:grids] << "- Bad grid name '#{gn}' for '#{vn}'" unless
         gn.blank? || Marty::DataGrid.lookup('infinity', gn)
     end
+
     cg_err = computed_guards.delete('~~ERROR~~')
     errors[:computed] <<
       "- Error in rule '#{name}' field 'computed_guards': #{cg_err.capitalize}" if cg_err
+
     res_err = results.delete('~~ERROR~~')
     errors[:computed] <<
       "- Error in rule '#{name}' field 'results': #{res_err.capitalize}" if res_err
@@ -67,12 +70,14 @@ class Marty::BaseRule < Marty::Base
 
   validates_presence_of :name
   validate :validate
+  validate :validate_simple_guard_options
 
   before_validation(on: [:create, :update]) do
-    self.simple_guards     ||= {}
-    self.computed_guards   ||= {}
-    self.grids             ||= {}
-    self.results           ||= {}
+    self.simple_guards         ||= {}
+    self.simple_guards_options ||= {}
+    self.computed_guards       ||= {}
+    self.grids                 ||= {}
+    self.results               ||= {}
   end
 
   before_create do
@@ -83,38 +88,93 @@ class Marty::BaseRule < Marty::Base
     end
   end
 
-  def self.get_subq(field, subfield, multi, type, vraw)
-    arrow = multi || ![:range, :string, :date, :datetime].include?(type) ?
-              '->' : '->>'
-    op = multi || type == :range ? '@>' : '='
-    value0 = [:string, :date, :datetime].include?(type) ?
-               ActiveRecord::Base.connection.quote(vraw) :
-               type == :range ? vraw.to_f :
-                 "'#{vraw}'::jsonb"
-    value = multi ? %Q('["%s"]') % value0[1..-2] : value0
-    fieldcast = type == :range ? '::numrange' : ''
-    "(#{field}#{arrow}'#{subfield}')#{fieldcast} #{op} #{value}"
+  private
+
+  def validate_simple_guard_options
+    simple_guards_options.each do |guard_name, value|
+      field_path = "'simple_guard_options' -> '#{guard_name}' -> 'not'"
+
+      guard_info = self.class.guard_info[guard_name.to_s]
+
+      if guard_info.blank?
+        errors[:simple_guards_options] <<
+          "- Error in rule '#{name}' #{field_path}."\
+          "Guard '#{guard_name}' doesn't exist."
+
+        next
+      end
+
+      not_is_allowed = guard_info.fetch(:allow_not, true)
+
+      not_field = value['not'] || value[:not]
+      next if not_field.nil?
+
+      if not_field.is_a?(TrueClass)
+        next if not_is_allowed
+
+        errors[:simple_guards_options] <<
+          "- Error in rule '#{name}' #{field_path}. True value is not allowed"
+        next
+      end
+
+      next if not_field.is_a?(FalseClass)
+
+      errors[:simple_guards_options] <<
+        "- Error in rule '#{name}' #{field_path} field must be a boolean"
+    end
   end
 
-  def self.get_matches_(_pt, attrs, params)
-    q = select('DISTINCT ON (name) *').where(attrs)
-
-    params.each do |k, vraw|
-      h = guard_info
-      use_k = (h[k] && k) ||
-              (h[k + '_array'] && k + '_array') ||
-              (h[k + '_range'] && k + '_range')
-      next unless use_k
-
-      multi, type = h[use_k].values_at(:multi, :type)
-      filts = [vraw].flatten.map do |v|
-        qstr = get_subq('simple_guards', use_k, multi, type, v)
-      end.join(' OR ')
-      isn = "simple_guards->'#{use_k}' IS NULL OR"
-
-      q = q.where("(#{isn} #{filts})")
+  class << self
+    def get_subq(field, subfield, multi, type, vraw)
+      arrow = multi || ![:range, :string, :date, :datetime].include?(type) ?
+                '->' : '->>'
+      op = multi || type == :range ? '@>' : '='
+      value0 = [:string, :date, :datetime].include?(type) ?
+                 ActiveRecord::Base.connection.quote(vraw) :
+                 type == :range ? vraw.to_f :
+                   "'#{vraw}'::jsonb"
+      value = multi ? %Q('["%s"]') % value0[1..-2] : value0
+      fieldcast = type == :range ? '::numrange' : ''
+      "(#{field}#{arrow}'#{subfield}')#{fieldcast} #{op} #{value}"
     end
-    # print q.to_sql
-    q.order(:name)
+
+    def get_matches_(_pt, attrs, params)
+      q = select('DISTINCT ON (name) *').where(attrs)
+
+      h = guard_info
+
+      params.each do |k, vraw|
+        use_k = (h[k] && k) ||
+                (h[k + '_array'] && k + '_array') ||
+                (h[k + '_range'] && k + '_range')
+
+        next unless use_k
+
+        param_guard_info = h[use_k]
+
+        multi = param_guard_info[:multi]
+        type = param_guard_info[:type]
+        with_not = param_guard_info.fetch(:allow_not, true)
+
+        filts = [vraw].flatten.map do |v|
+          qstr = get_subq('simple_guards', use_k, multi, type, v)
+        end.join(' OR ')
+
+        condition = if with_not
+                      "CASE
+                       WHEN (simple_guards_options->'#{use_k}'->>'not')::boolean
+                       THEN simple_guards->'#{use_k}' IS NULL OR NOT #{filts}
+                       ELSE simple_guards->'#{use_k}' IS NULL OR #{filts}
+                       END
+                      "
+                    else
+                      "simple_guards->'#{use_k}' IS NULL OR #{filts}"
+                    end
+
+        q = q.where(condition)
+      end
+      # print q.to_sql
+      q.order(:name)
+    end
   end
 end

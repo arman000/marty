@@ -112,7 +112,7 @@ feature 'rule view', js: true do
     time_fill_in(1, '08:03:01')
     press('OK')
     wait_for_ajax
-    expect(mrv.row_count()).to eq(9)
+    expect(mrv.row_count()).to eq(12)
     expect(mrv.get_row_vals(1)).to include('name' => 'abc',
                                             'rule_type' => 'SimpleRule',
                                             'start_dt' => '2013-01-01T11:03:01',
@@ -336,7 +336,7 @@ computed_value = if paramb
      else (grid2_grid_result||1) / param1
 EOL
 
-    names = mrv.get_col_vals(:name, 9, 0)
+    names = mrv.get_col_vals(:name, 12, 0)
     idx = names.index { |n| n == 'Rule3' } + 1
     mrv.select_row(idx)
     press('Edit')
@@ -359,35 +359,68 @@ EOL
                                                  'ZRule3', 'ZRule4',
                                                  'ZRule5'])
     xrv.select_row(1)
+
+    expect(page).to_not have_content('NOT (G2V1)')
+
     press('Edit')
-    fill_in('Range Guard 1', with: '[100,200)')
-    fill_in('Range Guard 2', with: '[30,40)')
+
+    fill_in('Guard two', with: 'G2V1')
+    click_checkbox('Not')
+
+    fill_in('Range Guard 1', with: '[100,200)', fill_options: { clear: :backspace })
+    fill_in('Range Guard 2', with: '[30,40)', fill_options: { clear: :backspace })
     press('OK')
+
     wait_for_ajax
-    r = Gemini::XyzRule.get_matches('infinity', {},  'g_range1' => 150,
-                                                     'g_range2' => 35)
+
+    r = Gemini::XyzRule.get_matches(
+      'infinity',
+      {},
+      'g_range1' => 150,
+      'g_range2' => 35,
+      'guard_two' => 'G2V2'
+    )
 
     expect(r.to_a.count).to eq(1)
-    exp = { 'user_id' => 1,
-           'o_user_id' => nil,
-           'name' => 'ZRule1',
-           'engine' => 'Gemini::XyzRuleScriptSet',
-           'rule_type' => 'ZRule',
-           'start_dt' => DateTime.parse('2017-1-1 08:01:00'),
-           'simple_guards' => { 'g_bool' => false,
-                             'g_date' => '2017-1-1',
-                             'g_range1' => '[100,200)',
-                             'g_range2' => '[30,40)',
-                             'g_string' => 'aaa',
-                             'g_integer' => '5',
-                             'g_datetime' => '2017-1-1 12:00:01' },
-           'computed_guards' => {},
-           'grids' => { 'grid1' => 'DataGrid1' },
-           'results' =>
-           { 'bvlen' => 'base_value.length',
-            'bv' => 'base_value' } }
+    exp = {
+      'user_id' => 1,
+      'o_user_id' => nil,
+      'name' => 'ZRule1',
+      'engine' => 'Gemini::XyzRuleScriptSet',
+      'rule_type' => 'ZRule',
+      'start_dt' => DateTime.parse('2017-1-1 08:01:00'),
+      'simple_guards' => {
+        'g_bool' => false,
+        'g_date' => '2017-1-1',
+        'guard_two' => 'G2V1',
+        'g_range1' => '[100,200)',
+        'g_range2' => '[30,40)',
+        'g_string' => 'aaa',
+        'g_integer' => '5',
+        'g_datetime' => '2017-1-1 12:00:01'
+      },
+      'simple_guards_options' => {
+        'g_bool' => { 'not' => false },
+        'g_date' => { 'not' => false },
+        'g_datetime' => { 'not' => false },
+        'g_integer' => { 'not' => false },
+        'g_range1' => { 'not' => false },
+        'g_range2' => { 'not' => false },
+        'g_string' => { 'not' => false },
+        'guard_two' => { 'not' => true }
+      },
+      'computed_guards' => {},
+      'grids' => { 'grid1' => 'DataGrid1' },
+      'results' => {
+        'bvlen' => 'base_value.length',
+        'bv' => 'base_value'
+      }
+    }
 
     expect(r.first.as_json).to include(exp)
+
+    expect(page).to have_content('NOT (G2V1)')
+
     expect(xrv.get_col_vals(:g_string, 8, 0)).to eq(['aaa', 'bbb', 'ccc', 'ddd',
                                                      'eee', 'eee', 'eee', 'eee'])
     click_column(xrv, 'String list Guard')
@@ -415,6 +448,7 @@ EOL
                                                    %Q({"grid1":"DataGrid2"}),
                                                    %Q({"grid1":"DataGrid1"}),
                                                    %Q({"grid1":"DataGrid1"})])
+
     press('Applications')
     press('Data Grids Admin')
     dgv = netzke_find('data_grid_view')
@@ -444,9 +478,9 @@ EOL
     go_to_my_rules
     wait_for_ajax
 
-    names = mrv.get_col_vals(:name, 9, 0)
-    gvs = mrv.get_col_vals(:grids, 9, 0)
-    rvs = mrv.get_col_vals(:results, 9, 0)
+    names = mrv.get_col_vals(:name, 12, 0)
+    gvs = mrv.get_col_vals(:grids, 12, 0)
+    rvs = mrv.get_col_vals(:results, 12, 0)
     expect(JSON.parse(gvs[names.index('abc')])).to eq(g1h)
     expect(JSON.parse(gvs[names.index('Rule2b')])).to eq(g1h +
                                                          { 'grid2' => 'DataGrid2' })

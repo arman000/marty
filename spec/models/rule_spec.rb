@@ -11,9 +11,11 @@ module Marty::RuleSpec
                           'grid_sum', 'c1', 'sr2']
       @ruleopts_xyz = ['bvlength', 'bv']
     end
+
     after(:all) do
       restore_clean_db(@save_file)
     end
+
     before(:each) do
       dt = DateTime.parse('2017-1-1')
       p = File.expand_path('../../fixtures/csv/rule', __FILE__)
@@ -23,6 +25,7 @@ module Marty::RuleSpec
       end
       Marty::Tag.do_create('2017-01-01', 'tag')
     end
+
     context 'validation' do
       subject do
         guards = (@g_array   ? { 'g_array' => @g_array } : {}) +
@@ -37,6 +40,7 @@ module Marty::RuleSpec
                                start_dt: @start_dt || '2013-1-1',
                                end_dt:   @end_dt,
                                simple_guards: guards,
+                               simple_guards_options: @simple_guards_options || {},
                                computed_guards: @computed_guards || {},
                                grids: @grids || {},
                                results: @results || {}
@@ -121,18 +125,85 @@ module Marty::RuleSpec
         exp = /Grids - Bad grid name 'xyz' for 'grid1'/
         expect { subject }.to raise_error(exp)
       end
+
+      describe 'simple_guards_options' do
+        before do
+          @rule_type = 'SimpleRule'
+        end
+
+        let(:simple_guards_options) do
+          {
+            'g_array' => { 'not' => true },
+            'g_string' => { 'not' => true },
+            'g_range' => { 'not' => true },
+            'g_integer' => { 'not' => true },
+            'g_bool' => { 'not' => true }
+          }
+        end
+
+        it 'detects wrong simple guards options value' do
+          @simple_guards_options = simple_guards_options.merge(
+            'g_array' => { 'not' => 'wrong_type' }
+          )
+
+          exp = Regexp.new(
+            "Error in rule 'testrule' 'simple_guard_options' ->"\
+            " 'g_array' -> 'not' field must be a boolean"
+          )
+
+          expect { subject }.to raise_error(exp)
+        end
+
+        it 'detects wrong simple guards options field' do
+          @simple_guards_options = {
+            'g_integer_wrong' => { 'not' => true }
+          }
+
+          exp = Regexp.new(
+            "Error in rule 'testrule' 'simple_guard_options' -> "\
+            "'g_integer_wrong' -> 'not'.Guard 'g_integer_wrong' doesn't exist."
+          )
+
+          expect { subject }.to raise_error(exp)
+        end
+
+        it 'detects wrong simple guards options field2' do
+          @simple_guards_options = {
+            'g_nullbool' => { 'not' => true }
+          }
+
+          exp = Regexp.new(
+            "Error in rule 'testrule' 'simple_guard_options' ->"\
+            " 'g_nullbool' -> 'not'. True value is not allowed"
+          )
+          expect { subject }.to raise_error(exp)
+        end
+
+        it 'saves' do
+          @simple_guards_options = simple_guards_options
+          expect { subject }.to_not raise_error
+        end
+      end
+
       it 'sets guard defaults correctly' do
         vals = Gemini::MyRule.all.map do |r|
           [r.name, r.simple_guards['g_has_default']]
         end
-        expect(vals.sort).to eq([['Rule1', 'different'],
-                                 ['Rule2', 'string default'],
-                                 ['Rule2a', 'string default'],
-                                 ['Rule2b', 'string default'],
-                                 ['Rule2c', 'string default'],
-                                 ['Rule3', 'string default'],
-                                 ['Rule4', 'string default'],
-                                 ['Rule5', 'foo']].sort)
+        expect(vals.sort).to eq(
+          [
+            ['NotRule1', 'foo'],
+            ['NotRule2', 'foo'],
+            ['NotRule3', 'foo'],
+            ['Rule1', 'different'],
+            ['Rule2', 'string default'],
+            ['Rule2a', 'string default'],
+            ['Rule2b', 'string default'],
+            ['Rule2c', 'string default'],
+            ['Rule3', 'string default'],
+            ['Rule4', 'string default'],
+            ['Rule5', 'foo']
+          ].sort
+        )
       end
     end
     context 'validation (xyz type)' do
@@ -176,6 +247,7 @@ module Marty::RuleSpec
         expect(rule.compute_xyz('infinity', true)).to be false
         expect(rule.compute_xyz('infinity', false)).to be true
       end
+
       it 'no error' do
         @rule_type = 'XRule'
         @results = { 'x' => '1' }
@@ -250,7 +322,7 @@ module Marty::RuleSpec
         expect(lookup.first.name).to eq('Rule2c')
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_type' => 'SimpleRule' }, {})
-        expect(lookup.to_a.count).to eq(5)
+        expect(lookup.to_a.count).to eq(8)
         lookup = Gemini::MyRule.get_matches('infinity',
                                             { 'rule_dt' => '2017-3-1 02:00:00' },
                                             {})
@@ -273,8 +345,43 @@ module Marty::RuleSpec
                                             'g_nbool_def' => true)
         expect(lookup.to_a.count).to eq(1)
         expect(lookup.pluck(:name).first).to eq('Rule1')
+
+        #####
+        # NOT lookups
+        #####
+        lookup = Gemini::MyRule.get_matches('infinity', {},
+                                            'g_bool_def' => true,
+                                            'g_integer' => 3757)
+        expect(lookup.to_a.count).to eq(2)
+        expect(lookup.pluck(:name).sort).to eq(['NotRule1', 'Rule5'])
+
+        lookup = Gemini::MyRule.get_matches('infinity', {},
+                                            'g_bool_def' => true,
+                                            'g_integer' => 100500)
+        expect(lookup.to_a.count).to eq(2)
+        expect(lookup.pluck(:name).sort).to eq(['NotRule2', 'NotRule3'])
+
+        lookup = Gemini::MyRule.get_matches('infinity', {},
+                                            'g_string' => 'wrong',
+                                            'g_range' => 20
+        )
+        expect(lookup.to_a.count).to eq(2)
+        expect(lookup.pluck(:name).sort).to eq(['NotRule1', 'NotRule2'])
+
+        lookup = Gemini::MyRule.get_matches('infinity', {},
+                                            'g_string' => 'wrong',
+        )
+        expect(lookup.to_a.count).to eq(3)
+        expect(lookup.pluck(:name).sort).to eq(['NotRule1', 'NotRule2', 'NotRule3'])
+
+        lookup = Gemini::MyRule.get_matches('infinity', {},
+                                            'g_range' => 250,
+                                            'g_string' => 'wrong')
+        expect(lookup.to_a.count).to eq(1)
+        expect(lookup.pluck(:name).sort).to eq(['NotRule3'])
       end
     end
+
     context 'rule compute' do
       let(:complex) do
         Gemini::MyRule.get_matches('infinity',
