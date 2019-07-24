@@ -22,14 +22,23 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     c.model = self.class.klass
     c.title = I18n.t('rule')
     c.attributes = self.class.base_fields +
-                   klass.guard_info.
-                     sort_by { |_, h| h[:order] || 0 }.
-                     reject { |_, h| h[:hidden] }.
-                     map { |name, _| name.to_sym } + self.class.computed_fields
+                   guard_info_attributes + self.class.computed_fields
     c.store_config.merge!(sorters: [{ property: :name, direction: 'ASC' }])
     c.editing      = :in_form
     c.paging       = :pagination
     c.multi_select = false
+  end
+
+  def guard_info_attributes
+    res = klass.guard_info.
+      sort_by { |_, h| h[:order] || 0 }.
+      reject { |_, h| h[:hidden] }.
+      map do |name, opts|
+        next name.to_sym unless opts.fetch(:allow_not, true)
+
+        [name.to_sym, "#{name}_not".to_sym]
+      end
+    res.flatten
   end
 
   def default_bbar
@@ -222,7 +231,11 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def form_items_guards
-    klass.guard_info.reject { |_, h| h[:hidden] }.keys.map(&:to_sym)
+    klass.guard_info.reject { |_, h| h[:hidden] }.map do |field, opts|
+      next { field: field.to_sym } unless opts.fetch(:allow_not, true)
+
+      { field: field.to_sym, not_field: "#{field.to_sym}_not".to_sym }
+    end
   end
 
   def form_items_grids
@@ -246,17 +259,56 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
                  height: 225)]
   end
 
+  def default_form_items_guards
+    with_not_fields = form_items_guards.any? { |h| h.key?(:not_field) }
+
+    guards = form_items_guards.map do |h|
+      if with_not_fields
+        hbox(
+          vbox(h.fetch(:field), width: '78%', border: false),
+          vbox(width: '2%', border: false),
+          vbox(h.fetch(:not_field, nil), width: '20%', border: false),
+          width: '100%',
+          border: false
+        )
+      else
+        hbox(
+          vbox(h.fetch(:field), width: '100%', border: false),
+          width: '100%',
+          border: false
+        )
+      end
+    end
+  end
+
   def default_form_items
     [
       hbox(
-        vbox(*form_items_attrs +
-             form_items_guards,
-             border: false,
-             width: '40%',
+        vbox(
+          hbox(
+            vbox(
+              *form_items_attrs,
+              width: '100%',
+              border: false
             ),
+            width: '100%',
+            border: false
+          ),
+          hbox(
+            vbox(
+              *default_form_items_guards,
+              width: '100%',
+              border: false
+            ),
+            width: '100%',
+            border: false
+          ),
+          width: '40%',
+          border: false
+        ),
         vbox(width: '2%', border: false),
         vbox(
-          width: '55%', border: false),
+          width: '5%', border: false),
         height: '40%',
         border: false,
       ),
@@ -310,9 +362,41 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
       else
         c.getter = range_getter(namestr, meth)
         c.setter = range_setter(namestr, meth)
+
         c.filterable = false
       end
+
+      c.column_config = {
+        renderer: 'simpleGuardColumnRenderer'
+      }
       c.sorting_scope = get_json_sorter(meth, namestr)
+    end
+
+    # Checkbox and hidden column for "NOT" option for simpleguards
+    attribute "#{name}_not" do |c|
+      c.width = 30
+      c.label = 'Not'
+      c.type = :boolean
+      c.filterable = false
+      c.column_config = { hidden: true }
+
+      c.field_config = {
+        label_align: 'right',
+        max_width: 100,
+        label_pad: 2,
+        label_width: 30
+      }
+      c.getter = lambda do |record|
+        record.simple_guards_options.dig(name.to_s, 'not')
+      end
+
+      c.setter = lambda do |record, value|
+        options = record.simple_guards_options.fetch(name.to_s, {})
+        new_options = options.merge('not' => value)
+        record.simple_guards_options = record.simple_guards_options.merge(
+          name.to_s => new_options
+        )
+      end
     end
   end
 
@@ -346,5 +430,15 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
         rel.where("#{a}::text like '%#{v}%'")
       end
     end
+  end
+
+  client_class do |c|
+    c.myy_renderer = l(<<-JS)
+      function(value){
+        console.log(arguments)
+
+        return value ? "*" + value + "*" : "";
+      }
+    JS
   end
 end

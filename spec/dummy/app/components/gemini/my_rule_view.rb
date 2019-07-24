@@ -32,15 +32,41 @@ class Gemini::MyRuleView < Marty::DeloreanRuleView
                  setter: jsonb_simple_setter(:computed_guards),
                  height: 50)]
   end
+
   def default_form_items
     [
       hbox(
-        vbox(*form_items_attrs +
-             form_items_guards +
-             form_items_grids,
-             border: false,
-             width: "40%",
-        ),
+        vbox(
+          hbox(
+            vbox(
+              *form_items_attrs,
+              width: '100%',
+              border: false
+            ),
+            width: '100%',
+            border: false
+          ),
+          hbox(
+            vbox(
+              *default_form_items_guards,
+              width: '100%',
+              border: false
+            ),
+            width: '100%',
+            border: false
+          ),
+          hbox(
+            vbox(
+              *form_items_grids,
+              width: '100%',
+              border: false
+            ),
+            width: '100%',
+            border: false
+          ),
+          width: '40%',
+          border: false
+        ), 
         vbox(width: '2%', border: false),
         vbox(
              width: '55%', border: false),

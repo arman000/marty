@@ -16,7 +16,9 @@ class Gemini::XyzRule < Marty::DeloreanRule
     'RULEOPTS_XYZ'
   end
   def self.guard_info
-    super + {"flavors" => { multi: true, type: :string,
+    super + {"flavors" => { multi: true,
+                            type: :string,
+                            allow_not: false,
                             enum: Gemini::XyzEnum,
                             width: 150},
              "guard_two" => { type: :string,
