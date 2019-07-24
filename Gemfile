@@ -14,10 +14,8 @@ end
 
 group :default, :cmit do
   gem 'delorean_lang'
-  gem 'marty_rspec'
   gem 'mcfly'
   # gem 'delorean_lang', path: File.expand_path('../../delorean', __FILE__)
-  # gem 'marty_rspec', path: File.expand_path('../../marty_rspec', __FILE__)
   # gem 'mcfly', path: File.expand_path('../../mcfly', __FILE__)
 end
 
