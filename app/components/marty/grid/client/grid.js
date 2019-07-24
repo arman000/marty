@@ -1,13 +1,13 @@
 {
-  getComponent: function (name) {
+  getComponent: function(name) {
     return Ext.getCmp(name);
   },
 
-  findComponent: function (name) {
+  findComponent: function(name) {
     return Ext.ComponentQuery.query(`[name=${name}]`)[0];
   },
 
-  setDisableComponentActions: function (prefix, flag) {
+  setDisableComponentActions: function(prefix, flag) {
     for (var key in this.actions) {
       if (key.substring(0, prefix.length) == prefix) {
         this.actions[key].setDisabled(flag);
@@ -15,7 +15,7 @@
     }
   },
 
-  initComponent: function () {
+  initComponent: function() {
     this.dockedItems = this.dockedItems || [];
     if (this.paging == 'pagination') {
       this.dockedItems.push({
@@ -57,7 +57,7 @@
 
     var children = me.serverConfig.child_components || [];
     me.onSelectionChange(
-      function (m) {
+      function(m) {
         var has_sel = m.hasSelection();
 
         var rid = null;
@@ -92,7 +92,7 @@
     var store = me.getStore();
     var linked = me.serverConfig.linked_components || [];
     for (var event of ['update', 'netzkerefresh']) {
-      store.on(event, function () {
+      store.on(event, function() {
         for (var link of linked) {
           var comp = me.findComponent(link);
           if (comp && comp.reload) {
@@ -103,19 +103,30 @@
     }
   },
 
-  onSelectionChange: function (f) {
+  onSelectionChange: function(f) {
     var me = this;
     me.getSelectionModel().on('selectionchange', f);
   },
 
-  doViewInForm: function (record) {
+  // override netzkeReloadStore to allow option passthrough
+  // reference: http://api.netzke.org/client/files/doc_client_netzke-basepack_javascripts_grid_event_handlers.js.html
+  netzkeReloadStore: function(opts = {}) {
+    var store = this.getStore();
+
+    // HACK to work around buffered store's buggy reload()
+    if (!store.lastRequestStart) {
+      store.load(opts);
+    } else store.reload(opts);
+  },
+
+  doViewInForm: function(record) {
     this.netzkeLoadComponent("view_window", {
       serverConfig: {
         record_id: record.id
       },
-      callback: function (w) {
+      callback: function(w) {
         w.show();
-        w.on('close', function () {
+        w.on('close', function() {
           if (w.closeRes === "ok") {
             this.netzkeReloadStore();
           }
@@ -124,11 +135,16 @@
     });
   },
 
-  reload: function (opts = {}) {
+  // always reset store to first page on reload
+  // to avoid load bug when moving from a higher page count
+  // to a grid with a lower page count
+  reload: function(opts = {
+    start: 0
+  }) {
     this.netzkeReloadStore(opts);
   },
 
-  reloadAll: function () {
+  reloadAll: function() {
     var me = this;
     var children = me.serverConfig.child_components || [];
     this.store.reload();
@@ -140,7 +156,7 @@
     }
   },
 
-  clearFilters: function () {
+  clearFilters: function() {
     this.filters.clearFilters();
   },
 }
