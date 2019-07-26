@@ -179,6 +179,16 @@ Admin Services Plus\t-1.625
 Investor Services Acadamy\t-0.5
 EOS
 
+    Gl = <<EOS
+lenient
+fha_203k_option2\tstring\tv\tfha_203k_option2
+
+Investor Services\t-0.625
+NOT (Admin Premium Services|Admin Services|Admin Services Plus)\t-1.0
+Admin Services Plus\t-1.625
+Investor Services Acadamy\t-0.5
+EOS
+
     before(:each) do
       # Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
@@ -295,8 +305,8 @@ EOS
       let(:pt) { 'infinity' }
 
       before(:each) do
-        ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'Ga', 'Gb',
-         'Gc', 'Gd', 'Ge', 'Gf', 'Gg', 'Gh', 'Gj'].each do |g|
+        %w[G1 G2 G3 G4 G5 G6 G7 G8 Ga Gb
+           Gc Gd Ge Gf Gg Gh Gj Gl].each do |g|
           dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
         end
       end
@@ -624,18 +634,22 @@ EOS
         expected_metadata = [{ 'dir' => 'v',
                                'attr' => 'units',
                                'keys' => [[1, 2], [1, 2], [3, 4], [3, 4]],
+                               'nots' => [false, false, false, false],
                                'type' => 'integer' },
                              { 'dir' => 'v',
                                'attr' => 'ltv',
                                'keys' => ['[,80]', '(80,105]', '[,80]', '(80,105]'],
+                               'nots' => [false, false, false, false],
                                'type' => 'numrange' },
                              { 'dir' => 'h',
                                'attr' => 'cltv',
                                'keys' => ['[100,110)', '[110,120)', '[120,]'],
+                               'nots' => [false, false, false],
                                'type' => 'numrange' },
                              { 'dir' => 'h',
                                'attr' => 'fico',
                                'keys' => ['[600,700)', '[700,750)', '[750,]'],
+                               'nots' => [false, false, false],
                                'type' => 'numrange' }]
 
         dgh = Marty::DataGrid.lookup_h(pt, 'G2')
@@ -651,15 +665,18 @@ EOS
         expected_metadata = [{ 'dir' => 'v',
                                'attr' => 'state',
                                'keys' => [['CA'], ['HI', 'TX'], ['NM'], ['MA'], nil],
+                               'nots' => [false, false, false, false, false],
                                'type' => 'string' },
                              { 'dir' => 'v',
                                'attr' => 'ltv',
                                'keys' => ['[,80]', '(80,105]', '[,80]', '(80,105]',
                                           '[,80]'],
+                                'nots' => [false, false, false, false, false],
                                'type' => 'numrange' },
                              { 'dir' => 'h',
                                'attr' => 'fico',
                                'keys' => ['[600,700)', '[700,750)', '[750,]'],
+                               'nots' => [false, false, false],
                                'type' => 'numrange' }]
         dgh = Marty::DataGrid.lookup_h(pt, 'G8')
         res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
@@ -676,6 +693,7 @@ EOS
         expected_metadata = [{ 'dir' => 'v',
                                'attr' => 'ltv',
                                'keys' => ['[,115]', '(115,135]', '(135,140]'],
+                               'nots' => [false, false, false],
                                'type' => 'numrange' }]
         dgh = Marty::DataGrid.lookup_h(pt, 'G8')
         res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
@@ -698,6 +716,7 @@ EOS
                                                              dgh, nil, false, true)
         end
       end
+
       it 'should handle all quote chars in grid inputs' do
         dgh = Marty::DataGrid.lookup_h(pt, 'G1')
         # single, double, backslash, grave, acute, unicode quotes: left single,
@@ -710,11 +729,69 @@ EOS
             pt, { 'ltv' => 10, 'fico' => 690, 'state' => st }, dgh, nil, false, true)
         end
       end
+
       it 'should handle quote chars in object name' do
         dgh = Marty::DataGrid.lookup_h(pt, 'G1')
         st = Gemini::State.new(name: "'\\")
         res = Marty::DataGrid.lookup_grid_distinct_entry_h(
           pt, { 'ltv' => 10, 'fico' => 690, 'state' => st }, dgh, nil, false, true)
+      end
+
+      it 'Should handle NOT condition in lookups' do
+        dgh = Marty::DataGrid.lookup_h(pt, 'Gl')
+
+        g1_res = lookup_grid_helper(
+          'infinity',
+          'Gl',
+          { 'fha_203k_option2' => 'Admin Services Plus' },
+          false,
+          true
+        )
+        expect(g1_res).to eq([-1.625, 'Gl'])
+
+        g1_res = lookup_grid_helper(
+          'infinity',
+          'Gl',
+          { 'fha_203k_option2' => 'Not Existing Services' },
+          false,
+          true
+        )
+        expect(g1_res).to eq([-1.0, 'Gl'])
+
+        g1_res = lookup_grid_helper(
+          'infinity',
+          'Gl',
+          { 'fha_203k_option2' => 'Admin Services' },
+          false,
+          true
+        )
+        expect(g1_res).to eq([nil, 'Gl'])
+      end
+
+      it 'Should handle NOT condition in import' do
+        dg = dg_from_import('Gl0', Gl)
+        expect(dg.id).to be_present
+
+        expect(dg.metadata.first['nots']).to eq([false, true, false, false])
+        expect(dg.metadata.first['keys']).to eq(
+          [
+            ['Investor Services'],
+            ['Admin Premium Services', 'Admin Services', 'Admin Services Plus'],
+            ['Admin Services Plus'],
+            ['Investor Services Acadamy']
+          ]
+        )
+
+        indexes = Marty::GridIndexString.where(data_grid_id: dg.id)
+
+        expect(indexes.size).to eq 4
+        expect(indexes.where(not: true).size).to eq 1
+
+        not_index = indexes.find_by(not: true)
+        expect(not_index.key).to eq(
+          ['Admin Premium Services', 'Admin Services', 'Admin Services Plus']
+        )
+        expect(not_index.index).to eq(1)
       end
     end
 
@@ -724,6 +801,11 @@ EOS
         dg2 = dg_from_import('Gf2', dg.export)
 
         expect(dg.export).to eq(dg2.export)
+      end
+
+      it 'Should handle NOT condition in export' do
+        dg = dg_from_import('Gl0', Gl)
+        expect(dg.export.delete("\r")).to eq(Gl)
       end
     end
 
@@ -757,13 +839,48 @@ EOS
       end
 
       it 'should be able to export and import back grids' do
-        [G1, G2, G3, G4, G5, G6, G7, G8, G9, Ga, Gb].each_with_index do |grid, i|
+        [G1, G2, G3, G4, G5, G6, G7, G8, G9, Ga, Gb, Gl].each_with_index do |grid, i|
           dg = dg_from_import("G#{i}", grid)
           g1 = dg.export
+
           dg = dg_from_import("Gx#{i}", g1)
           g2 = dg.export
+
+          dg1 = Marty::DataGrid.lookup_h('infinity', "G#{i}").except(
+            'id',
+            'group_id',
+            'created_dt',
+            'name',
+          )
+
+          dg2 = Marty::DataGrid.lookup_h('infinity', "Gx#{i}").except(
+            'id',
+            'group_id',
+            'created_dt',
+            'name',
+          )
+
           expect(g1).to eq g2
+          expect(dg1).to eq dg2
         end
+      end
+
+      it 'Should handle NOT condition in update' do
+        dgb = dg_from_import('Gl', Gl, '1/1/2014')
+        new_gl = Gl.sub(/-1.0/, '-3.45').sub('Investor Services', 'NOT (Investor Services)')
+        dgb.update_from_import('Gl', new_gl, '1/1/2015')
+
+        grids = Marty::DataGrid.where(name: 'Gl')
+        expect(grids.size).to eq 2
+
+        old_dg = grids.where.not(obsoleted_dt: 'infinity').first
+        new_dg = grids.where(obsoleted_dt: 'infinity').first
+
+        expect(old_dg.metadata.first['nots']).to eq [false, true, false, false]
+        expect(old_dg.data).to eq [[-0.625], [-1.0], [-1.625], [-0.5]]
+
+        expect(new_dg.metadata.first['nots']).to eq [true, true, false, false]
+        expect(new_dg.data).to eq [[-0.625], [-3.45], [-1.625], [-0.5]]
       end
 
       it 'should be able to externally export/import grids' do
