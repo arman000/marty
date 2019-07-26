@@ -19,7 +19,7 @@ app-bash:
 	docker-compose --file=docker-compose.dummy.yml run --rm app bash
 
 app-console:
-	docker-compose --file=docker-compose.dummy.yml run --rm app /bin/bash -c "cd spec/dummy && bin/rails c"
+	docker-compose --file=docker-compose.dummy.yml run --rm app /bin/bash -c "cd spec/dummy && rails c"
 
 app-initialise-docker:
 	touch .bash_history.docker

@@ -24,11 +24,17 @@ DECLARE
   sql_scripts_arr_intersect text;
   sql_filter text;
 
+  includes_nots boolean;
+
 BEGIN
   FOR i IN 1 .. COALESCE(array_upper(infos, 1), 0)
     LOOP
       attr_type := infos[i] ->> 'type';
       attr_name := infos[i] ->> 'attr';
+
+      -- Use not condition only if given type indexes has rows with 'not' = true
+      includes_nots = COALESCE(infos[i] -> 'nots', '[]'::JSONB)  @> 'true';
+
       attr_value := h ->> attr_name;
       h_key_exists := h ? attr_name;
 
@@ -50,7 +56,7 @@ BEGIN
       END CASE;
 
       sql_script = 'SELECT DISTINCT index from ' || table_name ||
-        -- Convertion to FLOAT is neeed to make numbers like 2005.0 work
+        -- Convertion to FLOAT is needed to make numbers like 2005.0 work
         ' WHERE data_grid_id = ($1 ->> ' || sqlidx || ')::FLOAT::INTEGER' ||
         ' AND created_dt = ($1 ->> ' || (sqlidx + 1) || ')::TIMESTAMP' ||
         ' AND attr = $1 ->> ' || (sqlidx + 2) || ' ';
@@ -83,7 +89,15 @@ BEGIN
         args := args || attr_value;
       END IF;
 
-      sql_script := sql_script || ' AND (' || sql_filter || 'key is NULL) ';
+
+      -- Use not condition only if given type indexes has rows with 'not' = true
+      IF includes_nots THEN
+        sql_script := sql_script || ' AND CASE WHEN ' || table_name ||'.not '
+          'THEN NOT (' || sql_filter || 'key IS NULL) '
+          'ELSE (' || sql_filter || 'key IS NULL) END';
+      ELSE
+        sql_script := sql_script || ' AND (' || sql_filter || 'key is NULL) ';
+      END IF;
 
       sql_scripts_arr := sql_scripts_arr || sql_script;
     END LOOP;

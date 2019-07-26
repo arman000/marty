@@ -8,9 +8,11 @@ class Marty::DataGrid < Marty::Base
     'integer'   => Marty::GridIndexInteger,
     'string'    => Marty::GridIndexString,
     'boolean'   => Marty::GridIndexBoolean,
-  }
+  }.freeze
 
-  ARRSEP = '|'
+  ARRSEP = '|'.freeze
+  NOT_STRING_START = 'NOT ('.freeze
+  NOT_STRING_END = ')'.freeze
 
   class DataGridValidator < ActiveModel::Validator
     def validate(dg)
@@ -326,9 +328,10 @@ class Marty::DataGrid < Marty::Base
     # should unify this with Marty::DataConversion.convert
 
     type = inf['type']
+    nots = inf.fetch('nots', [])
     klass = type.constantize unless INDEX_MAP[type]
 
-    inf['keys'].map do |v|
+    keys = inf['keys'].map do |v|
       case type
       when 'numrange', 'int4range'
         Marty::Util.pg_range_to_human(v)
@@ -349,6 +352,12 @@ class Marty::DataGrid < Marty::Base
         end if v
         v.join(ARRSEP) if v
       end
+    end
+
+    keys.each_with_index.map do |v, index|
+      next v unless nots[index]
+
+      add_not(v)
     end
   end
 
@@ -414,6 +423,8 @@ class Marty::DataGrid < Marty::Base
   def self.parse_fvalue(pt, v, type, klass)
     return unless v
 
+    v = remove_not(v)
+
     case type
     when 'numrange', 'int4range'
       Marty::Util.human_to_pg_range(v)
@@ -466,8 +477,17 @@ class Marty::DataGrid < Marty::Base
 
   def self.parse_keys(pt, keys, type)
     klass = maybe_get_klass(type)
+
     keys.map do |v|
       parse_fvalue(pt, v, type, klass)
+    end
+  end
+
+  def self.parse_nots(_pt, keys)
+    keys.map do |v|
+      next false unless v
+
+      v.starts_with?(NOT_STRING_START) && v.ends_with?(NOT_STRING_END)
     end
   end
 
@@ -511,11 +531,15 @@ class Marty::DataGrid < Marty::Base
       raise "unknown metadata type #{type}" unless
         Marty::DataGrid.type_to_index(type)
 
+      keys = key && parse_keys(pt, [key], type)
+      nots = key && parse_nots(pt, [key])
+
       res = {
         'attr' => attr,
         'type' => type,
         'dir'  => dir,
-        'keys' => key && parse_keys(pt, [key], type),
+        'keys' => keys,
+        'nots' => nots,
       }
       res['rs_keep'] = rs_keep if rs_keep
       res
@@ -535,6 +559,7 @@ class Marty::DataGrid < Marty::Base
         row[0, v_infos.count].any?
 
       inf['keys'] = parse_keys(pt, row[v_infos.count, row.count], inf['type'])
+      inf['nots'] = parse_nots(pt, row[v_infos.count, row.count])
     end
 
     raise 'horiz. info keys length mismatch!' unless
@@ -547,6 +572,7 @@ class Marty::DataGrid < Marty::Base
 
     v_infos.each_with_index do |inf, i|
       inf['keys'] = parse_keys(pt, v_key_cols[i], inf['type'])
+      inf['nots'] = parse_nots(pt, v_key_cols[i])
     end
 
     raise 'vert. info keys length mismatch!' unless
@@ -558,18 +584,23 @@ class Marty::DataGrid < Marty::Base
 
     # based on data type, decide to check using convert or instance
     # lookup.  FIXME: DRY.
+
     if String === c_data_type
       tsym = c_data_type.to_sym
 
       data = data_rows.map do |r|
         r[v_infos.count, r.count].map do |v|
-          Marty::DataConversion.convert(v, tsym) if v
+          next v unless v
+
+          Marty::DataConversion.convert(v, tsym)
         end
       end
     else
       data = data_rows.map do |r|
         r[v_infos.count, r.count].map do |v|
-          next v if !v || Marty::DataGrid.
+          next v unless v
+
+          next v if Marty::DataGrid.
                          find_class_instance(pt, c_data_type, v)
 
           raise "can't find key '#{v}' for class #{data_type}"
@@ -577,12 +608,24 @@ class Marty::DataGrid < Marty::Base
       end
     end
 
-    [metadata, data, data_type, lenient, constraint]
+    {
+      metadata: metadata,
+      data: data,
+      data_type: data_type,
+      lenient: lenient,
+      constraint: constraint,
+    }
   end
 
   def self.create_from_import(name, import_text, created_dt = nil)
-    metadata, data, data_type, lenient, constraint = parse(created_dt,
-                                                           import_text, {})
+    parsed_result = parse(created_dt, import_text, {})
+
+    metadata = parsed_result[:metadata]
+    data = parsed_result[:data]
+    data_type = parsed_result[:data_type]
+    lenient = parsed_result[:lenient]
+    constraint = parsed_result[:constraint]
+
     dg            = new
     dg.name       = name
     dg.data       = data
@@ -596,8 +639,13 @@ class Marty::DataGrid < Marty::Base
   end
 
   def update_from_import(name, import_text, created_dt = nil)
-    new_metadata, data, data_type, lenient, constraint =
-      self.class.parse(created_dt, import_text, {})
+    parsed_result = self.class.parse(created_dt, import_text, {})
+
+    new_metadata = parsed_result[:metadata]
+    data = parsed_result[:data]
+    data_type = parsed_result[:data_type]
+    lenient = parsed_result[:lenient]
+    constraint = parsed_result[:constraint]
 
     self.name       = name
     self.data       = data
@@ -614,7 +662,10 @@ class Marty::DataGrid < Marty::Base
   def build_index
     # create indices for the metadata
     metadata.each do |inf|
-      attr, type, keys = inf['attr'], inf['type'], inf['keys']
+      attr = inf['attr']
+      type = inf['type']
+      keys = inf['keys']
+      nots = inf.fetch('nots', [])
 
       # find index class
       idx_class = Marty::DataGrid.type_to_index(type)
@@ -626,6 +677,7 @@ class Marty::DataGrid < Marty::Base
         gi.created_dt   = created_dt
         gi.data_grid_id = group_id
         gi.index        = index
+        gi.not          = nots[index] || false
         gi.save!
       end
     end
@@ -800,5 +852,18 @@ class Marty::DataGrid < Marty::Base
     # data grid value is expressed as what to keep
     # we convert to the opposite (what to prune)
     [opposite_sign(opstr.to_sym), ident]
+  end
+
+  def self.remove_not(string)
+    return string unless string.starts_with?(NOT_STRING_START)
+    return string unless string.ends_with?(NOT_STRING_END)
+
+    remove_from_left = NOT_STRING_START.size
+    remove_from_right = NOT_STRING_END.size
+    string.slice(remove_from_left...-remove_from_right)
+  end
+
+  def self.add_not(string)
+    "#{NOT_STRING_START}#{string}#{NOT_STRING_END}"
   end
 end
