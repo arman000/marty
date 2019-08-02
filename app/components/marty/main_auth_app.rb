@@ -51,7 +51,7 @@ class Marty::MainAuthApp < Marty::AuthApp
       {
         text: 'Log Maintenance',
         icon_cls: 'fa fa-wrench glyph',
-        disabled: !self.class.has_perm?(:admin),
+        disabled: !(self.class.has_perm?(:admin) || self.class.has_perm?(:dev)),
         menu: [
           :log_view,
           :log_cleanup,
@@ -153,7 +153,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     return super unless self.class.has_any_perm?
 
     [ident_menu, sep] +
-      (self.class.has_perm?(:admin) ||
+      (self.class.has_perm?(:admin) || self.class.has_perm?(:dev) ||
        self.class.has_perm?(:user_manager) ? [system_menu, sep] : []) +
       data_menus +
       [
@@ -300,7 +300,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.tooltip  = 'View Log'
     a.handler  = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-cog glyph'
-    a.disabled = !self.class.has_perm?(:admin)
+    a.disabled = !(self.class.has_perm?(:admin) || self.class.has_perm?(:dev))
   end
 
   action :log_cleanup do |a|

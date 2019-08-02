@@ -156,7 +156,7 @@ feature 'under System menu, User Management worflows', js: true do
 
     it 'developer denied access' do
       log_in_as('dev1')
-      go_to_user_view_backdoor
+      ensure_on('/#userView')
 
       user_view = netzke_find('user_view')
       by 'check buttons' do
