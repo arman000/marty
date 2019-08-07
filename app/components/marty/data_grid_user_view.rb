@@ -1,6 +1,8 @@
 module Marty
   class DataGridUserView < DataGridView
-    has_marty_permissions read: [:data_grid_editor, :admin, :dev]
+    # permissions are handled by #get_records and #get_edit_permissions
+    has_marty_permissions read: :any,
+                        update: :any
 
     def configure(c)
       super
@@ -10,7 +12,19 @@ module Marty
           :name,
           :created_dt,
         ]
-      c.editing = :inline
+      c.title = I18n.t('data_grid_user_view')
+      c.editing = :in_form
+    end
+
+    client_class do |c|
+      c.do_edit_in_form = l(<<~JS)
+         function(record) {
+            var sel = this.getSelectionModel().getSelection()[0];
+            var record_id = sel && sel.getId();
+            if (!record_id) return;
+            this.server.editGrid({record_id: record_id});
+         }
+      JS
     end
 
     def default_bbar
