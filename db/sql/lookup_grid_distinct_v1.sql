@@ -25,6 +25,9 @@ DECLARE
   vertical_indexes JSONB = '[]'::JSONB;
   vertical_index INTEGER;
 
+  default_index_array JSONB = '[0]'::JSONB;
+  empty_jsonb_array JSONB = '[]'::JSONB;
+
   query_dir_result JSONB;
   query_index_result JSONB = '[]'::JSONB;
   metadata_record JSONB;
@@ -44,7 +47,7 @@ BEGIN
     USING row_info ->> 'id';
 
 
-  data_grid_metadata := COALESCE(data_grid_metadata, '[]'::JSONB);
+  data_grid_metadata := COALESCE(data_grid_metadata, empty_jsonb_array);
 
   FOR i IN 0 .. (jsonb_array_length(data_grid_metadata) - 1) LOOP
     metadata_record := data_grid_metadata -> i;
@@ -66,9 +69,9 @@ BEGIN
 
     IF COALESCE(array_length(data_grid_metadata_current, 1), 0) = 0 THEN
 			 IF direction = 'h' THEN
-				 horizontal_indexes := '[0]'::JSONB;
+				 horizontal_indexes := default_index_array;
 			 ELSE
-				 vertical_indexes := '[0]'::JSONB;
+				 vertical_indexes := default_index_array;
 			 END IF;
       CONTINUE;
     END IF;
@@ -84,16 +87,16 @@ BEGIN
 
      sql_scripts_arr := sql_scripts_arr || (query_dir_result ->> 0);
 
-     query_index_result := '[]'::JSONB;
+     query_index_result := empty_jsonb_array;
 
      -- execute the SQL query that has been received before and 
-     -- add it's (possibly multiple) results to query_index_result variable
+     -- add it's (possibly multiplt) results to query_index_result variable
      FOR target IN EXECUTE query_dir_result ->> 0 USING query_dir_result -> 1 LOOP
        query_index_result := query_index_result || to_jsonb(target.index);
      END LOOP;
 
      all_results := all_results || query_index_result;
-     query_index_result := '[]'::JSONB || query_index_result; -- Use empty JSONB array in case of NULL results
+     query_index_result := empty_jsonb_array || query_index_result; -- Use empty JSONB array in case of NULL results
 
      IF direction = 'h' THEN
        horizontal_indexes := query_index_result;
@@ -108,8 +111,8 @@ BEGIN
 
     END LOOP;
 
-    vertical_indexes := COALESCE(vertical_indexes, '[]'::JSONB);
-    horizontal_indexes := COALESCE(horizontal_indexes, '[]'::JSONB);
+    vertical_indexes := COALESCE(vertical_indexes, empty_jsonb_array);
+    horizontal_indexes := COALESCE(horizontal_indexes, empty_jsonb_array);
 
     IF ((jsonb_array_length(vertical_indexes)) = 0 
        OR (jsonb_array_length(horizontal_indexes)) = 0)

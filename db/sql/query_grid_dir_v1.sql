@@ -25,15 +25,19 @@ DECLARE
   sql_filter text;
 
   includes_nots boolean;
+  default_nots_array JSONB = '[]'::JSONB;
+  current_info jsonb;
 
 BEGIN
   FOR i IN 1 .. COALESCE(array_upper(infos, 1), 0)
     LOOP
-      attr_type := infos[i] ->> 'type';
-      attr_name := infos[i] ->> 'attr';
+      current_info := infos[i];
+
+      attr_type := current_info ->> 'type';
+      attr_name := current_info ->> 'attr';
 
       -- Use not condition only if given type indexes has rows with 'not' = true
-      includes_nots = COALESCE(infos[i] -> 'nots', '[]'::JSONB)  @> 'true';
+      includes_nots = COALESCE(current_info -> 'nots', default_nots_array)  @> 'true';
 
       attr_value := h ->> attr_name;
       h_key_exists := h ? attr_name;
