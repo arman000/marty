@@ -15,7 +15,7 @@ module Marty::Diagnostic
     end
 
     def git
-      `cd #{Rails.root.to_s}; git describe --tags --always;`.
+      `cd #{Rails.root}; git describe --tags --always;`.
         strip rescue 'Failed accessing git'
     end
 
