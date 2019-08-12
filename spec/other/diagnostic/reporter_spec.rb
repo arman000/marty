@@ -12,7 +12,7 @@ describe Marty::Diagnostic::Reporter do
   end
 
   def git
-      message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
+      message = `cd #{Rails.root}; git describe --tags --always;`.strip
   rescue StandardError
       message = error('Failed accessing git')
   end
@@ -213,9 +213,9 @@ describe Marty::Diagnostic::Reporter do
 
     it 'can detect errors in diagnostic for display and api' do
       described_class.request.params = params
-      n  = aggregate_data
-      e  = aggregate_data(status: false)
-      c  = aggregate_data(consistent: false)
+      n = aggregate_data
+      e = aggregate_data(status: false)
+      c = aggregate_data(consistent: false)
       ce = aggregate_data(status: false, consistent: false)
 
       aggregate_failures do

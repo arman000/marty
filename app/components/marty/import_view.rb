@@ -80,7 +80,7 @@ class Marty::ImportView < Marty::Form
       res       = import(processed)
       result    = res.map { |k, v| format_message(k, v) }
 
-      messages  = post_import
+      messages = post_import
       result << messages if messages
 
       client.set_result result.join('<br/>')

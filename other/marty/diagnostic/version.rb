@@ -1,7 +1,7 @@
 module Marty::Diagnostic; class Version < Base
   diagnostic_fn do
     begin
-      message = `cd #{Rails.root.to_s}; git describe --tags --always;`.strip
+      message = `cd #{Rails.root}; git describe --tags --always;`.strip
     rescue StandardError
       message = error('Failed accessing git')
     end
