@@ -1,20 +1,22 @@
 class Marty::RpcCall
   # POST to a remote marty
   def self.marty_post(host, port, path, script, node, attrs, params,
-                      options = {}, ssl = false)
+                      rpc_opts = {}, ssl = false, http_opts = {})
     http = Net::HTTP.new(host, port)
 
-    # FIXME: in 5.2.0 put ssl in options hash
+    # FIXME: in 5.2.0 put ssl in https_opts hash and change interface
     http.use_ssl = ssl
-    http.read_timeout = options[:read_timeout] if options[:read_timeout]
+    http.read_timeout = http_opts[:read_timeout] if http_opts[:read_timeout]
+    http.open_timeout = http_opts[:open_timeout] if http_opts[:open_timeout]
 
     request = Net::HTTP::Post.new(path)
     request.add_field('Content-Type', 'application/json')
-    request.body = { 'script' => script,
-                     'node'   => node,
-                     'attrs'  => attrs.to_json,
-                     'params' => params.to_json,
-                    }.to_json
+    request.body = rpc_opts.merge(
+      'script' => script,
+      'node'   => node,
+      'attrs'  => attrs.to_json,
+      'params' => params.to_json,
+    ).to_json
 
     begin
       response = http.request(request)
@@ -54,6 +56,7 @@ class Marty::RpcCall
     request = Net::HTTP::Post.new(path)
     http.use_ssl = use_ssl
     http.read_timeout = options[:read_timeout] if options[:read_timeout]
+    http.open_timeout = options[:open_timeout] if options[:open_timeout]
     request.add_field('Content-Type', 'xml')
     request.add_field('Accept', 'xml')
     request.body = body
