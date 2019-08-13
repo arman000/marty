@@ -7,6 +7,7 @@ class Marty::ScheduleJobsDashboard < Marty::Grid
     update: ACCESSIBLE_BY,
     delete: ACCESSIBLE_BY,
     destroy: ACCESSIBLE_BY,
+    job_run: ACCESSIBLE_BY,
     edit_window__edit_form__submit: ACCESSIBLE_BY,
     add_window__add_form__submit: ACCESSIBLE_BY
   )
@@ -31,6 +32,10 @@ class Marty::ScheduleJobsDashboard < Marty::Grid
     []
   end
 
+  def default_bbar
+    super + [:do_job_run]
+  end
+
   attribute :job_class do |c|
     c.width = 400
   end
@@ -50,6 +55,13 @@ class Marty::ScheduleJobsDashboard < Marty::Grid
 
     c.column_config = { editor: editor_config }
     c.field_config  = editor_config
+  end
+
+  action :do_job_run do |a|
+    a.text     = 'Run'
+    a.tooltip  = 'Run'
+    a.icon_cls = 'fa fa-play glyph'
+    a.disabled = true
   end
 
   endpoint :edit_window__edit_form__submit do |params|
@@ -89,6 +101,17 @@ class Marty::ScheduleJobsDashboard < Marty::Grid
     end
 
     res
+  end
+
+  endpoint :job_run do
+    begin
+      s = Marty::BackgroundJob::Schedule.find(client_config['selected'])
+      klass = s.job_class
+      klass.constantize.new.perform
+    rescue StandardError => e
+      next client.netzke_notify(e.message)
+    end
+    client.netzke_notify("#{klass.demodulize} ran successfully.")
   end
 end
 
