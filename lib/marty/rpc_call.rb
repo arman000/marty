@@ -1,17 +1,21 @@
 class Marty::RpcCall
   # POST to a remote marty
-  def self.marty_post(host, port, path, script, node, attrs, params, options = {},
-                      ssl = false)
+  def self.marty_post(host, port, path, script, node, attrs, params,
+                      options = {}, ssl = false)
     http = Net::HTTP.new(host, port)
+
+    # FIXME: in 5.2.0 put ssl in options hash
     http.use_ssl = ssl
+    http.read_timeout = options[:read_timeout] if options[:read_timeout]
+
     request = Net::HTTP::Post.new(path)
     request.add_field('Content-Type', 'application/json')
-    request.body = (options + {
-                      'script' => script,
-                      'node'   => node,
-                      'attrs'  => attrs.to_json,
-                      'params' => params.to_json,
-                    }).to_json
+    request.body = { 'script' => script,
+                     'node'   => node,
+                     'attrs'  => attrs.to_json,
+                     'params' => params.to_json,
+                    }.to_json
+
     begin
       response = http.request(request)
     rescue StandardError => e
@@ -25,7 +29,8 @@ class Marty::RpcCall
   end
 
   def self.marty_download(
-    host, port, path, job_id, ssl = false, read_timeout = 60)
+    host, port, path, job_id, ssl = false, read_timeout = 60
+  )
 
     params = { job_id: job_id }
     url = path + '?' + URI.encode(URI.encode_www_form(params))
@@ -43,10 +48,12 @@ class Marty::RpcCall
     end
   end
 
-  def self.xml_call(host, port, path, body, use_ssl)
+  # FIXME: in Marty 5.2.0 put ssl in options hash
+  def self.xml_call(host, port, path, body, use_ssl, options = {})
     http = Net::HTTP.new(host, port)
     request = Net::HTTP::Post.new(path)
     http.use_ssl = use_ssl
+    http.read_timeout = options[:read_timeout] if options[:read_timeout]
     request.add_field('Content-Type', 'xml')
     request.add_field('Accept', 'xml')
     request.body = body
