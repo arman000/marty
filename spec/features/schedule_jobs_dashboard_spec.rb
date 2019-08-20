@@ -26,7 +26,7 @@ feature 'Schedule Jobs Dashboard', js: true do
 
     let!(:schedule) do
       Marty::BackgroundJob::Schedule.create(
-        job_class: 'TestJob2',
+        job_class: 'Test2Job',
         cron: '0 0 * * *',
         state: 'on'
       ).tap do |job|
@@ -38,7 +38,7 @@ feature 'Schedule Jobs Dashboard', js: true do
     end
 
     before do
-      expect(TestJob2.scheduled?).to be true
+      expect(Test2Job.scheduled?).to be true
 
       log_in_as('admin1')
       wait_for_ajax
@@ -72,34 +72,34 @@ feature 'Schedule Jobs Dashboard', js: true do
       expect(TestJob.scheduled?).to be true
       expect(TestJob.delayed_job.cron).to eq '1 1 * * *'
 
-      expect(TestJob2.scheduled?).to be true
-      expect(TestJob2.delayed_job.cron).to eq '0 0 * * *'
+      expect(Test2Job.scheduled?).to be true
+      expect(Test2Job.delayed_job.cron).to eq '0 0 * * *'
     end
 
     it 'deletes schedule' do
-      find('.x-grid-item', text: 'TestJob2').click
+      find('.x-grid-item', text: 'Test2Job').click
       press 'Delete'
       press 'Yes'
 
       wait_for_ajax
 
-      expect(TestJob2.scheduled?).to be false
+      expect(Test2Job.scheduled?).to be false
     end
 
     it 'turns the schedule off' do
-      find('.x-grid-item', text: 'TestJob2').click
+      find('.x-grid-item', text: 'Test2Job').click
       press 'Edit'
       fill_in('state', with: 'off')
 
       press 'OK'
       wait_for_ajax
-      expect(TestJob2.scheduled?).to be false
+      expect(Test2Job.scheduled?).to be false
     end
 
     it 'shows validation errors' do
       press('Add')
 
-      fill_in('Job class', with: 'TestJob2')
+      fill_in('Job class', with: 'Test2Job')
       fill_in('state', with: 'on')
       fill_in('cron', with: '1')
 

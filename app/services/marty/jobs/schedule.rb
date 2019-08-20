@@ -7,6 +7,9 @@ module Marty
         glob = Rails.root.join('app', 'jobs', '**', '*_job.rb')
         Dir.glob(glob).each { |f| require f }
 
+        glob2 = Marty.root.join('app', 'jobs', '**', '*_job.rb')
+        Dir.glob(glob2).each { |f| require f }
+
         Marty::CronJob.subclasses.map do |klass|
           klass.schedule
           [klass.name, klass.cron_expression]
