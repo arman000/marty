@@ -5,7 +5,7 @@ module Marty
 
       validates :job_class, :status, presence: true
 
-      ALL_STATUSES = %w[success failure].freeze
+      ALL_STATUSES = %w[success failure failure_ignore].freeze
       enum status: ALL_STATUSES.zip(ALL_STATUSES).to_h
     end
   end

@@ -2,8 +2,11 @@ module Marty::Diagnostic; class ScheduledJobs < Base
   self.aggregatable = false
 
   diagnostic_fn do
-    logs = ::Marty::BackgroundJob::Log.order(job_class: :asc, status: :desc, id: :desc).
-      select('DISTINCT ON(job_class, status) *').first(1000)
+    logs = ::Marty::BackgroundJob::Log.
+      order(job_class: :asc, status: :desc, id: :desc).
+      select('DISTINCT ON(job_class, status) *').
+      where.not(status: :failure_ignore).
+      first(1000)
 
     failed_total = ::Marty::BackgroundJob::Log.where(status: :failure).count
 

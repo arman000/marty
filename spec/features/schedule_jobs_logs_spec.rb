@@ -85,5 +85,18 @@ feature 'Schedule Jobs Logs', js: true do
       expect(grid_view.row_count).to eq 0
       expect(Marty::BackgroundJob::Log.count).to eq 0
     end
+
+    it 'marks as ignored in diags' do
+      expect(Marty::BackgroundJob::Log.failure_ignore.count).to eq 0
+      find('.x-grid-item', text: 'Test error').click
+      press 'Ignore in diag'
+      press 'Yes'
+
+      wait_for_ajax
+
+      statuses = grid_view.get_col_vals('status', 3, 0)
+      expect(statuses).to eq ['success', 'failure_ignore', 'success']
+      expect(Marty::BackgroundJob::Log.failure_ignore.count).to eq 1
+    end
   end
 end

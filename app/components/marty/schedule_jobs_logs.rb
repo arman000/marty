@@ -8,6 +8,7 @@ class Marty::ScheduleJobsLogs < Marty::Grid
     delete: ACCESSIBLE_BY,
     destroy: ACCESSIBLE_BY,
     destroy_all: ACCESSIBLE_BY,
+    ignore: ACCESSIBLE_BY,
     edit_window__edit_form__submit: ACCESSIBLE_BY,
     add_window__add_form__submit: ACCESSIBLE_BY
   )
@@ -19,7 +20,7 @@ class Marty::ScheduleJobsLogs < Marty::Grid
     c.model = 'Marty::BackgroundJob::Log'
     c.paging = :buffered
     c.editing = :in_form
-    c.multi_select = false
+    c.multi_select = true
 
     c.attributes = [
       :job_class,
@@ -36,7 +37,7 @@ class Marty::ScheduleJobsLogs < Marty::Grid
   end
 
   def default_bbar
-    [:delete, :destroy_all]
+    [:delete, :destroy_all, :ignore]
   end
 
   attribute :job_class do |c|
@@ -60,8 +61,23 @@ class Marty::ScheduleJobsLogs < Marty::Grid
     a.icon_cls = 'fa fa-trash glyph'
   end
 
+  action :ignore do |a|
+    a.text     = 'Ignore in diag'
+    a.tooltip  = 'Ignore in diag'
+    a.icon_cls = 'fa fa-trash glyph'
+  end
+
   endpoint :destroy_all do
     Marty::BackgroundJob::Log.delete_all
+    client.reload
+  end
+
+  endpoint :ignore do |ids|
+    Marty::BackgroundJob::Log.
+      where(id: ids).
+      where(status: :failure).
+      each { |record| record.update(status: :failure_ignore) }
+
     client.reload
   end
 end
