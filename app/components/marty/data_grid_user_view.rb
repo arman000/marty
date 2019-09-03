@@ -17,7 +17,7 @@ module Marty
     end
 
     client_class do |c|
-      c.do_edit_in_form = l(<<~JS)
+      fn = l(<<~JS)
          function(record) {
             var sel = this.getSelectionModel().getSelection()[0];
             var record_id = sel && sel.getId();
@@ -25,6 +25,10 @@ module Marty
             this.server.editGrid({record_id: record_id});
          }
       JS
+
+      # inherited perms don't work right, set both fns to the fancy grid edit
+      c.do_edit_in_form = fn
+      c.do_view_in_form = fn
     end
 
     def default_bbar
