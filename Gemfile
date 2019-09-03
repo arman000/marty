@@ -9,7 +9,7 @@ group :default do
   gem 'daemons'
   gem 'delayed_job_active_record'
   gem 'pg'
-  gem 'rails', '< 6'
+  gem 'rails', '>= 5.2.3', '< 6.0.0'
 end
 
 group :default, :cmit do
