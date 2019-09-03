@@ -159,4 +159,22 @@
   clearFilters: function() {
     this.filters.clearFilters();
   },
+
+  netzkeGridSelectedDefaultAction: function(endpoint, confirmation) {
+    var selected = this.getSelectionModel().getSelection().map((r) => r.id)
+
+    if (confirmation) {
+      Ext.Msg.confirm(
+        confirmation,
+        Ext.String.format('Are you sure?'),
+        (btn, value, cfg) => {
+          if (btn == "yes") {
+            this.server[endpoint](selected, () => { this.unmask() })
+          }
+        }
+      );
+    } else {
+      this.server[endpoint](selected, () => { this.unmask() })
+    }
+  }
 }
