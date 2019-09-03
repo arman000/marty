@@ -4,6 +4,7 @@ require 'marty/api_log_view'
 require 'marty/config_view'
 require 'marty/data_grid_view'
 require 'marty/schedule_jobs_dashboard'
+require 'marty/schedule_jobs_logs'
 require 'marty/data_grid_user_view'
 require 'marty/event_view'
 require 'marty/import_type_view'
@@ -116,6 +117,7 @@ class Marty::MainAuthApp < Marty::AuthApp
           :bg_stop,
           :bg_restart,
           :schedule_jobs_dashboard,
+          :schedule_jobs_logs,
         ]
       },
     ]
@@ -295,6 +297,14 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.handler = :netzke_load_component_by_action
   end
 
+  action :schedule_jobs_logs do |a|
+    a.text     = "Schedule Job's Logs"
+    a.tooltip  = "Show Scheduled Job's logs"
+    a.icon_cls = 'fa fa-cog glyph'
+    a.disabled = !self.class.has_perm?(:admin)
+    a.handler = :netzke_load_component_by_action
+  end
+
   action :log_view do |a|
     a.text     = 'View Log'
     a.tooltip  = 'View Log'
@@ -393,6 +403,8 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :api_config_view
 
   component :schedule_jobs_dashboard
+
+  component :schedule_jobs_logs
 
   component :config_view
 

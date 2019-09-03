@@ -1,4 +1,34 @@
 class Marty::CronJob < ActiveJob::Base
+  around_perform do |_job, block|
+    begin
+      block.call
+      log_success
+    rescue StandardError => e
+      log_failure(e)
+      raise e
+    end
+  end
+
+  def log_failure(exception)
+    error = {
+      message: exception.message,
+      backtrace: exception.backtrace
+    }
+
+    ::Marty::BackgroundJob::Log.create!(
+      job_class: self.class.name,
+      status: :failure,
+      error: error
+    )
+  end
+
+  def log_success
+    ::Marty::BackgroundJob::Log.create!(
+      job_class: self.class.name,
+      status: :success
+    )
+  end
+
   class << self
     def schedule
       return reschedule if scheduled?
