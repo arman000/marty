@@ -46,9 +46,6 @@ class Marty::PromiseView < Netzke::Tree::Base
       update: class_can?(:update),
       delete: class_can?(:delete)
     }
-
-    # garbage collect old promises (hacky to do this here)
-    Marty::Promise.cleanup(false)
   end
 
   def bbar

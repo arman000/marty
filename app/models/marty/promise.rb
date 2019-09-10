@@ -213,7 +213,7 @@ class Marty::Promise < Marty::Base
     def cleanup(all = false)
       where(
         'start_dt < ? AND parent_id IS NULL',
-        DateTime.now - (all ? 0.hours : 4.hours)
+        all ? Time.zone.now : 4.hours.ago
       ).destroy_all
     rescue StandardError => e
         Marty::Util.logger.error("promise GC error: #{e}")

@@ -21,3 +21,11 @@ require 'marty/json_schema'
 # to the Gemfile
 require 'net-ldap'
 require 'delayed_cron_job'
+
+require 'pathname'
+
+module Marty
+  def self.root
+    Pathname.new(File.expand_path('..', __dir__))
+  end
+end
