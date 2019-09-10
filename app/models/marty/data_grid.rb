@@ -226,12 +226,6 @@ class Marty::DataGrid < Marty::Base
             "ri: #{row_info}" if res['error']
     end
 
-    if ret_grid_data
-      dg = find(dgh['id'])
-      md, mmd = modify_grid(h_passed, dg.metadata, dg.data)
-      res['data'] = md
-      res['metadata'] = mmd
-    end
     res
   end
 
@@ -683,141 +677,7 @@ class Marty::DataGrid < Marty::Base
     end
   end
 
-  def self.modify_grid(params, metadata, data)
-    removes = ['h', 'v'].each_with_object({}) { |dir, hash| hash[dir] = Set.new }
-
-    metadata_copy, data_copy = metadata.deep_dup, data.deep_dup
-
-    metadata_copy.each do |meta|
-      dir, keys, type, rs_keep = meta.values_at(
-        'dir', 'keys', 'type', 'rs_keep')
-      next unless rs_keep
-
-      if type == 'numrange' || type == 'int4range'
-        modop, modvalparm = parse_bounds(rs_keep)
-        modval = params[modvalparm]
-        if modval
-          prune_a, rewrite_a = compute_numeric_mods(keys, modop, modval)
-          removes[dir].merge(prune_a)
-          rewrite_a.each { |(ind, value)| keys[ind] = value }
-        end
-      else
-        modval = params[rs_keep]
-        if modval
-          prune_a, rewrite_a = compute_set_mods(keys, modval)
-          removes[dir].merge(prune_a)
-          rewrite_a.each { |(ind, value)| keys[ind] = value }
-        end
-      end
-    end
-
-    removes.reject! { |_dir, set| set.empty? }
-
-    removes.each do |dir, _set|
-      metadata_copy.select { |m| m['dir'] == dir }.each do |meta|
-        meta['keys'] = remove_indices(meta['keys'], removes[dir])
-      end
-    end
-
-    data_copy = remove_indices(data_copy, removes['v']) if removes['v']
-
-    data_copy.each_index do |index|
-      data_copy[index] = remove_indices(data_copy[index], removes['h'])
-    end if removes['h']
-
-    [data_copy, metadata_copy]
-  end
-
   private
-
-  def self.remove_indices(orig_array, inds)
-    orig_array.each_with_object([]).with_index do |(item, new_array), index|
-      new_array.push(item) unless inds.include?(index)
-    end
-  end
-
-  def self.opposite_sign(op)  # toggle sign and inclusivity
-    {
-      :<  => :>=,
-      :<= => :>,
-      :>  => :<=,
-      :>= => :<,
-    }[op]
-  end
-
-  def self.compute_numeric_mods(keys, op, val)
-    @keyhash ||= {}
-    prune_a, rewrite_a = [], []
-
-    # features allow multiple values, but for constraint on a grid range
-    # only a scalar is meaningful.  so if there are multiple values we
-    # take the first value to use
-    value = val.is_a?(Array) ? val[0] : val
-    keys.each_with_index do |key, index|
-      lhop, orig_lhv, orig_rhv, rhop = @keyhash[key] ||= parse_range(key)
-
-      lhv, rhv = orig_lhv || -Float::INFINITY, orig_rhv || Float::INFINITY
-
-      case op
-      when :>=, :>
-        next if value > rhv
-
-        if value == rhv
-          if rhop == :<= && op == :>=
-            rewrite_a.push(
-              [index, rewrite_range(lhop, orig_lhv, orig_rhv, :<)])
-          end
-        elsif value > lhv
-          rewrite_a.push(
-            [index, rewrite_range(lhop, orig_lhv, value, opposite_sign(op))])
-        elsif value == lhv && lhop == :>= && op == :>
-          rewrite_a.push([index, rewrite_range(:>=, value, value, :<=)])
-        elsif value <= lhv
-          prune_a.push(index)
-        end
-      when :<=, :<
-        next if value < lhv
-
-        if value == lhv
-          if lhop == :>= && op == :<=
-            rewrite_a.push(
-              [index, rewrite_range(:>, orig_lhv, orig_rhv, rhop)])
-          end
-        elsif value < rhv
-          rewrite_a.push(
-            [index, rewrite_range(opposite_sign(op), value, orig_rhv, rhop)])
-        elsif value == rhv && rhop == :<= && op == :<
-          rewrite_a.push([index, rewrite_range(:>=, value, value, :<=)])
-        elsif value >= rhv
-          prune_a.push(index)
-        end
-      end
-    end
-    [prune_a, rewrite_a]
-  end
-
-  # value is a list of what to keep
-  def self.compute_set_mods(keys, val)
-    prune_a, rewrite_a, value = [], [], Array(val)
-
-    keys.each_with_index do |key, index|
-      # rewrite any nil (wildcard) keys in the dimension
-      # to be our 'to-keep' val(s)
-      if key.nil?
-        rewrite_a.push([index, value])
-        next
-      end
-
-      remove = key - value
-      if remove == key
-        prune_a.push(index)
-        next
-      end
-
-      rewrite_a.push([index, key - remove]) if remove != []
-    end
-    [prune_a, rewrite_a]
-  end
 
   def self.parse_range(key)
     match = key.match(/\A(\[|\()([0-9\.-]*),([0-9\.-]*)(\]|\))\z/)
@@ -829,29 +689,6 @@ class Marty::DataGrid < Marty::Base
     rhv = rhs.blank? ? nil : rhs.to_f
 
     [lboundary == '(' ? :> : :>=, lhv, rhv, rboundary == ')' ? :< : :<=]
-  end
-
-  def self.rewrite_range(lb, lhv, rhv, rb)
-    lboundary = lb == :> ? '(' : '['
-
-    # even though numranges are float type, we don't want to output ".0"
-    # for integer values.  So for values like that we convert to int
-    # first before conversion to string
-    lvalue = (lhv.to_i == lhv ? lhv.to_i : lhv).to_s
-    rvalue = (rhv.to_i == rhv ? rhv.to_i : rhv).to_s
-    rboundary = rb == :< ? ')' : ']'
-    lboundary + lvalue + ',' + rvalue + rboundary
-  end
-
-  def self.parse_bounds(key)
-    match = key.match(/\A *(<|>|<=|>=)? *([a-z_]+) *\z/)
-    raise "unrecognized pattern #{key}" unless match
-
-    opstr, ident = match[1..2]
-
-    # data grid value is expressed as what to keep
-    # we convert to the opposite (what to prune)
-    [opposite_sign(opstr.to_sym), ident]
   end
 
   def self.remove_not(string)
