@@ -897,3 +897,14 @@ Ext.define('Marty.layout.container.Auto', {
     },
 
 });
+
+Ext.define('overrides.grid.column.Column', {
+    override: 'Ext.grid.column.Column',
+
+    initConfig: function(config) {
+        if (!config.renderer && !this.updater) {
+            config.formatter = 'htmlEncode'
+        }
+        return this.callParent(arguments)
+    }
+  })
