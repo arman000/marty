@@ -7,7 +7,7 @@
       <%='<th></th>' unless success %>
       <% data.keys.each do |node| %>
         <th <%='colspan="2"' if success %> scope="col">
-          <%= success ? 'consistent' : node %>
+          <%= success ? '&#9830' : node %>
         </th>
         <% break if success %>
       <% end %>
