@@ -130,7 +130,7 @@ describe Marty::Diagnostic::Reporter do
       <div class="wrapper">
         <table>
           <tr>
-            <th colspan="2" scope="col">consistent</th>
+            <th colspan="2" scope="col">&#9830</th>
           </tr>
           <tr>
             <th class="data" scope="row">Marty</th>
