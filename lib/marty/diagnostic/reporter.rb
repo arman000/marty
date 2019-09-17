@@ -9,7 +9,7 @@ module Marty::Diagnostic; class Reporter < Request
     self.request = request
 
     ops = op.split(/,\s*/).uniq - [unresolve_diagnostic(self)]
-    reps = ops.select { |o| reports.keys.include?(o) }
+    reps = ops.select { |o| reports.key?(o) }
 
     self.diagnostics = ((ops - reps) + reps.map { |r| reports[r] }.flatten).uniq.
                          map { |d| resolve_diagnostic(d) }
@@ -26,7 +26,7 @@ module Marty::Diagnostic; class Reporter < Request
       klass = (n + '::Diagnostic::' + diag_name).constantize rescue nil
       break if klass
     end
-    raise NameError.new("#{diag_name} could not be resolved by #{name}") if
+    raise NameError, "#{diag_name} could not be resolved by #{name}" if
       klass.nil?
 
     klass

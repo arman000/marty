@@ -46,10 +46,7 @@ module Dummy
     config.active_support.escape_html_entities_in_json = true
 
     # eager load paths instead of autoload paths
-    config.eager_load_paths += ['lib', 'other'].map do
-      |dir|
-      File.expand_path("../../#{dir}", __FILE__)
-    end
+    config.eager_load_paths << File.expand_path("../../lib", __FILE__)
 
     # Use SQL instead of Active Record's schema dumper when creating the database.
     # This is necessary if your schema can't be completely dumped by the schema dumper,

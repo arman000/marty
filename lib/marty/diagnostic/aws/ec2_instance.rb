@@ -70,13 +70,13 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
     instances = ensure_resp(
       ['reservationSet', 'item', 'instancesSet', 'item'],
       resp
-    ).map do |i|
+    ).flat_map do |i|
       {
         'id'    => i['instanceId'],
         'ip'    => i['privateIpAddress'],
         'state' => i['instanceState'],
       }
-    end.flatten(1)
+    end
   end
 
   def get_private_ips
