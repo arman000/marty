@@ -28,11 +28,9 @@ class Marty::Api::Base
     params
   end
 
-  def self.before_evaluate api_params
-  end
+  def self.before_evaluate api_params; end
 
-  def self.after_evaluate api_params, result
-  end
+  def self.after_evaluate api_params, result; end
 
   @@numbers = {}
   @@schemas = {}
@@ -85,14 +83,14 @@ class Marty::Api::Base
       return { "error": input_schema } if input_schema.is_a?(String)
 
       begin
-        res = SchemaValidator::validate_schema(input_schema, params[:params])
+        res = SchemaValidator.validate_schema(input_schema, params[:params])
       rescue NameError
         return { error: "Unrecognized PgEnum for attribute #{params[:attr]}" }
       rescue StandardError => e
         return { error: "#{params[:attr]}: #{e.message}" }
       end
 
-      schema_errors = SchemaValidator::get_errors(res) unless res.empty?
+      schema_errors = SchemaValidator.get_errors(res) unless res.empty?
       return { error: "Error(s) validating: #{schema_errors}" } if
         schema_errors
     end
@@ -101,8 +99,8 @@ class Marty::Api::Base
     begin
       engine = Marty::ScriptSet.new(params[:tag]).get_engine(params[:script])
     rescue StandardError => e
-      error = "Can't get engine: #{params[:script] || 'nil'} with tag: " +
-                "#{params[:tag] || 'nil'}; message: #{e.message}"
+      error = "Can't get engine: #{params[:script] || 'nil'} with tag: " \
+              "#{params[:tag] || 'nil'}; message: #{e.message}"
       Marty::Logger.info error
       return { error: error }
     end
@@ -127,13 +125,13 @@ class Marty::Api::Base
       if config[:output_validated] && !(res.is_a?(Hash) && res['error'])
         begin
           output_schema_params = params + { attr: params[:attr] + '_' }
-          schema = SchemaValidator::get_schema(output_schema_params)
+          schema = SchemaValidator.get_schema(output_schema_params)
         rescue StandardError => e
           return { error: e.message }
         end
 
         begin
-          schema_errors = SchemaValidator::validate_schema(schema, res)
+          schema_errors = SchemaValidator.validate_schema(schema, res)
         rescue NameError
           return { error: "Unrecognized PgEnum for attribute #{attr}" }
         rescue StandardError => e
@@ -160,7 +158,7 @@ class Marty::Api::Base
       Marty::Logger.info "Evaluation error: #{msg}"
       return retval = msg
     ensure
-      error = Hash === retval ? retval[:error] : nil
+      error = retval.is_a?(Hash) ? retval[:error] : nil
     end
   end
 
@@ -189,8 +187,7 @@ class Marty::Api::Base
       end_time:   Time.zone.now,
       error:      error,
       remote_ip:  request.remote_ip,
-      auth_name:  params[:auth]
-    }
+      auth_name:  params[:auth] }
   end
 
   def self.log result, params, request
@@ -221,7 +218,7 @@ class Marty::Api::Base
     end
 
     def self.massage_message(msg)
-      m = %r|'#/([^']+)' of type ([^ ]+) matched the disallowed schema|.
+      m = %r{'#/([^']+)' of type ([^ ]+) matched the disallowed schema}.
             match(msg)
 
       return msg unless m
@@ -239,7 +236,7 @@ class Marty::Api::Base
           fa, fragment, message, errors = errs.values_at(:failed_attribute,
                                                          :fragment,
                                                          :message, :errors)
-          ((['AllOf', 'AnyOf', 'Not'].include?(fa) && fragment == '#/') ?
+          (['AllOf', 'AnyOf', 'Not'].include?(fa) && fragment == '#/' ?
              [] : [massage_message(message)]) + _get_errors(errors || {})
         end
       end
