@@ -32,3 +32,12 @@ TableReport:
         ]
     format      = "csv"
 
+UserReport:
+    title   = "User List"
+    roles   = ['admin', 'user_manager']
+    raw     = [
+        u.attributes.except("id")
+        for u in Marty::User.select("login", "firstname", "lastname", "active")]
+    result  = Gemini::Helper.to_csv(raw)
+    form    = []
+    format  = "csv"
