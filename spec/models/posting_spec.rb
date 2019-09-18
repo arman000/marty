@@ -27,19 +27,6 @@ module Marty
         expect(Posting.lookup_dt('NOW')).to eq Float::INFINITY
       end
 
-      describe '.get_latest' do
-        it 'provide a list of latest of postings in descending order' do
-          4.times do |d|
-            Posting.do_create('BASE', d.day.from_now, 'a comment')
-          end
-          dt3 = 3.day.from_now
-
-          latest = Posting.get_latest(1)
-          expect(latest.count).to eq 1
-          expect(latest[0].name).to match /BASE-#{dt3.strftime("%Y%m%d-%H%M")}/
-        end
-      end
-
       describe '.get_latest_by_type' do
         context 'when invalid parameters are supplied' do
           it "raises 'posting type list missing' error" do
