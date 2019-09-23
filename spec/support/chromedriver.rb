@@ -13,6 +13,8 @@ module Marty; module RSpec; module Chromedriver
       }
 
       options = ::Selenium::WebDriver::Chrome::Options.new
+      options.add_preference(:download, default_directory:
+                              Marty::RSpec::DownloadHelper::PATH.to_s)
 
       # Add arguments to the driver using the Options interface
       if opts[:args]
