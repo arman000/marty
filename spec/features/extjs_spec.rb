@@ -28,7 +28,7 @@ feature 'on grid cells', js: true do
       press('New User')
 
       within(:gridpanel, 'add_window', match: :first) do
-        fill_in('Login', with: 'test_login')
+        fill_in('Login', with: 'extjs_test_login')
         fill_in('First Name', with: 'test_fname')
         fill_in('Last Name',
                 with:
@@ -45,8 +45,7 @@ feature 'on grid cells', js: true do
       end.to raise_error(Capybara::ElementNotFound)
 
       # positive test
-      text = uv.cell_value(2, 'lastname')
-      expect(text).to eq(
+      find('tr', text: 'extjs_test_login').should have_content(
         "<b class='test class' onclick='alert()'>test text</b>"
       )
 
