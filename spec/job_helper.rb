@@ -110,6 +110,43 @@ LOGGER:
              Gemini::Helper.testaction('message %d', msgid) && msgid
 EOS
 
+NAME_M = 'PromiseM'
+SCRIPT_M = <<EOS
+Node:
+    secs =?
+    label =?
+    reverse =? false
+    job_cnt =?
+    call_sleep = Gemini::Helper.sleep(secs, label)
+    blocker_inds = Gemini::Helper.get_inds(8)
+    blocker_calls = [Node(secs=5,
+                     p_title = "Blocker %d" % i,
+                     label = "Blocker %d" % i) | "call_sleep"
+                for i in blocker_inds]
+    prio_inds = Gemini::Helper.get_inds(job_cnt)
+    prios = [(if reverse then job_cnt - i else i)
+             for i in prio_inds]
+    prio_both = prio_inds.zip(prios)
+    prio_calls = [
+        Node(secs=2,
+             p_title = "Prioritized %d pri=%d" % [i, prio],
+             label = "Prioritized %d pri=%d" % [i, prio],
+             p_priority = prio) | "call_sleep"
+        for i, prio in prio_both]
+    result = blocker_calls + prio_calls
+EOS
+
+NAME_N = 'PromiseN'
+SCRIPT_N = <<EOS
+Node:
+    title =?
+    child1 = Gemini::Helper.sleep(0, 'child1')
+    child2 = Gemini::Helper.sleep(0, 'child2')
+
+    result = [Node(p_title=title + ' child1') | "child1",
+              Node(p_title=title + ' child2', p_priority=10) | "child2"]
+EOS
+
 def promise_bodies
   {
     NAME_A => SCRIPT_A,
@@ -123,5 +160,7 @@ def promise_bodies
     NAME_I => SCRIPT_I,
     NAME_J => SCRIPT_J,
     NAME_K => SCRIPT_K,
+    NAME_M => SCRIPT_M,
+    NAME_N => SCRIPT_N,
   }
 end

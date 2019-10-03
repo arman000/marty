@@ -30,6 +30,7 @@ class Marty::PromiseView < Netzke::Tree::Base
       { name: :title, xtype: :treecolumn },
       :user__login,
       :job_id,
+      :priority,
       :start_dt,
       :end_dt,
       :status,
@@ -89,6 +90,10 @@ class Marty::PromiseView < Netzke::Tree::Base
   attribute :user__login do |config|
     config.text = I18n.t('jobs.user_login')
     config.width = 100
+  end
+
+  attribute :priority do |config|
+    config.width = 90
   end
 
   attribute :job_id do |config|

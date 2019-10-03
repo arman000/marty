@@ -11,10 +11,19 @@ module Marty
           timeout = promise_params['p_timeout'] || default_timeout
           hook = promise_params['p_hook']
 
+          default_priority = 0
+          pid = promise_params[:_parent_id]
+          if pid
+            ppr = Marty::Promise.find_by(id: pid)
+            default_priority = ppr.priority if ppr
+          end
+
+          priority = promise_params['p_priority'] || default_priority
           promise = Marty::Promise.create(
             title: title,
             user_id: promise_params[:_user_id],
             parent_id: promise_params[:_parent_id],
+            priority: priority,
             promise_type: 'ruby'
           )
 
@@ -28,7 +37,7 @@ module Marty
               hook
             )
 
-            job = Delayed::Job.enqueue(promise_job)
+            job = Delayed::Job.enqueue(promise_job, priority: priority)
           rescue StandardError => e
             res = { 'error' => e.message }
             promise.set_start

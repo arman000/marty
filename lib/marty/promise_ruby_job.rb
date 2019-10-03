@@ -23,6 +23,7 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
     begin
       Mcfly.whodunnit = promise.user
 
+      ENV['__promise_id'] = promise.id.to_s
       mod = module_name.constantize
       res = { 'result' => mod.send(method_name, *method_args) }
     rescue StandardError => e
@@ -31,6 +32,7 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
 
     promise.set_result(res)
     process_hook(res)
+    ENV.delete('__promise_id')
   end
 
   def process_hook(res)
