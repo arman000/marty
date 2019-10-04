@@ -25,8 +25,8 @@ module Marty
         data_as_array = data.map do |row|
           row.keys.map { |key| row[key] }
         end
-        vcnt = dg.metadata.select { |md| md['dir'] == 'v' }.count
-        hcnt = dg.metadata.select { |md| md['dir'] == 'h' }.count
+        vcnt = dg.metadata.count { |md| md['dir'] == 'v' }
+        hcnt = dg.metadata.count { |md| md['dir'] == 'h' }
         cur_data_dim = [dg.data.length, dg.data[0].length]
         exported = dg.export.lines
         sep = exported.each_with_index.detect { |l, _i| /^\s*$/.match(l) }.last
