@@ -101,9 +101,9 @@ module Marty
         line_count = File.readlines('/tmp/logaction.txt').count
 
         log_count = Marty::Log.all.count
-        failed_count = f.readlines.select do |l|
+        failed_count = f.readlines.count do |l|
           l == "Marty::Logger failure: database is locked\n"
-        end.count
+        end
 
         expect(Marty::Promise.where.not(result: {}).count).to eq 1000
 

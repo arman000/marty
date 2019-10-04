@@ -190,7 +190,7 @@ class Marty::Xl
 
             # counter == col0 == (colw - 1) => merge the edges:
             a = boxborders[edge_h[r.object_id][1].to_sym] =
-                  merge_cell_edges(a, deep_copy(boxborders[edge_h[r.object_id][1].to_sym])) if
+              merge_cell_edges(a, deep_copy(boxborders[edge_h[r.object_id][1].to_sym])) if
               counter == (colw - 1)
 
             a = boxborders[edge_h[r.object_id][2].to_sym] unless
@@ -368,11 +368,11 @@ class Marty::Xl
       [d[0], d[1], d[2].select { |inner| inner if inner[0] != 'pos' }]
     end
     new_ops = new_ops1 + new_ops2
-    count = new_ops.select do |d|
-      d[2].select do |inner_ops|
+    count = new_ops.count do |d|
+      d[2].count do |inner_ops|
         inner_ops if inner_ops[0] == 'pos'
-      end.count > 0
-    end.count
+      end > 0
+    end
 
     count == 0 ? new_ops.sort : recalc_offsets(new_ops)
   end

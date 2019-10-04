@@ -10,6 +10,8 @@ module Marty
         glob2 = Marty.root.join('app', 'jobs', '**', '*_job.rb')
         Dir.glob(glob2).each { |f| require f }
 
+        Delayed::Job.where.not(cron: nil).each(&:destroy!)
+
         Marty::CronJob.subclasses.map do |klass|
           klass.schedule
           [klass.name, klass.cron_expression]

@@ -119,10 +119,10 @@ SQL
   end
 
   def self.last_event(klass, subject_id, operation = nil)
-    hash = all_running.select do |pm|
+    hash = all_running.reverse.find do |pm|
       pm['klass'] == klass && pm['subject_id'] == subject_id.to_i &&
         (operation.nil? || pm['enum_event_operation'] == operation)
-    end.last
+    end
 
     return hash if hash
 
