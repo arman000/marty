@@ -59,7 +59,7 @@ class Marty::LogView < Marty::Grid
     c.read_only    = true
     c.filterable = true
     c.xtype        = :datecolumn
-    c.format       = 'Y-m-d h:i:s.u'
+    c.format       = 'Y-m-d H:i:s.u'
     c.field_config = {
       xtype: :displayfield,
     }
