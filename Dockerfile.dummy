@@ -1,6 +1,6 @@
 # ONLY FOR DEVELOPMENT PURPOSES
 # dockerfile is not suitable to produce a production-grade docker image
-FROM ruby:2.5.1
+FROM ruby:2.6.3
 
 WORKDIR /opt/app
 
