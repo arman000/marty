@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'data grid view', js: true do
+feature 'data grid view', js: true, speed: :super_slow do
   before(:all) do
     self.use_transactional_tests = true
   end
