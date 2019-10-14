@@ -28,19 +28,23 @@
     if (status === true) return "green-row";
     return "orange-row";
   },
+
   listenFn: function (obj, search_text) {
     var lg = this.ownerCt.ownerCt;
     lg.getStore().getProxy().extraParams.live_search = search_text;
     lg.getStore().load();
   },
+
   netzkeOnDownload: function () {
     var jid = this.getSelectionModel().getSelection()[0].getId();
     // FIXME: seems pretty hacky
     window.location = this.jobPath(jid);
   },
+
   netzkeOnRefresh: function () {
     this.store.load();
   },
+
   netzkeOnClear: function (params) {
     var me = this;
     Ext.Msg.show({
@@ -53,5 +57,12 @@
         (btn == "ok" && value == "CLEAR") && me.server.clear({});
       }
     });
+  },
+
+  // Updates model's `expanded` column if it's present.
+  // Since promises don't have such column, we don't need to send that
+  // extra request for every node expand event.
+  netzkeOnNodeStateChange: function() {
+    return;
   }
 }
