@@ -12,9 +12,18 @@ module Marty::RSpec::StructureCompare
     return errs + [v2['error']] if
       v1.class != v2.class && v2.class == Hash && v2['error']
 
-    return errs + ["path=#{pathstr} class mismatch #{v1.class} #{v2.class}"] unless
+    errst = "path=#{pathstr} class mismatch "\
+            "#{v1.class}#{show_value(v1)} != "\
+            "#{v2.class}#{show_value(v2)}"
+
+    return if (cmp_opts['float_str_match'] ||
+               ENV['FLOAT_STR_MATCH'] == 'true') &&
+              v1.to_s == v2.to_s &&
+              [v1, v2].map(&:class).to_set == Set.new([String, Float])
+
+    return errs + [errst] unless
       v1.class == v2.class ||
-      (!cmp_opts['float_int_nomatch'] &&
+      (!(cmp_opts['float_int_nomatch'] || ENV['FLOAT_INT_NOMATCH'] == 'true') &&
        [v1, v2].map(&:class).to_set == Set.new([Integer, Float]))
 
     override = (cmp_opts['ignore'] || []).include?(key)
@@ -25,7 +34,7 @@ module Marty::RSpec::StructureCompare
         Regexp.new('\A' + v1 + '\z').match(v2) ||
         Regexp.new('\A' + v2 + '\z').match(v1) ||
         override
-    when Integer, DateTime, TrueClass, FalseClass, NilClass
+    when Integer, DateTime, TrueClass, FalseClass, NilClass, Time, Date
       return errs + ["path=#{pathstr} #{v1} != #{v2}"] if v1 != v2 && !override
     when Float
       return errs + ["path=#{pathstr} #{v1} != #{v2}"] if
@@ -52,6 +61,13 @@ module Marty::RSpec::StructureCompare
       raise "unhandled #{v1.class}"
     end
     errs
+  end
+
+  def self.show_value(val)
+    return '' if [Array, Hash, TrueClass, FalseClass, NilClass].
+                   include?(val.class)
+
+    format(' (%<val>s)', val: val)
   end
 end
 
