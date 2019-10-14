@@ -1,0 +1,11 @@
+import MartyFields
+import Styles
+
+EnumValuesReport:
+    title   = "Enum Values List"
+    roles   = ['admin', 'dev', 'data_grid_editor']
+    raw     = Marty::Enums::Report.call()
+    result  = Marty::Helper.to_csv(raw)
+    form    = []
+    format  = "csv"
+
