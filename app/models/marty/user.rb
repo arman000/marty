@@ -102,6 +102,18 @@ class Marty::User < Marty::Base
      mr.any? { |ur| ur.role == role }
   end
 
+  delorean_fn :export_for_report do
+     Marty::User.includes(:user_roles).map do |user|
+       {
+         'login' => user.login,
+         'firstname' => user.firstname,
+         'lastname' => user.lastname,
+         'active' => user.active,
+         'roles' => user.roles.sort.join(', ')
+       }
+     end
+  end
+
   private
 
   def verify_changes
