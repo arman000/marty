@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature 'rule view', js: true do
+feature 'rule view', js: true, speed: :slow do
   before(:all) do
     marty_whodunnit
     @save_file = "/tmp/save_#{Process.pid}.psql"

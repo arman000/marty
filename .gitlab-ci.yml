@@ -24,11 +24,23 @@ rspec-without-features:
   script:
     - bundle exec rspec --exclude-pattern "spec/features/**/*_spec.rb"
 
-rspec-features:
+rspec-features-1:
   extends: .base-test
   script:
     - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
-    - bundle exec rspec spec/features
+    - bundle exec rspec spec/features --tag ~speed
+
+rspec-features-2:
+  extends: .base-test
+  script:
+    - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
+    - bundle exec rspec spec/features --tag speed:slow
+
+rspec-features-3:
+  extends: .base-test
+  script:
+    - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
+    - bundle exec rspec spec/features --tag speed:super_slow
 
 cache:
   key: 'marty_bundler_cache'
