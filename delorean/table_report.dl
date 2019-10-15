@@ -32,3 +32,10 @@ TableReport:
         ]
     format      = "csv"
 
+UserReport:
+    title   = "User List"
+    roles   = ['admin', 'user_manager']
+    raw     = Marty::User.export_for_report()
+    result  = Marty::Helper.to_csv(raw)
+    form    = []
+    format  = "csv"
