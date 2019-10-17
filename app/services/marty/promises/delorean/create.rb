@@ -5,14 +5,24 @@ module Marty
         def self.call(params:, script:, node_name:, attr:, args:, tag:)
           default_timeout = Marty::Promise::DEFAULT_PROMISE_TIMEOUT
 
-          title = params['p_title'] || "#{script}::#{node_name.demodulize}"
-          timeout = params['p_timeout'] || default_timeout
-          hook = params['p_hook']
+          promise_params = params.with_indifferent_access
 
+          title = promise_params['p_title'] || "#{script}::#{node_name.demodulize}"
+          timeout = promise_params['p_timeout'] || default_timeout
+          hook = promise_params['p_hook']
+
+          default_priority = 0
+          pid = promise_params[:_parent_id]
+          if pid
+            ppr = Marty::Promise.find_by(id: pid)
+            default_priority = ppr.priority if ppr
+          end
+          priority = promise_params['p_priority'] || default_priority
           promise = Marty::Promise.create(
             title: title,
-            user_id: params[:_user_id],
-            parent_id: params[:_parent_id],
+            user_id: promise_params[:_user_id],
+            parent_id: promise_params[:_parent_id],
+            priority: priority,
             promise_type: 'delorean'
           )
 
@@ -30,7 +40,7 @@ module Marty
               hook
             )
 
-            job = Delayed::Job.enqueue(promise_job)
+            job = Delayed::Job.enqueue(promise_job, priority: priority)
           rescue StandardError => e
             # log "CALLERR #{exc}"
             res = ::Delorean::Engine.grok_runtime_exception(e)
