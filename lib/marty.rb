@@ -15,6 +15,7 @@ require 'marty/cache_adapters'
 require 'marty/monkey'
 require 'marty/promise_job'
 require 'marty/json_schema'
+require 'marty/rails_app'
 
 # This does not get loaded in via bundler unless it is included in the
 # application's Gemfile. Requiring it here removes the need to add it
@@ -25,7 +26,9 @@ require 'delayed_cron_job'
 require 'pathname'
 
 module Marty
-  def self.root
-    Pathname.new(File.expand_path('..', __dir__))
+  class << self
+    def root
+      Pathname.new(File.expand_path('..', __dir__))
+    end
   end
 end

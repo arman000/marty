@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
 	  integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
 	  crossorigin="anonymous">
-    <title><%= Rails.application.class.parent %></title>
+    <title><%= ::Marty::RailsApp.application_name %></title>
     <%= load_netzke theme: Rails.configuration.marty.extjs_theme %>
     <%= csrf_meta_tag %>
     <%= javascript_include_tag 'marty/application' %>

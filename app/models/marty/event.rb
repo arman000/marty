@@ -226,8 +226,8 @@ SQL
     ActiveRecord::Base.connection.execute(sql).to_a.map do |h|
       h['id']          = h['id'].to_i
       h['subject_id']  = h['subject_id'].to_i
-      h['start_dt']    = Time.zone.parse(h['start_dt']) if h['start_dt']
-      h['end_dt']      = Time.zone.parse(h['end_dt']) if h['end_dt']
+      h['start_dt']    = Time.zone.parse(h['start_dt'].to_s) if h['start_dt']
+      h['end_dt']      = Time.zone.parse(h['end_dt'].to_s) if h['end_dt']
       h['expire_secs'] = h['expire_secs'].to_i if h['expire_secs']
       h['comment']     = h['comment']
       h['error']       = h['error']

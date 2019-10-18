@@ -165,7 +165,8 @@ class Marty::Api::Base
   def self.filter_hash hash, filter_params
     return unless hash
 
-    pf = ActionDispatch::Http::ParameterFilter.new(filter_params)
+    pf_class = ::Marty::RailsApp.parameter_filter_class
+    pf = pf_class.new(filter_params)
     pf.filter(hash.stringify_keys)
   end
 
