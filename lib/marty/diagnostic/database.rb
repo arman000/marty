@@ -22,8 +22,7 @@ module Marty::Diagnostic::Database
   def self.db_schema
     current = ActiveRecord::Migrator.current_version
     raise "Migration is needed.\nCurrent Version: #{current}" if
-      Rails.version >= '5.2.0' &&
-      ActiveRecord::Base.connection.migration_context.needs_migration?
+        ::Marty::RailsApp.needs_migration?
 
     current.to_s
   end

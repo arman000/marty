@@ -208,13 +208,13 @@ describe Marty::JobController, slow: true do
 
     expect_csv = "a,b\r\n1,1\r\n2,4\r\n3,9\r\n"
     expect(response.body).to eq expect_csv
-    expect(response.content_type).to eq 'text/csv'
+    expect(response.media_type).to eq 'text/csv'
 
     get 'download', params: {
       job_id: promise.parent_id,
     }
 
-    expect(response.content_type).to eq 'application/zip'
+    expect(response.media_type).to eq 'application/zip'
 
     Zip::InputStream.open(StringIO.new(response.body)) do |io|
       count = 0

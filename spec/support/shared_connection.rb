@@ -18,7 +18,15 @@ module Marty; module RSpec; module SharedConnection
     clear_connection
 
     def self.connection
-      EXCL_LAMBDA.call.include?(model_name) ? orig_connection :
+      # Workaround to fix a bug in Rails 6 with shared connections
+      # https://github.com/rails/rails/issues/36757
+      model_name_str = if name == 'primary::SchemaMigration'
+                         name
+                       else
+                         model_name
+                       end
+
+      EXCL_LAMBDA.call.include?(model_name_str) ? orig_connection :
         @@shared_connection ||
         ConnectionPool::Wrapper.new(size: 1) { retrieve_connection }
     end
