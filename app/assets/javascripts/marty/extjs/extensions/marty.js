@@ -907,4 +907,8 @@ Ext.define('overrides.grid.column.Column', {
         }
         return this.callParent(arguments)
     }
-  })
+  });
+
+// Fix component fetching in ExtJS 7
+// This flag was false by default in ExtJS 6
+Ext.USE_NATIVE_JSON = false;
