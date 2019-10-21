@@ -356,3 +356,8 @@ module Netzke
     end
   end
 end
+
+require 'delayed_cron_job'
+require_relative './delayed_job/scheduled_job_plugin.rb'
+
+Delayed::Worker.plugins << Marty::DelayedJob::ScheduledJobPlugin
