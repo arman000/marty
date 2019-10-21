@@ -907,7 +907,25 @@ Ext.define('overrides.grid.column.Column', {
         }
         return this.callParent(arguments)
     }
-  });
+  }
+);
+
+Ext.define('Ext.netzke.marty.MultiSelectCombo', {
+    extend: 	'Ext.form.ComboBox',
+    alias: 	'widget.multiselectcombo',
+    separator: 	",",
+    multiSelect: true,
+
+    setValue: function(v) {
+      if (Ext.isString(v)) {
+          var vArray = v.split(this.separator);
+          this.callParent([vArray]);
+      } else {
+          this.callParent(arguments);
+      }
+    },
+  }
+);
 
 // Fix component fetching in ExtJS 7
 // This flag was false by default in ExtJS 6
