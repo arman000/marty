@@ -1,4 +1,4 @@
-image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image:2.6.3-20191003	
+image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image:2.6.3-extjs-7-20191018143452
 
 services:
   - "postgres:9.6"
