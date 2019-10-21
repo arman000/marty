@@ -175,6 +175,7 @@ Lint/DuplicateMethods:
 Lint/HandleExceptions:
   Exclude:
     - 'spec/support/netzke.rb'
+    - 'lib/marty/delayed_job/scheduled_job_plugin.rb'
 
 # Offense count: 19
 Lint/IneffectiveAccessModifier:
