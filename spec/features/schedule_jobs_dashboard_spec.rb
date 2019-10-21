@@ -22,7 +22,7 @@ feature 'Schedule Jobs Dashboard', js: true do
   end
 
   context 'as admin' do
-    let(:schedule_view) { netzke_find('schedule_jobs_dashboard') }
+    let(:schedule_view) { netzke_find('schedule_jobs_grid') }
 
     let!(:schedule) do
       Marty::BackgroundJob::Schedule.create(

@@ -297,6 +297,14 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.handler = :netzke_load_component_by_action
   end
 
+  action :schedule_jobs_dashboard do |a|
+    a.text     = 'Schedule Jobs Dashboard'
+    a.tooltip  = 'Edit Delayed Jobs Cron schedules'
+    a.icon_cls = 'fa fa-cog glyph'
+    a.disabled = !self.class.has_perm?(:admin)
+    a.handler = :netzke_load_component_by_action
+  end
+
   action :schedule_jobs_logs do |a|
     a.text     = "Schedule Job's Logs"
     a.tooltip  = "Show Scheduled Job's logs"
