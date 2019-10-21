@@ -136,6 +136,8 @@ en:
     end_dt: End Date
     user_login: User Login
     cformat: Format
+    schedule_dashboard:
+      warnings: Warnings
 
   data_import_view:
     import: Import

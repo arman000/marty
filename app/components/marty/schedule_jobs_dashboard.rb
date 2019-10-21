@@ -1,117 +1,51 @@
-class Marty::ScheduleJobsDashboard < Marty::Grid
-  ACCESSIBLE_BY = [:admin]
+require 'marty/schedule_jobs_grid'
 
-  has_marty_permissions(
-    read: ACCESSIBLE_BY,
-    create: ACCESSIBLE_BY,
-    update: ACCESSIBLE_BY,
-    delete: ACCESSIBLE_BY,
-    destroy: ACCESSIBLE_BY,
-    job_run: ACCESSIBLE_BY,
-    edit_window__edit_form__submit: ACCESSIBLE_BY,
-    add_window__add_form__submit: ACCESSIBLE_BY
-  )
+class Marty::ScheduleJobsDashboard < Marty::Form
+  include Marty::Extras::Layout
 
   def configure(c)
     super
-
-    c.title ||= I18n.t('schedule_jobs_dashboard_view_title', default: 'Schedule Jobs Dashboard')
-    c.model = 'Marty::BackgroundJob::Schedule'
-    c.paging = :buffered
-    c.editing = :in_form
-    c.multi_select = false
-
-    c.attributes = [
-      :job_class,
-      :cron,
-      :state
+    c.items = [
+      :schedule_jobs_grid,
+      :schedule_jobs_warnings
     ]
   end
 
-  def default_context_menu
-    []
+  def prepare_warnings
+    djs = ::Marty::BackgroundJob::FetchMissingInScheduleCronJobs.call
+
+    messages = djs.map do |dj|
+      handler_str = dj.handler[/job_class.*\n/]
+      job_class = handler_str.gsub('job_class:', '').strip
+
+      "#{job_class} with cron #{dj.cron} is present in delayed_jobs table, " \
+        'but is missing in the Dashboard.'
+    end
+
+    messages.join('<br>')
+  end
+
+  client_class do |c|
+    c.header   = false
+    # c.layout   = :border
+    c.defaults = { body_style: 'padding:0px' }
+  end
+
+  component :schedule_jobs_grid do |c|
+    c.klass = Marty::ScheduleJobsGrid
+    c.region = :north
+    c.min_height = 500
+  end
+
+  component :schedule_jobs_warnings do |c|
+    c.klass = Marty::Panel
+    c.title = I18n.t('jobs.schedule_dashboard.warnings')
+    c.html = prepare_warnings
+    c.min_height = 200
   end
 
   def default_bbar
-    super + [:do_job_run]
-  end
-
-  attribute :job_class do |c|
-    c.width = 400
-  end
-
-  attribute :cron do |c|
-    c.width = 400
-  end
-
-  attribute :state do |c|
-    c.width = 150
-    editor_config = {
-      trigger_action: :all,
-      xtype: :combo,
-      store: Marty::BackgroundJob::Schedule::ALL_STATES,
-      forceSelection: true,
-    }
-
-    c.column_config = { editor: editor_config }
-    c.field_config  = editor_config
-  end
-
-  action :do_job_run do |a|
-    a.text     = 'Run'
-    a.tooltip  = 'Run'
-    a.icon_cls = 'fa fa-play glyph'
-    a.disabled = true
-  end
-
-  endpoint :edit_window__edit_form__submit do |params|
-    result = super(params)
-    next result if result.empty?
-
-    obj_hash = result.first
-    Marty::BackgroundJob::UpdateSchedule.call(id: obj_hash['id'], job_class: obj_hash['job_class'])
-
-    result
-  end
-
-  endpoint :add_window__add_form__submit do |params|
-    result = super(params)
-    next result if result.empty?
-
-    obj_hash = result.first
-    Marty::BackgroundJob::UpdateSchedule.call(id: obj_hash['id'], job_class: obj_hash['job_class'])
-
-    result
-  end
-
-  endpoint :multiedit_window__multiedit_form__submit do |_params|
-    client.netzke_notify 'Multiediting is disabled for cron schedules'
-  end
-
-  endpoint :destroy do |params|
-    res = params.each_with_object({}) do |id, hash|
-      job_class = model.find_by(id: id)&.job_class
-      result = super([id])
-
-      # Do nothing If it wasn't destroyed
-      next hash.merge(result) unless result[id.to_i] == 'ok'
-
-      Marty::BackgroundJob::UpdateSchedule.call(id: id, job_class: job_class)
-      hash.merge(result)
-    end
-
-    res
-  end
-
-  endpoint :job_run do
-    begin
-      s = Marty::BackgroundJob::Schedule.find(client_config['selected'])
-      klass = s.job_class
-      klass.constantize.new.perform
-    rescue StandardError => e
-      next client.netzke_notify(e.message)
-    end
-    client.netzke_notify("#{klass.demodulize} ran successfully.")
+    []
   end
 end
 
