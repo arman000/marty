@@ -73,7 +73,7 @@ module Layout
   ######################################################################
   # PG ENUM field handling
 
-  def enum_column(c, class_or_array, col = nil)
+  def enum_column(c, class_or_array, col = nil, allow_null = true)
     col ||= c.name.demodulize.tableize.singularize
     vals = class_or_array.is_a?(Array) ? class_or_array : class_or_array::VALUES
     editor_config = {
@@ -81,7 +81,7 @@ module Layout
       xtype:          :combo,
 
       # hacky: extjs has issues with forceSelection true and clearing combos
-      store:          vals + ['---'],
+      store:          vals + (allow_null ? ['---'] : []),
 
       # we can dynamically add enums (i.e. they're not in VALUES) --
       # turn off forced selection.
