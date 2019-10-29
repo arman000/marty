@@ -48,4 +48,10 @@ class Marty::Config < Marty::Base
       result
     end
   end
+
+  def self.strict_lookup(key)
+    value = self.[](key)
+    raise "'#{key}' not defined" unless value
+    value
+  end
 end
