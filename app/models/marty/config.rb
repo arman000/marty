@@ -50,9 +50,9 @@ class Marty::Config < Marty::Base
   end
 
   def self.strict_lookup(key)
-    value = self.[](key)
-    raise KeyError, "'#{key}' not defined" unless value
+    entry = find_by_key(key)
+    raise KeyError, "'#{key}' not defined" unless entry
 
-    value
+    entry.get_value
   end
 end
