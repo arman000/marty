@@ -13,6 +13,7 @@ class Gemini::CmAuthApp < Marty::MainAuthApp
           :loan_program_view,
           :my_rule_view,
           :xyz_rule_view,
+          :simple_view,
         ],
       }
     ]
@@ -33,13 +34,24 @@ class Gemini::CmAuthApp < Marty::MainAuthApp
     a.handler = :netzke_load_component_by_action
   end
 
+  action :simple_view do |a|
+    a.text    = a.tooltip = 'Gemini Simple'
+    a.handler = :netzke_load_component_by_action
+  end
+
   component :loan_program_view do |c|
     c.klass = Gemini::LoanProgramView
   end
+
   component :my_rule_view do |c|
     c.klass = Gemini::MyRuleView
   end
+
   component :xyz_rule_view do |c|
     c.klass = Gemini::XyzRuleView
+  end
+
+  component :simple_view do |c|
+    c.klass = Gemini::SimpleView
   end
 end
