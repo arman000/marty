@@ -2,6 +2,7 @@ image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image
 
 services:
   - "postgres:9.6"
+  - "redis:5.0.6-alpine"
 
 before_script:
   - time bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
@@ -56,6 +57,7 @@ variables:
   PGTZ: "America/Los_Angeles"
   POSTGRES_USER: "runner"
   POSTGRES_PASSWORD: ""
+  MARTY_REDIS_URL: 'localhost:6379/1'
   RAILS_ENV: "test"
   RAILS_DUMP_SCHEMA: "false"
   REPOSITORY_URL: '415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image'

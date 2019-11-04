@@ -87,6 +87,11 @@ class Gemini::Helper
     (0..cnt-1).to_a
   end
 
+  delorean_fn :cached_factorial, cache: true do |number|
+    Kernel.sleep 0.001
+    Math.gamma(number + 1) 
+  end
+
   delorean_fn :priority_tester do |reverse, job_cnt|
     blockers = 8.times.map do |idx|
       title =  "Blocker #{idx}"

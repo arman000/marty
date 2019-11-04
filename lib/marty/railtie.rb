@@ -4,5 +4,6 @@ module Marty
     config.marty.default_posting_type = 'BASE'
     config.marty.extjs_theme = 'classic'
     config.marty.promise_job_enqueue_hooks = []
+    config.marty.redis_url = nil
   end
 end

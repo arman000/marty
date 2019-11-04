@@ -99,16 +99,25 @@ describe 'McflyModel' do
     Marty::Script.load_script_bodies({ 'E6' => (errscript3 % 'b_func_p') }, dt)
 
     @engine = Marty::ScriptSet.new.get_engine('AA')
+
+    mcfly_cache_adapter = ::Marty::CacheAdapters::McflyRubyCache.new(
+      size_per_class: 1000
+    )
+
+    ::Delorean::Cache.adapter = mcfly_cache_adapter
   end
+
   after(:all) do
     restore_clean_db(@clean_file)
     Marty::ScriptSet.clear_cache
   end
+
   let(:params) do
     { 'pt' => 'infinity',
                  'entity'    => Gemini::Entity.all.first,
                  'note_rate' => 2.875 }
   end
+
   it 'lookup mode default' do
     a1 = @engine.evaluate('A', 'lookup', params)
     a2 = @engine.evaluate('A', 'clookup', params)

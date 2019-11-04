@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'net-ldap'
   s.add_dependency 'netzke'
   s.add_dependency 'pg'
+  s.add_dependency 'redis'
   s.add_dependency 'rubyzip'
   s.add_dependency 'zip-zip'
 end
