@@ -112,6 +112,25 @@ class Netzke::Base
   end
 end
 
+# FIXME: Move to Netzke
+module Netzke
+  module Basepack
+    class ColumnConfig < AttrConfig
+      alias old_set_defaults set_defaults
+
+      def set_defaults
+        old_set_defaults
+
+        return unless xtype == :checkcolumn
+        # Use default value only if there is a boolean attribute with that name
+        return unless @model_adapter.attr_type(name) == :boolean
+        return if key?(:default_value)
+
+        self.default_value = false
+      end
+    end
+  end
+end
 ######################################################################
 
 # The following is a hack to get around ActiveRecord's broken handling

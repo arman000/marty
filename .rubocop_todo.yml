@@ -1029,7 +1029,7 @@ Style/TrailingCommaInHashLiteral:
 
 # Offense count: 12
 # Cop supports --auto-correct.
-Style/UnneededPercentQ:
+Style/RedundantPercentQ:
   Exclude:
     - 'app/components/marty/simple_app.rb'
     - 'spec/features/rule_spec.rb'
@@ -1037,7 +1037,7 @@ Style/UnneededPercentQ:
 
 # Offense count: 1
 # Cop supports --auto-correct.
-Style/UnneededSort:
+Style/RedundantSort:
   Exclude:
     - 'app/models/marty/event.rb'
 
