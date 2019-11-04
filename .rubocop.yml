@@ -41,3 +41,8 @@ Lint/UnusedMethodArgument:
 
 Style/SymbolArray:
   EnforcedStyle: brackets
+
+# Marshal serialisation is used in Redis caching
+Security/MarshalLoad:
+  Exclude:
+    - 'lib/marty/cache_adapters/redis.rb'

@@ -20,6 +20,7 @@ group :default, :cmit do
 end
 
 group :development, :test do
+  gem 'benchmark-ips'
   gem 'capybara'
   gem 'connection_pool'
   gem 'database_cleaner'

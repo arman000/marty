@@ -83,6 +83,7 @@ module Dummy
     config.marty.extjs_theme = 'crisp'
 
     config.active_job.queue_adapter = :delayed_job
+    config.marty.redis_url = ENV['MARTY_REDIS_URL']
   end
 end
 require "marty/permissions"
