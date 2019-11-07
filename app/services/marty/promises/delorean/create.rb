@@ -56,27 +56,6 @@ module Marty
           promise.job_id = job.id
           promise.save!
 
-          evh = params['p_event']
-          if evh
-            event, klass, subject_id, operation = evh.values_at(
-              'event',
-              'klass',
-              'id',
-              'operation'
-            )
-
-            if event
-              event.promise_id = promise.id
-              event.save!
-            else
-              Marty::Event.create!(
-                promise_id: promise.id,
-                klass: klass,
-                subject_id: subject_id,
-                enum_event_operation: operation
-              )
-            end
-          end
           Marty::PromiseProxy.new(promise.id, timeout, attr)
         end
       end

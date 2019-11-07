@@ -70,14 +70,10 @@ class Delorean::BaseModule::NodeCall
 end
 
 class Delorean::Engine
-  def background_eval(node, params, attrs, event = {})
+  # FIXME: Marty::Event no longer exists, we should remove event at some point
+  def background_eval(node, params, attrs, _event = {})
     raise 'background_eval bad params' unless params.is_a?(Hash)
 
-    unless event.empty?
-      params['p_event'] = event.each_with_object({}) do |(k, v), h|
-        h[k.to_s] = v
-      end
-    end
     nc = Delorean::BaseModule::NodeCall.new({}, self, node, params)
     # start the background promise
     nc | attrs
