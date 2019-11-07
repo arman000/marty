@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'job_helper'
 
-describe Marty::Promise, slow: true do
+describe Marty::Promise, slow: true, retry: 3 do
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
@@ -18,6 +18,7 @@ describe Marty::Promise, slow: true do
   end
 
   before(:each) do
+    ActiveRecord::Base.connection.reconnect!
     @time = DateTime.now
     expect(Marty::Promise.count).to eq(0)
     engine = Marty::ScriptSet.new.get_engine(NAME_A)
@@ -28,6 +29,7 @@ describe Marty::Promise, slow: true do
   end
 
   after(:each) do
+    ActiveRecord::Base.connection.reconnect!
     Marty::Log.delete_all
     Marty::Promise.where('parent_id IS NULL').destroy_all
     Timecop.return
