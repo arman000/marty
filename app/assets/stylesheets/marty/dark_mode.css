@@ -1,0 +1,17 @@
+html {
+  background: #000 !important;
+}
+
+body {
+  background-color: #FFF !important;
+  filter: invert(90%) grayscale(10%) hue-rotate(180deg) !important;
+  -moz-filter: invert(90%) grayscale(10%) hue-rotate(180deg) !important;
+  -webkit-filter: invert(90%) grayscale(10%) hue-rotate(180deg) !important;
+}
+
+em, img, svg, image, video, audio, embed, iframe, object, button, canvas, figure:empty {
+  filter: invert(100%) !important;
+  -moz-filter: invert(100%) !important;
+  -webkit-filter: invert(100%) !important;
+}
+

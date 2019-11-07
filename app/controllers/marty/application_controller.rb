@@ -113,13 +113,17 @@ class Marty::ApplicationController < ActionController::Base
   end
 
   def failed_authentication(login)
-      logger.info("Failed authentication for '#{login}' " +
-                  "from #{request.remote_ip} at #{Time.now.utc}")
+    logger.info("Failed authentication for '#{login}' " +
+                "from #{request.remote_ip} at #{Time.now.utc}")
   end
 
   def successful_authentication(user)
     logger.info("Successful authentication for '#{user.login}' " +
                 "from #{request.remote_ip} at #{Time.now.utc}")
     set_user(user)
+  end
+
+  def toggle_dark_mode
+    cookies[:dark_mode] = cookies[:dark_mode] != 'true'
   end
 end

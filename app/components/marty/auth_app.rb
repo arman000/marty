@@ -25,7 +25,7 @@ class Marty::AuthApp < Marty::SimpleApp
   end
 
   def user_menu
-    [:sign_out]
+    [:sign_out, :toggle_dark_mode]
   end
 
   action :sign_in do |c|
@@ -35,6 +35,11 @@ class Marty::AuthApp < Marty::SimpleApp
   action :sign_out do |c|
     c.icon_cls = 'fa fa-sign-out-alt gylph'
     c.text     = "Sign out #{Mcfly.whodunnit.name}" if Mcfly.whodunnit
+  end
+
+  action :toggle_dark_mode do |a|
+    a.text = 'Toggle Dark Mode'
+    a.icon_cls = 'fa fa-adjust glyph'
   end
 
   endpoint :sign_in do |params|
@@ -48,5 +53,9 @@ class Marty::AuthApp < Marty::SimpleApp
   endpoint :sign_out do
     Netzke::Base.controller.logout_user
     true
+  end
+
+  endpoint :toggle_dark_mode do
+    Netzke::Base.controller.toggle_dark_mode
   end
 end
