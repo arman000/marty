@@ -87,5 +87,9 @@
         window.location.href = "/";
       }
     })
+  },
+
+  netzkeOnToggleDarkMode: function() {
+      this.server.toggleDarkMode(() => { window.location.href = "/" });
   }
 }
