@@ -23,6 +23,19 @@ class Marty::Config < Marty::Base
     self.value = [v]
   end
 
+  def self.fetch(*args)
+    unless (1..2).cover?(args.size)
+      raise ArgumentError, 'wrong number of arguments '\
+                           "(given #{args.size}, expected 1..2)"
+    end
+
+    entry = find_by_key(args[0])
+    return entry.get_value if entry
+    return args[1] if args.size > 1
+
+    raise KeyError, "key not found: \"#{args[0]}\""
+  end
+
   def self.[]=(key, value)
     entry = find_by_key(key)
     if !entry
@@ -36,8 +49,7 @@ class Marty::Config < Marty::Base
   end
 
   def self.[](key)
-    entry = find_by_key(key)
-    entry and entry.get_value
+    fetch(key, nil)
   end
 
   def self.del(key)
