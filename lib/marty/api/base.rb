@@ -53,14 +53,19 @@ class Marty::Api::Base
     params = params.deep_dup
 
     schema_key = [params[:tag], params[:script], params[:node], params[:attr]]
-    input_schema = nil
-    begin
-      # get_schema will either return a hash with the schema,
-      # or a string with the error
-      input_schema = @@schemas[schema_key] ||=
-        Marty::JsonSchema.get_schema(*schema_key)
-    rescue StandardError => e
-      return { error: e.message }
+    input_schema = @@schemas[schema_key]
+    unless input_schema
+      begin
+        # get_schema will either return a hash with the schema,
+        # or a string with the error
+        result_schema = Marty::JsonSchema.get_schema(*schema_key)
+
+        # only store schema in cache when not error
+        @@schemas[schema_key] = result_schema if result_schema.is_a?(Hash)
+        input_schema = result_schema
+      rescue StandardError => e
+        return { error: e.message }
+      end
     end
 
     # if schema was found
