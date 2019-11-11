@@ -50,11 +50,18 @@ class Marty::PromiseView < Netzke::Tree::Base
   end
 
   def bbar
-    [:clear, '->', :refresh, :download]
+    [:clear, :cancel_job, '->', :refresh, :download]
   end
 
   action :clear do |a|
     a.text     = a.tooltip = 'Clear'
+    a.disabled = false
+    a.icon_cls = 'fa fa-minus glyph'
+    a.hidden   = !self.class.has_perm?(:admin)
+  end
+
+  action :cancel_job do |a|
+    a.text     = a.tooltip = 'Cancel Job'
     a.disabled = false
     a.icon_cls = 'fa fa-minus glyph'
     a.hidden   = !self.class.has_perm?(:admin)
@@ -74,6 +81,11 @@ class Marty::PromiseView < Netzke::Tree::Base
 
   endpoint :clear do |_params|
     Marty::Promise.cleanup(true)
+    client.netzke_on_refresh
+  end
+
+  endpoint :cancel_job do |id|
+    Marty::Promises::Cancel.call(id)
     client.netzke_on_refresh
   end
 

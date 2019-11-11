@@ -42,6 +42,7 @@ class Marty::Promise < Marty::Base
   def set_result(res)
     # log "SETRES #{Process.pid} #{self}"
 
+    reload
     # promise must have been started and not yet ended
     if !start_dt || end_dt || result != {}
       # log "SETERR #{Process.pid} #{self}"
