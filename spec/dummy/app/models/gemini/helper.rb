@@ -34,6 +34,68 @@ class Gemini::Helper
     idh.values.map { |h| h['result'] }
   end
 
+  def self.pr_wait(ids)
+    idh = ids.each_with_object({}) do |id, h|
+      h[id] = false
+    end
+    timeout = 60
+    all_done = false
+    loop do
+      idh.each do |id, v|
+        next if v
+        p = Marty::Promise.uncached { Marty::Promise.find_by(id: id) }
+        idh[id] = p.result if p.status
+      end
+      all_done = idh.values.all? { |v| v }
+      break if all_done || timeout == 0
+      timeout -= 1
+      sleep 1
+    end
+    raise "DID NOT FINISH" unless all_done
+    idh.values.map { |h| h['result'] }
+  end
+
+  def self.promise_test(job_title)
+    sleep 5
+    pps = [1, 2, 3].map do |id|
+      new_title = job_title + ' ' + id.to_s
+      Marty::Promises::Ruby::Create.call(
+        module_name: 'Gemini::Helper',
+        method_name: 'promise_test_1',
+        method_args: [new_title],
+        params: {
+          p_title: new_title,
+          _user_id: 1,
+          _parent_id: ENV['__promise_id']&.to_i
+        }.compact
+      ).as_json.values.first.first
+    end
+    pr_wait(pps)
+  end
+
+  def self.promise_test_1(job_title)
+    pps = [1, 2, 3].map do |id|
+      new_title = job_title + ' ' + id.to_s
+      sleep 2
+      Marty::Promises::Ruby::Create.call(
+        module_name: 'Gemini::Helper',
+        method_name: 'promise_test_2',
+        method_args: [new_title],
+        params: {
+          p_title: new_title,
+          _user_id: 1,
+          _parent_id: ENV['__promise_id']&.to_i
+        }.compact
+      ).as_json.values.first.first
+    end
+    pr_wait(pps)
+  end
+
+  def self.promise_test_2(job_title)
+    sleep(5, job_title)
+    job_title
+  end
+
   # Just for testing
   delorean_fn :to_csv, sig: [1, 2] do
     |*args|

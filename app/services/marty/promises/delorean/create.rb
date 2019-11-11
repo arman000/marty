@@ -15,9 +15,13 @@ module Marty
           pid = promise_params[:_parent_id]
           if pid
             ppr = Marty::Promise.find_by(id: pid)
+            # make sure parent isn't cancelled
+            return if ppr&.result&.[]('error') == 'Cancelled'
+
             default_priority = ppr.priority if ppr
           end
           priority = promise_params['p_priority'] || default_priority
+
           promise = Marty::Promise.create(
             title: title,
             user_id: promise_params[:_user_id],

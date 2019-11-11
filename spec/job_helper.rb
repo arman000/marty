@@ -109,7 +109,19 @@ LOGGER:
     result = Gemini::Helper.testlog('message', [msgid]) &&
              Gemini::Helper.testaction('message %d', msgid) && msgid
 EOS
-
+NAME_L = 'PromiseL'
+SCRIPT_L = <<EOS
+Node:
+    jobs = [1, 2, 3]
+    job_title =? 'base'
+    base_attr = [ (Node(p_title  = ('%s %s' % [job_title, j]),
+                       job_title = ('%s %s' % [job_title, j])) | "run0") == true
+                  for j in jobs ]
+    run0 = [ (Node(p_title   = ('%s %s' % [job_title, j]),
+                   job_title = ('%s %s' % [job_title, j])) | "run1") == true
+                  for j in jobs ]
+    run1 = Gemini::Helper.sleep(5, job_title)
+EOS
 NAME_M = 'PromiseM'
 SCRIPT_M = <<EOS
 Node:
@@ -160,6 +172,7 @@ def promise_bodies
     NAME_I => SCRIPT_I,
     NAME_J => SCRIPT_J,
     NAME_K => SCRIPT_K,
+    NAME_L => SCRIPT_L,
     NAME_M => SCRIPT_M,
     NAME_N => SCRIPT_N,
   }

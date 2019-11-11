@@ -64,5 +64,23 @@
   // extra request for every node expand event.
   netzkeOnNodeStateChange: function() {
     return;
+  },
+
+  netzkeOnCancelJob: function (params) {
+    var me = this;
+      var sel = this.getSelectionModel().getSelection();
+      if (sel.length != 1) {
+          return this.netzkeNotify('select one job to cancel')
+      }
+    Ext.Msg.show({
+      title: 'Cancel this Job?',
+      msg: 'Enter CANCEL and press OK to cancel the job',
+      width: 375,
+      buttons: Ext.Msg.OKCANCEL,
+      prompt: true,
+        fn: function (btn, value) {
+            (btn == "ok" && value == "CANCEL") && me.server.cancelJob(sel[0].getId());
+      }
+    });
   }
 }

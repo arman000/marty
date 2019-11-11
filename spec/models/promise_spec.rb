@@ -93,6 +93,127 @@ describe Marty::Promise, slow: true, retry: 3 do
       expect(log.message).to eq 'was called'
     end
 
+    it 'can cancel jobs' do
+      run_ruby_job = lambda do |title1, title2|
+        title = title1 + ' ' + title2
+        Marty::Promises::Ruby::Create.call(
+          module_name: 'Gemini::Helper',
+          method_name: 'promise_test',
+          method_args: [title2],
+          params: {
+            p_title: title,
+            _user_id: 1,
+          }
+        )
+      end
+      engine = Marty::ScriptSet.new.get_engine(NAME_L)
+      run_delorean_job = lambda do |title1, title2|
+        engine.background_eval('Node', { 'p_title' => title1 + ' ' + title2,
+                                         'job_title' => title2 }, ['base_attr'])
+      end
+
+      aggregate_failures do
+        [['Ruby', run_ruby_job],
+         ['PromiseL', run_delorean_job]].each do |title1, runner|
+          # first run with no cancel.  make sure the test parts work as expected
+          title2 = 'first run'
+          x = runner.call(title1, title2)
+
+          base_p = nil
+          timeout = 60
+          # wait until base promise completes
+          loop do
+            base_p = Marty::Promise.find_by("title like '#{title1}%'")
+            break if p&.status || timeout == 0
+
+            timeout -= 1
+            sleep 1
+          end
+          expect(base_p.is_a?(Marty::Promise)).to be_truthy
+          expect(base_p.status).to be_truthy
+          expect(timeout).to be < 55
+
+          # count promises that ran
+          ps = Marty::Promise.where("title like '#{title2} %' or "\
+                                    "title = '#{title1} #{title2}'").
+                 pluck(:id, :title, :end_dt, :status, :result)
+
+          # this check could fail on rare occasion due to the fact that
+          # delayed jobs sometimes run twice
+          expect(ps.count).to eq(13)
+
+          # check status
+          expect(ps.all? { |p| p[4] }).to be_truthy
+
+          # check the names
+          exp_pnames = [
+            'first run 1', 'first run 1 1', 'first run 1 2', 'first run 1 3',
+            'first run 2', 'first run 2 1', 'first run 2 2', 'first run 2 3',
+            'first run 3', 'first run 3 1', 'first run 3 2', 'first run 3 3'
+          ]
+
+          expect(ps.map { |p| p[1] }.reject { |s| s.starts_with?(title1) }.sort).
+            to eq(exp_pnames)
+
+          # make sure the log was written by the leaf jobs. (uniq because
+          # rarely jobs run twice due to race condition -- see promise.rb:126)
+          exp_log = ['first run 1 1', 'first run 1 2', 'first run 1 3',
+                     'first run 2 1', 'first run 2 2', 'first run 2 3',
+                     'first run 3 1', 'first run 3 2', 'first run 3 3']
+          logs = Marty::Log.all.pluck(:details).map { |d| d['label'] }.sort.uniq
+          expect(logs).to eq(exp_log)
+
+          Marty::Promise.where("title like '#{title2}%'").destroy_all
+          Marty::Log.where("details->>'label' like '#{title2}%'").destroy_all
+
+          # run with early cancel
+          cancel_with_checks(runner, title1, '2nd run', '1', ps.count,
+                             exp_log.count)
+
+          # run with later cancel
+          cancel_with_checks(runner, title1, '3rd run', '1 1', ps.count,
+                             exp_log.count)
+
+          # some workers may die because we deleted the promises,
+          # so restart them
+          stop_delayed_job
+          start_delayed_job
+        end
+      end
+    end
+
+    def cancel_with_checks(runner, title1, title2, cancel_name, cnt1, cnt2)
+      testinfo = "#{title1} #{title2}"
+      runner.call(title1, title2)
+
+      # wait for indicated job and cancel
+      timeout = 30
+      title_where = "title = '#{title2} #{cancel_name}'"
+      until timeout == 0 || (p = Marty::Promise.find_by(title_where))
+        sleep 1
+        timeout -= 1
+      end
+      expect(p).to be_a(Marty::Promise), testinfo
+      Marty::Promises::Cancel.call(p.id)
+
+      # count the logs that were generated, should be less
+      l = Marty::Log.where("details->>'label' like '#{title2}%'").uniq
+      expect(l.count).to be < cnt2, testinfo
+
+      ps = Marty::Promise.where("title like '#{title2}%' or "\
+                                "title = '#{title1} #{title2}'").
+             pluck(:job_id, :id, :title, :end_dt, :status, :result)
+
+      # cancel should have stopped creation of promises
+      expect(ps.count).to be < cnt1, testinfo
+
+      # make sure all the promises have an error=Cancelled in result
+      errors = ps.map(&:last).map { |h| h['error'] }.to_set
+      expect(errors).to eq(['Cancelled'].to_set), testinfo
+      Marty::Promise.where("title like '#{title2}%'").destroy_all
+      Marty::Log.where("details->>'label' like '#{title2}%'").destroy_all
+    end
+
     it 'fails on exception' do
       expect(Marty::Promise.where(title: 'PromiseJ').exists?).to be false
 
