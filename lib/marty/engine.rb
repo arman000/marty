@@ -14,7 +14,8 @@ module Marty
 
     config.assets.precompile += [
       'marty/application.js',
-      'marty/application.css'
+      'marty/application.css',
+      'marty/dark_mode.css'
     ]
   end
 end
