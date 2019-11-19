@@ -37,7 +37,7 @@ DECLARE
 
   result JSONB;
   return_json JSONB;
-  
+
   error_extra JSONB;
 
   target RECORD;
@@ -58,7 +58,7 @@ BEGIN
     END IF;
   END LOOP;
 
-  FOREACH direction IN ARRAY directions LOOP 
+  FOREACH direction IN ARRAY directions LOOP
 
     IF direction = 'h' THEN
       data_grid_metadata_current := data_grid_metadata_h;
@@ -89,7 +89,7 @@ BEGIN
 
      query_index_result := empty_jsonb_array;
 
-     -- execute the SQL query that has been received before and 
+     -- execute the SQL query that has been received before and
      -- add it's (possibly multiplt) results to query_index_result variable
      FOR target IN EXECUTE query_dir_result ->> 0 USING query_dir_result -> 1 LOOP
        query_index_result := query_index_result || to_jsonb(target.index);
@@ -105,7 +105,7 @@ BEGIN
      END IF;
 
 
-     IF dis AND jsonb_array_length(query_index_result) > 1 THEN 
+     IF dis AND jsonb_array_length(query_index_result) > 1 THEN
        RAISE EXCEPTION 'matches > 1';
      END IF;
 
@@ -114,7 +114,7 @@ BEGIN
     vertical_indexes := COALESCE(vertical_indexes, empty_jsonb_array);
     horizontal_indexes := COALESCE(horizontal_indexes, empty_jsonb_array);
 
-    IF ((jsonb_array_length(vertical_indexes)) = 0 
+    IF ((jsonb_array_length(vertical_indexes)) = 0
        OR (jsonb_array_length(horizontal_indexes)) = 0)
        AND NOT data_grid_lenient
        AND NOT return_grid_data THEN
@@ -140,7 +140,7 @@ BEGIN
       result := data_grid_data -> vertical_index -> horizontal_index;
     END IF;
 
-    IF NOT return_grid_data THEN 
+    IF NOT return_grid_data THEN
       data_grid_data := NULL;
       data_grid_metadata := NULL;
     END IF;
