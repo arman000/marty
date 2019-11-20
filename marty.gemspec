@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
   s.files       = `git ls-files`.split($\)
   s.licenses    = ['MIT']
   # used for signing aws ec2 requests
+  s.add_dependency 'actioncable'
   s.add_dependency 'aws-sigv4'
   # Only pinning this because there's no other way around it for Axlsx.
   # DO NOT unpin this.
@@ -43,5 +44,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'pg'
   s.add_dependency 'redis'
   s.add_dependency 'rubyzip'
+  s.add_dependency 'state_machines'
+  s.add_dependency 'state_machines-activerecord'
   s.add_dependency 'zip-zip'
 end

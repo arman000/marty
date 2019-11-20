@@ -18,6 +18,7 @@
     });
 
     this.setRouting();
+    this.netzkeInitComponentCallback();
   },
 
   setRouting: function () {
@@ -54,5 +55,8 @@
 
   onToggleConfigMode: function (params) {
     this.toggleConfigMode();
-  }
+  },
+
+  netzkeInitComponentCallback: function() {
+  },
 }

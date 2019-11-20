@@ -22,6 +22,7 @@ class Marty::ApplicationController < ActionController::Base
     if session[:user_id]
       if session_expired? && !try_to_autologin
         reset_session
+        reset_signed_cookies
       else
         session[:atime] = Time.now.utc.to_i
       end
@@ -50,6 +51,8 @@ class Marty::ApplicationController < ActionController::Base
     session[:user_id] = user.id
     session[:ctime] = Time.now.utc.to_i
     session[:atime] = Time.now.utc.to_i
+
+    set_signed_cookies
   end
 
   def user_setup
@@ -78,6 +81,7 @@ class Marty::ApplicationController < ActionController::Base
       user = Marty::User.try_to_autologin(cookies[:autologin])
       if user
         reset_session
+        reset_signed_cookies
         start_user_session(user)
       end
       user
@@ -87,6 +91,7 @@ class Marty::ApplicationController < ActionController::Base
   # Sets the logged in user
   def set_user(user)
     reset_session
+    reset_signed_cookies
     if user && user.is_a?(Marty::User)
       Marty::User.current = user
       start_user_session(user)
@@ -121,6 +126,14 @@ class Marty::ApplicationController < ActionController::Base
     logger.info("Successful authentication for '#{user.login}' " +
                 "from #{request.remote_ip} at #{Time.now.utc}")
     set_user(user)
+  end
+
+  def set_signed_cookies
+    cookies.signed[:user_id] = session[:user_id]
+  end
+
+  def reset_signed_cookies
+    cookies.signed[:user_id] = nil
   end
 
   def toggle_dark_mode

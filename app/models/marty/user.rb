@@ -9,6 +9,13 @@ class Marty::User < Marty::Base
 
   has_many :user_roles, dependent: :destroy
 
+  has_many(
+    :notification_deliveries,
+    class_name: '::Marty::Notifications::Delivery',
+    dependent: :destroy,
+    foreign_key: :recipient_id
+  )
+
   scope :active, -> { where(active: true) }
 
   validate :verify_changes
@@ -112,6 +119,13 @@ class Marty::User < Marty::Base
          'roles' => user.roles.sort.join(', ')
        }
      end
+  end
+
+  def unread_web_notifications_count
+    notification_deliveries.where(
+      delivery_type: :web,
+      state: [:sent]
+    ).count
   end
 
   private
