@@ -91,5 +91,58 @@
 
   netzkeOnToggleDarkMode: function() {
       this.server.toggleDarkMode(() => { window.location.href = "/" });
+  },
+
+  netzkeOnNotificationsWindow: function () {
+    this.netzkeLoadComponent("notifications_window", {
+      callback: function (w) {
+        w.show();
+
+        this.server.markWebNotificationsDelivered();
+
+        var notificationsButton = this.menuBar.items.items.find(
+          function(item) { return item.name === "notificationsWindow" }
+        );
+
+        notificationsButton.setText(''); // Remove the counter
+      },
+    });
+  },
+
+  netzkeInitComponentCallback: function() {
+    try {
+      var subscription = RailsApp.cable.subscriptions.subscriptions.find(
+        (sub) => sub.identifier === '{"channel":"Marty::NotificationChannel"}'
+      )
+
+      // In case if component is initialized twice
+      if (subscription) {
+        return
+      }
+
+      RailsApp.cable.subscriptions.create(
+        'Marty::NotificationChannel',
+        {
+          received: (data) => {
+            var notificationsButton = this.menuBar.items.items.find(
+              function(item) { return item.name === "notificationsWindow" }
+            );
+
+            if (data.unread_notifications_count > 0) {
+              notificationsButton.setText(
+                `<span class='notification-counter'>${data.unread_notifications_count}</span>`
+              );
+            } else {
+              notificationsButton.setText('');
+            }
+          }
+        }
+      );
+    }
+    catch(error) {
+      console.log('ActionCable connection failed')
+      console.error(error);
+    }
   }
 }
+

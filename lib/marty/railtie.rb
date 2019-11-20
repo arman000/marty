@@ -5,5 +5,6 @@ module Marty
     config.marty.extjs_theme = 'classic'
     config.marty.promise_job_enqueue_hooks = []
     config.marty.redis_url = nil
+    config.marty.enable_action_cable = true
   end
 end

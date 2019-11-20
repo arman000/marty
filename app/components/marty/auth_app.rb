@@ -2,6 +2,8 @@
 #
 # == Extending Marty::AuthApp
 # DOCFIX
+require 'marty/notifications/window'
+
 class Marty::AuthApp < Marty::SimpleApp
   client_class do |c|
     c.include :auth_app
@@ -12,20 +14,52 @@ class Marty::AuthApp < Marty::SimpleApp
     [].tap do |menu|
       user = Mcfly.whodunnit
       if !user.nil?
-        menu << '->' << {
-          text: user.name,
-          tooltip: 'Current user',
-          menu: user_menu,
-          name: 'sign_out',
-        }
+        menu <<
+          '->' <<
+          notification_menu_item <<
+          current_user_menu_item(user)
       else
         menu << '->' << :sign_in
       end
     end
   end
 
+  def notification_menu_item
+    :notifications_window
+  end
+
+  def current_user_menu_item(user)
+    {
+      text: user.name,
+      tooltip: 'Current user',
+      menu: user_menu,
+      name: 'sign_out',
+    }
+  end
+
   def user_menu
     [:sign_out, :toggle_dark_mode]
+  end
+
+  def unread_notifications_count
+    user = Mcfly.whodunnit
+
+    return 0 unless user.present?
+
+    user.unread_web_notifications_count
+  end
+
+  action :notifications_window do |c|
+    c.icon_cls = 'fa fa-bell gylph '
+    c.tooltip = 'Show notifications'
+
+    c.text = nil
+
+    notifications_count = unread_notifications_count
+
+    next if notifications_count.zero?
+
+    c.text = "<span class='notification-counter'>#{notifications_count}</span>"
   end
 
   action :sign_in do |c|
@@ -57,5 +91,19 @@ class Marty::AuthApp < Marty::SimpleApp
 
   endpoint :toggle_dark_mode do
     Netzke::Base.controller.toggle_dark_mode
+  end
+
+  endpoint :mark_web_notifications_delivered do
+    user = Mcfly.whodunnit
+    deliveries = user.notification_deliveries.where(
+      delivery_type: :web,
+      state: [:sent]
+    )
+
+    deliveries.each(&:set_delivered!)
+  end
+
+  component :notifications_window do |c|
+    c.klass = ::Marty::Notifications::Window
   end
 end

@@ -7,6 +7,7 @@
 
 # Also note that anything required here will need to require in any
 # classes that they might be overriding methods in
+require 'action_cable/engine'
 
 require 'marty/engine'
 require 'marty/railtie'
@@ -22,6 +23,7 @@ require 'marty/rails_app'
 # to the Gemfile
 require 'net-ldap'
 require 'delayed_cron_job'
+require 'state_machines-activerecord'
 
 require 'pathname'
 

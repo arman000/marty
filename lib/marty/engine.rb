@@ -14,8 +14,13 @@ module Marty
 
     config.assets.precompile += [
       'marty/application.js',
+      'marty/cable.js',
       'marty/application.css',
       'marty/dark_mode.css'
     ]
+
+    config.action_cable.disable_request_forgery_protection = true
+    # Can be overriden by config/cable.yml in Rails app
+    ActionCable.server.config.cable ||= { 'adapter' => 'postgresql' }
   end
 end

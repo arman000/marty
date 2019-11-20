@@ -13,6 +13,8 @@ require 'marty/promise_view'
 require 'marty/reporting'
 require 'marty/scripting'
 require 'marty/user_view'
+require 'marty/notifications/config_view'
+require 'marty/notifications/deliveries_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
@@ -86,7 +88,7 @@ class Marty::MainAuthApp < Marty::AuthApp
         :config_view,
         :reload_scripts,
         :load_seed,
-      ] + background_jobs_menu + log_menu + api_menu
+      ] + background_jobs_menu + notifications_menu + log_menu + api_menu
     }
   end
 
@@ -116,6 +118,22 @@ class Marty::MainAuthApp < Marty::AuthApp
           :bg_restart,
           :schedule_jobs_dashboard,
           :schedule_jobs_logs,
+        ]
+      },
+    ]
+  end
+
+  def notifications_menu
+    disabled = !(self.class.has_perm?(:admin) ||
+                 self.class.has_perm?(:user_manager))
+    [
+      {
+        text: 'Notifications',
+        icon_cls: 'fa fa-bell glyph',
+        disabled: disabled,
+        menu: [
+          :notifications_config_view,
+          :notifications_deliveries_view,
         ]
       },
     ]
@@ -319,6 +337,25 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_perm?(:admin)
   end
 
+  # action 'Notifications::ConfigView' do |a|
+  action :notifications_config_view do |a|
+    a.text     = 'User Notification Rules'
+    a.tooltip  = 'Configure notification rules for users'
+    a.handler  = :netzke_load_component_by_action
+    a.icon_cls = 'fa fa-sliders-h glyph'
+    a.disabled = !(self.class.has_perm?(:admin) ||
+                   self.class.has_perm?(:user_manager))
+  end
+
+  action :notifications_deliveries_view do |a|
+    a.text     = 'Notificaiton messages'
+    a.tooltip  = 'Show all notification messages'
+    a.handler  = :netzke_load_component_by_action
+    a.icon_cls = 'fa fa-list glyph'
+    a.disabled = !(self.class.has_perm?(:admin) ||
+                   self.class.has_perm?(:dev))
+  end
+
   ######################################################################
 
   def bg_command(subcmd)
@@ -408,6 +445,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :config_view
 
   component :data_grid_view
+
   component :data_grid_user_view
 
   component :import_type_view
@@ -418,6 +456,14 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   component :new_posting_window do |c|
     c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?
+  end
+
+  component :notifications_config_view do |c|
+    c.klass = ::Marty::Notifications::ConfigView
+  end
+
+  component :notifications_deliveries_view do |c|
+    c.klass = ::Marty::Notifications::DeliveriesView
   end
 
   component :posting_window
