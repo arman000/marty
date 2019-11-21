@@ -10,7 +10,14 @@ before_script:
   - RAILS_ENV=test bundle exec rails db:create db:migrate
 
 .base-test:
+  # Cancel if new commits where pushed
+  interruptible: true
+  # Run only when there is an MR
+  only:
+    - merge_requests
+
   stage: test
+
   # Use only the following CI runners
   tags:
     - gitlabci-runner-eks-shared-dev
