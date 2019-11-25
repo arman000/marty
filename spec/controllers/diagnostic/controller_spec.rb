@@ -67,7 +67,7 @@ module Marty::Diagnostic
                   'status'      => true,
                   'consistent'  => true
                 },
-                'Git' => {
+                'Root Git' => {
                   'description' => git,
                   'status'      => true,
                   'consistent'  => true
