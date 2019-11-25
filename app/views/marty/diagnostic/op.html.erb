@@ -1,5 +1,9 @@
 <!DOCTYPE html>
 <html>
+  <% if cookies[:dark_mode] == 'true' %>
+    <%= stylesheet_link_tag 'marty/dark_mode', media: 'all', 'data-turbolinks-track': 'reload' %>
+  <% end %>
+
   <head>
     <title><%=Rails.application.class.parent_name%> Diagnostic</title>
     <style type="text/css">
