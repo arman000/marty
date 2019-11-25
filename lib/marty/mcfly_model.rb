@@ -6,8 +6,14 @@ module Mcfly::Model
   end
 
   module ClassMethods
-    def hash_if_necessary(q, private)
+    def openstruct_if_necessary(q, private)
       !private && q.is_a?(ActiveRecord::Base) ? make_openstruct(q) : q
+    end
+
+    def hash_if_necessary(q, to_hash)
+      return make_hash(q) if to_hash && q.is_a?(ActiveRecord::Base)
+
+      q
     end
 
     def base_mcfly_lookup(name, options = {}, &block)
@@ -41,7 +47,14 @@ module Mcfly::Model
 
         q = q.first if q.respond_to?(:first) && options[:mode] == :first
 
-        hash_if_necessary(q, options[:private])
+        if options[:to_hash]
+          next hash_if_necessary(
+            q,
+            options.fetch(:to_hash, false)
+          )
+        end
+
+        openstruct_if_necessary(q, options[:private])
       end
     end
 
@@ -55,7 +68,7 @@ module Mcfly::Model
 
     def gen_mcfly_lookup(name, attrs, options = {})
       raise "bad options #{options.keys}" unless
-        (options.keys - [:mode, :cache, :private]).empty?
+      (options.keys - [:mode, :cache, :private, :to_hash]).empty?
 
       mode = options.fetch(:mode, :first)
 
@@ -134,7 +147,7 @@ module Mcfly::Model
 
       pc_name = "pc_#{name}".to_sym
 
-      gen_mcfly_lookup(pc_name, pc_attrs, options + { private: true })
+      gen_mcfly_lookup(pc_name, pc_attrs, options + { private: true, to_hash: false })
 
       lpi = attrs.keys.index rel_attr
 
@@ -142,7 +155,7 @@ module Mcfly::Model
       raise "need #{rel_attr} argument" unless lpi
 
       # cache if mode is not nil
-      priv = options[:private]
+      to_hash = options.fetch(:to_hash, false)
 
       # cache if mode is not explicitly set to nil or cache is true
       cache = options.fetch(:cache) { options.fetch(:mode, :first) }
@@ -165,7 +178,15 @@ module Mcfly::Model
                       send(cat_attr_id)
 
         q = send(pc_name, ts, *args)
-        hash_if_necessary(q, priv)
+
+        if to_hash
+          next hash_if_necessary(
+            q,
+            options.fetch(:to_hash, false)
+          )
+        end
+
+        openstruct_if_necessary(q, options[:private])
       end
     end
   end
