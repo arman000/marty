@@ -1,21 +1,53 @@
 # ONLY FOR DEVELOPMENT PURPOSES
 # dockerfile is not suitable to produce a production-grade docker image
-FROM ruby:2.6.3
+FROM ruby:2.6.3-buster
 
 WORKDIR /opt/app
 
-ADD https://dl.yarnpkg.com/debian/pubkey.gpg /tmp/yarn-pubkey.gpg
-RUN apt-key add /tmp/yarn-pubkey.gpg && rm /tmp/yarn-pubkey.gpg
-RUN echo 'deb http://dl.yarnpkg.com/debian/ stable main' > /etc/apt/sources.list.d/yarn.list
+# Versioned dependencies
+ENV FREETDS_VER 1.1.20
+ENV TDSVER 7.1
+ENV NODE_VER 12.x
+ENV POSTGRES_VER 11
 
-RUN apt-get update && apt-get install -qq -y --no-install-recommends \
-      build-essential libpq-dev curl
+# Other useful env variables to set
+ENV BUNDLE_PATH /bundle_box/bundle
+ENV GEM_HOME /bundle_box/bundle
+ENV PATH /bundle_box/bundle/bin:$PATH
 
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get update && apt-get install -qq -y --no-install-recommends nodejs yarn
+# Install several necessary packages and add Postgres repo key
+RUN apt-get update && apt-get install -y -qq software-properties-common apt-transport-https
 
-# Install psql client for tests
-RUN apt-get install -qq -y --no-install-recommends postgresql-client
+# Add Debian Buster postgres keychain for verification to download psql client
+RUN \
+     echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
+     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - &&\
+     apt-get update
+
+# Install several more packages
+RUN \
+      apt-get install -qq -y --no-install-recommends \
+      build-essential libpq-dev curl unixodbc unixodbc-dev freetds-dev \
+      freetds-bin tdsodbc postgresql-client-${POSTGRES_VER} xvfb imagemagick \
+      netcat-openbsd vim libc6-dev
+
+# Install FreeTDS
+RUN wget https://www.freetds.org/files/stable/freetds-"${FREETDS_VER}".tar.gz && \
+      tar -xzf freetds-"${FREETDS_VER}".tar.gz && \
+      rm freetds-"${FREETDS_VER}".tar.gz && \
+      cd freetds-"${FREETDS_VER}" && \
+      ./configure --prefix=/usr/local --with-tdsver=${TDSVER} && \
+      make && \
+      make install && \
+      make clean
+
+# Install Nodejs
+RUN export VERSION="node_${NODE_VER}" DISTRO="$(lsb_release -s -c)" && \
+    curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
+    echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" | tee /etc/apt/sources.list.d/nodesource.list && \
+    echo "deb-src https://deb.nodesource.com/$VERSION $DISTRO main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
+    apt-get -o Acquire::Check-Valid-Until=false update && \
+    apt-get install -qq -y --no-install-recommends nodejs
 
 # Install chrome for integration tests
 RUN curl -L -o google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
@@ -24,25 +56,4 @@ RUN curl -L -o google-chrome.deb https://dl.google.com/linux/direct/google-chrom
     && sed -i 's|HERE/chrome\"|HERE/chrome\" --disable-setuid-sandbox|g' /opt/google/chrome/google-chrome \
     && rm google-chrome.deb
 
-# Install additional tools
-RUN apt-get install -qq -y --no-install-recommends netcat-openbsd vim
-
-RUN gem install bundler
-
-ENV BUNDLE_PATH /bundle_box/bundle
-ENV GEM_HOME /bundle_box/bundle
-ENV PATH /bundle_box/bundle/bin:$PATH
-# ENV NODE_PATH /bundle_box/node
-
-COPY . .
-
-# RUN bundle install
-# RUN yarn install
-
-# RUN mv .rbenv-vars.example .rbenv-vars
-# RUN chmod +x entrypoint.sh
-
-# ENV RAILS_ENV=development
-# ENV PORT=3001
-# EXPOSE 3001
-
+RUN gem update --system
