@@ -4,7 +4,7 @@ module Marty::PgEnum
     index = (i1 || i0).to_s
 
     raise "no such #{name}: '#{index}'" unless
-      self::VALUES.include?(index)
+    values.include?(index)
 
     index
   end
@@ -14,7 +14,7 @@ module Marty::PgEnum
       extend ::Delorean::Functions unless respond_to?(:delorean_fn)
 
       delorean_fn :get_all do |_pt = nil|
-        self::VALUES.map(&:to_s)
+        values.map(&:to_s)
       end
 
       delorean_fn :[] do |i0, i1 = nil|
@@ -29,6 +29,10 @@ module Marty::PgEnum
         send(:[], i0, i1)
       end
     end
+  end
+
+  def values
+    self::VALUES
   end
 
   def seed

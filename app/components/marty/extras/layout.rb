@@ -75,7 +75,7 @@ module Layout
 
   def enum_column(c, class_or_array, col = nil, allow_null = true)
     col ||= c.name.demodulize.tableize.singularize
-    vals = class_or_array.is_a?(Array) ? class_or_array : class_or_array::VALUES
+    vals = class_or_array.is_a?(Array) ? class_or_array : class_or_array.values
     editor_config = {
       trigger_action: :all,
       xtype:          :combo,
@@ -99,7 +99,7 @@ module Layout
   def enum_array(c, klass)
     editor_config = {
       multi_select: true,
-      store:        klass::VALUES.to_a.sort,
+      store:        klass.values.to_a.sort,
       type:         :string,
       xtype:        :combo,
     }

@@ -153,7 +153,7 @@ module Marty; class UserView < Marty::Grid
       Marty::RoleType.to_nice_names(r.user_roles.map(&:role))
     end
 
-    store = ::Marty::RoleType.to_nice_names(::Marty::RoleType::VALUES.sort)
+    store = ::Marty::RoleType.to_nice_names(::Marty::RoleType.values.sort)
 
     c.editor_config = {
       multi_select: true,
