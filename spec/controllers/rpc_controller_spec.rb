@@ -1022,9 +1022,18 @@ describe Marty::RpcController do
 
   class FruitsEnum
     VALUES = Set['Apple', 'Banana', 'Orange']
+
+    def self.values
+      VALUES
+    end
   end
+
   class CondEnum
     VALUES = Set['no opts', 'opt1', 'opt2', 'opttf']
+
+    def self.values
+      VALUES
+    end
   end
 
   it 'validates schema with a pg_enum (Positive)' do

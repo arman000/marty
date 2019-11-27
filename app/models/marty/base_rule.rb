@@ -42,9 +42,10 @@ class Marty::BaseRule < Marty::Base
       return errors[errtype] << "- Wrong type for #{ns}" unless
         gettypes(vv).member?(type)
     end
+
     return unless enum || values
 
-    vals = enum && enum::VALUES || values.to_set
+    vals = enum&.values || values.to_set
     bad = (vs - vals)
     p = bad.count > 1 ? 's' : ''
     return errors[errtype] <<

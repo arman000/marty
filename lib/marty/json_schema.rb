@@ -10,7 +10,7 @@ module Marty
       begin
         cs = curr_schema.schema['pg_enum']
         enum = cs.constantize
-        values = enum::VALUES
+        values = enum.values
       rescue StandardError => e
         msg = "The property '#{path}': '#{cs}' is not a pg_enum class"
         validation_error(pro, msg, frag, curr_schema, self, opt[:record_errors])

@@ -2,7 +2,7 @@ class AddRuleTypeEnums < ActiveRecord::Migration[4.2]
   def change
     [Gemini::XyzRuleType, Gemini::MyRuleType, Gemini::GuardOne,
      Gemini::GuardTwo, Gemini::XyzEnum].each do |cl|
-      values = cl::VALUES
+      values = cl.values
       str_values = values.map {|v| ActiveRecord::Base.connection.quote v}.
                    join(',')
       clstr = cl.to_s.sub('Gemini::','').underscore

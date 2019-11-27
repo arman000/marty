@@ -2,10 +2,18 @@ require 'spec_helper'
 
 class MammalEnum
   VALUES = Set['Dog', 'Cat', 'Human', 'Cow', 'Bear']
+
+  def self.values
+    VALUES
+  end
 end
 
 class ElectronicsEnum
   VALUES = Set['Phone', 'Keyboard', 'Terminator']
+
+  def self.values
+    VALUES
+  end
 end
 
 class NotAnEnum

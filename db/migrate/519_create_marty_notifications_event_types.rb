@@ -1,6 +1,6 @@
 class CreateMartyNotificationsEventTypes < ActiveRecord::Migration[4.2]
   def up
-    values = ::Marty::Notifications::EventType::VALUES
+    values = ::Marty::Notifications::EventType.values
     str_values = values.map {|v| ActiveRecord::Base.connection.quote v}.join ','
 
     execute <<-SQL

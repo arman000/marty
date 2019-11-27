@@ -10,7 +10,7 @@ module Marty::Migrations
     raise 'model class needs VALUES (as Set)' unless
       klass.const_defined?(:VALUES)
 
-    values = klass::VALUES
+    values = klass.values
     str_values =
       values.map { |v| ActiveRecord::Base.connection.quote v }.join ','
 
@@ -41,7 +41,7 @@ module Marty::Migrations
     SQL
 
     db_values = res.first['enum_range'].gsub(/[{"}]/, '').split(',')
-    ex_values = klass::VALUES.map(&:to_s) - db_values
+    ex_values = klass.values.map(&:to_s) - db_values
 
     return if ex_values.empty?
 
