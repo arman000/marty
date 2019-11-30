@@ -12,7 +12,7 @@ module Marty; module RSpec; module Components
 
     def initialize(name)
       @name = name
-      if /^\d+$/.match(name)
+      if /^\d+$/.match?(name)
         @combobox = ext_find('combobox', nil, name)
       else
         @combobox = ext_combo(name)

@@ -48,7 +48,7 @@ class Marty::DataGrid < Marty::Base
 
         # enforce Delorean attr syntax (a bit Draconian)
         dg.errors.add(:base, "bad attribute '#{attr}'") unless
-          attr =~ /^[a-z][A-Za-z0-9_]*$/
+          /^[a-z][A-Za-z0-9_]*$/.match?(attr)
 
         dg.errors.add(:base, "unknown metadata type #{type}") unless
           Marty::DataGrid.type_to_index(type)
