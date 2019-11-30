@@ -13,7 +13,7 @@ module Marty; module RSpec; module Components
     def initialize(name, c_type)
       # for now, also allows treepanel
       @name = name
-      if /^\d+$/.match(name)
+      if /^\d+$/.match?(name)
         @grid = ext_find(c_type, nil, name)
       else
         @grid = ext_find(ext_arg(c_type, name: name))

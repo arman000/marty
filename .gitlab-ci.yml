@@ -17,6 +17,9 @@ before_script:
     - merge_requests
 
   stage: test
+  retry:
+    max: 2
+    when: script_failure
 
   # Use only the following CI runners
   tags:
@@ -27,10 +30,45 @@ rubocop:
   script:
     - bundle exec rubocop
 
-rspec-without-features:
+rspec (controllers):
   extends: .base-test
   script:
-    - bundle exec rspec --exclude-pattern "spec/features/**/*_spec.rb"
+    - bundle exec rspec spec/controllers
+
+rspec (jobs):
+  extends: .base-test
+  script:
+    - bundle exec rspec spec/jobs
+
+rspec (lib):
+  extends: .base-test
+  script:
+    - bundle exec rspec spec/lib
+
+rspec (models):
+  extends: .base-test
+  script:
+    - bundle exec rspec spec/models
+
+rspec (other):
+  extends: .base-test
+  script:
+    - bundle exec rspec spec/other
+
+rspec (performance):
+  extends: .base-test
+  script:
+    - bundle exec rspec spec/performance
+
+rspec (requests):
+  extends: .base-test
+  script:
+    - bundle exec rspec spec/requests
+
+rspec (services):
+  extends: .base-test
+  script:
+    - bundle exec rspec spec/services
 
 rspec-features-1:
   extends: .base-test

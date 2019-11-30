@@ -157,11 +157,11 @@ class Marty::Api::Base
       end
 
       # if attr is an array, return result as an array
-      return retval = params[:return_array] ? [res] : res
+      retval = params[:return_array] ? [res] : res
     rescue StandardError => e
       msg = Delorean::Engine.grok_runtime_exception(e).symbolize_keys
       Marty::Logger.info "Evaluation error: #{msg}"
-      return retval = msg
+      retval = msg
     ensure
       error = retval.is_a?(Hash) ? retval[:error] : nil
     end

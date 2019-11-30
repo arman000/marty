@@ -83,7 +83,9 @@ class Marty::RpcController < ActionController::Base
       ret_arr = true
     end
 
-    return { error: 'Malformed attrs' } unless attr =~ /\A[a-z][a-zA-Z0-9_]*\z/
+    return { error: 'Malformed attrs' } unless /\A[a-z][a-zA-Z0-9_]*\z/.match?(
+      attr.to_s
+    )
 
     begin
       case params

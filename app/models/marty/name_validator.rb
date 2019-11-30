@@ -8,7 +8,7 @@ class Marty::NameValidator < ActiveModel::Validator
     return if value.nil?
 
     # disallow leading, trailing, >1 internal spaces, special chars (|)
-    if value =~ /\A\s|\s\z|\A.*\s\s.*\z|.*\|.*/
+    if /\A\s|\s\z|\A.*\s\s.*\z|.*\|.*/.match?(value)
       entry.errors[field] <<
         I18n.t('activerecord.errors.messages.extraneous_spaces')
     end

@@ -525,7 +525,7 @@ feature 'data grid view', js: true, speed: :super_slow do
     begin
       press('Edit Grid')
       press('Edit Grid')
-    rescue StandardError => e # rubocop:disable Lint/HandleExceptions
+    rescue StandardError => e
     end
     wait_for_ajax
     grid_setup
@@ -544,7 +544,7 @@ feature 'data grid view', js: true, speed: :super_slow do
     begin
       press('Edit Grid')
       press('Edit Grid')
-    rescue StandardError => e # rubocop:disable Lint/HandleExceptions
+    rescue StandardError => e
     end
     wait_for_ajax
     grid_setup

@@ -933,7 +933,7 @@ EOS
       # rubocop:enable Style/NestedTernaryOperator
       con_part = constraint.present? ? "\t" + constraint : ''
       top = [lenient_str, type_str].compact.join(' ') + con_part + "\n"
-      (top =~ /\A\s*\z/ ? '' : top) +
+      (/\A\s*\z/.match?(top) ? '' : top) +
         <<~EOS
           b\tboolean\tv
           i\tinteger\tv

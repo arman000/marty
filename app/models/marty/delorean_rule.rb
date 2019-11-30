@@ -13,7 +13,7 @@ class Marty::DeloreanRule < Marty::BaseRule
         eclass = engine && engine.constantize || Marty::RuleScriptSet
         eng = eclass.new('infinity').get_engine(self_as_hash)
       rescue StandardError => e
-        return errors[:computed] << '- ' + e.message
+        errors[:computed] << '- ' + e.message
       end
     end
   end

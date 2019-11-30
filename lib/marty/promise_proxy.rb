@@ -14,7 +14,7 @@ class Marty::PromiseProxy < BasicObject
                    :as_json,
                   ]
 
-  instance_methods.each { |m| undef_method m unless m =~ /^(__.*|object_id)$/ }
+  instance_methods.each { |m| undef_method m unless /^(__.*|object_id)$/.match?(m) }
 
   def initialize(promise_id, timeout, attr = nil)
     promise_id, @timeout, @attr = promise_id, timeout, attr
