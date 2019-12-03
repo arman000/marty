@@ -27,13 +27,23 @@ module Marty::RSpec::StructureCompare
        [v1, v2].map(&:class).to_set == Set.new([Integer, Float]))
 
     override = (cmp_opts['ignore'] || []).include?(key)
+
     case v1
     when String
-      return errs + ["path=#{pathstr} #{v1} != #{v2}"] unless
-        v1 == v2 ||
-        Regexp.new('\A' + v1 + '\z').match(v2) ||
-        Regexp.new('\A' + v2 + '\z').match(v1) ||
-        override
+      return errs if override
+      return errs if v1 == v2
+
+      begin
+        return errs if
+          Regexp.new('\A' + v1 + '\z').match(v2) ||
+          Regexp.new('\A' + v2 + '\z').match(v1)
+
+      # Invalid regexp, for example: '[, 65)'
+      rescue RegexpError
+        return errs + ["path=#{pathstr} #{v1} != #{v2}"]
+      end
+
+      return errs + ["path=#{pathstr} #{v1} != #{v2}"]
     when Integer, DateTime, TrueClass, FalseClass, NilClass, Time, Date
       return errs + ["path=#{pathstr} #{v1} != #{v2}"] if v1 != v2 && !override
     when Float
@@ -72,15 +82,23 @@ module Marty::RSpec::StructureCompare
 end
 
 def struct_compare(v1raw, v2raw, cmp_opts = {})
-    res = Marty::RSpec::StructureCompare.struct_compare_all(v1raw, v2raw, nil,
-                                                            cmp_opts).first
+    res = Marty::RSpec::StructureCompare.struct_compare_all(
+      v1raw,
+      v2raw,
+      nil,
+      cmp_opts
+    ).first
 rescue StandardError => e
     e.message
 end
 
 def struct_compare_all(v1raw, v2raw, cmp_opts = {})
-    Marty::RSpec::StructureCompare.struct_compare_all(v1raw, v2raw, nil,
-                                                      cmp_opts)
+    Marty::RSpec::StructureCompare.struct_compare_all(
+      v1raw,
+      v2raw,
+      nil,
+      cmp_opts
+    )
 rescue StandardError => e
     e.message
 end
