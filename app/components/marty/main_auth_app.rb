@@ -1,20 +1,21 @@
 require 'marty/api_auth_view'
 require 'marty/api_config_view'
 require 'marty/api_log_view'
+require 'marty/background_job/delayed_jobs_grid'
+require 'marty/background_job/schedule_jobs_dashboard'
+require 'marty/background_job/schedule_jobs_logs'
 require 'marty/config_view'
 require 'marty/data_grid_view'
-require 'marty/schedule_jobs_dashboard'
-require 'marty/schedule_jobs_logs'
 require 'marty/data_grid_user_view'
 require 'marty/import_type_view'
 require 'marty/new_posting_window'
+require 'marty/notifications/config_view'
+require 'marty/notifications/deliveries_view'
 require 'marty/posting_window'
 require 'marty/promise_view'
 require 'marty/reporting'
 require 'marty/scripting'
 require 'marty/user_view'
-require 'marty/notifications/config_view'
-require 'marty/notifications/deliveries_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
@@ -116,6 +117,7 @@ class Marty::MainAuthApp < Marty::AuthApp
           :bg_status,
           :bg_stop,
           :bg_restart,
+          :delayed_jobs_grid,
           :schedule_jobs_dashboard,
           :schedule_jobs_logs,
         ]
@@ -298,6 +300,14 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_perm?(:admin)
   end
 
+  action :delayed_jobs_grid do |a|
+    a.text     = 'Delayed Jobs Dashboard'
+    a.tooltip  = 'Show running delayed jobs'
+    a.icon_cls = 'fa fa-clock glyph'
+    a.disabled = !self.class.has_perm?(:admin)
+    a.handler = :netzke_load_component_by_action
+  end
+
   action :schedule_jobs_dashboard do |a|
     a.text     = 'Schedule Jobs Dashboard'
     a.tooltip  = 'Edit Delayed Jobs Cron schedules'
@@ -438,9 +448,9 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   component :api_config_view
 
-  component :schedule_jobs_dashboard
-
-  component :schedule_jobs_logs
+  component :delayed_jobs_grid do |c|
+    c.klass = ::Marty::BackgroundJob::DelayedJobsGrid
+  end
 
   component :config_view
 
@@ -471,6 +481,14 @@ class Marty::MainAuthApp < Marty::AuthApp
   component :promise_view
 
   component :reporting
+
+  component :schedule_jobs_dashboard do |c|
+    c.klass = ::Marty::BackgroundJob::ScheduleJobsDashboard
+  end
+
+  component :schedule_jobs_logs do |c|
+    c.klass = ::Marty::BackgroundJob::ScheduleJobsLogs
+  end
 
   component :scripting do |c|
     c.allow_edit = self.class.has_scripting_perm?
