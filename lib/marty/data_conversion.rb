@@ -56,7 +56,7 @@ class Marty::DataConversion
       # Dates are kept as float in Google spreadsheets.  Need to
       # convert them to dates.
       begin
-        FLOAT_PAT.match?(v) ? EXCEL_START_DATE + v.to_f :
+        FLOAT_PAT.match?(v.to_s) ? EXCEL_START_DATE + v.to_f :
           Mcfly.is_infinity(v) ? 'infinity' : v.to_date
       rescue StandardError => e
         raise "date conversion failed for #{v.inspect}}"
