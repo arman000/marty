@@ -122,7 +122,11 @@ module Netzke
         return unless @model_adapter.attr_type(name) == :boolean
         return if key?(:default_value)
 
-        self.default_value = false
+        m = @model_adapter.model
+
+        return self.default_value = false unless m.respond_to?(:column_defaults)
+
+        self.default_value = @model_adapter.model.column_defaults[name] || false
       end
     end
   end

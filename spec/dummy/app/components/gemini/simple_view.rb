@@ -12,6 +12,7 @@ class Gemini::SimpleView < Marty::McflyGridPanel
       :user_id,
       :some_name,
       :active,
+      :default_true
     ]
   end
 end
