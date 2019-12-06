@@ -14,9 +14,8 @@ feature 'Inline editing', js: true do
     grid = netzke_find('simple_view')
     press 'Add'
 
-    row = grid.select_row(1)
-    user_id = row.all('.x-grid-cell')[0]
-    name = row.all('.x-grid-cell')[1]
+    user_id = grid.all('.x-grid-cell')[0]
+    name = grid.all('.x-grid-cell')[1]
 
     user_id.double_click
     user_id.fill_in 'user_id', with: 1
@@ -29,5 +28,6 @@ feature 'Inline editing', js: true do
 
     model = Gemini::Simple.find_by(some_name: 'test name')
     expect(model.active).to be false
+    expect(model.default_true).to be true
   end
 end
