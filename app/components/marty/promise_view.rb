@@ -89,9 +89,21 @@ class Marty::PromiseView < Netzke::Tree::Base
     client.netzke_on_refresh
   end
 
-  def get_records params
+  def get_records(params)
     search_scope = config[:live_search_scope] || :live_search
-    Marty::VwPromise.children_for_id(params[:id], params[search_scope])
+    res = Marty::VwPromise.children_for_id(params[:id], params[search_scope])
+
+    # Fetch actual promise objects without results in advance to avoid N+1
+    promises_without_status_ids = res.reject(&:status).map(&:id)
+    promises_without_status = Marty::Promise.where(
+      id: promises_without_status_ids
+    )
+
+    @results = promises_without_status.each_with_object({}) do |promise, hash|
+      hash[promise.id] = promise.result.to_s
+    end
+
+    res
   end
 
   attribute :title do |config|
@@ -130,11 +142,10 @@ class Marty::PromiseView < Netzke::Tree::Base
   end
 
   attribute :error do |config|
-    config.getter = ->(record) {
-      if !record.status
-        Marty::Promise.find_by(id: record.id).try(:result).to_s
-      end
-    }
+    config.getter = ->(record) do
+      @results[record.id] unless record.status
+    end
+
     config.flex = 1
   end
 end
