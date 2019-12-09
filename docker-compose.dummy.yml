@@ -32,7 +32,7 @@ services:
     stdin_open: true
 
   postgres:
-    image: "postgres:9.6"
+    image: "postgres:11"
     volumes:
       - postgresql-data:/var/lib/postgresql/data
 
