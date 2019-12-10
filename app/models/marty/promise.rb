@@ -176,12 +176,12 @@ class Marty::Promise < Marty::Base
 
   delorean_fn :result_and_status, sig: 1 do |promise_id|
     promise = find_by(id: promise_id)
-    next { error: 'not found' } if promise.nil?
+    next { 'error' => 'not found' } if promise.nil?
 
     {
-      completed: !promise.status.nil?,
-      status: promise.status,
-      result: promise.result
+      'completed' => !promise.status.nil?,
+      'status' => promise.status,
+      'result' => promise.result
     }
   end
 
