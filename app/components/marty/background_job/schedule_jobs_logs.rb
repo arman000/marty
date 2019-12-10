@@ -61,15 +61,22 @@ module Marty
         a.text     = 'Delete all'
         a.tooltip  = 'Delete all logs'
         a.icon_cls = 'fa fa-trash glyph'
+
+        a.handler = :netzke_call_endpoint
+        a.require_confirmation = true
+        a.confirmation_title = 'Delete All'
+        a.in_progress_message = 'Deleting...'
+        a.endpoint_name = :destroy_all
       end
 
       action :ignore do |a|
         a.text     = 'Ignore in diag'
         a.tooltip  = 'Ignore in diag'
         a.icon_cls = 'fa fa-trash glyph'
+        a.handler = :netzke_call_endpoint
       end
 
-      endpoint :destroy_all do
+      endpoint :destroy_all do |_params|
         Marty::BackgroundJob::Log.delete_all
         client.reload
       end
