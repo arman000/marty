@@ -1,5 +1,5 @@
 {
-  initComponent: function () {
+  initComponent() {
     this.callParent();
 
     this.mainPanel = this.down('panel[itemId="main_panel"]');
@@ -10,9 +10,11 @@
     Ext.Ajax.on('beforerequest', function () {
       statusBar.showBusy();
     });
+
     Ext.Ajax.on('requestcomplete', function () {
       statusBar.hideBusy();
     });
+
     Ext.Ajax.on('requestexception', function () {
       statusBar.hideBusy();
     });
@@ -21,13 +23,13 @@
     this.netzkeInitComponentCallback();
   },
 
-  setRouting: function () {
+  setRouting() {
     this.router = Ext.util.History;
     this.router.init();
     this.router.on('change', this.loadRoute, this);
   },
 
-  loadRoute: function (token) {
+  loadRoute(token) {
     if (token) {
       this.netzkeLoadComponent(token, {
         container: this.mainPanel
@@ -37,7 +39,7 @@
     }
   },
 
-  afterRender: function () {
+  afterRender() {
     this.callParent();
     var currentToken = this.router.getToken();
     if (typeof currentToken == "string" && currentToken.length > 0) {
@@ -45,18 +47,51 @@
     }
   },
 
-  appLoadComponent: function (name) {
+  appLoadComponent(name) {
     this.router.add(name);
   },
 
-  netzkeLoadComponentByAction: function (action) {
+  netzkeLoadComponentByAction(action) {
     this.router.add(action.name.underscore());
   },
 
-  onToggleConfigMode: function (params) {
+  onToggleConfigMode(params) {
     this.toggleConfigMode();
   },
 
-  netzkeInitComponentCallback: function() {
+  netzkeInitComponentCallback() {
+  },
+
+  // FIXME: move to netzke
+  netzkeCallEndpoint(action) {
+    const selected = this.getSelectionModel().getSelection().map((r) => r.id)
+    const endpointName = action.endpointName || action.name;
+
+    const camelCasedEndpointName = endpointName.replace(
+      /_([a-z])/g,
+      (g) => g[1].toUpperCase()
+    );
+
+    const requireConfirmation = action.requireConfirmation || action.confirmationMessage;
+
+    const handlerFunction = this.server[camelCasedEndpointName];
+
+    if (!requireConfirmation) {
+      return handlerFunction(selected, () => { this.unmask()});
+    };
+
+    const confirmationTitle = action.confirmationTitle || action.name;
+    const confirmationMessage = action.confirmationMessage || 'Are you sure?';
+    const inProgressMessage = action.inProgressMessage || 'In progress...';
+
+    return Ext.Msg.confirm(
+      confirmationTitle,
+      Ext.String.format(confirmationMessage),
+      (btn, value, cfg) => {
+        if (btn !== "yes") { return null; };
+        this.mask(inProgressMessage);
+        return handlerFunction(selected, () => { this.unmask()});
+      }
+    );
   },
 }

@@ -1,13 +1,13 @@
 {
-  getComponent: function(name) {
+  getComponent(name) {
     return Ext.getCmp(name);
   },
 
-  findComponent: function(name) {
+  findComponent(name) {
     return Ext.ComponentQuery.query(`[name=${name}]`)[0];
   },
 
-  setDisableComponentActions: function(prefix, flag) {
+  setDisableComponentActions(prefix, flag) {
     for (var key in this.actions) {
       if (key.substring(0, prefix.length) == prefix) {
         this.actions[key].setDisabled(flag);
@@ -15,7 +15,7 @@
     }
   },
 
-  initComponent: function() {
+  initComponent() {
     this.dockedItems = this.dockedItems || [];
     if (this.paging == 'pagination') {
       this.dockedItems.push({
@@ -103,14 +103,14 @@
     }
   },
 
-  onSelectionChange: function(f) {
+  onSelectionChange(f) {
     var me = this;
     me.getSelectionModel().on('selectionchange', f);
   },
 
   // override netzkeReloadStore to allow option passthrough
   // reference: http://api.netzke.org/client/files/doc_client_netzke-basepack_javascripts_grid_event_handlers.js.html
-  netzkeReloadStore: function(opts = {}) {
+  netzkeReloadStore(opts = {}) {
     var store = this.getStore();
 
     // HACK to work around buffered store's buggy reload()
@@ -119,7 +119,7 @@
     } else store.reload(opts);
   },
 
-  doViewInForm: function(record) {
+  doViewInForm(record) {
     this.netzkeLoadComponent("view_window", {
       serverConfig: {
         record_id: record.id
@@ -138,13 +138,11 @@
   // always reset store to first page on reload
   // to avoid load bug when moving from a higher page count
   // to a grid with a lower page count
-  reload: function(opts = {
-    start: 0
-  }) {
+  reload(opts = { start: 0 }) {
     this.netzkeReloadStore(opts);
   },
 
-  reloadAll: function() {
+  reloadAll() {
     var me = this;
     var children = me.serverConfig.child_components || [];
     this.store.reload();
@@ -156,11 +154,16 @@
     }
   },
 
-  clearFilters: function() {
+  clearFilters() {
     this.filters.clearFilters();
   },
 
-  netzkeGridSelectedDefaultAction: function(endpoint, confirmation) {
+  netzkeGridSelectedDefaultAction(endpoint, confirmation) {
+    console.log(`
+      netzkeGridSelectedDefaultAction is deprecated.
+      Please use netzkeCallEndpoint instead.
+    `);
+
     var selected = this.getSelectionModel().getSelection().map((r) => r.id)
 
     if (confirmation) {
@@ -176,5 +179,38 @@
     } else {
       this.server[endpoint](selected, () => { this.unmask() })
     }
-  }
+  },
+
+  // FIXME: move to netzke
+  netzkeCallEndpoint(action) {
+    const selected = this.getSelectionModel().getSelection().map((r) => r.id)
+    const endpointName = action.endpointName || action.name;
+
+    const camelCasedEndpointName = endpointName.replace(
+      /_([a-z])/g,
+      (g) => g[1].toUpperCase()
+    );
+
+    const requireConfirmation = action.requireConfirmation || action.confirmationMessage;
+
+    const handlerFunction = this.server[camelCasedEndpointName];
+
+    if (!requireConfirmation) {
+      return handlerFunction(selected, () => { this.unmask()});
+    };
+
+    const confirmationTitle = action.confirmationTitle || action.name;
+    const confirmationMessage = action.confirmationMessage || 'Are you sure?';
+    const inProgressMessage = action.inProgressMessage || 'In progress...';
+
+    return Ext.Msg.confirm(
+      confirmationTitle,
+      Ext.String.format(confirmationMessage),
+      (btn, value, cfg) => {
+        if (btn !== "yes") { return null; };
+        this.mask(inProgressMessage);
+        return handlerFunction(selected, () => { this.unmask()});
+      }
+    );
+  },
 }

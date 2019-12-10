@@ -68,6 +68,11 @@ module Marty
         a.tooltip  = 'Run'
         a.icon_cls = 'fa fa-play glyph'
         a.disabled = true
+        a.handler = :netzke_call_endpoint
+        a.require_confirmation = true
+        a.confirmation_title = 'Run Job'
+        a.in_progress_message = 'Performing job...'
+        a.endpoint_name = :job_run
       end
 
       endpoint :edit_window__edit_form__submit do |params|
@@ -121,7 +126,7 @@ module Marty
         res
       end
 
-      endpoint :job_run do
+      endpoint :job_run do |_ids|
         begin
           s = Marty::BackgroundJob::Schedule.find(client_config['selected'])
           klass = s.job_class
