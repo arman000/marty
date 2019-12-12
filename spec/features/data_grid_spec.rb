@@ -431,10 +431,46 @@ feature 'data grid view', js: true, speed: :super_slow do
     expect(qtips[3][0]).to eq('property_state')
     expect(qtips[3][1]).to eq('property_county_name')
 
+    press('Edit Grid')
+    wait_for_ajax
+    grid_setup
+    cell_edit(2, 3, '')
+    cell_edit(3, 3, '')
+    press('Save')
+    wait_for_ajax
+    colors = get_grid(to_get: :colors)
+    expect(colors).to be_nil
+
+    press('Edit Grid')
+    wait_for_ajax
+    grid_setup
+    cell_edit(4, 3, '')
+    press('Save')
+    wait_for_ajax
+    colors = get_grid(to_get: :colors)
+
+    # colors should be nil because grid closed(saved) successfully
+    expect(colors).to be_nil
+
+    press('Edit Grid')
+    wait_for_ajax
+    grid_setup
+    colors = get_grid(to_get: :colors)
+    qtips = get_grid(to_get: :qtips)
+
+    # make sure data area of colors and qtips are all blank/false
+    expect(colors[3..-1].map { |r| r[2..-1] }.flatten.to_set).
+      to eq(Set.new(['']))
+    expect(qtips[3..-1].map { |r| r[2..-1] }.flatten.to_set).
+      to eq(Set.new([false]))
+    press('Cancel')
+
+    press('Edit Grid')
+    wait_for_ajax
     grid_setup
     cell_edit(2, 3, '123.456')
     cell_edit(3, 3, '1.1')
-
+    cell_edit(4, 3, '2.2')
     cell_edit(2, 2, 'yo')
     press('Save')
     expect(page).to have_content('error: bad range yo')
