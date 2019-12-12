@@ -21,6 +21,14 @@ RSpec.configure do |config|
   config.include Marty::RSpec::SharedConnection
   config.include Marty::RSpec::SharedConnectionDbHelpers
 
+  config.before :each, :js do
+    ActionCable.server.pubsub.shutdown
+  end
+
+  config.after :each, :js do
+    ActionCable.server.pubsub.shutdown
+  end
+
   # RspecMarty::SharedConnection.classes_to_exclude_shared = ['Marty::Log']
   Capybara.default_max_wait_time = 3
 

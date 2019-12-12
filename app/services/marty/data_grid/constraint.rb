@@ -55,7 +55,7 @@ module Marty
             err = nil
             begin
               cvt_val = cvt && !data_v.class.in?(rt) ?
-                          DataGrid.parse_fvalue(pt, data_v, dt, klass).first :
+                          DataGrid.parse_fvalue(pt, data_v, dt, klass)&.first :
                           data_v
             rescue StandardError => e
               err = e.message
@@ -63,6 +63,7 @@ module Marty
             next res << [:type, x, y] if err
 
             res << [:constraint, x, y] unless
+              cvt_val.nil? ||
               chks.map { |op, chk_val| cvt_val.send(op, chk_val) }.all? { |v| v }
           end
         end

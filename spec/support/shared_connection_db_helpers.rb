@@ -21,6 +21,7 @@ module Marty; module RSpec; module SharedConnectionDbHelpers
     end
 
     `rm -f #{clean_file}` if remove_file
+    ActionCable.server.pubsub.shutdown
     ActiveRecord::Base.clear_all_connections!
     ActiveRecord::Base.reset_shared_connection
     self.use_transactional_tests = true
