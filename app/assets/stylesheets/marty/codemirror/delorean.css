@@ -1,10 +1,10 @@
 .CodeMirror {
-/*
+  /*
     border-top: 1px solid black;
     border-bottom: 1px solid black;
 */
 }
 
 .errorline {
-    background: #FF5959 !important;
+  background: #ff5959 !important;
 }

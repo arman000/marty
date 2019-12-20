@@ -39,3 +39,6 @@ spec/dummy/.sass-cache
 
 # Ignore Gemfile.lock
 Gemfile.lock
+
+# JS stuff
+/node_modules

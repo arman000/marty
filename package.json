@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "scripts": {
+    "lint": "eslint 'app/assets/**/*.{js,jsx}' && prettier --check \"app/assets/**/*\"",
+    "lintfix": "eslint --fix 'app/assets/**/*.{js,jsx}' && prettier --write \"app/assets/**/*\""
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "eslint": "^6.0.0",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "prettier": "^1.17.1"
+  }
+}
