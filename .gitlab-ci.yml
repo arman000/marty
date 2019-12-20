@@ -30,6 +30,12 @@ rubocop:
   script:
     - bundle exec rubocop
 
+eslint-prettier:
+  extends: .base-test
+  script:
+    - yarn
+    - make lint-js
+
 rspec (controllers):
   extends: .base-test
   script:

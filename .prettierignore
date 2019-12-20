@@ -1,0 +1,14 @@
+# Files ignored by Prettier.
+.gitignore
+.dockerignore
+.editorconfig
+.prettierignore
+.browserslistrc
+.env.local*
+.ssh-docker/*
+yarn.lock
+Makefile
+Dockerfile
+docker-compose.yml
+docker-entrypoint.sh
+app/assets/javascripts/marty/codemirror/**/*
