@@ -9,7 +9,7 @@ module Marty::Diagnostic
             "#{name}_sha".titleize => sha[0..7],
             "#{name}_tag".titleize => tag,
           }
-        end.reduce(&:merge) || {}
+        end.reduce(&:merge).compact || {}
 
         git_tag = `cd #{Rails.root}; git describe --tags --always;`.strip
         git = { 'Root Git' => git_tag }.merge(submodules)
