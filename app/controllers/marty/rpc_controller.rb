@@ -34,6 +34,9 @@ class Marty::RpcController < ActionController::Base
           api.log(result, log_params, request)
         end
 
+        # Do not expose backtrace in case of error
+        next result.except('backtrace', :backtrace) if result.is_a?(Hash)
+
         result
       rescue StandardError => e
         Marty::Logger.log('rpc_controller', 'failure', e.message)

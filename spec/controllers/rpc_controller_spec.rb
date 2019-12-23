@@ -488,6 +488,8 @@ describe Marty::RpcController do
   let(:p1) { @p1 }
   let(:p2) { @p2 }
 
+  let(:json_response) { JSON.parse(response.body) }
+
   it 'should be able to post' do
     post 'evaluate', params: {
            format: :json,
@@ -787,10 +789,10 @@ describe Marty::RpcController do
           params: params
         }
     expect = 'Schema error for M1/A attrs=b: Schema not defined'
-    res = JSON.parse(response.body)
-    expect(res.keys.size).to eq(1)
-    expect(res.keys[0]).to eq('error')
-    expect(res.values[0]).to eq(expect)
+    expect(json_response['backtrace']).to be nil
+    expect(json_response.size).to eq(1)
+    expect(json_response.keys[0]).to eq('error')
+    expect(json_response.values[0]).to eq(expect)
   end
 
   it 'returns an error message on missing attributes in schema script' do
@@ -849,6 +851,7 @@ describe Marty::RpcController do
         }
     expect = '[""The property \'#/p\' of type string did not '\
              'match the following type: integer'
+
     expect(response.body).to include(expect)
   end
 
@@ -870,9 +873,10 @@ describe Marty::RpcController do
             attrs: attr,
             params: params
           }
-      res = JSON.parse(response.body)
       errpart = 'of type string did not match the following type: integer'
-      expect(res['error']).to include(errpart)
+      expect(json_response['error']).to include(errpart)
+      expect(json_response['backtrace']).to be nil
+
       logs = Marty::Log.all
       expect(logs.count).to eq(1)
       expect(logs[0].details['error'][0]).to include(errpart)
@@ -1386,41 +1390,51 @@ describe Marty::RpcController do
     it 'returns bad attrs if attr is not a string' do
       get :evaluate, params: { format: :json, attrs: 0 }
       expect(response.body).to match(/"error":"Malformed attrs"/)
+      expect(json_response['backtrace']).to be nil
     end
 
     it 'returns malformed attrs for improperly formatted json' do
       get :evaluate, params: { format: :json, attrs: '{' }
       expect(response.body).to match(/"error":"Malformed attrs"/)
+      expect(json_response['backtrace']).to be nil
     end
 
     it 'returns malformed attrs if attr is not an array of strings' do
       get :evaluate, params: { format: :json, attrs: '{}' }
       expect(response.body).to match(/"error":"Malformed attrs"/)
+      expect(json_response['backtrace']).to be nil
 
       get :evaluate, params: { format: :json, attrs: '[0]' }
       expect(response.body).to match(/"error":"Malformed attrs"/)
+      expect(json_response['backtrace']).to be nil
     end
 
     it 'returns malformed params for improperly formatted json' do
       get :evaluate, params: { format: :json, attrs: 'e', params:  '{' }
       expect(response.body).to match(/"error":"Malformed params"/)
+      expect(json_response['backtrace']).to be nil
     end
 
     it 'returns malformed params if params is not a hash' do
       get :evaluate, params: { format: :json, attrs: 'e', params: '[0]' }
       expect(response.body).to match(/"error":"Malformed params"/)
+      expect(json_response['backtrace']).to be nil
     end
 
     it 'returns engine/tag lookup error if script not found' do
       get :evaluate, params: { format: :json, script: 'M1', attrs: 'e', tag: 'invalid' }
       expect(response.body).to match(/bad tag identifier.*invalid/)
+      expect(json_response['backtrace']).to be nil
+
       get :evaluate, params: { format: :json, script: 'Invalid', attrs: 'e', tag: t1.name }
       expect(response.body).to match(/"error":"Can't get engine:/)
+      expect(json_response['backtrace']).to be nil
     end
 
     it 'returns the script runtime error (no node specified)' do
       get :evaluate, params: { format: :json, script: 'M1', attrs: 'e', tag: t1.name }
       expect(response.body).to match(/"error":"bad node/)
+      expect(json_response['backtrace']).to be nil
     end
   end
 end
