@@ -8,7 +8,6 @@ end
 module Marty::Diagnostic
   RSpec.describe Controller, type: :controller do
     before(:each) { @routes = Marty::Engine.routes }
-    let(:json_response) { JSON.parse(response.body) }
 
     def my_ip
       Node.my_ip
