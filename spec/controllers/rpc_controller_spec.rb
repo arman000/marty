@@ -513,7 +513,7 @@ describe Marty::RpcController do
            params: { a: 333, d: 5 }.to_json,
            background: true,
          }
-    res = ActiveSupport::JSON.decode response.body
+    res = json_response
     expect(res).to include('job_id')
     job_id = res['job_id']
 
