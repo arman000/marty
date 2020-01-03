@@ -1,7 +1,7 @@
 module Marty
   class RemoveOldPromisesJob < ::Marty::CronJob
     def perform
-      Marty::Promise.cleanup(false)
+      ::Marty::Cleaner::Promises.call
     end
   end
 end
