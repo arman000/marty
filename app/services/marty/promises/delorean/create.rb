@@ -41,7 +41,10 @@ module Marty
               node_name,
               params,
               args,
-              hook
+              hook,
+              # FIXME: should we use default timeout if not specified
+              # Do we want to limit job execution time with that?
+              promise_params['p_timeout']
             )
 
             job = Delayed::Job.enqueue(promise_job, priority: priority)

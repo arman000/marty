@@ -4,6 +4,7 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
                                          :method_name,
                                          :method_args,
                                          :hook,
+                                         :max_run_time
                                         )
 
   def enqueue(job)
@@ -26,6 +27,13 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
       ENV['__promise_id'] = promise.id.to_s
       mod = module_name.constantize
       res = { 'result' => mod.send(method_name, *method_args) }
+    rescue ::Delayed::WorkerTimeout => e
+      timeout_error = StandardError.new(
+        ::Marty::Promise.timeout_message(promise)
+      )
+      timeout_error.set_backtrace(e.backtrace)
+
+      res = Delorean::Engine.grok_runtime_exception(timeout_error)
     rescue StandardError => e
       res = ::Marty::Promise.exception_to_result(promise: promise, exception: e)
     end

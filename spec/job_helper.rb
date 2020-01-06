@@ -158,6 +158,11 @@ Node:
     result = [Node(p_title=title + ' child1') | "child1",
               Node(p_title=title + ' child2', p_priority=10) | "child2"]
 EOS
+NAME_O = 'PromiseO'
+SCRIPT_O = <<EOS
+Node:
+    call_sleep = Gemini::Helper.sleep(5)
+EOS
 
 def promise_bodies
   {
@@ -175,5 +180,6 @@ def promise_bodies
     NAME_L => SCRIPT_L,
     NAME_M => SCRIPT_M,
     NAME_N => SCRIPT_N,
+    NAME_O => SCRIPT_O,
   }
 end

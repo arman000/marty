@@ -65,6 +65,36 @@ describe Marty::Promise, slow: true, retry: 3 do
   end
 
   describe 'delorean' do
+    it 'timeout test' do
+      engine = Marty::ScriptSet.new.get_engine(NAME_O)
+      timeout = 2
+
+      [0, 1, 3, 4].each do |seconds_to_sleep|
+        st = Time.zone.now
+        x = engine.background_eval('Node', { p_timeout: timeout }, 'call_sleep')
+        error = nil
+
+        sleep seconds_to_sleep
+
+        begin
+          y = "result returned: #{x}"
+        rescue StandardError => e
+          error = "error raised: #{e.message}"
+        end
+
+        # If we check before timeout, ruby should wait until promise is timed out
+        # so that total time would be just above the timeout time.
+        # If sleep is longer than timeout, total time would be slightly above
+        # the sleep time
+        runtime = Time.zone.now - st
+        expected_time = [seconds_to_sleep, timeout].max
+
+        expect(runtime > expected_time).to be true
+        expect(runtime < expected_time + 0.5).to be true
+        expect(error).to be_present
+      end
+    end
+
     it 'processes result' do
       expect(Marty::Promise.where(title: 'PromiseB').exists?).to be false
 
@@ -129,6 +159,7 @@ describe Marty::Promise, slow: true, retry: 3 do
             timeout -= 1
             sleep 1
           end
+
           expect(base_p.is_a?(Marty::Promise)).to be_truthy
           expect(base_p.status).to be_truthy
           expect(timeout).to be < 55
