@@ -47,7 +47,10 @@ module Marty
               promise_params['p_timeout']
             )
 
-            job = Delayed::Job.enqueue(promise_job, priority: priority)
+            job = Delayed::Job.enqueue(
+              promise_job,
+              priority: priority,
+              queue: params[:queue] || Delayed::Worker.default_queue_name)
           rescue StandardError => e
             # log "CALLERR #{exc}"
             res = ::Delorean::Engine.grok_runtime_exception(e)
