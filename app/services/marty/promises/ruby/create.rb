@@ -37,7 +37,8 @@ module Marty
               module_name,
               method_name,
               method_args,
-              hook
+              hook,
+              promise_params['p_timeout']
             )
 
             job = Delayed::Job.enqueue(promise_job, priority: priority)

@@ -8,6 +8,7 @@ class Marty::PromiseJob < Struct.new(:promise,
                                      :params,
                                      :attrs,
                                      :hook,
+                                     :max_run_time
                                     )
   # def log(msg)
   #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
@@ -41,10 +42,18 @@ class Marty::PromiseJob < Struct.new(:promise,
       end
 
       # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
+    rescue ::Delayed::WorkerTimeout => e
+      timeout_error = StandardError.new(
+        ::Marty::Promise.timeout_message(promise)
+      )
+      timeout_error.set_backtrace(e.backtrace)
+
+      res = Delorean::Engine.grok_runtime_exception(timeout_error)
     rescue StandardError => e
       res = Delorean::Engine.grok_runtime_exception(e)
       # log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{e}"
     end
+
     promise.set_result(res)
     process_hook(res)
   end

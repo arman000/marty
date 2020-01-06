@@ -150,7 +150,7 @@ class Marty::Promise < Marty::Base
         # timeout error.
         if !last.start_dt
           # log "TO11 #{Process.pid} #{last}"
-          return { 'error' => "promise #{last.id} timed out (never started)" }
+          return { 'error' => self.class.never_started_message(last) }
         end
       end
 
@@ -163,7 +163,7 @@ class Marty::Promise < Marty::Base
         last = latest
 
         if !last.end_dt
-          return { 'error' => "promise #{last.id} timed out (didn't end)" }
+          return { 'error' => self.class.timeout_message(last) }
         end
       end
 
@@ -226,6 +226,14 @@ class Marty::Promise < Marty::Base
        end
 
       { 'error' => exception.message, 'backtrace' => exception.backtrace }
+    end
+
+    def never_started_message(promise)
+      "promise #{promise.id} timed out (never started)"
+    end
+
+    def timeout_message(promise)
+      "promise #{promise.id} timed out (didn't end)"
     end
   end
 end
