@@ -1,21 +1,23 @@
-{
+({
   initComponent() {
     this.callParent();
 
     this.mainPanel = this.down('panel[itemId="main_panel"]');
     this.menuBar = this.down('container[itemId="menu_bar"]');
-    var statusBar = this.statusBar = this.down('container[itemId="status_bar"]');
+    const statusBar = (this.statusBar = this.down(
+      'container[itemId="status_bar"]'
+    ));
 
     // Setting the "busy" indicator for Ajax requests
-    Ext.Ajax.on('beforerequest', function () {
+    Ext.Ajax.on("beforerequest", function() {
       statusBar.showBusy();
     });
 
-    Ext.Ajax.on('requestcomplete', function () {
+    Ext.Ajax.on("requestcomplete", function() {
       statusBar.hideBusy();
     });
 
-    Ext.Ajax.on('requestexception', function () {
+    Ext.Ajax.on("requestexception", function() {
       statusBar.hideBusy();
     });
 
@@ -26,7 +28,7 @@
   setRouting() {
     this.router = Ext.util.History;
     this.router.init();
-    this.router.on('change', this.loadRoute, this);
+    this.router.on("change", this.loadRoute, this);
   },
 
   loadRoute(token) {
@@ -41,7 +43,7 @@
 
   afterRender() {
     this.callParent();
-    var currentToken = this.router.getToken();
+    const currentToken = this.router.getToken();
     if (typeof currentToken == "string" && currentToken.length > 0) {
       this.loadRoute(currentToken);
     }
@@ -55,43 +57,50 @@
     this.router.add(action.name.underscore());
   },
 
-  onToggleConfigMode(params) {
+  onToggleConfigMode(_params) {
     this.toggleConfigMode();
   },
 
-  netzkeInitComponentCallback() {
-  },
+  netzkeInitComponentCallback() {},
 
   // FIXME: move to netzke
   netzkeCallEndpoint(action) {
-    const selected = this.getSelectionModel().getSelection().map((r) => r.id)
+    const selected = this.getSelectionModel()
+      .getSelection()
+      .map((r) => r.id);
     const endpointName = action.endpointName || action.name;
 
-    const camelCasedEndpointName = endpointName.replace(
-      /_([a-z])/g,
-      (g) => g[1].toUpperCase()
+    const camelCasedEndpointName = endpointName.replace(/_([a-z])/g, (g) =>
+      g[1].toUpperCase()
     );
 
-    const requireConfirmation = action.requireConfirmation || action.confirmationMessage;
+    const requireConfirmation =
+      action.requireConfirmation || action.confirmationMessage;
 
     const handlerFunction = this.server[camelCasedEndpointName];
 
     if (!requireConfirmation) {
-      return handlerFunction(selected, () => { this.unmask()});
-    };
+      return handlerFunction(selected, () => {
+        this.unmask();
+      });
+    }
 
     const confirmationTitle = action.confirmationTitle || action.name;
-    const confirmationMessage = action.confirmationMessage || 'Are you sure?';
-    const inProgressMessage = action.inProgressMessage || 'In progress...';
+    const confirmationMessage = action.confirmationMessage || "Are you sure?";
+    const inProgressMessage = action.inProgressMessage || "In progress...";
 
     return Ext.Msg.confirm(
       confirmationTitle,
       Ext.String.format(confirmationMessage),
-      (btn, value, cfg) => {
-        if (btn !== "yes") { return null; };
+      (btn, _value, _cfg) => {
+        if (btn !== "yes") {
+          return null;
+        }
         this.mask(inProgressMessage);
-        return handlerFunction(selected, () => { this.unmask()});
+        return handlerFunction(selected, () => {
+          this.unmask();
+        });
       }
     );
-  },
-}
+  }
+});

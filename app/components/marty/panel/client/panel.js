@@ -1,5 +1,5 @@
-{
-  updateBodyHtml: function (html) {
+({
+  updateBodyHtml(html) {
     this.body.update(html);
   }
-}
+});

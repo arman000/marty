@@ -376,6 +376,23 @@ module Netzke
   end
 end
 
+module Netzke
+  module Core
+    class ClientClassConfig
+      # FIXME: move to Netzke
+      # This fix removes ; in the end of JS code that is required by JS linters
+      # And adds new line before closing bracket, so that if there is a comment
+      # in the end of file, it won't break the code.
+      def override_from_file(path)
+        str = File.read(path)
+        str.chomp!("\n").chomp!(';')
+        %{#{class_name}.override(#{str}
+);}
+      end
+    end
+  end
+end
+
 require 'delayed_cron_job'
 require_relative './delayed_job/scheduled_job_plugin.rb'
 

@@ -1,7 +1,6 @@
-{
-  setResult: function (val) {
-    var result = this.netzkeGetComponent('result');
+({
+  setResult(val) {
+    const result = this.netzkeGetComponent("result");
     result.updateBodyHtml(val);
   }
-
-}
+});

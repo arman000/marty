@@ -1,22 +1,28 @@
-{
-  initComponent: function () {
+({
+  initComponent() {
     this.callParent();
 
-    this.getSelectionModel().on('selectionchange', function (selModel) {
-      this.actions.detail &&
-        this.actions.detail.setDisabled(!selModel.hasSelection());
-    }, this);
+    this.getSelectionModel().on(
+      "selectionchange",
+      function(selModel) {
+        this.actions.detail &&
+          this.actions.detail.setDisabled(!selModel.hasSelection());
+      },
+      this
+    );
   },
 
-  detail: function () {
-    record_id = this.getSelectionModel().getSelection()[0].getId();
+  detail() {
+    const record_id = this.getSelectionModel()
+      .getSelection()[0]
+      .getId();
     this.server.detail({
-      record_id: record_id
+      record_id
     });
   },
 
-  netzkeShowDetail: function (details) {
-    Ext.create('Ext.Window', {
+  netzkeShowDetail(details) {
+    Ext.create("Ext.Window", {
       height: 150,
       minWidth: 250,
       autoWidth: true,
@@ -27,17 +33,17 @@
     }).show();
   },
 
-  netzkeOnDelete: function () {
-    var records = [];
-    var me = this;
-    me.getSelectionModel().selected.each(function (r) {
+  netzkeOnDelete() {
+    const records = [];
+    const me = this;
+    me.getSelectionModel().selected.each(function(r) {
       records.push(r.getId());
     }, me);
 
     // find the root component (main application)
-    var main_app = me;
+    let main_app = me;
     while (1) {
-      var p = main_app.netzkeGetParentComponent();
+      const p = main_app.netzkeGetParentComponent();
       if (!p) {
         break;
       }
@@ -47,4 +53,4 @@
     // assumes main_app has serverSelectPosting method
     main_app.server.selectPosting(records);
   }
-}
+});

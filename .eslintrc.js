@@ -19,7 +19,8 @@ module.exports = {
     "prefer-const": ["error"],
     "linebreak-style": ["error", "unix"],
     "quotes": [2, "double", { "avoidEscape": true }],
-    "no-unused-vars": ["error", {"args": "after-used"}],
-    "object-shorthand": ["error", "always"]
+    "no-unused-vars": ["error", { "args": "after-used", "argsIgnorePattern": "^_" }],
+    "object-shorthand": ["error", "always"],
+    "no-constant-condition": ["error", { "checkLoops": false }]
   }
 };
