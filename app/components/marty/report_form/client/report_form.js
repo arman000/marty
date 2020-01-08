@@ -1,10 +1,10 @@
-{
-    netzkeOnForeground: function () {
-    var values = this.getForm().getValues();
-    var data = Ext.encode(values);
+({
+  netzkeOnForeground() {
+    const values = this.getForm().getValues();
+    const data = Ext.encode(values);
 
-    var params = {
-      data: data,
+    const params = {
+      data,
       reptitle: this.reptitle
     };
 
@@ -15,21 +15,21 @@
       params["disposition"] = "inline";
     }
 
-    var form = document.createElement("form");
+    const form = document.createElement("form");
 
     form.setAttribute("method", "post");
     form.setAttribute("action", this.mountPath() + "/report." + this.repformat);
 
     // set authenticity token
-    var hiddenField = document.createElement("input");
+    const hiddenField = document.createElement("input");
     hiddenField.setAttribute("type", "hidden");
     hiddenField.setAttribute("name", "authenticity_token");
     hiddenField.setAttribute("value", this.authenticityToken);
     form.appendChild(hiddenField);
 
-    for (var key in params) {
-      if (params.hasOwnProperty(key)) {
-        var hiddenField = document.createElement("input");
+    for (const key in params) {
+      if (Object.prototype.hasOwnProperty.call(params, key)) {
+        const hiddenField = document.createElement("input");
         hiddenField.setAttribute("type", "hidden");
         hiddenField.setAttribute("name", key);
         hiddenField.setAttribute("value", params[key]);
@@ -43,36 +43,38 @@
     document.body.removeChild(form);
   },
 
-  netzkeOnLink: function () {
-    var values = this.getForm().getValues();
+  netzkeOnLink() {
+    const values = this.getForm().getValues();
 
     // check for early url generation and exit with error message
-    if (values['selected_script_name'] == null) {
+    if (values["selected_script_name"] == null) {
       alert("Please select a report before generating url.");
       return;
     }
 
-    params = {
-      "format": this.repformat,
-      "reptitle": this.reptitle
-    }
+    const params = {
+      format: this.repformat,
+      reptitle: this.reptitle
+    };
 
-    for (var key in values) {
+    let key;
+
+    for (key in values) {
       if (values[key] == "") {
-        delete values[key]
+        delete values[key];
       }
     }
-    data = Ext.encode(values)
+    const data = Ext.encode(values);
 
     // construct url
-    var proto_host = location.protocol + '//' + location.host
-    var url = proto_host + '/report?data=' + data
-    for (var key in params) {
+    const proto_host = location.protocol + "//" + location.host;
+    let url = proto_host + "/report?data=" + data;
+    for (key in params) {
       if (params[key] == "") continue;
-      url += '&' + key + '=' + params[key];
+      url += "&" + key + "=" + params[key];
     }
-    url = encodeURI(url)
-    var win = window.open('');
+    url = encodeURI(url);
+    const win = window.open("");
     win.document.write(url.link(url));
   }
-}
+});
