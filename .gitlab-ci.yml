@@ -14,6 +14,7 @@ before_script:
   interruptible: true
   # Run only when there is an MR
   only:
+    - master
     - merge_requests
 
   stage: test
