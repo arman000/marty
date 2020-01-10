@@ -450,8 +450,9 @@ describe 'Blame Report without yml translations' do
 
     @res = Marty::Script.evaluate(
       nil, 'BlameReport', 'DataBlameReport', 'result',
-      'pt_name1' => p.name,
-      'pt_name2' => p2.name
+      'class_list' => ['Gemini::BudCategory', 'Gemini::FannieBup'],
+      'dt1' => p.created_dt,
+      'dt2' => p2.created_dt.end_of_day,
     )
   end
 
@@ -476,8 +477,9 @@ describe 'Blame Report with yml translations' do
 
     @res = Marty::Script.evaluate(
       nil, 'BlameReport', 'DataBlameReport', 'result',
-      'pt_name1' => p.name,
-      'pt_name2' => p2.name,
+      'class_list' => ['Gemini::BudCategory', 'Gemini::FannieBup'],
+      'dt1' => p.created_dt,
+      'dt2' => p2.created_dt.end_of_day,
     )
   end
 

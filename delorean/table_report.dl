@@ -1,7 +1,7 @@
-import MartyFields
+import Fields
 import Styles
 
-ReadableField: MartyFields::CheckboxField
+ReadableField: Fields::CheckboxField
     name        = "readable"
     field_label = "Disable Encoding"
 
@@ -26,8 +26,8 @@ TableReport:
     row_count   = result_raw.length
     result      = Marty::Helper.to_csv(result_raw, {'readable' : readable})
     form        = [
-        MartyFields::PostingField,
-        MartyFields::ClassField,
+        Fields::PostingField,
+        Fields::ClassField,
         ReadableField,
         ]
     format      = "csv"
