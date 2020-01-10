@@ -41,7 +41,11 @@ module Marty
               promise_params['p_timeout']
             )
 
-            job = Delayed::Job.enqueue(promise_job, priority: priority)
+            job = Delayed::Job.enqueue(
+              promise_job,
+              priority: priority,
+              queue: promise_params['p_queue'] ||
+                Delayed::Worker.default_queue_name)
           rescue StandardError => e
             res = { 'error' => e.message }
             promise.set_start
