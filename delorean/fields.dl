@@ -60,3 +60,19 @@ TextField:
     xtype        = ":textfield"
     field_label  = "Text"
     name         = "text_field"
+
+######################################################################
+
+DateField:
+    field_label = "Date"
+    xtype       = ":datefield"
+    name        = "date"
+    value       = nil
+    format      = 'Y-m-d'
+
+DatetimeField:
+    field_label = "Datetime"
+    xtype       = ":datetimefield"
+    name        = "datetime"
+    value       = nil
+    format      = 'Y-m-d H:i:s'

@@ -1,10 +1,13 @@
-import MartyFields
+import Fields
 import Styles
 
-PostingField2: MartyFields::PostingField2
-    store = [ ["NOW", "NOW"] ] + [ [ lp.name, lp.name + ' (' + lp.comment + ')']
-                       for lp in Marty::Posting.get_latest_by_type(
-                         20, ['BASE', 'INTRA', 'CLOSE'])]
+DateField1: Fields::DatetimeField
+    field_label = "Date 1"
+    name        = "dt1"
+
+DateField2: Fields::DatetimeField
+    field_label = "Date 2"
+    name        = "dt2"
 
 StyleRow:
     profile     =?
@@ -56,12 +59,12 @@ StyleGroup:
         ]
 
 ModelRows:
-    klass       =?
-    t1          =?
-    t2          =?
-    ids         =?
+    klass =?
+    dt1   =?
+    dt2   =?
+    ids   =?
 
-    groups = Marty::DataChange.changes(t1, t2, klass, ids)
+    groups = Marty::DataChange.changes(dt1, dt2, klass, ids)
 
     headers = ["Group ID", "Created", "By", "Deleted", "By"] +
         Marty::DataChange.class_headers(klass)
@@ -84,36 +87,31 @@ ModelRows:
     count       = row_groups.length
     ws          = if count > 0 then [klass, rows] else nil
 
-OptionalIDsField: MartyFields::TextField
+OptionalIDsField: Fields::TextField
     field_label = "Group IDs (optional)"
     name = "restrict_to_ids"
 
 DataBlameReport:
     title = "Data Blame Report"
 
-    pt_name1    =?
-    posting1    =? Marty::Posting.lookup(pt_name1)
-    t1          = posting1.created_dt
+    dt1 =?
+    dt2 =?
 
-    pt_name2    =?
-    posting2    =? Marty::Posting.lookup(pt_name2)
-    t2          = posting2.created_dt
-
-    class_list  =? false
+    class_list  =? []
     restrict_to_ids =? nil
 
     form = [
-        MartyFields::PostingField1,
-        PostingField2,
-        MartyFields::ClassListField,
+        DateField1,
+        DateField2,
+        Fields::ClassListField,
         OptionalIDsField
         ]
 
-    ts = if Marty::Helper.infinity_dt(t1)
-         then [t2, t1]
-         else if Marty::Helper.infinity_dt(t2)
-              then [t1, t2]
-              else [t1, t2].sort
+    ts = if Marty::Helper.infinity_dt(dt1)
+         then [dt2, dt1]
+         else if Marty::Helper.infinity_dt(dt2)
+              then [dt1, dt2]
+              else [dt1, dt2].sort
 
     sanitized = if class_list
         then Marty::DataChange.sanitize_classes(class_list)
@@ -128,7 +126,7 @@ DataBlameReport:
         else true
 
     result = ids_check && [
-        ModelRows(t1 = ts[0], t2 = ts[1], klass = klass,
+        ModelRows(dt1 = ts[0], dt2 = ts[1], klass = klass,
                   ids = ids).ws
         for klass in sanitized
         ].compact
@@ -136,11 +134,11 @@ DataBlameReport:
     format = "xlsx"
 
 ModelSummaryRow:
-    klass       =?
-    t1          =?
-    t2          =?
+    klass =?
+    dt1   =?
+    dt2   =?
 
-    r = Marty::DataChange.change_summary(t1, t2, klass)
+    r = Marty::DataChange.change_summary(dt1, dt2, klass)
     cr = r['created']
     up = r['updated']
     dl = r['deleted']
@@ -150,22 +148,17 @@ ModelSummaryRow:
 DataBlameReportSummary:
     title = "Summary Data Blame Report"
 
-    pt_name1    =?
-    posting1    =? Marty::Posting.lookup(pt_name1)
-    t1          = posting1.created_dt
-
-    pt_name2    =?
-    posting2    =? Marty::Posting.lookup(pt_name2)
-    t2          = posting2.created_dt
+    dt1 =?
+    dt2 =?
 
     form = [
-        MartyFields::PostingField1,
-        PostingField2,
+        DateField1,
+        DateField2,
         ]
 
-    postings = [
-        ["Posting 1", pt_name1,],
-        ["Posting 2", pt_name2,],
+    dates = [
+        ["Date 1", dt1,],
+        ["Date 2", dt2,],
         ]
 
     hrow = [
@@ -173,18 +166,18 @@ DataBlameReportSummary:
         Styles::Style.m_hdr_style0,
         ]
 
-    ts = if Marty::Helper.infinity_dt(t1)
-         then [t2, t1]
-         else if Marty::Helper.infinity_dt(t2)
-              then [t1, t2]
-              else [t1, t2].sort
+    ts = if Marty::Helper.infinity_dt(dt1)
+         then [dt2, dt1]
+         else if Marty::Helper.infinity_dt(dt2)
+              then [dt1, dt2]
+              else [dt1, dt2].sort
 
     rows = [
-        ModelSummaryRow(t1 = ts[0], t2 = ts[1], klass = klass).ws
+        ModelSummaryRow(dt1 = ts[0], dt2 = ts[1], klass = klass).ws
         for klass in Marty::DataChange.class_list
         ].compact
 
-    header = [["row", r, {"style" : [Styles::Style.s_hdr]}] for r in postings]
+    header = [["row", r, {"style" : [Styles::Style.s_hdr]}] for r in dates]
     result = [[title,[hrow] + rows, {"widths" : [30]}], ["Parameters", header]]
     format = "xlsx"
 
@@ -192,21 +185,20 @@ DeadReferenceReport:
     title = "Dead Reference Report"
 
     class_list =? false
-    pt_name    =?
-    posting    =? Marty::Posting.lookup(pt_name)
+    date =?
 
     sanitized = if class_list
         then Marty::DataChange.sanitize_classes(class_list)
         else Marty::DataChange.class_list
 
     form = [
-        MartyFields::PostingField,
-        MartyFields::ClassListField,
+        Fields::DateField,
+        Fields::ClassListField,
         ]
 
     result = [
         [[[klass, attr, obj].flatten for obj in list]
-         for attr, list in Marty::DataChange.dead_refs(posting.created_dt,
+         for attr, list in Marty::DataChange.dead_refs(date,
                                                        klass)].flatten(1)
         for klass in sanitized
         ].flatten(1)
@@ -226,7 +218,7 @@ DataImportParam:
         }
     height      =  600
 
-CommaSepField: MartyFields::CheckboxField
+CommaSepField: Fields::CheckboxField
     name        = "comma_sep"
     field_label = "Comma Separated"
 
@@ -260,7 +252,7 @@ DiffReport:
               ]
 
     form = [
-        MartyFields::ClassField,
+        Fields::ClassField,
         DataImportParam,
         CommaSepField,
         ]

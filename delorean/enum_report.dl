@@ -1,4 +1,4 @@
-import MartyFields
+import Fields
 import Styles
 
 EnumValuesReport:
@@ -8,4 +8,3 @@ EnumValuesReport:
     result  = Marty::Helper.to_csv(raw)
     form    = []
     format  = "csv"
-
