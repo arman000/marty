@@ -37,6 +37,7 @@ group :development, :test do
   gem 'rubocop-performance', require: false
   gem 'rubocop-rails', require: false
   gem 'selenium-webdriver'
+  gem 'simplecov', require: false
   gem 'timecop'
   gem 'webdrivers'
 end
