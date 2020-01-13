@@ -7,6 +7,10 @@ require 'zlib'
 require 'csv'
 require 'pathname'
 
+git_tracked_files = `git ls-files`.split($\)
+gem_ignored_files = `git ls-files -i -X .gemignore`.split($\)
+files = git_tracked_files - gem_ignored_files
+
 Gem::Specification.new do |s|
   s.name        = 'marty'
   s.version     = Marty::VERSION
@@ -24,7 +28,7 @@ Gem::Specification.new do |s|
   s.summary     = 'A framework for working with versioned data'
   s.description =
     'Marty is a framework for viewing and reporting on versioned data.'
-  s.files       = `git ls-files`.split($\)
+  s.files       = files
   s.licenses    = ['MIT']
   # used for signing aws ec2 requests
   s.add_dependency 'actioncable'
