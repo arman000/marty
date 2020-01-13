@@ -1,5 +1,11 @@
 image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image:2.6.3-extjs-7-20191018143452
 
+stages:
+  - setup
+  - test
+  - codecov
+  - deploy
+
 services:
   - "postgres:9.6"
   - "redis:5.0.6-alpine"
@@ -9,27 +15,40 @@ before_script:
   - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
   - RAILS_ENV=test bundle exec rails db:create db:migrate
 
+# Use only the following CI runners
+.runners:
+  tags:
+    - gitlabci-runner-eks-shared-dev
+
 .base-test:
+  extends:
+    - .runners
   # Cancel if new commits where pushed
   interruptible: true
   # Run only when there is an MR
   only:
     - master
     - merge_requests
-
   stage: test
   retry:
     max: 2
-    when: script_failure
+    when:
+      - script_failure
+      - runner_system_failure
 
-  # Use only the following CI runners
-  tags:
-    - gitlabci-runner-eks-shared-dev
+.base-rspec:
+  extends: .base-test
+  coverage: '/LOC\s\(\d+\.\d+%\)\scovered/'
+  artifacts:
+    paths:
+      - "coverage/$CI_JOB_NAME"
+    name: "$CI_JOB_NAME Coverage"
+    when: always
 
 rubocop:
   extends: .base-test
   script:
-    - bundle exec rubocop
+    - bundle exec rubocop -f simple -P
 
 eslint-prettier:
   extends: .base-test
@@ -38,62 +57,76 @@ eslint-prettier:
     - make lint-js
 
 rspec (controllers):
-  extends: .base-test
+  extends: .base-rspec
   script:
     - bundle exec rspec spec/controllers
 
 rspec (jobs):
-  extends: .base-test
+  extends: .base-rspec
   script:
     - bundle exec rspec spec/jobs
 
 rspec (lib):
-  extends: .base-test
+  extends: .base-rspec
   script:
     - bundle exec rspec spec/lib
 
 rspec (models):
-  extends: .base-test
+  extends: .base-rspec
   script:
     - bundle exec rspec spec/models
 
 rspec (other):
-  extends: .base-test
+  extends: .base-rspec
   script:
     - bundle exec rspec spec/other
 
 rspec (performance):
-  extends: .base-test
+  extends: .base-rspec
   script:
     - bundle exec rspec spec/performance
 
 rspec (requests):
-  extends: .base-test
+  extends: .base-rspec
   script:
     - bundle exec rspec spec/requests
 
 rspec (services):
-  extends: .base-test
+  extends: .base-rspec
   script:
     - bundle exec rspec spec/services
 
 rspec-features-1:
-  extends: .base-test
+  extends: .base-rspec
   script:
     - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
-    - bundle exec rspec spec/features --tag ~speed
+    - bundle exec rspec spec/features --tag ~speed --format documentation
 
 rspec-features-2:
-  extends: .base-test
+  extends: .base-rspec
   script:
     - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
-    - bundle exec rspec spec/features --tag speed:slow
+    - bundle exec rspec spec/features --tag speed:slow --format documentation
 
 rspec-features-3:
-  extends: .base-test
+  extends: .base-rspec
   script:
     - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
-    - bundle exec rspec spec/features --tag speed:super_slow
+    - bundle exec rspec spec/features --tag speed:super_slow --format documentation
+
+code coverage:
+  extends: .runners
+  stage: codecov
+  when: always
+  coverage: '/LOC\s\(\d+\.\d+%\)\scovered/'
+  only:
+    - merge_requests
+  script:
+    - bundle exec rake marty:merge_coverage_reports
+  artifacts:
+    paths:
+      - "coverage/"
+    name: "Pipeline $CI_PIPELINE_ID Merged Coverage"
 
 cache:
   key: 'marty_bundler_cache'
@@ -102,6 +135,7 @@ cache:
 
 variables:
   BUNDLER_VERSION: "2.0.1"
+  COVERAGE: "true"
   DOCKER_AUTH_CONFIG: '{ "credsStore": "ecr-login" }'
   GIT_SSL_NO_VERIFY: "true"
   HEADLESS: "true"

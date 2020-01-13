@@ -42,3 +42,6 @@ Gemfile.lock
 
 # JS stuff
 /node_modules
+
+# Ignore code coverage
+coverage/

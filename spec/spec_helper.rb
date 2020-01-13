@@ -1,6 +1,9 @@
 ENV['RAILS_ENV'] ||= 'test'
 ENV['TZ'] ||= 'America/Los_Angeles'
 
+require_relative 'support/simplecov_helper'
+SimpleCovHelper.start!
+
 require 'dummy/config/application'
 require 'rspec/rails'
 require 'database_cleaner'

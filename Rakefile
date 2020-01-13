@@ -26,3 +26,13 @@ load 'rails/tasks/engine.rake'
 Bundler::GemHelper.install_tasks
 
 task default: 'app:spec'
+
+namespace :marty do
+  desc 'Merge the results of various SimpleCov coverage reports'
+  task merge_coverage_reports: :environment do
+    require_relative 'spec/support/simplecov_helper'
+    SimpleCovHelper.configure_profile
+    puts 'Merging code coverage reports...'
+    SimpleCovHelper.merge_all_results!
+  end
+end
