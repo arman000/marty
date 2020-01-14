@@ -9,7 +9,7 @@ module ApplicationCable
     private
 
     def find_verified_user
-      return unless cookies.signed[:user_id].present?
+      return if cookies.signed[:user_id].blank?
 
       ::Marty::User.find_by(id: cookies.signed[:user_id])
     end

@@ -1,8 +1,8 @@
-class Marty::JobController < ActionController::Base
+class Marty::JobController < ApplicationController
   def download
     job_id = params['job_id']
 
-    promise = Marty::Promise.find_by_id(job_id)
+    promise = Marty::Promise.find_by(id: job_id)
 
     if promise
       format = promise.cformat

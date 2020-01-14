@@ -16,7 +16,7 @@ describe 'Blame Report', slow: true do
     time5 = Time.zone.parse '2019-01-27 05:14:50 -0800'
 
     posting = Marty::Posting.do_create('BASE', time3 - 2.hours, 'base posting')
-    @pt = Marty::Posting.find_by_name(posting.name).created_dt
+    @pt = Marty::Posting.find_by(name: posting.name).created_dt
 
     bc = Gemini::BudCategory.create(name: 'Conv Fixed 30', created_dt: time1)
     bc2 = Gemini::BudCategory.create(name: 'Govt Fixed 30', created_dt: time1)

@@ -175,7 +175,7 @@ describe Marty::Script do
       it 'gets the files from the default paths' do
         allow(Dir).to receive(:glob).and_return([])
         Marty::Script.get_script_filenames
-        expect(Dir).to have_received(:glob).with("#{Rails.root}/delorean/**/*.dl")
+        expect(Dir).to have_received(:glob).with(Rails.root.join('delorean/**/*.dl').to_s)
         expect(Dir).to have_received(:glob).
           with(File.expand_path('../../../delorean/**/*.dl', __FILE__))
         expect(Dir).to have_received(:glob).twice

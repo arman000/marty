@@ -8,15 +8,15 @@ describe Marty::RpcController do
     @tags << Marty::Script.load_script_bodies({
                          'A' => "A:\n    a = 1\n",
                          'B' => "B:\n    b = 0\n",
-                       }, Date.today)
+                        }, Time.zone.today)
 
     @tags << Marty::Script.load_script_bodies({
                          'B' => "import A\nB:\n    b = A::A().a\n",
-                       }, Date.today + 1.minute)
+                        }, Time.zone.today + 1.minute)
 
     @tags << Marty::Script.load_script_bodies({
                          'A' => "A:\n    a = 2\n",
-                       }, Date.today + 2.minute)
+                        }, Time.zone.today + 2.minutes)
 
     # create an untagged version for DEV
     s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: 'A')

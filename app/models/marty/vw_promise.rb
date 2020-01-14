@@ -2,7 +2,8 @@ class Marty::VwPromise < Marty::Base
   has_many :children,
            foreign_key: 'parent_id',
            class_name: 'Marty::VwPromise',
-           dependent: :destroy
+           dependent: :destroy,
+           inverse_of: :parent
 
   belongs_to :parent, class_name: 'Marty::VwPromise'
   belongs_to :user, class_name: 'Marty::User'

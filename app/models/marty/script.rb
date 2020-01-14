@@ -1,11 +1,11 @@
 class Marty::Script < Marty::Base
   has_mcfly
 
-  validates_presence_of :name, :body
+  validates :name, :body, presence: true
   mcfly_validates_uniqueness_of :name
-  validates_format_of :name,
-                      with: /\A[A-Z][a-zA-Z0-9]*(::[A-Z][a-zA-Z0-9]*)*\z/,
-                      message: I18n.t('script.save_error')
+  validates :name,
+            format: { with: /\A[A-Z][a-zA-Z0-9]*(::[A-Z][a-zA-Z0-9]*)*\z/,
+            message: I18n.t('script.save_error') }
 
   belongs_to :user, class_name: 'Marty::User'
 
@@ -50,7 +50,7 @@ class Marty::Script < Marty::Base
   end
 
   delorean_fn :pretty_print, sig: 1 do |id|
-    script = find_by_id id
+    script = find_by id: id
 
     next "unknown script #{id}" unless script
 
@@ -96,7 +96,7 @@ class Marty::Script < Marty::Base
       tag = Marty::Tag.get_latest1
       latest = Marty::Script.order('created_dt DESC').first
 
-      tag_time = (dt || [latest.try(:created_dt), Time.now].compact.max) +
+      tag_time = (dt || [latest.try(:created_dt), Time.zone.now].compact.max) +
         1.second
 
       # If no tag_time is provided, the tag created_dt will be the same
@@ -149,7 +149,7 @@ class Marty::Script < Marty::Base
       return paths_from_config if paths_from_config.present?
 
       [
-        "#{Rails.root}/delorean",
+        Rails.root.join('delorean'),
         # FIXME: HACKY, wouldn't it be better to use
         # Gem::Specification.find_by_name("marty").gem_dir??
         File.expand_path('../../../../delorean', __FILE__),

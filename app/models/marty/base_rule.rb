@@ -69,7 +69,7 @@ class Marty::BaseRule < Marty::Base
       "- Error in rule '#{name}' field 'results': #{res_err.capitalize}" if res_err
   end
 
-  validates_presence_of :name
+  validates :name, presence: true
   validate :validate
   validate :validate_simple_guard_options
 

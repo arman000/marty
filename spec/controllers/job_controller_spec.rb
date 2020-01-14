@@ -17,7 +17,7 @@ describe Marty::JobController, slow: true do
     # means we lose the globally set uesr
     Mcfly.whodunnit = system_user
 
-    Marty::Script.load_script_bodies(promise_bodies, Date.today)
+    Marty::Script.load_script_bodies(promise_bodies, Time.zone.today)
 
     start_delayed_job
   end
@@ -111,7 +111,7 @@ describe Marty::JobController, slow: true do
     res = engine.background_eval('Z', { 'p_title' => NAME_C }, ['result'])
     wait_for_jobs
 
-    promise = Marty::Promise.find_by_title(NAME_C)
+    promise = Marty::Promise.find_by(title: NAME_C)
 
     get 'download', params: {
       job_id: promise.id,
@@ -126,7 +126,7 @@ describe Marty::JobController, slow: true do
     engine.background_eval('Z', { 'p_title' => NAME_E }, ['result'])
     wait_for_jobs
 
-    promise = Marty::Promise.find_by_title(NAME_E)
+    promise = Marty::Promise.find_by(title: NAME_E)
 
     res = promise.result['result']
 
@@ -167,7 +167,7 @@ describe Marty::JobController, slow: true do
     engine.background_eval('Y', { 'p_title' => title }, ['d'])
     sleep 5
 
-    promise = Marty::Promise.find_by_title(title)
+    promise = Marty::Promise.find_by(title: title)
 
     res = { 'd' => [
       { 'z' => 0.875, 'a' => { 'b' => { 'e' => 0.125 } } },
@@ -194,7 +194,7 @@ describe Marty::JobController, slow: true do
                           )
     sleep 5
 
-    promise = Marty::Promise.find_by_title(NAME_B)
+    promise = Marty::Promise.find_by(title: NAME_B)
 
     expect(promise.result).to eq(
       'result' => [{ 'a' => 1, 'b' => 1 }, { 'a' => 2, 'b' => 4 }, { 'a' => 3, 'b' => 9 }],
@@ -237,8 +237,8 @@ describe Marty::JobController, slow: true do
     engine = Marty::ScriptSet.new.get_engine(NAME_G)
     res = engine.evaluate('V', 'result', {})
     expect(res).to eq [123]
-    p1 = Marty::Promise.find_by_title(NAME_G.to_s)
-    p2 = Marty::Promise.find_by_title("#{NAME_G}2")
+    p1 = Marty::Promise.find_by(title: NAME_G.to_s)
+    p2 = Marty::Promise.find_by(title: "#{NAME_G}2")
     expect(p2.parent_id).to eq p1.id
   end
 end

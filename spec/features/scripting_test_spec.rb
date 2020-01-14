@@ -20,7 +20,7 @@ feature 'under Applications menu, Scripting (debug) workflows', js: true do
   end
 
   def with_user(uname, &block)
-    u = Marty::User.find_by_login(uname)
+    u = Marty::User.find_by(login: uname)
     begin
       old_u, Mcfly.whodunnit = Mcfly.whodunnit, u
       block.call(u)
@@ -50,7 +50,7 @@ DELOREAN
         load_script_bodies({
                              'M1' => sample_script,
                              'M2' => sample_script.gsub(/a/, 'aa').gsub(/b/, 'bb'),
-                           }, Date.today)
+                           }, Time.zone.today)
 
       # add a DEV version of M1.
       s = Marty::Script.find_by(obsoleted_dt: 'infinity', name: 'M1')
@@ -78,7 +78,7 @@ DELOREAN
       Marty::Script.
         load_script_bodies({
                              'M3' => sample_script2,
-                           }, Date.today + 2.minute)
+                           }, Time.zone.today + 2.minutes)
     end
   end
 

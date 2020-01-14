@@ -438,7 +438,7 @@ describe Marty::RpcController do
   end
 
   before(:each) do
-    @p0 = Marty::Posting.do_create('BASE', Date.today, 'a comment')
+    @p0 = Marty::Posting.do_create('BASE', Time.zone.today, 'a comment')
 
     @t1 = Marty::Script.load_script_bodies({
                          'M1' => sample_script,
@@ -463,16 +463,16 @@ describe Marty::RpcController do
                          'M9Schemas' => script9_schema,
                          'M10Schemas' => script10_schema,
                          'M11Schemas' => script11_schema,
-                       }, Date.today + 1.minute)
+                        }, Time.zone.today + 1.minute)
 
-    @p1 = Marty::Posting.do_create('BASE', Date.today + 2.minute, 'a comment')
+    @p1 = Marty::Posting.do_create('BASE', Time.zone.today + 2.minutes, 'a comment')
 
     @t2 = Marty::Script.load_script_bodies({
                          'M1' =>
                          sample_script.gsub(/A/, 'AA') + '    e =? "hello"',
-                       }, Date.today + 3.minute)
+                        }, Time.zone.today + 3.minutes)
 
-    @p2 = Marty::Posting.do_create('BASE', Date.today + 4.minute, 'a comment')
+    @p2 = Marty::Posting.do_create('BASE', Time.zone.today + 4.minutes, 'a comment')
     @data = [['some data', 7, [1, 2, 3], { foo: 'bar', baz: 'quz' }, 5, 'string'],
              ['some more data', [1, 2, 3], 5, { foo: 'bar', baz: 'quz' }, 5, 'string']]
     @data_json = @data.to_json
@@ -517,7 +517,7 @@ describe Marty::RpcController do
     expect(res).to include('job_id')
     job_id = res['job_id']
 
-    promise = Marty::Promise.find_by_id(job_id)
+    promise = Marty::Promise.find_by(id: job_id)
 
     expect(promise.result).to eq('e' => 4)
 
@@ -542,7 +542,7 @@ describe Marty::RpcController do
     job_id = res['job_id']
 
     marty_whodunnit
-    Marty::Script.load_scripts(File.join(Rails.root, '../../delorean'), Date.today)
+    Marty::Script.load_scripts(Rails.root.join('../../delorean'), Time.zone.today)
 
     post 'evaluate', params: {
            format: :json,
@@ -574,7 +574,7 @@ describe Marty::RpcController do
     expect(res).to include('job_id')
     job_id = res['job_id']
 
-    promise = Marty::Promise.find_by_id(job_id)
+    promise = Marty::Promise.find_by(id: job_id)
 
     expect(promise.result).to eq('e' => 4)
 

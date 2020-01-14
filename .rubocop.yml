@@ -1,5 +1,7 @@
 inherit_from: .rubocop_todo.yml
-require: rubocop-performance
+require:
+  - rubocop-performance
+  - rubocop-rails
 
 AllCops:
   TargetRubyVersion: 2.4.2
@@ -46,3 +48,34 @@ Style/SymbolArray:
 Security/MarshalLoad:
   Exclude:
     - 'lib/marty/cache_adapters/redis.rb'
+
+Rails/TimeZone:
+  EnforcedStyle: strict
+
+Rails/OutputSafety:
+  Exclude:
+    - 'app/components/marty/main_auth_app.rb'
+
+Rails/HelperInstanceVariable:
+  Exclude:
+    - 'app/helpers/marty/script_set.rb' # It's a class, not a helper
+
+Rails/SkipsModelValidations:
+  Exclude:
+    - 'app/models/marty/promise.rb'
+
+Rails/DynamicFindBy:
+  Exclude:
+    - 'app/models/marty/data_grid.rb' # Enum
+    - 'app/models/marty/enum.rb' # Enum
+    - 'spec/features/**/*'
+    - 'spec/support/**/*'
+
+Rails/ApplicationRecord:
+  Enabled: false
+
+Rails/ApplicationJob:
+  Enabled: false
+
+Rails/ApplicationController:
+  Enabled: false

@@ -67,7 +67,7 @@ class Marty::ApiConfigView < Marty::Grid
   [:node, :attr].each do |a|
     attribute a do |c|
       c.width = 150
-      c.setter = lambda { |r, v| r.send("#{a}=", v.blank? ? nil : v) }
+      c.setter = lambda { |r, v| r.send("#{a}=", v.presence) }
     end
   end
 

@@ -2,7 +2,7 @@ class Marty::Posting < Marty::Base
   has_mcfly append_only: true
 
   mcfly_validates_uniqueness_of :name
-  validates_presence_of :name, :posting_type_id, :comment
+  validates :name, :posting_type_id, :comment, presence: true
 
   belongs_to :user, class_name: 'Marty::User'
   belongs_to :posting_type
@@ -16,19 +16,19 @@ class Marty::Posting < Marty::Base
     # use Time.now.strftime to name the posting.  This has the effect
     # of using the host's timezone. i.e. since we're in PST8PDT, names
     # will be based off of the Pacific TZ.
-    dt ||= Time.now
+    dt ||= Time.zone.now
     "#{posting_type.name}-#{dt.strftime('%Y%m%d-%H%M')}"
   end
 
   before_validation :set_posting_name
   def set_posting_name
-    posting_type = Marty::PostingType.find_by_id(posting_type_id)
+    posting_type = Marty::PostingType.find_by(id: posting_type_id)
     self.name = self.class.make_name(posting_type, created_dt)
     true
   end
 
   def self.do_create(type_name, dt, comment)
-    posting_type = Marty::PostingType.find_by_name(type_name)
+    posting_type = Marty::PostingType.find_by(name: type_name)
 
     raise "unknown posting type #{name}" unless posting_type
 
@@ -50,12 +50,12 @@ class Marty::Posting < Marty::Base
   # might be created.  Or, use regular validates_uniqueness_of instead
   # of mcfly_validates_uniqueness_of.
   delorean_fn :lookup, sig: 1 do |name|
-    p = select(get_struct_attrs).find_by_name(name)
+    p = select(get_struct_attrs).find_by(name: name)
     make_openstruct(p)
   end
 
   delorean_fn :lookup_dt, sig: 1 do |name|
-    find_by_name(name).try(:created_dt)
+    find_by(name: name).try(:created_dt)
   end
 
   delorean_fn :first_match, sig: [1, 2] do |dt, posting_type = nil|

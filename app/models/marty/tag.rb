@@ -2,7 +2,7 @@ class Marty::Tag < Marty::Base
   has_mcfly append_only: true
 
   mcfly_validates_uniqueness_of :name
-  validates_presence_of :name, :comment
+  validates :name, :comment, presence: true
 
   belongs_to :user, class_name: 'Marty::User'
 
@@ -17,7 +17,7 @@ class Marty::Tag < Marty::Base
     # use Time.now.strftime to name the posting.  This has the effect
     # of using the host's timezone. i.e. since we're in PST8PDT, names
     # will be based off of the Pacific TZ.
-    dt ||= Time.now
+    dt ||= Time.zone.now
     dt.strftime('%Y%m%d-%H%M')
   end
 
@@ -44,9 +44,9 @@ class Marty::Tag < Marty::Base
     # many different types of arguments.
     case tag_id
     when Integer, /\A[0-9]+\z/
-      tag = find_by_id(tag_id)
+      tag = find_by(id: tag_id)
     when String
-      tag = find_by_name(tag_id)
+      tag = find_by(name: tag_id)
       # if tag name wasn't found, look for a matching
       # posting, then find the tag whose created_dt <= posting dt.
       if !tag
@@ -65,7 +65,7 @@ class Marty::Tag < Marty::Base
   end
 
   delorean_fn :lookup, cache: true, sig: 1 do |name|
-    t = find_by_name(name).select(get_struct_attrs)
+    t = find_by(name: name).select(get_struct_attrs)
     t && t.attributes
   end
 

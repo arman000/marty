@@ -1,6 +1,6 @@
 class Marty::UserRole < Marty::Base
-  validates_uniqueness_of :user_id, scope: [:role]
-  validates_presence_of :user_id, :role
+  validates :user_id, uniqueness: { scope: [:role] }
+  validates :user_id, :role, presence: true
 
   belongs_to :user
 end

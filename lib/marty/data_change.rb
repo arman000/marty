@@ -94,7 +94,7 @@ class Marty::DataChange
   end
 
   delorean_fn :user_name, sig: 1 do |user_id|
-    Marty::User.find_by_id(user_id).try(:name)
+    Marty::User.find_by(id: user_id).try(:name)
   end
 
   delorean_fn :sanitize_classes, sig: 1 do |classes|

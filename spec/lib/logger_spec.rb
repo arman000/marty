@@ -74,7 +74,7 @@ module Marty
       # means we lose the globally set user
       Mcfly.whodunnit = system_user
 
-      Marty::Script.load_script_bodies(promise_bodies, Date.today)
+      Marty::Script.load_script_bodies(promise_bodies, Time.zone.today)
       start_delayed_job
     end
 

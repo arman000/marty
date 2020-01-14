@@ -1,6 +1,6 @@
 module Marty; module RSpec; module Setup
   def marty_whodunnit
-    Mcfly.whodunnit = Marty::User.find_by_login('marty')
+    Mcfly.whodunnit = Marty::User.find_by(login: 'marty')
   end
 
   def load_scripts(path, dt)

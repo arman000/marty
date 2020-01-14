@@ -6,7 +6,7 @@ module Marty
       Marty::Script.load_script_bodies({
                            'Script1' => "A:\n    a = 1\n",
                            'NewScript1' => "B:\n    b = 0\n",
-                         }, Date.today)
+      }, Time.zone.today)
 
       @api = ApiAuth.new
       @api.app_name = 'TestApp'
@@ -70,7 +70,7 @@ module Marty
         s.name = 'TestScript'
         s.body = '-- Test3'
         # Creates a script in the future - no tag exists
-        s.created_dt = Time.now + 1.minute
+        s.created_dt = Time.zone.now + 1.minute
         s.save!
 
         api = ApiAuth.new

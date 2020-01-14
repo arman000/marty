@@ -608,7 +608,7 @@ EOS
       end
 
       it 'should handle DataGrid typed data grids -- non mcfly' do
-        ca = Gemini::State.find_by_name('CA')
+        ca = Gemini::State.find_by(name: 'CA')
 
         res = lookup_grid_helper('infinity', 'Gb', 'property_state' => ca)
         expect(res).to eq [70, 'Gb']
@@ -620,7 +620,7 @@ EOS
 
       it 'should handle typed (enum) data lookup_grid' do
         pt = 'infinity'
-        ca = Gemini::State.find_by_name('CA')
+        ca = Gemini::State.find_by(name: 'CA')
 
         res = Marty::DataGrid.
                 lookup_grid_h(pt, 'Gb', { 'property_state' => ca }, false)
@@ -884,7 +884,7 @@ EOS
       end
 
       it 'should be able to externally export/import grids' do
-        load_scripts(nil, Date.today)
+        load_scripts(nil, Time.zone.today)
 
         dg = dg_from_import('G1', G1)
 

@@ -7,8 +7,8 @@ class Marty::Config < Marty::Base
     end
   end
 
-  validates_presence_of :key, :value
-  validates_uniqueness_of :key
+  validates :key, :value, presence: true
+  validates :key, uniqueness: true
   validates_with ConfigValidator
 
   delorean_fn :lookup, sig: 1 do |key|
@@ -29,7 +29,7 @@ class Marty::Config < Marty::Base
                            "(given #{args.size}, expected 1..2)"
     end
 
-    entry = find_by_key(args[0])
+    entry = find_by(key: args[0])
     return entry.get_value if entry
     return args[1] if args.size > 1
 
@@ -37,7 +37,7 @@ class Marty::Config < Marty::Base
   end
 
   def self.[]=(key, value)
-    entry = find_by_key(key)
+    entry = find_by(key: key)
     if !entry
       entry = new
       entry.key = key
@@ -53,7 +53,7 @@ class Marty::Config < Marty::Base
   end
 
   def self.del(key)
-    entry = find_by_key(key)
+    entry = find_by(key: key)
     if entry
       result = entry.get_value
       entry.destroy

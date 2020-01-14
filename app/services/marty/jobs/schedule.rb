@@ -4,10 +4,10 @@ module Marty
       extend Delorean::Functions
 
       delorean_fn :call, sig: 0 do
-        glob = Rails.root.join('app', 'jobs', '**', '*_job.rb')
+        glob = Rails.root.join('app/jobs/**/*_job.rb')
         Dir.glob(glob).sort.each { |f| require f }
 
-        glob2 = Marty.root.join('app', 'jobs', '**', '*_job.rb')
+        glob2 = Marty.root.join('app/jobs/**/*_job.rb')
         Dir.glob(glob2).sort.each { |f| require f }
 
         Delayed::Job.where.not(cron: nil).each(&:destroy!)

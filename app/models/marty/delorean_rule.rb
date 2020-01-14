@@ -1,7 +1,7 @@
 class Marty::DeloreanRule < Marty::BaseRule
   self.abstract_class = true
 
-  validates_presence_of :rule_type, :start_dt
+  validates :rule_type, :start_dt, presence: true
 
   def validate
     super
@@ -200,7 +200,7 @@ class Marty::DeloreanRule < Marty::BaseRule
 
   def self.get_grid_rename_handler(klass)
     proc do |old, new|
-      klass.where(obsoleted_dt: 'infinity').each do |r|
+      klass.where(obsoleted_dt: 'infinity').find_each do |r|
         r.grids.each { |k, v| r.grids[k] = new if v == old }
         r.results.each do |k, _v|
           r.results[k] = %Q("#{new}") if

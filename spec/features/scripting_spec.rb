@@ -28,7 +28,7 @@ feature 'under Applications menu, Scripting workflows', js: true, speed: :slow d
   end
 
   def with_user(uname, &block)
-    u = Marty::User.find_by_login(uname)
+    u = Marty::User.find_by(login: uname)
     begin
       old_u, Mcfly.whodunnit = Mcfly.whodunnit, u
       block.call(u)
@@ -48,7 +48,7 @@ feature 'under Applications menu, Scripting workflows', js: true, speed: :slow d
                              'A3' => "#3\n",
                              'A4' => "#4\n",
                              'A5' => "#5\n",
-                           }, Date.today)
+                           }, Time.zone.today)
 
       # create 3 additional tags and modify A5 in the process
       (1..3).each do |i|
@@ -57,7 +57,7 @@ feature 'under Applications menu, Scripting workflows', js: true, speed: :slow d
         Marty::Script.
           load_script_bodies({
                                'A5' => body + "##{i}\n"
-                             }, Date.today + i.minute)
+                             }, Time.zone.today + i.minute)
       end
     end
   end

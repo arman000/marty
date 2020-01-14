@@ -44,19 +44,19 @@ module Marty
           before do
             PostingType.create(name: 'SNAPSHOT')
             PostingType.create(name: 'OTHER')
-            Posting.do_create('BASE',     0.day.from_now, 'base posting')
+            Posting.do_create('BASE',     0.days.from_now, 'base posting')
             Posting.do_create('SNAPSHOT', 1.day.from_now, 'snapshot1 posting')
-            Posting.do_create('SNAPSHOT', 2.day.from_now, 'snapshot2 posting')
-            Posting.do_create('OTHER', 3.day.from_now, 'other1 posting')
-            Posting.do_create('SNAPSHOT', 4.day.from_now, 'snapshot3 posting')
-            Posting.do_create('OTHER', 5.day.from_now, 'other2 posting')
+            Posting.do_create('SNAPSHOT', 2.days.from_now, 'snapshot2 posting')
+            Posting.do_create('OTHER', 3.days.from_now, 'other1 posting')
+            Posting.do_create('SNAPSHOT', 4.days.from_now, 'snapshot3 posting')
+            Posting.do_create('OTHER', 5.days.from_now, 'other2 posting')
           end
 
           it 'filters on a single posting type' do
             # First param is just the limit (max) to return
             res = Posting.get_latest_by_type(10, ['BASE'])
             expect(res.count).to eq 1
-            r0 = Posting.find_by_name(res[0]['name'])
+            r0 = Posting.find_by(name: res[0]['name'])
             expect(r0.comment).to eq 'base posting'
           end
 
@@ -64,8 +64,8 @@ module Marty
             res = Posting.get_latest_by_type(10, ['BASE', 'SNAPSHOT'])
             expect(res.count).to eq 4
             # snapshot3 is most recent with this filter
-            r0 = Posting.find_by_name(res[0]['name'])
-            r3 = Posting.find_by_name(res[3]['name'])
+            r0 = Posting.find_by(name: res[0]['name'])
+            r3 = Posting.find_by(name: res[3]['name'])
             expect(r0.comment).to eq 'snapshot3 posting'
             expect(r3.comment).to eq 'base posting'
           end
@@ -74,8 +74,8 @@ module Marty
             res = Posting.get_latest_by_type(10, ['SNAPSHOT', 'OTHER'])
             expect(res.count).to eq 5
             # other2 is most recent with this filter
-            r0 = Posting.find_by_name(res[0]['name'])
-            r4 = Posting.find_by_name(res[4]['name'])
+            r0 = Posting.find_by(name: res[0]['name'])
+            r4 = Posting.find_by(name: res[4]['name'])
             expect(r0.comment).to eq 'other2 posting'
             expect(r4.comment).to eq 'snapshot1 posting'
           end
@@ -84,8 +84,8 @@ module Marty
             res = Posting.get_latest_by_type(3, ['SNAPSHOT', 'OTHER'])
             expect(res.count).to eq 3
             # other2 is most recent with this filter
-            r0 = Posting.find_by_name(res[0]['name'])
-            r2 = Posting.find_by_name(res[2]['name'])
+            r0 = Posting.find_by(name: res[0]['name'])
+            r2 = Posting.find_by(name: res[2]['name'])
             expect(r0.comment).to eq 'other2 posting'
             expect(r2.comment).to eq 'other1 posting'
           end

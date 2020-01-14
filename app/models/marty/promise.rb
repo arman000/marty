@@ -13,9 +13,10 @@ class Marty::Promise < Marty::Base
   has_many :children,
            foreign_key: 'parent_id',
            class_name: 'Marty::Promise',
-           dependent: :destroy
+           dependent: :destroy,
+           inverse_of: :parent
 
-  validates_presence_of :title, :promise_type
+  validates :title, :promise_type, presence: true
 
   belongs_to :parent, class_name: 'Marty::Promise'
   belongs_to :user, class_name: 'Marty::User'
@@ -94,7 +95,7 @@ class Marty::Promise < Marty::Base
   end
 
   def self.job_by_id(job_id)
-    Delayed::Job.uncached { Delayed::Job.find_by_id(job_id) }
+    Delayed::Job.uncached { Delayed::Job.find_by(id: job_id) }
   end
 
   def work_off_job(job)

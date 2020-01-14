@@ -101,14 +101,14 @@ module Marty; module RSpec; module Netzke
 
   def wait_for_element(seconds_to_wait = 2.0, sleeptime = 0.1)
     res = nil
-    start_time = current_time = Time.now
+    start_time = current_time = Time.zone.now
     while !res && current_time - start_time < seconds_to_wait
       begin
         res = yield
       rescue StandardError
       ensure
         sleep sleeptime
-        current_time = Time.now
+        current_time = Time.zone.now
       end
     end
     res

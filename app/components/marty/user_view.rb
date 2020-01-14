@@ -31,7 +31,7 @@ module Marty; class UserView < Marty::Grid
   end
 
   def self.set_roles(roles, user)
-    roles = [] unless roles.present?
+    roles = [] if roles.blank?
 
     roles = ::Marty::RoleType.from_nice_names(roles)
 
