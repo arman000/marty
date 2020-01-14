@@ -44,7 +44,7 @@ class Marty::AuthApp < Marty::SimpleApp
   def unread_notifications_count
     user = Mcfly.whodunnit
 
-    return 0 unless user.present?
+    return 0 if user.blank?
 
     user.unread_web_notifications_count
   end

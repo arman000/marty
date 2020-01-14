@@ -11,7 +11,7 @@ describe Marty::Diagnostic::DelayedJobVersion do
   end
 
   before(:each) do
-    Marty::Script.load_scripts(nil, Date.today)
+    Marty::Script.load_scripts(nil, Time.zone.today)
     allow(described_class).to receive(:scope).and_return(nil)
   end
 

@@ -4,7 +4,7 @@ module Marty
       def self.call(id:, job_class:)
         model = Marty::BackgroundJob::Schedule.find_by(id: id)
 
-        return remove_schedule(job_class: job_class) unless model.present?
+        return remove_schedule(job_class: job_class) if model.blank?
         return remove_schedule(job_class: job_class) if model.off?
         return schedule(job_class: job_class) if model.on?
       end

@@ -35,7 +35,7 @@ class Marty::DataGrid < Marty::Base
         attr, type, keys, rs_keep =
           inf['attr'], inf['type'], inf['keys'], inf['rs_keep']
 
-        unless rs_keep.nil? || rs_keep.empty?
+        if rs_keep.present?
           m = /\A *(<|<=|>|>=)? *([a-z][a-z_0-9]+) *\z/.match(rs_keep)
           unless m
             dg.errors.add(:base, "invalid grid modifier expression: #{rs_keep}")
@@ -81,7 +81,7 @@ class Marty::DataGrid < Marty::Base
       end
       data_check = Marty::DataGrid::Constraint.check_data(dg.data_type,
                                                           dg.data, con_chk)
-      return unless data_check.present?
+      return if data_check.blank?
 
       data_check.each do |(err, x, y)|
         dg.errors.add(:base, "cell #{x}, #{y} fails constraint check") if
@@ -94,7 +94,7 @@ class Marty::DataGrid < Marty::Base
 
   has_mcfly
 
-  validates_presence_of :name, :data, :metadata
+  validates :name, :data, :metadata, presence: true
 
   mcfly_validates_uniqueness_of :name
   validates_with DataGridValidator

@@ -1,6 +1,6 @@
 module Marty::Util
   def self.set_posting_id(sid)
-    snap = Marty::Posting.find_by_id(sid)
+    snap = Marty::Posting.find_by(id: sid)
     sid = nil if snap && (snap.created_dt == Float::INFINITY)
     Netzke::Base.session[:posting] = sid
   end
@@ -9,7 +9,7 @@ module Marty::Util
     sid = Netzke::Base.session && Netzke::Base.session[:posting]
     return unless sid.is_a? Integer
 
-    sid && Marty::Posting.find_by_id(sid)
+    sid && Marty::Posting.find_by(id: sid)
   end
 
   def self.get_posting_time

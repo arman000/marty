@@ -61,7 +61,7 @@ class Marty::ScriptForm < Marty::Form
       data[k] = nil if v.blank? || v == 'null'
     end
 
-    @record = script = Marty::Script.find_by_id(data['id'])
+    @record = script = Marty::Script.find_by(id: data['id'])
 
     unless script
       client.netzke_notify 'no record'
@@ -81,7 +81,7 @@ class Marty::ScriptForm < Marty::Form
     end
 
     begin
-      dev = Marty::Tag.find_by_name('DEV')
+      dev = Marty::Tag.find_by(name: 'DEV')
       Marty::ScriptSet.new(dev).parse_check(script.name, data['body'])
     rescue Delorean::ParseError => e
       client.netzke_notify e.message
@@ -106,7 +106,7 @@ class Marty::ScriptForm < Marty::Form
     return client.netzke_notify('Permission Denied') unless
       self.class.has_any_perm?
 
-    script = Marty::Script.find_by_id(script_id)
+    script = Marty::Script.find_by(id: script_id)
 
     return client.netzke_notify('bad script') unless script
 

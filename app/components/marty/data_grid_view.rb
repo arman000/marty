@@ -116,9 +116,9 @@ module Marty; class DataGridView < McflyGridPanel
       Marty::RoleType.from_nice_names(plist)
     end
     dg.permissions = {
-      view: view.present? ? view : [],
-      edit_data: edit_data.present? ? edit_data : [],
-      edit_all: edit_all.present? ? edit_all : [],
+      view: view.presence || [],
+      edit_data: edit_data.presence || [],
+      edit_all: edit_all.presence || [],
     }
     dg.save!
   end
@@ -142,7 +142,7 @@ module Marty; class DataGridView < McflyGridPanel
   endpoint :edit_window__edit_form__submit do |params|
     data = ActiveSupport::JSON.decode(params[:data])
 
-    dg = DataGrid.find_by_id(data['id'])
+    dg = DataGrid.find_by(id: data['id'])
 
     begin
       dg.update_from_import(data['name'], data['export'])
@@ -169,7 +169,7 @@ module Marty; class DataGridView < McflyGridPanel
   endpoint :show_grid do |params|
     record_id = params[:record_id]
 
-    dg = DataGrid.find_by_id(record_id)
+    dg = DataGrid.find_by(id: record_id)
 
     return client.netzke_notify('No data grid.') unless dg
 
@@ -193,7 +193,7 @@ module Marty; class DataGridView < McflyGridPanel
   endpoint :edit_grid do |params|
     record_id = params[:record_id]
 
-    dg = DataGrid.find_by_id(record_id)
+    dg = DataGrid.find_by(id: record_id)
 
     return client.netzke_notify('No data grid.') unless dg
 

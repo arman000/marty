@@ -24,7 +24,7 @@ class Marty::ApplicationController < ActionController::Base
         reset_session
         reset_signed_cookies
       else
-        session[:atime] = Time.now.utc.to_i
+        session[:atime] = Time.zone.now.utc.to_i
       end
     end
   end
@@ -35,13 +35,13 @@ class Marty::ApplicationController < ActionController::Base
 
     if session_lifetime
       return true unless session[:ctime] &&
-        (Time.now.utc.to_i -
+        (Time.zone.now.utc.to_i -
          session[:ctime].to_i <= session_lifetime.to_i * 60)
     end
 
     if session_timeout
       return true unless session[:atime] &&
-        (Time.now.utc.to_i - session[:atime].to_i <= session_timeout.to_i * 60)
+        (Time.zone.now.utc.to_i - session[:atime].to_i <= session_timeout.to_i * 60)
     end
 
     false
@@ -49,8 +49,8 @@ class Marty::ApplicationController < ActionController::Base
 
   def start_user_session(user)
     session[:user_id] = user.id
-    session[:ctime] = Time.now.utc.to_i
-    session[:atime] = Time.now.utc.to_i
+    session[:ctime] = Time.zone.now.utc.to_i
+    session[:atime] = Time.zone.now.utc.to_i
 
     set_signed_cookies
   end
@@ -119,12 +119,12 @@ class Marty::ApplicationController < ActionController::Base
 
   def failed_authentication(login)
     logger.info("Failed authentication for '#{login}' " +
-                "from #{request.remote_ip} at #{Time.now.utc}")
+                "from #{request.remote_ip} at #{Time.zone.now.utc}")
   end
 
   def successful_authentication(user)
     logger.info("Successful authentication for '#{user.login}' " +
-                "from #{request.remote_ip} at #{Time.now.utc}")
+                "from #{request.remote_ip} at #{Time.zone.now.utc}")
     set_user(user)
   end
 

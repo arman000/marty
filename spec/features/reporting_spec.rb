@@ -22,7 +22,7 @@ feature 'under Applications menu, Reports workflows', js: true do
   end
 
   def with_user(uname, &block)
-    u = Marty::User.find_by_login(uname)
+    u = Marty::User.find_by(login: uname)
     begin
       old_u, Mcfly.whodunnit = Mcfly.whodunnit, u
       block.call(u)
@@ -81,13 +81,13 @@ DELOREAN
 
       Marty::Script.
         load_script_bodies({ 'SomeReport' => a_report, },
-                           Date.today)
+                           Time.zone.today)
 
       Marty::Script.
         load_script_bodies({ 'SomeReport' =>
                              a_report +
                              "CC: BB\n    title=\"CC\"\n    result = 123" },
-                           Date.today + 1.minute)
+                           Time.zone.today + 1.minute)
     end
   end
 

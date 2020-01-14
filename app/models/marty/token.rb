@@ -1,6 +1,6 @@
 class Marty::Token < Marty::Base
   belongs_to :user
-  validates_uniqueness_of :value
+  validates :value, uniqueness: true
 
   before_create :delete_previous_tokens, :generate_new_token
 

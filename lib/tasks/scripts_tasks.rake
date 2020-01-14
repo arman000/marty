@@ -6,8 +6,8 @@ namespace :marty do
 
   desc 'load scripts from the LOAD_DIR directory'
   task load_scripts: :environment do
-    Mcfly.whodunnit = Marty::User.find_by_login(
-      Rails.configuration.marty.system_account
+    Mcfly.whodunnit = Marty::User.find_by(
+      login: Rails.configuration.marty.system_account
     )
 
     raise 'must have system user account seeded' unless Mcfly.whodunnit

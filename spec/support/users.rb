@@ -3,7 +3,7 @@ module Marty; module RSpec; module Users
     (1..2).each do |i|
       Rails.configuration.marty.roles.each do |role_name|
         username = "#{role_name}#{i}"
-        next if Marty::User.find_by_login(username)
+        next if Marty::User.find_by(login: username)
 
         user = Marty::User.new
         user.firstname = user.login = username
@@ -23,7 +23,7 @@ module Marty; module RSpec; module Users
   end
 
   def system_user
-    Marty::User.find_by_login('marty') # (system_login)
+    Marty::User.find_by(login: 'marty') # (system_login)
   end
 
   def create_user(name)

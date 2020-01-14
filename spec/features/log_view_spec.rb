@@ -23,7 +23,7 @@ feature 'logger view', js: true, capybara: true do
                        timestamp: Time.zone.now - 10.days)
 
     @ts = Marty::Log.select(:timestamp).order(timestamp: :desc).map do |(ts)|
-      Time.zone.at(ts[:timestamp]).strftime('%Y-%m-%dT%H:%M:%S.%L%:z')
+      Time.zone.at(ts[:timestamp]).strftime('%Y-%m-%d %H:%M:%S')
     end
 
     @clean_file = "/tmp/clean_#{Process.pid}.psql"

@@ -28,9 +28,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     super()
   end
 
-  def parse_check(sname, body)
-    sset.parse_check(sname, body)
-  end
+  delegate :parse_check, to: :sset
 
   def write_attr(k, v)
     equals, rhs = v == :parameter ? [' =?', ''] :

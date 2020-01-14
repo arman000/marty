@@ -76,7 +76,7 @@ describe 'McflyModel' do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"
     save_clean_db(@clean_file)
     marty_whodunnit
-    dt = Date.today
+    dt = Time.zone.today
     Marty::DataImporter.do_import_summary(Gemini::Entity, entities)
     Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
     Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup)
@@ -93,7 +93,7 @@ describe 'McflyModel' do
       Marty::Script.load_script_bodies(
         {
           name => (errscript % fn),
-        }, Date.today)
+        }, Time.zone.today)
     end
 
     Marty::Script.load_script_bodies({ 'E5' => (errscript2 % 'a_func_p') }, dt)

@@ -42,7 +42,7 @@ class Marty::PostingGrid < Marty::Grid
     # Prepare an HTML popup with session details such that the
     # contents can be easily pasted into a spreadsheet.
 
-    pt = Marty::Posting.find_by_id(record_id)
+    pt = Marty::Posting.find_by(id: record_id)
 
     dt = pt.created_dt.to_s == 'Infinity' ? '---' :
       pt.created_dt.strftime('%Y-%m-%d %I:%M %p')

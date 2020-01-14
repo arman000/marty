@@ -1,5 +1,5 @@
 class Marty::ApiConfig < Marty::Base
-  validates_presence_of :script
+  validates :script, presence: true
 
   def self.lookup(script, node, attr)
     res = where('node IS NULL OR node = ?', node).

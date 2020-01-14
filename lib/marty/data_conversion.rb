@@ -203,7 +203,7 @@ class Marty::DataConversion
           # got an id for an association -- FIXME: perhaps this should
           # not be allowed at all?
           raise "#{type[:assoc_class].name} with id #{v} not found" unless
-            type[:assoc_class].find_by_id(v)
+            type[:assoc_class].find_by(id: v)
 
           h[ga] = v
         else

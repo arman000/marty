@@ -201,7 +201,7 @@ EOSQL
     end.group_by { |a| a[:name] }.each do |_k, v|
       v.sort! { |a, b| b[:version] <=> a[:version] }
     end
-    time_now = Time.now.utc
+    time_now = Time.zone.now.utc
     gen_count = 0
 
     sql_files.each do |sql|
@@ -224,7 +224,7 @@ EOSQL
       File.open(sql_snap_literal, 'w') do |f|
         f.print sql_lines.join
       end
-      puts "creating #{newbase}.rb"
+      Rails.logger.info "creating #{newbase}.rb"
 
       # only split on "GO" at the start of a line with optional whitespace
       # before EOL.  GO in comments could trigger this and will cause an error

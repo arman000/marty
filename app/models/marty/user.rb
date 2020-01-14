@@ -1,9 +1,9 @@
 class Marty::User < Marty::Base
-  validates_presence_of :login, :firstname, :lastname
-  validates_uniqueness_of :login
+  validates :login, :firstname, :lastname, presence: true
+  validates :login, uniqueness: true
 
-  validates_format_of :login, with: /\A[a-z0-9_\-@\.]*\z/i
-  validates_length_of :login, :firstname, :lastname, maximum: 100
+  validates :login, format: { with: /\A[a-z0-9_\-@\.]*\z/i }
+  validates :login, :firstname, :lastname, length: { maximum: 100 }
 
   MARTY_IMPORT_UNIQUENESS = [:login]
 
@@ -13,7 +13,8 @@ class Marty::User < Marty::Base
     :notification_deliveries,
     class_name: '::Marty::Notifications::Delivery',
     dependent: :destroy,
-    foreign_key: :recipient_id
+    foreign_key: :recipient_id,
+    inverse_of: :recipient
   )
 
   scope :active, -> { where(active: true) }
@@ -56,7 +57,7 @@ class Marty::User < Marty::Base
     # Make sure no one can sign in with an empty password
     return nil if password.empty?
 
-    user = find_by_login(login)
+    user = find_by(login: login)
 
     return nil if !user || !user.active?
 
@@ -93,7 +94,7 @@ class Marty::User < Marty::Base
       raise "bad auth_source: #{auth_source.inspect}"
     end
 
-    find_by_login(login) if ok
+    find_by(login: login) if ok
   end
 
   def self.current=(user)
@@ -135,8 +136,8 @@ class Marty::User < Marty::Base
     # 1 - Do not allow user to edit own record
     # 2 - Do not allow user to edit the application system record
     if user_manager_only
-      system_user = Marty::User.find_by_login(
-        Rails.configuration.marty.system_account.to_s)
+      system_user = Marty::User.find_by(
+        login: Rails.configuration.marty.system_account.to_s)
       system_id = system_user.id if system_user
 
       roles = user_roles.map(&:role)
@@ -173,6 +174,6 @@ class Marty::User < Marty::Base
     errors.add :base,
                "Users cannot be deleted - set 'Active' to false to disable the account"
 
-    throw :abort unless errors.blank?
+    throw :abort if errors.present?
   end
 end

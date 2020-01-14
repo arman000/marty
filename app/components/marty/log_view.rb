@@ -63,7 +63,7 @@ class Marty::LogView < Marty::Grid
     c.field_config = {
       xtype: :displayfield,
     }
-    c.getter = lambda { |r| Time.at(r.timestamp) }
+    c.getter = lambda { |r| Time.zone.at(r.timestamp) }
     c.sorting_scope = lambda { |r, dir| r.order('timestamp ' + dir.to_s) }
 
     # FIXME?: The UI AR/PG DateTime workaround requires the timestamp to be cast

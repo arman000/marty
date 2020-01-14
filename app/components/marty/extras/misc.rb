@@ -13,7 +13,7 @@ module Marty::Extras::Misc
     renderer: "function(v){return ('0' + v).slice (-2);}",
     # FIXME: a little bogus since this is computed statically.  lambda
     # didn't work.
-    default_value: Date.today.month
+    default_value: Time.zone.today.month
   }
   def self.numberfield_cfg(decimal_places)
     {

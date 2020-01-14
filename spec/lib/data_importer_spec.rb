@@ -129,7 +129,7 @@ describe DataImporter do
     Gemini::FannieBup.count.should == 6
 
     # spot-check the import
-    bc = Gemini::BudCategory.find_by_name('Conv Fixed 30')
+    bc = Gemini::BudCategory.find_by(name: 'Conv Fixed 30')
     fb = Gemini::FannieBup.where(bud_category_id: bc.id, note_rate: 2.50).first
     fb.buy_up.should == 4.41300
     fb.buy_down.should == 7.22800
@@ -418,7 +418,7 @@ describe DataImporter do
   end
 
   it 'should be able to export' do
-    Marty::Script.load_scripts(nil, Date.today)
+    Marty::Script.load_scripts(nil, Time.zone.today)
     Marty::ScriptSet.clear_cache
     Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
     Marty::DataImporter.do_import_summary(Gemini::FannieBup, fannie_bup1)
@@ -441,7 +441,7 @@ describe 'Blame Report without yml translations' do
                                       note_rate: nil
                                     }
                                    )
-    Marty::Script.load_scripts(nil, Date.today)
+    Marty::Script.load_scripts(nil, Time.zone.today)
     Marty::ScriptSet.clear_cache
     p = Marty::Posting.do_create('BASE', DateTime.yesterday, 'yesterday')
     Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)
@@ -468,7 +468,7 @@ describe 'Blame Report with yml translations' do
   before(:each) do
     I18n.backend.store_translations(:en, attributes: { note_rate: 'Note Rate' })
 
-    Marty::Script.load_scripts(nil, Date.today)
+    Marty::Script.load_scripts(nil, Time.zone.today)
     Marty::ScriptSet.clear_cache
     p = Marty::Posting.do_create('BASE', DateTime.yesterday, 'yesterday')
     Marty::DataImporter.do_import_summary(Gemini::BudCategory, bud_cats)

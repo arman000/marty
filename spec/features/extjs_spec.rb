@@ -16,7 +16,7 @@ feature 'on grid cells', js: true do
   let(:uv) { netzke_find('user_view') }
 
   before do
-    Mcfly.whodunnit = Marty::User.find_by_login('marty')
+    Mcfly.whodunnit = Marty::User.find_by(login: 'marty')
   end
 
   it 'grid cells should encode html' do

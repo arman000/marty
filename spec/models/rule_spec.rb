@@ -437,7 +437,7 @@ module Marty::RuleSpec
           to receive(:evaluate).and_raise('hi mom')
         expect do
           simple.compute(@ruleopts_myrule,
-                         'pt' => Time.now)
+                         'pt' => Time.zone.now)
         end        .to raise_error(/hi mom/)
         # simple2a should return results without evaluation (they are all fixed)
         expect(simple2a.compute(@ruleopts_myrule, 'pt' => Time.zone.now)).to eq(

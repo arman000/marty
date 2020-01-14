@@ -27,8 +27,8 @@ class Marty::ImportType < Marty::Base
     self.preprocess_function = nil if preprocess_function.blank?
   end
 
-  validates_presence_of :name, :db_model_name, :role
-  validates_uniqueness_of :name
+  validates :name, :db_model_name, :role, presence: true
+  validates :name, uniqueness: true
   validates_with ImportTypeValidator
 
   def get_model_class

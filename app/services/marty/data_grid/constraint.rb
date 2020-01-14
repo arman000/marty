@@ -14,7 +14,7 @@ module Marty
           [r[0, 2], r[2..-1].reverse]
         else
           raw_vals = constraint.split('|')
-          return unless raw_vals.present?
+          return if raw_vals.blank?
           raise 'list constraint not allowed for type Float' if dt == 'float'
 
           pt = 'infinity'

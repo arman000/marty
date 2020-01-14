@@ -12,7 +12,7 @@ feature 'Enum Values List report', js: true do
   end
 
   def with_user(uname)
-    u = Marty::User.find_by_login(uname)
+    u = Marty::User.find_by(login: uname)
     begin
       old_u, Mcfly.whodunnit = Mcfly.whodunnit, u
       yield(u)

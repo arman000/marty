@@ -88,7 +88,7 @@ describe 'DeloreanQuery' do
     Marty::Script.load_script_bodies(
       {
         'A' => script,
-      }, Date.today)
+      }, Time.zone.today)
 
     @engine = Marty::ScriptSet.new.get_engine('A')
   end
