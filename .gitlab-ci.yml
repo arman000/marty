@@ -10,11 +10,6 @@ services:
   - "postgres:9.6"
   - "redis:5.0.6-alpine"
 
-before_script:
-  - time bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
-  - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
-  - RAILS_ENV=test bundle exec rails db:create db:migrate
-
 # Use only the following CI runners
 .runners:
   tags:
@@ -36,8 +31,20 @@ before_script:
       - script_failure
       - runner_system_failure
 
-.base-rspec:
+.base-ruby:
   extends: .base-test
+  before_script:
+    - time bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
+    - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
+    - RAILS_ENV=test bundle exec rails db:create db:migrate
+
+.base-js:
+  extends: .base-test
+  before_script:
+    - yarn
+
+.base-rspec:
+  extends: .base-ruby
   coverage: '/LOC\s\(\d+\.\d+%\)\scovered/'
   artifacts:
     paths:
@@ -46,14 +53,13 @@ before_script:
     when: always
 
 rubocop:
-  extends: .base-test
+  extends: .base-ruby
   script:
     - bundle exec rubocop -f simple -P
 
 eslint-prettier:
-  extends: .base-test
+  extends: .base-js
   script:
-    - yarn
     - make lint-js
 
 rspec (controllers):
@@ -115,7 +121,7 @@ rspec-features-3:
     - bundle exec rspec spec/features --tag speed:super_slow --format documentation
 
 code coverage:
-  extends: .runners
+  extends: .base-ruby
   stage: codecov
   when: always
   coverage: '/LOC\s\(\d+\.\d+%\)\scovered/'
