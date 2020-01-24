@@ -4,13 +4,25 @@
 (function() {
   this.RailsApp || (this.RailsApp = {});
 
-  if (window.location.port === "") {
-    RailsApp.cable = ActionCable.createConsumer(
-      `ws://${window.location.hostname}/cable`
-    );
-  } else {
-    RailsApp.cable = ActionCable.createConsumer(
-      `ws://${window.location.hostname}:${window.location.port}/cable`
-    );
-  }
+  this.RailsApp.startActionCable = () => {
+    // Already started
+    if (RailsApp.cable) {
+      return false;
+    }
+
+    const protocol =
+      window.location.protocol.slice(0, 5) === "https" ? "wss" : "ws";
+
+    if (window.location.port === "") {
+      RailsApp.cable = ActionCable.createConsumer(
+        `${protocol}://${window.location.hostname}/cable`
+      );
+    } else {
+      RailsApp.cable = ActionCable.createConsumer(
+        `${protocol}://${window.location.hostname}:${window.location.port}/cable`
+      );
+    }
+
+    return true;
+  };
 }.call(this));

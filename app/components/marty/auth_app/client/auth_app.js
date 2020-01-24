@@ -118,7 +118,13 @@
   },
 
   netzkeInitComponentCallback() {
+    if (!this.config.clientConfig.marty_enable_action_cable) {
+      return;
+    }
+
     try {
+      RailsApp.startActionCable();
+
       const subscription = RailsApp.cable.subscriptions.subscriptions.find(
         (sub) => sub.identifier === '{"channel":"Marty::NotificationChannel"}'
       );
