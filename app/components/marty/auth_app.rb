@@ -5,6 +5,13 @@
 require 'marty/notifications/window'
 
 class Marty::AuthApp < Marty::SimpleApp
+  def configure(c)
+    super
+
+    enable_action_cable = Rails.application.config.marty.enable_action_cable
+    client_config[:marty_enable_action_cable] = enable_action_cable
+  end
+
   client_class do |c|
     c.include :auth_app
   end
