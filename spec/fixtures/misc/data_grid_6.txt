@@ -1,0 +1,9 @@
+lenient boolean
+ltv_ratio_percent	numrange	v	
+loan_amortization_period_count	int4range	v	
+fn_ineligible	boolean	v	
+
+<60			false
+	<=300		false
+		true	false
+		false	false
