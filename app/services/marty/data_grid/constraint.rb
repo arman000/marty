@@ -37,6 +37,7 @@ module Marty
                   [data_type]
                 end
         types << Integer if types.include?(Float)
+        types
       end
 
       # if check_data is called from validation, data has already been converted
@@ -55,8 +56,8 @@ module Marty
             err = nil
             begin
               cvt_val = cvt && !data_v.class.in?(rt) ?
-                          DataGrid.parse_fvalue(pt, data_v, dt, klass)&.first :
-                          data_v
+                          [DataGrid.parse_fvalue(pt, data_v, dt, klass)].
+                            flatten.first : data_v
             rescue StandardError => e
               err = e.message
             end

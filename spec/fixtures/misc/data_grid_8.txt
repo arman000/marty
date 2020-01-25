@@ -1,0 +1,10 @@
+integer
+mortgage_type	string	v	
+loan_amortization_period_count	int4range	v	
+
+FHA|USDA/Rural Housing|VA	>=96<=180	180
+FHA|USDA/Rural Housing|VA	>180<=360	360
+Conventional	>=96<=120	120
+Conventional	>120<=180	180
+Conventional	>180<=240	240
+Conventional	>240<=360	360

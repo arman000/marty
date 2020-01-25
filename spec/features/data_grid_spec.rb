@@ -10,10 +10,15 @@ feature 'data grid view', js: true, speed: :super_slow do
     Marty::Script.load_scripts
     dt = DateTime.parse('2017-1-1')
     p = File.expand_path('../../fixtures/misc', __FILE__)
-    Dir.glob(p + '/data_grid_*.txt').each do |path|
+    Dir.glob(p + '/data_grid_*.txt').sort.each do |path|
+      next if path.include?('data_grid_7')
+
       n = File.basename(path, '.txt').camelize
       Marty::DataGrid.create_from_import(n, File.read(path), dt)
     end
+    path = p + '/data_grid_7.txt'
+    Marty::DataGrid.create_from_import('DataGrid7', File.read(path),
+                                       dt + 1.second)
     u = Marty::User.create!(login: 'grid_user',
                             firstname: 'grid',
                             lastname: 'user',
@@ -295,7 +300,7 @@ feature 'data grid view', js: true, speed: :super_slow do
     log_in_as('marty')
     go_to_data_grids
     dgv = netzke_find('data_grid_view')
-    grids = dgv.get_col_vals('name', 5)
+    grids = dgv.get_col_vals('name', 6)
     set_one = lambda do |grid, perms|
       pos = grids.index(grid) + 1
       dgv.select_row(pos)
@@ -398,7 +403,7 @@ feature 'data grid view', js: true, speed: :super_slow do
     log_in_as('grid_user')
     go_to_data_grids(admin: false)
     dgv = netzke_find('data_grid_user_view')
-    grids = dgv.get_col_vals('name', 5)
+    grids = dgv.get_col_vals('name', 9)
 
     # now test some editing, saving, and cancel logic
     get_latest = lambda do
@@ -407,6 +412,99 @@ feature 'data grid view', js: true, speed: :super_slow do
     grid = get_latest.call
     grid.constraint = '>=0<200'
     grid.save!
+
+    # check boolean validation
+    pos = grids.index('DataGrid6') + 1
+    dgv.select_row(pos)
+    press('Edit Grid')
+    wait_for_ajax
+    grid_setup
+    cell_edit(3, 0, 'bad')
+    press('Save')
+    expect(page).to have_content('error: some entries failed constraint or '\
+                                 'data type check')
+    press('OK')
+    wait_for_ajax
+    press('Cancel')
+    press('Yes')
+    wait_for_ajax
+    press('Edit Grid')
+    wait_for_ajax
+    # test saving and validation etc
+    grid_setup
+    cell_edit(3, 0, 'true')
+    cell_edit(3, 2, 'true')
+    press('Save')
+    wait_for_ajax
+    dg_data = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid6').
+                data.flatten
+    expect(dg_data).to eq([true, false, true, false])
+
+    # class validation
+    pos = grids.index('DataGrid7') + 1
+    dgv.select_row(pos)
+    press('Edit Grid')
+    wait_for_ajax
+    grid_setup
+    cell_edit(1, 0, 'bad')
+    press('Save')
+    expect(page).to have_content('error: some entries failed constraint or '\
+                                 'data type check')
+    press('OK')
+    wait_for_ajax
+    press('Cancel')
+    press('Yes')
+    wait_for_ajax
+    press('Edit Grid')
+    wait_for_ajax
+    # test saving and validation etc
+    grid_setup
+    cell_edit(1, 0, 'DataGrid8')
+    press('Save')
+    wait_for_ajax
+    dg_data = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid7').
+                data.flatten
+    expect(dg_data).to eq(['DataGrid8', 'DataGrid3', 'DataGrid4', 'DataGrid5'])
+
+    # int validation
+    pos = grids.index('DataGrid8') + 1
+    dgv.select_row(pos)
+    press('Edit Grid')
+    wait_for_ajax
+    grid_setup
+    cell_edit(2, 0, 'bad')
+    press('Save')
+    expect(page).to have_content('error: some entries failed constraint or '\
+                                 'data type check')
+    press('OK')
+    wait_for_ajax
+    press('Cancel')
+    press('Yes')
+    wait_for_ajax
+    press('Edit Grid')
+    wait_for_ajax
+    # test saving and validation etc
+    grid_setup
+    cell_edit(2, 0, 123)
+    press('Save')
+    wait_for_ajax
+    dg_data = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid8').
+                data.flatten
+    expect(dg_data).to eq([123, 360, 120, 180, 240, 360])
+
+    # string grid
+    pos = grids.index('DataGrid9') + 1
+    dgv.select_row(pos)
+    press('Edit Grid')
+    wait_for_ajax
+    grid_setup
+    cell_edit(2, 0, 'bad')
+    press('Save')
+    wait_for_ajax
+    dg_data = Marty::DataGrid.mcfly_pt('infinity').find_by(name: 'DataGrid9').
+                data.flatten
+    expect(dg_data).to eq(['bad', '360', '120', '180', '240', '360'])
+
     pos = grids.index('DataGrid5') + 1
     dgv.select_row(pos)
     press('Edit Grid')
