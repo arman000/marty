@@ -385,7 +385,8 @@ module Netzke
       # in the end of file, it won't break the code.
       def override_from_file(path)
         str = File.read(path)
-        str.chomp!("\n").chomp!(';')
+        str.chomp!("\n")
+        str.chomp!(';')
         %{#{class_name}.override(#{str}
 );}
       end
