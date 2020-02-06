@@ -55,6 +55,7 @@ class Marty::RpcCall
     http = Net::HTTP.new(host, port)
     request = Net::HTTP::Post.new(path)
     http.use_ssl = use_ssl
+    http.ciphers = options[:ciphers] if options[:ciphers]
     http.read_timeout = options[:read_timeout] if options[:read_timeout]
     http.open_timeout = options[:open_timeout] if options[:open_timeout]
     request.add_field('Content-Type', 'xml')
