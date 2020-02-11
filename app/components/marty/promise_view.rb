@@ -1,5 +1,4 @@
-class Marty::PromiseView < Netzke::Tree::Base
-  extend ::Marty::Permissions
+class Marty::PromiseView < Marty::Tree
   has_marty_permissions read: :any
 
   client_styles do |config|
@@ -18,12 +17,9 @@ class Marty::PromiseView < Netzke::Tree::Base
 
   ######################################################################
 
-  def class_can?(op)
-    self.class.can_perform_action?(op)
-  end
-
   def configure(c)
     super
+
     c.title = I18n.t('jobs.promise_view')
     c.model = 'Marty::VwPromise'
     c.attributes = [
@@ -41,12 +37,6 @@ class Marty::PromiseView < Netzke::Tree::Base
     c.paging = :none
     c.bbar = bbar
     c.read_only = true
-    c.permissions = {
-      create: class_can?(:create),
-      read:   class_can?(:read),
-      update: class_can?(:update),
-      delete: class_can?(:delete)
-    }
   end
 
   def bbar
@@ -143,11 +133,18 @@ class Marty::PromiseView < Netzke::Tree::Base
 
   attribute :error do |config|
     config.getter = ->(record) do
-      @results[record.id] unless record.status
+      next if record.status
+      next @results[record.id] if @records
+
+      Marty::Promise.find(record.id).result.to_s
     end
 
-    config.flex = 1
+    editor_config = {
+      xtype: :textarea,
+    }
+
+    config.field_config = editor_config
   end
 end
 
-PromiseView = Marty::PromiseView
+Marty::PromiseView
