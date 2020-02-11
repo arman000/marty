@@ -478,7 +478,9 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   component :posting_window
 
-  component :promise_view
+  component :promise_view do |c|
+    c.klass = Marty::PromiseView
+  end
 
   component :reporting
 
