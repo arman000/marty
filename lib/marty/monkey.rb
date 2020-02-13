@@ -364,12 +364,12 @@ module Netzke
     module DynamicAssets
       class << self
         def minify_js(js_string)
-          if ::Rails.env.test? || ::Rails.env.development?
-            js_string.gsub(/\/\*\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//, '') # strip docs
-          else
-            # MONKEY: enable es6 by passing in harmony argument
-            Uglifier.compile(js_string, harmony: true)
+          if Rails.application.config.marty.uglify_assets
+            # Doesn't fully support ES6 syntax
+            return Uglifier.compile(js_string, harmony: true)
           end
+
+          js_string.gsub(/\/\*\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//, '') # strip docs
         end
       end
     end
