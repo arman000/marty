@@ -84,6 +84,7 @@ module Dummy
 
     config.active_job.queue_adapter = :delayed_job
     config.marty.redis_url = ENV['MARTY_REDIS_URL']
+    config.marty.uglify_assets = ENV['MARTY_UGLIFY_ASSETS'].to_s == 'true'
   end
 end
 require "marty/permissions"
