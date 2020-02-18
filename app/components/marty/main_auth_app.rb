@@ -78,6 +78,19 @@ class Marty::MainAuthApp < Marty::AuthApp
     ]
   end
 
+  def misc_menu
+    [
+      {
+        text: 'Miscellaneous Views',
+        icon_cls: 'fa fa-window-restore glyph',
+        disabled: !self.class.has_perm?(:admin),
+        menu: [
+          :show_env,
+        ],
+      },
+    ]
+  end
+
   def system_menu
     {
       text:  I18n.t('system'),
@@ -89,7 +102,12 @@ class Marty::MainAuthApp < Marty::AuthApp
         :config_view,
         :reload_scripts,
         :load_seed,
-      ] + background_jobs_menu + notifications_menu + log_menu + api_menu
+      ] +
+      background_jobs_menu  +
+      notifications_menu    +
+      log_menu              +
+      api_menu              +
+      misc_menu
     }
   end
 
@@ -366,6 +384,13 @@ class Marty::MainAuthApp < Marty::AuthApp
                    self.class.has_perm?(:dev))
   end
 
+  action :show_env do |a|
+    a.text     = 'Show Env Variables'
+    a.tooltip  = 'Run `env` on host'
+    a.icon_cls = 'fa fa-terminal glphy'
+    a.disabled = !self.class.has_perm?(:admin)
+  end
+
   ######################################################################
 
   def bg_command(subcmd)
@@ -406,6 +431,22 @@ class Marty::MainAuthApp < Marty::AuthApp
       res = e.message
       client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Log Cleanup'
     end
+  end
+
+  endpoint :show_env do |_|
+    html = `env`.
+           split(/\n/).
+           sort.
+           map do |e|
+             # mask passwords and expose first 4 digits of SECRET_KEY
+             e.
+             gsub(/PASSWORD=.*/, 'PASSWORD=********').
+             gsub(/SECRET_KEY_BASE=(.{4}).*/, 'SECRET_KEY_BASE=\1****')
+           end.
+           join('<br/>').
+           html_safe
+
+    client.show_detail html, 'Server Environment'
   end
 
   ######################################################################

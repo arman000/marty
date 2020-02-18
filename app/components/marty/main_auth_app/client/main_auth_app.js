@@ -120,5 +120,9 @@
         btn == "ok" && me.server.logCleanup(value);
       }
     });
+  },
+
+  netzkeOnShowEnv() {
+    this.server.showEnv({});
   }
 });
