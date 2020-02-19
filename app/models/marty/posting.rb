@@ -64,7 +64,7 @@ class Marty::Posting < Marty::Base
 
     q = where('created_dt <= ?', dt)
     q = q.where(posting_type_id: posting_type.id) if posting_type
-    q.order('created_dt DESC').first.attributes
+    q.order('created_dt DESC').first&.attributes
   end
 
   delorean_fn :get_latest_by_type, sig: [1, 2] do |limit, posting_types = []|
