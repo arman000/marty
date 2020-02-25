@@ -148,7 +148,8 @@ variables:
   HEADLESS_WINDOW_SIZE: "1400,1400"
   PGTZ: "America/Los_Angeles"
   POSTGRES_USER: "runner"
-  POSTGRES_PASSWORD: ""
+  POSTGRES_PASSWORD: "runner-password"
+  POSTGRES_HOST_AUTH_METHOD: "trust"
   MARTY_REDIS_URL: 'localhost:6379/1'
   RAILS_ENV: "test"
   RAILS_DUMP_SCHEMA: "false"
