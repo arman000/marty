@@ -18,44 +18,45 @@ and delorean scripts.
 To create the correct migrations for a Marty-based application (see below for
 getting the internal dummy application to work):
 
-```
-$ rake marty:install:migrations
+```bash
+rake marty:install:migrations
 ```
 
 The Marty database needs to be seeded with specific configuration
 information. Before running your Marty application for the first time you will
 need to run:
 
-```
-$ rake marty:seed
+```bash
+rake marty:seed
 ```
 
 If you are using Delorean scripts in your application you can load them
 with a rake task. By default these scripts will be picked up from
 `app/delorean_scripts`. To load scripts:
 
-```
-$ rake marty:load_scripts
+```bash
+rake marty:load_scripts
 ```
 
 You can override the default directory by setting the `LOAD_DIR` environment
 variable:
 
-```
-$ LOAD_DIR=<delorean script directory> marty:load_scripts
+```bash
+LOAD_DIR=<delorean script directory> marty:load_scripts
 ```
 
 To delete scripts:
 
+``` bash
+rake marty:delete_scripts
 ```
-$ rake marty:delete_scripts
-```
+
 # Scheduled Job
 
-To use scheduled backgroud jobs, add to `config/application.rb`:
+To use scheduled background jobs, add to `config/application.rb`:
 
-```
-  config.active_job.queue_adapter = :delayed_job
+```bash
+config.active_job.queue_adapter = :delayed_job
 ```
 
 # Dummy Application & Testing
@@ -66,45 +67,53 @@ dummy app at spec/dummy/public.
 Docker doesn't support symlinks, so in order to run it in Docker you will have to copy extjs files.
 
 ```bash
-$ cp -r PATH/TO/YOUR/EXTJS/FILES spec/dummy/public/extjs
+cp -r PATH/TO/YOUR/EXTJS/FILES spec/dummy/public/extjs
 ```
 
-You can run it with docker:
+You can run it with Docker:
 
 ```bash
-$ make app-initialise-docker
-
-$ make app-start
+make app-initialise-docker
+make app-start
 ```
 
 To run tests:
 
 ```bash
-$ make app-bash
-
-$ HEADLESS=true rspec
+make app-bash
+HEADLESS=true rspec
 ```
 
-To run without docker:
+To run without Docker:
 
-Marty currently only runs with postgresql. To be able to run the tests
+Marty currently only runs with PostgreSQL. To be able to run the tests
 you will first need to create a `database.yml` file in `spec/dummy/config`.
 You can use the example file by doing:
 
 ```bash
-$ cp spec/dummy/config/database.yml.example spec/dummy/config/database.yml
+cp spec/dummy/config/database.yml.example spec/dummy/config/database.yml
 ```
 
 To initialize the dummy application for a demo run:
 
 ```bash
-$ bundle install
-$ bundle exec rake db:create db:migrate db:seed app:marty:load_scripts
-$ cd spec/dummy
-$ rails s
+bundle install
+bundle exec rake db:create db:migrate db:seed app:marty:load_scripts
+cd spec/dummy
+bundle exec rails s
 ```
 
-The marty dummy app should now be accessible in your browser:
+Or, to run the application with the job workers running:
+
+```bash
+bundle install
+bundle exec rake db:create db:migrate db:seed app:marty:load_scripts
+cd spec/dummy
+gem install foreman
+foreman start
+```
+
+The Marty dummy app should now be accessible in your browser:
 `localhost:3000`
 
 You can log in using `marty` as both user and password.
@@ -112,13 +121,13 @@ You can log in using `marty` as both user and password.
 To create the test database in prepartion to run your tests:
 
 ```bash
-$ RAILS_ENV=test bundle exec rake db:create
+RAILS_ENV=test bundle exec rake db:create
 ```
 
 Then to run the tests:
 
 ```bash
-$ bundle exec rspec
+bundle exec rspec
 ```
 
 # History & Status
