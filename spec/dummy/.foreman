@@ -1,0 +1,2 @@
+formation: worker=4,web=1
+port: 3000
