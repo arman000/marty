@@ -32,6 +32,7 @@ class Marty::PromiseView < Marty::Tree
       :status,
       :cformat,
       :error,
+      :timeout
     ]
     c.root_visible = false
     c.paging = :none

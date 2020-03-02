@@ -92,6 +92,7 @@ describe Marty::Promise, slow: true, retry: 3 do
         expect(runtime > expected_time).to be true
         expect(runtime < expected_time + 0.5).to be true
         expect(error).to be_present
+        expect(error).to include('Triggered by Delayed::WorkerTimeout')
       end
     end
 

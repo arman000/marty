@@ -27,7 +27,8 @@ module Marty
             user_id: promise_params[:_user_id],
             parent_id: promise_params[:_parent_id],
             priority: priority,
-            promise_type: 'ruby'
+            promise_type: 'ruby',
+            timeout: timeout
           )
 
           begin
