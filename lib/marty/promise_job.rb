@@ -43,8 +43,9 @@ class Marty::PromiseJob < Struct.new(:promise,
 
       # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
     rescue ::Delayed::WorkerTimeout => e
+      msg = ::Marty::Promise.timeout_message(promise)
       timeout_error = StandardError.new(
-        ::Marty::Promise.timeout_message(promise)
+        "#{msg} (Triggered by #{e.class})"
       )
       timeout_error.set_backtrace(e.backtrace)
 

@@ -23,15 +23,17 @@ class Marty::VwPromise < Marty::Base
     def user_id
       0
     end
-    alias_method :job_id, :user_id
 
-    def result
-      nil
+    def job_id
+      0
     end
-    [:start_dt, :end_dt].each { |m| alias_method m, :result }
 
     def status
       true
+    end
+
+    [:result, :start_dt, :end_dt, :timeout].each do |m|
+      define_method(m) { nil }
     end
   end
 

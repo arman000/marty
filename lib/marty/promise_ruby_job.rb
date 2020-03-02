@@ -28,8 +28,9 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
       mod = module_name.constantize
       res = { 'result' => mod.send(method_name, *method_args) }
     rescue ::Delayed::WorkerTimeout => e
+      msg = ::Marty::Promise.timeout_message(promise)
       timeout_error = StandardError.new(
-        ::Marty::Promise.timeout_message(promise)
+        "#{msg} (Triggered by #{e.class})"
       )
       timeout_error.set_backtrace(e.backtrace)
 

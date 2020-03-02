@@ -27,7 +27,8 @@ module Marty
             user_id: promise_params[:_user_id],
             parent_id: promise_params[:_parent_id],
             priority: priority,
-            promise_type: 'delorean'
+            promise_type: 'delorean',
+            timeout: timeout
           )
 
           params[:_promise_id] = promise.id
