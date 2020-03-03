@@ -1,6 +1,8 @@
 class Gemini::XyzRule < Marty::DeloreanRule
   self.table_name = 'gemini_xyz_rules'
 
+  validates :rule_type, presence: true
+
   gen_mcfly_lookup :lookup, {
     name: false,
   }

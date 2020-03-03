@@ -6,7 +6,17 @@ class Marty::DeloreanRuleView < Marty::BaseRuleView
   end
 
   def self.base_fields
-    super + [:rule_type, :start_dt, :end_dt]
+    fields = if klass&.column_names&.include?('rule_type')
+               [:rule_type, :start_dt, :end_dt]
+             else
+               [:start_dt, :end_dt]
+             end
+
+    super + fields
+  end
+
+  attribute :rule_type do |c|
+    c.width = 200
   end
 
   attribute :start_dt do |c|
@@ -17,9 +27,5 @@ class Marty::DeloreanRuleView < Marty::BaseRuleView
   attribute :end_dt do |c|
     c.width = 150
     c.format = 'Y-m-d H:i'
-  end
-
-  attribute :rule_type do |c|
-    c.width = 200
   end
 end

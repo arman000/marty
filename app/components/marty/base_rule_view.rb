@@ -410,10 +410,6 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     c.format = 'Y-m-d H:i'
   end
 
-  attribute :rule_type do |c|
-    c.width = 200
-  end
-
   def self.init_fields
     klass.guard_info.each do |namestr, h|
       field_maker(namestr, h, :simple_guards)
