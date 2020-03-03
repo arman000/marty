@@ -1,7 +1,7 @@
 class Marty::DeloreanRule < Marty::BaseRule
   self.abstract_class = true
 
-  validates :rule_type, :start_dt, presence: true
+  validates :start_dt, presence: true
 
   def validate
     super
