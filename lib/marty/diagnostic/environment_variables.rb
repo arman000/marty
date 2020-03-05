@@ -4,7 +4,7 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
   end
 
   def self.env filter = ''
-    env = ENV.clone
+    env = ENV.to_h.clone
 
     to_delete = (Marty::Config['DIAG_ENV_BLOCK'] || []).map(&:upcase) + [
       'SCRIPT_URI', 'SCRIPT_URL'
