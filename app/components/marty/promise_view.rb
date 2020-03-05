@@ -29,6 +29,7 @@ class Marty::PromiseView < Marty::Tree
       :priority,
       :start_dt,
       :end_dt,
+      :total_time,
       :status,
       :cformat,
       :error,
@@ -121,6 +122,19 @@ class Marty::PromiseView < Marty::Tree
 
   attribute :end_dt do |config|
     config.text = I18n.t('jobs.end_dt')
+  end
+
+  attribute :total_time do |config|
+    config.text = I18n.t('jobs.total_time')
+    config.width = 90
+
+    config.getter = ->(record) do
+      next unless record.start_dt
+      next unless record.end_dt
+
+      time_diff = record.end_dt - record.start_dt
+      Time.zone.at(time_diff.to_i.abs).utc.strftime '%H:%M:%S'
+    end
   end
 
   attribute :status do |config|
