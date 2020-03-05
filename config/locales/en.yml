@@ -134,6 +134,7 @@ en:
     title: Job Name
     start_dt: Start Date
     end_dt: End Date
+    total_time: Total Time
     user_login: User Login
     cformat: Format
     schedule_dashboard:
