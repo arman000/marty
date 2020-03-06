@@ -4,26 +4,33 @@ module Marty
       def self.call(id:, job_class:)
         model = Marty::BackgroundJob::Schedule.find_by(id: id)
 
-        return remove_schedule(job_class: job_class) if model.blank?
-        return remove_schedule(job_class: job_class) if model.off?
-        return schedule(job_class: job_class) if model.on?
+        if model.blank? || model.off?
+          return remove_schedule(
+            schedule_id: id,
+            job_class: job_class
+          )
+        end
+
+        return schedule(schedule_obj: model) if model.on?
       end
 
-      def self.remove_schedule(job_class:)
+      def self.remove_schedule(schedule_id:, job_class:)
         klass = job_class.constantize
-        klass.remove_schedule if klass.respond_to?(:remove_schedule)
+        return true unless klass.respond_to?(:remove_schedule)
+
+        klass.remove_schedule(Delayed::Job.find_by(schedule_id: schedule_id))
 
         true
       rescue NameError
         false
       end
 
-      def self.schedule(job_class:)
-        klass = job_class.constantize
+      def self.schedule(schedule_obj:)
+        klass = schedule_obj.job_class.constantize
 
         return false unless klass.respond_to?(:schedule)
 
-        klass.schedule
+        klass.schedule(schedule_obj: schedule_obj)
 
         true
       rescue NameError

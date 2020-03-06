@@ -5,7 +5,11 @@ class TestFailingJob < Marty::CronJob
   end
 
   def self.trigger_destroy
-    delayed_job.destroy!
+    dj = Marty::BackgroundJob::Schedule.find_by(
+      job_class: 'TestFailingJob'
+    ).delayed_job
+
+    dj.destroy!
   end
 
   def self.trigger_failure

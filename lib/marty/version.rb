@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module Marty
-  VERSION = '9.7.1'
+  VERSION = '10.0.0'
 end

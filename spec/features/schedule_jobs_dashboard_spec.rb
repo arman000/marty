@@ -28,17 +28,18 @@ feature 'Schedule Jobs Dashboard', js: true do
       Marty::BackgroundJob::Schedule.create(
         job_class: 'Test2Job',
         cron: '0 0 * * *',
-        state: 'on'
+        state: 'on',
+        arguments: []
       ).tap do |job|
         Marty::BackgroundJob::UpdateSchedule.call(
           id: job.id,
-          job_class: job.job_class
+          job_class: job.job_class,
         )
       end
     end
 
     before do
-      expect(Test2Job.scheduled?).to be true
+      expect(Test2Job.scheduled?(schedule_id: schedule.id)).to be true
 
       log_in_as('admin1')
       wait_for_ajax
@@ -52,8 +53,6 @@ feature 'Schedule Jobs Dashboard', js: true do
     end
 
     it 'creates new schedule' do
-      expect(TestJob.scheduled?).to be false
-
       press('Add')
 
       fill_in('Job class', with: 'TestJob')
@@ -69,11 +68,12 @@ feature 'Schedule Jobs Dashboard', js: true do
       expect(crons).to include('1 1 * * *')
       expect(crons).to include('0 0 * * *')
 
-      expect(TestJob.scheduled?).to be true
-      expect(TestJob.delayed_job.cron).to eq '1 1 * * *'
+      new_schedule = Marty::BackgroundJob::Schedule.order(:created_at).last
+      expect(TestJob.scheduled?(schedule_id: new_schedule.id)).to be true
+      expect(new_schedule.delayed_job.cron).to eq '1 1 * * *'
 
-      expect(Test2Job.scheduled?).to be true
-      expect(Test2Job.delayed_job.cron).to eq '0 0 * * *'
+      expect(Test2Job.scheduled?(schedule_id: schedule.id)).to be true
+      expect(schedule.delayed_job.cron).to eq '0 0 * * *'
     end
 
     it 'deletes schedule' do
@@ -83,7 +83,7 @@ feature 'Schedule Jobs Dashboard', js: true do
 
       wait_for_ajax
 
-      expect(Test2Job.scheduled?).to be false
+      expect(Test2Job.scheduled?(schedule_id: schedule.id)).to be false
     end
 
     it 'turns the schedule off' do
@@ -93,7 +93,7 @@ feature 'Schedule Jobs Dashboard', js: true do
 
       press 'OK'
       wait_for_ajax
-      expect(Test2Job.scheduled?).to be false
+      expect(Test2Job.scheduled?(schedule_id: schedule.id)).to be false
     end
 
     it 'shows validation errors' do
@@ -105,7 +105,7 @@ feature 'Schedule Jobs Dashboard', js: true do
 
       press 'OK'
       wait_for_ajax
-      expect(page).to have_content('Job class has already been taken')
+      expect(page).to have_content('Arguments are not unique')
       expect(page).to have_content('Cron is invalid')
     end
   end

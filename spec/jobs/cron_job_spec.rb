@@ -7,20 +7,21 @@ describe 'Cron jobs' do
     Marty::BackgroundJob::Schedule.create!(
       job_class: klass.name,
       cron: '* * * * *',
-      state: 'on'
+      state: 'on',
+      arguments: []
     ).tap do |job|
       Marty::BackgroundJob::UpdateSchedule.call(
         id: job.id,
-        job_class: job.job_class
+        job_class: job.job_class,
       )
 
-      dj = klass.delayed_job
+      dj = job.delayed_job
       dj.update!(run_at: 1.minute.ago)
     end
   end
 
   def run_job
-    expect(klass.delayed_job).to be_present
+    expect(schedule.delayed_job).to be_present
     expect(Delayed::Job.count).to eq 1
     worker = Delayed::Worker.new
     worker.work_off
@@ -34,8 +35,8 @@ describe 'Cron jobs' do
         end
 
         it 'job is recreated' do
-          expect(klass).to be_scheduled
-          expect(klass.delayed_job).to be_present
+          expect(klass.scheduled?(schedule_id: schedule.id)).to be true
+          expect(schedule.delayed_job).to be_present
         end
       end
 
@@ -46,8 +47,8 @@ describe 'Cron jobs' do
         end
 
         it 'job is not recreated' do
-          expect(klass).to_not be_scheduled
-          expect(klass.delayed_job).to_not be_present
+          expect(klass.scheduled?(schedule_id: schedule.id)).to be false
+          expect(schedule.reload.delayed_job).to_not be_present
         end
       end
     end
@@ -59,8 +60,8 @@ describe 'Cron jobs' do
       end
 
       it 'job is not recreated' do
-        expect(klass).to_not be_scheduled
-        expect(klass.delayed_job).to_not be_present
+        expect(klass.scheduled?(schedule_id: schedule.id)).to be false
+        expect(schedule.reload.delayed_job).to_not be_present
       end
     end
   end
@@ -75,7 +76,7 @@ describe 'Cron jobs' do
       log = Marty::BackgroundJob::Log.find_by(job_class: klass.name)
       expect(log.error).to be_present
       expect(log.failure?).to be true
-      expect(klass).to be_scheduled
+      expect(klass.scheduled?(schedule_id: schedule.id)).to be true
     end
 
     it 'logs success' do
@@ -85,7 +86,10 @@ describe 'Cron jobs' do
       log = Marty::BackgroundJob::Log.find_by(job_class: klass.name)
       expect(log.error).to_not be_present
       expect(log.success?).to be true
-      expect(klass).to be_scheduled
+      expect(klass.scheduled?(schedule_id: schedule.id)).to be true
+
+      dj = schedule.reload.delayed_job
+      expect(dj.schedule_id).to eq schedule.id
     end
   end
 end

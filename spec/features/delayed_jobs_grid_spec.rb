@@ -29,11 +29,12 @@ feature 'Delayed Jobs Dashboard', js: true do
         Marty::BackgroundJob::Schedule.create(
           job_class: klass_name,
           cron: '0 0 * * *',
-          state: 'on'
+          state: 'on',
+          arguments: []
         ).tap do |job|
           Marty::BackgroundJob::UpdateSchedule.call(
             id: job.id,
-            job_class: job.job_class
+            job_class: job.job_class,
           )
         end
       end

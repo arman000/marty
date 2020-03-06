@@ -26,6 +26,7 @@ module Marty
 
         c.attributes = [
           :job_class,
+          :arguments,
           :status,
           :error,
           :created_at
@@ -45,6 +46,17 @@ module Marty
       attribute :job_class do |c|
         c.width = 400
         c.read_only = true
+      end
+
+      attribute :arguments do |c|
+        c.getter = lambda do |record|
+          record.arguments.to_json
+        end
+
+        c.setter = lambda do |record, value|
+          # FIXME: hacky way to parse JSON with single quotes
+          record.arguments = JSON.parse(value.tr("'", '"'))
+        end
       end
 
       attribute :status do |c|
