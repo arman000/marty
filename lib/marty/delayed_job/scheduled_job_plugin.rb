@@ -14,17 +14,20 @@ module Marty
         lifecycle.before(:error) do |worker, job, &block|
           if cron?(job)
             begin
-              job_class_str = job.handler.split("\n").find do |line|
-                line.include? 'job_class'
+              schedule = ::Marty::BackgroundJob::Schedule.find_by(id: job.schedule_id)
+
+              if schedule&.on?
+                job.cron = schedule.cron
+                job.schedule_id = schedule.id
+              else
+                job.cron = nil
+                job.schedule_id = nil
               end
-              job_class_name = job_class_str.gsub('job_class:', '').strip
-              job_class = job_class_name.constantize
-              job.cron = job_class.cron_expression
             rescue StandardError
             end
           else
             # No cron job - proceed as normal
-            block.call(worker, job)
+            block&.call(worker, job)
           end
         end
       end

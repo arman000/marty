@@ -29,6 +29,7 @@ module Marty
 
         c.attributes = [
           :job_class,
+          :arguments,
           :cron,
           :state
         ]
@@ -44,6 +45,19 @@ module Marty
 
       attribute :job_class do |c|
         c.width = 400
+      end
+
+      attribute :arguments do |c|
+        c.width = 400
+
+        c.getter = lambda do |record|
+          record.arguments.to_json
+        end
+
+        c.setter = lambda do |record, value|
+          # FIXME: hacky way to parse JSON with single quotes
+          record.arguments = JSON.parse(value.tr("'", '"'))
+        end
       end
 
       attribute :cron do |c|
@@ -76,6 +90,8 @@ module Marty
       end
 
       endpoint :edit_window__edit_form__submit do |params|
+        id = JSON.parse(params['data'])['id']
+
         result = super(params)
         next result if result.empty?
 
@@ -83,7 +99,7 @@ module Marty
 
         Marty::BackgroundJob::UpdateSchedule.call(
           id: obj_hash['id'],
-          job_class: obj_hash['job_class']
+          job_class: obj_hash['job_class'],
         )
 
         result
@@ -97,7 +113,7 @@ module Marty
 
         Marty::BackgroundJob::UpdateSchedule.call(
           id: obj_hash['id'],
-          job_class: obj_hash['job_class']
+          job_class: obj_hash['job_class'],
         )
 
         result
@@ -109,7 +125,8 @@ module Marty
 
       endpoint :destroy do |params|
         res = params.each_with_object({}) do |id, hash|
-          job_class = model.find_by(id: id)&.job_class
+          record = model.find_by(id: id)
+          job_class = record&.job_class
           result = super([id])
 
           # Do nothing If it wasn't destroyed
@@ -117,7 +134,7 @@ module Marty
 
           Marty::BackgroundJob::UpdateSchedule.call(
             id: id,
-            job_class: job_class
+            job_class: job_class,
           )
 
           hash.merge(result)
@@ -130,7 +147,7 @@ module Marty
         begin
           s = Marty::BackgroundJob::Schedule.find(client_config['selected'])
           klass = s.job_class
-          klass.constantize.new.perform
+          klass.constantize.new.perform(*s.arguments)
         rescue StandardError => e
           next client.netzke_notify(e.message)
         end

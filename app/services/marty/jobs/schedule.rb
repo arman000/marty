@@ -3,7 +3,7 @@ module Marty
     module Schedule
       extend Delorean::Functions
 
-      delorean_fn :call, sig: 0 do
+      delorean_fn :call do
         glob = Rails.root.join('app/jobs/**/*_job.rb')
         Dir.glob(glob).sort.each { |f| require f }
 
@@ -12,9 +12,13 @@ module Marty
 
         Delayed::Job.where.not(cron: nil).each(&:destroy!)
 
-        Marty::CronJob.subclasses.map do |klass|
-          klass.schedule
-          [klass.name, klass.cron_expression]
+        Marty::BackgroundJob::Schedule.all.map do |schedule|
+          Marty::BackgroundJob::UpdateSchedule.call(
+            id: schedule.id,
+            job_class: schedule.job_class,
+          )
+
+          [schedule.job_class, schedule.arguments, schedule.cron]
         end
       end
     end

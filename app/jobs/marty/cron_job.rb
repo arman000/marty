@@ -1,15 +1,23 @@
 class Marty::CronJob < ActiveJob::Base
-  around_perform do |_job, block|
+  attr_accessor :schedule_id
+
+  def enqueue(options = {})
+    self.cron = options[:cron] if options[:cron]
+    self.schedule_id = options[:schedule_id] if options[:schedule_id]
+    super
+  end
+
+  around_perform do |job, block|
     begin
       block.call
-      log_success
+      log_success(job.arguments)
     rescue StandardError => e
-      log_failure(e)
+      log_failure(e, job.arguments)
       raise e
     end
   end
 
-  def log_failure(exception)
+  def log_failure(exception, arguments)
     error = {
       message: exception.message,
       backtrace: exception.backtrace
@@ -17,55 +25,49 @@ class Marty::CronJob < ActiveJob::Base
 
     ::Marty::BackgroundJob::Log.create!(
       job_class: self.class.name,
+      arguments: arguments,
       status: :failure,
       error: error
     )
   end
 
-  def log_success
+  def log_success(arguments)
     ::Marty::BackgroundJob::Log.create!(
       job_class: self.class.name,
+      arguments: arguments,
       status: :success
     )
   end
 
   class << self
-    def schedule
-      return reschedule if scheduled?
+    def schedule(schedule_obj:)
+      dj = schedule_obj.delayed_job
 
-      cron = cron_expression
+      return reschedule_obj(schedule_obj: schedule_obj) if dj.present?
+
+      cron = schedule_obj.cron
 
       return if cron.blank?
 
-      set(cron: cron).perform_later
+      set(cron: cron, schedule_id: schedule_obj.id).perform_later(*schedule_obj.arguments)
     end
 
-    def reschedule
-      dj = delayed_job
-      return dj.update(cron: cron_expression) if dj.locked_by?
+    def reschedule(schedule_obj:)
+      dj = schedule_obj.delayed_job
+      return dj.update(cron: schedule_obj.cron) if dj.locked_by?
 
-      remove
-      schedule
+      remove(dj)
+      schedule(schedule_obj: schedule_obj)
     end
 
-    def remove
-      delayed_job.destroy if scheduled?
+    def remove(dj)
+      dj.destroy if dj.present?
     end
 
     alias remove_schedule remove
 
-    def scheduled?
-      delayed_job.present?
-    end
-
-    def delayed_job
-      Delayed::Job.
-        where('handler LIKE ?', "%job_class: #{name}\n%").
-        first
-    end
-
-    def cron_expression
-      ::Marty::BackgroundJob::Schedule.on.find_by(job_class: name)&.cron
+    def scheduled?(schedule_id:)
+      Delayed::Job.find_by(schedule_id: schedule_id).present?
     end
   end
 end

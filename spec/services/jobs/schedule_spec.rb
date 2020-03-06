@@ -5,20 +5,21 @@ module Marty
     let!(:schedule) do
       Marty::BackgroundJob::Schedule.create!(
         job_class: 'TestJob',
+        arguments: [],
         cron: '0 0 * * *',
         state: 'on'
       )
     end
 
     it 'schedules jobs' do
-      expect(TestJob).to_not be_scheduled
+      expect(TestJob.scheduled?(schedule_id: schedule.id)).to be false
       described_class.call
-      expect(TestJob).to be_scheduled
+      expect(TestJob.scheduled?(schedule_id: schedule.id)).to be true
     end
 
     it 'deletes previously scheduled jobs' do
       described_class.call
-      expect(TestJob).to be_scheduled
+      expect(TestJob.scheduled?(schedule_id: schedule.id)).to be true
       schedule.destroy!
 
       non_cron_job = Delayed::Job.create!(handler: 'Non cron job')
@@ -29,7 +30,7 @@ module Marty
 
       described_class.call
 
-      expect(TestJob).to_not be_scheduled
+      expect(TestJob.scheduled?(schedule_id: schedule.id)).to be false
       any_old_scheduled_jobs = Delayed::Job.where('handler ILIKE ?', '%WrongTestJob%').any?
       expect(any_old_scheduled_jobs).to be false
 

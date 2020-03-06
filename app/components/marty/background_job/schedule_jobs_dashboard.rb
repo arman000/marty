@@ -20,8 +20,8 @@ module Marty
           handler_str = dj.handler[/job_class.*\n/]
           job_class = handler_str.gsub('job_class:', '').strip
 
-          "#{job_class} with cron #{dj.cron} is present " \
-            'in delayed_jobs table, but is missing in the Dashboard.'
+          "#{job_class} with cron #{dj.cron} and schedule_id #{dj.schedule_id}" \
+            'is present in delayed_jobs table, but is missing in the Dashboard.'
         end
 
         messages.join('<br>')

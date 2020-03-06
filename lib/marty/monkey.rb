@@ -396,5 +396,16 @@ end
 
 require 'delayed_cron_job'
 require_relative './delayed_job/scheduled_job_plugin.rb'
+require_relative './delayed_job/queue_adapter.rb'
 
 Delayed::Worker.plugins << Marty::DelayedJob::ScheduledJobPlugin
+
+if ActiveJob::QueueAdapters::DelayedJobAdapter.respond_to?(:enqueue)
+  ActiveJob::QueueAdapters::DelayedJobAdapter.extend(
+    Marty::DelayedJob::QueueAdapter
+  )
+else
+  ActiveJob::QueueAdapters::DelayedJobAdapter.include(
+    Marty::DelayedJob::QueueAdapter
+  )
+end

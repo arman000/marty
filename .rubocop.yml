@@ -51,6 +51,8 @@ Security/MarshalLoad:
 
 Rails/TimeZone:
   EnforcedStyle: strict
+  Exclude:
+    - 'lib/marty/delayed_job/queue_adapter.rb'
 
 Rails/OutputSafety:
   Exclude:
