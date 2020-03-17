@@ -253,10 +253,18 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
   end
 
   def form_items_results
-    [jsonb_field(:results,
-                 getter: jsonb_simple_getter(:results),
-                 setter: jsonb_simple_setter(:results),
-                 height: 225)]
+    [
+      jsonb_field(
+        :results,
+        {
+          getter: jsonb_simple_getter(:results),
+          setter: jsonb_simple_setter(:results),
+          min_height: 150,
+          height: nil, # must be nil to allow the field to resize automatically
+          grow: true,
+        }
+      )
+    ]
   end
 
   def default_form_items_guards
