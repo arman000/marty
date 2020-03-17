@@ -172,6 +172,8 @@ module Layout
   def range_setter(name, json_field = nil)
     if json_field
       lambda do |r, v|
+        v = nil if v.blank?
+
         cookedv = v && v.present? && (Marty::Util.human_to_pg_range(v) rescue v)
         h = r.send(json_field)
         if cookedv
@@ -183,6 +185,8 @@ module Layout
       end
     else
       lambda do |r, v|
+        next r.send("#{name}=", nil) if v.blank?
+
         r.send("#{name}=", v && (Marty::Util.human_to_pg_range(v) rescue v))
       end
     end
