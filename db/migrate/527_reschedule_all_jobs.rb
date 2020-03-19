@@ -12,6 +12,7 @@ class RescheduleAllJobs < ActiveRecord::Migration[5.2]
         )
 
       "::#{job[:job_class]}".constantize.schedule(schedule_obj: new_job)
+    end
   end
 
   def down
