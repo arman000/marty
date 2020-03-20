@@ -16,6 +16,9 @@ class AddScheduleIdToDelayedJobs < ActiveRecord::Migration[5.1]
   end
 
   def reschedule_jobs
+
+    Marty::BackgroundJob::Schedule.column_names
+
     Marty::BackgroundJob::Schedule.all.each do |job|
       puts job.attributes
       Marty::BackgroundJob::Schedule.where(
