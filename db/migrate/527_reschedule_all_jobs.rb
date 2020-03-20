@@ -1,21 +1,32 @@
-class RescheduleAllJobs < ActiveRecord::Migration[5.2]
+class RescheduleAllJobs < ActiveRecord::Migration[5.1]
   def up
     Marty::BackgroundJob::Schedule.all.each do |job|
       Marty::BackgroundJob::Schedule.where(
           job_class: job[:job_class]
         ).destroy_all
 
-      new_job = Marty::BackgroundJob::Schedule.create!(
-          job_class: job[:job_class],
-          cron: job[:cron],
-          state: job[:state]
-        )
+      if class_exists?(job[:job_class])
 
-      "::#{job[:job_class]}".constantize.schedule(schedule_obj: new_job)
+        new_job = Marty::BackgroundJob::Schedule.create!(
+            job_class: job[:job_class],
+            cron: job[:cron],
+            state: job[:state]
+          )
+
+        "::#{job[:job_class]}".constantize.schedule(schedule_obj: new_job)
+      end
+
     end
   end
 
   def down
-    announce("No-op on RescheduleAllJobs.down")
+    # do nothing?
+  end
+
+  def class_exists?(class_name)
+    klass = Module.const_get(class_name)
+    return klass.is_a?(Class)
+  rescue NameError
+    return false
   end
 end
