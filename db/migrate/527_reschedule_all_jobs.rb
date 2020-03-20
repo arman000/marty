@@ -1,6 +1,9 @@
 class RescheduleAllJobs < ActiveRecord::Migration[5.1]
   def up
     Marty::BackgroundJob::Schedule.all.each do |job|
+
+      puts job
+
       Marty::BackgroundJob::Schedule.where(
           job_class: job[:job_class]
         ).destroy_all
