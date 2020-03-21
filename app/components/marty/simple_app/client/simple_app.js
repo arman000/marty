@@ -2,6 +2,7 @@
   initComponent() {
     this.callParent();
 
+    this.martyDocumentTitle = document.title;
     this.mainPanel = this.down('panel[itemId="main_panel"]');
     this.menuBar = this.down('container[itemId="menu_bar"]');
     const statusBar = (this.statusBar = this.down(
@@ -34,7 +35,17 @@
   loadRoute(token) {
     if (token) {
       this.netzkeLoadComponent(token, {
-        container: this.mainPanel
+        container: this.mainPanel,
+        callback: (component) => {
+          if (component.martyDocumentTitle) {
+            document.title = [
+              this.martyDocumentTitle,
+              component.martyDocumentTitle
+            ].join(" - ");
+          } else {
+            document.title = this.martyDocumentTitle;
+          }
+        }
       });
     } else {
       this.mainPanel.removeAll();
