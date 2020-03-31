@@ -309,4 +309,9 @@ class Marty::DataChange
       res[fk] = arr unless arr.empty?
     end
   end
+
+  # Can be overriden in Marty apps
+  def self.class_list_base
+    class_list
+  end
 end

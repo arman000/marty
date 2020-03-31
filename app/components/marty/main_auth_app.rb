@@ -8,14 +8,14 @@ require 'marty/config_view'
 require 'marty/data_grid_view'
 require 'marty/data_grid_user_view'
 require 'marty/import_type_view'
-require 'marty/new_posting_window'
 require 'marty/notifications/config_view'
 require 'marty/notifications/deliveries_view'
-require 'marty/posting_window'
+require 'marty/postings/new_window'
+require 'marty/postings/window'
 require 'marty/promise_view'
 require 'marty/reporting'
 require 'marty/scripting'
-require 'marty/user_view'
+require 'marty/users/user_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
@@ -27,7 +27,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   # set of posting types user is allowed to post with
   def self.has_posting_perm?
-    Marty::NewPostingForm.has_any_perm?
+    Marty::Postings::NewForm.has_any_perm?
   end
 
   def self.has_scripting_perm?
@@ -507,6 +507,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   component :new_posting_window do |c|
     c.disabled = Marty::Util.warped? || !self.class.has_posting_perm?
+    c.klass = ::Marty::Postings::NewWindow
   end
 
   component :notifications_config_view do |c|
@@ -517,7 +518,9 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.klass = ::Marty::Notifications::DeliveriesView
   end
 
-  component :posting_window
+  component :posting_window do |c|
+    c.klass = ::Marty::Postings::Window
+  end
 
   component :promise_view do |c|
     c.klass = Marty::PromiseView
@@ -537,7 +540,9 @@ class Marty::MainAuthApp < Marty::AuthApp
     c.allow_edit = self.class.has_scripting_perm?
   end
 
-  component :user_view
+  component :user_view do |c|
+    c.klass = ::Marty::Users::UserView
+  end
 
   endpoint :reload_scripts do |_params|
     Marty::Script.load_scripts

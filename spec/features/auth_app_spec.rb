@@ -17,7 +17,7 @@ feature 'Posting workflows', js: true do
   def monkey_patch_new_posting_form
     # presently, Gemini displays similar monkeypatching behavior.
     # consider coming up with a proper fix...
-    Marty::NewPostingForm.has_marty_permissions(BASE: :admin)
+    Marty::Postings::NewForm.has_marty_permissions(BASE: :admin)
   end
 
   it 'create posting and select it' do

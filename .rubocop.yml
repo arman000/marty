@@ -73,6 +73,9 @@ Rails/DynamicFindBy:
     - 'spec/features/**/*'
     - 'spec/support/**/*'
 
+Style/NumericPredicate:
+  Enabled: false
+
 Rails/ApplicationRecord:
   Enabled: false
 
@@ -80,4 +83,7 @@ Rails/ApplicationJob:
   Enabled: false
 
 Rails/ApplicationController:
+  Enabled: false
+
+Rails/IndexWith:
   Enabled: false

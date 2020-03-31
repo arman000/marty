@@ -256,13 +256,11 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     [
       jsonb_field(
         :results,
-        {
-          getter: jsonb_simple_getter(:results),
-          setter: jsonb_simple_setter(:results),
-          min_height: 150,
-          height: nil, # must be nil to allow the field to resize automatically
-          grow: true,
-        }
+        getter: jsonb_simple_getter(:results),
+        setter: jsonb_simple_setter(:results),
+        min_height: 150,
+        height: nil, # must be nil to allow the field to resize automatically
+        grow: true,
       )
     ]
   end
