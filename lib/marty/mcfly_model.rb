@@ -6,8 +6,16 @@ module Mcfly::Model
   end
 
   module ClassMethods
-    def openstruct_if_necessary(q, private)
-      !private && q.is_a?(ActiveRecord::Base) ? make_openstruct(q) : q
+    def openstruct_if_necessary(q, private_lookup)
+      return q if private_lookup
+      return q unless q.is_a?(ActiveRecord::Base)
+
+      warning = 'Mcfly::Model#openstruct_if_necessary is deprecated.' \
+        "Please use 'to_hash: true' or 'private: true' option instead"
+
+      Rails.logger.warn warning
+
+      make_openstruct(q)
     end
 
     def hash_if_necessary(q, to_hash)
