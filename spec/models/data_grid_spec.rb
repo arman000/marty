@@ -553,7 +553,7 @@ EOS
       end
 
       it 'should handle string typed data grids' do
-        expect(Marty::DataGrid.lookup('infinity', 'G7').data_type).to eq 'string'
+        expect(Marty::DataGrid.lookup('infinity', 'G7')['data_type']).to eq 'string'
 
         res = lookup_grid_helper('infinity',
                                  'G7',
@@ -564,7 +564,7 @@ EOS
       end
 
       it 'should handle DataGrid typed data grids' do
-        expect(Marty::DataGrid.lookup('infinity', 'G8').data_type).
+        expect(Marty::DataGrid.lookup('infinity', 'G8')['data_type']).
           to eq 'Marty::DataGrid'
         g1 = Marty::DataGrid.lookup('infinity', 'G1')
 
@@ -573,7 +573,7 @@ EOS
       end
 
       it 'should handle multi DataGrid lookups' do
-        expect(Marty::DataGrid.lookup('infinity', 'G8').data_type).
+        expect(Marty::DataGrid.lookup('infinity', 'G8')['data_type']).
           to eq 'Marty::DataGrid'
 
         h = {

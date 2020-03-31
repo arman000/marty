@@ -100,8 +100,8 @@ class Marty::DataGrid < Marty::Base
   validates_with DataGridValidator
   validates_with Marty::NameValidator, field: :name
 
-  gen_mcfly_lookup :lookup, [:name], cache: true
-  gen_mcfly_lookup :get_all, [], mode: nil
+  gen_mcfly_lookup :lookup, [:name], cache: true, to_hash: true
+  gen_mcfly_lookup :get_all, [], mode: nil, to_hash: true
 
   # FIXME: if the caller requests data as part of fields, there could
   # be memory concerns with caching since some data_grids have massive data

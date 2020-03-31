@@ -9,7 +9,7 @@ class Marty::Script < Marty::Base
 
   belongs_to :user, class_name: 'Marty::User'
 
-  gen_mcfly_lookup :lookup, [:name], cache: true
+  gen_mcfly_lookup :lookup, [:name], cache: true, to_hash: true
 
   # find script by name/tag (not cached)
 
