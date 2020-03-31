@@ -1,5 +1,5 @@
 module Marty
-  class Users
+  module Users
     class UserView < Marty::Grid
       has_marty_permissions create: [:admin, :user_manager],
                             read:   :any,
