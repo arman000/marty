@@ -1,4 +1,4 @@
-image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image:2.6.3-extjs-7-20191018143452
+image: $CI_IMAGE
 
 stages:
   - setup
@@ -153,6 +153,6 @@ variables:
   MARTY_REDIS_URL: 'localhost:6379/1'
   RAILS_ENV: "test"
   RAILS_DUMP_SCHEMA: "false"
-  REPOSITORY_URL: '415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image'
+  REPOSITORY_URL: $CI_REPO_URL
   RSPEC_AUTO_RETRY_JS: "true"
 
