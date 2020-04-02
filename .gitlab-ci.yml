@@ -153,6 +153,5 @@ variables:
   MARTY_REDIS_URL: 'localhost:6379/1'
   RAILS_ENV: "test"
   RAILS_DUMP_SCHEMA: "false"
-  REPOSITORY_URL: $CI_REPO_URL
   RSPEC_AUTO_RETRY_JS: "true"
 
