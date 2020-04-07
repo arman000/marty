@@ -14,8 +14,12 @@ module Marty::Diagnostic
     end
 
     def git
-      `cd #{Rails.root}; git describe --tags --always;`.
-        strip rescue 'Failed accessing git'
+      tag = `cd #{Rails.root}; git describe --tags --always;`.strip
+      git_datetime = `cd #{Rails.root}; git log -1 --format=%cd;`.strip
+
+      "#{tag} (#{git_datetime})"
+    rescue StandardError
+      'Failed accessing git'
     end
 
     describe 'GET #op' do
