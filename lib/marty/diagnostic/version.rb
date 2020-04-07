@@ -12,7 +12,8 @@ module Marty::Diagnostic
         end.reduce(&:merge) || {}
 
         git_tag = `cd #{Rails.root}; git describe --tags --always;`.strip
-        git = { 'Root Git' => git_tag }.merge(submodules)
+        git_datetime = `cd #{Rails.root}; git log -1 --format=%cd;`.strip
+        git = { 'Root Git' => "#{git_tag} (#{git_datetime})" }.merge(submodules)
       rescue StandardError
         git = { 'Root Git' => error('Failed accessing git') }
       end
