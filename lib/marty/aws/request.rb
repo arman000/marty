@@ -16,11 +16,13 @@ class Marty::Aws::Request < Marty::Aws::Base
     url += '?' + (default + params).map { |a, v| "#{a}=#{v}" }.join('&') unless
       params.empty?
 
-    sig = Aws::Sigv4::Signer.new(service:           @service,
-                                 region:            @doc[:region],
-                                 access_key_id:     @creds[:access_key_id],
-                                 secret_access_key: @creds[:secret_access_key],
-                                 session_token:     @creds[:token])
+    sig = ::Aws::Sigv4::Signer.new(
+      service: @service,
+      region: @doc[:region],
+      access_key_id: @creds[:access_key_id],
+      secret_access_key: @creds[:secret_access_key],
+      session_token: @creds[:token]
+    )
     signed_url = sig.presign_url(http_method: 'GET', url: url)
 
     http = Net::HTTP.new(host, 443)
