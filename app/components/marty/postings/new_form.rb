@@ -31,15 +31,21 @@ module Marty
 
         c.model = 'Marty::Posting'
         c.items = [
-          {
-            name: :posting_type__name,
-            scope: lambda { |r|
-              r.where(name: Marty::Postings::NewForm.can_perform_actions)
-            },
-          },
+          :posting_type,
           :comment,
           :summary_grid
         ]
+      end
+
+      attribute :posting_type do |c|
+        store = Marty::Postings::NewForm.can_perform_actions
+
+        c.editor_config = {
+          multi_select: false,
+          store:        store,
+          type:         :string,
+          xtype:        :combo,
+        }
       end
 
       component :summary_grid do |c|

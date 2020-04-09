@@ -1,5 +1,6 @@
 # create system account if not there
 system_login = Rails.configuration.marty.system_account || 'marty'
+
 unless Marty::User.find_by_login(system_login)
   user           = Marty::User.new
   user.login     = system_login
@@ -13,22 +14,20 @@ end
 Mcfly.whodunnit = Marty::User.find_by_login(system_login)
 
 # Give system account all roles
-Marty::RoleType.get_all.map { |role|
+Marty::RoleType.get_all.map do |role|
   ur = Marty::UserRole.new
   ur.user = Mcfly.whodunnit
   ur.role = role
   ur.save
-}
+end
 
 # Create default PostingType from configuration
 default_p_type =  Rails.configuration.marty.default_posting_type
 
-Marty::PostingType.create(name: default_p_type)
-
 # Create NOW posting
 unless Marty::Posting.find_by_name('NOW')
   sn                 = Marty::Posting.new
-  sn.posting_type_id = Marty::PostingType[default_p_type].id
+  sn.posting_type    = Marty::PostingType[default_p_type]
   sn.comment         = '---'
   sn.created_dt      = 'infinity'
   sn.save!

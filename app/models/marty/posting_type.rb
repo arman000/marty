@@ -1,6 +1,5 @@
 class Marty::PostingType < Marty::Base
-  extend Marty::Enum
+  extend Marty::PgEnum
 
-  validates :name, presence: true
-  validates :name, uniqueness: true
+  VALUES = ['BASE']
 end
