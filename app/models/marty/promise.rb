@@ -44,8 +44,12 @@ class Marty::Promise < Marty::Base
     # log "SETRES #{Process.pid} #{self}"
 
     reload
+    # If exception happened before the promise was started
+    # we should still update the record
+    if res['error'].present? && !start_dt
+      self.start_dt ||= DateTime.now
     # promise must have been started and not yet ended
-    if !start_dt || end_dt || result != {}
+    elsif !start_dt || end_dt || result != {}
       # log "SETERR #{Process.pid} #{self}"
       Marty::Util.logger.error("unexpected promise state: #{self}")
       return
@@ -136,7 +140,10 @@ class Marty::Promise < Marty::Base
             work_off_job(job)
           rescue StandardError => e
             # log "OFFERR #{exc}"
-            error = exception_to_result(e)
+            error = self.class.exception_to_result(
+              promise: self,
+              exception: e
+            )
             last.set_result(error)
           end
           # log "OFF1 #{Process.pid} #{last}"
