@@ -42,8 +42,6 @@ module Marty
 
         context 'when valid parameters are supplied' do
           before do
-            PostingType.create(name: 'SNAPSHOT')
-            PostingType.create(name: 'OTHER')
             Posting.do_create('BASE',     0.days.from_now, 'base posting')
             Posting.do_create('SNAPSHOT', 1.day.from_now, 'snapshot1 posting')
             Posting.do_create('SNAPSHOT', 2.days.from_now, 'snapshot2 posting')

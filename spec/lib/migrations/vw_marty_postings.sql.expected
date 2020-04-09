@@ -14,11 +14,9 @@ select
     main.created_dt,
     main.obsoleted_dt,
     main.name,
-    marty_posting_types1.name as posting_type_name,
-    marty_posting_types1.id as post_type_id
+    main.posting_type
 from marty_postings main
     join marty_users u on main.user_id = u.id
-    left join marty_users ou on main.o_user_id = ou.id
-    left join marty_posting_types marty_posting_types1 on main.posting_type_id = marty_posting_types1.id;
+    left join marty_users ou on main.o_user_id = ou.id;
 
 grant select on vw_marty_postings to public;

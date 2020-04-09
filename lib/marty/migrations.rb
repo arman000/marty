@@ -304,6 +304,16 @@ OUT
     end.map(&:to_sym)
   end
 
+  def disable_triggers(table_name)
+    ActiveRecord::Base.connection.
+      execute("ALTER TABLE #{table_name} DISABLE TRIGGER USER;")
+
+    yield
+  ensure
+    ActiveRecord::Base.connection.
+      execute("ALTER TABLE #{table_name} ENABLE TRIGGER USER;")
+  end
+
   def self.get_plv8_migration(file)
     fnname = %r(/([^/]+)_v[0-9]+\.js\z).match(file)[1]
     lines = File.readlines(file)

@@ -2,10 +2,9 @@ class Marty::Posting < Marty::Base
   has_mcfly append_only: true
 
   mcfly_validates_uniqueness_of :name
-  validates :name, :posting_type_id, :comment, presence: true
+  validates :name, :posting_type, :comment, presence: true
 
   belongs_to :user, class_name: 'Marty::User'
-  belongs_to :posting_type
 
   def self.make_name(posting_type, dt)
     return 'NOW' if Mcfly.is_infinity(dt)
@@ -17,19 +16,17 @@ class Marty::Posting < Marty::Base
     # of using the host's timezone. i.e. since we're in PST8PDT, names
     # will be based off of the Pacific TZ.
     dt ||= Time.zone.now
-    "#{posting_type.name}-#{dt.strftime('%Y%m%d-%H%M')}"
+    "#{posting_type}-#{dt.strftime('%Y%m%d-%H%M')}"
   end
 
   before_validation :set_posting_name
+
   def set_posting_name
-    posting_type = Marty::PostingType.find_by(id: posting_type_id)
     self.name = self.class.make_name(posting_type, created_dt)
     true
   end
 
-  def self.do_create(type_name, dt, comment)
-    posting_type = Marty::PostingType.find_by(name: type_name)
-
+  def self.do_create(posting_type, dt, comment)
     raise "unknown posting type #{name}" unless posting_type
 
     o              = new
@@ -60,10 +57,10 @@ class Marty::Posting < Marty::Base
 
   delorean_fn :first_match, sig: [1, 2] do |dt, posting_type = nil|
     raise 'bad posting type' if
-      posting_type && !posting_type.is_a?(Marty::PostingType)
+      posting_type && !posting_type[posting_type]
 
     q = where('created_dt <= ?', dt)
-    q = q.where(posting_type_id: posting_type.id) if posting_type
+    q = q.where(posting_type: posting_type) if posting_type
     q.order('created_dt DESC').first&.attributes
   end
 
@@ -71,10 +68,11 @@ class Marty::Posting < Marty::Base
     raise 'missing posting types list' unless posting_types
     raise 'bad posting types list' unless posting_types.is_a?(Array)
 
-    q = joins(:posting_type).where("created_dt <> 'infinity'").
-       where(marty_posting_types: { name: posting_types }).
+    q = where("created_dt <> 'infinity'").
+       where(posting_type: posting_types).
        select(get_struct_attrs).
        order('created_dt DESC').limit(limit || 1)
+
     q.map(&:attributes)
   end
 end

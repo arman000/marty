@@ -7,7 +7,7 @@
   initComponent() {
     this.callParent();
 
-    const postingType = this.getForm().findField("posting_type__name");
+    const postingType = this.getForm().findField("posting_type");
     const me = this;
 
     me.serverConfig.selected_posting_type = null;

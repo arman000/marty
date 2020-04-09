@@ -41,13 +41,13 @@ module Marty
         return [] if config[:selected_posting_type].to_i.negative?
 
         last_posting = Marty::Posting.where(
-          posting_type_id: config[:selected_posting_type]
+          posting_type: config[:selected_posting_type]
         ).where.not(created_dt: 'infinity').order(:created_dt).last
 
         start_dt = last_posting&.created_dt || 1.year.ago
         end_dt = Time.zone.now
 
-        posting_type = Marty::PostingType.find(config[:selected_posting_type])
+        posting_type = Marty::PostingType[config[:selected_posting_type]]
 
         summary_records = class_list(posting_type).map do |klass|
           summary = Marty::DataChange.change_summary(start_dt, end_dt, klass)
@@ -69,7 +69,7 @@ module Marty
       end
 
       def class_list(posting_type)
-        method_name = "class_list_#{posting_type.name}".downcase.to_sym
+        method_name = "class_list_#{posting_type}".downcase.to_sym
 
         if Marty::DataChange.respond_to?(method_name)
           Marty::DataChange.send(method_name)
