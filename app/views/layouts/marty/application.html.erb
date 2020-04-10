@@ -13,6 +13,7 @@
     <%= javascript_include_tag 'marty/application' %>
     <%= stylesheet_link_tag 'marty/application' %>
     <%= javascript_include_tag 'application' if javascript_exists?('application') %>
+    <%= stylesheet_link_tag 'application' if stylesheet_exists?('application') %>
     <% if cookies[:dark_mode] == 'true' %>
       <%= stylesheet_link_tag 'marty/dark_mode', media: 'all', 'data-turbolinks-track': 'reload' %>
     <% end %>
