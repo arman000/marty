@@ -43,7 +43,7 @@ class Marty::CronJob < ActiveJob::Base
     def schedule(schedule_obj:)
       dj = schedule_obj.delayed_job
 
-      return reschedule_obj(schedule_obj: schedule_obj) if dj.present?
+      return reschedule(schedule_obj: schedule_obj) if dj.present?
 
       cron = schedule_obj.cron
 
@@ -57,7 +57,8 @@ class Marty::CronJob < ActiveJob::Base
       return dj.update(cron: schedule_obj.cron) if dj.locked_by?
 
       remove(dj)
-      schedule(schedule_obj: schedule_obj)
+      set(cron: schedule_obj.cron, schedule_id: schedule_obj.id).
+        perform_later(*schedule_obj.arguments)
     end
 
     def remove(dj)
