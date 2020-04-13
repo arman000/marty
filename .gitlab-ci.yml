@@ -62,6 +62,14 @@ eslint-prettier:
   script:
     - make lint-js
 
+schema-linter:
+  extends: .base-ruby
+  script:
+    - yarn
+    # Hacky fix to make file run in CI
+    - sed -i "1s/.*/\#\!\/usr\/bin\/env node/" node_modules/schemalint/bin/schemalint
+    - make lint-schema
+
 rspec (controllers):
   extends: .base-rspec
   script:
@@ -148,6 +156,8 @@ variables:
   HEADLESS_WINDOW_SIZE: "1400,1400"
   PGTZ: "America/Los_Angeles"
   POSTGRES_USER: "runner"
+  POSTGRES_DB_NAME: "marty_test"
+  POSTGRES_HOST: "127.0.0.1"
   POSTGRES_PASSWORD: "runner-password"
   POSTGRES_HOST_AUTH_METHOD: "trust"
   MARTY_REDIS_URL: 'localhost:6379/1'

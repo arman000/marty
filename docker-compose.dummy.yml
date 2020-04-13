@@ -18,6 +18,7 @@ services:
       - "PGTZ=America/Los_Angeles"
       - "BUNDLER_VERSION=2.0.1"
       - "MARTY_REDIS_URL=redis:6379/1"
+      - "POSTGRES_HOST=postgres"
     # env_file: ".rbenv-vars"
     depends_on:
       - "postgres"
