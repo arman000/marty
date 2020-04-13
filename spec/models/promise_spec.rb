@@ -362,6 +362,39 @@ describe Marty::Promise, slow: true, retry: 3 do
       expect(promise.result['error']).to eq 'Something went wrong'
       expect(promise.result['backtrace']).to_not be_empty
     end
+
+    describe 'without DJs' do
+      before do
+        stop_delayed_job
+      end
+
+      after do
+        start_delayed_job
+      end
+
+      it 'fails on exception' do
+        Marty::Promises::Ruby::Create.call(
+          module_name: 'Gemini::BudCategory',
+          method_name: 'create_from_promise_error',
+          method_args: [],
+          params: {
+            _user_id: user.id,
+          }
+        )
+
+        promise = Marty::Promise.where(promise_type: 'ruby').last
+        # Simulate exception outside of the job
+        expect(promise).to receive(:work_off_job).once.and_raise 'Test exception'
+
+        promise.wait_for_result(Marty::Promise::DEFAULT_PROMISE_TIMEOUT)
+        promise.reload
+
+        expect(promise.status).to be false
+        expect(promise.promise_type).to eq 'ruby'
+        expect(promise.result['error']).to eq 'Test exception'
+        expect(promise.result['backtrace']).to_not be_empty
+      end
+    end
   end
 
   describe 'priority' do
