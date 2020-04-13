@@ -1,6 +1,7 @@
 lint:
 	make lint-ruby
 	make lint-js
+	make lint-schema
 
 lint-fix:
 	make lint-ruby-fix
@@ -16,4 +17,7 @@ lint-js:
 	yarn lint
 
 lint-js-fix:
-	yarn lintfix
+	yarn lint-fix
+
+lint-schema:
+	yarn lint-schema

@@ -1,16 +1,21 @@
 {
   "private": true,
   "scripts": {
-    "lint": "eslint 'app/**/*.{js,jsx}' && prettier --check \"app/**/*.{js,jsx,css,scss}\"",
-    "lintfix": "eslint --fix 'app/**/*.{js,jsx}' && prettier --write \"app/**/*.{js,jsx,css,scss}\""
+    "eslint-check": "eslint  'app/**/*.{js,jsx}' ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
+    "eslint-write": "eslint --fix 'app/**/*.{js,jsx}' ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
+    "prettier-check": "prettier --check \"app/**/*.{js,jsx,css,scss}\" ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
+    "prettier-write": "prettier --write \"app/**/*.{js,jsx,css,scss}\" ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
+    "lint": "yarn run eslint-check && yarn run prettier-check",
+    "lint-fix": "yarn run eslint-write && yarn run prettier-write",
+    "lint-schema": "schemalint"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel-eslint": "^10.0.1",
     "eslint": "^6.0.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-prettier": "^3.1.0",
-    "prettier": "^1.17.1"
+    "prettier": "^1.17.1",
+    "schemalint": "^0.2.2"
   }
 }
