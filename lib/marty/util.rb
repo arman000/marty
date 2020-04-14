@@ -1,4 +1,6 @@
 module Marty::Util
+  extend Delorean::Functions
+
   def self.set_posting_id(sid)
     snap = Marty::Posting.find_by(id: sid)
     sid = nil if snap && (snap.created_dt == Float::INFINITY)
@@ -51,6 +53,31 @@ module Marty::Util
     if m[:end] != ''
       op = m[:close] == ')' ? '<' : '<='
       res += "#{op}#{m[:end]}"
+    end
+
+    res
+  end
+
+  # Returns an array of methods and values that can be applied to a number
+  # in order to check if it's in the given range.
+  # Example: '(1,14]') => [[">", 1.0], ["<=", 14.0]]
+  delorean_fn :pg_range_to_ruby, cache: true do |r|
+    next r if r == 'empty' || r.nil?
+
+    m = pg_range_match(r)
+
+    raise "bad PG range #{r}" unless m
+
+    res = []
+
+    if m[:start] != ''
+      op = m[:open] == '(' ? '>' : '>='
+      res += [[op, m[:start].to_f]]
+    end
+
+    if m[:end] != ''
+      op = m[:close] == ')' ? '<' : '<='
+      res += [[op, m[:end].to_f]]
     end
 
     res
