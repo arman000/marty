@@ -1,3 +1,7 @@
+13.0.2 - 2020-04-14
+=================
+* Use VARCHAR without size limit instead of recently added TEXT columns, since default field for TEXT column is textarea.
+
 13.0.1 - 2020-04-14
 =================
 * Add missing index by `posting_type` for `marty_postings` table.
