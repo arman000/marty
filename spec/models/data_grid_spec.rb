@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'benchmark/ips'
 
 module Marty::DataGridSpec # rubocop:disable Metrics/ModuleLength
   describe DataGrid do
@@ -454,7 +455,7 @@ EOS
                              'ltv' => 100,
                              'cltv' => 110.1,
                             )
-        end.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError, /matches > 1/)
       end
 
       it 'should return nil when matching data grid cell is nil' do
@@ -485,7 +486,7 @@ EOS
                                    'G9',
                                    'state' => 'CA', 'ltv' => 81,
                                   )
-        end.to raise_error(RuntimeError)
+        end.to raise_error(RuntimeError, /matches > 1/)
 
         res = lookup_grid_helper('infinity',
                                  'G9',
@@ -518,6 +519,17 @@ EOS
                                  false, false)
 
         expect(res).to eq [456, 'G9']
+      end
+
+      it 'should raise if nothing was found' do
+        dg_from_import('G9', G9)
+
+        expect do
+          lookup_grid_helper('infinity',
+                             'G9',
+                             'ltv' => 80,
+                            )
+        end.to raise_error(/Data Grid lookup failed/)
       end
 
       it 'should handle boolean keys' do
@@ -945,6 +957,65 @@ EOS
           false\t\t>10\t\t#{values3[2]}
         EOS
     end
+
+    describe 'performance' do
+      before(:each) do
+        %w[G1 Gf Gl].each do |g|
+          dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
+        end
+      end
+
+      after do
+        Rails.application.config.marty.data_grid_plpg_lookups = false
+      end
+
+      let(:pt) { 'infinity' }
+
+      grid_data = {
+        'Gf' => { 'b' => true },
+        'G1' => {
+          'fico' => 600,
+          'state' => 'RI',
+          'ltv' => 10,
+        },
+        'Gl' => {
+          'fha_203k_option2' => 'Not Existing Services'
+        }
+      }
+
+      grid_data.each_with_index do |(grid, params), index|
+        it "ruby lookup is faster than plpgsql #{index}" do
+          bm = Benchmark.ips do |x|
+            x.report('postgres') do
+              Rails.application.config.marty.data_grid_plpg_lookups = true
+              res = Marty::DataGrid.lookup_grid_h(pt, grid, params, false)
+            end
+
+            x.report('ruby') do
+              Rails.application.config.marty.data_grid_plpg_lookups = false
+              res = Marty::DataGrid.lookup_grid_h(pt, grid, params, false)
+            end
+
+            x.compare!
+          end
+
+          h = bm.entries.each_with_object({}) do |e, hh|
+            hh[e.label] = e.stats.central_tendency
+          end
+
+          factor = h['ruby'] / h['postgres']
+
+          if ENV['CI'] == 'true'
+            # Performance drops down in CI, probably due to running postgres
+            # in a separate container utilizing it's own CPU core.
+            expect(factor).to be > 0.8
+          else
+            expect(factor).to be > 1.02
+          end
+        end
+      end
+    end
+
     describe 'constraint' do
       it 'constraint' do
         Mcfly.whodunnit = system_user

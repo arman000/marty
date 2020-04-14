@@ -184,6 +184,128 @@ class Marty::DataGrid < Marty::Base
 
   PLV_DT_FMT = '%Y-%m-%d %H:%M:%S.%N6'
 
+  def self.ruby_lookup_indices(h_passed, dgh)
+    dgh['metadata'].each_with_object({ 'v' => [], 'h' => [] }) do |m, h|
+      attr = m['attr']
+
+      next unless h_passed.key?(attr)
+
+      inc = h_passed[attr]
+
+      val = (defined? inc.name) ? inc.name : inc
+
+      dir = m['dir']
+
+      m_type = m['type']
+      nots = m.fetch('nots', [])
+
+      arr = m['keys'].each_with_index.map do |key_val, index|
+        next index if key_val.nil?
+
+        not_condition = nots[index]
+
+        check_res = if ['int4range', 'numrange'].include?(m_type)
+                      raise 'Data Grid lookup failed' if val.nil?
+
+                      checks = Marty::Util.pg_range_to_ruby(key_val)
+                      checks.all? { |check| val.send(check[0], check[1]) }
+                    elsif m_type == 'boolean'
+                      key_val == val
+                    else
+                      key_val.include?(val)
+                    end
+
+        if check_res && !not_condition
+          next index
+        elsif !check_res && not_condition
+          next index
+        end
+
+        nil
+      end.compact
+
+      h[dir] << arr
+    end
+  end
+
+  def self.ruby_lookup_grid_distinct(h_passed, dgh, ret_grid_data = false,
+                                     distinct = true)
+
+    grid = Marty::DataGrid.find(dgh['id'])
+    indices = ruby_lookup_indices(h_passed, dgh)
+
+    # We use the 0 as default, if there are no indices in that dir
+    # Otherwise we find an intersection between all indices
+    v_indices = if indices['v'].empty?
+                  [0]
+                else
+                  indices['v'].reduce(:&)
+                end
+
+    h_indices = if indices['h'].empty?
+                  [0]
+                else
+                  indices['h'].reduce(:&)
+                end
+
+    if distinct
+      raise 'matches > 1' if v_indices.size > 1
+      raise 'matches > 1' if h_indices.size > 1
+    end
+
+    v_index_min = v_indices.min
+    h_index_min = h_indices.min
+
+    if v_index_min.nil? || h_index_min.nil?
+      nil_res = {
+        'data' => nil,
+        'name' => grid.name,
+        'result' => nil,
+        'metadata' => nil
+      }
+
+      return nil_res if grid.lenient && !ret_grid_data
+
+      raise 'Data Grid lookup failed'
+    end
+
+    res2 = grid.data.dig(v_index_min, h_index_min)
+
+    if ret_grid_data
+      {
+        'data' => grid.data,
+         'name' => grid.name,
+         'result' => res2,
+         'metadata' => grid.metadata
+      }
+    else
+      {
+        'data' => nil,
+        'name' => grid.name,
+        'result' => res2,
+        'metadata' => nil
+      }
+    end
+  rescue StandardError => e
+    ri = {
+      'id' => grid.id,
+      'group_id' => grid.group_id,
+      'created_dt' => grid.created_dt
+    }
+
+    dg = grid.attributes.reject do |k, _|
+      next true if !ret_grid_data && k == 'data'
+
+      k == 'permissions'
+    end
+
+    raise "DG #{name}: Error in Ruby call: #{e.message} \n"\
+      "params: #{h_passed}\n"\
+      "results: #{[h_indices, v_indices]}\n"\
+      "dg: #{grid.attributes}\n"\
+      "ri: #{ri}"
+  end
+
   def self.plpg_lookup_grid_distinct(h_passed, dgh, ret_grid_data = false,
                                      distinct = true)
     cd = dgh['created_dt']
@@ -280,7 +402,12 @@ class Marty::DataGrid < Marty::Base
     #   "name"     => <grid name>
     #   "data"     => <grid's data array>
     #   "metadata" => <grid's metadata (array of hashes)>
-    vhash = plpg_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
+
+    vhash = if Rails.application.config.marty.data_grid_plpg_lookups
+              plpg_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
+            else
+              ruby_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
+            end
 
     return vhash if vhash['result'].nil? || !dgh['data_type']
 
