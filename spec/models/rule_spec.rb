@@ -438,7 +438,7 @@ module Marty::RuleSpec
         expect do
           simple.compute(@ruleopts_myrule,
                          'pt' => Time.zone.now)
-        end        .to raise_error(/hi mom/)
+        end.to raise_error(/hi mom/)
         # simple2a should return results without evaluation (they are all fixed)
         expect(simple2a.compute(@ruleopts_myrule, 'pt' => Time.zone.now)).to eq(
           'simple_result' => 'b value',
@@ -479,7 +479,7 @@ module Marty::RuleSpec
                                    'param1' => 66,
                                    'param2' => 'abc',
                                    'paramb' => false)
-        end        .to raise_error(exp)
+        end.to raise_error(exp)
       end
       it 'grids embedded in result work properly and receive prior attrs' do
         v = altgridmethod.compute(@ruleopts_myrule,  'pt' => Time.zone.now,

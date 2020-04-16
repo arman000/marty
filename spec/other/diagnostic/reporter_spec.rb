@@ -161,7 +161,7 @@ describe Marty::Diagnostic::Reporter do
     end
 
     it 'displays all nodes when there is an inconsistent node (version)' do
-     Marty:: Diagnostic::Reporter.request.params = params
+     Marty::Diagnostic::Reporter.request.params = params
      bad_ver = '0.0.0'
 
      data = {
