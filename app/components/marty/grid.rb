@@ -118,6 +118,8 @@ class Marty::Grid < ::Netzke::Grid::Base
     # for a form where the fields are stacked top to bottom
     # Netzke 0.8.4 defaulted width to 400px - let's make it a bit wider
     c.width = 475
+
+    c.form_config.submit_handler = nil
   end
 
   component :view_window do |c|

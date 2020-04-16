@@ -43,6 +43,21 @@ module Marty
         super + [:do_job_run]
       end
 
+      def configure_form_window(c)
+        super
+
+        c.form_config.submit_handler = lambda { |params|
+          return unless super(params)
+
+          Marty::BackgroundJob::UpdateSchedule.call(
+            id: record.id,
+            job_class: record.job_class
+          )
+
+          true
+        }
+      end
+
       attribute :job_class do |c|
         c.width = 400
       end
@@ -87,36 +102,6 @@ module Marty
         a.confirmation_title = 'Run Job'
         a.in_progress_message = 'Performing job...'
         a.endpoint_name = :job_run
-      end
-
-      endpoint :edit_window__edit_form__submit do |params|
-        id = JSON.parse(params['data'])['id']
-
-        result = super(params)
-        next result if result.empty?
-
-        obj_hash = result.first
-
-        Marty::BackgroundJob::UpdateSchedule.call(
-          id: obj_hash['id'],
-          job_class: obj_hash['job_class'],
-        )
-
-        result
-      end
-
-      endpoint :add_window__add_form__submit do |params|
-        result = super(params)
-        next result if result.empty?
-
-        obj_hash = result.first
-
-        Marty::BackgroundJob::UpdateSchedule.call(
-          id: obj_hash['id'],
-          job_class: obj_hash['job_class'],
-        )
-
-        result
       end
 
       endpoint :multiedit_window__multiedit_form__submit do |_params|

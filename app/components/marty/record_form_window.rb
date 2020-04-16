@@ -9,4 +9,10 @@ class Marty::RecordFormWindow < Netzke::Basepack::RecordFormWindow
     c.record_id = config.client_config[:record_id]
     c.mode = :lockable
   end
+
+  def preconfigure_form(c)
+    super
+
+    c.klass = Marty::Form
+  end
 end
