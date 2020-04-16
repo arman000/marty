@@ -143,7 +143,7 @@ Layout/MultilineOperationIndentation:
 # Offense count: 11
 # Cop supports --auto-correct.
 # Configuration parameters: IndentationWidth.
-Layout/Tab:
+Layout/IndentationStyle:
   Exclude:
     - 'app/components/marty/posting_window.rb'
 
