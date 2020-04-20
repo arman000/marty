@@ -11,7 +11,7 @@ module Marty
     end
 
     def javascript_exists?(file)
-      asset_exists?(file, :js, DEFAULT_ASSETS_PATH + '/javascript')
+      asset_exists?(file, :js, DEFAULT_ASSETS_PATH + '/javascripts')
     end
 
     def stylesheet_exists?(file)
