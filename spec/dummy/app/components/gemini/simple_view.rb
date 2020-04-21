@@ -15,4 +15,5 @@ class Gemini::SimpleView < Marty::McflyGridPanel
       :default_true
     ]
   end
+
 end

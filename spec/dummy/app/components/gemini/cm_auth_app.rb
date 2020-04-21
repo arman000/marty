@@ -14,6 +14,7 @@ class Gemini::CmAuthApp < Marty::MainAuthApp
           :my_rule_view,
           :xyz_rule_view,
           :simple_view,
+          :user_grid_without_model,
         ],
       }
     ]
@@ -39,6 +40,11 @@ class Gemini::CmAuthApp < Marty::MainAuthApp
     a.handler = :netzke_load_component_by_action
   end
 
+  action :user_grid_without_model do |a|
+    a.text    = a.tooltip = 'User Grid Without Model'
+    a.handler = :netzke_load_component_by_action
+  end
+
   component :loan_program_view do |c|
     c.klass = Gemini::LoanProgramView
   end
@@ -53,5 +59,9 @@ class Gemini::CmAuthApp < Marty::MainAuthApp
 
   component :simple_view do |c|
     c.klass = Gemini::SimpleView
+  end
+
+  component :user_grid_without_model do |c|
+    c.klass = Gemini::UserGridWithoutModel
   end
 end
