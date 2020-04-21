@@ -1,3 +1,9 @@
+13.2.0 - 2020-04-21
+=====================
+* Patch Netzke components, so that they won't call model methods directly and use model_adapter instead.
+* Pass model adapter to the forms from grid. Otherwise they might automatically find a different adapter based on model class.
+* Add Marty::Grid::HashDataAdapter that allows to inherit from it and define only few specific methods that should return hashes instead of AR instances.
+
 13.1.0 - 2020-04-14
 =====================
 * Use ruby for Marty::DataGrid lookups. That gives a small performance boost and simplifies the code.
