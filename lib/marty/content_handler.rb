@@ -6,6 +6,7 @@ module Marty::ContentHandler
     'html' => ['text/html',                'download'],
     'txt'  => ['text/plain',               'inline'],
     'json' => ['application/json',         'download'],
+    'pdf'  => ['application/pdf',          'download'],
 
     # hacky: default format is JSON
     nil    => ['application/json',         'download'],
@@ -29,7 +30,7 @@ module Marty::ContentHandler
         res = to_zip(data)
       when nil, 'json'
         res, format = data.to_json, 'json'
-      when 'html'
+      when 'html', 'pdf'
         res = data.to_s
       else
         res, format = { error: "Unknown format: #{format}" }.to_json, 'json'
@@ -92,6 +93,7 @@ module Marty::ContentHandler
     res = Zip::OutputStream.write_buffer do |stream|
       to_zip_stream(stream, [], data)
     end
+
     res.string
   end
 end
