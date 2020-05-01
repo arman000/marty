@@ -20,7 +20,8 @@ group :default, :cmit do
 end
 
 group :development, :test do
-  gem 'benchmark-ips'
+  # FIXME: 2.8.0 is broken, we should wait until 2.8.1 is out
+  gem 'benchmark-ips', '< 2.8.0'
   gem 'capybara'
   gem 'connection_pool'
   gem 'database_cleaner'
