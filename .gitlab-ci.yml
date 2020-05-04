@@ -40,6 +40,8 @@ services:
 
 .base-js:
   extends: .base-test
+  retry:
+    max: 0
   before_script:
     - yarn
 
@@ -53,6 +55,8 @@ services:
     when: always
 
 rubocop:
+  retry:
+    max: 0
   extends: .base-ruby
   script:
     - bundle exec rubocop -f simple -P
@@ -63,6 +67,8 @@ eslint-prettier:
     - make lint-js
 
 schema-linter:
+  retry:
+    max: 0
   extends: .base-ruby
   script:
     - yarn

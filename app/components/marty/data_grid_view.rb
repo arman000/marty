@@ -96,6 +96,7 @@ module Marty; class DataGridView < McflyGridPanel
         :vcols,
         :hcols,
         :lenient,
+        :strict_null_mode,
         :data_type,
         :constraint,
         :perm_view,
@@ -303,6 +304,10 @@ module Marty; class DataGridView < McflyGridPanel
 
   attribute :lenient do |c|
     c.width  = 75
+  end
+
+  attribute :strict_null_mode do |c|
+    c.width  = 100
   end
 
   attribute :data_type do |c|

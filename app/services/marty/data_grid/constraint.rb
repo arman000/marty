@@ -19,7 +19,7 @@ module Marty
 
           pt = 'infinity'
           vals = raw_vals.map do |v|
-            DataGrid.parse_fvalue(pt, v, data_type, dt)
+            DataGrid.parse_fvalue(pt, v, data_type, dt, false)
           end
           [[:in?, vals.flatten]]
         end
@@ -56,7 +56,7 @@ module Marty
             err = nil
             begin
               cvt_val = cvt && !data_v.class.in?(rt) ?
-                          [DataGrid.parse_fvalue(pt, data_v, dt, klass)].
+                          [DataGrid.parse_fvalue(pt, data_v, dt, klass, false)].
                             flatten.first : data_v
             rescue StandardError => e
               err = e.message

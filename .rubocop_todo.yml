@@ -277,7 +277,9 @@ Metrics/AbcSize:
 # Offense count: 22
 # Configuration parameters: CountComments.
 Metrics/ClassLength:
-  Max: 549
+  Max: 500
+  Exclude:
+    - 'app/models/marty/data_grid.rb'
 
 # Offense count: 68
 # Configuration parameters: IgnoredMethods.

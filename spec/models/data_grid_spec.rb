@@ -190,9 +190,49 @@ Admin Services Plus\t-1.625
 Investor Services Acadamy\t-0.5
 EOS
 
+    G1_with_nulls = <<EOS
+strict_null_mode
+state\tstring\tv\t\t
+ltv\tnumrange\tv\t\t
+fico\tnumrange\th\t\t
+
+\t\t>=600<700\t>=700<750\t>=750
+CA\t<=80\t1.1\t2.2\t3.3
+TX|HI\t>80<=105\t4.4\t5.5\t6.6
+NM\t<=80\t1.2\t2.3\t3.4
+MA\t>80<=105\t4.5\t5.6\t
+NULL\t<=80\t11\t22\t33
+EOS
+
+    G1_with_bool_nulls = <<EOS
+strict_null_mode
+bool_state\tboolean\tv\t\t
+ltv\tnumrange\tv\t\t
+fico\tnumrange\th\t\t
+
+\t\t>=600<700\t>=700<750\t>=750
+f\t>80<=105\t4.5\t5.6\t
+NULL\t<=80\t11\t22\t33
+EOS
+
+    G1_with_integer_nulls = <<EOS
+strict_null_mode
+int_state\tinteger\tv\t\t
+ltv\tnumrange\tv\t\t
+fico\tnumrange\th\t\t
+
+\t\t>=600<700\t>=700<750\t>=750
+1\t<=80\t1.1\t2.2\t3.3
+2\t>80<=105\t4.4\t5.5\t6.6
+3\t<=80\t1.2\t2.3\t3.4
+4|5\t>80<=105\t4.5\t5.6\t
+NULL\t<=80\t11\t22\t33
+EOS
+
     before(:each) do
       # Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
+      Rails.application.config.marty.data_grid_plpg_lookups = false
     end
 
     def lookup_grid_helper(pt, gridname, params, follow = false, distinct = true)
@@ -213,6 +253,110 @@ EOS
         expect do
           dg_from_import('Gh', Gh + "\t\t\n")
         end.to raise_error(RuntimeError)
+      end
+
+      it 'show not allow import NULL fields unless strict_null_mode is on' do
+        expect do
+          dg_from_import(
+            'G1_with_nulls',
+            G1_with_nulls.gsub("strict_null_mode\n", '')
+          )
+        end.to raise_error(
+          /NULL is not supported in grids without strict_null_mode/
+        )
+      end
+
+      it 'should import wildcards' do
+        dg = dg_from_import('G1', G1)
+        state_attr = dg.metadata.find { |key| key['attr'] == 'state' }
+        expect(state_attr['keys'].last).to be nil
+        expect(state_attr['wildcards'].last).to be true
+        expect(state_attr['wildcards']).to eq [false, false, false, false, true]
+      end
+
+      it 'allows to import NULL values in string fields' do
+        dg = dg_from_import('G1_with_nulls', G1_with_nulls)
+        state_attr = dg.metadata.find { |key| key['attr'] == 'state' }
+        expect(state_attr['keys'].last).to be nil
+        expect(state_attr['wildcards'].last).to be false
+
+        # FIXME: do we actually need mixing nulls with values?
+        dg = dg_from_import(
+          'G1_with_nulls2',
+          G1_with_nulls.sub('NULL', 'NY|NULL')
+        )
+        state_attr = dg.metadata.find { |key| key['attr'] == 'state' }
+        expect(state_attr['keys'].last).to eq [nil, 'NY']
+        expect(state_attr['wildcards'].last).to be false
+
+        dg = dg_from_import(
+          'G1_with_nulls3',
+          G1_with_nulls.sub('NULL', 'NOT (NULL)')
+        )
+
+        state_attr = dg.metadata.find { |key| key['attr'] == 'state' }
+        expect(state_attr['keys'].last).to be nil
+        expect(state_attr['wildcards'].last).to be false
+        expect(state_attr['nots'].last).to be true
+
+        dg = dg_from_import(
+          'G1_with_nulls4',
+          G1_with_nulls.sub('NULL', 'NOT (NY|NULL)')
+        )
+
+        state_attr = dg.metadata.find { |key| key['attr'] == 'state' }
+        expect(state_attr['keys'].last).to eq [nil, 'NY']
+        expect(state_attr['wildcards'].last).to be false
+        expect(state_attr['nots'].last).to be true
+      end
+
+      it 'allows to import NULL values in integer field' do
+        dg = dg_from_import('G1_with_integer_nulls', G1_with_integer_nulls)
+        state_attr = dg.metadata.find { |key| key['attr'] == 'int_state' }
+        expect(state_attr['keys'].last).to be nil
+        expect(state_attr['wildcards'].last).to be false
+
+        dg = dg_from_import(
+          'G1_with_integer_nulls2',
+          G1_with_integer_nulls.sub('NULL', '6|NULL')
+        )
+
+        state_attr = dg.metadata.find { |key| key['attr'] == 'int_state' }
+        expect(state_attr['keys'].last).to eq [nil, 6]
+        expect(state_attr['nots'].last).to be false
+        expect(state_attr['wildcards'].last).to be false
+
+        dg = dg_from_import(
+          'G1_with_integer_nulls3',
+          G1_with_integer_nulls.sub('NULL', 'NOT (NULL)')
+        )
+
+        state_attr = dg.metadata.find { |key| key['attr'] == 'int_state' }
+        expect(state_attr['keys'].last).to be nil
+        expect(state_attr['nots'].last).to be true
+        expect(state_attr['wildcards'].last).to be false
+
+        dg = dg_from_import(
+          'G1_with_integer_nulls4',
+          G1_with_integer_nulls.sub('NULL', 'NOT (6|NULL)')
+        )
+
+        state_attr = dg.metadata.find { |key| key['attr'] == 'int_state' }
+        expect(state_attr['keys'].last).to eq [nil, 6]
+        expect(state_attr['nots'].last).to be true
+        expect(state_attr['wildcards'].last).to be false
+      end
+
+      it 'allows to import NULL values in boolean field' do
+        dg = dg_from_import('G1_with_bool_nulls', G1_with_bool_nulls)
+        state_attr = dg.metadata.find { |key| key['attr'] == 'bool_state' }
+        expect(state_attr['keys'].last).to be nil
+        expect(state_attr['wildcards'].last).to be false
+
+        dg = dg_from_import('G1_with_bool_nulls2', G1_with_bool_nulls.sub('NULL', 'NOT (NULL)'))
+        state_attr = dg.metadata.find { |key| key['attr'] == 'bool_state' }
+        expect(state_attr['keys'].last).to be nil
+        expect(state_attr['nots'].last).to be true
       end
     end
 
@@ -307,7 +451,7 @@ EOS
 
       before(:each) do
         %w[G1 G2 G3 G4 G5 G6 G7 G8 Ga Gb
-           Gc Gd Ge Gf Gg Gh Gj Gl].each do |g|
+           Gc Gd Ge Gf Gg Gh Gj Gl G1_with_nulls].each do |g|
           dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
         end
       end
@@ -350,6 +494,24 @@ EOS
           res = Marty::DataGrid.lookup_grid_h(pt, dgh, { 'i' => 13, 'n' => 15 }, true)
           expect(res).to eq('N')
         end
+      end
+
+      it 'should cast types' do
+        res = Marty::DataGrid.lookup_grid_h(pt, 'Gf', { 'i' => 13, 'n' => 15 }, true)
+        expect(res).to eq('N')
+
+        res = Marty::DataGrid.lookup_grid_h(pt, 'Gf', { 'i' => '13', 'n' => '15' }, true)
+        expect(res).to eq('N')
+
+        res = Marty::DataGrid.lookup_grid_h(pt, 'Gf', { 'b' => 'true', 'i4' => '6' }, false)
+        expect(res).to eq('Y')
+
+        res = Marty::DataGrid.lookup_grid_h(pt, 'Gg', { 'i1' => 2, 'i2' => 1 }, false)
+        expect(res).to eq(1)
+
+        dg_from_import('G9', G9)
+        res = Marty::DataGrid.lookup_grid_h(pt, 'G9', { 'state' => 4, 'ltv' => 81 }, false)
+        expect(res).to eq(456)
       end
 
       it 'should handle ambiguous lookups' do
@@ -475,7 +637,79 @@ EOS
                                  'state' => 'GU',
                                  'ltv' => 80,
                                 )
+
         expect(res).to eq [22, 'G1']
+      end
+
+      it 'should treat nil as missing attr' do
+        expect do
+          res = lookup_grid_helper('infinity',
+                                   'G1',
+                                   'fico' => 720,
+                                   'state' => 'NM',
+                                   'ltv' => 80,
+                                  )
+        end.to raise_error(RuntimeError, /matches > 1/)
+
+        expect do
+          res = lookup_grid_helper('infinity',
+                                   'G1',
+                                   'fico' => 720,
+                                   'ltv' => 80,
+                                  )
+        end.to raise_error(RuntimeError, /matches > 1/)
+
+        expect do
+          res = lookup_grid_helper('infinity',
+                                   'G1',
+                                   'fico' => 720,
+                                   'state' => nil,
+                                   'ltv' => 80,
+                                  )
+        end.to raise_error(RuntimeError, /matches > 1/)
+      end
+
+      it 'should handle string NULLS' do
+        res = lookup_grid_helper('infinity',
+                                 'G1_with_nulls',
+                                 'fico' => 720,
+                                 'state' => nil,
+                                 'ltv' => 80,
+                                )
+
+        expect(res).to eq [22, 'G1_with_nulls']
+
+        expect do
+          lookup_grid_helper('infinity',
+                             'G1_with_nulls',
+                             'fico' => 720,
+                             'state' => 'BLABLA',
+                             'ltv' => 80,
+                            )
+        end.to raise_error(/Data Grid lookup failed/)
+
+        dg = dg_from_import(
+          'G1_with_nulls2',
+          G1_with_nulls.sub('NULL', 'NY|NULL')
+        )
+
+        res = lookup_grid_helper('infinity',
+                                 dg.name,
+                                 'fico' => 720,
+                                 'state' => nil,
+                                 'ltv' => 80,
+                                )
+
+        expect(res).to eq [22, dg.name]
+
+        res = lookup_grid_helper('infinity',
+                                 dg.name,
+                                 'fico' => 720,
+                                 'state' => 'NY',
+                                 'ltv' => 80,
+                                )
+
+        expect(res).to eq [22, dg.name]
       end
 
       it 'should handle matches which also have a wildcard match' do
@@ -495,31 +729,32 @@ EOS
         expect(res).to eq [456, 'G9']
       end
 
-      it 'should raise on nil attr values' do
-        dg_from_import('G9', G9)
-
-        expect do
-          lookup_grid_helper('infinity',
-                             'G9',
-                             'ltv' => 81,
-                            )
-        end.to raise_error(/matches > 1/)
-
-        err = /Data Grid lookup failed/
-        expect do
-          lookup_grid_helper('infinity',
-                             'G9',
-                             { 'state' => 'CA', 'ltv' => nil },
-                             false, false)
-        end.to raise_error(err)
-
-        res = lookup_grid_helper('infinity',
-                                 'G9',
-                                 { 'state' => nil, 'ltv' => 81 },
-                                 false, false)
-
-        expect(res).to eq [456, 'G9']
-      end
+      # it 'should raise on nil attr values' do
+      #   next
+      #   dg_from_import('G9', G9)
+      #
+      #   expect do
+      #     lookup_grid_helper('infinity',
+      #                        'G9',
+      #                        'ltv' => 81,
+      #                       )
+      #   end.to raise_error(/matches > 1/)
+      #
+      #   err = /Data Grid lookup failed/
+      #   expect do
+      #     lookup_grid_helper('infinity',
+      #                        'G9',
+      #                        { 'state' => 'CA', 'ltv' => nil },
+      #                        false, false)
+      #   end.to raise_error(err)
+      #
+      #   res = lookup_grid_helper('infinity',
+      #                            'G9',
+      #                            { 'state' => nil, 'ltv' => 81 },
+      #                            false, false)
+      #
+      #   expect(res).to eq [456, 'G9']
+      # end
 
       it 'should raise if nothing was found' do
         dg_from_import('G9', G9)
@@ -647,21 +882,25 @@ EOS
                                'attr' => 'units',
                                'keys' => [[1, 2], [1, 2], [3, 4], [3, 4]],
                                'nots' => [false, false, false, false],
+                               'wildcards' => [false, false, false, false],
                                'type' => 'integer' },
                              { 'dir' => 'v',
                                'attr' => 'ltv',
                                'keys' => ['[,80]', '(80,105]', '[,80]', '(80,105]'],
                                'nots' => [false, false, false, false],
+                               'wildcards' => [false, false, false, false],
                                'type' => 'numrange' },
                              { 'dir' => 'h',
                                'attr' => 'cltv',
                                'keys' => ['[100,110)', '[110,120)', '[120,]'],
                                'nots' => [false, false, false],
+                               'wildcards' => [false, false, false],
                                'type' => 'numrange' },
                              { 'dir' => 'h',
                                'attr' => 'fico',
                                'keys' => ['[600,700)', '[700,750)', '[750,]'],
                                'nots' => [false, false, false],
+                               'wildcards' => [false, false, false],
                                'type' => 'numrange' }]
 
         dgh = Marty::DataGrid.lookup_h(pt, 'G2')
@@ -678,17 +917,20 @@ EOS
                                'attr' => 'state',
                                'keys' => [['CA'], ['HI', 'TX'], ['NM'], ['MA'], nil],
                                'nots' => [false, false, false, false, false],
+                               'wildcards' => [false, false, false, false, true],
                                'type' => 'string' },
                              { 'dir' => 'v',
                                'attr' => 'ltv',
                                'keys' => ['[,80]', '(80,105]', '[,80]', '(80,105]',
                                           '[,80]'],
                                 'nots' => [false, false, false, false, false],
+                                'wildcards' => [false, false, false, false, false],
                                'type' => 'numrange' },
                              { 'dir' => 'h',
                                'attr' => 'fico',
                                'keys' => ['[600,700)', '[700,750)', '[750,]'],
                                'nots' => [false, false, false],
+                               'wildcards' => [false, false, false],
                                'type' => 'numrange' }]
         dgh = Marty::DataGrid.lookup_h(pt, 'G8')
         res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,
@@ -706,6 +948,7 @@ EOS
                                'attr' => 'ltv',
                                'keys' => ['[,115]', '(115,135]', '(135,140]'],
                                'nots' => [false, false, false],
+                               'wildcards' => [false, false, false],
                                'type' => 'numrange' }]
         dgh = Marty::DataGrid.lookup_h(pt, 'G8')
         res = Marty::DataGrid.lookup_grid_distinct_entry_h(pt,

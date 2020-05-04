@@ -13,6 +13,7 @@ class Marty::DataGrid < Marty::Base
   ARRSEP = '|'.freeze
   NOT_STRING_START = 'NOT ('.freeze
   NOT_STRING_END = ')'.freeze
+  NULL_STRING = 'NULL'.freeze
 
   class DataGridValidator < ActiveModel::Validator
     def validate(dg)
@@ -106,7 +107,7 @@ class Marty::DataGrid < Marty::Base
   # FIXME: if the caller requests data as part of fields, there could
   # be memory concerns with caching since some data_grids have massive data
   delorean_fn :lookup_h, cache: true, sig: [2, 3] do |pt, name, fields = nil|
-    fields ||= %w(id group_id created_dt metadata data_type name)
+    fields ||= %w(id group_id created_dt metadata data_type name strict_null_mode)
     dga = mcfly_pt(pt).where(name: name).pluck(*fields).first
     dga && Hash[fields.zip(dga)]
   end
@@ -188,8 +189,6 @@ class Marty::DataGrid < Marty::Base
     dgh['metadata'].each_with_object({ 'v' => [], 'h' => [] }) do |m, h|
       attr = m['attr']
 
-      next unless h_passed.key?(attr)
-
       inc = h_passed[attr]
 
       val = (defined? inc.name) ? inc.name : inc
@@ -198,9 +197,39 @@ class Marty::DataGrid < Marty::Base
 
       m_type = m['type']
       nots = m.fetch('nots', [])
+      wildcards = m.fetch('wildcards', [])
+
+      unless dgh['strict_null_mode']
+        next unless h_passed.key?(attr)
+        # FIXME: Make sure it won't break lookups
+        # Before missing attribute would match anything,
+        # while explicitly passed nil would only match wildcard keys
+        # We want to be consistent and treat nil attribute as missing one,
+        # unless it's a stict_null_mode, where nil would be explicitly mapped
+        # to NULL keys
+        next if val.nil?
+      end
+
+      converted_val = if val.nil?
+                        nil
+                      elsif m_type == 'string'
+                        val.to_s
+                      elsif m_type == 'integer'
+                        val.to_i
+                      elsif m_type == 'numrange'
+                        val.to_f
+                      elsif m_type == 'int4range'
+                        val.to_i
+                      elsif m_type == 'boolean'
+                        ActiveModel::Type::Boolean.new.cast(val)
+                      else
+                        val
+                      end
 
       arr = m['keys'].each_with_index.map do |key_val, index|
-        next index if key_val.nil?
+        wildcard = wildcards.fetch(index, true) # By default empty value is a wildcard
+
+        next index if key_val.nil? && wildcard
 
         not_condition = nots[index]
 
@@ -208,11 +237,15 @@ class Marty::DataGrid < Marty::Base
                       raise 'Data Grid lookup failed' if val.nil?
 
                       checks = Marty::Util.pg_range_to_ruby(key_val)
-                      checks.all? { |check| val.send(check[0], check[1]) }
+                      checks.all? do |check|
+                        converted_val.send(check[0], check[1])
+                      end
+                    elsif key_val.nil? # Non-wildcard lookup
+                      val.nil?
                     elsif m_type == 'boolean'
-                      key_val == val
+                      key_val == converted_val
                     else
-                      key_val.include?(val)
+                      key_val.include?(converted_val)
                     end
 
         if check_res && !not_condition
@@ -403,7 +436,8 @@ class Marty::DataGrid < Marty::Base
     #   "data"     => <grid's data array>
     #   "metadata" => <grid's metadata (array of hashes)>
 
-    vhash = if Rails.application.config.marty.data_grid_plpg_lookups
+    vhash = if Rails.application.config.marty.data_grid_plpg_lookups &&
+               Rails.env.test? # Keep plpg lookups for performance tests
               plpg_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
             else
               ruby_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
@@ -450,16 +484,25 @@ class Marty::DataGrid < Marty::Base
 
     type = inf['type']
     nots = inf.fetch('nots', [])
+    wildcards = inf.fetch('wildcards', [])
     klass = type.constantize unless INDEX_MAP[type]
 
-    keys = inf['keys'].map do |v|
+    keys = inf['keys'].each_with_index.map do |v, index|
+      wildcard = wildcards.fetch(index, true)
+
+      next 'NULL' if v.nil? && !wildcard
+
       case type
       when 'numrange', 'int4range'
         Marty::Util.pg_range_to_human(v)
       when 'boolean'
         v.to_s
       when 'string', 'integer'
-        v.map(&:to_s).join(ARRSEP) if v
+        v.map do |val|
+          next 'NULL' if val.nil? && !wildcard
+
+          val.to_s
+        end.join(ARRSEP) if v
       else
         # assume it's an AR class
         v.each do |k|
@@ -489,16 +532,13 @@ class Marty::DataGrid < Marty::Base
   def export_array
     # add data type metadata row if not default
     lenstr = 'lenient' if lenient
+    strict_null_mode_str = 'strict_null_mode' if strict_null_mode
 
     typestr = data_type unless [nil, DEFAULT_DATA_TYPE].member?(data_type)
-    len_type = [lenstr, typestr].compact.join(' ')
+    len_type = [lenstr, strict_null_mode_str, typestr].compact.join(' ')
 
-    meta_rows = if (lenient || typestr) && constraint
-                  [[len_type, constraint]]
-                elsif lenient || typestr
-                  [[len_type]]
-                elsif constraint
-                  [['', constraint]]
+    meta_rows = if len_type.present? || constraint.present?
+                  [[len_type, constraint].compact]
                 else
                   []
                 end
@@ -541,30 +581,54 @@ class Marty::DataGrid < Marty::Base
     dg.export
   end
 
-  def self.parse_fvalue(pt, v, type, klass)
-    return unless v
+  def self.null_value?(value, strict_null_mode)
+    return false unless value == NULL_STRING
+    return true if strict_null_mode
 
-    v = remove_not(v)
+    raise 'NULL is not supported in grids without strict_null_mode'
+  end
+
+  def self.parse_fvalue(pt, passed_val, type, klass, strict_null_mode = false)
+    return unless passed_val
+
+    v = remove_not(passed_val)
+
+    return nil if null_value?(v, strict_null_mode)
 
     case type
     when 'numrange', 'int4range'
       Marty::Util.human_to_pg_range(v)
     when 'integer'
       v.split(ARRSEP).map do |val|
+        next nil if null_value?(val, strict_null_mode)
+
         Integer(val) rescue raise "invalid integer: #{val}"
-      end.uniq.sort
+      end.uniq.sort_by(&:to_i)
     when 'float'
       v.split(ARRSEP).map do |val|
+        next nil if null_value?(val, strict_null_mode)
+
         Float(val) rescue raise "invalid float: #{val}"
       end.uniq.sort
     when 'string'
-      res = v.split(ARRSEP).uniq.sort
-      raise 'leading/trailing spaces in elements not allowed' if
-        res.any? { |x| x != x.strip }
-      raise '0-length string not allowed' if res.any?(&:empty?)
+      res = v.split(ARRSEP).uniq.sort.map do |val|
+        next nil if null_value?(val, strict_null_mode)
+
+        val
+      end
+
+      raise 'leading/trailing spaces in elements not allowed' if res.any? do |x|
+        x != x&.strip
+      end
+
+      raise '0-length string not allowed' if res.any? do |x|
+        x&.empty?
+      end
 
       res
     when 'boolean'
+      return nil if null_value?(v, strict_null_mode)
+
       case v.downcase
       when 'true', 't'
         true
@@ -596,20 +660,24 @@ class Marty::DataGrid < Marty::Base
       raise "unknown header type/klass: #{type}"
   end
 
-  def self.parse_keys(pt, keys, type)
+  def self.parse_keys(pt, keys, type, strict_null_mode)
     klass = maybe_get_klass(type)
 
     keys.map do |v|
-      parse_fvalue(pt, v, type, klass)
+      parse_fvalue(pt, v, type, klass, strict_null_mode)
     end
   end
 
-  def self.parse_nots(_pt, keys)
+  def self.parse_nots(keys)
     keys.map do |v|
       next false unless v
 
       v.starts_with?(NOT_STRING_START) && v.ends_with?(NOT_STRING_END)
     end
+  end
+
+  def self.parse_wildcards(keys)
+    keys.map(&:nil?)
   end
 
   # parse grid external representation into metadata/data
@@ -630,20 +698,23 @@ class Marty::DataGrid < Marty::Base
 
     raise "last row can't be blank" if rows[-1].all?(&:nil?)
 
-    data_type, lenient = nil, false
+    data_type, lenient, strict_null_mode = nil, false, false
 
     # check if there's a data_type definition
     dt, constraint, *x = rows[0]
     if dt && x.all?(&:nil?)
       dts = dt.split
-      raise "bad data type '#{dt}'" if dts.count > 2
 
-      lenient = dts.delete 'lenient'
+      lenient = dts.delete('lenient').present?
+      strict_null_mode = dts.delete('strict_null_mode').present?
       data_type = dts.first
+      raise "bad data type '#{dt}'" if dts.size > 1
     end
+
     constraint = nil if x.first.in?(['v', 'h'])
 
-    start_md = constraint || data_type || lenient ? 1 : 0
+    start_md = constraint || data_type || lenient || strict_null_mode ? 1 : 0
+
     rows_for_metadata = rows[start_md...blank_index]
     metadata = rows_for_metadata.map do |attr, type, dir, rs_keep, key|
       raise 'metadata elements must include attr/type/dir' unless
@@ -652,8 +723,9 @@ class Marty::DataGrid < Marty::Base
       raise "unknown metadata type #{type}" unless
         Marty::DataGrid.type_to_index(type)
 
-      keys = key && parse_keys(pt, [key], type)
-      nots = key && parse_nots(pt, [key])
+      keys = key && parse_keys(pt, [key], type, strict_null_mode)
+      nots = key && parse_nots([key])
+      wildcards = key && parse_wildcards([key])
 
       res = {
         'attr' => attr,
@@ -661,6 +733,7 @@ class Marty::DataGrid < Marty::Base
         'dir'  => dir,
         'keys' => keys,
         'nots' => nots,
+        'wildcards' => wildcards,
       }
       res['rs_keep'] = rs_keep if rs_keep
       res
@@ -679,8 +752,9 @@ class Marty::DataGrid < Marty::Base
       raise "horiz. key row #{data_index + i} must include nil starting cells" if
         row[0, v_infos.count].any?
 
-      inf['keys'] = parse_keys(pt, row[v_infos.count, row.count], inf['type'])
-      inf['nots'] = parse_nots(pt, row[v_infos.count, row.count])
+      inf['keys'] = parse_keys(pt, row[v_infos.count, row.count], inf['type'], strict_null_mode)
+      inf['nots'] = parse_nots(row[v_infos.count, row.count])
+      inf['wildcards'] = parse_wildcards(row[v_infos.count, row.count])
     end
 
     raise 'horiz. info keys length mismatch!' unless
@@ -692,8 +766,9 @@ class Marty::DataGrid < Marty::Base
     v_key_cols = data_rows.map { |r| r[0, v_infos.count] }.transpose
 
     v_infos.each_with_index do |inf, i|
-      inf['keys'] = parse_keys(pt, v_key_cols[i], inf['type'])
-      inf['nots'] = parse_nots(pt, v_key_cols[i])
+      inf['keys'] = parse_keys(pt, v_key_cols[i], inf['type'], strict_null_mode)
+      inf['nots'] = parse_nots(v_key_cols[i])
+      inf['wildcards'] = parse_wildcards(v_key_cols[i])
     end
 
     raise 'vert. info keys length mismatch!' unless
@@ -734,6 +809,7 @@ class Marty::DataGrid < Marty::Base
       data: data,
       data_type: data_type,
       lenient: lenient,
+      strict_null_mode: strict_null_mode,
       constraint: constraint,
     }
   end
@@ -746,15 +822,17 @@ class Marty::DataGrid < Marty::Base
     data_type = parsed_result[:data_type]
     lenient = parsed_result[:lenient]
     constraint = parsed_result[:constraint]
+    strict_null_mode = parsed_result[:strict_null_mode]
 
-    dg            = new
-    dg.name       = name
-    dg.data       = data
-    dg.data_type  = data_type
-    dg.lenient    = !!lenient
-    dg.metadata   = metadata
-    dg.created_dt = created_dt if created_dt
-    dg.constraint = constraint
+    dg                  = new
+    dg.name             = name
+    dg.data             = data
+    dg.data_type        = data_type
+    dg.lenient          = lenient
+    dg.strict_null_mode = strict_null_mode
+    dg.metadata         = metadata
+    dg.created_dt       = created_dt if created_dt
+    dg.constraint       = constraint
     dg.save!
     dg
   end
@@ -767,15 +845,17 @@ class Marty::DataGrid < Marty::Base
     data_type = parsed_result[:data_type]
     lenient = parsed_result[:lenient]
     constraint = parsed_result[:constraint]
+    strict_null_mode = parsed_result[:strict_null_mode]
 
-    self.name       = name
-    self.data       = data
-    self.data_type  = data_type
-    self.lenient    = !!lenient
+    self.name             = name
+    self.data             = data
+    self.data_type        = data_type
+    self.lenient          = !!lenient
+    self.strict_null_mode = strict_null_mode
     # Otherwise changed will depend on order in hashes
-    self.metadata   = new_metadata unless metadata == new_metadata
-    self.constraint = constraint
-    self.created_dt = created_dt if created_dt
+    self.metadata         = new_metadata unless metadata == new_metadata
+    self.constraint       = constraint
+    self.created_dt       = created_dt if created_dt
     save!
   end
 
