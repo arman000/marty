@@ -141,12 +141,32 @@ code coverage:
   coverage: '/LOC\s\(\d+\.\d+%\)\scovered/'
   only:
     - merge_requests
+  except:
+    - master
+    - tags
   script:
     - bundle exec rake marty:merge_coverage_reports
   artifacts:
     paths:
       - "coverage/"
     name: "Pipeline $CI_PIPELINE_ID Merged Coverage"
+
+CHANGELOG.md updated:
+  extends: .base-test
+  stage: .pre
+  only:
+    - merge_requests
+  except:
+    - master
+    - tags
+  script: 
+    - |
+      export VERSION_CHANGE=`git diff lib/marty/version.rb`
+      export CHGLOG_CHANGE=`git diff CHANGELOG.md`
+      if [[ ! -z $VERSION_CHANGE && -z $CHGLOG_CHANGE ]]; then \
+         echo "Please update CHANGELOG.md with your notes" \
+         exit 1; \
+      fi;
 
 cache:
   key: 'marty_bundler_cache'

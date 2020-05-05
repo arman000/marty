@@ -1,3 +1,9 @@
+14.1.0 - 2020-05-01
+=====================
+* Add cleaner service and migration. The job is disabled by default.
+
+In monkey.rb override `CLASSES_TO_CLEAN` with the desired classes to be scanned/cleaned.
+
 14.0.0 - 2020-04-28
 =====================================================
 * Adds NULL support for data grid matchers:
@@ -8,6 +14,10 @@ In strict mode it would only match wildcards and keys with NULL value
 NULL can be combined with other values in array
 
 * DataGrid's PLPGSQL lookups are no longer supported
+
+13.2.0 - 2020-04-30
+=====================
+* Add PDF content type handling
 
 13.1.0 - 2020-04-14
 =====================
