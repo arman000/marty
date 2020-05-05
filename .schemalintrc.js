@@ -7,16 +7,13 @@ module.exports = {
     charset: "utf8"
   },
 
-  // plugins: ['./custom-rules'],
+  plugins: ["./.schemalint-rules"],
 
   rules: {
     "name-casing": ["error", "snake"],
     "name-inflection": ["error", "plural"],
-    "prefer-jsonb-to-json": ["error"]
-    // FIXME: user varchar with no size limit instead
-    // We would need to update lib so it would return column size info
-    // And create our own rule that checks that
-    // "prefer-text-to-varchar": ["error"]
+    "prefer-jsonb-to-json": ["error"],
+    "prefer-varchar-without-size-limit": ["error"]
   },
 
   schemas: [{ name: "public" }],
