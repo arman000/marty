@@ -1,3 +1,7 @@
+14.2.0 - 2020-05-05
+=====================================================
+* Adds `Marty::Diagnostic::Version.git_tag` method that is used in diags and can be redifined in Marty apps.
+
 14.1.0 - 2020-05-01
 =====================
 * Add cleaner service and migration. The job is disabled by default.

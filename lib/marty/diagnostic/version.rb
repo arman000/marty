@@ -1,5 +1,11 @@
 module Marty::Diagnostic
   class Version < Base
+    def self.git_tag
+      git_tag = `cd #{Rails.root}; git describe --tags --always --abbrev=7;`.strip
+      git_datetime = `cd #{Rails.root}; git log -1 --format=%cd;`.strip
+      "#{git_tag} (#{git_datetime})"
+    end
+
     diagnostic_fn do
       begin
         submodules = `cd #{Rails.root}; git submodule`.split("\n").map do |s|
@@ -11,12 +17,11 @@ module Marty::Diagnostic
           }
         end.reduce(&:merge) || {}
 
-        git_tag = `cd #{Rails.root}; git describe --tags --always --abbrev=7;`.strip
-        git_datetime = `cd #{Rails.root}; git log -1 --format=%cd;`.strip
-        git = { 'Root Git' => "#{git_tag} (#{git_datetime})" }.merge(submodules)
+        git = { 'Root Git' => git_tag }.merge(submodules)
       rescue StandardError
         git = { 'Root Git' => error('Failed accessing git') }
       end
+
       rbv = "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
       {
         'Marty'                   => Marty::VERSION,

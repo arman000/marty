@@ -14,7 +14,7 @@ module Marty::Diagnostic
     end
 
     def git
-      tag = `cd #{Rails.root}; git describe --tags --always;`.strip
+      tag = `cd #{Rails.root}; git describe --tags --always --abbrev=7;`.strip
       git_datetime = `cd #{Rails.root}; git log -1 --format=%cd;`.strip
 
       "#{tag} (#{git_datetime})"
