@@ -1,10 +1,10 @@
 {
   "private": true,
   "scripts": {
-    "eslint-check": "eslint  'app/**/*.{js,jsx}' ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
-    "eslint-write": "eslint --fix 'app/**/*.{js,jsx}' ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
-    "prettier-check": "prettier --check \"app/**/*.{js,jsx,css,scss}\" ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
-    "prettier-write": "prettier --write \"app/**/*.{js,jsx,css,scss}\" ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
+    "eslint-check": "eslint  'app/**/*.{js,jsx}' ./.schemalint-rules ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
+    "eslint-write": "eslint --fix 'app/**/*.{js,jsx}' ./.schemalint-rules ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
+    "prettier-check": "prettier --check \"app/**/*.{js,jsx,css,scss}\" ./.schemalint-rules/**/* ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
+    "prettier-write": "prettier --write \"app/**/*.{js,jsx,css,scss}\" ./.schemalint-rules/**/* ./.schemalintrc.js ./.eslintrc.js ./prettier.config.js",
     "lint": "yarn run eslint-check && yarn run prettier-check",
     "lint-fix": "yarn run eslint-write && yarn run prettier-write",
     "lint-schema": "schemalint"

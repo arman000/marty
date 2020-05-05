@@ -10,7 +10,8 @@ module.exports = {
     Ext: "readonly",
     CodeMirror: "readonly",
     module: "writable",
-    process: "readonly"
+    process: "readonly",
+    require: "readonly"
   },
   parserOptions: {
     ecmaVersion: 6

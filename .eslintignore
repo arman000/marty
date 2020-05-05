@@ -1,3 +1,4 @@
 app/assets/javascripts/marty/codemirror/*
 !.schemalintrc.js
+!.schemalint-rules/*
 !.eslintrc.js
