@@ -1,5 +1,19 @@
 14.2.0 - 2020-05-05
 =====================================================
+* Treating passed nil to data grids in the same way as missing attribute
+broke our lookups. Roll that change back. With this change, the behavior
+would be the following:
+
+In non strict null mode:
+missing attribute matches everything
+passed nil matches only wildcard keys (empty keys)
+
+In strict_null_mode:
+missing attribute matches only NULLs and wildcard keys
+passed nil matches only NULLs and wildcard keys
+
+14.2.0 - 2020-05-05
+=====================================================
 * Adds `Marty::Diagnostic::Version.git_tag` method that is used in diags and can be redifined in Marty apps.
 
 14.1.0 - 2020-05-01

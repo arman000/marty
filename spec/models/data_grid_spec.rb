@@ -641,7 +641,7 @@ EOS
         expect(res).to eq [22, 'G1']
       end
 
-      it 'should treat nil as missing attr' do
+      it 'should not treat nil as missing attr' do
         expect do
           res = lookup_grid_helper('infinity',
                                    'G1',
@@ -659,14 +659,14 @@ EOS
                                   )
         end.to raise_error(RuntimeError, /matches > 1/)
 
-        expect do
-          res = lookup_grid_helper('infinity',
-                                   'G1',
-                                   'fico' => 720,
-                                   'state' => nil,
-                                   'ltv' => 80,
-                                  )
-        end.to raise_error(RuntimeError, /matches > 1/)
+        res = lookup_grid_helper('infinity',
+                                 'G1',
+                                 'fico' => 720,
+                                 'state' => nil,
+                                 'ltv' => 80,
+                                )
+
+        expect(res).to eq [22, 'G1']
       end
 
       it 'should handle string NULLS' do

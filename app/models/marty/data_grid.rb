@@ -201,13 +201,15 @@ class Marty::DataGrid < Marty::Base
 
       unless dgh['strict_null_mode']
         next unless h_passed.key?(attr)
-        # FIXME: Make sure it won't break lookups
+
+        # FIXME: Treating passed nil in the same way
+        # as missing broke our lookups. Maybe we should get back to it later.
         # Before missing attribute would match anything,
         # while explicitly passed nil would only match wildcard keys
         # We want to be consistent and treat nil attribute as missing one,
         # unless it's a stict_null_mode, where nil would be explicitly mapped
         # to NULL keys
-        next if val.nil?
+        # next if val.nil?
       end
 
       converted_val = if val.nil?
@@ -240,7 +242,7 @@ class Marty::DataGrid < Marty::Base
                       checks.all? do |check|
                         converted_val.send(check[0], check[1])
                       end
-                    elsif key_val.nil? # Non-wildcard lookup
+                    elsif key_val.nil?
                       val.nil?
                     elsif m_type == 'boolean'
                       key_val == converted_val
