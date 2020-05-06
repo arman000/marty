@@ -64,9 +64,25 @@ module Layout
         spellcheck:  false,
         allow_blank: false,
         field_style: {
-          font_family: 'courier new',
+          font_family: 'Fira Code',
           font_size:   '12px'
         },
+    }.merge(options)
+  end
+
+  def codemirror_field(name, options = {})
+    {
+      name:         name,
+      line_numbers: true,
+      indent_unit:    2,
+      xtype:       :codemirror,
+      mode:        'text/x-ruby',
+      spellcheck:  false,
+      allow_blank: false,
+      field_style: {
+        font_family: 'Fira Code',
+        font_size:   '12px'
+      },
     }.merge(options)
   end
 

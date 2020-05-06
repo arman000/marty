@@ -458,7 +458,7 @@ Ext.define("Ext.ux.form.field.CodeMirror", {
     // change the codemirror css
     const css1 = Ext.util.CSS.getRule(".CodeMirror");
     if (css1) {
-      css1.style.height = "100%";
+      css1.style.height = "inherit"; // Don't stretch beyond viewport height
       css1.style.position = "relative";
       css1.style.overflow = "hidden";
     }

@@ -1,0 +1,9 @@
+.CodeMirror * {
+  font-family: "Fira Code", monospace !important;
+}
+
+/* FiraCode for Textarea and CodeMirror */
+code { font-family: 'Fira Code', monospace !important; }
+@supports (font-variation-settings: normal) {
+  code { font-family: 'Fira Code VF', monospace; }
+}

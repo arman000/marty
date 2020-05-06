@@ -2,3 +2,78 @@
 *= stub marty/dark_mode
 *= require_tree .
 */
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/tonsky/FiraCode@3/distr/fira_code.css');
+
+/*
+  Select all elements with classes that begin with 'x-' (ExtJS classes),
+  except for elements that haev the .fa and .fab classes (font-awesome)
+*/
+*[class^="x-"]:not(.fa):not(.fab), *[class*=" x-"]:not(.fa):not(.fab) {
+  font-family: "Open Sans", sans-serif;
+}
+
+.bg-pennymac-blue {
+  background-color: #003087;
+  color: white;
+}
+
+.bg-pennymac-blue:hover {
+  background-color: #01175B;
+}
+
+.bg-pennymac-yellow {
+  background-color: #F1C400;
+  color: black;
+}
+
+.bg-pennymac-yellow:hover {
+  background-color: #A68104;
+}
+
+.bg-pennymac-cyan {
+  background-color: #31AFDF;
+  color: black;
+}
+
+.bg-pennymac-cyan:hover {
+  background-color: #18789C;
+}
+
+.bg-pennymac-red {
+  background-color: #D1231D;
+  color: white;
+}
+
+.bg-pennymac-red:hover {
+  background-color: #881701;
+}
+
+.bg-pennymac-green {
+  background-color: #14892C;
+  color: white;
+}
+
+.bg-pennymac-green:hover {
+  background-color: #06621B;
+}
+
+.bg-pennymac-charcoal {
+  background-color: #333333;
+  color: white;
+}
+
+.bg-pennymac-charcoal:hover {
+  background-color: #1B1B1B;
+}
+
+.bg-pennymac-black {
+  background-color: #000000;
+  color: white;
+}
+
+.bg-pennymac-white {
+  background-color: #FFFFFF;
+  color: black;
+}

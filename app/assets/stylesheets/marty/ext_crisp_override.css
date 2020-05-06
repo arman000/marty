@@ -1,0 +1,119 @@
+.x-column-header-sort-ASC,
+.x-column-header-sort-DESC {
+  background-image: none;
+}
+
+body {
+  font-size: 18px;
+  line-height: 20px;
+  font-weight: 300;
+}
+
+.x-btn {
+  border: none;
+  padding: 10px;
+  text-align: center;
+  position: relative;
+  outline: none;
+}
+
+.x-tab.x-tab-active.x-tab-default {
+  border: none;
+  padding: 10px;
+  text-align: center;
+  position: relative;
+  outline: none;
+}
+
+.x-menu-icon-separator.x-menu-icon-separator-default {
+  border: 0px;
+  color: none;
+}
+
+.x-menu-item,
+.x-menu-item-icon-default {
+  padding: 10px;
+}
+
+.x-menu-item-arrow,
+.x-menu-item-arrow-default {
+  padding: 10px;
+  top: 18px !important;
+}
+
+
+.x-hmenu-sort-asc,
+.x-hmenu-sort-desc,
+.x-cols-icon,
+.x-menu-item-checkbox {
+  top: 12px;
+}
+
+.x-tab-bar-horizontal > .x-tab-bar-body-default {
+  min-height: 36px;
+}
+
+.x-tab-bar-default-top > .x-tab-bar-body-default {
+  padding: 6px;
+}
+
+.x-btn-inner-default-toolbar-small {
+  text-align: center;
+  position: relative;
+  background-image: none;
+  padding: 0 5px;
+  max-width: 100%;
+}
+
+.x-btn.x-btn-menu-active.x-btn-default-toolbar-small,
+.x-btn.x-btn-pressed.x-btn-default-toolbar-small {
+  background-image: none;
+}
+
+.x-title-align-left {
+  text-align: left;
+}
+
+.x-title {
+  display: table;
+  table-layout: fixed;
+}
+
+.x-box-item {
+  position: absolute !important;
+  left: 0;
+  top: 0;
+}
+
+.x-border-box,
+.x-border-box * {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+.x-window-header-title-default {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 20px;
+}
+
+.x-panel-header-title-default-framed {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 20px;
+}
+
+.x-panel-header-title-default {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 20px;
+}
+
+.x-btn-inner {
+  display: inline-block;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

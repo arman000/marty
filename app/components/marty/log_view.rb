@@ -29,7 +29,7 @@ class Marty::LogView < Marty::Grid
       :timestamp_custom,
       :message_type,
       :message,
-      textarea_field(:details).merge!(height: 400)
+      codemirror_field(:details).merge!(height: 400)
     ]
   end
 
