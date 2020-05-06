@@ -25,5 +25,5 @@
     }
 
     return `bg-pennymac-${typeClass}`;
-  },
+  }
 });

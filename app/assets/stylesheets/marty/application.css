@@ -3,14 +3,15 @@
 *= require_tree .
 */
 
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap');
-@import url('https://cdn.jsdelivr.net/gh/tonsky/FiraCode@3/distr/fira_code.css');
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap");
+@import url("https://cdn.jsdelivr.net/gh/tonsky/FiraCode@3/distr/fira_code.css");
 
 /*
   Select all elements with classes that begin with 'x-' (ExtJS classes),
   except for elements that haev the .fa and .fab classes (font-awesome)
 */
-*[class^="x-"]:not(.fa):not(.fab), *[class*=" x-"]:not(.fa):not(.fab) {
+*[class^="x-"]:not(.fa):not(.fab),
+*[class*=" x-"]:not(.fa):not(.fab) {
   font-family: "Open Sans", sans-serif;
 }
 
@@ -20,29 +21,29 @@
 }
 
 .bg-pennymac-blue:hover {
-  background-color: #01175B;
+  background-color: #01175b;
 }
 
 .bg-pennymac-yellow {
-  background-color: #F1C400;
+  background-color: #f1c400;
   color: black;
 }
 
 .bg-pennymac-yellow:hover {
-  background-color: #A68104;
+  background-color: #a68104;
 }
 
 .bg-pennymac-cyan {
-  background-color: #31AFDF;
+  background-color: #31afdf;
   color: black;
 }
 
 .bg-pennymac-cyan:hover {
-  background-color: #18789C;
+  background-color: #18789c;
 }
 
 .bg-pennymac-red {
-  background-color: #D1231D;
+  background-color: #d1231d;
   color: white;
 }
 
@@ -51,12 +52,12 @@
 }
 
 .bg-pennymac-green {
-  background-color: #14892C;
+  background-color: #14892c;
   color: white;
 }
 
 .bg-pennymac-green:hover {
-  background-color: #06621B;
+  background-color: #06621b;
 }
 
 .bg-pennymac-charcoal {
@@ -65,7 +66,7 @@
 }
 
 .bg-pennymac-charcoal:hover {
-  background-color: #1B1B1B;
+  background-color: #1b1b1b;
 }
 
 .bg-pennymac-black {
@@ -74,6 +75,6 @@
 }
 
 .bg-pennymac-white {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   color: black;
 }
