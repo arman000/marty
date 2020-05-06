@@ -11,6 +11,7 @@ require "sprockets/railtie"
 
 Bundler.require(*Rails.groups)
 require "marty"
+require "marty/permissions"
 
 module Dummy
   APP_ROOT = File.expand_path("..", __FILE__).freeze
@@ -87,4 +88,3 @@ module Dummy
     config.marty.uglify_assets = ENV['MARTY_UGLIFY_ASSETS'].to_s == 'true'
   end
 end
-require "marty/permissions"
