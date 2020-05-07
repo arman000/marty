@@ -33,6 +33,15 @@ schema-lint:
     - .marty-rspec-rails
   variables:
     POSTGRES_DB_NAME: "marty_test"
+  script:
+    - yarn install
+    # Hacky fix to make file run in CI
+    - ls -la node_modules/
+    - ls -la node_modules/schemalint/
+    - ls -la node_modules/schemalint/bin/
+    - sed -i "1s/.*/\#\!\/usr\/bin\/env node/" \
+      node_modules/schemalint/bin/schemalint
+    - yarn run schemalint
 
 rspec-controllers:
   extends:
