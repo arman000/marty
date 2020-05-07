@@ -2,9 +2,7 @@ version: "2"
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile.dummy
+    image: 415596832415.dkr.ecr.us-west-2.amazonaws.com/cm_tech/docker-ruby-ci-image:latest
     command: bash -c 'cd spec/dummy && rm -f tmp/pids/server.pid && rails s -b 0.0.0.0'
     ports:
       - "3000:3000"
@@ -13,10 +11,10 @@ services:
       - "PATH=/bundle_box/bundle/bin:/usr/local/bundle/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       - "DEVELOPMENT_DATABASE_URL=postgres://postgres@postgres/marty_dev"
       - "TEST_DATABASE_URL=postgres://postgres@postgres/marty_test"
-      - "HEADLESS_WINDOW_SIZE=1400,1400"
+      - "HEADLESS_WINDOW_SIZE=1920,1400"
       - "HEADLESS=true"
       - "PGTZ=America/Los_Angeles"
-      - "BUNDLER_VERSION=2.0.1"
+      - "BUNDLER_VERSION=2.1.4"
       - "MARTY_REDIS_URL=redis:6379/1"
       - "POSTGRES_HOST=postgres"
     # env_file: ".rbenv-vars"

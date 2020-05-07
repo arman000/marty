@@ -8,28 +8,23 @@ gemspec
 group :default do
   gem 'daemons'
   gem 'delayed_job_active_record'
+  gem 'netzke'
   gem 'pg'
   gem 'rails'
-end
-
-group :default, :cmit do
-  gem 'delorean_lang'
-  gem 'mcfly'
-  # gem 'delorean_lang', path: File.expand_path('../../delorean', __FILE__)
-  # gem 'mcfly', path: File.expand_path('../../mcfly', __FILE__)
+  group :cmit do
+    gem 'delorean_lang'
+    gem 'mcfly'
+    # gem 'delorean_lang', path: File.expand_path('../../delorean', __FILE__)
+    # gem 'mcfly', path: File.expand_path('../../mcfly', __FILE__)
+  end
 end
 
 group :development, :test do
-  # FIXME: 2.8.0 is broken, we should wait until 2.8.1 is out
-  gem 'benchmark-ips', '< 2.8.0'
+  gem 'benchmark-ips'
   gem 'capybara'
   gem 'connection_pool'
   gem 'database_cleaner'
   gem 'fuubar', require: false
-  gem 'netzke', '6.5.0.0'
-  gem 'pry-byebug'
-  gem 'pry-rails'
-  gem 'puma'
   gem 'rails-controller-testing'
   gem 'rspec-instafail', require: false
   gem 'rspec-rails'

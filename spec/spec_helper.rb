@@ -1,8 +1,8 @@
 ENV['RAILS_ENV'] ||= 'test'
 ENV['TZ'] ||= 'America/Los_Angeles'
 
-require_relative 'support/simplecov_helper'
-SimpleCovHelper.start!
+require 'marty/simplecov_helper'
+Marty::SimpleCovHelper.start!
 
 require 'dummy/config/application'
 require 'rspec/rails'
@@ -77,7 +77,7 @@ RSpec.configure do |config|
 
   if ENV['RSPEC_AUTO_RETRY_JS'] == 'true'
     config.around :each, :js do |ex|
-      ex.run_with_retry retry: 3
+      ex.run_with_retry retry: ENV['RSPEC_AUTO_RETRY_JS_ATTEMPTS'] || 5
     end
 
     config.retry_callback = proc do |ex|
