@@ -5,7 +5,7 @@ module Marty; module RSpec; module SharedConnectionDbHelpers
 
   def save_clean_db(clean_file)
     if db_host == 'localhost'
-      `pg_dump -O -Fc #{current_db} > #{clean_file}`
+      `pg_dump -O -p #{db_port} -Fc #{current_db} > #{clean_file}`
     else
       `#{remote_db_pw} pg_dump -O -Fc #{remote_db_args} #{current_db} > #{clean_file}`
     end
@@ -15,7 +15,7 @@ module Marty; module RSpec; module SharedConnectionDbHelpers
     self.use_transactional_tests = false
 
     if db_host == 'localhost'
-      `pg_restore -j 2 -O -x -c -d #{current_db} #{clean_file}`
+      `pg_restore -p #{db_port} -j 2 -O -x -c -d #{current_db} #{clean_file}`
     else
       `#{remote_db_pw} pg_restore #{remote_db_args} #{restore_args(current_db, clean_file)}`
     end
@@ -37,6 +37,10 @@ module Marty; module RSpec; module SharedConnectionDbHelpers
     ActiveRecord::Base.connection_config[:host] || 'localhost'
   end
 
+  def db_port
+    ActiveRecord::Base.connection_config[:port] || 5432
+  end
+
   def db_user
     ActiveRecord::Base.connection_config[:username]
   end
@@ -50,7 +54,7 @@ module Marty; module RSpec; module SharedConnectionDbHelpers
   end
 
   def remote_db_args
-    "-h #{db_host} -U #{db_user} -w"
+    "-h #{db_host} -p #{db_port} -U #{db_user} -w"
   end
 
   def remote_db_pw
