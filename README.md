@@ -84,6 +84,17 @@ make app-bash
 HEADLESS=true rspec
 ```
 
+You can also use docker for running Postgres and Redis only:
+
+```bash
+cp spec/dummy/config/database.yml.db_in_docker.example spec/dummy/config/database.yml
+
+make db-start
+make db-stop
+```
+
+Postgres container would listen to 3030 port
+
 To run without Docker:
 
 Marty currently only runs with PostgreSQL. To be able to run the tests

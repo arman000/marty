@@ -44,3 +44,8 @@ app-db-prepare:
 app-db-seed:
 	docker-compose --file=docker-compose.dummy.yml run --rm app rake db:seed
 
+db-start:
+	docker-compose --file=docker-compose.dummy.yml up -d postgres redis
+
+db-stop:
+	docker-compose --file=docker-compose.dummy.yml stop postgres redis

@@ -1,0 +1,12 @@
+common: &common
+  adapter: postgresql
+
+development:
+  <<: *common
+  url: 'postgres://postgres@127.0.0.1:3030/marty_dev'
+  database: marty_dev
+
+test:
+  <<: *common
+  database: marty_test
+  url: 'postgres://postgres@127.0.0.1:3030/marty_test'
