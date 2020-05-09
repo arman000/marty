@@ -106,4 +106,5 @@ code-coverage:
 
 include:
   - project: 'cm_tech/cm_shared'
+    ref: needs_and_dependencies
     file: '/.gitlab/ci/defaults.yml'
