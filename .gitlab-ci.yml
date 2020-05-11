@@ -5,7 +5,7 @@ variables:
   PG_IMAGE_VERSION: "11"
   RAILS_DUMP_SCHEMA: "false"
   REDIS_IMAGE_VERSION: "5.0.6-alpine"
-  RUBY_IMAGE_VERSION: "latest"
+  RUBY_IMAGE_VERSION: "2.6.3"
 
 # Redefining it here since it's different from other projects
 .marty-rspec-rails: &marty-rspec-rails
