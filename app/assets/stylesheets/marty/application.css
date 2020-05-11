@@ -3,18 +3,6 @@
 *= require_tree .
 */
 
-@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap");
-@import url("https://cdn.jsdelivr.net/gh/tonsky/FiraCode@3/distr/fira_code.css");
-
-/*
-  Select all elements with classes that begin with 'x-' (ExtJS classes),
-  except for elements that haev the .fa and .fab classes (font-awesome)
-*/
-*[class^="x-"]:not(.fa):not(.fab),
-*[class*=" x-"]:not(.fa):not(.fab) {
-  font-family: "Open Sans", sans-serif;
-}
-
 .bg-pennymac-blue {
   background-color: #003087;
   color: white;

@@ -16,7 +16,10 @@ module Marty
       'marty/application.js',
       'marty/cable.js',
       'marty/application.css',
-      'marty/dark_mode.css'
+      'marty/codemirror_override.css',
+      'marty/dark_mode.css',
+      'marty/ext_crisp_override.css',
+      'marty/fonts.css',
     ]
 
     config.action_cable.disable_request_forgery_protection = true

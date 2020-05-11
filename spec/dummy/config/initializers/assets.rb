@@ -1,1 +1,6 @@
-Rails.application.config.assets.precompile += ['*.js', '*.css']
+Rails.application.config.assets.precompile += [
+  '*.js',
+  '*.css',
+  '*.ttf',
+  '*.woff2'
+]

@@ -1,3 +1,12 @@
+/*
+  Select all elements with classes that begin with 'x-' (ExtJS classes),
+  except for elements that haev the .fa and .fab classes (font-awesome)
+*/
+*[class^="x-"]:not(.fa):not(.fab),
+*[class*=" x-"]:not(.fa):not(.fab) {
+  font-family: 'Open Sans', sans-serif;
+}
+
 .x-column-header-sort-ASC,
 .x-column-header-sort-DESC {
   background-image: none;

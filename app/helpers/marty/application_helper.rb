@@ -17,5 +17,10 @@ module Marty
     def stylesheet_exists?(file)
       asset_exists?(file, :css, DEFAULT_ASSETS_PATH + '/stylesheets')
     end
+
+    def font_exists?(file)
+      asset_exists?(file, :ttf, DEFAULT_ASSETS_PATH + '/fonts') ||
+        asset_exists?(file, :woff2, DEFAULT_ASSETS_PATH + '/fonts')
+    end
   end
 end
