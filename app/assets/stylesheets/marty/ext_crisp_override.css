@@ -4,7 +4,7 @@
 */
 *[class^="x-"]:not(.fa):not(.fab),
 *[class*=" x-"]:not(.fa):not(.fab) {
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 .x-column-header-sort-ASC,
