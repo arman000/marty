@@ -44,17 +44,17 @@ describe 'Caching Performance' do
         )
       )
 
-      x.report('redis_adapter') do |_t|
+      x.report('redis_adapter') do
         ::Delorean::Cache.adapter = redis_adapter
         10.times { |n| Gemini::Helper.cached_factorial(n) }
       end
 
-      x.report('memory_and_redis_adapter') do |_t|
+      x.report('memory_and_redis_adapter') do
         ::Delorean::Cache.adapter = memory_and_redis_adapter
         10.times { |n| Gemini::Helper.cached_factorial(n) }
       end
 
-      x.report('mcfly_adapter') do |_t|
+      x.report('mcfly_adapter') do
         ::Delorean::Cache.adapter = mcfly_adapter
         10.times { |n| Gemini::Helper.cached_factorial(n) }
       end
@@ -70,7 +70,7 @@ describe 'Caching Performance' do
     redis_vs_memory_and_redis_factor = h['memory_and_redis_adapter'] / h['redis_adapter']
 
     expect(memory_and_redis_vs_memory_factor).to be < 3
-    expect(redis_vs_memory_and_redis_factor).to be > 100
+    expect(redis_vs_memory_and_redis_factor).to be > 10
   end
 end
 
