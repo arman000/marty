@@ -78,6 +78,7 @@ class Marty::LogView < Marty::Grid
     c.filter_with = lambda { |r, v, op|
       r.where("details::text  #{op} '%#{v}%'")
     }
+    c.getter    = lambda { |r| r.details.to_s[0..200] }
   end
 
   attribute :details do |c|
