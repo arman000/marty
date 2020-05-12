@@ -49,11 +49,11 @@ feature 'logger view', js: true, capybara: true do
     exp_messages = ['fatal message', 'error message',
                     'info message', 'hi mom', 'all your base']
     exp_details = ['["string", 123, {"fatal"=>"message", '\
-                     "\"another_key\"=>\"value\"}]\n",
-                   "[1, 2, 3, {\"error\"=>\"message\"}]\n",
-                   "nil\n",
-                   "[\"one\", \"two\", 3, 4.0]\n",
-                   "[5]\n"]
+                     '"another_key"=>"value"}]',
+                   '[1, 2, 3, {"error"=>"message"}]',
+                   '',
+                   '["one", "two", 3, 4.0]',
+                   '[5]']
     [[nil, 5], [7, 4], [3, 3], [0, 0]].each do |days, exp_count|
        if days
          press('System')
