@@ -105,5 +105,5 @@ code-coverage:
   script: bundle exec rake app:marty:merge_coverage_reports
 
 include:
-  - project: 'cm_tech/cm_shared'
+  - project: 'cm_tech/cm_gitlab_ci'
     file: '/.gitlab/ci/defaults.yml'
