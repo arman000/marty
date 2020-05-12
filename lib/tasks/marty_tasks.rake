@@ -68,7 +68,6 @@ namespace :marty do
   desc 'Merge the results of various SimpleCov coverage reports'
   task merge_coverage_reports: :environment do
     require 'marty/simplecov_helper'
-    puts $LOAD_PATH
     require_relative '../marty/simplecov_helper.rb'
     Marty::SimpleCovHelper.configure_profile
     puts 'Merging code coverage reports...'

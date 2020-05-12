@@ -4,7 +4,7 @@ variables:
   MARTY_REDIS_URL: 'localhost:6379/1'
   PG_IMAGE_VERSION: "11"
   RAILS_DUMP_SCHEMA: "false"
-  REDIS_IMAGE_VERSION: "5.0.6-alpine"
+  REDIS_IMAGE_VERSION: "latest"
   RUBY_IMAGE_VERSION: "latest"
 
 # Redefining it here since it's different from other projects
@@ -106,5 +106,4 @@ code-coverage:
 
 include:
   - project: 'cm_tech/cm_shared'
-    ref: needs_and_dependencies
     file: '/.gitlab/ci/defaults.yml'
