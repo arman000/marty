@@ -29,6 +29,7 @@ spec/dummy/.sass-cache
 /spec/dummy/public/assets
 .rspec
 .rspec-results
+.DS_Store
 
 # Files with command history for docker
 .bash_history.docker

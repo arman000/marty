@@ -1,193 +1,109 @@
-image: $CI_IMAGE
+variables:
+  COVERAGE: "true"
+  GIT_SSL_NO_VERIFY: "true"
+  MARTY_REDIS_URL: 'localhost:6379/1'
+  PG_IMAGE_VERSION: "11"
+  RAILS_DUMP_SCHEMA: "false"
+  REDIS_IMAGE_VERSION: "latest"
+  RUBY_IMAGE_VERSION: "latest"
 
-stages:
-  - setup
-  - test
-  - codecov
-  - deploy
-
-services:
-  - "postgres:9.6"
-  - "redis:5.0.6-alpine"
-
-# Use only the following CI runners
-.runners:
-  tags:
-    - gitlabci-runner-eks-shared-dev
-
-.base-test:
+# Redefining it here since it's different from other projects
+.marty-rspec-rails: &marty-rspec-rails
   extends:
-    - .runners
-  # Cancel if new commits where pushed
-  interruptible: true
-  # Run only when there is an MR
-  only:
-    - master
-    - merge_requests
-  stage: test
-  retry:
-    max: 2
-    when:
-      - script_failure
-      - runner_system_failure
-
-.base-ruby:
-  extends: .base-test
+    - .base-rails
+    - .base-rspec
   before_script:
-    - time bundle install --jobs $(nproc) --path vendor "${FLAGS[@]}"
+    - mkdir -p spec/dummy/public/ && ln -s $EXTJS_PATH spec/dummy/public/
     - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
-    - RAILS_ENV=test bundle exec rails db:create db:migrate
+    - bundle exec rake db:create db:migrate app:assets:precompile
 
-.base-js:
-  extends: .base-test
-  retry:
-    max: 0
-  before_script:
-    - yarn
-
-.base-rspec:
-  extends: .base-ruby
-  coverage: '/LOC\s\(\d+\.\d+%\)\scovered/'
-  artifacts:
-    paths:
-      - "coverage/$CI_JOB_NAME"
-    name: "$CI_JOB_NAME Coverage"
-    when: always
+setup:
+  extends: .setup
 
 rubocop:
-  retry:
-    max: 0
-  extends: .base-ruby
-  script:
-    - bundle exec rubocop -f simple -P
+  extends: .rubocop
 
 eslint-prettier:
-  extends: .base-js
-  script:
-    - make lint-js
+  extends: .eslint-prettier
 
-schema-linter:
-  retry:
-    max: 0
-  extends: .base-ruby
-  script:
-    - yarn
-    # Hacky fix to make file run in CI
-    - sed -i "1s/.*/\#\!\/usr\/bin\/env node/" node_modules/schemalint/bin/schemalint
-    - make lint-schema
+schema-lint:
+  stage: check
+  extends:
+    - .schema-lint
+    - .marty-rspec-rails
+  variables:
+    POSTGRES_DB_NAME: "marty_test"
 
-rspec (controllers):
-  extends: .base-rspec
-  script:
-    - bundle exec rspec spec/controllers
+rspec-controllers:
+  extends:
+    - .rspec-controllers
+    - .marty-rspec-rails
 
-rspec (jobs):
-  extends: .base-rspec
-  script:
-    - bundle exec rspec spec/jobs
+rspec-features-normal:
+  extends:
+    - .rspec-features
+    - .marty-rspec-rails
+  script: bundle exec rspec spec/features --tag ~speed --format documentation
 
-rspec (lib):
-  extends: .base-rspec
-  script:
-    - bundle exec rspec spec/lib
+rspec-features-slow:
+  extends:
+    - .rspec-features
+    - .marty-rspec-rails
+  script: bundle exec rspec spec/features --tag speed:slow --format documentation
 
-rspec (models):
-  extends: .base-rspec
-  script:
-    - bundle exec rspec spec/models
+rspec-features-super-slow:
+  extends:
+    - .rspec-features
+    - .marty-rspec-rails
+  script: bundle exec rspec spec/features --tag speed:super_slow --format documentation
 
-rspec (other):
-  extends: .base-rspec
-  script:
-    - bundle exec rspec spec/other
+rspec-jobs:
+  extends:
+    - .rspec-jobs
+    - .marty-rspec-rails
 
-rspec (performance):
-  extends: .base-rspec
-  script:
-    - bundle exec rspec spec/performance
+rspec-lib:
+  extends:
+    - .rspec-lib
+    - .marty-rspec-rails
 
-rspec (requests):
-  extends: .base-rspec
-  script:
-    - bundle exec rspec spec/requests
+rspec-models:
+  extends:
+    - .rspec-models
+    - .marty-rspec-rails
 
-rspec (services):
-  extends: .base-rspec
-  script:
-    - bundle exec rspec spec/services
+rspec-other:
+  extends:
+    - .rspec-other
+    - .marty-rspec-rails
 
-rspec-features-1:
-  extends: .base-rspec
-  script:
-    - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
-    - bundle exec rspec spec/features --tag ~speed --format documentation
+rspec-performance:
+  extends:
+    - .rspec-performance
+    - .marty-rspec-rails
+  services:
+    - "postgres:$PG_IMAGE_VERSION"
+    - "redis:$REDIS_IMAGE_VERSION"
 
-rspec-features-2:
-  extends: .base-rspec
-  script:
-    - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
-    - bundle exec rspec spec/features --tag speed:slow --format documentation
+rspec-requests:
+  extends:
+    - .rspec-requests
+    - .marty-rspec-rails
 
-rspec-features-3:
-  extends: .base-rspec
-  script:
-    - ln -s /opt/support/extjs /cm_tech/marty/spec/dummy/public/extjs
-    - bundle exec rspec spec/features --tag speed:super_slow --format documentation
+rspec-services:
+  extends:
+    - .rspec-services
+    - .marty-rspec-rails
 
-code coverage:
-  extends: .base-ruby
-  stage: codecov
-  when: always
-  coverage: '/LOC\s\(\d+\.\d+%\)\scovered/'
-  only:
-    - merge_requests
-  except:
-    - master
-    - tags
-  script:
-    - bundle exec rake marty:merge_coverage_reports
-  artifacts:
-    paths:
-      - "coverage/"
-    name: "Pipeline $CI_PIPELINE_ID Merged Coverage"
+code-coverage:
+  extends: .code-coverage
+  variables:
+    RAILS_ENV: test
+  before_script:
+    - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
+    - bundle exec rake db:create db:migrate
+  script: bundle exec rake app:marty:merge_coverage_reports
 
-CHANGELOG.md updated:
-  extends: .base-test
-  stage: .pre
-  only:
-    - merge_requests
-  except:
-    - master
-    - tags
-  script: 
-    - |
-      export VERSION_CHANGE=`git diff lib/marty/version.rb`
-      export CHGLOG_CHANGE=`git diff CHANGELOG.md`
-      if [[ ! -z $VERSION_CHANGE && -z $CHGLOG_CHANGE ]]; then \
-         echo "Please update CHANGELOG.md with your notes" \
-         exit 1; \
-      fi;
-
-cache:
-  key: 'marty_bundler_cache'
-  paths:
-    - vendor/ruby
-
-variables:
-  BUNDLER_VERSION: "2.0.1"
-  COVERAGE: "true"
-  DOCKER_AUTH_CONFIG: '{ "credsStore": "ecr-login" }'
-  GIT_SSL_NO_VERIFY: "true"
-  HEADLESS: "true"
-  HEADLESS_WINDOW_SIZE: "1400,1400"
-  PGTZ: "America/Los_Angeles"
-  POSTGRES_USER: "runner"
-  POSTGRES_DB_NAME: "marty_test"
-  POSTGRES_HOST: "127.0.0.1"
-  POSTGRES_PASSWORD: "runner-password"
-  POSTGRES_HOST_AUTH_METHOD: "trust"
-  MARTY_REDIS_URL: 'localhost:6379/1'
-  RAILS_ENV: "test"
-  RAILS_DUMP_SCHEMA: "false"
-  RSPEC_AUTO_RETRY_JS: "true"
-
+include:
+  - project: 'cm_tech/cm_gitlab_ci'
+    file: '/.gitlab/ci/defaults.yml'
