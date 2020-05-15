@@ -19,7 +19,7 @@ module Marty
       'marty/codemirror_override.css',
       'marty/dark_mode.css',
       'marty/ext_crisp_override.css',
-      'marty/fonts.css',
+      'marty/fonts.css.erb',
     ]
 
     config.action_cable.disable_request_forgery_protection = true
