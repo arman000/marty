@@ -42,8 +42,8 @@ module Marty
       return unless defined?(RSpec)
 
       SimpleCov.configure do
-        if ENV['GITLAB_CI']
-          job_name = ENV['CI_JOB_NAME'] || nil
+        if Rails.application.config.marty.gitlab_ci
+          job_name = Rails.application.config.marty.ci_job_name
           coverage_dir "coverage/#{job_name}"
           command_name job_name
           SimpleCov.at_exit { SimpleCov.result }
@@ -90,7 +90,7 @@ module Marty
     end
 
     def self.start!
-      return unless ENV['COVERAGE'] == 'true'
+      return unless Rails.application.config.marty.coverage
 
       configure_profile
       configure_job

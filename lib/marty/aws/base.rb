@@ -10,13 +10,14 @@ class Marty::Aws::Base
               :role,
               :creds,
               :version,
-              :host,
-              def self.get url
-                uri = URI.parse(url)
-                req = Net::HTTP.new(uri.host, uri.port)
-                req.read_timeout = req.open_timeout = ENV['AWS_REQUEST_TIMEOUT'] || 0.25
-                req.start { |http| http.get(uri.to_s) }.body
-              end
+              :host
+
+  def self.get(url)
+    uri = URI.parse(url)
+    req = Net::HTTP.new(uri.host, uri.port)
+    req.read_timeout = req.open_timeout = Rails.application.config.marty.aws_request_timeout
+    req.start { |http| http.get(uri.to_s) }.body
+  end
 
   def self.is_aws?
     # FIXME: hack to pass tests on CI

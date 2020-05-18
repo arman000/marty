@@ -168,7 +168,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def app_title
-    e = ENV['RAILS_ENV']
+    e = Rails.env
 
     title = "#{app_moniker} #{::Marty::RailsApp.application_name.titleize}"
     title += " - #{e.capitalize}" unless e == 'production'
@@ -395,7 +395,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   def bg_command(subcmd)
     params = Marty::Config['DELAYED_JOB_PARAMS'] || ''
-    e, root, p = ENV['RAILS_ENV'], Rails.root, Marty::Config['RUBY_PATH']
+    e, root, p = Rails.env, Rails.root, Marty::Config['RUBY_PATH']
     dj_path = Marty::Config['DELAYED_JOB_PATH'] || 'bin/delayed_job'
     cmd = "export RAILS_ENV=#{e};"
     # FIXME: Environment looks to be setup incorrectly - this is a hack

@@ -14,7 +14,7 @@ class Marty::Helper
   end
 
   delorean_fn :git, sig: 0 do
-    [my_ip, ENV['DELAYED_VER']]
+    [my_ip, Rails.application.config.marty.delayed_ver]
   end
 
   delorean_fn :infinity_dt, sig: 1 do |pt|

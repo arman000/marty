@@ -57,7 +57,7 @@
     <div style="text-align:center">
       <h1 class="application <%= 'error' unless @result['errors'].empty? %>">
         <%=
-          ENV['DIAG_TITLE'] || ::Marty::RailsApp.application_name
+          Rails.application.config.marty.diag_title || ::Marty::RailsApp.application_name
         %> Diagnostic
       </h1>
       <h3><i><%= DateTime.now %></i></h3>
