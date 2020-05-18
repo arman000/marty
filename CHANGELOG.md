@@ -1,3 +1,10 @@
+14.4.0 - 2020-18-05
+=====================================================
+* Use Rails.application.config.marty instead of ENV vars in Marty code.
+
+Having one centralized structure with all application configs seems to
+be more convenient than having ENV checks all over our code.
+
 14.2.0 - 2020-05-05
 =====================================================
 * Treating passed nil to data grids in the same way as missing attribute
