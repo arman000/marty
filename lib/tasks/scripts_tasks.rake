@@ -12,7 +12,7 @@ namespace :marty do
 
     raise 'must have system user account seeded' unless Mcfly.whodunnit
 
-    load_dir = ENV['LOAD_DIR']
+    load_dir = Rails.application.config.marty.load_dir
     Marty::Script.load_scripts(load_dir)
   end
 end

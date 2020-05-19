@@ -29,6 +29,7 @@ describe Marty::Diagnostic::DelayedJobVersion do
 
   it 'can detect if all workers are running correct application version' do
     ENV['DELAYED_VER'] = Marty::VERSION
+    Rails.application.config.marty = Marty::ApplicationConfig.new
     start_delayed_job
     expect(described_class.generate).to eq(sample_data)
     stop_delayed_job
@@ -36,6 +37,7 @@ describe Marty::Diagnostic::DelayedJobVersion do
 
   it 'will fail if DELAYED_VER is not set' do
     ENV.delete('DELAYED_VER')
+    Rails.application.config.marty = Marty::ApplicationConfig.new
     start_delayed_job
     expect { described_class.generate }.to raise_error(RuntimeError)
     stop_delayed_job

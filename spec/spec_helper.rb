@@ -1,12 +1,12 @@
 ENV['RAILS_ENV'] ||= 'test'
 ENV['TZ'] ||= 'America/Los_Angeles'
 
-require 'marty/simplecov_helper'
-Marty::SimpleCovHelper.start!
-
 require 'dummy/config/application'
 require 'rspec/rails'
 require 'database_cleaner'
+require 'marty/simplecov_helper'
+
+Marty::SimpleCovHelper.start!
 
 support = Pathname.new(__FILE__).parent.to_s + '/support'
 require "#{support}/suite"

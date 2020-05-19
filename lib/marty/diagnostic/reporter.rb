@@ -90,7 +90,7 @@ module Marty::Diagnostic; class Reporter < Request
         }
         req = Net::HTTP.new(uri.host, uri.port)
         req.use_ssl = ssl?
-        req.read_timeout = req.open_timeout = ENV['DIAG_TIMEOUT'] || 10
+        req.read_timeout = req.open_timeout = Rails.application.config.marty.diag_timeout
         req.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
         begin
