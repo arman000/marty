@@ -38,7 +38,9 @@ module Marty; module RSpec; module SharedConnectionDbHelpers
   end
 
   def db_port
-    ActiveRecord::Base.connection_config[:port] || 5432
+    return 5432 if ActiveRecord::Base.connection_config[:port].blank?
+
+    ActiveRecord::Base.connection_config[:port]
   end
 
   def db_user
