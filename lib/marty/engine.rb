@@ -22,6 +22,10 @@ module Marty
       'marty/fonts.css.erb',
     ]
 
+    initializer 'marty.assets.precompile' do |app|
+      app.config.assets.precompile += config.assets.precompile
+    end
+
     config.action_cable.disable_request_forgery_protection = true
     # Can be overriden by config/cable.yml in Rails app
     ActionCable.server.config.cable ||= { 'adapter' => 'postgresql' }
