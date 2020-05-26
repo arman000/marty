@@ -1,5 +1,41 @@
 ({
+  validateReportForm() {
+    if (!this.validateForm) {
+      return true;
+    }
+
+    const formObject = this.getForm();
+
+    if (formObject.isValid()) {
+      return true;
+    }
+
+    const fields = formObject.getFields(); // form : Ext.form.Basic
+
+    fields.each((field) => {
+      const errors = field.getErrors();
+
+      errors.forEach((error) => {
+        this.netzkeNotify(`${field.fieldLabel}: ${error}`);
+      });
+    });
+
+    return false;
+  },
+
+  netzkeOnApply() {
+    if (!this.validateReportForm()) {
+      return;
+    }
+
+    this.callParent(arguments);
+  },
+
   netzkeOnForeground() {
+    if (!this.validateReportForm()) {
+      return;
+    }
+
     const values = this.getForm().getValues();
     const data = Ext.encode(values);
 
@@ -44,6 +80,10 @@
   },
 
   netzkeOnLink() {
+    if (!this.validateReportForm()) {
+      return;
+    }
+
     const values = this.getForm().getValues();
 
     // check for early url generation and exit with error message
