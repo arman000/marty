@@ -12,6 +12,7 @@ ParametersJsonField: Fields::JsonField
 
 NullablePostingField: Fields::PostingField
     value = nil
+    force_selection = true
 
 DataGridNameField:
     field_label = "Data Grid"
@@ -22,6 +23,7 @@ DataGridNameField:
                    order("name DESC").pluck("name")
     value       = nil
     allow_blank = false
+    force_selection = true
 
 TestDataGridReport:
     pt_name =? nil

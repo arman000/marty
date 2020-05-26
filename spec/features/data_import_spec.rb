@@ -63,7 +63,7 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
       end
 
       and_by 'select DataReport script & Data Import node' do
-        script_grid.select_row(2)
+        script_grid.select_row(3)
       end
 
       and_by 'select Data Import node' do
@@ -132,7 +132,7 @@ feature 'under Applications menu, Reports using  Data Import', js: true do
       end
 
       and_by 'select DataReport script & Data Import node' do
-        script_grid.select_row(2)
+        script_grid.select_row(3)
       end
 
       and_by 'select Data Import node' do

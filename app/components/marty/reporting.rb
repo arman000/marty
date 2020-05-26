@@ -16,7 +16,14 @@ class Marty::Reporting < Netzke::Base
   end
 
   component :report_form do |c|
-    c.klass  = Marty::ReportForm
+    script_name = root_sess[:selected_script_name]
+
+    c.klass  = if script_name.present?
+                 self.class.const_get(script_name) rescue Marty::ReportForm
+               else
+                 Marty::ReportForm
+               end
+
     c.flex   = 1
     c.region = :center
   end
