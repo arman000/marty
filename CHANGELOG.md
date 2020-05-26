@@ -1,3 +1,9 @@
+14.5.0 - 2020-21-05
+=====================================================
+* Allow disabling multirecord editing in grids by setting multi_edit to false.
+
+Enable multiselect for Gemini Rules' views and disable multiediting. For testing purposes, it would be convenient if user could delete multiple rules at once.
+
 14.4.0 - 2020-18-05
 =====================================================
 * Use Rails.application.config.marty instead of ENV vars in Marty code.

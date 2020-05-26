@@ -26,7 +26,8 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     c.store_config.merge!(sorters: [{ property: :name, direction: 'ASC' }])
     c.editing      = :in_form
     c.paging       = :pagination
-    c.multi_select = false
+    c.multi_select = true
+    c.multi_edit   = false
   end
 
   def guard_info_attributes
