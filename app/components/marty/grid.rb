@@ -38,6 +38,7 @@ class Marty::Grid < ::Netzke::Grid::Base
 
     # disable buffered renderer plugin to avoid white space on reload
     c.buffered_renderer = false
+    c.multi_edit = true
   end
 
   def has_search_action?

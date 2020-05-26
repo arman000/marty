@@ -113,6 +113,41 @@
     me.getSelectionModel().on("selectionchange", f);
   },
 
+  netzkeSetActionEvents() {
+    this.getSelectionModel().on(
+      "selectionchange",
+      function(selModel, selected) {
+        if (this.actions.delete)
+          this.actions.delete.setDisabled(selected.length == 0);
+
+        if (this.actions.edit) {
+          let disabled = false;
+          Ext.each(selected, (r) => {
+            if (r.isNew) {
+              disabled = true;
+              return false;
+            }
+          });
+
+          this.actions.edit.setDisabled(selected.length == 0 || disabled);
+
+          if (!this.multiEdit && selected.length > 1) {
+            this.actions.edit.setDisabled(true);
+          }
+        }
+
+        if (this.actions.editInForm) {
+          this.actions.editInForm.setDisabled(selected.length == 0);
+
+          if (!this.multiEdit && selected.length > 1) {
+            this.actions.editInForm.setDisabled(true);
+          }
+        }
+      },
+      this
+    );
+  },
+
   // override netzkeReloadStore to allow option passthrough
   // reference: http://api.netzke.org/client/files/doc_client_netzke-basepack_javascripts_grid_event_handlers.js.html
   netzkeReloadStore(opts = {}) {
