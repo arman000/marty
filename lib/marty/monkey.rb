@@ -117,6 +117,8 @@ module Netzke
       def set_defaults
         old_set_defaults
 
+        return set_defaults_combo if editor_config && editor_config[:xtype] == :combo
+
         return unless xtype == :checkcolumn
         # Use default value only if there is a boolean attribute with that name
         return unless @model_adapter.attr_type(name) == :boolean
@@ -127,6 +129,26 @@ module Netzke
         return self.default_value = false unless m.respond_to?(:column_defaults)
 
         self.default_value = @model_adapter.model.column_defaults[name] || false
+      end
+
+      def set_defaults_combo
+        # Allow matching of the typed characters at any position in the values.
+        editor_config[:any_match] = true unless editor_config.key?(:any_match)
+      end
+    end
+
+    class FieldConfig < AttrConfig
+      alias old_set_defaults set_defaults
+
+      def set_defaults
+        old_set_defaults
+
+        return set_defaults_combo if xtype == :combo
+      end
+
+      def set_defaults_combo
+        # Allow matching of the typed characters at any position in the values.
+        self.any_match = true unless key?(:any_match)
       end
     end
   end

@@ -1,10 +1,16 @@
-14.5.0 - 2020-21-05
+14.6.0 - 2020-05-26
+=====================================================
+* Allow matching of the typed characters at any position in the values in comboboxes.
+
+To opt out please use: `editor_config[:any_match] = false` in columns and `self.any_match = false` in fields.
+
+14.5.0 - 2020-05-21
 =====================================================
 * Allow disabling multirecord editing in grids by setting multi_edit to false.
 
 Enable multiselect for Gemini Rules' views and disable multiediting. For testing purposes, it would be convenient if user could delete multiple rules at once.
 
-14.4.0 - 2020-18-05
+14.4.0 - 2020-05-18
 =====================================================
 * Use Rails.application.config.marty instead of ENV vars in Marty code.
 
