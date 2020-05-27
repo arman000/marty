@@ -204,6 +204,20 @@ MA\t>80<=105\t4.5\t5.6\t
 NULL\t<=80\t11\t22\t33
 EOS
 
+    G1_with_range_nulls = <<EOS
+strict_null_mode
+state\tstring\tv\t\t
+ltv\tnumrange\tv\t\t
+fico\tnumrange\th\t\t
+
+\t\t>=600<700\t>=700<750\t>=750
+CA\t<=80\t1.1\t2.2\t3.3
+TX|HI\t>80<=105\t4.4\t5.5\t6.6
+NM\t\t1.2\t2.3\t3.4
+MA\t>80<=105\t4.5\t5.6\t
+\tNULL\t11\t22\t33
+EOS
+
     G1_with_bool_nulls = <<EOS
 strict_null_mode
 bool_state\tboolean\tv\t\t
@@ -358,6 +372,27 @@ EOS
         expect(state_attr['keys'].last).to be nil
         expect(state_attr['nots'].last).to be true
       end
+
+      it 'allows to import NULL values in range field' do
+        dg = dg_from_import('G1_with_range_nulls', G1_with_range_nulls)
+        ltv_attr = dg.metadata.find { |key| key['attr'] == 'ltv' }
+        expect(ltv_attr['keys'].last).to be nil
+        expect(ltv_attr['wildcards'].last).to be false
+        expect(ltv_attr['nots'].last).to be false
+
+        dg = dg_from_import('G1_with_range_nulls2', G1_with_range_nulls.sub('NULL', 'NOT (NULL)'))
+        ltv_attr = dg.metadata.find { |key| key['attr'] == 'ltv' }
+        expect(ltv_attr['keys'].last).to be nil
+        expect(ltv_attr['wildcards'].last).to be false
+        expect(ltv_attr['nots'].last).to be true
+      end
+
+      it 'allows to import wildcard values in range field' do
+        dg = dg_from_import('G1_with_range_nulls', G1_with_range_nulls)
+        ltv_attr = dg.metadata.find { |key| key['attr'] == 'ltv' }
+        expect(ltv_attr['keys'][2]).to be nil
+        expect(ltv_attr['wildcards'][2]).to be true
+      end
     end
 
     describe 'validations' do
@@ -451,7 +486,7 @@ EOS
 
       before(:each) do
         %w[G1 G2 G3 G4 G5 G6 G7 G8 Ga Gb
-           Gc Gd Ge Gf Gg Gh Gj Gl G1_with_nulls].each do |g|
+           Gc Gd Ge Gf Gg Gh Gj Gl G1_with_nulls G1_with_range_nulls].each do |g|
           dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
         end
       end
@@ -710,6 +745,44 @@ EOS
                                 )
 
         expect(res).to eq [22, dg.name]
+      end
+
+      it 'should handle nils passed to range fields' do
+        res = lookup_grid_helper('infinity',
+                                 'G4',
+                                 'hb_indicator' => true,
+                                 'cltv' => nil
+                                )
+
+        expect(res).to eq [nil, 'G4']
+      end
+
+      it 'should handle range NULLs' do
+        res = lookup_grid_helper('infinity',
+                                 'G1_with_range_nulls',
+                                 'state' => nil,
+                                 'ltv' => nil,
+                                 'fico' => 650,
+                                )
+
+        expect(res).to eq [11.0, 'G1_with_range_nulls']
+
+        res = lookup_grid_helper('infinity',
+                                 'G1_with_range_nulls',
+                                 'ltv' => nil,
+                                 'fico' => 650,
+                                )
+        expect(res).to eq [11.0, 'G1_with_range_nulls']
+
+        # Wildcards should still work in strict_null_mode
+        expect do
+          lookup_grid_helper(
+            'infinity',
+            'G1_with_range_nulls',
+            'state' => 'NM',
+            'fico' => 650,
+          )
+        end.to raise_error(RuntimeError, /matches > 1/)
       end
 
       it 'should handle matches which also have a wildcard match' do

@@ -1,3 +1,7 @@
+14.7.0 - 2020-05-26
+=====================================================
+* Add NULL support for numranges and intranges in DataGrids
+
 14.6.0 - 2020-05-26
 =====================================================
 * Allow matching of the typed characters at any position in the values in comboboxes.
