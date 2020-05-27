@@ -54,19 +54,18 @@ feature 'data grid view', js: true, speed: :super_slow do
   end
 
   def context_click(col, row, menuidx, click: false)
-    colx = @colh[col][0]
+    colx = @colh[col][0] rescue binding.pry
     colw = @colh[col][1]
     xpos = (colx + colw / 2).to_i - @gridx
     ypos = (@perr * row + @perr / 2).to_i
     mxpos = xpos + 20
     mypos = ypos + (@perr * menuidx + @perr / 2).to_i
-    page.driver.browser.action.
-      move_to(@grid.native, xpos, ypos).context_click.perform
-
     if click
-      page.driver.browser.action.move_to(@grid.native, mxpos, mypos).click.
-        release.perform
+      page.driver.browser.action.move_to(@grid.native, xpos, ypos).context_click
+        .click.send_keys(Array.new(menuidx, :arrow_down) + [:enter]).perform
     else
+      page.driver.browser.action.
+        move_to(@grid.native, xpos, ypos).context_click.perform
       ret = get_menu
       page.driver.browser.action.move_to(@grid.native, 0, 0).click.perform
       ret
