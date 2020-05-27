@@ -235,15 +235,13 @@ class Marty::DataGrid < Marty::Base
 
         not_condition = nots[index]
 
-        check_res = if ['int4range', 'numrange'].include?(m_type)
-                      raise 'Data Grid lookup failed' if val.nil?
-
+        check_res = if key_val.nil?
+                      val.nil?
+                    elsif ['int4range', 'numrange'].include?(m_type)
                       checks = Marty::Util.pg_range_to_ruby(key_val)
-                      checks.all? do |check|
+                      val && checks.all? do |check|
                         converted_val.send(check[0], check[1])
                       end
-                    elsif key_val.nil?
-                      val.nil?
                     elsif m_type == 'boolean'
                       key_val == converted_val
                     else
