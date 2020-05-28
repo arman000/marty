@@ -58,6 +58,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'redis'
   s.add_dependency 'rubyzip'
   s.add_dependency 'simplecov' # TODO: Move to cm_shared when it's ready
+  s.add_dependency 'sprockets', '>= 4.0.0'
   s.add_dependency 'state_machines'
   s.add_dependency 'state_machines-activerecord'
   s.add_dependency 'zip-zip'
