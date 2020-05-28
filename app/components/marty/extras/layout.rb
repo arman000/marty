@@ -74,11 +74,11 @@ module Layout
     {
       name:         name,
       line_numbers: true,
-      indent_unit:    2,
-      xtype:       :codemirror,
-      mode:        'text/x-ruby',
-      spellcheck:  false,
-      allow_blank: false,
+      indent_unit:  2,
+      xtype:        :codemirror,
+      mode:         'text/x-ruby',
+      spellcheck:   false,
+      allow_blank:  true,
       field_style: {
         font_family: 'Fira Code',
         font_size:   '12px'

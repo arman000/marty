@@ -1,4 +1,6 @@
 class Marty::ScriptForm < Marty::Form
+  include Marty::Extras::Layout
+
   DASH = 0x2012.chr('utf-8')
 
   client_class do |c|
@@ -151,18 +153,16 @@ class Marty::ScriptForm < Marty::Form
     c.model = 'Marty::Script'
     c.items =
       [
-        {
-          line_numbers:   true,
-          indent_unit:    4,
-          tab_mode:       'shift',
+        codemirror_field(
+          :body,
+          indent_unit: 4,
+          mode: 'text/x-delorean',
+          tab_mode: 'shift',
           match_brackets: true,
-          hide_label:     true,
-          xtype:          :codemirror,
-          mode:           'text/x-delorean',
-          name:           :body,
-          empty_text:     'No script selected.',
-          getter:         lambda { |r| r.body },
-        },
+          hide_label: true,
+          empty_text: 'No script selected.',
+          getter: lambda { |r| r.body }
+        ),
       ]
   end
 end
