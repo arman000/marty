@@ -31,6 +31,16 @@ class Marty::Helper
     Marty::DataConversion.col_types(klass)
   end
 
+  delorean_fn :now do
+    DateTime.now
+  end
+
+  delorean_fn :parse_json do |json|
+    raise 'arg must be string' unless json.is_a? String
+
+    JSON.parse(json)
+  end
+
   delorean_fn :parse_csv_to_hash, sig: 3 do |txt, comma_sep, types|
     txt ||= ''
     headers, *rows = CSV.parse(txt.strip,

@@ -1,3 +1,12 @@
+15.1.0 - 2020-05-29
+=====================================================
+* Disable actions in Reporting view if no report is selected.
+
+* Add opt-in ability to validate report's fields by setting `validate_form = true` in report's Delorean node.
+Set `allow_empty = false` in the field's node to make it required.
+
+* Add a Report that evaluates DataGrid by passing it the parameters from the JSON field.
+
 15.0.0 - 2020-05-28
 =====================================================
 * Stop using separate grids column in our rules and use results instead. That would allow to compute grid name dynamically and simplify things in general.

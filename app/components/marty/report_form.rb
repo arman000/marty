@@ -4,19 +4,19 @@ class Marty::ReportForm < Marty::Form
     a.text     = a.tooltip = I18n.t('reporting.background')
     a.handler  = :netzke_on_apply
     a.icon_cls = 'fa fa-cloud glyph'
-    a.disabled = false
+    a.disabled = config.disable_actions
   end
 
   action :foreground do |a|
     a.text     = a.tooltip = I18n.t('reporting.generate')
     a.icon_cls = 'fa fa-download glyph'
-    a.disabled = false
+    a.disabled = config.disable_actions
   end
 
   action :link do |a|
     a.text     = a.tooltip = I18n.t('reporting.link')
     a.icon_cls = 'fa fa-link glyph'
-    a.disabled = false
+    a.disabled = config.disable_actions
   end
 
   ######################################################################
@@ -138,6 +138,7 @@ class Marty::ReportForm < Marty::Form
 
     unless root_sess[:selected_script_name] && root_sess[:selected_node]
       c.title = 'No Report selected.'
+      c.disable_actions = true
       return
     end
 
@@ -147,11 +148,19 @@ class Marty::ReportForm < Marty::Form
 
       raise engine.to_s if engine.is_a?(Hash)
 
-      items, title, format = engine.
-        evaluate(root_sess[:selected_node],
-                 ['form', 'title', 'format'],
-                 {},
-                )
+      items, title, format = engine.evaluate(
+        root_sess[:selected_node],
+        ['form', 'title', 'format'],
+        {},
+      )
+
+      validate_form = engine.evaluate(
+        root_sess[:selected_node],
+        'validate_form',
+        {},
+      ) rescue false # Default to false if attr doesn't exist in the Node
+
+      c.validate_form = validate_form
 
       raise 'bad form items' unless items.is_a?(Array)
       raise 'bad format' unless

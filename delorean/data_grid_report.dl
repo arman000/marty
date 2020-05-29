@@ -1,0 +1,52 @@
+import Fields
+import Styles
+
+DistinctField: Fields::CheckboxField
+    field_label = 'Distinct'
+    name = 'distinct'
+
+ParametersJsonField: Fields::JsonField
+    field_label = 'Parameters (JSON)'
+    name = 'parameters_json'
+    value = '{}'
+
+NullablePostingField: Fields::PostingField
+    value = nil
+    force_selection = true
+
+DataGridNameField:
+    field_label = "Data Grid"
+    name        = "data_grid_name"
+    xtype       = ":combo"
+    store       =  Marty::DataGrid.
+                   where("obsoleted_dt = 'infinity'").
+                   order("name DESC").pluck("name")
+    value       = nil
+    allow_blank = false
+    force_selection = true
+
+TestDataGridReport:
+    pt_name =? nil
+    data_grid_name =? nil
+    distinct =? false
+    parameters_json =? nil
+    
+    title   = "Test Data Grid"
+    roles   = ['admin', 'dev', 'data_grid_editor']
+    form    = [NullablePostingField, DataGridNameField,
+               DistinctField, ParametersJsonField]
+    format  = "json"
+    validate_form = true
+
+    posting = pt_name && Marty::Posting.lookup(pt_name)
+    pt      = posting&.created_dt || Marty::Helper.now()
+
+    parameters = Marty::Helper.parse_json(parameters_json)
+
+    raw = Marty::DataGrid.lookup_grid_h(
+          pt,
+          data_grid_name,
+          parameters,
+          distinct)
+
+    result = raw.to_json
