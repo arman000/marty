@@ -66,6 +66,10 @@ Rails/SkipsModelValidations:
   Exclude:
     - 'app/models/marty/promise.rb'
 
+Metrics/ModuleLength:
+  Exclude:
+    - 'spec/**/*'
+
 Rails/DynamicFindBy:
   Exclude:
     - 'app/models/marty/data_grid.rb' # Enum

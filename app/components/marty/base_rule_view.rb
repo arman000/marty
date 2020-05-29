@@ -239,6 +239,7 @@ class Marty::BaseRuleView < Marty::McflyGridPanel
     end
   end
 
+  # FIXME: Deprecated. We should delete it at some point
   def form_items_grids
     [jsonb_field(:grids,
                  getter: jsonb_simple_getter(:grids),

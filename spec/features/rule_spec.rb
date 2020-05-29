@@ -129,7 +129,6 @@ feature 'rule view', js: true, speed: :slow do
                                             'g_integer' => nil,
                                             'g_has_default' => 'string default',
                                             'computed_guards' => '',
-                                            'grids' => '',
                                             'results' => '',
                                           )
 
@@ -151,6 +150,7 @@ feature 'rule view', js: true, speed: :slow do
     # type validation (string with values list)
     mrv.select_row(1)
     press('Edit')
+
     # type validation (range)
     netzke_find('String list Guard', 'combobox').select_values('Hi Mom')
     click_checkbox('Bool Guard')
@@ -165,8 +165,6 @@ feature 'rule view', js: true, speed: :slow do
     expect(page).to have_content("Wrong type for 'g_range'")
     # validate rule
     fill_in(:g_range, with: '<=100')
-    netzke_find('Grid1', 'combobox').select_values('DataGrid1')
-    netzke_find('Grid2', 'combobox').select_values('DataGrid2')
     fill_in('Defaulted String', with: '12345')
     press('OK')
     wait_for_ajax
@@ -184,7 +182,6 @@ feature 'rule view', js: true, speed: :slow do
            'g_integer' => 123,
            'g_has_default' => '12345',
            'computed_guards' => '',
-           'grids' => '{"grid1":"DataGrid1","grid2":"DataGrid2"}',
            'results' => '',
           }
     r = Gemini::MyRule.lookup('infinity', 'abc')
@@ -195,15 +192,13 @@ feature 'rule view', js: true, speed: :slow do
     netzke_find('Grid2', 'combobox').select_values('---')
     press('OK')
     wait_for_ajax
-    expect(mrv.get_row_vals(1)).to include(exp + { 'grids' =>
-                                                '{"grid1":"DataGrid1"}' })
+    expect(mrv.get_row_vals(1)).to include(exp)
+
     press('Edit')
     netzke_find('NullBool Guard', 'combobox').select_values('---')
     press('OK')
     wait_for_ajax
-    expect(mrv.get_row_vals(1)).to include(exp + { 'g_nullbool' => '',
-                                                'grids' =>
-                                                '{"grid1":"DataGrid1"}' })
+    expect(mrv.get_row_vals(1)).to include(exp + { 'g_nullbool' => '' })
     r = Gemini::MyRule.lookup('infinity', 'abc')
     expect(r['simple_guards']).not_to include('g_nullbool')
     # computed fields
@@ -329,11 +324,13 @@ EOL
     press('OK')
     wait_for_ajax
 
-    exp = <<-EOL
-simple_result = "c value"
-computed_value = if paramb
-    then param1 / (grid1_grid_result||1)
-     else (grid2_grid_result||1) / param1
+    exp = <<~EOL
+      grid1_grid = "DataGrid1"
+      grid2_grid = "DataGrid2"
+      simple_result = "c value"
+      computed_value = if paramb
+          then param1 / (grid1_grid_result||1)
+           else (grid2_grid_result||1) / param1
 EOL
 
     names = mrv.get_col_vals(:name, 12, 0)
@@ -410,8 +407,8 @@ EOL
         'guard_two' => { 'not' => true }
       },
       'computed_guards' => {},
-      'grids' => { 'grid1' => 'DataGrid1' },
       'results' => {
+        'grid1_grid' => '"DataGrid1"',
         'bvlen' => 'base_value.length',
         'bv' => 'base_value'
       }
@@ -433,21 +430,10 @@ EOL
     rc = xrv.row_count
     expect(xrv.get_col_vals(:g_string, rc, 0)).to eq(['eee', 'eee', 'eee', 'eee',
                                                       'ddd', 'ccc', 'bbb', 'aaa'])
-    column_filter(xrv, 'Grids', 'Grid1')
     rc = xrv.row_count
     # netzke reports jsonb as string
-    expect(xrv.get_col_vals(:grids, rc, 0)).to eq([%Q({"grid1":"DataGrid1"}),
-                                                   %Q({"grid1":"DataGrid1"})])
-    column_filter_toggle(xrv, 'Grids')
-    rc = xrv.row_count
-    expect(xrv.get_col_vals(:grids, rc, 0)).to eq([%Q({"grid1":"DataGrid3"}),
-                                                   %Q({"grid1":"DataGrid3"}),
-                                                   %Q({"grid1":"DataGrid3"}),
-                                                   %Q({"grid1":"DataGrid3"}),
-                                                   %Q({"grid1":"DataGrid3"}),
-                                                   %Q({"grid1":"DataGrid2"}),
-                                                   %Q({"grid1":"DataGrid1"}),
-                                                   %Q({"grid1":"DataGrid1"})])
+    exp = '{"grid1_grid":"\"DataGrid3\"","log__":"true","bvlen":"1","bv":"2"}'
+    expect(xrv.get_col_vals(:results, rc, 0)).to include(exp)
 
     press('Applications')
     press('Data Grids Admin')
@@ -470,20 +456,12 @@ EOL
     wait_for_ajax
 
     names = xrv.get_col_vals(:name, 5, 0)
-    gvs = xrv.get_col_vals(:grids, 5, 0)
-    g1h = { 'grid1' => 'DataGrid1 new' }
-    expect(JSON.parse(gvs[names.index('ZRule1')])).to eq(g1h)
-    expect(JSON.parse(gvs[names.index('ZRule2')])).to eq(g1h)
 
     go_to_my_rules
     wait_for_ajax
 
     names = mrv.get_col_vals(:name, 12, 0)
-    gvs = mrv.get_col_vals(:grids, 12, 0)
     rvs = mrv.get_col_vals(:results, 12, 0)
-    expect(JSON.parse(gvs[names.index('abc')])).to eq(g1h)
-    expect(JSON.parse(gvs[names.index('Rule2b')])).to eq(g1h +
-                                                         { 'grid2' => 'DataGrid2' })
     expect(JSON.parse(rvs[names.index('Rule5')])['other_grid']).to eq(
       '"DataGrid4 new"')
   end

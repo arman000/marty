@@ -55,6 +55,12 @@ class Marty::BaseRule < Marty::Base
   def validate
     self.class.guard_info.each { |name, h| check(name, h) }
 
+    if grids.present?
+      error = "'grids' field is deprecated in Rules. Use 'results' instead"
+      return errors[:grids] << error
+    end
+
+    # FIXME: Deprecated. We should delete it at some point
     grids.each do |vn, gn|
       return errors[:grids] << "- Bad grid name '#{gn}' for '#{vn}'" unless
         gn.blank? || Marty::DataGrid.lookup('infinity', gn)
