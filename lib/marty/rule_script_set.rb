@@ -108,11 +108,6 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
 
     code = self.class.body_start +
            self.class.indent(grid_i + guard_c + grid_c + result_c)
-    # puts '='*40
-    # puts ruleh["name"]
-    # puts '-'
-    # puts code
-    # puts '-'*10
 
     code
   end
@@ -137,14 +132,28 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     [secnm, line - st + 1]
   end
 
+  # FIXME: The code in this method is really hard to understand.
+  # Maybe we should just use this instead:
+  # attrnm = get_code(ruleh).split("\n")[exc.line - 1] rescue nil
   def get_parse_error_field(ruleh, exc)
     line = (exc.line || 1) - 1
     errs = { class_body: self.class.body_lines } + code_section_counts(ruleh)
     secnm, line_in_sec = search_ranges(errs, line)
+
     if [:computed_guards, :results].include?(secnm)
-      h = Hash[ruleh[secnm.to_s].map { |k, v| [k, v.lines.count + 1] }]
-      attrnm, = search_ranges(h, line_in_sec)
+      h = ruleh[secnm.to_s].map do |k, v|
+        extra_lines = 1
+        [k, v.lines.count + extra_lines]
+      end.to_h
+
+      attrnm = begin
+                 line = get_code(ruleh).split("\n")[exc.line - 1]
+                 line.split(' =').first.strip
+               rescue StandardError
+                 search_ranges(h, line_in_sec).first
+               end
     end
+
     [secnm, attrnm || line_in_sec]
   rescue StandardError => e
     Marty::Logger.error('RuleScriptSet#get_parse_error_field',

@@ -1,3 +1,29 @@
+15.0.0 - 2020-05-28
+=====================================================
+* Stop using separate grids column in our rules and use results instead. That would allow to compute grid name dynamically and simplify things in general.
+
+```ruby
+grids:
+  adjustment = My Grid
+  breakeven = My Breakeven Grid
+
+results:
+  res = adjustment_grid_result
+```
+
+Users will have to use something like that:
+
+```ruby
+results:
+  adjustment_grid = "My Grid"
+  breakeven_grid = "My Breakeven Grid"
+  res = adjustment_grid_result
+```
+
+We should update our rules in the migration. We still display grids fields and columns, so that users can view older rules correctly. However Marty won't allow to create/update rule that has grids in the grids field.
+
+If grid name is static, Marty would still validate its presence in the Marty::DataGrids table.
+
 14.7.0 - 2020-05-26
 =====================================================
 * Add NULL support for numranges and intranges in DataGrids

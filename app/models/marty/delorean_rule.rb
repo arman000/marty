@@ -16,6 +16,13 @@ class Marty::DeloreanRule < Marty::BaseRule
         errors[:computed] << '- ' + e.message
       end
     end
+
+    fixed_results.each do |vn, gn|
+      next unless vn.ends_with?('_grid')
+
+      return errors[:results] << "- Bad grid name '#{gn}' for '#{vn}'" unless
+        Marty::DataGrid.lookup('infinity', gn)
+    end
   end
 
   def self_as_hash
