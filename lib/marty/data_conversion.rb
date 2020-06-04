@@ -4,7 +4,7 @@ class Marty::DataConversion
   FLOAT_PAT = /\A-?\d+(\.?\d+)?([eE][-+]?[0-9]+)?\z/
 
   PATS = {
-    integer: /^-?\d+(\.0+)?$/,
+    integer: /\A-?\d+(\.0+)?\z/,
     float:   FLOAT_PAT,
     decimal: FLOAT_PAT,
   }
