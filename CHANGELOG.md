@@ -1,3 +1,8 @@
+15.1.1 - 2020-06-04
+=====================================================
+* In ruby regexes ^ and $ means beginning and end of line, not the whole string, which makes it unsafe in case if someone passed multiline string.
+Use \A and \z instead.
+
 15.1.0 - 2020-05-29
 =====================================================
 * Disable actions in Reporting view if no report is selected.
