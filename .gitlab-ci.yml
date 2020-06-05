@@ -26,6 +26,17 @@ rubocop:
 eslint-prettier:
   extends: .eslint-prettier
 
+changelog-version-check:
+  stage: check
+  script: |
+          export VERSION_CHANGE=`git diff lib/marty/version.rb`
+          export CHGLOG_CHANGE=`git diff CHANGELOG.md`
+          if [[ ! -z $VERSION_CHANGE && -z $CHGLOG_CHANGE ]]; then \
+            echo "Please update CHANGELOG.md with your notes" \
+            exit 1; \
+          fi;
+
+
 schema-lint:
   stage: check
   extends:
