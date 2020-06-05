@@ -29,7 +29,7 @@ module Marty
         hcnt = dg.metadata.count { |md| md['dir'] == 'h' }
         cur_data_dim = [dg.data.length, dg.data[0].length]
         exported = dg.export.lines
-        sep = exported.each_with_index.detect { |l, _i| /^\s*$/.match(l) }.last
+        sep = exported.each_with_index.detect { |l, _i| /\A\s*\z/.match(l) }.last
         new_data = data_as_array.map do |line|
           line.join("\t") + "\r\n"
         end.compact
