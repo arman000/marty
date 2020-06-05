@@ -1,3 +1,10 @@
+16.0.0 - 2020-06-05
+=====================================================
+* Fully remove PG support for DataGrids
+* Drop DataGrid indices tables
+* Drop DG related PG functions
+* Would break the migrations that use marty/db/sql/...
+
 15.1.1 - 2020-06-04
 =====================================================
 * In ruby regexes ^ and $ means beginning and end of line, not the whole string, which makes it unsafe in case if someone passed multiline string.
