@@ -149,7 +149,6 @@ class Marty::DataGrid < Marty::Base
         res = super
         update_rules(nw, n) if nc && nw.present?
         reload
-        build_index
         res
       end
     end
@@ -339,51 +338,6 @@ class Marty::DataGrid < Marty::Base
       "ri: #{ri}"
   end
 
-  def self.plpg_lookup_grid_distinct(h_passed, dgh, ret_grid_data = false,
-                                     distinct = true)
-    cd = dgh['created_dt']
-    @@dtcache ||= {}
-    @@dtcache[cd] ||= cd.strftime(PLV_DT_FMT)
-    row_info = {
-      'id'         => dgh['id'],
-      'group_id'   => dgh['group_id'],
-      'created_dt' => @@dtcache[cd]
-    }
-
-    h = dgh['metadata'].each_with_object({}) do |m, h|
-      attr = m['attr']
-      inc = h_passed.fetch(attr, :__nf__)
-      next if inc == :__nf__
-
-      val = (defined? inc.name) ? inc.name : inc
-      h[attr] = val.is_a?(String) ?
-                  ActiveRecord::Base.connection.quote(val)[1..-2] : val
-    end
-
-    fn     = 'lookup_grid_distinct'
-    hjson  = "'#{h.to_json}'::JSONB"
-    rijson = "'#{row_info.to_json}'::JSONB"
-    params = "#{hjson}, #{rijson}, #{ret_grid_data}, #{distinct}"
-    sql    = "SELECT #{fn}(#{params})"
-    raw    = ActiveRecord::Base.connection.execute(sql)[0][fn]
-    res    = JSON.parse(raw)
-
-    if res['error']
-      msg = res['error']
-      parms, sqls, ress, dg = res['error_extra'].values_at(
-        'params', 'sql', 'results', 'dg')
-
-      raise "DG #{name}: Error in PLPG call: #{msg}\n"\
-            "params: #{parms}\n"\
-            "sqls: #{sqls}\n"\
-            "results: #{ress}\n"\
-            "dg: #{dg}\n"\
-            "ri: #{row_info}" if res['error']
-    end
-
-    res
-  end
-
   # this function is cached through lookup_grid_h_priv
   delorean_fn :lookup_grid_h, sig: 4 do |pt, dgn, h, distinct|
     dgh = lookup_h(pt, dgn)
@@ -436,12 +390,7 @@ class Marty::DataGrid < Marty::Base
     #   "data"     => <grid's data array>
     #   "metadata" => <grid's metadata (array of hashes)>
 
-    vhash = if Rails.application.config.marty.data_grid_plpg_lookups &&
-               Rails.env.test? # Keep plpg lookups for performance tests
-              plpg_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
-            else
-              ruby_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
-            end
+    vhash = ruby_lookup_grid_distinct(h, dgh, return_grid_data, distinct)
 
     return vhash if vhash['result'].nil? || !dgh['data_type']
 
@@ -857,31 +806,6 @@ class Marty::DataGrid < Marty::Base
     self.constraint       = constraint
     self.created_dt       = created_dt if created_dt
     save!
-  end
-
-  # FIXME: should be private
-  def build_index
-    # create indices for the metadata
-    metadata.each do |inf|
-      attr = inf['attr']
-      type = inf['type']
-      keys = inf['keys']
-      nots = inf.fetch('nots', [])
-
-      # find index class
-      idx_class = Marty::DataGrid.type_to_index(type)
-
-      keys.each_with_index do |k, index|
-        gi              = idx_class.new
-        gi.attr         = attr
-        gi.key          = k
-        gi.created_dt   = created_dt
-        gi.data_grid_id = group_id
-        gi.index        = index
-        gi.not          = nots[index] || false
-        gi.save!
-      end
-    end
   end
 
   private

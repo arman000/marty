@@ -246,7 +246,6 @@ EOS
     before(:each) do
       # Mcfly.whodunnit = Marty::User.find_by_login('marty')
       marty_whodunnit
-      Rails.application.config.marty.data_grid_plpg_lookups = false
     end
 
     def lookup_grid_helper(pt, gridname, params, follow = false, distinct = true)
@@ -1109,17 +1108,6 @@ EOS
             ['Investor Services Acadamy']
           ]
         )
-
-        indexes = Marty::GridIndexString.where(data_grid_id: dg.id)
-
-        expect(indexes.size).to eq 4
-        expect(indexes.where(not: true).size).to eq 1
-
-        not_index = indexes.find_by(not: true)
-        expect(not_index.key).to eq(
-          ['Admin Premium Services', 'Admin Services', 'Admin Services Plus']
-        )
-        expect(not_index.index).to eq(1)
       end
     end
 
@@ -1272,64 +1260,6 @@ EOS
           \t2\t\t\t#{values3[1]}
           false\t\t>10\t\t#{values3[2]}
         EOS
-    end
-
-    describe 'performance' do
-      before(:each) do
-        %w[G1 Gf Gl].each do |g|
-          dg_from_import(g, "Marty::DataGridSpec::#{g}".constantize)
-        end
-      end
-
-      after do
-        Rails.application.config.marty.data_grid_plpg_lookups = false
-      end
-
-      let(:pt) { 'infinity' }
-
-      grid_data = {
-        'Gf' => { 'b' => true },
-        'G1' => {
-          'fico' => 600,
-          'state' => 'RI',
-          'ltv' => 10,
-        },
-        'Gl' => {
-          'fha_203k_option2' => 'Not Existing Services'
-        }
-      }
-
-      grid_data.each_with_index do |(grid, params), index|
-        it "ruby lookup is faster than plpgsql #{index}" do
-          bm = Benchmark.ips do |x|
-            x.report('postgres') do
-              Rails.application.config.marty.data_grid_plpg_lookups = true
-              res = Marty::DataGrid.lookup_grid_h(pt, grid, params, false)
-            end
-
-            x.report('ruby') do
-              Rails.application.config.marty.data_grid_plpg_lookups = false
-              res = Marty::DataGrid.lookup_grid_h(pt, grid, params, false)
-            end
-
-            x.compare!
-          end
-
-          h = bm.entries.each_with_object({}) do |e, hh|
-            hh[e.label] = e.stats.central_tendency
-          end
-
-          factor = h['ruby'] / h['postgres']
-
-          if ENV['CI'] == 'true'
-            # Performance drops down in CI, probably due to running postgres
-            # in a separate container utilizing it's own CPU core.
-            expect(factor).to be > 0.8
-          else
-            expect(factor).to be > 1.02
-          end
-        end
-      end
     end
 
     describe 'constraint' do
