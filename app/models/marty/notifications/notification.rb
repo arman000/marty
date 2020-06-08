@@ -9,7 +9,6 @@ module Marty
         :deliveries,
         class_name: '::Marty::Notifications::Delivery',
         dependent: :destroy,
-        foreign_key: :notification_id,
         inverse_of: :notification
       )
 
