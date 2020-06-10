@@ -10,8 +10,8 @@ class DropDataGridIndicesTables < ActiveRecord::Migration[5.1]
     drop_table :marty_grid_index_strings
 
     ActiveRecord::Base.connection.execute <<~SQL
-      DROP FUNCTION IF EXISTS public.query_grid_dir;
-      DROP FUNCTION IF EXISTS public.lookup_grid_distinct;
+      DROP FUNCTION IF EXISTS public.query_grid_dir(h jsonb, infos jsonb[], row_info jsonb);
+      DROP FUNCTION IF EXISTS public.lookup_grid_distinct(h jsonb, row_info jsonb, return_grid_data boolean, dis boolean);
     SQL
   end
 
