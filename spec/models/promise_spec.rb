@@ -117,6 +117,7 @@ describe Marty::Promise, slow: true, retry: 3 do
       expect(promise.status).to be true
       expect(promise.promise_type).to eq 'delorean'
       expect(promise.result['error']).to be nil
+      expect(promise.run_by).to be_present
       expect(promise.result['result']).to eq expected
 
       sleep 0.1 # Wait while hooks are executed after Promise was updated
@@ -259,6 +260,7 @@ describe Marty::Promise, slow: true, retry: 3 do
       expect(promise.status).to be false
       expect(promise.promise_type).to eq 'delorean'
       expect(promise.result['error']).to eq 'I had an error'
+      expect(promise.run_by).to be_present
       expect(promise.job_id).to be_present
     end
   end
@@ -293,6 +295,7 @@ describe Marty::Promise, slow: true, retry: 3 do
       expect(promise.promise_type).to eq 'ruby'
       expect(promise.result['result']).to eq bud_category.id
       expect(promise.job_id).to be_present
+      expect(promise.run_by).to be_present
       expect(log.message).to eq 'was called'
     end
 
@@ -316,6 +319,7 @@ describe Marty::Promise, slow: true, retry: 3 do
 
       expect(promise.status).to be true
       expect(promise.promise_type).to eq 'ruby'
+      expect(promise.run_by).to be_present
       expect(promise.result['result']).to eq bud_category.id
     end
 
@@ -339,6 +343,7 @@ describe Marty::Promise, slow: true, retry: 3 do
 
       expect(promise.status).to be true
       expect(promise.promise_type).to eq 'ruby'
+      expect(promise.run_by).to be_present
       expect(promise.result['result']).to eq bud_category.id
     end
 
@@ -359,6 +364,7 @@ describe Marty::Promise, slow: true, retry: 3 do
 
       expect(promise.status).to be false
       expect(promise.promise_type).to eq 'ruby'
+      expect(promise.run_by).to be_present
       expect(promise.result['error']).to eq 'Something went wrong'
       expect(promise.result['backtrace']).to_not be_empty
     end

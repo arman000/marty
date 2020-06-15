@@ -40,7 +40,7 @@ class Marty::Promise < Marty::Base
     save!
   end
 
-  def set_result(res)
+  def set_result(res, run_by = nil)
     # log "SETRES #{Process.pid} #{self}"
 
     reload
@@ -66,6 +66,8 @@ class Marty::Promise < Marty::Base
 
     # mark promise as ended
     self.end_dt = DateTime.now
+    self.run_by = run_by
+
     save!
 
     # log "NOTIFY #{Process.pid}"
@@ -105,7 +107,10 @@ class Marty::Promise < Marty::Base
   def work_off_job(job)
     # Create a temporary worker to work off the job
     Delayed::Job.where(id: job.id).
-      update_all(locked_at: Delayed::Job.db_time_now, locked_by: 'Temp')
+      update_all(
+        locked_at: Delayed::Job.db_time_now,
+        locked_by: 'Temp (Marty::Promise.work_off_job)'
+      )
     w = Delayed::Worker.new
     w.run(job)
   end
@@ -144,7 +149,7 @@ class Marty::Promise < Marty::Base
               promise: self,
               exception: e
             )
-            last.set_result(error)
+            last.set_result(error, job&.reload&.locked_by)
           end
           # log "OFF1 #{Process.pid} #{last}"
         end
