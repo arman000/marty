@@ -31,6 +31,7 @@ class Marty::PromiseView < Marty::Tree
       :end_dt,
       :total_time,
       :status,
+      :run_by,
       :cformat,
       :error,
       :timeout

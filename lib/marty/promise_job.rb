@@ -55,7 +55,8 @@ class Marty::PromiseJob < Struct.new(:promise,
       # log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{e}"
     end
 
-    promise.set_result(res)
+    locked_by = Delayed::Job.find_by(id: promise.job_id)&.locked_by
+    promise.set_result(res, locked_by)
     process_hook(res)
   end
 

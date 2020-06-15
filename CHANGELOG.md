@@ -1,3 +1,7 @@
+16.1.0 - 2020-06-09
+=====================================================
+* Adds a column `run_by` to Marty::Promise that shows what job runner ran the promise. Takes the value from `job.locked_by` column.
+
 16.0.0 - 2020-06-05
 =====================================================
 * Fully remove PG support for DataGrids

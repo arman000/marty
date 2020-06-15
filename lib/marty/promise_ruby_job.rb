@@ -39,7 +39,8 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
       res = ::Marty::Promise.exception_to_result(promise: promise, exception: e)
     end
 
-    promise.set_result(res)
+    locked_by = Delayed::Job.find_by(id: promise.job_id)&.locked_by
+    promise.set_result(res, locked_by)
     process_hook(res)
     ENV.delete('__promise_id')
   end
