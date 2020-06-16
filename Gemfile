@@ -12,14 +12,18 @@ group :default do
   gem 'pg'
   gem 'rails'
   group :cmit do
-    gem 'delorean_lang'
-    gem 'mcfly'
-    # gem 'delorean_lang', path: File.expand_path('../../delorean', __FILE__)
-    # gem 'mcfly', path: File.expand_path('../../mcfly', __FILE__)
+    gem 'delorean_lang', git: 'https://gitlab.pnmac.com/cm_tech/delorean.git'
+    gem 'mcfly', git: 'https://gitlab.pnmac.com/cm_tech/mcfly.git'
+    # gem 'delorean_lang', path: File.expand_path('../delorean', __dir__)
+    # gem 'mcfly', path: File.expand_path('../mcfly', __dir__)
   end
 end
 
 group :development, :test do
+  group :cmit do
+    gem 'cm_shared', git: 'https://gitlab.pnmac.com/cm_tech/cm_shared.git'
+    # gem 'cm_shared', path: File.expand_path('../cm_shared', __dir__)
+  end
   gem 'benchmark-ips'
   gem 'capybara'
   gem 'connection_pool'

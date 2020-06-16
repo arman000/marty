@@ -22,6 +22,16 @@ module Marty::Diagnostic
       'Failed accessing git'
     end
 
+    def consistent(key, description)
+      {
+        key => {
+          'description' => description,
+          'status' => true,
+          'consistent' => true
+        }
+      }
+    end
+
     describe 'GET #op' do
       it 'returns http success' do
         get :op, params: { format: :json, op: 'version' }
@@ -54,77 +64,35 @@ module Marty::Diagnostic
         expected = {
           'data' => {
             'Version' => {
-              my_ip => {
-                'Marty' => {
-                  'description' => Marty::VERSION,
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'Delorean' => {
-                  'description' => Delorean::VERSION,
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'Mcfly' => {
-                  'description' => Mcfly::VERSION,
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'Root Git' => {
-                  'description' => git,
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'Rails' => {
-                  'description' => Rails.version,
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'Netzke Core' => {
-                  'description' => Netzke::Core::VERSION,
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'Netzke Basepack' => {
-                  'description' => Netzke::Basepack::VERSION,
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'Ruby' => {
-                  'description' => "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} "\
-                                   "(#{RUBY_PLATFORM})",
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'RubyGems' => {
-                  'description' => Gem::VERSION,
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'Database Schema Version' => {
-                  'description' => Database.db_schema,
-                  'status'      => true,
-                  'consistent'  => true
-                },
-                'Environment' => {
-                  'description' => Rails.env,
-                  'status'      => true,
-                  'consistent'  => true
-                }
-              }
+              my_ip =>
+              [
+                consistent('Marty', Marty::VERSION),
+                consistent('Delorean', Delorean::VERSION),
+                consistent('Mcfly', Mcfly::VERSION),
+                consistent('CM Shared', CmShared::VERSION),
+                consistent('Rails', Rails.version),
+                consistent('Netzke Core', Netzke::Core::VERSION),
+                consistent('Netzke Basepack', Netzke::Basepack::VERSION),
+                consistent(
+                  'Ruby',
+                  "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
+                ),
+                consistent('RubyGems', Gem::VERSION),
+                consistent('Database Schema Version', Database.db_schema),
+                consistent('Postgres', Database.db_version),
+                consistent(
+                  'Shared GitLab CI',
+                  Marty::Diagnostic::Version.check_gitlab_ci.to_s
+                ),
+                consistent('Environment', Rails.env),
+                consistent('Root Git', git),
+              ].reduce({}, :merge)
             },
             'EnvironmentVariables' => {
-              my_ip => {
-              }
+              my_ip => {}
             },
             'Nodes' => {
-              my_ip => {
-                'Nodes' => {
-                  'description' => my_ip,
-                  'status'      => true,
-                  'consistent'  => true
-                }
-              }
+              my_ip => consistent('Nodes', my_ip)
             }
           }
         }
@@ -135,6 +103,7 @@ module Marty::Diagnostic
               data: 'true'
             }
 
+        diag_version_response = JSON.parse(response.body)
         expect(JSON.parse(response.body)).to eq(expected)
       end
     end

@@ -8,7 +8,10 @@ module Marty::Diagnostic; class Controller < ActionController::Base
   def op
       @result = Reporter.run(request)
   rescue NameError
-      render file: 'public/400', formats: [:html], status: :bad_request, layout: false
+    render file: 'public/400.html',
+            formats: [:html],
+            status: :bad_request,
+            layout: false
   else
       respond_to do |format|
         format.html { @result = display_parameters }

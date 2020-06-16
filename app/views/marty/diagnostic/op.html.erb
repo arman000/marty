@@ -5,7 +5,8 @@
   <% end %>
 
   <head>
-    <title><%=Rails.application.class.parent_name%> Diagnostic</title>
+    <!-- TODO: Rchange to `module_parent_name` once we all migrate to Rails 6-->
+    <title><%= Rails.application.class.parent_name %> Diagnostic</title>
     <style type="text/css">
       body { margin: auto;
        margin-bottom: 50px;
