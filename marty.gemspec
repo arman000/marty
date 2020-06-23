@@ -48,7 +48,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'daemons'
   s.add_dependency 'delayed_cron_job'
   s.add_dependency 'delayed_job_active_record'
-  s.add_dependency 'delorean_lang'
+  s.add_dependency 'delorean_lang', '>= 2.6.0'
   s.add_dependency 'json-schema'
   s.add_dependency 'mcfly'
   s.add_dependency 'net-ldap'

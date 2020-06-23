@@ -56,6 +56,9 @@ class Gemini::MyRule < Marty::DeloreanRule
     get_matches_(pt, attrs, params)
   end
 
+  delorean_fn :test_fn1 do
+  end
+
   def compute(*args)
     base_compute2(*args)
   end

@@ -338,6 +338,13 @@ class Marty::DataGrid < Marty::Base
       "ri: #{ri}"
   end
 
+  delorean_fn :lookup_grid_attrs, cache: true do |pt, dgn|
+    dgh = lookup_h(pt, dgn)
+    raise "#{dgn} grid not found" unless dgh
+
+    dgh['metadata'].map { |attr_hash| attr_hash['attr'] }
+  end
+
   # this function is cached through lookup_grid_h_priv
   delorean_fn :lookup_grid_h, sig: 4 do |pt, dgn, h, distinct|
     dgh = lookup_h(pt, dgn)
@@ -358,7 +365,7 @@ class Marty::DataGrid < Marty::Base
 
   # private method used to cache lookup_grid_distinct_entry_h result
   delorean_fn :lookup_grid_h_priv,
-              to_hash: false, private: true, cache: true, sig: 4 do |pt, dgh, h, distinct|
+              to_hash: false, private: true, cache: true do |pt, dgh, h, distinct|
     lookup_grid_distinct_entry_h(
       pt, h, dgh, nil, true, false, distinct)['result']
   end

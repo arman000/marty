@@ -50,9 +50,15 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
     if cache[dgname]
       h[final_name] = (cache[dgname]).to_s
     else
-      h[dgid] = dgname
-      h["#{dgid}_dgp__"] = "dgparams__ + \n" + self.class.indent(paramify_h(h))
       lgde = 'lookup_grid_h'
+      dg_attrs_attr = "#{dgid}_required_attrs__"
+      dg_available_attrs_attr = "#{dgid}_available_attrs__"
+      h[dgid] = dgname
+      h[dg_available_attrs_attr] = 'self.available_attrs'
+      dg_attrs_lookup = "Marty::DataGrid.lookup_grid_attrs(pt, #{dgid})"
+      h[dg_attrs_attr] = dg_attrs_lookup
+      h["#{dgid}_dgp__"] = 'dgparams__ + ' \
+        "self.send(#{dg_attrs_attr} & #{dg_available_attrs_attr})"
       h[final_name] = "Marty::DataGrid.#{lgde}(pt,#{dgid},#{dgid}_dgp__,true)"
       cache[dgname] = final_name
     end
