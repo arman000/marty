@@ -551,6 +551,46 @@ module Marty::RuleSpec
                          'grid1_grid_result' => 19)
       end
 
+      it 'passes only required arguments to data grids' do
+        new_results = {
+          'e1' => 'ERR("Should not be called")',
+          'e2' => 'ERR("Should not be called")',
+          'p2' => 'Gemini::MyRule.test_fn1() || 15',
+          'e3' => 'ERR("Should not be called")',
+          'p3' => 'ERR("Should not be called")',
+          'flavor' => 'Gemini::MyRule.test_fn1() || "lemon"',
+          'grid2_grid' => '"DataGrid2"',
+          'grid1_grid' => '"DataGrid" + "3"',
+          'simple_result' => '"c value"',
+          'computed_value' => "if paramb\n"\
+            "    then param1 / (grid1_grid_result||1)\n" \
+            '     else (grid2_grid_result||1) / param1'
+        }
+
+        complex.update!(results: new_results)
+
+        expect(Gemini::MyRule).to receive(:test_fn1).and_call_original.twice
+
+        expect(Marty::DataGrid).to receive(:lookup_grid_h).and_wrap_original do |m, *args|
+          dgn = args[1]
+          h_passed = args[2]
+          expect(dgn).to eq 'DataGrid3'
+          expect(h_passed).to_not have_key('p3')
+          expect(h_passed['p2']).to eq(15)
+          expect(h_passed['flavor']).to eq('lemon')
+
+          m.call(*args)
+        end
+
+        c = complex.compute(@ruleopts_myrule,  'pt' => Time.zone.now,
+                                               'param1' => 66,
+                                               'param2' => 'abc',
+                                               'paramb' => true)
+
+        expect(c).to eq('simple_result' => 'c value',
+                        'computed_value' => 8)
+      end
+
       it 'reports bad grid name' do
         exp = Regexp.new("Error .results. in rule '\\d+:Rule4': "\
                          'DataGridX grid not found')
