@@ -46,7 +46,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'axlsx', '3.0.0pre'
   s.add_dependency 'coderay'
   s.add_dependency 'daemons'
-  s.add_dependency 'delayed_cron_job'
+  # FIXME: fix our plugins to make it work with delayed_cron_job 0.7.3
+  s.add_dependency 'delayed_cron_job', '<= 0.7.2'
   s.add_dependency 'delayed_job_active_record'
   s.add_dependency 'delorean_lang', '>= 2.6.0'
   s.add_dependency 'json-schema'
