@@ -18,7 +18,10 @@ module Marty
       def configure(c)
         super
 
-        c.title ||= I18n.t('schedule_jobs_dashboard_view_title', default: "Scheduled Job's Logs")
+        c.title ||= I18n.t(
+          'schedule_jobs_dashboard_view_title',
+          default: 'Scheduled Jobs Logs'
+        )
         c.model = 'Marty::BackgroundJob::Log'
         c.paging = :buffered
         c.editing = :in_form

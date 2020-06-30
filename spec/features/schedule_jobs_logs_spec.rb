@@ -11,12 +11,12 @@ feature 'Schedule Jobs Logs', js: true do
       wait_for_ajax
       press('System')
       press('Background Jobs')
-      press("Schedule Job's Logs")
+      press('Scheduled Jobs Logs')
       wait_for_ajax
     end
 
     it 'access denied' do
-      expect(page).to_not have_content "Schedule Job's Logs"
+      expect(page).to_not have_content 'Scheduled Jobs Logs'
     end
   end
 
@@ -49,11 +49,11 @@ feature 'Schedule Jobs Logs', js: true do
       wait_for_ajax
       press('System')
       press('Background Jobs')
-      press("Schedule Job's Logs")
+      press('Scheduled Jobs Logs')
 
       wait_for_ajax
 
-      expect(page).to have_content "Scheduled Job's Logs"
+      expect(page).to have_content 'Scheduled Jobs Logs'
     end
 
     it 'shows logs' do

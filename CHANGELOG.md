@@ -1,3 +1,9 @@
+16.2.0 - 2020-06-29
+=====================================================
+* Change `perform` to `perform_now` when running scheduled jobs in order to be
+  able to utilize callbacks.
+* Change verbiage of "Schedule Job's Log" to "Scheduled Jobs Log".
+
 16.1.0 - 2020-06-09
 =====================================================
 * Adds a column `run_by` to Marty::Promise that shows what job runner ran the promise. Takes the value from `job.locked_by` column.

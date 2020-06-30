@@ -343,8 +343,8 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   action :schedule_jobs_logs do |a|
-    a.text     = "Schedule Job's Logs"
-    a.tooltip  = "Show Scheduled Job's logs"
+    a.text     = 'Scheduled Jobs Logs'
+    a.tooltip  = 'Show Scheduled Jobs logs'
     a.icon_cls = 'fa fa-cog glyph'
     a.disabled = !self.class.has_perm?(:admin)
     a.handler = :netzke_load_component_by_action
