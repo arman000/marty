@@ -45,3 +45,7 @@ end
 # if DELAYED_JOB_PATH is not bin/delayed_job
 Marty::Config["DELAYED_JOB_PARAMS"] ||= "-n 4 --sleep-delay 5"
 # Marty::Config["DELAYED_JOB_PATH"]   = "script/delayed_job"
+
+Marty::Config['CLEANER_MAINTENANCE_WINDOW'] = {
+  day: 'saturday', range: ['01:00', '02:00']
+}

@@ -147,7 +147,7 @@ module Marty
         begin
           s = Marty::BackgroundJob::Schedule.find(client_config['selected'])
           klass = s.job_class
-          klass.constantize.new.perform(*s.arguments)
+          klass.constantize.new(*s.arguments).perform_now
         rescue StandardError => e
           next client.netzke_notify(e.message)
         end
