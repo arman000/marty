@@ -20,11 +20,12 @@ module Marty
           end
         end
 
-        # state :email do
-        # def processor
-        # Marty::Notifications::Processors::Email
-        # end
-        # end
+        state :email do
+          def processor
+            Marty::Notifications::Processors::Email
+          end
+        end
+
         #
         # state :sms do
         # def processor
