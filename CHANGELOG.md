@@ -1,5 +1,12 @@
+16.3.0 - 2020-06-24
+=====================================================
+
+* Add ActionMailer defaults to be used by Marty applications through ENV
+  variables.
+
 16.2.0 - 2020-06-29
 =====================================================
+
 * Change `perform` to `perform_now` when running scheduled jobs in order to be
   able to utilize callbacks.
 * Change verbiage of "Schedule Job's Log" to "Scheduled Jobs Log".

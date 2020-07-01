@@ -9,6 +9,14 @@ module Marty
         end
       end
 
+      def application_name_with_env
+        e = Rails.env
+
+        return application_name if e.production?
+
+        application_name.titleize + " - #{e.capitalize}"
+      end
+
       def needs_migration?
         if Gem::Version.new(Rails.version) >= Gem::Version.new('5.2.0')
           ActiveRecord::Base.connection.migration_context.needs_migration?

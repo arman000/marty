@@ -1,19 +1,19 @@
-require File.expand_path('../boot', __FILE__)
+require File.expand_path('boot', __dir__)
 
 # Pick the frameworks you want:
-require "active_model/railtie"
-require "active_job/railtie"
-require "active_record/railtie"
-require "action_controller/railtie"
-require "action_mailer/railtie"
-require "action_view/railtie"
-require "sprockets/railtie"
+require 'active_model/railtie'
+require 'active_job/railtie'
+require 'active_record/railtie'
+require 'action_controller/railtie'
+require 'action_mailer/railtie'
+require 'action_view/railtie'
+require 'sprockets/railtie'
 
 Bundler.require(*Rails.groups)
-require "marty"
+require 'marty'
 
 module Dummy
-  APP_ROOT = File.expand_path("..", __FILE__).freeze
+  APP_ROOT = File.expand_path(__dir__).freeze
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -37,7 +37,7 @@ module Dummy
     # config.i18n.default_locale = :de
 
     # Configure the default encoding used in templates for Ruby 1.9.
-    config.encoding = "utf-8"
+    config.encoding = 'utf-8'
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
@@ -46,7 +46,7 @@ module Dummy
     config.active_support.escape_html_entities_in_json = true
 
     # eager load paths instead of autoload paths
-    config.eager_load_paths << File.expand_path("../../lib", __FILE__)
+    config.eager_load_paths << File.expand_path('../lib', __dir__)
 
     # Use SQL instead of Active Record's schema dumper when creating the database.
     # This is necessary if your schema can't be completely dumped by the schema dumper,
@@ -57,7 +57,9 @@ module Dummy
     # This will create an empty whitelist of attributes available for mass-assignment for all models
     # in your app. As such, your models will need to explicitly whitelist or blacklist accessible
     # parameters by using an attr_accessible or attr_protected declaration.
-    #config.active_record.whitelist_attributes = true
+    # config.active_record.whitelist_attributes = true
+
+    config.action_mailer = Marty::ApplicationConfig.action_mailer_defaults
 
     # Enable the asset pipeline
     config.assets.enabled = true
@@ -65,21 +67,21 @@ module Dummy
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
 
-    config.paths["config/database"] = "#{APP_ROOT}/database.yml"
+    config.paths['config/database'] = "#{APP_ROOT}/database.yml"
 
     config.marty.auth_source = 'local'
     config.marty.system_account = 'marty'
     config.marty.local_password = 'marty'
     require 'class_list'
     config.marty.roles = [
-                          :admin,
-                          :dev,
-                          :viewer,
-                          :user_manager,
-                          :data_grid_editor,
-                         ]
-    #config.marty.default_posting_type = 'BASE'
-    config.secret_key_base = "SECRET_KEY_BASE"
+      :admin,
+      :dev,
+      :viewer,
+      :user_manager,
+      :data_grid_editor,
+    ]
+    # config.marty.default_posting_type = 'BASE'
+    config.secret_key_base = 'SECRET_KEY_BASE'
     config.marty.extjs_theme = 'crisp'
 
     config.active_job.queue_adapter = :delayed_job
@@ -87,4 +89,4 @@ module Dummy
     config.marty.uglify_assets = ENV['MARTY_UGLIFY_ASSETS'].to_s == 'true'
   end
 end
-require "marty/permissions"
+require 'marty/permissions'
