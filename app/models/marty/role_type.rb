@@ -11,7 +11,7 @@ class Marty::RoleType < Marty::Base
 
   class << self
     def from_nice_names(roles)
-      klass.get_all.select do |role|
+      get_all.select do |role|
         roles.include?(I18n.t("roles.#{role}", default: role))
       end
     end
