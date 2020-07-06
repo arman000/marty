@@ -9,9 +9,9 @@ ltv\tnumrange\tv\t\t
 fico\tnumrange\th\t\t
 
 \t\t>=600<700\t>=700<750\t>=750
-CA\t<=80\t1.1\t2.2\t3.3
+CA\t<=80\t1.1\t2.2\t3.3\tExample comment
 TX|HI\t>80<=105\t4.4\t5.5\t6.6
-NM\t<=80\t1.2\t2.3\t3.4
+NM\t<=80\t1.2\t2.3\t3.4\tSecond comment
 MA\t>80<=105\t4.5\t5.6\t
 \t<=80\t11\t22\t33
 EOS
@@ -184,10 +184,10 @@ EOS
 lenient
 fha_203k_option2\tstring\tv\tfha_203k_option2
 
-Investor Services\t-0.625
-NOT (Admin Premium Services|Admin Services|Admin Services Plus)\t-1.0
-Admin Services Plus\t-1.625
-Investor Services Acadamy\t-0.5
+Investor Services\t-0.625\tcomment 1
+NOT (Admin Premium Services|Admin Services|Admin Services Plus)\t-1.0\tcomment 2
+Admin Services Plus\t-1.625\tcomment 3
+Investor Services Acadamy\t-0.5\tcomment 4
 EOS
 
     G1_with_nulls = <<EOS
@@ -285,6 +285,11 @@ EOS
         expect(state_attr['keys'].last).to be nil
         expect(state_attr['wildcards'].last).to be true
         expect(state_attr['wildcards']).to eq [false, false, false, false, true]
+      end
+
+      it 'should import comments' do
+        dg = dg_from_import('G1', G1)
+        expect(dg.comments).to eq ['Example comment', nil, 'Second comment', nil, nil]
       end
 
       it 'allows to import NULL values in string fields' do

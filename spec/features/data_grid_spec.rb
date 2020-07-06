@@ -174,14 +174,17 @@ feature 'data grid view', js: true, speed: :super_slow do
     return unless dim.count > 0
 
     color_sets = Array.new(dim_size) { Set.new }
+
     iterate_area(dim_area, ui_colors) do |cell, row_idx, col_idx|
       idx = by_col ? col_idx : row_idx
       color_sets[idx] << cell
     end
+
     color_sets.each do |the_set|
       expect(the_set.length).to eq(1)
       expect(the_set.to_a[0]).to match(/^rgb/)
     end
+
     all_set = color_sets.map(&:to_a).reduce(&:+).to_set
     expect(all_set.length).to eq(color_sets.length)
 
@@ -209,9 +212,14 @@ feature 'data grid view', js: true, speed: :super_slow do
     vdim_size = vdim.count
     hdim_size = hdim.count
     vdim_area =  { ulx: 0, uly: hdim_size, lrx: vdim_size, lry: row_cnt }
-    hdim_area =  { ulx: vdim_size, uly: 0, lrx: col_cnt, lry: hdim_size }
-    data_area =  { ulx: vdim_size, uly: hdim_size, lrx: col_cnt,
-                   lry: row_cnt }
+    hdim_area =  { ulx: vdim_size, uly: 0, lrx: col_cnt - 1, lry: hdim_size }
+    data_area =  {
+      ulx: vdim_size,
+      uly: hdim_size,
+      lrx: col_cnt - 1, # minus comment column
+      lry: row_cnt
+    }
+
     # check the dim areas
     check_dim(vdim, vdim_size, vdim_area, ui_colors, ui_data) if vdim_size > 0
     check_dim(hdim, hdim_size, hdim_area, ui_colors, ui_data, by_col: false) if
@@ -261,11 +269,13 @@ feature 'data grid view', js: true, speed: :super_slow do
                 else
                   all_enabled
                 end
+
     areas = [[data_area, data_menu],
              [vdim_area, perm == 'edit_all' && vdim.count > 0 ? col_disabled :
                            all_disabled],
              [hdim_area, perm == 'edit_all' && hdim.count > 0 ? row_disabled :
                            all_disabled]]
+
     areas.each do |area, menu_exp|
       xrangefull = (area[:ulx]...area[:lrx]).to_a
       yrangefull = (area[:uly]...area[:lry]).to_a
@@ -275,6 +285,7 @@ feature 'data grid view', js: true, speed: :super_slow do
 
       xrange = all_cells ? xrangefull : [xrangefull[0], xrangefull[-1]].uniq
       yrange = all_cells ? yrangefull : [yrangefull[0], yrangefull[-1]].uniq
+
       xrange.each do |x|
         yrange.each do |y|
           m = context_click(x, y, 0)
@@ -294,6 +305,11 @@ feature 'data grid view', js: true, speed: :super_slow do
       [md['dir'], md['attr'], md['keys']]
     end.sort
     expect(grid_meta).to eq(exp_meta)
+
+    return unless File.exist?("#{fix}/grid#{gn}_final_comments.json")
+
+    exp_comments = JSON.parse(File.read("#{fix}/grid#{gn}_final_comments.json"))
+    expect(grid.comments).to eq(exp_comments)
   end
 
   it 'dg perms' do
@@ -379,12 +395,19 @@ feature 'data grid view', js: true, speed: :super_slow do
      ['edit_data', false],
      ['view', false]].each do |perm, all_cells|
       set_perm(perm)
+
       press('Refresh')
+      # 'press('Refresh')' sometimes doesn't work locally, in that case
+      # uncomment the following line:
+      # page.find('.x-tool-refresh').click
+
       grids = dgv.get_col_vals('name', 5)
+
       if perm.nil?
         expect(grids).to be_nil
         next
       end
+
       grids.each do |grid|
         pos = grids.index(grid) + 1
         dgv.select_row(pos)
@@ -557,10 +580,15 @@ feature 'data grid view', js: true, speed: :super_slow do
     qtips = get_grid(to_get: :qtips)
 
     # make sure data area of colors and qtips are all blank/false
-    expect(colors[3..-1].map { |r| r[2..-1] }.flatten.to_set).
+    expect(colors[3..-1].flat_map { |r| r[2..-1] }.to_set).
       to eq(Set.new(['']))
-    expect(qtips[3..-1].map { |r| r[2..-1] }.flatten.to_set).
+    expect(qtips[3..-1].flat_map { |r| r[2..-2] }.to_set).
       to eq(Set.new([false]))
+
+    # Comments qtip
+    expect(qtips[3..-1].map { |r| r[-1] }.to_set).
+      to eq(Set.new(['Comments']))
+
     press('Cancel')
 
     press('Edit Grid')
@@ -684,10 +712,16 @@ feature 'data grid view', js: true, speed: :super_slow do
     grid_setup
     cell_edit(7, 2, '11111')
     context_click(3, 4, 1, click: true)
+
     ['5|4', 'Abc', 'Def', 'QQQ', 'ZZZ', 'AAA', '>5000011<6000000', 765].
       each_with_index do |v, idx|
       cell_edit(idx, 5, v)
     end
+
+    7.times do |idx|
+      cell_edit(8, idx, "Comment ##{idx}")
+    end
+
     press('Save')
     sleep 1
     validate_grid('1')

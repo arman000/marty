@@ -1,7 +1,8 @@
 ({
-  createStoreAndColumns(data, hdim, vdim, hcol, vcol, extra_attrs) {
+  createStoreAndColumns(data, hdim, vdim, hcol, vcol, extraAttrs) {
     const fields = [];
     const columns = [];
+
     for (let i = 0; i < data[0].length; i++) {
       fields.push("a" + i);
       columns.push({
@@ -14,17 +15,32 @@
             vlen = vdim.length,
             row = meta.rowIndex,
             col = meta.column.fullColumnIndex;
-          if (extra_attrs[row][col]) {
-            meta.tdStyle = extra_attrs[row][col][0];
+
+          if (extraAttrs[row][col]) {
+            meta.tdStyle = extraAttrs[row][col][0];
             meta.tdAttr = Ext.String.format(
               'data-qtip="{0}"',
-              extra_attrs[row][col][1]
+              extraAttrs[row][col][1]
             );
           }
+
+          const valuesInRow = Object.keys(meta.record.data).filter((row) =>
+            row.startsWith("a")
+          ).length;
+
+          // Make comments column non editable for H rows
+          if (col === valuesInRow - 1) {
+            meta.tdAttr = Ext.String.format('data-qtip="{0}"', "Comments");
+            if (row === hlen - 1) {
+              return "Comments:";
+            }
+          }
+
           if (row < hlen && col >= vlen) {
             meta.tdStyle = hcol[row];
             meta.tdAttr = Ext.String.format('data-qtip="{0}"', hdim[row]);
           }
+
           if (col < vlen && row >= hlen) {
             meta.tdStyle = vcol[col];
             meta.tdAttr = Ext.String.format('data-qtip="{0}"', vdim[col]);
@@ -35,13 +51,16 @@
         autoSizeColumn: true
       });
     }
+
     const thestore = Ext.create("Ext.data.ArrayStore", {
       fields,
       data
     });
+
     return [columns, thestore];
   },
-  editGrid(record_id, hdim, vdim, data, title_str, permission) {
+
+  editGrid(recordId, hdim, vdim, data, titleStr, permission) {
     const colors = [
       "background-color: #FFA1A1;",
       "background-color: #FF9D5C;",
@@ -80,7 +99,7 @@
       return arr;
     };
 
-    const extra_attrs = createArray(data.length, data[0].length);
+    const extraAttrs = createArray(data.length, data[0].length);
 
     const [columns, thestore] = this.createStoreAndColumns(
       data,
@@ -88,7 +107,7 @@
       vdim,
       hcol,
       vcol,
-      extra_attrs
+      extraAttrs
     );
 
     let dirty = false;
@@ -102,24 +121,26 @@
     me = this;
 
     const dataUpdate = function(grid, modFunc) {
-      const store_data = grid.getStore().data.items;
-      const mod_data = [];
-      modFunc(store_data, mod_data);
-      const extra_attrs = createArray(mod_data.length, mod_data[0].length);
+      const storeData = grid.getStore().data.items;
+      const modData = [];
+      modFunc(storeData, modData);
+      const extraAttrs = createArray(modData.length, modData[0].length);
       const [newcolumns, newstore] = me.createStoreAndColumns(
-        mod_data,
+        modData,
         hdim,
         vdim,
         hcol,
         vcol,
-        extra_attrs
+        extraAttrs
       );
       grid.reconfigure(newstore, newcolumns);
+
       Ext.each(grid.getColumns(), function(column) {
         column.autoSize();
       });
       setDirty();
     };
+
     const insertRow = function(inData, outData, rowIdx, up) {
       const width = inData[0].fields.length - 1;
       const newa = Array.apply(null, Array(width)).map(function() {
@@ -139,9 +160,10 @@
         }
       }
     };
+
     const insertCol = function(inData, outData, colIdx, left) {
       const target = left ? colIdx : colIdx + 1;
-      const row_width = inData[0].fields.length;
+      const rowWidth = inData[0].fields.length;
       for (let i = 0; i < inData.length; ++i) {
         const row = [];
         let idx = 0;
@@ -150,10 +172,11 @@
           if (key != "id") row.push(value);
           ++idx;
         }
-        if (target == row_width) row.push(null);
+        if (target == rowWidth) row.push(null);
         outData.push(row);
       }
     };
+
     const deleteRow = function(inData, outData, rowIdx) {
       for (let i = 0; i < inData.length; ++i) {
         if (i != rowIdx) {
@@ -165,6 +188,7 @@
         }
       }
     };
+
     const deleteCol = function(inData, outData, colIdx) {
       for (let i = 0; i < inData.length; ++i) {
         const row = [];
@@ -176,70 +200,79 @@
         outData.push(row);
       }
     };
-    const lookup_grid = function() {
+
+    const lookupGrid = function() {
       return Ext.ComponentQuery.query("grid").find(function(v) {
         return v.name == "data_grid_edit_grid";
       });
     };
-    const lookup_win = function() {
+
+    const lookupWin = function() {
       return Ext.ComponentQuery.query("window").find(function(v) {
         return v.name == "data_grid_edit_window";
       });
     };
+
     const insertRowAboveAction = Ext.create("Ext.Action", {
       text: "Insert Row Above",
       handler(widget, _event) {
-        const grid = lookup_grid();
-        dataUpdate(grid, function(data, mod_data) {
-          insertRow(data, mod_data, widget.position.row, true);
+        const grid = lookupGrid();
+        dataUpdate(grid, function(data, modData) {
+          insertRow(data, modData, widget.position.row, true);
         });
       }
     });
+
     const insertRowBelowAction = Ext.create("Ext.Action", {
       text: "Insert Row Below",
       handler(widget, _event) {
-        const grid = lookup_grid();
-        dataUpdate(grid, function(data, mod_data) {
-          insertRow(data, mod_data, widget.position.row, false);
+        const grid = lookupGrid();
+        dataUpdate(grid, function(data, modData) {
+          insertRow(data, modData, widget.position.row, false);
         });
       }
     });
+
     const insertColLeftAction = Ext.create("Ext.Action", {
       text: "Insert Column Left",
       handler(widget, _event) {
-        const grid = lookup_grid();
-        dataUpdate(grid, function(data, mod_data) {
-          insertCol(data, mod_data, widget.position.col, true);
+        const grid = lookupGrid();
+        dataUpdate(grid, function(data, modData) {
+          insertCol(data, modData, widget.position.col, true);
         });
       }
     });
+
     const insertColRightAction = Ext.create("Ext.Action", {
       text: "Insert Column Right",
       handler(widget, _event) {
-        const grid = lookup_grid();
-        dataUpdate(grid, function(data, mod_data) {
-          insertCol(data, mod_data, widget.position.col, false);
+        const grid = lookupGrid();
+        dataUpdate(grid, function(data, modData) {
+          insertCol(data, modData, widget.position.col, false);
         });
       }
     });
+
     const deleteRowAction = Ext.create("Ext.Action", {
       text: "Delete Row",
       handler(widget, _event) {
-        const grid = lookup_grid();
-        dataUpdate(grid, function(data, mod_data) {
-          deleteRow(data, mod_data, widget.position.row);
+        const grid = lookupGrid();
+        dataUpdate(grid, function(data, modData) {
+          deleteRow(data, modData, widget.position.row);
         });
       }
     });
+
     const deleteColAction = Ext.create("Ext.Action", {
       text: "Delete Column",
       handler(widget, _event) {
-        const grid = lookup_grid();
-        dataUpdate(grid, function(data, mod_data) {
-          deleteCol(data, mod_data, widget.position.col);
+        const grid = lookupGrid();
+        dataUpdate(grid, function(data, modData) {
+          deleteCol(data, modData, widget.position.col);
         });
       }
     });
+
     const itemContextMenu = Ext.create("Ext.menu.Menu", {
       items: [
         insertRowAboveAction,
@@ -260,22 +293,35 @@
       mode: "MULTI"
     });
 
-    const get_area = function(row, col) {
-      const row_hdim = row < hdim.length,
-        row_vdim = col < vdim.length;
-
+    const getArea = (row, col) => {
       let a;
-      if (row_hdim && row_vdim) a = "blank_area";
-      else if (!row_hdim && !row_vdim) a = "data_area";
-      else if (row_hdim && !row_vdim) a = "hdim_area";
+
+      const rowHdim = row < hdim.length,
+        rowVdim = col < vdim.length;
+
+      const valuesInRow = Object.keys(
+        lookupGrid().store.data.items[0].data
+      ).filter((row) => row.startsWith("a")).length;
+
+      if (rowHdim && col == valuesInRow - 1) a = "h_row_comments_area";
+      else if (!rowHdim && col == valuesInRow - 1) a = "comments_area";
+      else if (rowHdim && rowVdim) a = "blank_area";
+      else if (!rowHdim && !rowVdim) a = "data_area";
+      else if (rowHdim && !rowVdim) a = "hdim_area";
       else a = "vdim_area";
       return a;
     };
 
-    const can_edit = function(row, col) {
-      const area = get_area(row, col);
+    const canEdit = function(row, col) {
+      const area = getArea(row, col);
+
       if (area == "blank_area") return false;
-      if (area == "data_area") return permission != "view";
+      if (area == "h_row_comments_area") return false;
+
+      if (area == "data_area" || area == "comments_area") {
+        return permission != "view";
+      }
+
       if (area == "vdim_area" || area == "hdim_area")
         return permission == "edit_all";
     };
@@ -285,7 +331,7 @@
       clicksToEdit: 2,
       listeners: {
         beforeedit(editor, context, _eOpts) {
-          if (!can_edit(context.rowIdx, context.colIdx)) return false;
+          if (!canEdit(context.rowIdx, context.colIdx)) return false;
         },
         afteredit() {
           setDirty();
@@ -293,36 +339,65 @@
       }
     });
 
-    const context_disable_fn = function(menu, label, x, y, fn) {
+    const contextDisableFn = function(menu, label, x, y, fn) {
       const mi = menu.items.items.find(function(mi) {
         return mi.text == label;
       });
       if (fn(x, y)) mi.enable();
       else mi.disable();
     };
+
     // check to see if menu item should be enabled based on row, col
-    const row_menu_chk = function(row, col) {
-      const area = get_area(row, col);
+    const rowMenuCheck = function(row, col) {
+      const area = getArea(row, col);
       if (vdim.length == 0) return false;
       return (
-        (area == "vdim_area" || area == "data_area") && permission == "edit_all"
+        (area == "vdim_area" ||
+          area == "data_area" ||
+          area == "comments_area") &&
+        permission == "edit_all"
       );
     };
-    const col_menu_chk = function(row, col) {
-      const area = get_area(row, col);
+
+    const colMenuCheck = function(row, col) {
+      const area = getArea(row, col);
+
       if (hdim.length == 0) return false;
+
+      if (area == "comments_area" || area == "h_row_comments_area") {
+        return false;
+      }
+
       return (
-        (area == "hdim_area" || area == "data_area") && permission == "edit_all"
+        (area == "hdim_area" ||
+          area == "data_area" ||
+          area == "comments_area") &&
+        permission == "edit_all"
       );
     };
-    const disable_conds = [
-      ["Insert Row Above", row_menu_chk],
-      ["Insert Row Below", row_menu_chk],
-      ["Delete Row", row_menu_chk],
-      ["Insert Column Left", col_menu_chk],
-      ["Insert Column Right", col_menu_chk],
-      ["Delete Column", col_menu_chk]
+
+    const insertColLeftCheck = function(row, col) {
+      const area = getArea(row, col);
+      if (hdim.length == 0) return false;
+
+      return (
+        (area == "hdim_area" ||
+          area == "data_area" ||
+          area == "comments_area" ||
+          area == "h_row_comments_area") &&
+        permission == "edit_all"
+      );
+    };
+
+    const disableConds = [
+      ["Insert Row Above", rowMenuCheck],
+      ["Insert Row Below", rowMenuCheck],
+      ["Delete Row", rowMenuCheck],
+      ["Insert Column Left", insertColLeftCheck],
+      ["Insert Column Right", colMenuCheck],
+      ["Delete Column", colMenuCheck]
     ];
+
     Ext.define("DGEdit.grid.plugin.Clipboard", {
       override: "Ext.grid.plugin.Clipboard",
       beforepaste: Ext.emptyFn,
@@ -341,7 +416,7 @@
             rowIdx = event.position.rowIdx,
             colIdx = event.position.colIdx;
           let i, n, s;
-          if (!can_edit(rowIdx, colIdx)) {
+          if (!canEdit(rowIdx, colIdx)) {
             return;
           }
           if (me.fireEvent("beforepaste", keyCode, event, me.cmp) !== false) {
@@ -372,6 +447,7 @@
     });
     Ext.tip.Tip.prototype.minWidth = void 0;
     Ext.tip.QuickTipManager.init();
+
     const grid = {
       xtype: "grid",
       name: "data_grid_edit_grid",
@@ -412,8 +488,8 @@
           for (let i = 0; i < ctn; ++i) {
             items[i].position = { col: y, row: x };
           }
-          for (const [label, fn] of disable_conds) {
-            context_disable_fn(itemContextMenu, label, x, y, fn);
+          for (const [label, fn] of disableConds) {
+            contextDisableFn(itemContextMenu, label, x, y, fn);
           }
           itemContextMenu.showAt(e.getXY());
         }
@@ -442,7 +518,7 @@
       autoWidth: true,
       modal: true,
       autoScroll: true,
-      title: title_str,
+      title: titleStr,
       layout: "anchor",
       items: grid,
       submit() {
@@ -462,22 +538,23 @@
           for (let i = 0; i < store.length; ++i) {
             const row = {};
 
-            let col_idx = 0;
+            let colIdx = 0;
 
             // or remove label fields we added in top left
-            const col_null = i < hdim.length ? vdim.length : 0;
+            const colNull = i < hdim.length ? vdim.length : 0;
 
             for (const [key, value] of Object.entries(store[i].data)) {
               if (key != "id") {
-                if (col_idx < col_null) row[key] = "";
+                if (colIdx < colNull) row[key] = "";
                 else row[key] = value;
               }
               // const col0_skip = false;
-              col_idx++;
+              colIdx++;
             }
             ret.push(row);
           }
-          server.saveGrid({ record_id, data: ret }, function(res) {
+
+          server.saveGrid({ record_id: recordId, data: ret }, function(res) {
             if (res) {
               if (res["errorMessage"]) {
                 Ext.MessageBox.show({
@@ -493,15 +570,15 @@
                   buttons: Ext.Msg.OK
                 });
                 for (const [type, x, y] of res["problemArray"]) {
-                  const real_x = vdim.length + x,
-                    real_y = hdim.length + y;
+                  const realX = vdim.length + x,
+                    realY = hdim.length + y;
                   if (type == "constraint")
-                    extra_attrs[real_y][real_x] = [
+                    extraAttrs[realY][realX] = [
                       "background-color: #FF8181;",
                       "failed constraint check"
                     ];
                   else if (type == "type")
-                    extra_attrs[real_y][real_x] = [
+                    extraAttrs[realY][realX] = [
                       "background-color: #FFB181;",
                       "failed type check"
                     ];
@@ -509,7 +586,7 @@
                 grid.getView().refresh();
               }
             } else {
-              const win = lookup_win();
+              const win = lookupWin();
               win.destroy();
             }
             Ext.getBody().unmask();
@@ -526,7 +603,7 @@
       closeAction: "destroy",
       listeners: {
         beforeclose(win) {
-          const grid = lookup_grid();
+          const grid = lookupGrid();
           if (win.closeMe) {
             win.closeMe = false;
             grid.destroy();
@@ -554,9 +631,11 @@
       },
       fbar
     }).show();
+
     const gridobj = Ext.ComponentQuery.query("grid").find(function(v) {
       return v.name == "data_grid_edit_grid";
     });
+
     Ext.each(gridobj.getColumns(), function(column) {
       column.autoSize();
       column.setWidth(column.getWidth() + 20);
