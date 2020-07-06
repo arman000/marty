@@ -4,6 +4,8 @@ module Marty
 
     module_function
 
+    delegate :values, to: :klass
+
     def from_nice_names(roles)
       klass.get_all.select do |role|
         roles.include?(I18n.t("roles.#{role}", default: role))
