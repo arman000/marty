@@ -14,7 +14,7 @@ end
 Mcfly.whodunnit = Marty::User.find_by_login(system_login)
 
 # Give system account all roles
-Marty::RoleType.get_all.map do |role|
+Marty::RoleTypeAdapter.get_all.map do |role|
   ur = Marty::UserRole.new
   ur.user = Mcfly.whodunnit
   ur.role = role

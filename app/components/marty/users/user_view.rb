@@ -36,7 +36,7 @@ module Marty
       def self.set_roles(roles, user)
         roles = [] if roles.blank?
 
-        roles = ::Marty::RoleType.from_nice_names(roles)
+        roles = ::Marty::RoleTypeAdapter.from_nice_names(roles)
 
         roles_in_user = user.user_roles.map(&:role)
         roles_to_delete = roles_in_user - roles
@@ -153,11 +153,11 @@ module Marty
         c.type    = :string
 
         c.getter = lambda do |r|
-          Marty::RoleType.to_nice_names(r.user_roles.map(&:role))
+          Marty::RoleTypeAdapter.to_nice_names(r.user_roles.map(&:role))
         end
 
-        roles = Rails.application.config.marty.roles || ::Marty::RoleType.values
-        store = ::Marty::RoleType.to_nice_names(roles.sort)
+        roles = ::Marty::RoleTypeAdapter.values
+        store = ::Marty::RoleTypeAdapter.to_nice_names(roles.sort)
 
         c.editor_config = {
           multi_select: true,

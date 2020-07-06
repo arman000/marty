@@ -114,7 +114,7 @@ module Marty; class DataGridView < McflyGridPanel
   def set_perms(dg, data)
     permstrs = %w[perm_view perm_edit_data perm_edit_all]
     view, edit_data, edit_all = data.values_at(*permstrs).map do |plist|
-      Marty::RoleType.from_nice_names(plist)
+      Marty::RoleTypeAdapter.from_nice_names(plist)
     end
     dg.permissions = {
       view: view.presence || [],
@@ -259,9 +259,9 @@ module Marty; class DataGridView < McflyGridPanel
       c.label   = I18n.t("data_grid_view_perms.#{s}")
       c.type    = :string
       c.getter = lambda do |r|
-        Marty::RoleType.to_nice_names(r.permissions[p].sort)
+        Marty::RoleTypeAdapter.to_nice_names(r.permissions[p].sort)
       end
-      store = Marty::RoleType.to_nice_names(::Marty::RoleType.get_all.sort.map)
+      store = Marty::RoleTypeAdapter.to_nice_names(::Marty::RoleTypeAdapter.get_all.sort.map)
 
       # edit does not work without this dummy setter
       c.setter = ->(r, v) {}

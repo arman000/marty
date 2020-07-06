@@ -2,7 +2,7 @@ class MigrateMartyRolesToEnum < ActiveRecord::Migration[5.1]
   include Marty::Migrations
 
   def up
-    new_enum(Marty::RoleType, 'keep_marty_prefix_here')
+    new_enum(Marty::RoleTypeAdapter, 'keep_marty_prefix_here')
 
     add_column :marty_user_roles, :role, :marty_role_types
     add_column :marty_import_types, :role, :marty_role_types
@@ -38,7 +38,7 @@ class MigrateMartyRolesToEnum < ActiveRecord::Migration[5.1]
     add_column :marty_user_roles, :role_id, :integer
     add_column :marty_import_types, :role_id, :integer
 
-    Marty::RoleType.values.each do |role|
+    Marty::RoleTypeAdapter.values.each do |role|
       Marty::Role.create!(name: role)
     end
 
