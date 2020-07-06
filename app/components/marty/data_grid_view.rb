@@ -174,13 +174,20 @@ module Marty; class DataGridView < McflyGridPanel
 
     return client.netzke_notify('No data grid.') unless dg
 
-    meta_rows_raw, h_key_rows, data_rows = dg.export_array
+    meta_rows_raw, h_key_rows_raw, data_rows = dg.export_array
     meta_rows = meta_rows_raw.map do |row|
       # need to escape for HTML, otherwise characters such as >, <,
       # etc. not displayed properly.
       row.map { |field| CGI::escapeHTML(field) }
     end
-    res = meta_rows + [[]] + h_key_rows + data_rows
+
+    h_key_rows_with_comments = h_key_rows_raw.map do |row|
+      row += ['']
+    end
+
+    h_key_rows_with_comments[-1][-1] = 'Comments:' if h_key_rows_with_comments.any?
+
+    res = meta_rows + [[]] + h_key_rows_with_comments + data_rows
 
     maxcount = res.map(&:length).max
 
@@ -199,7 +206,8 @@ module Marty; class DataGridView < McflyGridPanel
     return client.netzke_notify('No data grid.') unless dg
 
     meta_rows_raw, h_key_rows, data_rows = dg.export_array
-    res = h_key_rows + data_rows
+    h_key_rows_with_comments = h_key_rows.map { |row| row += [''] }
+    res = h_key_rows_with_comments + data_rows
 
     md = dg.metadata
     hdim = md.map { |m| m['dir'] == 'h' && m['attr'] }.select { |v| v }

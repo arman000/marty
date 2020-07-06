@@ -1,3 +1,11 @@
+16.4.0 - 2020-07-02
+=====================================================
+
+* Add comments to grids.
+One comment per row
+The column on the right of the grid's view/edit window is the one with comments.
+Users can not add a column to the right of the one with comments.
+
 16.3.0 - 2020-06-24
 =====================================================
 

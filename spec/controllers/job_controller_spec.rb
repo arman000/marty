@@ -4,7 +4,7 @@ require 'delorean_lang'
 require 'benchmark'
 require 'job_helper'
 
-describe Marty::JobController, slow: true do
+describe Marty::JobController, slow: true, retry: 2 do
   before(:each) { @routes = Marty::Engine.routes }
 
   before(:all) do

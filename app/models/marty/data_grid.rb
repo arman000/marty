@@ -513,7 +513,7 @@ class Marty::DataGrid < Marty::Base
       v_infos.map { |inf| self.class.export_keys(inf) }.transpose
 
     data_rows = transposed_v_keys.each_with_index.map do |keys, i|
-      keys + (data[i] || [])
+      keys + (data[i] || []) + [comments[i]]
     end
 
     [meta_rows, h_key_rows, data_rows]
@@ -649,9 +649,6 @@ class Marty::DataGrid < Marty::Base
     raise 'must have a blank row separating metadata' unless
       blank_index
 
-    raise "can't import grid with trailing blank column" if
-      rows.map { |r| r.last.nil? }.all?
-
     raise "last row can't be blank" if rows[-1].all?(&:nil?)
 
     data_type, lenient, strict_null_mode = nil, false, false
@@ -671,29 +668,7 @@ class Marty::DataGrid < Marty::Base
 
     start_md = constraint || data_type || lenient || strict_null_mode ? 1 : 0
 
-    rows_for_metadata = rows[start_md...blank_index]
-    metadata = rows_for_metadata.map do |attr, type, dir, rs_keep, key|
-      raise 'metadata elements must include attr/type/dir' unless
-        attr && type && dir
-      raise "bad dir #{dir}" unless ['h', 'v'].member? dir
-      raise "unknown metadata type #{type}" unless
-        Marty::DataGrid.type_to_index(type)
-
-      keys = key && parse_keys(pt, [key], type, strict_null_mode)
-      nots = key && parse_nots([key])
-      wildcards = key && parse_wildcards([key])
-
-      res = {
-        'attr' => attr,
-        'type' => type,
-        'dir'  => dir,
-        'keys' => keys,
-        'nots' => nots,
-        'wildcards' => wildcards,
-      }
-      res['rs_keep'] = rs_keep if rs_keep
-      res
-    end
+    metadata = parse_metadata(rows[start_md...blank_index])
 
     v_infos = metadata.select { |inf| inf['dir'] == 'v' }
     h_infos = metadata.select { |inf| inf['dir'] == 'h' }
@@ -730,34 +705,25 @@ class Marty::DataGrid < Marty::Base
     raise 'vert. info keys length mismatch!' unless
       v_infos.map { |inf| inf['keys'].length }.uniq.count <= 1
 
-    c_data_type = Marty::DataGrid.convert_data_type(data_type)
-
-    raise "bad data type #{data_type}" unless c_data_type
-
     # based on data type, decide to check using convert or instance
     # lookup.  FIXME: DRY.
+    data_size = h_infos.dig(0, 'keys')&.size || 1
 
-    if String === c_data_type
-      tsym = c_data_type.to_sym
+    data = parse_data(
+      data_rows: data_rows,
+      data_type: data_type,
+      v_infos_size: v_infos.size,
+      data_size: data_size,
+      pt: pt
+    )
 
-      data = data_rows.map do |r|
-        r[v_infos.count, r.count].map do |v|
-          next v unless v
+    comment_index = v_infos.size + data_size
 
-          Marty::DataConversion.convert(v, tsym)
-        end
-      end
-    else
-      data = data_rows.map do |r|
-        r[v_infos.count, r.count].map do |v|
-          next v unless v
+    raise "can't import grid with trailing blank column" if
+      data_rows.any? { |r| r.size > comment_index + 1 }
 
-          next v if Marty::DataGrid.
-                         find_class_instance(pt, c_data_type, v)
-
-          raise "can't find key '#{v}' for class #{data_type}"
-        end
-      end
+    comments = data_rows.map do |r|
+      r[v_infos.size + data_size]
     end
 
     {
@@ -767,7 +733,62 @@ class Marty::DataGrid < Marty::Base
       lenient: lenient,
       strict_null_mode: strict_null_mode,
       constraint: constraint,
+      comments: comments
     }
+  end
+
+  def self.parse_metadata(rows_for_metadata)
+    rows_for_metadata.map do |attr, type, dir, rs_keep, key|
+      raise 'metadata elements must include attr/type/dir' unless
+        attr && type && dir
+      raise "bad dir #{dir}" unless ['h', 'v'].member? dir
+      raise "unknown metadata type #{type}" unless
+        Marty::DataGrid.type_to_index(type)
+
+      keys = key && parse_keys(pt, [key], type, strict_null_mode)
+      nots = key && parse_nots([key])
+      wildcards = key && parse_wildcards([key])
+
+      res = {
+        'attr' => attr,
+        'type' => type,
+        'dir'  => dir,
+        'keys' => keys,
+        'nots' => nots,
+        'wildcards' => wildcards,
+      }
+      res['rs_keep'] = rs_keep if rs_keep
+      res
+    end
+  end
+
+  def self.parse_data(pt:, v_infos_size:, data_type:, data_size:, data_rows:)
+    c_data_type = Marty::DataGrid.convert_data_type(data_type)
+
+    raise "bad data type #{data_type}" unless c_data_type
+
+    if String === c_data_type
+      tsym = c_data_type.to_sym
+
+      return data_rows.map do |r|
+        r[v_infos_size, data_size].map do |v|
+          next v unless v
+
+          Marty::DataConversion.convert(v, tsym)
+        end
+      end
+    end
+
+    data_rows.map do |r|
+      r[v_infos_size, data_size].map do |v|
+        next v unless v
+
+        next v if Marty::DataGrid.
+                       find_class_instance(pt, c_data_type, v)
+
+        raise "can't find key '#{v}' for class #{data_type}"
+      end
+    end
   end
 
   def self.create_from_import(name, import_text, created_dt = nil)
@@ -779,6 +800,7 @@ class Marty::DataGrid < Marty::Base
     lenient = parsed_result[:lenient]
     constraint = parsed_result[:constraint]
     strict_null_mode = parsed_result[:strict_null_mode]
+    comments = parsed_result[:comments]
 
     dg                  = new
     dg.name             = name
@@ -789,6 +811,7 @@ class Marty::DataGrid < Marty::Base
     dg.metadata         = metadata
     dg.created_dt       = created_dt if created_dt
     dg.constraint       = constraint
+    dg.comments         = comments
     dg.save!
     dg
   end
@@ -802,6 +825,7 @@ class Marty::DataGrid < Marty::Base
     lenient = parsed_result[:lenient]
     constraint = parsed_result[:constraint]
     strict_null_mode = parsed_result[:strict_null_mode]
+    comments = parsed_result[:comments]
 
     self.name             = name
     self.data             = data
@@ -811,6 +835,7 @@ class Marty::DataGrid < Marty::Base
     # Otherwise changed will depend on order in hashes
     self.metadata         = new_metadata unless metadata == new_metadata
     self.constraint       = constraint
+    self.comments         = comments
     self.created_dt       = created_dt if created_dt
     save!
   end
