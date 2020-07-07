@@ -38,7 +38,7 @@ class MigrateMartyRolesToEnum < ActiveRecord::Migration[5.1]
     add_column :marty_user_roles, :role_id, :integer
     add_column :marty_import_types, :role_id, :integer
 
-    Marty::RoleTypeAdapter.values.each do |role|
+    Marty::RoleTypeDelegator.values.each do |role|
       Marty::Role.create!(name: role)
     end
 
