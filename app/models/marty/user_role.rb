@@ -16,7 +16,7 @@ class Marty::UserRole < Marty::Base
     end
 
     def role_values
-      role_type&.values
+      role_type.values
     end
 
     def to_nice_names(roles)
