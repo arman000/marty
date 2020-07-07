@@ -14,10 +14,10 @@
       return value;
     }
 
-    const column_name = cell.column.config.name;
-    const with_not = obj.data[`${column_name}_not`];
+    const columnName = cell.column.config.name;
+    const withNot = obj.data[`${columnName}_not`];
 
-    if (with_not) {
+    if (withNot) {
       return `NOT (${value})`;
     }
 

@@ -4,10 +4,10 @@ Ext.define("Netzke.Grid.EventHandlers", {
     if (this.editsInline) return; // inline editing is handled elsewhere
 
     // MONKEY: add view in form capability
-    const has_perm = this.permissions || {};
-    if (has_perm.read !== false && !has_perm.update) {
+    const hasPerm = this.permissions || {};
+    if (hasPerm.read !== false && !hasPerm.update) {
       this.doViewInForm(record);
-    } else if (has_perm.update !== false) {
+    } else if (hasPerm.update !== false) {
       this.doEditInForm(record);
     }
   },
@@ -607,9 +607,11 @@ Ext.define("Ext.ux.form.field.CodeMirror", {
       if (
         !Ext.Array.contains(me.scriptsLoaded, path + "/" + item.dependencies[i])
       ) {
+        me.scriptIndex += 1;
+
         const options = {
           url: path + "/" + item.dependencies[i],
-          index: ++me.scriptIndex,
+          index: me.scriptIndex,
           onLoad() {
             let ok = true;
             for (let j = 0; j < me.scripts.length; j++) {

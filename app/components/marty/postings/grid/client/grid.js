@@ -13,11 +13,11 @@
   },
 
   detail() {
-    const record_id = this.getSelectionModel()
+    const recordId = this.getSelectionModel()
       .getSelection()[0]
       .getId();
     this.server.detail({
-      record_id
+      record_id: recordId
     });
   },
 
@@ -41,16 +41,16 @@
     }, me);
 
     // find the root component (main application)
-    let main_app = me;
+    let mainApp = me;
     while (1) {
-      const p = main_app.netzkeGetParentComponent();
+      const p = mainApp.netzkeGetParentComponent();
       if (!p) {
         break;
       }
-      main_app = p;
+      mainApp = p;
     }
 
-    // assumes main_app has serverSelectPosting method
-    main_app.server.selectPosting(records);
+    // assumes mainApp has serverSelectPosting method
+    mainApp.server.selectPosting(records);
   }
 });

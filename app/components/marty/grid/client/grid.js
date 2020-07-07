@@ -59,10 +59,10 @@
 
     const children = me.serverConfig.child_components || [];
     me.onSelectionChange(function(m) {
-      const has_sel = m.hasSelection();
+      const hasSel = m.hasSelection();
 
       let rid = null;
-      if (has_sel) {
+      if (hasSel) {
         if (m.type == "spreadsheet") {
           const cell = m.getSelected().startCell;
           rid = cell && cell.record.getId();
@@ -74,14 +74,14 @@
       }
 
       me.serverConfig.selected = rid;
-      me.setDisableComponentActions("do", !has_sel);
+      me.setDisableComponentActions("do", !hasSel);
 
       for (const child of children) {
         const comp = me.findComponent(child);
         if (comp) {
           comp.serverConfig.parent_id = rid;
           if (comp.setDisableComponentActions) {
-            comp.setDisableComponentActions("parent", !has_sel);
+            comp.setDisableComponentActions("parent", !hasSel);
           }
           if (comp.reload) {
             comp.reload();

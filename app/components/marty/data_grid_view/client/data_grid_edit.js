@@ -90,10 +90,13 @@
     const createArray = function(length) {
       const arr = new Array(length || 0);
       let i = length;
-
       if (arguments.length > 1) {
         const args = Array.prototype.slice.call(arguments, 1);
-        while (i--) arr[length - 1 - i] = createArray.apply(this, args);
+
+        while (i > 0) {
+          i -= 1;
+          arr[length - 1 - i] = createArray.apply(this, args);
+        }
       }
 
       return arr;
@@ -170,7 +173,7 @@
         for (const [key, value] of Object.entries(inData[i].data)) {
           if (idx == target) row.push(null);
           if (key != "id") row.push(value);
-          ++idx;
+          idx += 1;
         }
         if (target == rowWidth) row.push(null);
         outData.push(row);
@@ -195,7 +198,7 @@
         let idx = 0;
         for (const [key, value] of Object.entries(inData[i].data)) {
           if (idx != colIdx && key != "id") row.push(value);
-          ++idx;
+          idx += 1;
         }
         outData.push(row);
       }
@@ -549,7 +552,7 @@
                 else row[key] = value;
               }
               // const col0_skip = false;
-              colIdx++;
+              colIdx += 1;
             }
             ret.push(row);
           }

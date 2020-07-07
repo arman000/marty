@@ -5,10 +5,10 @@
     // const form = me.getForm();
 
     const window = this.netzkeGetParentComponent();
-    const parent_view = window.netzkeGetParentComponent();
+    const parentView = window.netzkeGetParentComponent();
 
     this.serverConfig.parent_id =
-      parent_view.serverConfig.parent_id || parent_view.serverConfig.selected;
+      parentView.serverConfig.parent_id || parentView.serverConfig.selected;
 
     // const textname = form.findField("import_data");
     const importbutton = me.actions["apply"].items[0];
@@ -23,10 +23,10 @@
     result.updateBodyHtml(html);
 
     const window = this.netzkeGetParentComponent();
-    const parent_view = window.netzkeGetParentComponent();
+    const parentView = window.netzkeGetParentComponent();
 
-    if (parent_view && parent_view.reload) {
-      parent_view.reload();
+    if (parentView && parentView.reload) {
+      parentView.reload();
     }
   }
 });
