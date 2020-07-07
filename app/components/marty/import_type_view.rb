@@ -29,7 +29,7 @@ class Marty::ImportTypeView < Marty::Grid
   attribute :role do |c|
     c.width = 150
 
-    store = ::Marty::RoleTypeDelegator.get_all.sort
+    store = ::Marty::UserRole.role_values.sort
 
     c.editor_config = {
       multi_select: false,

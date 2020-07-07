@@ -13,7 +13,7 @@ module Marty
   end
 
   describe ImportType do
-    let(:role) { Marty::RoleTypeDelegator.get_all.first }
+    let(:role) { Marty::UserRole.role_values.first }
 
     before(:each) do
       @import = ImportType.new
