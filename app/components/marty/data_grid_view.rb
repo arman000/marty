@@ -261,7 +261,9 @@ module Marty; class DataGridView < McflyGridPanel
       c.getter = lambda do |r|
         Marty::UserRole.to_nice_names(r.permissions[p].sort)
       end
-      store = Marty::UserRole.to_nice_names(::Marty::UserRole.get_all.sort.map)
+      store = Marty::UserRole.to_nice_names(
+        ::Marty::UserRole.role_values.sort.map
+      )
 
       # edit does not work without this dummy setter
       c.setter = ->(r, v) {}
