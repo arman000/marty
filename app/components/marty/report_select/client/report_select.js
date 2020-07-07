@@ -3,8 +3,8 @@
     const me = this;
     me.callParent();
 
-    const tag_grid = me.netzkeGetComponent("tag_grid").getView();
-    const script_grid = me.netzkeGetComponent("script_grid").getView();
+    const tagGrid = me.netzkeGetComponent("tag_grid").getView();
+    const scriptGrid = me.netzkeGetComponent("script_grid").getView();
     const nodename = me.getForm().findField("nodename");
 
     nodename.on("select", function(self, record) {
@@ -17,28 +17,28 @@
       });
     });
 
-    tag_grid.getSelectionModel().on(
+    tagGrid.getSelectionModel().on(
       "selectionchange",
       function(self, records) {
-        const tag_id = records[0].get("id");
+        const tagId = records[0].get("id");
         me.server.selectTag({
-          tag_id
+          tag_id: tagId
         });
-        script_grid.getStore().load();
+        scriptGrid.getStore().load();
       },
       me
     );
 
-    script_grid.getSelectionModel().on(
+    scriptGrid.getSelectionModel().on(
       "selectionchange",
       function(self, records) {
-        if (script_grid.getStore().isLoading() == true) return;
+        if (scriptGrid.getStore().isLoading() == true) return;
 
         if (records[0] == null) return;
 
-        const script_name = records[0].get("name");
+        const scriptName = records[0].get("name");
         me.server.selectScript({
-          script_name
+          script_name: scriptName
         });
         nodename.reset();
         nodename.store.load({

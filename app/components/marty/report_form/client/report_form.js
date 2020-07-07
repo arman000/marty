@@ -107,8 +107,8 @@
     const data = Ext.encode(values);
 
     // construct url
-    const proto_host = location.protocol + "//" + location.host;
-    let url = proto_host + "/report?data=" + data;
+    const protoHost = location.protocol + "//" + location.host;
+    let url = protoHost + "/report?data=" + data;
     for (key in params) {
       if (params[key] == "") continue;
       url += "&" + key + "=" + params[key];

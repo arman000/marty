@@ -27,6 +27,8 @@ module.exports = {
       { args: "after-used", argsIgnorePattern: "^_" }
     ],
     "object-shorthand": ["error", "always"],
-    "no-constant-condition": ["error", { checkLoops: false }]
+    "no-constant-condition": ["error", { checkLoops: false }],
+    "camelcase": ["error", { ignoreDestructuring: true, properties: "never" }],
+    "no-plusplus": ["error", { allowForLoopAfterthoughts: true }]
   }
 };

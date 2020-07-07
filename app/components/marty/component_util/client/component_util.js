@@ -1,14 +1,14 @@
 ({
-  createPopupWindow(html_to_show, title_to_show, height_to_use, width_to_use) {
+  createPopupWindow(htmlToShow, titleToShow, heightToUse, widthToUse) {
     Ext.create("Ext.Window", {
-      height: height_to_use,
-      minWidth: width_to_use,
+      height: heightToUse,
+      minWidth: widthToUse,
       autoWidth: true,
       layout: "fit",
       modal: false,
       autoScroll: true,
-      html: html_to_show,
-      title: title_to_show
+      html: htmlToShow,
+      title: titleToShow
     }).show();
   }
 });

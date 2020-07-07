@@ -35,9 +35,9 @@
     return "orange-row";
   },
 
-  listenFn(obj, search_text) {
+  listenFn(obj, searchText) {
     const lg = this.ownerCt.ownerCt;
-    lg.getStore().getProxy().extraParams.live_search = search_text;
+    lg.getStore().getProxy().extraParams.live_search = searchText;
     lg.getStore().load();
   },
 

@@ -36,15 +36,15 @@
     editor.refresh();
   },
 
-  refreshParent(script_name) {
-    this.netzkeGetParentComponent().scriptRefresh(script_name);
+  refreshParent(scriptName) {
+    this.netzkeGetParentComponent().scriptRefresh(scriptName);
   },
 
   netzkeOnDoPrint(_params) {
     this.server.doPrint(this.getScriptId());
   },
 
-  getReport(report_path) {
-    window.location = report_path;
+  getReport(reportPath) {
+    window.location = reportPath;
   }
 });

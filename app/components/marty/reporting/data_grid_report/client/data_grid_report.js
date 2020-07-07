@@ -26,7 +26,7 @@
   preloadGridDefaults() {
     const fields = this.getForm().getFields();
 
-    const dg_name_field = fields.find((field) => {
+    const dgNameField = fields.find((field) => {
       return field.name === "data_grid_name";
     });
 
@@ -34,7 +34,7 @@
       return field.name === "pt_name";
     });
 
-    const newValue = dg_name_field.getValue();
+    const newValue = dgNameField.getValue();
 
     if (!newValue) {
       return;
@@ -44,18 +44,18 @@
       return;
     }
 
-    const pt_name = postingField.getValue();
+    const ptName = postingField.getValue();
 
     this.server.updateDataGridJsonField(
-      { pt_name, data_grid_name: newValue },
+      { pt_name: ptName, data_grid_name: newValue },
       (response) => {
         const fields = this.getForm().getFields();
 
-        const parameters_field = fields.find((field) => {
+        const parametersField = fields.find((field) => {
           return field.name === "parameters_json";
         });
 
-        parameters_field.setValue(response);
+        parametersField.setValue(response);
       }
     );
   }
