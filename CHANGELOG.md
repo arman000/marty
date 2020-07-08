@@ -1,3 +1,14 @@
+16.5.1 - 2020-07-08
+=====================================================
+
+* There is a specific case with using send for DataGrids in Rules. Consider the following:
+* DataGrid has attr `x`
+* `x` is not passed to Rule and is not defined in the results section
+* There is a default value for `x` defined in the rule Node code: `x =? nil`
+
+We shouldn't pass `{ "x" => nil }` to the DG in that case, since it breaks our apps.
+However passing it would make sense and we might want to do it in the future.
+
 16.5.0 - 2020-07-07
 =====================================================
 
