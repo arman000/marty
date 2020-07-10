@@ -19,6 +19,17 @@ module Marty
               if schedule&.on?
                 job.cron = schedule.cron
                 job.schedule_id = schedule.id
+
+                # In delayed_cron_job >= 0.7.3 job recreation mechanism
+                # is reworked so it doesn't recreate the job if it was deleting
+                # during the execution. I'm not sure we should handle such cases,
+                # but just to be safe we do.
+                #
+                # Recreate job if it was deleted during the execution
+                unless Delayed::Job.where(id: job.id).exists?
+                  new_job = job.dup
+                  new_job.schedule_next_run
+                end
               else
                 job.cron = nil
                 job.schedule_id = nil
