@@ -27,6 +27,49 @@ describe 'Cron jobs' do
     worker.work_off
   end
 
+  describe 'normal case scenario' do
+    before do
+      allow(klass).to receive(:trigger_destroy).and_return(nil)
+    end
+
+    describe 'after failure' do
+      context 'schedule is on' do
+        before do
+          run_job
+        end
+
+        it 'job is recreated' do
+          expect(klass.scheduled?(schedule_id: schedule.id)).to be true
+          expect(schedule.delayed_job).to be_present
+        end
+      end
+
+      context 'schedule is off' do
+        before do
+          schedule.update!(state: :off)
+          run_job
+        end
+
+        it 'job is not recreated' do
+          expect(klass.scheduled?(schedule_id: schedule.id)).to be false
+          expect(schedule.reload.delayed_job).to_not be_present
+        end
+      end
+    end
+
+    describe 'after success' do
+      before do
+        allow(klass).to receive(:trigger_failure).and_return(nil)
+        run_job
+      end
+
+      it 'job is recreated' do
+        expect(klass.scheduled?(schedule_id: schedule.id)).to be true
+        expect(schedule.reload.delayed_job).to be_present
+      end
+    end
+  end
+
   describe 'when delayed_job record is deleted during the execution' do
     describe 'after failure' do
       context 'schedule is on' do
