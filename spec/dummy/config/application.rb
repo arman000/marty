@@ -59,8 +59,6 @@ module Dummy
     # parameters by using an attr_accessible or attr_protected declaration.
     # config.active_record.whitelist_attributes = true
 
-    config.action_mailer = Marty::ApplicationConfig.action_mailer_defaults
-
     # Enable the asset pipeline
     config.assets.enabled = true
 

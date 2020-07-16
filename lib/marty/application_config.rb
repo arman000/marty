@@ -29,28 +29,5 @@ module Marty
        self.promise_job_enqueue_hooks = []
        self.redis_url = nil
      end
-
-     def self.action_mailer_defaults
-       e = Rails.env
-       app_name = ::Marty::RailsApp.application_name.downcase
-
-       ActionMailer::Base.configure do |amc|
-         amc.raise_delivery_errors = !e.production?
-         amc.preview_path = Rails.root.join('spec/mailers/previews')
-         amc.delivery_method = :smtp
-         amc.default_options = {
-           from: "#{app_name}-#{e}@#{ENV['MAILER_SMTP_DOMAIN']}",
-         }
-         amc.smtp_settings = {
-           address: ENV['MAILER_SMTP_ADDRESS'],
-           port: ENV['MAILER_SMTP_PORT']&.to_i,
-           domain: ENV['MAILER_SMTP_DOMAIN'],
-           authentication: ENV['MAILER_AUTHENTICATION']&.to_sym,
-           user_name: ENV['MAILER_SMTP_USERNAME'],
-           password: ENV['MAILER_SMTP_PASSWORD']
-         }.compact
-         amc
-       end
-     end
    end
 end
