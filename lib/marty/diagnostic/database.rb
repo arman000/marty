@@ -15,6 +15,10 @@ module Marty::Diagnostic::Database
     ActiveRecord::Base.connection.execute('SELECT NOW();')[0]['now']
   end
 
+  def self.db_timezone
+    ActiveRecord::Base.connection.execute('SHOW TimeZone;')[0]['TimeZone']
+  end
+
   def self.db_version
     ActiveRecord::Base.connection.execute('SELECT VERSION();')[0]['version']
   end
