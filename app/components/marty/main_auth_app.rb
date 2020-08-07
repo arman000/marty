@@ -389,6 +389,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   ######################################################################
+  # Background Jobs/Delayed Jobs
 
   def bg_command(subcmd)
     params = Marty::Config['DELAYED_JOB_PARAMS'] || ''
@@ -398,27 +399,30 @@ class Marty::MainAuthApp < Marty::AuthApp
     # FIXME: Environment looks to be setup incorrectly - this is a hack
     cmd += "export PATH=#{p}:$PATH;" if p
     # 2>&1 redirects STDERR to STDOUT since backticks only captures STDOUT
-    cmd += "#{root}/#{dj_path} #{subcmd} #{params} 2>&1"
+    cmd += "sudo #{root}/#{dj_path} #{subcmd} #{params} 2>&1"
     cmd
   end
 
   endpoint :bg_status do |_|
     cmd = bg_command('status')
     res = `#{cmd}`
-    client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Status'
+    client.show_detail res.html_safe.gsub("\n", '<br/>'),
+      "Delayed Job Status: #{my_ip}"
   end
 
   endpoint :bg_stop do |_|
     cmd = bg_command('stop')
     res = `#{cmd}`
     res = 'delayed_job: no instances running. Nothing to stop.' if res.empty?
-    client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Stop'
+    client.show_detail res.html_safe.gsub("\n", '<br/>'),
+      "Delayed Job Stop: #{my_ip}"
   end
 
   endpoint :bg_restart do |_|
     cmd = bg_command('restart')
     res = `#{cmd}`
-    client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Restart'
+    client.show_detail res.html_safe.gsub("\n", '<br/>'),
+      "Delayed Job Restart: #{my_ip}"
   end
 
   endpoint :log_cleanup do |params|
@@ -444,6 +448,28 @@ class Marty::MainAuthApp < Marty::AuthApp
            html_safe
 
     client.show_detail html, 'Server Environment'
+  end
+
+  def my_ip
+    Marty::Diagnostic::Node.my_ip
+  end
+
+  def fdfdafdafa(jobs_old)
+    # Read delayed_job pids until timeout
+    # Or until the intersection with the old pids is empty
+    timeout.times do
+      pids_new = Dir.glob({Rails.root.join('/tmp/pids')}).map do |job|
+        File.read(job).delete("\n").to_i
+
+      rescue Errno::ENOENT
+        next
+      end
+
+      break if (pids_new.count == jobs_old.count) &&
+               (pids_new & jobs_old.values).empty?
+
+      sleep(1)
+    end
   end
 
   ######################################################################

@@ -59,6 +59,11 @@ To use scheduled background jobs, add to `config/application.rb`:
 config.active_job.queue_adapter = :delayed_job
 ```
 
+## Using Monit to keep background jobs alive
+
+To have monit keep track of background jobs run a bash script to configure
+monit after deployment. An example script is provided in `.application-scripts`
+
 # Dummy Application & Testing
 
 Make sure that extjs is installed (or symbolically linked) in the
