@@ -454,24 +454,6 @@ class Marty::MainAuthApp < Marty::AuthApp
     Marty::Diagnostic::Node.my_ip
   end
 
-  def fdfdafdafa(jobs_old)
-    # Read delayed_job pids until timeout
-    # Or until the intersection with the old pids is empty
-    timeout.times do
-      pids_new = Dir.glob({Rails.root.join('/tmp/pids')}).map do |job|
-        File.read(job).delete("\n").to_i
-
-      rescue Errno::ENOENT
-        next
-      end
-
-      break if (pids_new.count == jobs_old.count) &&
-               (pids_new & jobs_old.values).empty?
-
-      sleep(1)
-    end
-  end
-
   ######################################################################
   # Postings
 

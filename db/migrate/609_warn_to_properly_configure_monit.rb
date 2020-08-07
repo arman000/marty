@@ -1,6 +1,9 @@
 class WarnToProperlyConfigureMonit < ActiveRecord::Migration[5.1]
   def up
     wmsg = <<~WMSG
+      \n\n
+      WARNING!!!!!!!!
+
       MONIT MAY NOT BE CONFIGURED PROPERLY
 
       To ensure that monit is properly monitoring your background jobs, please:
@@ -12,6 +15,7 @@ class WarnToProperlyConfigureMonit < ActiveRecord::Migration[5.1]
          example script will expect 1 DJ worker per CPU. If you choose a
          different configuration be sure to update Marty accordingly
 
+      WARNING!!!!!!!!
       WMSG
     announce(wmsg)
 
