@@ -728,7 +728,7 @@ Style/MethodDefParentheses:
   Enabled: false
 
 # Offense count: 1
-Style/MethodMissingSuper:
+Style/MissingSuper:
   Exclude:
     - 'lib/marty/promise_proxy.rb'
 
