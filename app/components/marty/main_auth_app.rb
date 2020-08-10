@@ -392,7 +392,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   # Background Jobs/Delayed Jobs
 
   def bg_command(subcmd)
-    params = "-n #{Marty::Config['DELAYED_JOB_WORKERS'].chomp} --sleep-delay 5"
+    params = "-n #{Marty::Config['DELAYED_JOB_WORKERS'].to_s.chomp} --sleep-delay 5"
     e, root, p = Rails.env, Rails.root, Marty::Config['RUBY_PATH']
     dj_path = Marty::Config['DELAYED_JOB_PATH'] || 'bin/delayed_job'
     cmd = "export RAILS_ENV=#{e};"
