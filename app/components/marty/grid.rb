@@ -6,7 +6,7 @@ class Marty::Grid < ::Netzke::Grid::Base
   # parent grid is the grid in which child/linked_components is defined
   # child  components are components dependent on the selected parent row
   # linked components will update whenever the parent is updated
-  def initialize(args, kwargs = nil)
+  def initialize args, kwargs = nil
     super(args, kwargs)
     client_config[:child_components]  = child_components  || []
     client_config[:linked_components] = linked_components || []

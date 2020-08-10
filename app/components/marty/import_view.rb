@@ -13,7 +13,7 @@ class Marty::ImportView < Marty::Form
 
   def model_view;   end
 
-  def initialize(args, kwargs)
+  def initialize args, kwargs
     super(args, kwargs)
     @model_view   = model_view.camelize.constantize   if model_view
     @parent_model = parent_model.camelize.constantize if parent_model
@@ -44,12 +44,12 @@ class Marty::ImportView < Marty::Form
     nil
   end
 
-  def import(data)
+  def import data
     Marty::DataImporter.
       do_import_summary(@import_model, data, 'infinity', nil, nil)
   end
 
-  def format_message(k, v)
+  def format_message k, v
     case k
     when :clean  then "#{v} record(s) cleaned."
     when :same   then "#{v} record(s) unchanged."

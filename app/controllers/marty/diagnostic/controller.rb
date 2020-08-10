@@ -35,7 +35,7 @@ module Marty::Diagnostic; class Controller < ActionController::Base
     }
   end
 
-  def self.add_report(name, diagnostics)
+  def self.add_report name, diagnostics
     Reporter.reports[name] = diagnostics
   end
 end
