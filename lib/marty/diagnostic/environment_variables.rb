@@ -3,7 +3,7 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
     env
   end
 
-  def self.env filter = ''
+  def self.env(filter = '')
     env = ENV.to_h.clone
 
     to_delete = (Marty::Config['DIAG_ENV_BLOCK'] || []).map(&:upcase) + [
@@ -28,7 +28,7 @@ module Marty::Diagnostic; class EnvironmentVariables < Base
   end
 
   # overwritten to only return inconsitent data
-  def self.apply_consistency data
+  def self.apply_consistency(data)
     diff = get_difference(data)
     data.each_with_object({}) do |(node, diagnostic), new_data|
       new_data[node] = diagnostic.each_with_object({}) do |(test, info), new_diagnostic|

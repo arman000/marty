@@ -6,7 +6,7 @@ module Marty::Diagnostic; class Request
     @@request
   end
 
-  def self.request= req
+  def self.request=(req)
     @@request = req
   end
 

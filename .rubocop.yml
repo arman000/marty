@@ -107,3 +107,7 @@ Style/HashTransformKeys:
 
 Style/HashTransformValues:
   Enabled: false
+
+Style/MethodDefParentheses:
+  Exclude:
+    - 'spec/**/*'

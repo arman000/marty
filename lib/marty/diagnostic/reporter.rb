@@ -5,7 +5,7 @@ module Marty::Diagnostic; class Reporter < Request
   self.diagnostics = []
   self.namespaces  = ['Marty']
 
-  def self.run request
+  def self.run(request)
     self.request = request
 
     ops = op.split(/,\s*/).uniq - [unresolve_diagnostic(self)]
@@ -19,7 +19,7 @@ module Marty::Diagnostic; class Reporter < Request
 
   private
 
-  def self.resolve_diagnostic diag_name
+  def self.resolve_diagnostic(diag_name)
     diag_name = diag_name.camelize
     klass = nil
     namespaces.each do |n|
@@ -32,7 +32,7 @@ module Marty::Diagnostic; class Reporter < Request
     klass
   end
 
-  def self.unresolve_diagnostic klass
+  def self.unresolve_diagnostic(klass)
     klass.name.demodulize.underscore
   end
 
@@ -51,13 +51,13 @@ module Marty::Diagnostic; class Reporter < Request
     { 'data' => data, 'errors' => errors(data) }
   end
 
-  def self.consistency data
+  def self.consistency(data)
     data.each_with_object({}) do |(klass, result), h|
       h[klass] = resolve_diagnostic(klass).apply_consistency(result)
     end
   end
 
-  def self.errors data
+  def self.errors(data)
     data.each_with_object({}) do |(klass, result), new_data|
       new_data[klass] = result.each_with_object({}) do |(node, diagnostic), new_result|
         new_result[node] = diagnostic.each_with_object({}) do |(test, info), new_diagnostic|
@@ -70,7 +70,7 @@ module Marty::Diagnostic; class Reporter < Request
     end
   end
 
-  def self.displays result
+  def self.displays(result)
     result.map { |d, r| resolve_diagnostic(d).display(r) }.sum
   end
 

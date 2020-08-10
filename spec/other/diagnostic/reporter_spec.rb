@@ -7,7 +7,7 @@ describe Marty::Diagnostic::Reporter do
     attr_accessor :params, :port
   end
 
-  def params diagnostic = 'base', scope = nil
+  def params(diagnostic = 'base', scope = nil)
     { op: diagnostic, scope: scope }
   end
 
@@ -17,7 +17,7 @@ describe Marty::Diagnostic::Reporter do
       message = error('Failed accessing git')
   end
 
-  def aggregate_data opts = {}
+  def aggregate_data(opts = {})
     {
       'Dummy' => {
         'NodeA' => {
@@ -31,7 +31,7 @@ describe Marty::Diagnostic::Reporter do
     }
   end
 
-  def aggregate_consistency_data diagnostic = 'Base'
+  def aggregate_consistency_data(diagnostic = 'Base')
     original_a = Marty::Diagnostic::Base.create_info('A')
     original_b = Marty::Diagnostic::Base.create_info('B')
 
@@ -88,11 +88,11 @@ describe Marty::Diagnostic::Reporter do
     [test, expected]
   end
 
-  def info v, status, consistent
+  def info(v, status, consistent)
     Marty::Diagnostic::Base.create_info(v, status, consistent)
   end
 
-  def version_data consistent = true
+  def version_data(consistent = true)
     Marty::Diagnostic::Base.pack(include_ip = false) do
       {
         'Marty'    => info(Marty::VERSION, true, consistent),

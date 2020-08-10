@@ -21,6 +21,8 @@ setup:
   extends: .setup
 
 rubocop:
+  before_script:
+    - bundle exec rubocop -V
   extends: .rubocop
 
 eslint-prettier:

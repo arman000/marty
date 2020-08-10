@@ -10,13 +10,13 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
 
     attr_reader *STATES
 
-    def get_state instances, state
+    def get_state(instances, state)
       instances.map do |i|
         i.except('state') if i['state']['name'] == state
       end.compact
     end
 
-    def initialize instances
+    def initialize(instances)
       STATES.each do |s|
         instance_variable_set("@#{s}", get_state(instances, s.to_s))
       end
@@ -33,7 +33,7 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
 
   private
 
-  def ec2_request action, params = {}
+  def ec2_request(action, params = {})
     resp = request({ action: action }, params)
     parsed = Hash.from_xml(resp)
 

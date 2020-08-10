@@ -18,7 +18,7 @@ feature 'under System menu, User Management worflows', js: true do
   end
 
   # Checkbox Helpers
-  def check name, val = true
+  def check(name, val = true)
     page.driver.browser.execute_script <<-JS
       var poc = Ext.ComponentQuery.query("checkbox[fieldLabel='#{name}']")[0];
       poc = poc || Ext.ComponentQuery.query("checkbox[name='#{name}']")[0];
@@ -26,7 +26,7 @@ feature 'under System menu, User Management worflows', js: true do
     JS
   end
 
-  def uncheck name
+  def uncheck(name)
     check(name, false)
   end
 

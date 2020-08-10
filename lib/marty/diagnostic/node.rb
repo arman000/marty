@@ -5,7 +5,7 @@ module Marty::Diagnostic::Node
       e.message
   end
 
-  def self.get_target_connections target
+  def self.get_target_connections(target)
     Marty::Diagnostic::Database.current_connections.select do |conn|
       conn['application_name'].include?(target)
     end.map do |conn|

@@ -1,7 +1,7 @@
 module Marty; module RSpec; module Netzke
   MAX_WAIT_TIME = 5.0
 
-  def by message, _level = 0
+  def by(message, _level = 0)
     wait_for_ready(10)
     pending(message) unless block_given?
     yield
@@ -49,7 +49,7 @@ module Marty; module RSpec; module Netzke
     press('Sign out')
   end
 
-  def press button_name, index_of = 0
+  def press(button_name, index_of = 0)
     wait_for_element do
       begin
         cmp = first("a[data-qtip='#{button_name}']") rescue nil
@@ -65,7 +65,7 @@ module Marty; module RSpec; module Netzke
     end
   end
 
-  def popup _message = ''
+  def popup(_message = '')
     wait_for_ready
     yield if block_given?
     close_window
@@ -79,7 +79,7 @@ module Marty; module RSpec; module Netzke
   # stability functions
   ############################################################################
 
-  def wait_for_ready wait_time = nil
+  def wait_for_ready(wait_time = nil)
     if wait_time
       find(:status, 'Ready', wait: wait_time)
     else
@@ -87,7 +87,7 @@ module Marty; module RSpec; module Netzke
     end
   end
 
-  def wait_for_ajax wait_time = 10
+  def wait_for_ajax(wait_time = 10)
     wait_for_ready(wait_time)
     wait_for_element { !ajax_loading? }
     wait_for_ready
@@ -128,7 +128,7 @@ module Marty; module RSpec; module Netzke
     end
   end
 
-  def run_js js_str, seconds_to_wait = MAX_WAIT_TIME, sleeptime = 0.1
+  def run_js(js_str, seconds_to_wait = MAX_WAIT_TIME, sleeptime = 0.1)
     result = wait_for_element(seconds_to_wait, sleeptime) do
       page.document.synchronize { @res = page.execute_script(js_str) }
       @res
@@ -140,20 +140,20 @@ module Marty; module RSpec; module Netzke
   # component helpers
   ############################################################################
 
-  def show_submenu text
+  def show_submenu(text)
     run_js <<-JS
       Ext.ComponentQuery.query('menuitem[text="#{text}"] menu')[0].show()
     JS
   end
 
-  def ext_button_id title, scope = nil, index_of = 0
+  def ext_button_id(title, scope = nil, index_of = 0)
     c_str = ext_arg('button{isVisible(true)}', text: "\"#{title}\"")
     run_js <<-JS
       return #{ext_find(c_str, scope, index_of)}.id;
     JS
   end
 
-  def set_field_value value, field_type = 'textfield', name = ''
+  def set_field_value(value, field_type = 'textfield', name = '')
     args1 = name.empty? ? '' : "[fieldLabel='#{name}']"
     args2 = name.empty? ? '' : "[name='#{name}']"
     run_js <<-JS

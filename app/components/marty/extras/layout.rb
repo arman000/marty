@@ -207,7 +207,7 @@ module Layout
     c.align  = 'right'
   end
 
-  def tooltip s1, s2
+  def tooltip(s1, s2)
     "<span data-qtip=\"#{s2}\">#{s1}</span>"
   end
 end; end; end

@@ -21,7 +21,7 @@ feature 'User List report', js: true do
     end
   end
 
-  def select_node node_name
+  def select_node(node_name)
     wait_for_ajax
     # hacky: assumes only 1 combobox without label
     within(:gridpanel, 'report_select', match: :first) do

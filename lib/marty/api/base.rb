@@ -7,7 +7,7 @@ class Marty::Api::Base
     super
   end
 
-  def self.respond_to controller
+  def self.respond_to(controller)
     result = yield
     controller.respond_to do |format|
       format.json { controller.send_data result.to_json }
@@ -24,18 +24,18 @@ class Marty::Api::Base
     ['password']
   end
 
-  def self.process_params params
+  def self.process_params(params)
     params
   end
 
-  def self.before_evaluate api_params; end
+  def self.before_evaluate(api_params); end
 
-  def self.after_evaluate api_params, result; end
+  def self.after_evaluate(api_params, result); end
 
   @@numbers = {}
   @@schemas = {}
 
-  def self.is_authorized? params
+  def self.is_authorized?(params)
     is_secured = Marty::ApiAuth.where(
       script_name: params[:script],
       obsoleted_dt: 'infinity'
@@ -48,7 +48,7 @@ class Marty::Api::Base
     ).pluck(:app_name).first
   end
 
-  def self.evaluate params, _request, config
+  def self.evaluate(params, _request, config)
     # prevent script evaluation from modifying passed in params
     params = params.deep_dup
 
@@ -167,7 +167,7 @@ class Marty::Api::Base
     end
   end
 
-  def self.filter_hash hash, filter_params
+  def self.filter_hash(hash, filter_params)
     return unless hash
 
     pf_class = ::Marty::RailsApp.parameter_filter_class
@@ -175,7 +175,7 @@ class Marty::Api::Base
     pf.filter(hash.stringify_keys)
   end
 
-  def self.log_hash result, params, request
+  def self.log_hash(result, params, request)
     ret_arr = params[:return_array]
 
     # filter sensitive information from input/output
@@ -196,13 +196,13 @@ class Marty::Api::Base
       auth_name:  params[:auth] }
   end
 
-  def self.log result, params, request
+  def self.log(result, params, request)
     desc = params.values_at(:script, :node, :attr).join(' - ')
     Marty::Log.write_log('api', desc, log_hash(result, params, request))
   end
 
   class SchemaValidator
-    def self.get_schema params
+    def self.get_schema(params)
         Marty::ScriptSet.new(params[:tag]).get_engine(params[:script] + 'Schemas').
           evaluate(params[:node], params[:attr], {})
     rescue StandardError => e
@@ -213,7 +213,7 @@ class Marty::Api::Base
               "attrs=#{params[:attr]}: #{msg}"
     end
 
-    def self.validate_schema schema, hash
+    def self.validate_schema(schema, hash)
       JSON::Validator.fully_validate(
         schema.merge("\$schema" => Marty::JsonSchema::RAW_URI),
         hash,
