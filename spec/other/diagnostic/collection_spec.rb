@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Marty::Diagnostic::Collection do
-  def sample_data consistent = true
+  def sample_data(consistent = true)
     node_a_data = described_class.pack(include_ip = false) { 'A' }
     data = {
       'NodeA' => node_a_data,

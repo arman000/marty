@@ -3,7 +3,7 @@ require 'selenium-webdriver'
 require Pathname.new(__FILE__).parent.to_s + '/download_helper'
 
 module Marty; module RSpec; module Chromedriver
-  def self.register_chrome_driver driver = :chrome, opts = {}
+  def self.register_chrome_driver(driver = :chrome, opts = {})
     Capybara.register_driver driver do |app|
       copts = {
         chromeOptions: opts.deep_merge(

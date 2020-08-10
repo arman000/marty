@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'job_helper'
 
 describe Marty::Diagnostic::DelayedJobWorkers do
-  def sample_data opts = {}
+  def sample_data(opts = {})
     ip, error, status = opts.values_at(:ip, :error, :status)
     {
       ip || Marty::Helper.my_ip => {
@@ -15,7 +15,7 @@ describe Marty::Diagnostic::DelayedJobWorkers do
     }
   end
 
-  def sample_aggregate error = false
+  def sample_aggregate(error = false)
     [
       sample_data(ip: '0.0.0.0'),
       sample_data(ip: '0.0.0.1'),

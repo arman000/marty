@@ -91,7 +91,7 @@ DELOREAN
     end
   end
 
-  def select_node node_name
+  def select_node(node_name)
     wait_for_ajax
     # hacky: assumes only 1 combobox without label
     within(:gridpanel, 'report_select', match: :first) do
@@ -102,7 +102,7 @@ DELOREAN
     end
   end
 
-  def generate_rep_url format: 'csv'
+  def generate_rep_url(format: 'csv')
     URI.encode("http://#{Capybara.current_session.server.host}"\
                ":#{Capybara.current_session.server.port}"\
                '/report?data='\

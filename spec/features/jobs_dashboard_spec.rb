@@ -43,21 +43,21 @@ describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
     expect(tree_row_count(page_title)).to eq(1)
   end
 
-  def ext_button_id title
+  def ext_button_id(title)
     id = page.evaluate_script(
       "Ext.ComponentQuery.query(\"button{isVisible(true)}[text='#{title}']\")[0].id"
     )
     "##{id}"
   end
 
-  def ext_menuitem_id title
+  def ext_menuitem_id(title)
     id = page.evaluate_script(
       "Ext.ComponentQuery.query(\"menuitem[text='#{title}']\")[0].id"
     )
     "##{id}"
   end
 
-  def tree_row_count name
+  def tree_row_count(name)
     page.evaluate_script(
       "Ext.ComponentQuery.query('treepanel[title=\"#{name}\"]')[0].getStore().getCount()"
     )

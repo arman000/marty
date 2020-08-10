@@ -35,11 +35,11 @@ class Marty::Aws::Base
     @version       = '2016-11-15'
   end
 
-  def query_meta_data query
+  def query_meta_data(query)
     self.class.get("http://#{META_DATA_HOST}/latest/meta-data/#{query}/")
   end
 
-  def query_dynamic query
+  def query_dynamic(query)
     self.class.get("http://#{META_DATA_HOST}/latest/dynamic/#{query}/")
   end
 
@@ -53,7 +53,7 @@ class Marty::Aws::Base
     query_meta_data('iam/security-credentials').to_s
   end
 
-  def sym obj
+  def sym(obj)
     obj.each_with_object({}) { |(k, v), h| h[k.underscore.to_sym] = v }
   end
 

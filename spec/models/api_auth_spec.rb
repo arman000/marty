@@ -15,7 +15,7 @@ module Marty
       @api.reload
     end
 
-    def create_params script, key
+    def create_params(script, key)
       { script: script, api_key: key }
     end
 

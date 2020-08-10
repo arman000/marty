@@ -47,19 +47,19 @@ class Marty::RpcController < ActionController::Base
 
   private
 
-  def get_api_config params
+  def get_api_config(params)
     config_attrs = params.values_at(:script, :node, :attr)
     Marty::ApiConfig.lookup(*config_attrs)
   end
 
-  def process_active_params params
+  def process_active_params(params)
     # must permit params before conversion to_h
     # convert hash to json and parse to get expected hash (not indifferent)
     params.permit!
     JSON.parse(params.to_h.to_json)
   end
 
-  def massage_params request_params
+  def massage_params(request_params)
     sname,
     tag,
     node,

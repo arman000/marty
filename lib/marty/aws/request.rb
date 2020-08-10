@@ -2,7 +2,7 @@ class Marty::Aws::Request < Marty::Aws::Base
   # this class is used to make aws api requests for specific services
   # currently only used for diagnostics
 
-  def request info, params = {}
+  def request(info, params = {})
     action   = info[:action]
     endpoint = info[:endpoint]
     method   = info[:method] || :get
@@ -30,7 +30,7 @@ class Marty::Aws::Request < Marty::Aws::Base
     Net::HTTP.send(method, signed_url)
   end
 
-  def ensure_resp path, obj
+  def ensure_resp(path, obj)
     if path == []
       obj.is_a?(Array) ? obj : [obj]
     elsif obj.is_a?(Hash)
