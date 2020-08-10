@@ -310,7 +310,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   action :bg_restart do |a|
     a.text     = 'Restart Delayed Jobs'
-    a.tooltip  = 'Run delayed_job restart script using DELAYED_JOB_PARAMS'
+    a.tooltip  = 'Run delayed_job restart script using DELAYED_JOB_WORKERS'
     a.icon_cls = 'fa fa-power-off glyph'
     a.disabled = !self.class.has_perm?(:admin)
   end
@@ -392,7 +392,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   # Background Jobs/Delayed Jobs
 
   def bg_command(subcmd)
-    params = Marty::Config['DELAYED_JOB_PARAMS'] || ''
+    params = "-n #{Marty::Config['DELAYED_JOB_WORKERS'].chomp} --sleep-delay 5"
     e, root, p = Rails.env, Rails.root, Marty::Config['RUBY_PATH']
     dj_path = Marty::Config['DELAYED_JOB_PATH'] || 'bin/delayed_job'
     cmd = "export RAILS_ENV=#{e};"
