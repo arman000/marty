@@ -1,4 +1,4 @@
-class ScheduleDelayedJobsReaperJob < ActiveRecord::Migration[5.1]
+class ScheduleDelayedJobWorkerReaperJob < ActiveRecord::Migration[5.1]
   def up
     every_eight_hours = '0 */8 * * *'
 
