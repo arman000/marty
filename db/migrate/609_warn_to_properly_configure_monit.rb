@@ -13,7 +13,8 @@ class WarnToProperlyConfigureMonit < ActiveRecord::Migration[5.1]
       2. Set your Marty::Config["DELAYED_JOB_WORKERS"] to match the number of
          delayed job workers that you put in your monit script. By default, the
          example script will expect 1 DJ worker per CPU. If you choose a
-         different configuration be sure to update Marty accordingly
+         different configuration be sure to update both the script and your
+         Marty::Config to keep the two in sync.
 
       WARNING!!!!!!!!
       WMSG
