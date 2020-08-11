@@ -408,7 +408,7 @@ class Marty::MainAuthApp < Marty::AuthApp
     cmd = bg_command('status')
     res = `#{cmd}`
     client.show_detail res.html_safe.gsub("\n", '<br/>'),
-                       "Delayed Job Status: #{my_ip}"
+                       "Delayed Job Status: #{Marty::Diagnostic::Node.my_ip}"
   end
 
   endpoint :bg_stop do |_|
@@ -416,14 +416,14 @@ class Marty::MainAuthApp < Marty::AuthApp
     res = `#{cmd}`
     res = 'delayed_job: no instances running. Nothing to stop.' if res.empty?
     client.show_detail res.html_safe.gsub("\n", '<br/>'),
-                       "Delayed Job Stop: #{my_ip}"
+                       "Delayed Job Stop: #{Marty::Diagnostic::Node.my_ip}"
   end
 
   endpoint :bg_restart do |_|
     cmd = bg_command('restart')
     res = `#{cmd}`
     client.show_detail res.html_safe.gsub("\n", '<br/>'),
-                       "Delayed Job Restart: #{my_ip}"
+                       "Delayed Job Restart: #{Marty::Diagnostic::Node.my_ip}"
   end
 
   endpoint :log_cleanup do |params|
@@ -449,10 +449,6 @@ class Marty::MainAuthApp < Marty::AuthApp
            html_safe
 
     client.show_detail html, 'Server Environment'
-  end
-
-  def my_ip
-    Marty::Diagnostic::Node.my_ip
   end
 
   ######################################################################
