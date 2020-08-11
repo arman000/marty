@@ -46,11 +46,12 @@ if (("$(grep -c $DJ_BIN_PATH '/etc/sudoers.d')"==0)); then
    echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH stop -n ? --sleep-delay 5" >> /etc/sudoers
 fi
 
-# Create the monit config
+## Create the monit config
+# The pidfiles start at zero, so we create an index
 DJ_INDEX=`expr $DELAYED_JOBS_PER_SERVER - 1`
 for i in `seq 0 1 $DJ_INDEX`; do
 
-   # Write a monit entry
+   # Write a monit entry for each DJ worker
    cat >> $MONIT_CONFIG_PATH <<EOF
 
 check process delayed_job.$i
