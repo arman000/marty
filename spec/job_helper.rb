@@ -146,6 +146,9 @@ Node:
              p_priority = prio) | "call_sleep"
         for i, prio in prio_both]
     result = blocker_calls + prio_calls
+
+Node2:
+    result = Gemini::Helper.priority_tester2
 EOS
 
 NAME_N = 'PromiseN'

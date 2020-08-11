@@ -1,5 +1,9 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
   get 'report', to: 'marty/report#index'
+
+  mount Sidekiq::Web => '/sidekiq', :constraints => Marty::SidekiqUiAdminConstraint.new
 end
 
 Marty::Engine.routes.draw do
@@ -8,4 +12,5 @@ Marty::Engine.routes.draw do
   get  'job/download' => 'job', as: :job
   post 'delayed_job/trigger' => 'delayed_job#trigger', as: :trigger_delayed_job
   get  'diag', to: 'diagnostic/#op'
+
 end

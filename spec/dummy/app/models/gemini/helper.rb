@@ -13,25 +13,17 @@ class Gemini::Helper
     seconds.to_s
   end
 
-  def self.pr_wait(ids)
-    idh = ids.each_with_object({}) do |id, h|
-      h[id] = false
-    end
-    timeout = 60
-    all_done = false
-    loop do
-      idh.each do |id, v|
-        next if v
-        p = Marty::Promise.uncached { Marty::Promise.find_by(id: id) }
-        idh[id] = p.result if p.status
-      end
-      all_done = idh.values.all? { |v| v }
-      break if all_done || timeout == 0
-      timeout -= 1
-      sleep 1
-    end
-    raise "DID NOT FINISH" unless all_done
-    idh.values.map { |h| h['result'] }
+  delorean_fn :priority_promise do |priority, seconds_to_sleep = 1|
+    Marty::Promises::Ruby::Create.call(
+      module_name: 'Gemini::Helper',
+      method_name: 'sleep',
+      method_args: [seconds_to_sleep],
+      params: {
+        p_title: "priority_promise priority=#{priority}",
+        p_priority: priority,
+        _user_id: 1
+      }.compact
+    ).as_json.values.first.first
   end
 
   def self.pr_wait(ids)
@@ -66,7 +58,7 @@ class Gemini::Helper
         params: {
           p_title: new_title,
           _user_id: 1,
-          _parent_id: ENV['__promise_id']&.to_i
+          _parent_id: Marty::ThreadSafeGlobals.promise_id&.to_i
         }.compact
       ).as_json.values.first.first
     end
@@ -75,8 +67,8 @@ class Gemini::Helper
 
   def self.promise_test_1(job_title)
     pps = [1, 2, 3].map do |id|
-      new_title = job_title + ' ' + id.to_s
       sleep 2
+      new_title = job_title + ' ' + id.to_s
       Marty::Promises::Ruby::Create.call(
         module_name: 'Gemini::Helper',
         method_name: 'promise_test_2',
@@ -84,7 +76,7 @@ class Gemini::Helper
         params: {
           p_title: new_title,
           _user_id: 1,
-          _parent_id: ENV['__promise_id']&.to_i
+          _parent_id: Marty::ThreadSafeGlobals.promise_id&.to_i
         }.compact
       ).as_json.values.first.first
     end
@@ -151,7 +143,11 @@ class Gemini::Helper
 
   delorean_fn :cached_factorial, cache: true do |number|
     Kernel.sleep 0.001
-    Math.gamma(number + 1) 
+    Math.gamma(number + 1)
+  end
+
+  delorean_fn :priority_tester2 do
+    sleep 2
   end
 
   delorean_fn :priority_tester do |reverse, job_cnt|
@@ -193,7 +189,7 @@ class Gemini::Helper
         params: {
           p_title: title + ' child1',
           _user_id: 1,
-          _parent_id: ENV['__promise_id']&.to_i
+          _parent_id: Marty::ThreadSafeGlobals.promise_id&.to_i
         }.compact
      ).as_json.values.first.first,
      Marty::Promises::Ruby::Create.call(
@@ -204,7 +200,7 @@ class Gemini::Helper
           p_title: title + ' child2',
           _user_id: 1,
           p_priority: 10,
-          _parent_id: ENV['__promise_id']&.to_i
+          _parent_id: Marty::ThreadSafeGlobals.promise_id&.to_i
         }.compact
      ).as_json.values.first.first]
   end

@@ -431,3 +431,13 @@ else
     Marty::DelayedJob::QueueAdapter
   )
 end
+
+require 'sidekiq/web'
+
+module Sidekiq
+  module WebHelpers
+    def locale
+      'en'
+    end
+  end
+end

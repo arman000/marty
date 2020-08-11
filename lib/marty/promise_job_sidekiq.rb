@@ -1,9 +1,9 @@
 require 'delorean_lang'
-
+# FIXME: remove sidekiq require
 require 'sidekiq'
 require 'sidekiq/api'
 
-class Marty::PromiseJob < Struct.new(:promise,
+class Marty::PromiseJobSidekiq < Struct.new(:promise,
                                      :title,
                                      :sname,
                                      :tag,
@@ -30,22 +30,25 @@ class Marty::PromiseJob < Struct.new(:promise,
 
   def perform
     # log "PERF #{Process.pid} #{title}"
-
+    res = nil # Needed, since timeout block has it's own scope
     promise.set_start
 
     begin
-      # in case the job writes to the the database
-      Mcfly.whodunnit = promise.user
+      # FIXME: what if max_run_time is not defined?
+      Timeout.timeout(max_run_time&.to_i, Marty::WorkerTimeout) do
+        # in case the job writes to the the database
+        Mcfly.whodunnit = promise.user
 
-      engine = Marty::ScriptSet.new(tag).get_engine(sname)
+        engine = Marty::ScriptSet.new(tag).get_engine(sname)
 
-      attrs_eval = engine.evaluate(node, attrs, params)
-      res = attrs.zip(attrs_eval).each_with_object({}) do |(attr, val), h|
-        h[attr] = val
+        attrs_eval = engine.evaluate(node, attrs, params)
+        res = attrs.zip(attrs_eval).each_with_object({}) do |(attr, val), h|
+          h[attr] = val
+        end
       end
 
       # log "DONE #{Process.pid} #{promise.id} #{Time.now.to_f} #{res}"
-    rescue ::Delayed::WorkerTimeout => e
+    rescue ::Marty::WorkerTimeout => e
       msg = ::Marty::Promise.timeout_message(promise)
       timeout_error = StandardError.new(
         "#{msg} (Triggered by #{e.class})"
@@ -58,9 +61,7 @@ class Marty::PromiseJob < Struct.new(:promise,
       # log "ERR- #{Process.pid} #{promise.id} #{Time.now.to_f} #{e}"
     end
 
-    locked_by = Delayed::Job.find_by(id: promise.job_id)&.locked_by
-    # FIXME: separate sidekiq from DJs code
-    locked_by ||= "host:#{Socket.gethostname} pid:#{Process.pid}" rescue "pid:#{Process.pid}"
+    locked_by = "host:#{Socket.gethostname} pid:#{Process.pid}" rescue "pid:#{Process.pid}"
     promise.set_result(res, locked_by)
     process_hook(res)
   end

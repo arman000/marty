@@ -13,6 +13,7 @@ file_names = [
   'performance_helper',
   'post_run_logger',
   'setup',
+  'sidekiq_helpers',
   'structure_compare',
   'users'
 ]
@@ -24,6 +25,7 @@ module Marty; module RSpec; module Suite
   include Marty::RSpec::Users
   include Marty::RSpec::Netzke
   include Marty::RSpec::DelayedJobHelpers
+  include Marty::RSpec::SidekiqHelpers
   include Marty::RSpec::DownloadHelper
   include Marty::RSpec::JsonHelper
   include Marty::RSpec::PostRunLogger

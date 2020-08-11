@@ -17,7 +17,11 @@ require 'marty/mcfly_model'
 require 'marty/cache_adapters'
 require 'marty/monkey'
 require 'marty/promise_job'
+require 'marty/promise_job_sidekiq'
+require 'marty/promise_job_sidekiq_wrapper'
 require 'marty/json_schema'
+require 'marty/sidekiq_ui_admin_constraint'
+require 'marty/thread_safe_globals'
 
 # This does not get loaded in via bundler unless it is included in the
 # application's Gemfile. Requiring it here removes the need to add it

@@ -1,4 +1,4 @@
-class Marty::PromiseRubyJob < Struct.new(:promise,
+class Marty::PromiseRubySidekiqJob < Struct.new(:promise,
                                          :title,
                                          :module_name,
                                          :method_name,
@@ -19,16 +19,17 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
   end
 
   def perform
+    res = nil # Needed, since timeout block has it's own scope
     promise.set_start
 
     begin
-      Mcfly.whodunnit = promise.user
-
-      Marty::ThreadSafeGlobals.promise_id = promise.id.to_s
-
-      mod = module_name.constantize
-      res = { 'result' => mod.send(method_name, *method_args) }
-    rescue ::Delayed::WorkerTimeout => e
+      Timeout.timeout(max_run_time&.to_i, Marty::WorkerTimeout) do
+        Mcfly.whodunnit = promise.user
+        Marty::ThreadSafeGlobals.promise_id = promise.id.to_s
+        mod = module_name.constantize
+        res = { 'result' => mod.send(method_name, *method_args) }
+      end
+    rescue ::Marty::WorkerTimeout => e
       msg = ::Marty::Promise.timeout_message(promise)
       timeout_error = StandardError.new(
         "#{msg} (Triggered by #{e.class})"
@@ -40,10 +41,9 @@ class Marty::PromiseRubyJob < Struct.new(:promise,
       res = ::Marty::Promise.exception_to_result(promise: promise, exception: e)
     end
 
-    locked_by = Delayed::Job.find_by(id: promise.job_id)&.locked_by
+    locked_by = "host:#{Socket.gethostname} pid:#{Process.pid}" rescue "pid:#{Process.pid}"
     promise.set_result(res, locked_by)
     process_hook(res)
-
     Marty::ThreadSafeGlobals.promise_id = nil
   end
 

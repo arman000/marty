@@ -101,10 +101,36 @@ class Marty::Promise < Marty::Base
   end
 
   def self.job_by_id(job_id)
+    if Marty::Config['USE_SIDEKIQ_WITH_PROMISES'].to_s == 'true'
+      return job_by_id_sidekiq(job_id)
+    end
     Delayed::Job.uncached { Delayed::Job.find_by(id: job_id) }
   end
 
+  def self.job_by_id_sidekiq(job_id, priority = nil)
+    # FIXME: fetch the queue based on priority
+    # FIXME: or fetch from schedule set
+    job = Sidekiq::Queue.new.find { |job| job.jid == job_id }
+
+    return unless job
+
+    def job.locked_at
+      nil
+    end
+
+    # FIXME:
+    def job.reload
+      nil
+    end
+
+    job
+  end
+
   def work_off_job(job)
+    if Marty::Config['USE_SIDEKIQ_WITH_PROMISES'].to_s == 'true'
+      return work_off_job_sidekiq(job)
+    end
+
     # Create a temporary worker to work off the job
     Delayed::Job.where(id: job.id).
       update_all(
@@ -113,6 +139,19 @@ class Marty::Promise < Marty::Base
       )
     w = Delayed::Worker.new
     w.run(job)
+  end
+
+  def work_off_job_sidekiq(job)
+    # Create a temporary worker to work off the job
+    job.klass.constantize.new.perform(*job.args)
+    job.delete
+    # Delayed::Job.where(id: job.id).
+      # update_all(
+        # locked_at: Delayed::Job.db_time_now,
+        # locked_by: 'Temp (Marty::Promise.work_off_job)'
+      # )
+    # w = Delayed::Worker.new
+    # w.run(job)
   end
 
   def wait_for_result(timeout)
