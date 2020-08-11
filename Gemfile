@@ -41,4 +41,5 @@ group :development, :test do
   gem 'simplecov', '0.18.5', require: false
   gem 'timecop'
   gem 'webdrivers'
+  gem 'sidekiq'
 end
