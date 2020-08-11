@@ -40,7 +40,7 @@ mkdir -p $PIDFOLDER
 # We run DJs as root, therefore we should grant access to our run-as user to call our DJ bin.
 # We only want to run this if we haven't already added these permissions
 # note: If you want more than 9 workers/server -- change ? to ??, ???, etc.
-if (("$(grep -c $DJ_BIN_PATH '/etc/sudoers')"==0)); then
+if (("$(grep -c $DJ_BIN_PATH '/etc/sudoers.d')"==0)); then
    echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH status -n ? --sleep-delay 5" >> /etc/sudoers
    echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH restart -n ? --sleep-delay 5" >> /etc/sudoers
    echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH stop -n ? --sleep-delay 5" >> /etc/sudoers
