@@ -30,7 +30,7 @@ class WarnToProperlyConfigureMonit < ActiveRecord::Migration[5.1]
   end
 
   def down
-    Marty::Config["DELAYED_JOB_WORKERS"] = "-n #{Etc.nprocessors} --sleep-delay 5"
+    Marty::Config["DELAYED_JOB_PARAMS"] = "-n #{Etc.nprocessors} --sleep-delay 5"
     Marty::Config.where(key: 'DELAYED_JOB_WORKERS').destroy_all
   end
 end

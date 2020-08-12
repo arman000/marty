@@ -13,6 +13,7 @@ module Marty
 
         day, range = HASH_KEYS.map do |k|
           raise "'#{k}' is missing from '#{config_key}'" unless window.key?(k)
+
           window[k]
         end
 
@@ -20,7 +21,7 @@ module Marty
 
         pday = day.downcase
         raise '\'day\' must be a valid day of the week' unless
-          DAYNAMES.member?(pday) or pday == '*'
+          DAYNAMES.member?(pday) || (pday == '*')
 
         unless pday == '*' || Time.zone.now.send("#{pday}?")
           raise "#{name.demodulize} can only be called on "\

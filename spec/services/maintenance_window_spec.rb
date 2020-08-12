@@ -10,7 +10,7 @@ module Marty
       }
     end
 
-    after(:each){ Timecop.return}
+    after(:each) { Timecop.return }
 
     context '#call' do
       it 'requires day to be a valid dayname' do
@@ -23,9 +23,9 @@ module Marty
 
       it 'allows day to be all using *', :focus do
         Marty::Config[config_key] = {
-        'day' => '*',
+          'day' => '*',
         'range' => ['01:00', '24:00']
-      }
+        }
         expect { described_class.call(config_key) }.not_to raise_error
       end
 
@@ -42,4 +42,3 @@ module Marty
     end
   end
 end
-
