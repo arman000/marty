@@ -25,7 +25,7 @@ class WarnToProperlyConfigureMonit < ActiveRecord::Migration[5.1]
 
     Marty::Config["DELAYED_JOB_WORKERS"] = "#{Etc.nprocessors}"
     # Uncomment this to remove the old DELAYED_JOB_PARAMS config
-    # by default sleep-delay 5 is hardcoded into the the parameters.
+    # by default sleep-delay 5 is hardcoded into the parameters.
     # Marty::Config.where(key: 'DELAYED_JOB_PARAMS').destroy_all
   end
 
