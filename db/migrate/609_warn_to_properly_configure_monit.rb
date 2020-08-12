@@ -15,7 +15,7 @@ class WarnToProperlyConfigureMonit < ActiveRecord::Migration[5.1]
          different configuration be sure to update both the script and your
          Marty::Config to keep the two in sync.
 
-         Comment out this message once your are OK to proceed
+         Comment out this message once you are OK to proceed
 
       WARNING!!!!!!!!
       WMSG
