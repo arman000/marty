@@ -8,11 +8,6 @@ RAILS_ROOT_PATH= #!!FILL ME OUT!!#
 RUN_AS_USER=www-data
 MONIT_BIN_PATH=/etc/init.d/monit
 MONIT_CONFIG_PATH=/etc/monit/conf.d/delayed_job
-# There is a background job that should restart the DJ workers in Marty
-# gracefully. However, in the the event that all the DJ workers on a server get
-# hung, this background will be unable to run on the server. Monit will use
-# this MAX_ALIVE_TIME to kill and restart the workers forcefully in that event.
-MAX_ALIVE_TIME="48 hours"
 
 ## SCRIPT # This will create your monit config and launch monit/DJ workers
 DJ_BIN_PATH=$RAILS_ROOT_PATH/bin/delayed_job
@@ -40,10 +35,11 @@ mkdir -p $PIDFOLDER
 # We run DJs as root, therefore we should grant access to our run-as user to call our DJ bin.
 # We only want to run this if we haven't already added these permissions
 # note: If you want more than 9 workers/server -- change ? to ??, ???, etc.
-if (("$(grep -c $DJ_BIN_PATH '/etc/sudoers.d')"==0)); then
-   echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH status -n ? --sleep-delay 5" >> /etc/sudoers
-   echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH restart -n ? --sleep-delay 5" >> /etc/sudoers
-   echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH stop -n ? --sleep-delay 5" >> /etc/sudoers
+DOERS_PATH=/etc/sudoers.d/marty_monit
+if (("$(grep -c $DJ_BIN_PATH $DOERS_PATH)"==0)); then
+   echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH status -n ? --sleep-delay 5" >> $DOERS_PATH
+   echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH restart -n ? --sleep-delay 5" >> $DOERS_PATH
+   echo "$RUN_AS_USER ALL=(root) NOPASSWD: /bin/bash -c $DJ_BIN_PATH stop -n ? --sleep-delay 5" >> $DOERS_PATH
 fi
 
 ## Create the monit config
@@ -58,7 +54,6 @@ check process delayed_job.$i
    with pidfile $PIDFOLDER/delayed_job.$i.pid
    start program = "/bin/su -c '$DJ_BIN_PATH --pid-dir=$PIDFOLDER -i $i start' - root"
    stop program = "/bin/su -c '$DJ_BIN_PATH --pid-dir=$PIDFOLDER -i $i stop' - root"
-   if uptime > $MAX_ALIVE_TIME then restart
 
 EOF
 done

@@ -1,7 +1,6 @@
 class WarnToProperlyConfigureMonit < ActiveRecord::Migration[5.1]
   def up
     wmsg = <<~WMSG
-      \n\n
       WARNING!!!!!!!!
 
       MONIT MAY NOT BE CONFIGURED PROPERLY
@@ -16,12 +15,17 @@ class WarnToProperlyConfigureMonit < ActiveRecord::Migration[5.1]
          different configuration be sure to update both the script and your
          Marty::Config to keep the two in sync.
 
+         Comment out this message once your are OK to proceed
+
       WARNING!!!!!!!!
       WMSG
-    announce(wmsg)
+
+    # Comment this out once monit config is OK with you
+    raise(wmsg) unless Rails.application.class.parent_name == "Dummy"
 
     Marty::Config["DELAYED_JOB_WORKERS"] = "#{Etc.nprocessors}"
     # Uncomment this to remove the old DELAYED_JOB_PARAMS config
+    # by default sleep-delay 5 is hardcoded into the the parameters.
     # Marty::Config.where(key: 'DELAYED_JOB_PARAMS').destroy_all
   end
 

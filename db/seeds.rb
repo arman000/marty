@@ -43,7 +43,11 @@ end
 
 # Expect the # of DJ workers to be equal to the number of processors on the server
 # if you change this, you will have issues with monit
-Marty::Config["DELAYED_JOB_WORKERS"] ||= "#{Etc.nprocessors}"
+Marty::Config["DELAYED_JOB_WORKERS"] = "#{Etc.nprocessors}"
+
+Marty::Config['DELAYED_JOBS_MAINTENANCE_WINDOW'] = {
+  day: '*', range: ['01:00', '04:00']
+}
 
 Marty::Config['CLEANER_MAINTENANCE_WINDOW'] = {
   day: 'saturday', range: ['01:00', '02:00']

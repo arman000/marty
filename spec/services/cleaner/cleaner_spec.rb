@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Marty::Cleaner
-  describe MaintenanceWindow do
+  describe CleanAll do
     let(:config_key) { described_class::CONFIG_KEY }
 
     before(:each) do
@@ -14,30 +14,11 @@ module Marty::Cleaner
     after(:each) do
       Timecop.return
     end
-
-    it 'requires day to be a valid dayname' do
-      Marty::Config[config_key] = {
-        'day' => 'Sat',
-        'range' => ['00:00', '24:00']
-      }
-      expect { described_class.call }.to raise_error(/valid day/)
-    end
-
-    it 'refuses to run if today is not the maintenance day' do
-      Timecop.freeze(Time.zone.now.next_occurring(:friday))
-      expect { described_class.call }.to raise_error(/can only be called on/)
-    end
-
-    it 'refuses to run if current time not withing maintenance window' do
-      Timecop.freeze(Time.zone.now.next_occurring(:saturday).midnight)
-      expect { described_class.call }.to raise_error(
-        /time not within maintenance window/)
-    end
   end
 
   describe CleanAll do
     it 'takes parameters from the config key' do
-      allow(MaintenanceWindow).to receive(:call).and_return(
+      allow(Marty::MaintenanceWindow).to receive(:call).and_return(
         {
           'day' => 'saturday',
         'range' => ['11:00', '13:00'],
@@ -50,7 +31,7 @@ module Marty::Cleaner
     end
 
     it 'takes parameters from the config key' do
-      allow(MaintenanceWindow).to receive(:call).and_return(
+      allow(Marty::MaintenanceWindow).to receive(:call).and_return(
         {
           'day' => 'saturday',
         'range' => ['11:00', '13:00'],
