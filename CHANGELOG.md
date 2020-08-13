@@ -1,8 +1,7 @@
 16.10.0 - 2020-08-13
 =====================================================
 
-* Refactor Cleaner and Delayed Job maintenance windows into a common maintenance
-  window service.
+* Refactor Cleaner to use a common maintenance window service.
 
 16.9.0 - 2020-08-05
 =====================================================
