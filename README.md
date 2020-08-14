@@ -149,3 +149,31 @@ making it generally available as a platform for working with versioned
 data and scripts. However, some rspec and cucumber tests are still in
 the parent and have yet to be ported. Also, documentation is sorely
 lacking. Hopefully, this will be rectified soon.
+
+# WIP Documentation
+
+## Reports in Delorean
+
+Reports are the interface inside marty for users to submit data to processes
+as well as export data. To create a report you will need to create a Delorean
+script with the following conditions:
+
+- The script name must end in _report, e.g. example_report.dl
+- In a node inside the above script, define the following:
+  - title: The display title for the report in the UI
+  - form: A list of fields that will be mapped to any paramters in your node.
+  - result: This is the value returned after running the report
+  - optional
+    - roles: provide a list of roles that have access to execute the report. 
+    - format: provide the format for the report result. This will default to json.
+
+An exmaple node would be, which would belong in `example_report.dl`
+```ruby
+ExmapleExtract:
+    title   = "My Example Report"
+    roles   = ['admin', 'user_manager']
+    raw     = # some logic to do things goes here
+    result  = Marty::Helper.to_csv(raw)
+    form    = []
+    format  = "csv"
+```
