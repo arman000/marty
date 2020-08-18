@@ -41,10 +41,13 @@ unless Marty::Tag.find_by_name('DEV')
   tag.save!
 end
 
-# one time set up for delayed_job/promises, override only needed
-# if DELAYED_JOB_PATH is not bin/delayed_job
-Marty::Config["DELAYED_JOB_PARAMS"] ||= "-n 4 --sleep-delay 5"
-# Marty::Config["DELAYED_JOB_PATH"]   = "script/delayed_job"
+# Expect the # of DJ workers to be equal to the number of processors on the server
+# if you change this, you will have issues with monit
+Marty::Config["DELAYED_JOB_WORKERS"] = "#{Etc.nprocessors}"
+
+Marty::Config['DELAYED_JOBS_MAINTENANCE_WINDOW'] = {
+  day: '*', range: ['01:00', '04:00']
+}
 
 Marty::Config['CLEANER_MAINTENANCE_WINDOW'] = {
   day: 'saturday', range: ['01:00', '02:00']

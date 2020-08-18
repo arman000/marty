@@ -1,3 +1,13 @@
+16.9.0 - 2020-08-18
+=====================================================
+
+* Replace DELAYED_JOB_PARAMS with DELAYED_JOB_WORKERS to make it easier to
+  ensure that monit can be synced with Marty to manage Delayed Job workers.
+* Add sample script for monit config
+* Add `Marty::DelayedJobWorkerReaperJob` to restart jobs regularly
+* Various small fixes related to interacting with Delayed Job workers through
+  the Marty UI
+
 16.8.0 - 2020-07-16
 =====================================================
 
