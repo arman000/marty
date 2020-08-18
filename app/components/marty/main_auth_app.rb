@@ -310,7 +310,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   action :bg_restart do |a|
     a.text     = 'Restart Delayed Jobs'
-    a.tooltip  = 'Run delayed_job restart script using DELAYED_JOB_PARAMS'
+    a.tooltip  = 'Run delayed_job restart script using DELAYED_JOB_WORKERS'
     a.icon_cls = 'fa fa-power-off glyph'
     a.disabled = !self.class.has_perm?(:admin)
   end
@@ -389,36 +389,41 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   ######################################################################
+  # Background Jobs/Delayed Jobs
 
   def bg_command(subcmd)
-    params = Marty::Config['DELAYED_JOB_PARAMS'] || ''
+    params = "-n #{Marty::Config['DELAYED_JOB_WORKERS']} --sleep-delay 5"
     e, root, p = Rails.env, Rails.root, Marty::Config['RUBY_PATH']
     dj_path = Marty::Config['DELAYED_JOB_PATH'] || 'bin/delayed_job'
     cmd = "export RAILS_ENV=#{e};"
     # FIXME: Environment looks to be setup incorrectly - this is a hack
     cmd += "export PATH=#{p}:$PATH;" if p
+    # we use sudo -i to ensure that the root resources files (vars) are loaded
     # 2>&1 redirects STDERR to STDOUT since backticks only captures STDOUT
-    cmd += "#{root}/#{dj_path} #{subcmd} #{params} 2>&1"
+    cmd += "sudo -i #{root}/#{dj_path} #{subcmd} #{params} 2>&1"
     cmd
   end
 
   endpoint :bg_status do |_|
     cmd = bg_command('status')
     res = `#{cmd}`
-    client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Status'
+    client.show_detail res.html_safe.gsub("\n", '<br/>'),
+                       "Delayed Job Status: #{Marty::Diagnostic::Node.my_ip}"
   end
 
   endpoint :bg_stop do |_|
     cmd = bg_command('stop')
     res = `#{cmd}`
     res = 'delayed_job: no instances running. Nothing to stop.' if res.empty?
-    client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Stop'
+    client.show_detail res.html_safe.gsub("\n", '<br/>'),
+                       "Delayed Job Stop: #{Marty::Diagnostic::Node.my_ip}"
   end
 
   endpoint :bg_restart do |_|
     cmd = bg_command('restart')
     res = `#{cmd}`
-    client.show_detail res.html_safe.gsub("\n", '<br/>'), 'Delayed Job Restart'
+    client.show_detail res.html_safe.gsub("\n", '<br/>'),
+                       "Delayed Job Restart: #{Marty::Diagnostic::Node.my_ip}"
   end
 
   endpoint :log_cleanup do |params|

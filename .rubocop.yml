@@ -108,6 +108,7 @@ Style/HashTransformKeys:
 Style/HashTransformValues:
   Enabled: false
 
+# TODO: This should be re-enabled once rubocop finds more than one offense
+# at a time.
 Style/MethodDefParentheses:
-  Exclude:
-    - 'spec/**/*'
+  Enabled: false
