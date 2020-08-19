@@ -21,7 +21,7 @@ module Marty
         expect { described_class.call(config_key) }.to raise_error(/valid day/)
       end
 
-      it 'allows day to be all using *', :focus do
+      it 'allows day to be all using *' do
         Marty::Config[config_key] = {
           'day' => '*',
         'range' => ['01:00', '24:00']
