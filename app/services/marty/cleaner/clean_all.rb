@@ -2,6 +2,7 @@ module Marty
   module Cleaner
     module CleanAll
       LOG_DAYS_KEY = 'log_days'
+      CONFIG_KEY = 'CLEANER_MAINTENANCE_WINDOW'
       MCFLY_DAYS_KEY = 'mcfly_days'
       TS_DAYS_KEY = 'timestamp_days'
 
@@ -17,7 +18,7 @@ module Marty
         end
 
         def call
-          window_config = ::Marty::Cleaner::MaintenanceWindow.call
+          window_config = ::Marty::MaintenanceWindow.call(CONFIG_KEY)
           log_days = window_config.fetch(LOG_DAYS_KEY, 60)
           mcfly_days = window_config.fetch(MCFLY_DAYS_KEY, 365 * 3)
           ts_days = window_config.fetch(TS_DAYS_KEY, 365 * 3)
