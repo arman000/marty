@@ -43,7 +43,6 @@ module Marty::Diagnostic
         'RubyGems'                => Gem::VERSION,
         'Database Schema Version' => db_schema,
         'Postgres'                => Database.db_version,
-        'Shared GitLab CI'        => check_gitlab_ci,
         'Environment'             => Rails.env,
       }
     end
@@ -64,16 +63,6 @@ module Marty::Diagnostic
       CmShared::VERSION
     rescue NameError => e
       Bundler.locked_gems.dependencies.key?('cm_shared')
-    rescue StandardError => e
-      e.message
-    end
-
-    def self.check_gitlab_ci
-      gitlab_ci = YAML.load_file('.gitlab-ci.yml')
-      includes = gitlab_ci.fetch('include')
-      includes.any? { |incl| incl == GITLAB_CI_INCLUDE_HASH }
-    rescue Errno::ENOENT
-      '.gitlab-ci.yml not found'
     rescue StandardError => e
       e.message
     end
