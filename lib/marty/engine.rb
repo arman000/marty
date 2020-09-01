@@ -2,6 +2,27 @@ module Marty
   class Engine < ::Rails::Engine
     isolate_namespace Marty
 
+    # @note This gets called before the application's `before_configuration`
+    config.before_configuration do
+      file_path = Rails.root.join('config/env.yml')
+
+      if File.exist?(file_path)
+        file = File.open(file_path)
+
+        # Safely loads the env.yml file with alises enabled
+        YAML.safe_load(file, [], [], true)[Rails.env].each do |key, value|
+          # If ENV key already exists, don't overwrite it
+          ENV[key.to_s] = value.to_s unless ENV[key.to_s]
+        end
+
+        file.close
+      end
+
+      Rails.application.credentials[Rails.env.to_sym]&.each do |key, value|
+        ENV[key.to_s] = value.to_s if ENV[key.to_s].blank?
+      end
+    end
+
     # eager load paths instead of autoload paths
     config.eager_load_paths += ['lib', 'other'].map do |dir|
       File.expand_path("../../#{dir}", __dir__)
@@ -20,7 +41,8 @@ module Marty
     ]
 
     config.action_cable.disable_request_forgery_protection = true
-    # Can be overriden by config/cable.yml in Rails app
+
+    # @note Can be overriden by config/cable.yml in Rails app
     ActionCable.server.config.cable ||= { 'adapter' => 'postgresql' }
 
     # TODO: Might want to move/refactor `env.yml` loading
