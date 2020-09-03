@@ -1,12 +1,11 @@
-class Marty::PromiseRubySidekiqJob < Struct.new(:promise,
-                                         :title,
-                                         :module_name,
-                                         :method_name,
-                                         :method_args,
-                                         :hook,
-                                         :max_run_time
-                                        )
-
+Marty::PromiseRubySidekiqJob = Struct.new(:promise,
+                                          :title,
+                                          :module_name,
+                                          :method_name,
+                                          :method_args,
+                                          :hook,
+                                          :max_run_time
+                                         ) do
   def enqueue(job)
     config = Rails.configuration.marty
     hooks = config.promise_job_enqueue_hooks

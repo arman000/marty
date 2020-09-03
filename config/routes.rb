@@ -12,5 +12,4 @@ Marty::Engine.routes.draw do
   get  'job/download' => 'job', as: :job
   post 'delayed_job/trigger' => 'delayed_job#trigger', as: :trigger_delayed_job
   get  'diag', to: 'diagnostic/#op'
-
 end

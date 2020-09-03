@@ -4,7 +4,7 @@ module Marty
       return false unless request.session[:user_id]
 
       user = User.find_by(id: request.session[:user_id])
-      user && user.roles.include?('admin')
+      user&.roles&.include?('admin')
     end
   end
 end

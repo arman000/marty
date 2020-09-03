@@ -3,16 +3,16 @@ require 'delorean_lang'
 require 'sidekiq'
 require 'sidekiq/api'
 
-class Marty::PromiseJobSidekiq < Struct.new(:promise,
-                                     :title,
-                                     :sname,
-                                     :tag,
-                                     :node,
-                                     :params,
-                                     :attrs,
-                                     :hook,
-                                     :max_run_time
-                                    )
+Marty::PromiseJobSidekiq = Struct.new(:promise,
+                                      :title,
+                                      :sname,
+                                      :tag,
+                                      :node,
+                                      :params,
+                                      :attrs,
+                                      :hook,
+                                      :max_run_time
+                                     ) do
   # def log(msg)
   #   open('/tmp/dj.out', 'a') { |f| f.puts msg }
   # end
@@ -78,4 +78,3 @@ class Marty::PromiseJobSidekiq < Struct.new(:promise,
     1
   end
 end
-

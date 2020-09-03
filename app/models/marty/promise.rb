@@ -104,10 +104,11 @@ class Marty::Promise < Marty::Base
     if Marty::Config['USE_SIDEKIQ_WITH_PROMISES'].to_s == 'true'
       return job_by_id_sidekiq(job_id)
     end
+
     Delayed::Job.uncached { Delayed::Job.find_by(id: job_id) }
   end
 
-  def self.job_by_id_sidekiq(job_id, priority = nil)
+  def self.job_by_id_sidekiq(job_id, _priority = nil)
     # FIXME: fetch the queue based on priority
     # FIXME: or fetch from schedule set
     job = Sidekiq::Queue.new.find { |job| job.jid == job_id }
@@ -146,10 +147,10 @@ class Marty::Promise < Marty::Base
     job.klass.constantize.new.perform(*job.args)
     job.delete
     # Delayed::Job.where(id: job.id).
-      # update_all(
-        # locked_at: Delayed::Job.db_time_now,
-        # locked_by: 'Temp (Marty::Promise.work_off_job)'
-      # )
+    # update_all(
+    # locked_at: Delayed::Job.db_time_now,
+    # locked_by: 'Temp (Marty::Promise.work_off_job)'
+    # )
     # w = Delayed::Worker.new
     # w.run(job)
   end

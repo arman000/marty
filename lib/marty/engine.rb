@@ -45,6 +45,12 @@ module Marty
     # @note Can be overriden by config/cable.yml in Rails app
     ActionCable.server.config.cable ||= { 'adapter' => 'postgresql' }
 
+    # FIXME: Sidekiq-Cron uses Redis#exists(key) which starting from 4.3 version
+    # returns integer instead of boolean.
+    # We should remove this fix once sidekiq-cron replaces it with exists?
+    require 'redis'
+    Redis.exists_returns_integer = false
+
     # TODO: Might want to move/refactor `env.yml` loading
     # in the future to its own initializer that will come before everything
     # else.

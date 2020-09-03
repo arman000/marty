@@ -77,4 +77,3 @@ class Marty::PromiseJob < Struct.new(:promise,
     1
   end
 end
-

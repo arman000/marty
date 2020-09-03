@@ -41,6 +41,10 @@ class Marty::CronJob < ActiveJob::Base
 
   class << self
     def schedule(schedule_obj:)
+      if Marty::Config['USE_SIDEKIQ_WITH_PROMISES']
+        return schedule_sidekiq(schedule_obj: schedule_obj)
+      end
+
       dj = schedule_obj.delayed_job
 
       return reschedule(schedule_obj: schedule_obj) if dj.present?
@@ -68,7 +72,41 @@ class Marty::CronJob < ActiveJob::Base
     alias remove_schedule remove
 
     def scheduled?(schedule_id:)
+      if Marty::Config['USE_SIDEKIQ_WITH_PROMISES']
+        return scheduled_sidekiq?(schedule_id: schedule_id)
+      end
+
       Delayed::Job.find_by(schedule_id: schedule_id).present?
+    end
+
+    def scheduled_sidekiq?(schedule_id:)
+      Sidekiq::Cron::Job.all.any? do |job|
+        job.name.split(' ').first == schedule_id.to_s
+      end
+    end
+
+    def schedule_sidekiq(schedule_obj:)
+      sidekiq_job = schedule_obj.sidekiq_job
+
+      remove_sidekiq(sidekiq_job) if sidekiq_job.present?
+
+      cron = schedule_obj.cron
+
+      return if cron.blank?
+
+      job = ::Sidekiq::Cron::Job.new(
+        name: "#{schedule_obj.id} - class: #{name}, cron: #{cron}",
+        cron: cron,
+        class: name
+      )
+
+      return if job.save
+
+      raise "Failed to schedule sidekiq job, errors: #{job.errors}"
+    end
+
+    def remove_sidekiq(sidekiq_job)
+      sidekiq_job.destroy
     end
   end
 end

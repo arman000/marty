@@ -14,14 +14,21 @@ module Marty
       end
 
       def prepare_warnings
-        djs = ::Marty::BackgroundJob::FetchMissingInScheduleCronJobs.call
+        jobs = ::Marty::BackgroundJob::FetchMissingInScheduleCronJobs.call
 
-        messages = djs.map do |dj|
-          handler_str = dj.handler[/job_class.*\n/]
-          job_class = handler_str.gsub('job_class:', '').strip
+        messages = jobs.map do |job|
+          if job.is_a?(::Sidekiq::Cron::Job)
+            schedule_id = job.name.split(' ').first
 
-          "#{job_class} with cron #{dj.cron} and schedule_id #{dj.schedule_id}" \
-            'is present in delayed_jobs table, but is missing in the Dashboard.'
+            "#{job.klass} with cron #{job.cron} and schedule_id #{schedule_id}" \
+              ' is present in sidekiq, but is missing in the Dashboard.'
+          else
+            handler_str = dj.handler[/job_class.*\n/]
+            job_class = handler_str.gsub('job_class:', '').strip
+
+            "#{job_class} with cron #{dj.cron} and schedule_id #{dj.schedule_id}" \
+              ' is present in delayed_jobs table, but is missing in the Dashboard.'
+          end
         end
 
         messages.join('<br>')

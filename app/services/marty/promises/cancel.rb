@@ -2,9 +2,7 @@ module Marty::Promises
   module Cancel
     class << self
       def call(id)
-        if Marty::Config['USE_SIDEKIQ_WITH_PROMISES'].to_s == 'true'
-          return call_with_sidekiq(id)
-        end
+        return call_with_sidekiq(id) if Marty::Config['USE_SIDEKIQ_WITH_PROMISES'].to_s == 'true'
 
         ids = get_all_ids(id)
         promises = Marty::Promise.where(id: ids)

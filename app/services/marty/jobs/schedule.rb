@@ -12,6 +12,8 @@ module Marty
 
         Delayed::Job.where.not(cron: nil).each(&:destroy!)
 
+        Sidekiq::Cron::Job.destroy_all! if Marty::Config['USE_SIDEKIQ_WITH_PROMISES']
+
         Marty::BackgroundJob::Schedule.all.map do |schedule|
           Marty::BackgroundJob::UpdateSchedule.call(
             id: schedule.id,

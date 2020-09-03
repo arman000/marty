@@ -2,31 +2,29 @@ require 'timeout'
 
 module Marty::RSpec::SidekiqHelpers
   def log_path
-    Rails.root.join('log', 'sidekiq_test.log')
+    Rails.root.join('log/sidekiq_test.log')
   end
 
   def start_sidekiq
     File.delete(log_path) if File.exist?(log_path)
 
+    s_script = 'bundle exec sidekiq -e test -c 8 2>&1 >./log/sidekiq_test.log'
+
     Thread.new do
-      `cd #{Rails.root} && RAILS_EAGER_LOAD=true RAILS_ENV=test bundle exec sidekiq -e test -c 8 2>&1 >./log/sidekiq_test.log`
+      `cd #{Rails.root} && RAILS_EAGER_LOAD=true RAILS_ENV=test #{s_script}`
     end
 
     sleep 5
 
     begin
       sidekiq_pid = pid
-    rescue => e
+    rescue StandardError => e
       raise "Couldn't find sidekiq pid in #{log_path}"
     end
-    binding.pry if sidekiq_pid.blank?
+
     raise "Couldn't find sidekiq pid in #{log_path}" if sidekiq_pid.blank?
 
     ENV['__sidekiq_pid'] = sidekiq_pid
-    # line_with_pid = File.open(Rails.root.join('log', 'sidekiq_test.txt'), &:readline)
-    # pid = line_with_pid.split(' ').find { |text| text.include?('pid=') }.sub('pid=', '')
-    # puts 'started 1'
-    # puts "sidekiq started with pid: #{pid}"
   end
 
   def pid
@@ -38,14 +36,15 @@ module Marty::RSpec::SidekiqHelpers
           line
         end
         line_with_pid.split(' ').find { |text| text.include?('pid=') }.sub('pid=', '')
-      rescue => e
+      rescue StandardError => e # rubocop:disable Lint/SuppressedException
       end
     end
 
-    Timeout::timeout(5) do
-      while true
+    Timeout.timeout(5) do
+      loop do
         pid_str = read_pid.call
         return pid_str if pid_str.present?
+
         sleep 1
       end
     end

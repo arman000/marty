@@ -38,8 +38,9 @@ group :development, :test do
   gem 'rubocop-performance', require: false
   gem 'rubocop-rails', require: false
   gem 'selenium-webdriver'
+  gem 'sidekiq'
+  gem 'sidekiq-cron'
   gem 'simplecov', '0.18.5', require: false
   gem 'timecop'
   gem 'webdrivers'
-  gem 'sidekiq'
 end

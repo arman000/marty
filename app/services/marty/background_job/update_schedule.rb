@@ -20,6 +20,12 @@ module Marty
 
         klass.remove_schedule(Delayed::Job.find_by(schedule_id: schedule_id))
 
+        sidekiq_job = Sidekiq::Cron::Job.all.find do |job|
+          job.name.split(' ').first == schedule_id.to_s
+        end
+
+        klass.remove_sidekiq(sidekiq_job) if sidekiq_job.present?
+
         true
       rescue NameError
         false

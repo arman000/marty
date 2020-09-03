@@ -45,6 +45,12 @@ module Marty
         errors.add(:arguments, 'are not unique')
         false
       end
+
+      def sidekiq_job
+        Sidekiq::Cron::Job.all.find do |job|
+          job.name.split(' ').first == id.to_s
+        end
+      end
     end
   end
 end

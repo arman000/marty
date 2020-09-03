@@ -171,7 +171,6 @@ describe Marty::Promise, slow: true, retry: 1 do
           base_p = nil
           timeout = 60
 
-
           # wait until base promise completes
           loop do
             base_p = Marty::Promise.find_by("title like '#{title1}%'")
@@ -465,6 +464,7 @@ describe Marty::Promise, slow: true, retry: 1 do
 
       60.times do
         break if last_promise.reload.status
+
         sleep 1
       end
 
