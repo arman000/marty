@@ -10,17 +10,13 @@ module Marty
       # Parses a target yml file and returns a mapping of config keys to pseudo
       # OpenStruct/Config objects
       def call(yml_file = DEFAULT_PATH)
-        yml = YAML.load(File.read(yml_file))
+        dir = File.dirname(yml_file)
+        Dir.mkdir(dir) unless Dir.exists?(dir)
+        FileUtils.touch(yml_file)
+        yml = YAML.load(File.open(yml_file, 'r+').read)
         return {} unless yml
 
-        yml.map do |k, v|
-          value = JSON.parse(v['default_value'])
-          OpenStruct.new(
-            key: k,
-            value: value || value == false ? [value] : [],
-            description: v['description']
-          )
-        end.flatten.index_by(&:key)
+        yml
       end
     end
   end
