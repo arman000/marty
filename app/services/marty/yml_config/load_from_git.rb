@@ -5,6 +5,14 @@ module Marty
     module LoadFromGit
       module_function
 
+      GREP_CMD = <<~CMD
+        git grep -oP "Config\\['.*'\\]"
+      CMD
+
+      def config_keys_used_in_files
+        `GREP_CMD`.scan(/Config\['(.*)'\]/).flatten.uniq
+      end
+
       def config_keys_used_in_files
         `git grep -oP "Config\\['.*'\\]"`.scan(/Config\['(.*)'\]/).flatten.uniq.map(&:downcase)
       end

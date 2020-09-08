@@ -5,11 +5,14 @@ module Marty
     module Dump
       DEFAULT_PATH = Rails.root.join('config/marty/configs.yml')
       SECRETS = ['credential', 'password', 'secret', 'key'].freeze
+      GREP_CMD = <<~CMD
+        git grep -oP "Config\\['.*'\\]"
+      CMD
 
       module_function
 
       def config_keys_used_in_files
-        `git grep -oP "Config\\['.*'\\]"`.scan(/Config\['(.*)'\]/).flatten.uniq
+        `GREP_CMD`.scan(/Config\['(.*)'\]/).flatten.uniq
       end
 
       def all_configs
