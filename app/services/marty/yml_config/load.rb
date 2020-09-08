@@ -7,11 +7,9 @@ module Marty
 
       module_function
 
-      # Parses a target yml file and returns a mapping of config keys to pseudo
-      # OpenStruct/Config objects
       def call(yml_file = DEFAULT_PATH)
         dir = File.dirname(yml_file)
-        Dir.mkdir(dir) unless Dir.exists?(dir)
+        Dir.mkdir(dir) unless Dir.exist?(dir)
         FileUtils.touch(yml_file)
         yml = YAML.load(File.open(yml_file, 'r+').read)
         return {} unless yml
