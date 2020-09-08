@@ -27,9 +27,6 @@ module Marty
           yml_configs,
           Marty::Config.all.index_by(&:key)
         ].reduce(&:merge).sort.to_h
-
-        # raise "config keys must be lowercase" if
-        #  configs.any? { |k, _| k != k.downcase }
       end
 
       def mask_secret(key, value)
