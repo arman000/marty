@@ -5,29 +5,31 @@ module Marty
     module Dump
       DEFAULT_PATH = Rails.root.join('config/marty/configs.yml')
       SECRETS = ['credential', 'password', 'secret', 'key'].freeze
-      GREP_CMD = <<~CMD
-        git grep -oP "Config\\['.*'\\]"
-      CMD
 
       module_function
 
-      def config_keys_used_in_files
-        `GREP_CMD`.scan(/Config\['(.*)'\]/).flatten.uniq
+      def mock_config(key, value = nil, description = nil)
+        OpenStruct.new(
+          key: key,
+          value: value.as_json || [],
+          description: description
+        )
       end
 
       def all_configs
-        code_configs = LoadFromGit.call
-        yml_configs = Load.call
-        configs = Marty::Config.all
-        config_keys = configs.map { |c| c.key.downcase }
-        yml_keys = yml_configs.keys - config_keys
-        code_keys = code_configs.keys - yml_keys - config_keys
-        all = code_keys.map { |k| code_configs[k] } +
-              configs +
-              yml_keys.map { |k| yml_configs[k] }
+        code_configs = GitGrep.call.map { |k| mock_config(k) }.index_by(&:key)
+        yml_configs = Load.call.map do |k, v|
+          mock_config(k, v['default_value'], v['description'])
+        end.index_by(&:key)
 
-        binding.pry
-        all.sort_by { |config| config.key.downcase }
+        configs = [
+          code_configs,
+          yml_configs,
+          Marty::Config.all.index_by(&:key)
+        ].reduce(&:merge).sort.to_h
+
+        # raise "config keys must be lowercase" if
+        #  configs.any? { |k, _| k != k.downcase }
       end
 
       def mask_secret(key, value)
@@ -44,8 +46,7 @@ module Marty
       end
 
       def call(yml_path = DEFAULT_PATH)
-        entries = all_configs.map do |entry|
-          key = entry.key.downcase
+        entries = all_configs.map do |key, entry|
           value = mask_secret(key, entry.value.first)
           entry(key, value, entry.description)
         end

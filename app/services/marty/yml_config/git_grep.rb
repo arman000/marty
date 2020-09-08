@@ -8,8 +8,8 @@ module Marty
       GREP_CMD = "git grep -oP \"Config\\['.*'\\]\" \":!*spec*\""
       GREP_REGEX = /Config\['(.*)'\]/
 
-      def git_grep_config_keys(prepend = [])
-        cmds = ([prepend] + [GREP_CMD]).join('; ')
+      def git_grep_config_keys(commands = [])
+        cmds = (commands + [GREP_CMD]).join('; ')
         `#{cmds}`.scan(GREP_REGEX).flatten.uniq.map(&:downcase)
       end
 
