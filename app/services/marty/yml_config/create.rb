@@ -22,7 +22,8 @@ module Marty
       end
 
       def mask_secret(key, value)
-        SECRETS.any? { |s| key.downcase.include?(s) } ? 'null' : value
+        downcased_key = key.downcase
+        SECRETS.any? { |s| downcased_key.include?(s) } ? 'null' : value
       end
 
       def entry(key, value, description)
