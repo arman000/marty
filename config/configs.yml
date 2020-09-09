@@ -1,6 +1,6 @@
 CLEANER_MAINTENANCE_WINDOW:
   default_value: >
-    "{"day":"saturday","range":["01:00","02:00"]}"
+    "{'day':'saturday','range':['01:00','02:00']}"
   description: A JSON object that defines a window of time in which cleaning operations can occur.
 
 DELAYED_JOBS_MAINTENANCE_WINDOW:
