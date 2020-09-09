@@ -14,20 +14,9 @@ module Marty
       def call
         configs = LoadYml.call
 
-        # update existing configs
+        # update existing config description with yml value
         Marty::Config.where(key: configs.keys, description: NULL).each do |c|
-          yc = configs[c.key]
-
-          value = if c.value == [false]
-                    c.value
-                  else
-                    (c.value.present? && c.value) || yc.value
-                  end
-
-          c.update!(
-            { description: yc.description,
-              value: value.as_json }.compact
-          )
+          c.update!(description: configs[c.key].description)
         end
 
         # create configs that exist in yml and not db
