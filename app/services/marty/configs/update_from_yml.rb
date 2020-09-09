@@ -7,10 +7,6 @@ module Marty
 
       module_function
 
-      def resolve_value(value, default_value)
-        value == false ? value : value || default_value
-      end
-
       def call
         configs = LoadYml.call
 
