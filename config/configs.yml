@@ -1,12 +1,12 @@
 CLEANER_MAINTENANCE_WINDOW:
   default_value: >
-    null
-  description: null
+    "{"day":"saturday","range":["01:00","02:00"]}"
+  description: A JSON object that defines a window of time in which cleaning operations can occur.
 
 DELAYED_JOBS_MAINTENANCE_WINDOW:
   default_value: >
     null
-  description: null
+  description: A JSON object that defines a window of time in which delayed jobs maintenance operations can occur.
 
 DELAYED_JOB_PATH:
   default_value: >
