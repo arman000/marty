@@ -73,4 +73,14 @@ namespace :marty do
     puts 'Merging code coverage reports...'
     Marty::SimpleCovHelper.merge_all_results!
   end
+
+  desc 'create config/marty/configs.yml from existing yml, git grep, and db'
+  task create_configs_yml: :environment do
+    Marty::Configs::CreateYml.call
+  end
+
+  desc 'update configs based on config/marty/configs.yml'
+  task update_configs_from_yml: :environment do
+    Marty::Configs::UpdateFromYml.call
+  end
 end

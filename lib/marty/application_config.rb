@@ -1,9 +1,21 @@
+require 'pry'
 module Marty
    class ApplicationConfig < ActiveSupport::OrderedOptions
+     cattr_accessor :validators, default: {}
+
      def initialize(default_value = nil)
+       set_validators
        super
        set_defaults
      end
+
+     def []=(key, value)
+      binding.pry
+      sym = key.to_sym
+      validators[sym].call(value) if validators[sym]
+
+      super(sym, value)
+    end
 
      def set_defaults
        if methods.include?("set_defaults_#{Rails.env}".to_sym)
@@ -11,6 +23,16 @@ module Marty
        else
          set_defaults_common
        end
+     end
+
+     def set_validators
+      validators[:role_type] = lambda do |klass|
+        raise "'#{klass}' must be a Class" unless klass.is_a?(Class)
+
+        [:values, :table_name].each do |m|
+          raise "'#{klass}' missing '#{m}' method" unless klass.respond_to?(m)
+        end
+      end
      end
 
      def set_defaults_common
