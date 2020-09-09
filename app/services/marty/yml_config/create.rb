@@ -9,10 +9,8 @@ module Marty
       module_function
 
       def all_configs
-        code_configs = GitGrep.call.map { |k| Mock.call(k) }.index_by(&:key)
-        yml_configs = Load.call.map do |k, v|
-          Mock.call(k, v['default_value'], v['description'])
-        end.index_by(&:key)
+        code_configs = GitGrep.call.map { |k| Load.mock(k) }.index_by(&:key)
+        yml_configs = Load.call
 
         [
           code_configs,

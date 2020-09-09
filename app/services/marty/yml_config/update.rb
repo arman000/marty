@@ -12,9 +12,7 @@ module Marty
       end
 
       def call
-        configs = Load.call.map do |k, v|
-          Mock.call(k, v['default_value'], v['description'])
-        end.index_by(&:key)
+        configs = Load.call
 
         # update existing configs
         Marty::Config.where(key: configs.keys, description: NULL).each do |c|
