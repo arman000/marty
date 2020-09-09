@@ -1,0 +1,39 @@
+CLEANER_MAINTENANCE_WINDOW:
+    default_value: >
+      null
+    description: null
+
+DELAYED_JOBS_MAINTENANCE_WINDOW:
+    default_value: >
+      {"day":"*","range":["01:00","04:00"]}
+    description: null
+
+DELAYED_JOB_PATH:
+    default_value: >
+      null
+    description: null
+
+DELAYED_JOB_WORKERS:
+    default_value: >
+      "12"
+    description: null
+
+DIAG_ENV_BLOCK:
+    default_value: >
+      null
+    description: null
+
+DIAG_ENV_BLOCK_IF_INCL:
+    default_value: >
+      null
+    description: null
+
+DIAG_ENV_OBFUSCATE:
+    default_value: >
+      null
+    description: null
+
+RUBY_PATH:
+    default_value: >
+      null
+    description: null
