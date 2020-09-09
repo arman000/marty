@@ -1,3 +1,13 @@
+CLEANER_MAINTENANCE_WINDOW:
+  default_value: >
+    null
+  description: null
+
+DELAYED_JOBS_MAINTENANCE_WINDOW:
+  default_value: >
+    null
+  description: null
+
 DELAYED_JOB_PATH:
   default_value: >
     "bin/delayed_job"
