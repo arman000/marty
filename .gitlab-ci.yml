@@ -28,6 +28,7 @@ marty-configs:
     - cp config/env.example.yml config/env.yml || true
     - bundle exec rake app:marty:create_marty_default_configs
   script:
+    - cp ./spec/dummy/config/database.ci.yml ./spec/dummy/config/database.yml
     - |
       export MARTY_CONFIG_CHANGES=`git diff --ignore-space-at-eol \
       --ignore-blank-lines --ignore-submodules config/configs.yml`
