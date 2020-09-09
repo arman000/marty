@@ -51,9 +51,9 @@ module Marty
       def entry(key, value, description)
         <<~YML
           #{key}:
-              default_value: >
-                #{value.to_json}
-              description: #{description || 'null'}
+            default_value: >
+              #{value.to_json}
+            description: #{description || 'null'}
         YML
       end
 
