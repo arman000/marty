@@ -35,7 +35,7 @@ marty-configs:
       if [[ ! -z $MARTY_CONFIG_CHANGES ]]; then
         git --no-pager diff config/configs.yml;
         echo "";
-        echo "config/configs.yml has changed after marty:create_marty_default_configs. CI failed";
+        echo "config/configs.yml has changed after running rake app:marty:create_marty_default_configs. CI failed";
         exit 1;
       fi;
 
