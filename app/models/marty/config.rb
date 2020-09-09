@@ -7,15 +7,9 @@ class Marty::Config < Marty::Base
     end
   end
 
-  before_save { key.downcase! }
-
   validates :key, :value, presence: true
   validates :key, uniqueness: true
   validates_with ConfigValidator
-
-  def indifferent_access_key(key)
-    key.to_s.downcase
-  end
 
   delorean_fn :lookup, sig: 1 do |key|
     self[key]
@@ -35,7 +29,7 @@ class Marty::Config < Marty::Base
                            "(given #{args.size}, expected 1..2)"
     end
 
-    entry = find_by(key: indifferent_access_key(args[0]))
+    entry = find_by(key: args[0])
     return entry.get_value if entry
     return args[1] if args.size > 1
 
@@ -43,11 +37,10 @@ class Marty::Config < Marty::Base
   end
 
   def self.[]=(key, value)
-    iak = indifferent_access_key(key)
-    entry = find_by(key: iak)
+    entry = find_by(key: key)
     if !entry
       entry = new
-      entry.key = iak
+      entry.key = key
     end
     entry.set_value(value)
     entry.save!
@@ -60,8 +53,7 @@ class Marty::Config < Marty::Base
   end
 
   def self.del(key)
-    iak = indifferent_access_key(key)
-    entry = find_by(key: iak)
+    entry = find_by(key: key)
     if entry
       result = entry.get_value
       entry.destroy

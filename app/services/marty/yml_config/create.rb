@@ -2,27 +2,19 @@
 
 module Marty
   module YmlConfig
-    module Dump
+    module Create
       DEFAULT_PATH = Rails.root.join('config/marty/configs.yml')
       SECRETS = ['credential', 'password', 'secret', 'key'].freeze
 
       module_function
 
-      def mock_config(key, value = nil, description = nil)
-        OpenStruct.new(
-          key: key,
-          value: value.as_json || [],
-          description: description
-        )
-      end
-
       def all_configs
-        code_configs = GitGrep.call.map { |k| mock_config(k) }.index_by(&:key)
+        code_configs = GitGrep.call.map { |k| Mock.call(k) }.index_by(&:key)
         yml_configs = Load.call.map do |k, v|
-          mock_config(k, v['default_value'], v['description'])
+          Mock.call(k, v['default_value'], v['description'])
         end.index_by(&:key)
 
-        configs = [
+        [
           code_configs,
           yml_configs,
           Marty::Config.all.index_by(&:key)
@@ -30,7 +22,7 @@ module Marty
       end
 
       def mask_secret(key, value)
-        SECRETS.any? { |s| key.include?(s) } ? 'null' : value
+        SECRETS.any? { |s| key.downcase.include?(s) } ? 'null' : value
       end
 
       def entry(key, value, description)

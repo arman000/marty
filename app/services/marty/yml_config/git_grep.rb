@@ -10,7 +10,7 @@ module Marty
 
       def git_grep_config_keys(commands = [])
         cmds = (commands + [GREP_CMD]).join('; ')
-        `#{cmds}`.scan(GREP_REGEX).flatten.uniq.map(&:downcase)
+        `#{cmds}`.scan(GREP_REGEX).flatten.uniq
       end
 
       def gem_config_keys

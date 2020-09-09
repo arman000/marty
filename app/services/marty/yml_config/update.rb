@@ -12,12 +12,13 @@ module Marty
       end
 
       def call
-        yml_configs = Load.call
-        yml_keys = yml_configs.keys.map(&:upcase)
+        configs = Load.call.map do |k, v|
+          Mock.call(k, v['default_value'], v['description'])
+        end.index_by(&:key)
 
         # update existing configs
-        Marty::Config.where(key: yml_keys, description: NULL).each do |c|
-          yc = yml_configs[c.key.downcase]
+        Marty::Config.where(key: configs.keys, description: NULL).each do |c|
+          yc = configs[c.key]
           c.update!(
             {
               description: yc.description,
@@ -27,14 +28,14 @@ module Marty
         end
 
         # create configs that exist in yml and not db
-        (yml_keys - Marty::Config.all.pluck(:key)).each do |k|
-          config = yml_configs[k.downcase]
-          next if config.value.empty?
+        (configs.keys - Marty::Config.all.pluck(:key)).each do |k|
+          c = configs[k]
+          next if c.value.empty?
 
           Marty::Config.create!(
             key: k,
-            value: config.value,
-            description: config.description
+            value: c.value,
+            description: c.description
           )
         end
       end
