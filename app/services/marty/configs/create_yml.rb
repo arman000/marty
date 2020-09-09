@@ -4,7 +4,7 @@ module Marty
   module Configs
     module CreateYml
       DEFAULT_PATH = Rails.root.join('config/marty/configs.yml')
-      SECRETS = ['credential', 'password', 'secret', 'key'].freeze
+      SECRETS = ['credential', 'password', 'key', 'secret'].freeze
 
       module_function
 
