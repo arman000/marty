@@ -10,7 +10,6 @@ module Marty
      end
 
      def []=(key, value)
-      binding.pry
       sym = key.to_sym
       validators[sym].call(value) if validators[sym]
 
