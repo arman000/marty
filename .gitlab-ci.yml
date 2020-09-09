@@ -1,7 +1,7 @@
 variables:
   COVERAGE: "true"
   GIT_SSL_NO_VERIFY: "true"
-  MARTY_REDIS_URL: 'localhost:6379/1'
+  MARTY_REDIS_URL: "localhost:6379/1"
   PG_IMAGE_VERSION: "11"
   RAILS_DUMP_SCHEMA: "false"
   REDIS_IMAGE_VERSION: "latest"
@@ -19,6 +19,25 @@ variables:
 
 setup:
   extends: .setup
+
+marty-configs:
+  extends:
+    - .base-check
+    - .base-rails
+  before_script:
+    - cp config/env.example.yml config/env.yml || true
+    - bundle exec rake app:marty:create_marty_default_configs
+  script:
+    - |
+      export MARTY_CONFIG_CHANGES=`git diff --ignore-space-at-eol \
+      --ignore-blank-lines --ignore-submodules config/configs.yml`
+    - |
+      if [[ ! -z $MARTY_CONFIG_CHANGES ]]; then
+        git --no-pager diff config/configs.yml;
+        echo "";
+        echo "config/configs.yml has changed after marty:create_marty_default_configs. CI failed";
+        exit 1;
+      fi;
 
 rubocop:
   before_script:
@@ -110,5 +129,5 @@ code-coverage:
   script: bundle exec rake app:marty:merge_coverage_reports
 
 include:
-  - project: 'cm_tech/cm_gitlab_ci'
-    file: '/.gitlab/ci/defaults.yml'
+  - project: "cm_tech/cm_gitlab_ci"
+    file: "/.gitlab/ci/defaults.yml"

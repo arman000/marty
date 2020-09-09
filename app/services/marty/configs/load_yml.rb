@@ -19,7 +19,7 @@ module Marty
         dir = File.dirname(path)
         Dir.mkdir(dir) unless Dir.exist?(dir)
         FileUtils.touch(path)
-        yml = YAML.safe_load(File.open(path, 'r+').read)
+        yml = YAML.safe_load(File.read(path))
         return {} unless yml
 
         yml.map { |k, v| mock(k, v['default_value'], v['description']) }.
