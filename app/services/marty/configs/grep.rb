@@ -5,7 +5,7 @@ module Marty
     module Grep
       module_function
 
-      GREP_CMD = "git grep -oP \"Config\\['.*'\\]\" \":!*spec*\" \":!*db*\"" 
+      GREP_CMD = "git grep -oP \"Config\\['.*'\\]\" \":!*spec*\" \":!*db*\""
       GREP_REGEX = /Config\['(.*)'\]/
 
       def git_grep_config_keys(commands = [])
