@@ -14,8 +14,8 @@ module Marty
 
         [
           code_configs,
-          yml_configs,
-          Marty::Config.all.index_by(&:key)
+          Marty::Config.all.index_by(&:key),
+          yml_configs
         ].reduce(&:merge).sort.to_h
       end
 

@@ -10,7 +10,7 @@ module Marty
       def mock(key, value = nil, description = nil)
         OpenStruct.new(
           key: key,
-          value: value.as_json || [],
+          value: value ? [JSON.parse(value)].compact : [],
           description: description
         )
       end

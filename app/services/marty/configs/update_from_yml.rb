@@ -17,11 +17,16 @@ module Marty
         # update existing configs
         Marty::Config.where(key: configs.keys, description: NULL).each do |c|
           yc = configs[c.key]
+
+          value = if c.value == [false]
+                    c.value
+                  else
+                    (c.value.present? && c.value) || yc.value
+                  end
+
           c.update!(
-            {
-              description: yc.description,
-              value: c.value == false ? c.value : c.value || yc.value
-            }.compact
+            { description: yc.description,
+              value: value.as_json }.compact
           )
         end
 
@@ -32,7 +37,7 @@ module Marty
 
           Marty::Config.create!(
             key: k,
-            value: c.value,
+            value: c.value.as_json,
             description: c.description
           )
         end
