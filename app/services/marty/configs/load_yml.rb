@@ -15,11 +15,11 @@ module Marty
         )
       end
 
-      def call(yml_file = DEFAULT_PATH)
-        dir = File.dirname(yml_file)
+      def call(path: DEFAULT_PATH)
+        dir = File.dirname(path)
         Dir.mkdir(dir) unless Dir.exist?(dir)
-        FileUtils.touch(yml_file)
-        yml = YAML.safe_load(File.open(yml_file, 'r+').read)
+        FileUtils.touch(path)
+        yml = YAML.safe_load(File.open(path, 'r+').read)
         return {} unless yml
 
         yml.map { |k, v| mock(k, v['default_value'], v['description']) }.
