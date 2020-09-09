@@ -74,12 +74,12 @@ namespace :marty do
     Marty::SimpleCovHelper.merge_all_results!
   end
 
-  desc 'create config/marty/configs.yml from existing yml, git grep, and db'
+  desc 'create config yml from existing yml, git grep, and db'
   task create_configs_yml: :environment do
     Marty::Configs::CreateYml.call
   end
 
-  desc 'update configs based on config/marty/configs.yml'
+  desc 'update configs based on config yml'
   task update_configs_from_yml: :environment do
     Marty::Configs::UpdateFromYml.call
   end
