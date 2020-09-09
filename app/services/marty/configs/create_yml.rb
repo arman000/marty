@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 module Marty
-  module YmlConfig
-    module Create
+  module Configs
+    module CreateYml
       DEFAULT_PATH = Rails.root.join('config/marty/configs.yml')
       SECRETS = ['credential', 'password', 'secret', 'key'].freeze
 
       module_function
 
       def all_configs
-        code_configs = GitGrep.call.map { |k| Load.mock(k) }.index_by(&:key)
-        yml_configs = Load.call
+        code_configs = Grep.call.map { |k| LoadYml.mock(k) }.index_by(&:key)
+        yml_configs = LoadYml.call
 
         [
           code_configs,

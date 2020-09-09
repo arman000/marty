@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Marty
-  module YmlConfig
-    module Update
+  module Configs
+    module UpdateFromYml
       NULL = [nil, 'TODO'].freeze
 
       module_function
@@ -12,7 +12,7 @@ module Marty
       end
 
       def call
-        configs = Load.call
+        configs = LoadYml.call
 
         # update existing configs
         Marty::Config.where(key: configs.keys, description: NULL).each do |c|

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Marty
-  module YmlConfig
-    module GitGrep
+  module Configs
+    module Grep
       module_function
 
       GREP_CMD = "git grep -oP \"Config\\['.*'\\]\" \":!*spec*\""

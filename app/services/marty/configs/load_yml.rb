@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Marty
-  module YmlConfig
-    module Load
+  module Configs
+    module LoadYml
       DEFAULT_PATH = Rails.root.join('config/marty/configs.yml')
 
       module_function
