@@ -12,7 +12,8 @@ module Marty
 
         # update existing config description with yml value
         Marty::Config.where(key: configs.keys, description: NULL).each do |c|
-          c.update!(description: configs[c.key].description)
+          desc = configs[c.key].description
+          c.update!(description: desc) if desc
         end
 
         # create configs that exist in yml and not db
