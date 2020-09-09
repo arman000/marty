@@ -83,4 +83,9 @@ namespace :marty do
   task update_configs_from_yml: :environment do
     Marty::Configs::UpdateFromYml.call
   end
+
+  desc 'update marty default config yml'
+  task create_marty_default_configs: :environment do
+    Marty::Configs::CreateYml.create_marty_configs_yml
+  end
 end
