@@ -13,12 +13,8 @@ module Marty
         `#{cmds}`.scan(GREP_REGEX).flatten.uniq
       end
 
-      def application_config_keys
-        git_grep_config_keys
-      end
-
       def call
-        application_config_keys.sort
+        git_grep_config_keys.sort
       end
     end
   end
