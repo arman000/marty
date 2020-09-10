@@ -12,6 +12,7 @@ class Marty::DataConversion
   # database types that can be converted to on import
   DATABASE_TYPES = Set[
     :boolean,
+    :citext,
     :string,
     :text,
     :integer,
@@ -44,7 +45,7 @@ class Marty::DataConversion
       when 'false', '0', 'n', 'f' then false
       else raise "unknown boolean: #{v.inspect}"
       end
-    when :string, :text, :enum
+    when :citext, :string, :text, :enum
       v
     when :integer
       v.to_i
