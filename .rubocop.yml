@@ -112,3 +112,7 @@ Style/HashTransformValues:
 # at a time.
 Style/MethodDefParentheses:
   Enabled: false
+
+# This rule is ridicolous and makes code less readable
+Performance/CollectionLiteralInLoop:
+  Enabled: false
