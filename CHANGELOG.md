@@ -1,4 +1,9 @@
 =======
+16.11.0 - 2020-09-03
+=====================================================
+
+* Change column type from VARCHAR to CITEXT for marty_users.login and add a unique index for it.
+
 16.10.0 - 2020-08-18
 =====================================================
 

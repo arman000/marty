@@ -34,6 +34,10 @@ class Marty::User < Marty::Base
     user_roles.map(&:role)
   end
 
+  def login=(value)
+    super(value&.to_s&.downcase)
+  end
+
   # Returns the user who matches the given autologin +key+ or nil
   def self.try_to_autologin(key)
     tokens = Marty::Token.find_all_by_action_and_value('autologin', key.to_s)
