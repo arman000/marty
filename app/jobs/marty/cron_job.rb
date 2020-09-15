@@ -41,9 +41,7 @@ class Marty::CronJob < ActiveJob::Base
 
   class << self
     def schedule(schedule_obj:)
-      if Marty::Config['USE_SIDEKIQ_WITH_PROMISES']
-        return schedule_sidekiq(schedule_obj: schedule_obj)
-      end
+      return schedule_sidekiq(schedule_obj: schedule_obj) if Marty::Config['USE_SIDEKIQ_WITH_PROMISES']
 
       dj = schedule_obj.delayed_job
 
@@ -72,9 +70,7 @@ class Marty::CronJob < ActiveJob::Base
     alias remove_schedule remove
 
     def scheduled?(schedule_id:)
-      if Marty::Config['USE_SIDEKIQ_WITH_PROMISES']
-        return scheduled_sidekiq?(schedule_id: schedule_id)
-      end
+      return scheduled_sidekiq?(schedule_id: schedule_id) if Marty::Config['USE_SIDEKIQ_WITH_PROMISES']
 
       Delayed::Job.find_by(schedule_id: schedule_id).present?
     end

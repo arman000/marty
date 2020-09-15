@@ -10,7 +10,19 @@ NodeB:
   attr = 456
 eof
 
+s3 = <<~DELOREAN
+NodeC:
+    my_param =?
+    attr1 = my_param + 10
+    attr2 = attr1 + 5
+
+DELOREAN
+
 describe Marty::Script do
+  after do
+    Thread.abort_on_exception = false
+  end
+
   let(:now) { Time.zone.now - 1.minute }
 
   describe '.load_a_script' do
@@ -280,6 +292,44 @@ describe Marty::Script do
         res = call_ar(method_name)
         expect(res).to be_present
       end
+    end
+
+    it 'works corretly with multiple threads' do
+      Marty::Script.load_script_bodies(
+        { 'ThreadTest' => s3 },
+        Time.zone.now
+      )
+
+      time = Time.zone.now + 10.seconds
+
+      Thread.abort_on_exception = true
+
+      total_runs = 0
+      lock = Mutex.new
+
+      10.times do |t|
+        Thread.start do
+          sleep 0.01
+          100.times do
+            res = Marty::Script.evaluate(
+              time,
+              'ThreadTest',
+              'NodeC',
+              'attr2',
+              { 'my_param' => t }
+            )
+            expect(res).to eq(t + 15)
+
+            lock.synchronize do
+              total_runs += 1
+            end
+          end
+        end
+      end
+
+      sleep 10
+
+      expect(total_runs).to eq(1_000)
     end
   end
 end

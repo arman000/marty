@@ -155,7 +155,7 @@ class Marty::RuleScriptSet < Delorean::AbstractContainer
       attrnm = begin
                  line = get_code(ruleh).split("\n")[exc.line - 1]
                  line.split(' =').first.strip
-               rescue StandardError
+      rescue StandardError
                  search_ranges(h, line_in_sec).first
                end
     end

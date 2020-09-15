@@ -17,7 +17,7 @@ module Marty
                       resultset_files.map do |result_file|
                         SimpleCov::Result.from_hash JSON.parse(result_file.read)
                       end
-                     rescue StandardError => e
+      rescue StandardError => e
                       {}
                      end
 

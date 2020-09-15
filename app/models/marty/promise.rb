@@ -111,7 +111,11 @@ class Marty::Promise < Marty::Base
   def self.job_by_id_sidekiq(job_id, _priority = nil)
     # FIXME: fetch the queue based on priority
     # FIXME: or fetch from schedule set
-    job = Sidekiq::Queue.new.find { |job| job.jid == job_id }
+    job = Sidekiq::Queue.all.map do |queue|
+      queue.find do |q_job|
+        q_job.jid == job_id
+      end
+    end.compact.first
 
     return unless job
 

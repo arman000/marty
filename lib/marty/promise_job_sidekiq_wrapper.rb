@@ -18,7 +18,7 @@ class Marty::PromiseJobSidekiqWrapper
             # ATM load doesn't autoload constants
             YAML.load_dj(yaml_job)
           else
-            YAML.load(yaml_job)
+            YAML.load(yaml_job) # rubocop:disable Security/YAMLLoad
           end
 
     # logger.info yaml_job
