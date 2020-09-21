@@ -15,6 +15,38 @@
     }
   },
 
+  childReloadMs: 500,
+
+  reloadChildren(selModel) {
+    const children = this.serverConfig.child_components || [];
+    const hasSel = selModel.hasSelection();
+
+    let rid = null;
+    if (hasSel) {
+      if (selModel.type == "spreadsheet") {
+        const cell = selModel.getSelected().startCell;
+        rid = cell && cell.record.getId();
+      }
+      if (!rid) {
+        const selected = selModel.getSelection()[0];
+        rid = selected && selected.getId();
+      }
+    }
+
+    this.serverConfig.selected = rid;
+    this.setDisableComponentActions("do", !hasSel);
+
+    for (const child of children) {
+      const comp = this.findComponent(child);
+      if (comp) {
+        comp.serverConfig.parent_id = rid;
+        if (comp.setDisableComponentActions) {
+          comp.setDisableComponentActions("parent", !hasSel);
+        }
+        if (comp.reload) comp.reload();
+      }
+    }
+  },
   initComponent() {
     this.dockedItems = this.dockedItems || [];
     if (this.paging == "pagination") {
@@ -46,6 +78,18 @@
       });
     }
 
+    const reloadChildrenDebouncer = new Ext.util.DelayedTask(
+      this.reloadChildren
+    );
+
+    this.listeners = {
+      selectionchange: (selModel) => {
+        reloadChildrenDebouncer.delay(this.childReloadMs, null, this, [
+          selModel
+        ]);
+      }
+    };
+
     // block creation of toolbars in parent
     delete this.bbar;
     const paging = this.paging;
@@ -56,40 +100,6 @@
     this.paging = paging;
 
     const me = this;
-
-    const children = me.serverConfig.child_components || [];
-    me.onSelectionChange(function(m) {
-      const hasSel = m.hasSelection();
-
-      let rid = null;
-      if (hasSel) {
-        if (m.type == "spreadsheet") {
-          const cell = m.getSelected().startCell;
-          rid = cell && cell.record.getId();
-        }
-        if (!rid) {
-          const selected = m.getSelection()[0];
-          rid = selected && selected.getId();
-        }
-      }
-
-      me.serverConfig.selected = rid;
-      me.setDisableComponentActions("do", !hasSel);
-
-      for (const child of children) {
-        const comp = me.findComponent(child);
-        if (comp) {
-          comp.serverConfig.parent_id = rid;
-          if (comp.setDisableComponentActions) {
-            comp.setDisableComponentActions("parent", !hasSel);
-          }
-          if (comp.reload) {
-            comp.reload();
-          }
-        }
-      }
-    });
-
     const store = me.getStore();
     const linked = me.serverConfig.linked_components || [];
     for (const event of ["update", "netzkerefresh"]) {
