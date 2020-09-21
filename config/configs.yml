@@ -1,0 +1,39 @@
+CLEANER_MAINTENANCE_WINDOW:
+  default_value: >
+    {"day":"saturday","range":["01:00","02:00"]}
+  description: A JSON object that defines a window of time in which cleaning operations can occur.
+
+DELAYED_JOBS_MAINTENANCE_WINDOW:
+  default_value: >
+    null
+  description: A JSON object that defines a window of time in which delayed jobs maintenance operations can occur.
+
+DELAYED_JOB_PATH:
+  default_value: >
+    "bin/delayed_job"
+  description: The path to the delayed job scripts.
+
+DELAYED_JOB_WORKERS:
+  default_value: >
+    null
+  description: The number of delayed job workers used in delayed job commands.
+
+DIAG_ENV_BLOCK:
+  default_value: >
+    null
+  description: An array of explicit terms to block from environment variables diagnostic.
+
+DIAG_ENV_BLOCK_IF_INCL:
+  default_value: >
+    null
+  description: An array of key words to block from environment variables diagnostics.
+
+DIAG_ENV_OBFUSCATE:
+  default_value: >
+    null
+  description: An array of key words that define which variables to obfuscate from environment variables diagnostic.
+
+RUBY_PATH:
+  default_value: >
+    null
+  description: Ruby path used for system calls.

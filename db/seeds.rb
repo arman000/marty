@@ -52,3 +52,5 @@ Marty::Config['DELAYED_JOBS_MAINTENANCE_WINDOW'] = {
 Marty::Config['CLEANER_MAINTENANCE_WINDOW'] = {
   day: 'saturday', range: ['01:00', '02:00']
 }
+
+Marty::Configs::UpdateFromYml.call
