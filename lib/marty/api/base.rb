@@ -167,12 +167,10 @@ class Marty::Api::Base
     end
   end
 
-  def self.filter_hash(hash, filter_params)
+  def self.filter_hash(hash, terms)
     return unless hash
 
-    pf_class = ::Marty::RailsApp.parameter_filter_class
-    pf = pf_class.new(filter_params)
-    pf.filter(hash.stringify_keys)
+    Marty::Secrets.filter_hash_values(hash, terms)
   end
 
   def self.log_hash(result, params, request)
