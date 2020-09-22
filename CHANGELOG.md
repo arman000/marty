@@ -1,4 +1,12 @@
 =======
+17.0.0 - 2020-09-22
+=====================================================
+
+* Remove unused cache and PLV methods from `Marty::DataGrid`
+* Remove Data Grid index models
+* Refactor usage of `INDEX_MAP` in `Marty::DataGrid`
+
+=======
 16.11.0 - 2020-09-03
 =====================================================
 

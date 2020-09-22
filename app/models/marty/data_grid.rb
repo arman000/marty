@@ -2,13 +2,13 @@ class Marty::DataGrid < Marty::Base
   # If data_type is nil, assume float
   DEFAULT_DATA_TYPE = 'float'
 
-  INDEX_MAP = {
-    'numrange'  => Marty::GridIndexNumrange,
-    'int4range' => Marty::GridIndexInt4range,
-    'integer'   => Marty::GridIndexInteger,
-    'string'    => Marty::GridIndexString,
-    'boolean'   => Marty::GridIndexBoolean,
-  }.freeze
+  TYPES = [
+    'numrange',
+    'int4range',
+    'integer',
+    'string',
+    'boolean',
+  ].freeze
 
   ARRSEP = '|'.freeze
   NOT_STRING_START = 'NOT ('.freeze
@@ -52,7 +52,7 @@ class Marty::DataGrid < Marty::Base
           /\A[a-z][A-Za-z0-9_]*\z/.match?(attr)
 
         dg.errors.add(:base, "unknown metadata type #{type}") unless
-          Marty::DataGrid.type_to_index(type)
+          Marty::DataGrid.check_type(type)
 
         dg.errors.add(:base, 'bad metadata keys') unless
           keys.is_a?(Array) && !keys.empty?
@@ -159,12 +159,10 @@ class Marty::DataGrid < Marty::Base
     save!
   end
 
-  def self.type_to_index(type)
-    # map given header type to an index class -- uses string index
-    # for ruby classes.
-    return INDEX_MAP[type] if INDEX_MAP[type]
+  def self.check_type(type)
+    return true if TYPES.include?(type)
 
-    INDEX_MAP['string'] if (type.constantize rescue nil)
+    true if type.constantize rescue nil
   end
 
   def self.convert_data_type(data_type)
@@ -177,12 +175,6 @@ class Marty::DataGrid < Marty::Base
 
     data_type.constantize rescue nil
   end
-
-  def self.clear_dtcache
-    @@dtcache = {}
-  end
-
-  PLV_DT_FMT = '%Y-%m-%d %H:%M:%S.%N6'
 
   def self.ruby_lookup_indices(h_passed, dgh)
     dgh['metadata'].each_with_object({ 'v' => [], 'h' => [] }) do |m, h|
@@ -441,7 +433,7 @@ class Marty::DataGrid < Marty::Base
     type = inf['type']
     nots = inf.fetch('nots', [])
     wildcards = inf.fetch('wildcards', [])
-    klass = type.constantize unless INDEX_MAP[type]
+    klass = type.constantize unless TYPES.include?(type)
 
     keys = inf['keys'].each_with_index.map do |v, index|
       wildcard = wildcards.fetch(index, true)
@@ -611,9 +603,9 @@ class Marty::DataGrid < Marty::Base
   end
 
   def self.maybe_get_klass(type)
-      type.constantize unless INDEX_MAP[type] || type == 'float'
+    type.constantize unless TYPES.include?(type) || type == 'float'
   rescue NameError
-      raise "unknown header type/klass: #{type}"
+    raise "unknown header type/klass: #{type}"
   end
 
   def self.parse_keys(pt, keys, type, strict_null_mode)
@@ -743,7 +735,7 @@ class Marty::DataGrid < Marty::Base
         attr && type && dir
       raise "bad dir #{dir}" unless ['h', 'v'].member? dir
       raise "unknown metadata type #{type}" unless
-        Marty::DataGrid.type_to_index(type)
+        check_type(type)
 
       keys = key && parse_keys(pt, [key], type, strict_null_mode)
       nots = key && parse_nots([key])
