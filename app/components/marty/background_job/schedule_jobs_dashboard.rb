@@ -1,4 +1,4 @@
-require 'marty/background_job/schedule_jobs_grid'
+require_relative 'schedule_jobs_grid'
 
 module Marty
   module BackgroundJob

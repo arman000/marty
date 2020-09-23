@@ -1,4 +1,4 @@
-require 'marty/notifications/grid_view'
+require_relative 'grid_view'
 
 module Marty
   module Notifications

@@ -1,4 +1,4 @@
-require 'marty/postings/summary_grid'
+require_relative 'summary_grid'
 
 module Marty
   module Postings

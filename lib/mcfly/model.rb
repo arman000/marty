@@ -24,7 +24,7 @@ module Mcfly::Model
       q
     end
 
-    def base_mcfly_lookup(name, options = {}, &block)
+    def base_mcfly_lookup(name, options = {})
       delorean_options = {
         # private: options.fetch(:private, false),
         cache: options.fetch(:cache, false),
@@ -47,7 +47,7 @@ module Mcfly::Model
         ts = Mcfly.normalize_infinity(ts)
         q = where("#{table_name}.obsoleted_dt >= ? AND " +
                    "#{table_name}.created_dt < ?", ts, ts).scoping do
-          block.call(ts, *args)
+          yield(ts, *args)
         end
 
         fa = get_final_attrs
@@ -94,7 +94,7 @@ module Mcfly::Model
         v ? "(#{k} = ? OR #{k} IS NULL)" : "(#{k} = ?)"
       end.join(' AND ')
 
-      if Hash === attrs
+      if attrs.is_a?(Hash)
         order = attrs.select { |_k, v| v }.keys.reverse.map do |k|
           k = "#{k}_id" if assoc.member?(k)
 
@@ -102,14 +102,14 @@ module Mcfly::Model
         end.join(', ')
         attrs = attrs.keys
       else
-        raise 'bad attrs' unless Array === attrs
+        raise 'bad attrs' unless attrs.is_a?(Array)
       end
 
       base_mcfly_lookup(name, options + { sig:  attrs.length + 1,
                                              mode: mode }) do |_t, *attr_list|
         attr_list_ids = attr_list.each_with_index.map do |_x, i|
           assoc.member?(attrs[i]) ?
-            (attr_list[i] && attr_list[i].id) : attr_list[i]
+            attr_list[i]&.id : attr_list[i]
         end
 
         q = where(qstr, *attr_list_ids)

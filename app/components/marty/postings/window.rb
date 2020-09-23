@@ -1,4 +1,4 @@
-require 'marty/postings/grid'
+require_relative 'grid'
 
 module Marty
   module Postings

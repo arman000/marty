@@ -2,7 +2,7 @@
 #
 # == Extending Marty::AuthApp
 # DOCFIX
-require 'marty/notifications/window'
+require_relative 'notifications/window'
 
 class Marty::AuthApp < Marty::SimpleApp
   def configure(c)
