@@ -1,4 +1,4 @@
-require 'marty/postings/new_form'
+require_relative 'new_form'
 
 module Marty
   module Postings
