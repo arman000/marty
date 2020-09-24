@@ -388,7 +388,6 @@ feature 'data grid view', js: true, speed: :super_slow do
   it 'dg context menus' do
     log_in_as('grid_user')
     go_to_data_grids(admin: false)
-    dgv = netzke_find('data_grid_user_view')
     context_test_all = ENV['DG_FEATURE_FULL'] == 'true'
     [[nil, nil],
      ['edit_all', context_test_all],
@@ -399,8 +398,9 @@ feature 'data grid view', js: true, speed: :super_slow do
       press('Refresh')
       # 'press('Refresh')' sometimes doesn't work locally, in that case
       # uncomment the following line:
-      # page.find('.x-tool-refresh').click
+      page.find('.x-tool-refresh').click
 
+      dgv = netzke_find('data_grid_user_view')
       grids = dgv.get_col_vals('name', 5)
 
       if perm.nil?
@@ -410,7 +410,14 @@ feature 'data grid view', js: true, speed: :super_slow do
 
       grids.each do |grid|
         pos = grids.index(grid) + 1
-        dgv.select_row(pos)
+
+        begin
+          dgv.select_row(pos)
+        rescue StandardError => e
+          sleep 1
+          dgv.select_row(pos)
+        end
+
         press('Edit Grid')
         wait_for_ajax
         check_grid(grid, perm, all_cells)
