@@ -58,6 +58,18 @@ class Marty::DataGrid < Marty::Base
           keys.is_a?(Array) && !keys.empty?
       end
 
+      if Marty::Config['ENFORCE_DATA_GRID_STRICT_NULL_MODE'].to_s == 'true' &&
+         !dg.strict_null_mode
+
+        dg.errors.add(
+          :base,
+          <<~ERROR
+            All new and updated data grids must be in strict_null_mode.
+            See 'ENFORCE_DATA_GRID_STRICT_NULL_MODE' in System/Configuration tab.
+          ERROR
+        )
+      end
+
       # Check key uniqueness of vertical/horizontal key
       # combinations. FIXME: ideally, we should also check for
       # array/range key subsumption.  Those will result in runtime
@@ -142,7 +154,7 @@ class Marty::DataGrid < Marty::Base
   # FIXME: not sure what's the right way to perform the save in a
   # transaction -- i.e. together with build_index.  before_save would
   # be OK, but then save inside it would cause an infinite loop.
-  def save!
+  def save!(*arguments)
     if changed?
       transaction do
         nc, nw, n = [name_changed?, name_was, name]
@@ -155,8 +167,8 @@ class Marty::DataGrid < Marty::Base
   end
 
   # FIXME: hacky -- save is just save!
-  def save
-    save!
+  def save(*arguments)
+    save!(*arguments)
   end
 
   def self.check_type(type)

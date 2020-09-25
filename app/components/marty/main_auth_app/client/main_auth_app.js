@@ -124,5 +124,26 @@
 
   netzkeOnShowEnv() {
     this.server.showEnv({});
+  },
+
+  netzkeOnUpdateDataGridsToStrictNullMode() {
+    const me = this;
+
+    const msg = [
+      "Set the strict null mode for all non-obsoleted Data Grids?",
+      "This change is non-reversible."
+    ].join("\n");
+
+    Ext.Msg.show({
+      title: "Update all DataGrids?",
+      msg,
+      width: 375,
+      buttons: Ext.Msg.OKCANCEL,
+      fn(btn) {
+        if (btn == "ok") {
+          me.server.updateDataGridsToStrictNullMode({});
+        }
+      }
+    });
   }
 });

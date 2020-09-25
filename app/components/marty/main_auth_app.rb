@@ -86,6 +86,7 @@ class Marty::MainAuthApp < Marty::AuthApp
         disabled: !self.class.has_perm?(:admin),
         menu: [
           :show_env,
+          :update_data_grids_to_strict_null_mode,
         ],
       },
     ]
@@ -388,6 +389,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_perm?(:admin)
   end
 
+  action :update_data_grids_to_strict_null_mode do |a|
+    a.text     = 'Update Data Grids to strict_null_mode'
+    a.tooltip  = 'Non reverible. Use with caution.'
+    a.icon_cls = 'fa fa-exclamation-triangle glphy'
+    a.disabled = !self.class.has_perm?(:admin)
+  end
+
   ######################################################################
   # Background Jobs/Delayed Jobs
 
@@ -449,6 +457,16 @@ class Marty::MainAuthApp < Marty::AuthApp
            html_safe
 
     client.show_detail html, 'Server Environment'
+  end
+
+  endpoint :update_data_grids_to_strict_null_mode do |_|
+    next client.netzke_notify('Permission Denied') unless self.class.has_perm?(:admin)
+
+    number_of_dgs = ::Marty::DataGrid::UpdateAllToStrictNullMode.call
+
+    Marty::Config['ENFORCE_DATA_GRID_STRICT_NULL_MODE'] = true
+
+    client.show_detail "#{number_of_dgs} DataGrids were updated to strict_null_mode"
   end
 
   ######################################################################

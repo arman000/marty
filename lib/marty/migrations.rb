@@ -305,6 +305,12 @@ OUT
   end
 
   def disable_triggers(table_name)
+    ::Marty::Migrations.disable_triggers(table_name) do
+      yield
+    end
+  end
+
+  def self.disable_triggers(table_name)
     ActiveRecord::Base.connection.
       execute("ALTER TABLE #{table_name} DISABLE TRIGGER USER;")
 
