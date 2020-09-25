@@ -24,7 +24,7 @@ module Marty
       it 'allows day to be all using *' do
         Marty::Config[config_key] = {
           'day' => '*',
-        'range' => ['01:00', '24:00']
+        'range' => ['00:00', '24:00']
         }
         expect { described_class.call(config_key) }.not_to raise_error
       end
