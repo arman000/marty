@@ -33,6 +33,11 @@ DIAG_ENV_OBFUSCATE:
     null
   description: An array of key words that define which variables to obfuscate from environment variables diagnostic.
 
+ENFORCE_DATA_GRID_STRICT_NULL_MODE:
+  default_value: >
+    false
+  description: Require strict null mode to be true for new and updated Data Grids
+
 RUBY_PATH:
   default_value: >
     null

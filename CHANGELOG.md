@@ -1,4 +1,10 @@
 =======
+17.2.0 - 2020-09-24
+=====================================================
+
+* Add an admin button to convert all DataGrids to strict_null_mode
+* Add a 'ENFORCE_DATA_GRID_STRICT_NULL_MODE' flag to Marty::Config. If set to true it DG would require to be in strict_null_mode during the validation.
+
 17.1.0 - 2020-09-23
 =====================================================
 
