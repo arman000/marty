@@ -34,9 +34,6 @@ group :development, :test do
   gem 'rspec-instafail', require: false
   gem 'rspec-rails'
   gem 'rspec-retry'
-  gem 'rubocop', '0.90.0', require: false
-  gem 'rubocop-performance', require: false
-  gem 'rubocop-rails', require: false
   gem 'selenium-webdriver'
   gem 'simplecov', '0.18.5', require: false
   gem 'timecop'

@@ -40,8 +40,6 @@ marty-configs:
       fi;
 
 rubocop:
-  before_script:
-    - bundle exec rubocop -V
   extends: .rubocop
 
 eslint-prettier:
@@ -105,9 +103,6 @@ rspec-performance:
   extends:
     - .rspec-performance
     - .marty-rspec-rails
-  services:
-    - "postgres:$PG_IMAGE_VERSION"
-    - "redis:$REDIS_IMAGE_VERSION"
 
 rspec-requests:
   extends:
