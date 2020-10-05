@@ -51,6 +51,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'delorean_lang', '>= 2.6.0'
   s.add_dependency 'json-schema'
   s.add_dependency 'mcfly'
+  s.add_dependency 'mini_racer'
   s.add_dependency 'net-ldap'
   s.add_dependency 'netzke'
   s.add_dependency 'pg'

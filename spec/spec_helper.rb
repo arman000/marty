@@ -75,6 +75,7 @@ RSpec.configure do |config|
 
   config.infer_spec_type_from_file_location!
   config.use_transactional_fixtures = true
+  config.file_fixture_path = 'spec/fixtures'
 
   Netzke::Testing.rspec_init(config)
 
