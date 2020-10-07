@@ -1,12 +1,16 @@
 .bundle/
 log/*.log
 pkg/
+
+# Dummy app related ignores
 spec/dummy/db/*.sqlite3
 spec/dummy/log/*.log
 spec/dummy/log/*.sql
 spec/dummy/tmp/
 spec/dummy/spec/tmp/
 spec/dummy/.sass-cache
+spec/dummy/public/extjs
+spec/dummy/public/assets
 
 # Ignore schema
 /db/schema.rb
@@ -25,10 +29,11 @@ spec/dummy/.sass-cache
 /pkg
 *.swp
 
-/spec/dummy/public/extjs
-/spec/dummy/public/assets
+# RSpec
 .rspec
 .rspec-results
+
+# macOS
 .DS_Store
 
 # Files with command history for docker

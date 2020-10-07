@@ -28,6 +28,18 @@ module Marty
       self.load_dir = ENV['LOAD_DIR']
       self.promise_job_enqueue_hooks = []
       self.redis_url = nil
+      self.sql_server = sql_server
+    end
+
+    private
+
+    def sql_server
+      options = ActiveSupport::OrderedOptions.new
+      options.adapter = ENV['MSSQL_ADAPTER'] || 'sqlserver'
+      options.encoding = ENV['ENCODING'] || 'UTF-8'
+      options.timeout = ENV['TDS_DEFAULT_TIMEOUT'] || 30
+      options.tds_ver = ENV['TDSVER'] || 7.3
+      options
     end
   end
 end

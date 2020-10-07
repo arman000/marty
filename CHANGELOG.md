@@ -1,10 +1,17 @@
-=======
+17.4.0 - 2020-10-06
+=====================================================
+
+* Added `Marty::SqlServer` module to act as an interface for database connections
+  to auxillary SQL Server systems.
+* Added `Marty::RSpec::VcrSqlServer` to help stub requests going in and out of
+  `Marty::SqlServer` connections.
+* Added `.yardopts`.
+
 17.3.0 - 2020-09-24
 =====================================================
 
 * Add a v0.1 V8 runtime to run JS packaged rules
 
-=======
 17.2.0 - 2020-09-24
 =====================================================
 
@@ -16,7 +23,6 @@
 
 * Added Zeitwerk initializer that resolves netzke-basepack and other issues.
 
-=======
 17.0.0 - 2020-09-22
 =====================================================
 
@@ -24,7 +30,6 @@
 * Remove Data Grid index models
 * Refactor usage of `INDEX_MAP` in `Marty::DataGrid`
 
-=======
 16.11.0 - 2020-09-03
 =====================================================
 
