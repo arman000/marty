@@ -14,19 +14,25 @@ file_names = [
   'post_run_logger',
   'setup',
   'structure_compare',
-  'users'
+  'users',
+  'vcr_sql_server'
 ]
 
-file_names.each { |f| require (relative + '/' + f) }
+file_names.sort.each { |f| require (relative + '/' + f) }
 
-module Marty; module RSpec; module Suite
-  include Marty::RSpec::Setup
-  include Marty::RSpec::Users
-  include Marty::RSpec::Netzke
-  include Marty::RSpec::DelayedJobHelpers
-  include Marty::RSpec::DownloadHelper
-  include Marty::RSpec::JsonHelper
-  include Marty::RSpec::PostRunLogger
-  include Marty::RSpec::PerformanceHelper
-  include Marty::RSpec::StructureCompare
-end end end
+module Marty
+  module RSpec
+    module Suite
+      include Marty::RSpec::Setup
+      include Marty::RSpec::Users
+      include Marty::RSpec::Netzke
+      include Marty::RSpec::DelayedJobHelpers
+      include Marty::RSpec::DownloadHelper
+      include Marty::RSpec::JsonHelper
+      include Marty::RSpec::PostRunLogger
+      include Marty::RSpec::PerformanceHelper
+      include Marty::RSpec::StructureCompare
+      include Marty::RSpec::VcrSqlServer
+    end
+  end
+end

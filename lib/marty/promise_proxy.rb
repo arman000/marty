@@ -73,7 +73,8 @@ class Marty::PromiseProxy < BasicObject
   ##
   # Does this promise support the given method?
   #
-  # @param  [Symbol]
+  # @param method [Symbol]
+  # @param include_all [Boolean]
   # @return [Boolean]
   def respond_to?(method, include_all = false)
     METH_SET.member?(method) || __force__.respond_to?(method, include_all)

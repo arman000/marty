@@ -61,6 +61,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'simplecov' # TODO: Move to cm_shared when it's ready
   s.add_dependency 'state_machines'
   s.add_dependency 'state_machines-activerecord'
+  s.add_dependency 'tiny_tds'
   s.add_dependency 'zip-zip'
 
   # Development-only Dependencies
