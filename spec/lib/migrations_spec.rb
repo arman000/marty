@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe 'Migrations' do
     it 'writes db views correctly' do

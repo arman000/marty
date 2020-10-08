@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'Enum Values List report', js: true do
   before(:each) do
     populate_test_users

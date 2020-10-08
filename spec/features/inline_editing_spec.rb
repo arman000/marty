@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'Inline editing', js: true do
   before do
     populate_test_users

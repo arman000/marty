@@ -35,7 +35,6 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'rspec-retry'
   gem 'selenium-webdriver'
-  gem 'simplecov', '0.18.5', require: false
   gem 'timecop'
   gem 'webdrivers'
 end

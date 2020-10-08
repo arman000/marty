@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'under System menu, User Management worflows', js: true do
   def go_to_user_view
     press('System')

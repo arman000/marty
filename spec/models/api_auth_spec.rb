@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe ApiAuth do
     before(:each) do

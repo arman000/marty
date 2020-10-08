@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 sample_script = <<DELOREAN
 A:
     a =? 123.0

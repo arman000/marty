@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'Schedule Jobs Dashboard', js: true do
   before do
     Delayed::Job.delete_all

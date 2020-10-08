@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe CleanerJob do
     context '.perform' do

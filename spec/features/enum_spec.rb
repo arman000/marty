@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'test netzke + pg_enum compatibility', js: true do
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"

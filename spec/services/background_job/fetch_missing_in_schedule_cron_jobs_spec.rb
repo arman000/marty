@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe BackgroundJob::FetchMissingInScheduleCronJobs do
     before do

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe 'Marty Rails engine routes', type: :request do
   it 'can reach the rpc endpoint' do
     get marty.rpc_path(:evaluate, format: :json)

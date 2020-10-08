@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe MaintenanceWindow do
     let(:config_key) { 'SPEC_MAINT_WINDOW' }

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe DataConversion do
     describe '#convert' do

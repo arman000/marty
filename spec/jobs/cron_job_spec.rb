@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe 'Cron jobs' do
   let(:klass) { TestFailingJob }
 

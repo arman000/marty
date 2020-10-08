@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe 'Jobs Dashboard', type: :feature, js: true, capybara: true do
   it 'filters out usernames other than the one specified in the search box' do
     other_user = Marty::User.create(login: 'other',

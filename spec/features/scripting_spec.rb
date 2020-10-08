@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'under Applications menu, Scripting workflows', js: true, speed: :slow do
   before(:all) do
     self.use_transactional_tests = false

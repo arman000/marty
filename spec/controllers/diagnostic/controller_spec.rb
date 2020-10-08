@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 # used for testing controller inheritance
 module Test
   module Diagnostic; end

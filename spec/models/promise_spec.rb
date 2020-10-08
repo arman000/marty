@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'job_helper'
 
 describe Marty::Promise, slow: true, retry: 3 do
