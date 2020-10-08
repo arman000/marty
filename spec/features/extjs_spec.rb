@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'on grid cells', js: true do
   def go_to_user_view
     press('System')

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty::RuleSpec
   describe 'Rule' do
     before(:all) do

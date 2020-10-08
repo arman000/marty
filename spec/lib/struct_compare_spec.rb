@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe 'StructCompare' do
   it 'compares correctly' do
     p = File.expand_path('../../fixtures/misc', __FILE__)

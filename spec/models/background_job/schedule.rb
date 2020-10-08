@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'marty/background_job/schedule'
 
 module Marty

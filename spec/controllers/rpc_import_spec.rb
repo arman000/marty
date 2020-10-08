@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Marty::RpcController do
   before(:each) { @routes = Marty::Engine.routes }
 

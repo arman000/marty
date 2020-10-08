@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'job_helper'
 
 describe Marty::Diagnostic::Reporter do

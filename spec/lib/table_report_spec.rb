@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe 'Blame Report', slow: true do
   RES0 = [
     ['bud_category', 'note_rate', 'settlement_mm', 'settlement_yy', 'buy_up'],

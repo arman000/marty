@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'under Applications menu, Reports workflows', js: true do
   before(:all) do
     SOME_DATE = '20130520'

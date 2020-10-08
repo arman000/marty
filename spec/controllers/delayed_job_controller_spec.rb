@@ -1,7 +1,3 @@
-require 'spec_helper'
-require 'marty'
-require 'delorean_lang'
-require 'benchmark'
 require 'job_helper'
 require 'support/empty_job'
 

@@ -16,7 +16,6 @@ module Marty
     def set_defaults_common
       self.aws_request_timeout = ENV['AWS_REQUEST_TIMEOUT'] || 0.25
       self.ci_job_name = ENV['CI_JOB_NAME'] || nil
-      self.coverage = ENV['COVERAGE'] == 'true'
       self.data_grid_plpg_lookups = false
       self.default_posting_type = 'BASE'
       self.delayed_ver = ENV['DELAYED_VER']

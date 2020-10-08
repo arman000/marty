@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe Jobs::Schedule do
     let!(:schedule) do

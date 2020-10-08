@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 # Most of the code is tested in cron_job_spec.rb
 describe 'Delorean Background Jobs' do
   let(:klass) { Marty::DeloreanBackgroundJob }

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'rule view', js: true, speed: :slow do
   before(:all) do
     marty_whodunnit

@@ -1,5 +1,4 @@
 require 'benchmark/ips'
-require 'spec_helper'
 
 describe 'Caching Performance' do
   def check_cache(adapter:)

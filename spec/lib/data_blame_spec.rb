@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe 'Blame Report', slow: true do
   U = 'marty marty'
   BC = 'Conv Fixed 30'

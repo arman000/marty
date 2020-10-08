@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe Marty::Config do
     describe 'validations' do

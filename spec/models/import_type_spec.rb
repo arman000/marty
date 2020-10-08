@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   class Marty::ARTestModel < ActiveRecord::Base
     def self.import_cleaner

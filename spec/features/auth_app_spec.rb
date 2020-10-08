@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'Posting workflows', js: true do
   before(:all) do
     @clean_file = "/tmp/clean_#{Process.pid}.psql"

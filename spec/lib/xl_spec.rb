@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'marty'
 require 'delorean_lang'
 

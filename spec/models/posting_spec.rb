@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe Posting do
     describe 'validations' do

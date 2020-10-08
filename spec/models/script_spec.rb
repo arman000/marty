@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 s1 = <<eof
 NodeA:
   attr = 123

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 feature 'logger view', js: true, capybara: true do
   before(:all) do
     self.use_transactional_tests = false

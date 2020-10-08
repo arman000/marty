@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 class MammalEnum
   VALUES = Set['Dog', 'Cat', 'Human', 'Cow', 'Bear']
 

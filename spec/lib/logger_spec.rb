@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'job_helper'
 
 module Marty

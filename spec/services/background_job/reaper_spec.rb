@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty
   describe BackgroundJob::Reaper do
     context '#call' do

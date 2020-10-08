@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Marty::Cleaner
   describe CleanAll do
     let(:config_key) { described_class::CONFIG_KEY }
