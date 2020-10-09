@@ -29,6 +29,7 @@ group :development, :test do
   gem 'connection_pool'
   gem 'database_cleaner'
   gem 'fuubar', require: false
+  gem 'mini_racer'
   gem 'pry'
   gem 'rails-controller-testing'
   gem 'rspec-instafail', require: false

@@ -51,14 +51,14 @@ Gem::Specification.new do |s|
   s.add_dependency 'delorean_lang', '>= 2.6.0'
   s.add_dependency 'json-schema'
   s.add_dependency 'mcfly'
-  s.add_dependency 'mini_racer'
+  # s.add_dependency 'mini_racer' # FIXME: add mini_racer as dependency once we fix the lambda layer size issue
   s.add_dependency 'net-ldap'
   s.add_dependency 'netzke'
   s.add_dependency 'pg'
   s.add_dependency 'rails'
   s.add_dependency 'redis'
   s.add_dependency 'rubyzip'
-  s.add_dependency 'simplecov' # TODO: Move to cm_shared when it's ready
+  s.add_dependency 'simplecov' # FIXME: Move to cm_shared when it's ready
   s.add_dependency 'state_machines'
   s.add_dependency 'state_machines-activerecord'
   s.add_dependency 'tiny_tds'
