@@ -1,3 +1,8 @@
+18.0.0 - 2020-10-09
+=====================================================
+
+* Remove mini_racer dependency from the gemspec. Marty::Rules::Runtime would still require MiniRacer classes to be present if it's used.
+
 17.4.0 - 2020-10-06
 =====================================================
 
