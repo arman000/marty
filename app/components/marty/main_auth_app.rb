@@ -406,9 +406,8 @@ class Marty::MainAuthApp < Marty::AuthApp
     cmd = "export RAILS_ENV=#{e};"
     # FIXME: Environment looks to be setup incorrectly - this is a hack
     cmd += "export PATH=#{p}:$PATH;" if p
-    # we use sudo -i to ensure that the root resources files (vars) are loaded
     # 2>&1 redirects STDERR to STDOUT since backticks only captures STDOUT
-    cmd += "sudo -i #{root}/#{dj_path} #{subcmd} #{params} 2>&1"
+    cmd += "#{root}/#{dj_path} #{subcmd} #{params} 2>&1"
     cmd
   end
 
