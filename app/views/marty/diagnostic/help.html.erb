@@ -1,0 +1,52 @@
+<h1 class="application error">
+  <%=
+        Rails.application.config.marty.diag_title || ::Marty::RailsApp.application_name
+      %> Diagnostic - 400
+</h1>
+<div>
+  <p>The diagnostic you requested does not exist.</p>
+  <% diag_path = "#{request.path}?op=%s" %>
+  <% if Marty::Diagnostic::Reporter.reports.present? %>
+    <h4>Reports</h4>
+    <div class="wrapper">
+      <% Marty::Diagnostic::Reporter.reports.each do |report, diagnostics| %>
+          <a class="button" target="_blank" href="<%= diag_path % report %>">
+            <%= report.camelize %>
+          </a>
+      <% end %>
+    </div>
+  <% end %>
+  <table>
+  <th colspan="2">URL Parameters</th>
+  <tr>
+    <th>scope</th>
+    <td>Set to <b>local</b> to get values from an individual node.</td>
+  </tr>
+  <tr>
+    <th>data</th>
+    <td>Set to <b>true</b> when using diagnostic <b>json</b> API to get all diagnostic information.</td>
+  </tr>
+</table>
+  <% klass_diagnostics = Marty::Diagnostic::Base.descendants.sort_by(&:name).map do |klass| 
+        next unless klass.respond_to?(:description)
+        klass
+      end.compact.group_by(&:parent) %>
+  <% klass_diagnostics.each do |parent, diagnostics| %>
+    <div class="wrapper">
+      <table>
+        <th colspan="2"><%= parent.name.split('::').first %></th>
+        <% diagnostics.sort_by(&:name).each do |d| %>
+          <% diag_name = d.name.demodulize %>
+          <tr>
+            <th>
+              <a target="_blank" href="<%= diag_path % diag_name %>">
+                <%= diag_name %>
+              </a>
+            </th>
+            <td><%= d.description %></td>
+          </tr>
+        <% end %>
+      </table>
+    </div>
+  <% end %>
+</div>

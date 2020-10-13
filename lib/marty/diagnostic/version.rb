@@ -11,6 +11,12 @@ module Marty::Diagnostic
       "#{git_tag} (#{git_datetime})"
     end
 
+    def self.description
+      <<~TEXT
+        Returns application, git, and submodule versions.
+      TEXT
+    end
+
     diagnostic_fn do
       begin
         submodules = `cd #{Rails.root}; git submodule`.split("\n").map do |s|

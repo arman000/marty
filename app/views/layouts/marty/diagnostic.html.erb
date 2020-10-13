@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <% if cookies[:dark_mode] == 'true' %>
+    <%= stylesheet_link_tag 'marty/dark_mode', media: 'all', 'data-turbolinks-track': 'reload' %>
+  <% end %>
+  <%= stylesheet_link_tag 'marty/diagnostic', media: 'all', 'data-turbolinks-track': 'reload' %>
+  <head>
+    <!-- TODO: Rchange to `module_parent_name` once we all migrate to Rails 6-->
+    <title><%= Rails.application.class.parent_name %> Diagnostic</title>
+  </head>
+  <body>
+    <div style="text-align:center">
+      <%= yield %>
+    </div>
+  </body>
+</html>
