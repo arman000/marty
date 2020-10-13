@@ -37,7 +37,8 @@ module Marty
       'marty/application.js',
       'marty/cable.js',
       'marty/application.css',
-      'marty/dark_mode.css'
+      'marty/dark_mode.css',
+      'marty/diagnostic.css'
     ]
 
     config.action_cable.disable_request_forgery_protection = true

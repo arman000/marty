@@ -1,4 +1,10 @@
 module Marty::Diagnostic; class ServerTimeAndTz < Base
+  def self.description
+    <<~TEXT
+      Returns the application server and database time.
+    TEXT
+  end
+
   diagnostic_fn(status_only: true) do
     begin
       D_FORMAT  = '%Y-%m-%d'

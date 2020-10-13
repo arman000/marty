@@ -1,6 +1,12 @@
 require_relative 'aws/ec2_instance'
 
 module Marty::Diagnostic; class Nodes < Base
+  def self.description
+    <<~TEXT
+      Returns a list of IP addresses for nodes by uing the database and AWS for discovery.
+    TEXT
+  end
+
   diagnostic_fn aggregatable: false do
     begin
       pg_nodes = Node.get_nodes.sort

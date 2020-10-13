@@ -1,6 +1,13 @@
 module Marty::Diagnostic; class DelayedJobWorkers < Base
   DIAG_NAME          = 'Delayed Workers / Node'
   DIAG_CONFIG_TARGET = 'DIAG_DELAYED_TARGET'
+
+  def self.description
+    <<~TEXT
+      Reports the number of delayed job workers on each node.
+    TEXT
+  end
+
   diagnostic_fn do
     my_ip = Node.my_ip
     workers = Database.current_connections.map do |c|

@@ -1,6 +1,12 @@
 module Marty::Diagnostic; class ScheduledJobs < Base
   self.aggregatable = false
 
+  def self.description
+    <<~TEXT
+      Returns the total number of scheduled job failures.
+    TEXT
+  end
+
   diagnostic_fn do
     logs = ::Marty::BackgroundJob::Log.
       order(job_class: :asc, status: :desc, id: :desc).

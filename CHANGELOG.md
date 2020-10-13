@@ -1,3 +1,12 @@
+18.0.2 - 2020-10-12
+=====================================================
+
+* Update how css is integrated into diagnostics and change style.
+* Add help menu when bad diagnostics are entered.
+* Add new marty config `diagnostic_directory` in order to allow application diagnostics to be initialized and appear in help menu.
+* Updates `delayed_job_version` diagnostic to have spam protection.
+* Removed `diagnostics.dl`
+
 18.0.1 - 2020-10-09
 =====================================================
 

@@ -1,4 +1,12 @@
 module Marty::Diagnostic; class EnvironmentVariables < Base
+  def self.description
+    <<~TEXT
+      Checks the consistency of environment variables across all nodes. If URL 
+      parameter `scope=local` is used in conjunction with a node's IP address 
+      (ex: `10.0.0.1/diag?op=environment_variables&scope=local`), the
+      diagnostic will display all of the environment variables for that node.
+    TEXT
+  end
   diagnostic_fn do
     env
   end

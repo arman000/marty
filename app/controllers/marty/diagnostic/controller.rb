@@ -1,4 +1,6 @@
 module Marty::Diagnostic; class Controller < ActionController::Base
+  layout 'marty/diagnostic'
+
   def self.inherited(klass)
     namespace = klass.name.deconstantize.split('::')[0] rescue ''
     Reporter.namespaces.unshift(namespace)
@@ -8,10 +10,9 @@ module Marty::Diagnostic; class Controller < ActionController::Base
   def op
       @result = Reporter.run(request)
   rescue NameError
-    render file: 'public/400.html',
-            formats: [:html],
-            status: :bad_request,
-            layout: false
+    render :help,
+           formats: [:html],
+           status: :bad_request
   else
       respond_to do |format|
         format.html { @result = display_parameters }
