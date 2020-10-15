@@ -4,6 +4,25 @@
 marty_path = Gem.loaded_specs['marty'].full_gem_path
 require "#{marty_path}/app/services/marty/sql_server"
 
+RSpec.configure do |config|
+  config.around do |example|
+    described_class = example&.metadata&.dig(:described_class)
+    description = example&.description
+    Marty::RSpec::VcrSqlServer.rspec_class = described_class
+    Marty::RSpec::VcrSqlServer.rspec_description = description
+    Marty::RSpec::VcrSqlServer.rspec_context = example&.metadata&.dig(:full_description)&.
+                                                sub(described_class.to_s, '')&.
+                                                sub(description, '')
+    Marty::RSpec::VcrSqlServer.wipe_cassette_if_regen
+
+    example.run
+
+    Marty::RSpec::VcrSqlServer.rspec_class = nil
+    Marty::RSpec::VcrSqlServer.rspec_context = nil
+    Marty::RSpec::VcrSqlServer.rspec_description = nil
+  end
+end
+
 module Marty
   module RSpec
     # This module borrows its name from the `vcr` gem.
@@ -11,43 +30,33 @@ module Marty
     # systems. These SQL Server systems are contacted directly using the
     # `tiny_tds` gem, and are auxillary to the main database.
     module VcrSqlServer
-      CASSETTE_DIR = Rails.root.join('spec/sql_server_cassettes')
-      TARGET_CALLER_PATH = Rails.root.join('spec').to_s
+      CASSETTE_HOME = Rails.root.join('spec/sql_server_cassettes')
+
+      class << self
+        attr_accessor :rspec_class
+        attr_accessor :rspec_context
+        attr_accessor :rspec_description
+      end
 
       class ConnectionNotAllowedError < StandardError; end
-      class MockClient
-        def initialize(l)
-          @l = l
-        end
-
-        def active?
-          true
-        end
-
-        def execute(sql)
-          @l.call(sql)
-        end
-
-        def sqlsent?
-          false
-        end
-
-        def close; end
-      end
 
       module_function
 
-      def make_directory
-        Dir.mkdir(CASSETTE_DIR) unless File.exist?(CASSETTE_DIR)
+      def make_directories
+        Dir.mkdir(CASSETTE_HOME) unless File.exist?(CASSETTE_HOME)
+
+        folders = cassette_subdir.split('/')
+        folders.each_with_index do |_, index|
+          dirp = File.join(CASSETTE_HOME, folders.first(index + 1).join('/'))
+          Dir.mkdir(dirp) unless File.exist?(dirp)
+        end
       end
 
       def resolve_file_name
-        loc = caller_locations[3..-1].detect do |l|
-          l.path.include?(TARGET_CALLER_PATH)
-        end
-
-        file_name = File.basename(loc.path, '.rb')
-        "#{file_name}_#{loc.lineno}"
+        file_name = [
+          rspec_context.parameterize,
+          rspec_description.parameterize
+        ].compact.join('--')
       end
 
       def raise_for_fixture_file(file_path)
@@ -57,62 +66,48 @@ module Marty
         ERROR
       end
 
-      def transform_hashes(hashes)
-        hashes.map do |h|
-          h.transform_values do |v|
-            next v unless v.is_a?(String)
+      def cassette_subdir
+        rspec_class.to_s.underscore
+      end
 
-            v.to_f.to_s == v ? BigDecimal(v) : v
-          end
+      def cassette_filepath
+        File.join(CASSETTE_HOME, cassette_subdir, "#{resolve_file_name}.yaml")
+      end
+
+      def write_cassette(result)
+        make_directories
+
+        File.open(cassette_filepath, 'a') do |f|
+          f.write(result.to_yaml)
         end
+      end
+
+      def wipe_cassette_if_regen
+        File.delete(cassette_filepath) if
+          ENV['REGEN'] == 'true' &&
+          File.exist?(cassette_filepath)
       end
 
       def connection(config_prefix, &block)
-        file_path = "#{CASSETTE_DIR}/#{resolve_file_name}.json"
         if ENV['REGEN'] == 'true'
           method_result = Marty::SqlServer.og_connection(config_prefix, &block)
-
-          return method_result unless method_result.is_a?(TinyTds::Client)
-
-          return MockClient.new(
-            lambda do |sql|
-              result = method_result&.execute(sql)
-              File.open(file_path, 'w+') do |f|
-                f.write(JSON.pretty_generate(result.to_a))
-              end
-              result
-            end
-          )
+          write_cassette(method_result) if block_given?
+          return method_result
         end
 
-        raise_for_fixture_file(file_path)
-
-        data = transform_hashes(JSON.parse(File.read(file_path)))
-        MockClient.new(lambda { |_sql|
-          OpenStruct.new(
-            count: data.empty? ? 0 : 1,
-            cancel: nil,
-            to_a: data,
-            sqlsent?: false,
-            return_code: 0
-          )
-        })
+        raise_for_fixture_file(cassette_filepath)
+        YAML.safe_load(File.read(cassette_filepath))
       end
 
       def exec_query(config_prefix, query)
-        file_path = "#{CASSETTE_DIR}/#{resolve_file_name}.json"
         if ENV['REGEN'] == 'true'
           result = Marty::SqlServer.og_exec_query(config_prefix, query)
-          File.open(file_path, 'w+') do |f|
-            f.write(JSON.pretty_generate(result.to_a))
-          end
-
+          write_cassette(result)
           return result
         end
 
-        raise_for_fixture_file(file_path)
-
-        transform_hashes(JSON.parse(File.read(file_path)))
+        raise_for_fixture_file(cassette_filepath)
+        YAML.safe_load(File.read(cassette_filepath))
       end
 
       def mock
@@ -136,8 +131,6 @@ module Marty
             alias_method :exec_query, :vcr_exec_query
           end
         end
-
-        Marty::RSpec::VcrSqlServer.make_directory
       end
     end
   end

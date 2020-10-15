@@ -1,3 +1,9 @@
+18.1.0 - 2020-10-13
+=====================================================
+
+* Added test coverage to `Marty::SqlServer` module and improved behavior
+  for EXEC calls that return rowsets.
+
 18.0.2 - 2020-10-12
 =====================================================
 
@@ -16,6 +22,12 @@
 =====================================================
 
 * Remove mini_racer dependency from the gemspec. Marty::Rules::Runtime would still require MiniRacer classes to be present if it's used.
+
+17.5.0 - 2020-10-08
+=====================================================
+
+* Added test coverage to `Marty::SqlServer` module and improved behavior
+  for EXEC calls that return rowsets.
 
 17.4.0 - 2020-10-06
 =====================================================

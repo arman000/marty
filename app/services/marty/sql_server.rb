@@ -35,12 +35,31 @@ module Marty
   #     password: '<%= ENV['DBNAME_DB_PASSWORD'] %>'
   #
   # @author Omri Gabay
-  # @version 1.0
+  # @version 1.1
   module SqlServer
     # Sets the default TDSVER of FreeTDS based on an environment variable, or
     # a default variable of 7.3 (which is also the default that `tiny_tds`)
     # uses.
     TDSVER = Rails.application.config.marty.sql_server.tds_ver
+
+    class Connection
+      attr_reader :client
+      def initialize(params)
+        @client = TinyTds::Client.new(params)
+      end
+
+      def execute(query)
+        client.execute(query).each.to_a
+      end
+
+      delegate :close, to: :client
+
+      delegate :active?, to: :client
+
+      def escape(*args)
+        client.escape(*args)
+      end
+    end
 
     class << self
       # Takes the appropriate prefix for the database to connect to, and
@@ -68,16 +87,29 @@ module Marty
         conn = init_connection(prefix)
         apply_connection_params(conn)
 
-        if block_given?
-          res = yield(conn)
-          conn.close if conn.active?
+        return conn unless block_given?
 
-          res
-        else
-          conn
-        end
+        block_res = yield(conn)
+
+        # If we close the connection before we do any result handling the
+        # values aren't accessable and you will get deep stack error.
+        # To avoid this we resolve TinyTds::Results before closing the connection.
+
+        conn.close if conn.active?
+
+        block_res
       end
+
       alias with_connection connection
+
+      # Applies connections params to the connection `conn`.
+      #
+      # @param conn [TinyTds::Client] The prefix of the DB from `database.yml`
+      # @param params [Array<String>] The parameters to apply to a connection.
+      # @return void
+      def apply_connection_params(conn, params = default_connection_params)
+        conn.execute(params.join("\n") + ';').to_a
+      end
 
       # Used to run a one-off query against the database, and return the results
       # as an array. It returns the `Array` result of the query.
@@ -87,22 +119,23 @@ module Marty
       # @todo Implement a `retry` system
       #
       # @param prefix [String] The prefix of the DB from `database.yml`
-      # @param query [String] A correctly formatted SQL query string.
+      # @param stmt [String] A correctly formatted SQL query statement.
       #
       # @return [Array] An array of hashes containing the query's results
       # @raise [ArgumentError] if `prefix` isn't given
       # @raise [ArgumentError] if a query isn't given
       #   from the connection
-      def exec_query(prefix, query)
+      def exec_query(prefix, stmt)
         unless prefix
           raise ArgumentError,
                 'Either a prefix or instantiated connection must given'
         end
 
         conn = connection(prefix)
-        raise ArgumentError, 'Query must be given inside block' unless query
+        raise ArgumentError, 'Statement must be given inside block' unless stmt
 
-        conn.execute(query.squish).to_a
+        escaped = conn.escape(stmt.squish)
+        conn.execute(escaped)
       rescue TinyTds::Error => e
         Rails.logger.error("[TinyTds] #{e}")
         Marty::Logger.error(
@@ -110,7 +143,7 @@ module Marty
           {
             prefix: prefix,
             exception: e.message,
-            query: yield,
+            query: stmt.squish,
             db_error_number: e.db_error_number,
             os_error_number: e.os_error_number,
             severity: e.severity
@@ -119,16 +152,7 @@ module Marty
 
         []
       ensure
-        conn.close if conn.active?
-      end
-
-      # Applies connections params to the connection `conn`.
-      #
-      # @param conn [TinyTds::Client] The prefix of the DB from `database.yml`
-      # @param params [Array<String>] The parameters to apply to a connection.
-      # @return void
-      def apply_connection_params(conn, params = default_connection_params)
-        conn.execute(params.join("\n") + ';').do
+        conn&.close if conn&.active?
       end
 
       private
@@ -144,10 +168,10 @@ module Marty
       #   active after initialization.
       def init_connection(prefix)
         config = Rails.configuration.database_configuration[prefix + Rails.env]
-        raise Errors::DatabaseConfigurationError unless config
+        raise Errors::DatabaseConfigurationError, prefix unless config
 
-        conn = TinyTds::Client.new(**client_params(config))
-        raise Errors::ConnectionNotEstablishedError unless conn.active?
+        conn = Marty::SqlServer::Connection.new(**client_params(config))
+        raise Errors::ConnectionNotEstablishedError, prefix unless conn&.active?
 
         conn
       end
