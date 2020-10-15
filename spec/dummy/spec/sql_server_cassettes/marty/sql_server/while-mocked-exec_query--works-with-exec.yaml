@@ -1,0 +1,55 @@
+---
+- loan_number: '8000054075'
+  address_line_text: 10655 BIRCH ST
+  city_name: BURBANK
+  property_state: CA
+  property_postal_code: '91502'
+  total_monthly_income_amount:
+- loan_number: '8000054441'
+  address_line_text: 123 ABC ST
+  city_name: PANORAMA CITY
+  property_state: CA
+  property_postal_code: '91402'
+  total_monthly_income_amount:
+- loan_number: '8000053155'
+  address_line_text: 123 ABC ST
+  city_name: PANORAMA CITY
+  property_state: CA
+  property_postal_code: '91402'
+  total_monthly_income_amount:
+- loan_number: '7005622953'
+  address_line_text: 15313 KNOLLS DR
+  city_name: FOREST RANCH
+  property_state: CA
+  property_postal_code: '95942'
+  total_monthly_income_amount: 0
+- loan_number: '7005632721'
+  address_line_text: 7645 SULLIVAN PL
+  city_name: BUENA PARK
+  property_state: CA
+  property_postal_code: '90621'
+  total_monthly_income_amount: 12854
+- loan_number: '6000485301'
+  address_line_text: 1235 N 173RD ST
+  city_name: SHORELINE
+  property_state: WA
+  property_postal_code: 98133-5459
+  total_monthly_income_amount: 12133
+- loan_number: '7005504625'
+  address_line_text: 5226 EAGLE WING CT
+  city_name: EUREKA
+  property_state: MO
+  property_postal_code: '63025'
+  total_monthly_income_amount: 7952
+- loan_number: '7006066677'
+  address_line_text: 545 E DAWN DR
+  city_name: SANDY
+  property_state: UT
+  property_postal_code: '84070'
+  total_monthly_income_amount: 0
+- loan_number: '7005893247'
+  address_line_text: 208 W COLLEGE STREET
+  city_name: JACKSBORO
+  property_state: TX
+  property_postal_code: '76458'
+  total_monthly_income_amount: 0
