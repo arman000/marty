@@ -3,7 +3,7 @@ require_relative 'aws/ec2_instance'
 module Marty::Diagnostic; class Nodes < Base
   def self.description
     <<~TEXT
-      Returns a list of IP addresses for nodes by uing the database and AWS for discovery.
+      Returns a list of IP addresses for nodes by using the database and AWS for discovery.
     TEXT
   end
 
