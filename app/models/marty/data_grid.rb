@@ -119,7 +119,9 @@ class Marty::DataGrid < Marty::Base
   # FIXME: if the caller requests data as part of fields, there could
   # be memory concerns with caching since some data_grids have massive data
   delorean_fn :lookup_h, cache: true, sig: [2, 3] do |pt, name, fields = nil|
-    fields ||= %w(id group_id created_dt metadata data_type name strict_null_mode)
+    fields ||= %w(id metadata data_type name strict_null_mode)
+    fields += %w(group_id created_dt) # Used to fetch the grid's data later
+
     dga = mcfly_pt(pt).where(name: name).pluck(*fields).first
     dga && Hash[fields.zip(dga)]
   end
@@ -267,7 +269,11 @@ class Marty::DataGrid < Marty::Base
   def self.ruby_lookup_grid_distinct(h_passed, dgh, ret_grid_data = false,
                                      distinct = true)
 
-    grid = Marty::DataGrid.find(dgh['id'])
+    # FIXME: Should we fetch the data later, so that non matching results or errors would work faster
+    grid = Marty::DataGrid.find_by!(
+      group_id: dgh['group_id'],
+      created_dt: dgh['created_dt']
+    )
     indices = ruby_lookup_indices(h_passed, dgh)
 
     # We use the 0 as default, if there are no indices in that dir
