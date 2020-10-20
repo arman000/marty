@@ -87,6 +87,7 @@ class Marty::MainAuthApp < Marty::AuthApp
         menu: [
           :show_env,
           :update_data_grids_to_strict_null_mode,
+          :clear_cache,
         ],
       },
     ]
@@ -396,6 +397,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_perm?(:admin)
   end
 
+  action :clear_cache do |a|
+    a.text     = 'Clear Delorean cache'
+    a.tooltip  = 'Run Delorean::Cache.adapter.clear_all!'
+    a.icon_cls = 'fa fa-eraser glphy'
+    a.disabled = !self.class.has_perm?(:admin)
+  end
+
   ######################################################################
   # Background Jobs/Delayed Jobs
 
@@ -466,6 +474,14 @@ class Marty::MainAuthApp < Marty::AuthApp
     Marty::Config['ENFORCE_DATA_GRID_STRICT_NULL_MODE'] = true
 
     client.show_detail "#{number_of_dgs} DataGrids were updated to strict_null_mode"
+  end
+
+  endpoint :clear_cache do |_|
+    next client.netzke_notify('Permission Denied') unless self.class.has_perm?(:admin)
+
+    Delorean::Cache.adapter.clear_all!
+
+    client.show_detail 'Delorean cache was cleared!'
   end
 
   ######################################################################
