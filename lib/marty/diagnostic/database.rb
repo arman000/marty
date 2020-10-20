@@ -1,4 +1,22 @@
 module Marty::Diagnostic::Database
+  SIZES_SQL = <<~SQL.squish
+    SELECT
+      relname,
+      pg_size_pretty(table_size)
+    FROM (
+      SELECT
+        pg_catalog.pg_namespace.nspname AS schema_name,
+        relname,
+        pg_relation_size(pg_catalog.pg_class.oid) AS table_size
+      FROM
+        pg_catalog.pg_class
+        JOIN pg_catalog.pg_namespace ON relnamespace = pg_catalog.pg_namespace.oid) t
+    WHERE
+      schema_name NOT LIKE 'pg_%'
+    ORDER BY
+      table_size DESC;
+  SQL
+
   def self.db_name
     ActiveRecord::Base.connection_config[:database]
   end
@@ -46,5 +64,9 @@ module Marty::Diagnostic::Database
 
   def self.current_connections
     get_postgres_connections[db_name]
+  end
+
+  def self.sizes
+    ActiveRecord::Base.connection.exec_query(SIZES_SQL).rows
   end
 end
