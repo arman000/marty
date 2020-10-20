@@ -1,3 +1,9 @@
+18.2.0 - 2020-10-23
+=====================================================
+
+* Add a button that allows to clear Delorean cache. That might be useful
+  if Redis is used for caching.
+
 18.1.3 - 2020-10-23
 =====================================================
 

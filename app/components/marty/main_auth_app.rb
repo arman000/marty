@@ -481,7 +481,7 @@ class Marty::MainAuthApp < Marty::AuthApp
 
     Delorean::Cache.adapter.clear_all!
 
-    client.show_detail 'Delorean cache was cleared!'
+    client.show_detail 'Delorean cache was cleared'
   end
 
   ######################################################################
