@@ -7,7 +7,7 @@
 #
 module Marty
   module Diagnostic
-    class DelayedJobVersion < Base
+    class DelayedJobVersion < Marty::Diagnostic::Base
       self.aggregatable = false
 
       class << self
