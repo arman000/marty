@@ -30,7 +30,6 @@ module Marty::Diagnostic; class ServerTimeAndTz < Base
         ERRMSG
       )
     rescue StandardError => e
-      binding.pry
       error(e.message)
     end
   end
