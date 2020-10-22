@@ -12,8 +12,11 @@ module Marty::Diagnostic; class ServerTimeAndTz < Base
       DT_FMT = "#{D_FORMAT} #{T_FORMAT}"
 
       app_time = Time.zone.now
-      db_time  = Time.zone.parse(Marty::Diagnostic::Database.db_time)
-      diff     = (app_time - db_time).abs.round(1)
+
+      # to_s db_time result as Rails 6 returns time object instead of string
+      db_time = Time.zone.parse(Marty::Diagnostic::Database.db_time.to_s)
+
+      diff = (app_time - db_time).abs.round(1)
 
       # If the DB and App timezones are not the same and the DB
       # isn't storing timestamps with TZ (as is the rails default)
