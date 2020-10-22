@@ -12,7 +12,7 @@ module Marty::Diagnostic; class ServerTimeAndTz < Base
       DT_FMT = "#{D_FORMAT} #{T_FORMAT}"
 
       app_time = Time.zone.now
-      db_time  = Time.zone.parse(Marty::Diagnostic::Database.db_time)
+      db_time  = Marty::Diagnostic::Database.db_time
       diff     = (app_time - db_time).abs.round(1)
 
       # If the DB and App timezones are not the same and the DB
@@ -30,6 +30,7 @@ module Marty::Diagnostic; class ServerTimeAndTz < Base
         ERRMSG
       )
     rescue StandardError => e
+      binding.pry
       error(e.message)
     end
   end
