@@ -37,7 +37,7 @@ class Marty::McflyGridPanel < Marty::Grid
       rescue StandardError
         raise "trouble finding #{assoc_name} assoc class on #{model}"
       end
-      c[:scope] = Mcfly.has_mcfly?(aklass) ?
+      c[:scope] = Mcfly.mcfly?(aklass) ?
       self.class.mcfly_scope(assoc_method || 'id') :
                   self.class.sorted_scope(assoc_method || 'id')
     end

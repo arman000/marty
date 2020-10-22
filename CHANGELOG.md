@@ -1,6 +1,7 @@
 18.1.2 - 2020-10-22
 =====================================================
 
+* Change `has_mcfly` to `mcfly`
 * Fix `ServerTime` diagnostic.
 * Fix `DelayedJobVersion` diagnostic in development mode.
 

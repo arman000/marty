@@ -256,7 +256,7 @@ class Marty::DataChange
     query = klass
 
     query = query.where('obsoleted_dt >= ? AND created_dt < ?', ts, ts) if
-      Mcfly.has_mcfly?(klass)
+      Mcfly.mcfly?(klass)
 
     query = query.where.not(id: found_sources.map(&:id))
 
@@ -276,13 +276,13 @@ class Marty::DataChange
   delorean_fn :dead_refs, sig: 2 do |ts, class_name|
     klass = class_name.constantize
 
-    return unless Mcfly.has_mcfly?(klass)
+    return unless Mcfly.mcfly?(klass)
 
     ts = Mcfly.normalize_infinity(ts)
     col_types = Marty::DataConversion.col_types(klass)
 
     mcfly_cols = col_types.map do |_attr, h|
-      Hash === h && Mcfly.has_mcfly?(h[:assoc_class]) && h || nil
+      Hash === h && Mcfly.mcfly?(h[:assoc_class]) && h || nil
     end.compact
 
     mcfly_cols.each_with_object({}) do |h, res|

@@ -145,7 +145,7 @@ class Marty::DataExporter
   def self.do_export(ts, klass, sort_field = nil, exclude_attrs = [])
     query = klass
 
-    if Mcfly.has_mcfly?(klass)
+    if Mcfly.mcfly?(klass)
       ts = Mcfly.normalize_infinity(ts)
       query = query.where('obsoleted_dt >= ? AND created_dt < ?', ts, ts)
     end

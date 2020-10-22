@@ -1,5 +1,5 @@
 class Marty::Posting < Marty::Base
-  has_mcfly append_only: true
+  mcfly append_only: true
 
   mcfly_validates_uniqueness_of :name
   validates :name, :posting_type, :comment, presence: true
