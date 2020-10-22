@@ -82,13 +82,16 @@
       this.reloadChildren
     );
 
-    this.listeners = {
-      selectionchange: (selModel) => {
-        reloadChildrenDebouncer.delay(this.childReloadMs, null, this, [
-          selModel
-        ]);
-      }
-    };
+    this.listeners = Object.assign(
+      {
+        selectionchange: (selModel) => {
+          reloadChildrenDebouncer.delay(this.childReloadMs, null, this, [
+            selModel
+          ]);
+        }
+      },
+      this.listeners || {}
+    );
 
     // block creation of toolbars in parent
     delete this.bbar;

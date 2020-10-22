@@ -2,6 +2,7 @@
 =====================================================
 
 * Change `has_mcfly` to `mcfly`
+* Fix bug with `listeners` that caused custom `listeners` to be overwritten in grids.
 * Fix `ServerTime` diagnostic.
 * Fix `DelayedJobVersion` diagnostic in development mode.
 
