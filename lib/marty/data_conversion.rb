@@ -81,7 +81,7 @@ class Marty::DataConversion
   ######################################################################
 
   def self.assoc_keys(klass)
-    return Mcfly.mcfly_uniqueness(klass) if Mcfly.has_mcfly?(klass)
+    return Mcfly.mcfly_uniqueness(klass) if Mcfly.mcfly?(klass)
 
     # FIXME: very hacky -- picks 1st non-id attr as the association
     # key for regular (non-mcfly) AR models which don't have
@@ -158,7 +158,7 @@ class Marty::DataConversion
 
     q = klass.where(find_options)
     q = q.where('obsoleted_dt >= ? AND created_dt < ?', dt, dt) if
-       dt && Mcfly.has_mcfly?(klass)
+       dt && Mcfly.mcfly?(klass)
 
     # q.count is almost always 0 or 1 => hopefully it's not too slow on PG.
     raise "too many results for: #{klass} -- #{options}" if q.count > 1

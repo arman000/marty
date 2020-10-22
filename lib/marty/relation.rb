@@ -22,7 +22,7 @@ class Marty::Relation
       assoc_class = ah[:assoc_class]
       foreign_key = ah[:foreign_key]
 
-      next unless Mcfly.has_mcfly? assoc_class
+      next unless Mcfly.mcfly? assoc_class
 
       h[a] = klass.where(obsoleted_dt: 'infinity').map do |obj|
         ref_key = obj.send(foreign_key)

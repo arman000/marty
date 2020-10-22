@@ -1,5 +1,5 @@
 class Marty::ApiAuth < Marty::Base
-  has_mcfly
+  mcfly
 
   KEY_SIZE = 19
 
