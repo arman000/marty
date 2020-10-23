@@ -5,18 +5,18 @@ require_relative 'sql_server/errors/connection_not_established_error'
 require_relative 'sql_server/errors/database_configuration_error'
 
 module Marty
-  # This module is used as a sort of 'singleton' that implements connections
-  # to SQL Server databases. It uses the `tiny_tds` gem under the hood, which
+  # This module is used to generate and wrap connections
+  # to SQL Server databases. It uses the +tiny_tds+ gem under the hood, which
   # requires that FreeTDS be installed.
   #
-  # This module gets its information about each database from `database.yml`
-  # through `Rails.configuration.database_configuration`. `database.yml` shall
+  # This module gets its information about each database from +database.yml+
+  # through +Rails.configuration.database_configuration+. +database.yml+ shall
   # be defined with names of SQL Server databases starting with a prefix.
   #
   # @todo In the future, we should use connections pools here to allow for
   #   better performance and more flexibility.
   #
-  # @example `database.yml`
+  # @example +database.yml+
   #   <%= Rails.env %>:
   #     adapter:  '<%= ENV['PSQL_ADAPTER'] %>'
   #     host:     '<%= ENV['DB_HOST'] %>'
@@ -35,29 +35,34 @@ module Marty
   #     password: '<%= ENV['DBNAME_DB_PASSWORD'] %>'
   #
   # @author Omri Gabay
-  # @version 1.1
+  # @version 1.2
   module SqlServer
     # Sets the default TDSVER of FreeTDS based on an environment variable, or
-    # a default variable of 7.3 (which is also the default that `tiny_tds`)
+    # a default variable of 7.3 (which is also the default that +tiny_tds+)
     # uses.
     TDSVER = Rails.application.config.marty.sql_server.tds_ver
 
+    # A class responsible for wrapping {TinyTds::Client} connections.
+    # @since 18.1.0
     class Connection
       attr_reader :client
       def initialize(params)
         @client = TinyTds::Client.new(params)
       end
 
+      # @param query [String]
+      # @return [Array]
       def execute(query)
-        client.execute(query).each.to_a
+        client.execute(query).to_a
       end
 
-      delegate :close, to: :client
+      def respond_to_missing?(method_name, include_private = false)
+        super
+      end
 
-      delegate :active?, to: :client
-
-      def escape(*args)
-        client.escape(*args)
+      # Proxy/forward all methods to the original client.
+      def method_missing(method_name, *args, &block)
+        @client.send(method_name, *args, &block)
       end
     end
 
@@ -77,7 +82,7 @@ module Marty
       #   end
       #   res.to_a
       #
-      # @param prefix [String] The prefix of the DB from `database.yml`
+      # @param prefix [String] The prefix of the DB from +database.yml+
       # @return [TinyTds::Client] if no block is given
       #
       # @yieldparam [TinyTds::Client] conn
@@ -102,9 +107,9 @@ module Marty
 
       alias with_connection connection
 
-      # Applies connections params to the connection `conn`.
+      # Applies connections params to the connection +conn+.
       #
-      # @param conn [TinyTds::Client] The prefix of the DB from `database.yml`
+      # @param conn [TinyTds::Client] The prefix of the DB from +database.yml+
       # @param params [Array<String>] The parameters to apply to a connection.
       # @return void
       def apply_connection_params(conn, params = default_connection_params)
@@ -112,17 +117,17 @@ module Marty
       end
 
       # Used to run a one-off query against the database, and return the results
-      # as an array. It returns the `Array` result of the query.
+      # as an array. It returns the +Array+ result of the query.
       # By default, it will close every connection after using it. This is to
       # avoid race conditions while we haven't implemented a connection pool.
       #
-      # @todo Implement a `retry` system
+      # @todo Implement a +retry+ system
       #
-      # @param prefix [String] The prefix of the DB from `database.yml`
+      # @param prefix [String] The prefix of the DB from +database.yml+
       # @param stmt [String] A correctly formatted SQL query statement.
       #
       # @return [Array] An array of hashes containing the query's results
-      # @raise [ArgumentError] if `prefix` isn't given
+      # @raise [ArgumentError] if +prefix+ isn't given
       # @raise [ArgumentError] if a query isn't given
       #   from the connection
       def exec_query(prefix, stmt)
@@ -159,11 +164,11 @@ module Marty
 
       # Initializes a connection to a DB.
       #
-      # @param prefix [String] The prefix of the DB from `database.yml`
-      # @return [TinyTds::Client]
+      # @param prefix [String] The prefix of the DB from +database.yml+
+      # @return [Marty::SqlServer::Connection]
       #
       # @raise [Errors::DatabaseConfigurationError] if a configuration from
-      #   `database.yml` is not found
+      #   +database.yml+ is not found
       # @raise [Errors::ConnectionNotEstablishedError] if the connection is not
       #   active after initialization.
       def init_connection(prefix)
@@ -231,7 +236,7 @@ module Marty
       }.merge(overrides).map { |cp| get_set_statement(*cp) }.freeze
     end
 
-    # Merges {default_client_params} with `configuration`. Used when
+    # Merges {default_client_params} with +configuration+. Used when
     # instantiating a new client.
     #
     # @param configuration [Hash]
@@ -251,7 +256,7 @@ module Marty
     end
     private_class_method :message_handler
 
-    # Used to generate the `SET` statements needed to apply connection settings
+    # Used to generate the +SET+ statements needed to apply connection settings
     # to a SQL Server connection.
     #
     # @param param [String, Symbol]
