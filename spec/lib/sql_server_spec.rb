@@ -34,6 +34,22 @@ module Marty
               expect(res).to eq([{ 'juan' => 3 }])
             end
 
+            it 'properly stubs out multiple calls in one spec' do
+              res1 = Marty::SqlServer.with_connection(server_name) do |conn|
+                conn.execute('SELECT 0 as zero')
+                conn.execute('SELECT 1 as juan')
+              end
+              res2 = Marty::SqlServer.with_connection(server_name) do |conn|
+                conn.execute('SELECT 2 as duex')
+              end
+              res3 = Marty::SqlServer.with_connection(server_name) do |conn|
+                conn.execute('SELECT 3 as tres')
+              end
+              expect(res1).to eq([{ 'juan' => 1 }])
+              expect(res2).to eq([{ 'duex' => 2 }])
+              expect(res3).to eq([{ 'tres' => 3 }])
+            end
+
             it "doesn't fail if you try to reuse a connection without handling results" do
               expect do
                 Marty::SqlServer.with_connection(server_name) do |conn|
@@ -84,6 +100,13 @@ module Marty
         it 'works with select' do
           res = described_class.exec_query(server_name, 'SELECT 1 as juan')
           expect(res).to eq([{ 'juan' => 1 }])
+        end
+
+        it 'properly stubs out multiple calls in one spec' do
+          res1 = described_class.exec_query(server_name, 'SELECT 1 as juan')
+          res2 = described_class.exec_query(server_name, 'SELECT 2 as duex')
+          expect(res1).to eq([{ 'juan' => 1 }])
+          expect(res2).to eq([{ 'duex' => 2 }])
         end
 
         it 'works with exec' do

@@ -13,9 +13,13 @@ RSpec.configure do |config|
     Marty::RSpec::VcrSqlServer.rspec_context = example&.metadata&.dig(:full_description)&.
                                                 sub(described_class.to_s, '')&.
                                                 sub(description, '')
-    Marty::RSpec::VcrSqlServer.wipe_cassette_if_regen
+    Marty::RSpec::VcrSqlServer.cassette_index = 0
+    Marty::RSpec::VcrSqlServer.cassette_contents = []
 
     example.run
+
+    Marty::RSpec::VcrSqlServer.write_cassette unless
+      Marty::RSpec::VcrSqlServer.cassette_contents.empty?
 
     Marty::RSpec::VcrSqlServer.rspec_class = nil
     Marty::RSpec::VcrSqlServer.rspec_context = nil
@@ -33,6 +37,8 @@ module Marty
       CASSETTE_HOME = Rails.root.join('spec/sql_server_cassettes')
 
       class << self
+        attr_accessor :cassette_contents
+        attr_accessor :cassette_index
         attr_accessor :rspec_class
         attr_accessor :rspec_context
         attr_accessor :rspec_description
@@ -74,40 +80,42 @@ module Marty
         File.join(CASSETTE_HOME, cassette_subdir, "#{resolve_file_name}.yaml")
       end
 
-      def write_cassette(result)
-        make_directories
-
-        File.open(cassette_filepath, 'a') do |f|
-          f.write(result.to_yaml)
-        end
+      def record_stub(result)
+        cassette_contents << result
       end
 
-      def wipe_cassette_if_regen
-        File.delete(cassette_filepath) if
-          ENV['REGEN'] == 'true' &&
-          File.exist?(cassette_filepath)
+      def write_cassette
+        make_directories
+
+        File.open(cassette_filepath, 'w+') do |f|
+          f.write(cassette_contents.to_yaml)
+        end
       end
 
       def connection(config_prefix, &block)
         if ENV['REGEN'] == 'true'
           method_result = Marty::SqlServer.og_connection(config_prefix, &block)
-          write_cassette(method_result) if block_given?
+          record_stub(method_result) if block_given?
           return method_result
         end
 
         raise_for_fixture_file(cassette_filepath)
-        YAML.safe_load(File.read(cassette_filepath))
+        YAML.safe_load(File.read(cassette_filepath))[cassette_index]
+      ensure
+        self.cassette_index += 1
       end
 
       def exec_query(config_prefix, query)
         if ENV['REGEN'] == 'true'
           result = Marty::SqlServer.og_exec_query(config_prefix, query)
-          write_cassette(result)
+          record_stub(result)
           return result
         end
 
         raise_for_fixture_file(cassette_filepath)
-        YAML.safe_load(File.read(cassette_filepath))
+        YAML.safe_load(File.read(cassette_filepath))[self.cassette_index]
+      ensure
+        self.cassette_index += 1
       end
 
       def mock
