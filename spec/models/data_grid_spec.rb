@@ -254,6 +254,92 @@ EOS
       [res['result'], res['name']]
     end
 
+    describe 'caching' do
+      # FIXME: not implemented
+      xit 'should cache correctly with future pt 1' do
+       dg = dg_from_import('G4', G4.gsub("\n", "\t\n"))
+       pt = 1.day.from_now
+       params = { 'hb_indicator' => true, 'cltv' => 82 }
+       res1 = Marty::DataGrid.lookup_grid_h(pt, 'G4', params, false)
+
+       # FIXME: we shouldn't pass created_dt here, but that won't work until
+       # we start using statement_timestamp() instead of now in mcfly, because
+       # now returns transaction timestamp and it's always the same
+       # in transactional tests in Rspec.
+
+       dg.update_from_import('G4', G4.gsub('-1.5', '-2.5'), 1.minute.from_now)
+
+       res2 = Marty::DataGrid.lookup_grid_h(pt, 'G4', params, false)
+
+       Delorean::Cache.adapter.clear_all!
+
+       res3 = Marty::DataGrid.lookup_grid_h(pt, 'G4', params, false)
+
+       expect(res2).to eq(-2.5)
+       expect(res2).to eq(res3)
+      end
+
+      # FIXME: not implemented
+      xit 'should cache correctly with future pt 2' do
+        dg = dg_from_import('G4', G4.gsub("\n", "\t\n"), 1.hour.ago)
+        pt = JSON.parse(1.hour.from_now.to_json)
+        params = { 'hb_indicator' => true, 'cltv' => 82 }
+        res1 = Marty::DataGrid.lookup_grid_h(pt, 'G4', params, false)
+
+        # FIXME: we shouldn't pass created_dt here, but that won't work until
+        # we start using statement_timestamp() instead of now in mcfly, because
+        # now returns transaction timestamp and it's always the same
+        # in transactional tests in Rspec.
+        dg.update_from_import('G4', G4.gsub('-1.5', '-2.5'), 1.minute.from_now)
+
+        res2 = Marty::DataGrid.lookup_grid_h(pt, 'G4', params, false)
+
+        Delorean::Cache.adapter.clear_all!
+
+        res3 = Marty::DataGrid.lookup_grid_h(pt, 'G4', params, false)
+
+        expect(res2).to eq(-2.5)
+        expect(res2).to eq(res3)
+      end
+
+      it 'should cache correctly with past pt 1' do
+       dg = dg_from_import('G4WithoutBug', G4.gsub("\n", "\t\n"), 3.hours.ago)
+       dg = dg_from_import('G4WithBug', G4.gsub("\n", "\t\n"), 3.hours.ago)
+
+       pt = 1.hour.ago
+       params = { 'hb_indicator' => true, 'cltv' => 82 }
+       Marty::DataGrid.lookup_h(pt, 'G4WithoutBug')
+       Marty::DataGrid.lookup_h(pt, 'G4WithBug')
+
+       dg.update_from_import('G4WithBug', G4.gsub('-1.5', '-2.5'))
+
+       res_without_bug = Marty::DataGrid.lookup_grid_h(pt, 'G4WithoutBug', params, false)
+       res_with_bug = Marty::DataGrid.lookup_grid_h(pt, 'G4WithBug', params, false)
+
+       expect(res_without_bug).to eq(res_with_bug)
+      end
+
+      it 'should cache correctly with past pt 2' do
+       dg = dg_from_import('G4WithBug', G4.gsub("\n", "\t\n"), 3.hours.ago)
+
+       pt = 1.hour.ago
+
+       params1 = { 'hb_indicator' => true, 'cltv' => 82 }
+
+       res1 = Marty::DataGrid.lookup_grid_h(pt, 'G4WithBug', params1, false)
+
+       dg.update_from_import('G4WithBug', G4.gsub('-1.5', '-2.5'))
+
+       params2 = { 'hb_indicator' => true, 'cltv' => 83 }
+
+       res2 = Marty::DataGrid.lookup_grid_h(pt, 'G4WithBug', params1, false)
+       res3 = Marty::DataGrid.lookup_grid_h(pt, 'G4WithBug', params2, false)
+
+       expect(res1).to eq(res2)
+       expect(res2).to eq(res3)
+      end
+    end
+
     describe 'imports' do
       it 'should not allow imports with trailing blank columns' do
         expect do
@@ -641,7 +727,7 @@ EOS
         res = lookup_grid_helper('infinity', 'G1', h)
         expect(res).to eq [11, 'G1']
 
-        dg.update_from_import('G1', G1.sub(/11/, '111'))
+        dg.update_from_import('G1', G1.sub(/11/, '111'), 1.second.from_now)
 
         res = lookup_grid_helper('infinity', 'G1', h)
         expect(res).to eq [111, 'G1']
