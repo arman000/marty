@@ -145,5 +145,24 @@
         }
       }
     });
+  },
+
+  netzkeOnClearCache() {
+    const msg = [
+      "Clear Delorean cache?",
+      "This will not affect other processes' local cache if memory cache is being used."
+    ].join("\n");
+
+    Ext.Msg.show({
+      title: "Clear the cache?",
+      msg,
+      width: 375,
+      buttons: Ext.Msg.OKCANCEL,
+      fn: (btn) => {
+        if (btn === "ok") {
+          this.server.clearCache({});
+        }
+      }
+    });
   }
 });
