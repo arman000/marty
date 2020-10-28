@@ -6,7 +6,7 @@
   <%= stylesheet_link_tag 'marty/diagnostic', media: 'all', 'data-turbolinks-track': 'reload' %>
   <head>
     <!-- TODO: Rchange to `module_parent_name` once we all migrate to Rails 6-->
-    <title><%= Rails.application.class.parent_name %> Diagnostic</title>
+    <title><%= Marty::RailsApp.application_name %> Diagnostic</title>
   </head>
   <body>
     <div style="text-align:center">
