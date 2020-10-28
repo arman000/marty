@@ -1,6 +1,6 @@
 module Marty::Diagnostic; class DelayedJobWorkers < Base
-  DIAG_NAME          = 'Delayed Workers / Node'
-  DIAG_CONFIG_TARGET = 'DIAG_DELAYED_TARGET'
+  DIAG_NAME ||= 'Delayed Workers / Node'
+  DIAG_CONFIG_TARGET ||= 'DIAG_DELAYED_TARGET'
 
   def self.description
     <<~TEXT

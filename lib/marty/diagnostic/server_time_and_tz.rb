@@ -7,9 +7,9 @@ module Marty::Diagnostic; class ServerTimeAndTz < Base
 
   diagnostic_fn(status_only: true) do
     begin
-      D_FORMAT  = '%Y-%m-%d'
-      T_FORMAT  = '%H:%M:%S'
-      DT_FMT = "#{D_FORMAT} #{T_FORMAT}"
+      D_FORMAT ||= '%Y-%m-%d'
+      T_FORMAT ||= '%H:%M:%S'
+      DT_FMT ||= "#{D_FORMAT} #{T_FORMAT}"
 
       app_time = Time.zone.now
 
