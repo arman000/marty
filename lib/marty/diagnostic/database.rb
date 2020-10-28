@@ -1,5 +1,5 @@
 module Marty::Diagnostic::Database
-  SIZES_SQL = <<~SQL.squish
+  SIZES_SQL ||= <<~SQL.squish
     SELECT
       relname,
       pg_size_pretty(table_size)

@@ -3,6 +3,8 @@
 
 * Add a button that allows to clear Delorean cache. That might be useful
   if Redis is used for caching.
+* Tweak diagnostic initializer and change how constants are assigned in 
+  diagnostic classes.
 
 18.1.3 - 2020-10-23
 =====================================================

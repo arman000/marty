@@ -1,6 +1,6 @@
 module Marty::Diagnostic
   class Version < Base
-    GITLAB_CI_INCLUDE_HASH = {
+    GITLAB_CI_INCLUDE_HASH ||= {
       'project' => 'cm_tech/cm_gitlab_ci',
       'file' => '/.gitlab/ci/defaults.yml'
     }.freeze
