@@ -1,7 +1,8 @@
 18.3.0 - 2020-10-28
 =====================================================
 
-* Grant users that have `dev` role `user_manager` in Development environemnt
+* Grant users that have `dev` role `user_manager` in Development environment.
+* Handle spreadsheet model on child reload debouncing.
 
 18.2.0 - 2020-10-23
 =====================================================
