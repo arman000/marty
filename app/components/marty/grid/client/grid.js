@@ -84,9 +84,9 @@
 
     this.listeners = Object.assign(
       {
-        selectionchange: (selModel) => {
+        selectionchange: (obj) => {
           reloadChildrenDebouncer.delay(this.childReloadMs, null, this, [
-            selModel
+            obj.type == "rowmodel" ? obj : obj.selModel
           ]);
         }
       },
