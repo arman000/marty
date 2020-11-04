@@ -1,5 +1,7 @@
 module Marty
   module RpcCall
+    module_function
+
     # POST to a remote marty
     def marty_post(host, port, path, script, node, attrs, params, rpc_opts = {}, ssl = false, http_opts = {})
       http = Net::HTTP.new(host, port)
