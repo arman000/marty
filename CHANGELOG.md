@@ -3,6 +3,7 @@
 
 * Grant users that have `dev` role `user_manager` in Development environment.
 * Handle spreadsheet model on child reload debouncing.
+* Refactor `Marty::RpcCall` to resolve circular dependencies in zeitwerk in development mode.
 
 18.2.0 - 2020-10-23
 =====================================================
