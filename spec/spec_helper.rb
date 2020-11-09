@@ -6,23 +6,25 @@ ENV['PGTZ'] ||= 'America/Los_Angeles'
 
 require 'dummy/config/application'
 require 'rspec/rails'
+require 'rspec/retry'
 require 'database_cleaner'
 
-support = Pathname.new(__FILE__).parent.to_s + '/support'
-require "#{support}/suite"
-require "#{support}/shared_connection"
+require_relative 'support/request_recording'
+require_relative 'support/suite'
+require_relative 'support/shared_connection'
 
 Dummy::Application.initialize! unless Dummy::Application.initialized?
 
 ActiveRecord::Migration.migrate File.expand_path('../../db/migrate/', __FILE__)
 ActiveRecord::Migration.migrate File.expand_path('../dummy/db/migrate/', __FILE__)
 
-require 'rspec/retry'
-
 RSpec.configure do |config|
   config.include Marty::RSpec::Suite
   config.include Marty::RSpec::SharedConnection
   config.include Marty::RSpec::SharedConnectionDbHelpers
+  config.include Marty::RSpec::RequestRecording
+
+  Marty::RSpec::RequestRecording.enable_integration!
 
   config.before :each, :js do
     ActionCable.server.pubsub.shutdown

@@ -1,3 +1,10 @@
+18.4.0 - 2020-11-08
+=====================================================
+
+* Add `Marty::RSpec::RequestRecording` module to have a consistent interface
+  for stubbing and recording request fixtures for external services across
+  applications.
+
 18.3.0 - 2020-10-28
 =====================================================
 
