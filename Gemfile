@@ -37,5 +37,7 @@ group :development, :test do
   gem 'rspec-retry'
   gem 'selenium-webdriver'
   gem 'timecop'
+  gem 'vcr'
   gem 'webdrivers'
+  gem 'webmock'
 end
