@@ -78,10 +78,6 @@ module Marty::Diagnostic
                 consistent('RubyGems', Gem::VERSION),
                 consistent('Database Schema Version', Database.db_schema),
                 consistent('Postgres', Database.db_version),
-                consistent(
-                  'Shared GitLab CI',
-                  Marty::Diagnostic::Version.check_gitlab_ci.to_s
-                ),
                 consistent('Environment', Rails.env),
                 consistent('Root Git', git),
               ].reduce({}, :merge)
