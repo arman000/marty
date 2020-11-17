@@ -4,6 +4,7 @@
 * Add `Marty::RSpec::RequestRecording` module to have a consistent interface
   for stubbing and recording request fixtures for external services across
   applications.
+* Remove `Shared GitLab CI` check in `version` diagnostic as it doesn't work and isn't needed.
 
 18.3.0 - 2020-10-28
 =====================================================
