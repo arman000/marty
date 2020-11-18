@@ -5,7 +5,7 @@ module Marty
     module Grep
       module_function
 
-      GREP_REGEX = /Config\[(?:'|")(\w+)(?:'|")\]/
+      GREP_REGEX = /Config(?:\.fetch)?(?:\[|\()(?:'|")(\w+)(?:'|")(?:\]|(?:,\s*\w+\)))/
       GREP_CMD = "git grep -oP \"#{GREP_REGEX.to_s.gsub('"', '\"')}\" \"*.rb\" \":!*db*\" \":!*spec*\""
 
       def git_grep_config_keys(commands = [])
