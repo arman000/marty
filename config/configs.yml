@@ -18,6 +18,11 @@ DELAYED_JOB_WORKERS:
     null
   description: The number of delayed job workers used in delayed job commands.
 
+DIAG_DELAYED_JOB_VERSION_DISABLED:
+  default_value: >
+    null
+  description: Allows the ability to disable the delayed_job_version diagnostic when value is set to true.
+
 DIAG_ENV_BLOCK:
   default_value: >
     null
@@ -36,7 +41,7 @@ DIAG_ENV_OBFUSCATE:
 ENFORCE_DATA_GRID_STRICT_NULL_MODE:
   default_value: >
     false
-  description: Require strict null mode to be true for new and updated Data Grids
+  description: Require strict null mode to be true for new and updated Data Grids.
 
 RUBY_PATH:
   default_value: >
