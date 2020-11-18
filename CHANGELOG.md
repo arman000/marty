@@ -5,6 +5,8 @@
   for stubbing and recording request fixtures for external services across
   applications.
 * Remove `Shared GitLab CI` check in `version` diagnostic as it doesn't work and isn't needed.
+* Add `DIAG_DELAYED_JOB_VERSION_DISABLED` config value to disable the 
+  `delayed_job_version` diagnostic for extra spam protection if needed.
 
 18.3.0 - 2020-10-28
 =====================================================
