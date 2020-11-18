@@ -32,7 +32,18 @@ module Marty
           Marty::Helper.git
         end
 
+        def disabled_info
+          {
+            Marty::Diagnostic::Node.my_ip => {
+              'Version' => create_info('Disabled')
+            }
+          }
+        end
+
         def generate
+          return disabled_info if Marty::Config.
+            fetch('MARTY_DIAG_DELAYED_JOB_VERSION_DISABLED', false)
+
           raise 'DelayedJob cannot be called with local scope.' if
             scope == 'local'
 
