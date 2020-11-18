@@ -41,8 +41,7 @@ module Marty
         end
 
         def generate
-          return disabled_info if Marty::Config.
-            fetch('MARTY_DIAG_DELAYED_JOB_VERSION_DISABLED', false)
+          return disabled_info if Marty::Config.fetch('MARTY_DIAG_DELAYED_JOB_VERSION_DISABLED', false)
 
           raise 'DelayedJob cannot be called with local scope.' if
             scope == 'local'
