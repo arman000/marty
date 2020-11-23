@@ -32,7 +32,7 @@ require 'pathname'
 module Marty
   class << self
     def root
-      Pathname.new(File.expand_path('..', __dir__))
+      Marty::Gem.dir
     end
   end
 end

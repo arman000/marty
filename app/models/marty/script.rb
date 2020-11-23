@@ -148,12 +148,7 @@ class Marty::Script < Marty::Base
       return Array(paths) if paths
       return paths_from_config if paths_from_config.present?
 
-      [
-        Rails.root.join('delorean'),
-        # FIXME: HACKY, wouldn't it be better to use
-        # Gem::Specification.find_by_name("marty").gem_dir??
-        File.expand_path('../../../../delorean', __FILE__),
-      ]
+      [Rails.root.join('delorean'), Marty::Gem.delorean_dir]
     end
 
     def delete_scripts

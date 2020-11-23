@@ -1,3 +1,16 @@
+18.5.0 - 2020-11-19
+=====================================================
+
+* Remove `INDEPENDENCE_ISSUES.md`; we aren't using this anymore
+* Add more functionality to `Marty::RailsApp` and refactor (auto `constantize`)
+* Remove `gemini_deprecations.md`; we aren't using this anymore
+* Remove `script/rails`; obsolete, not used by Rails convention anymore
+* Remove `.gemignore` and explicitly specify which files we want in `Gem::Specification`.
+  * This will greatly reduce bundle/download size.
+* Add `Marty::Gem` helper which caches our `Gem::Specification` and defines useful helper methods
+  * Refactor with helper methods
+* Add YARD related files to `.gitignore`
+
 18.4.0 - 2020-11-08
 =====================================================
 

@@ -1,3 +1,5 @@
+require 'csv'
+
 class Marty::DataGrid < Marty::Base
   # If data_type is nil, assume float
   DEFAULT_DATA_TYPE = 'float'
@@ -653,7 +655,7 @@ class Marty::DataGrid < Marty::Base
 
     pt ||= 'infinity'
 
-    rows = CSV.new(grid_text, options).to_a
+    rows = ::CSV.new(grid_text, options).to_a
     blank_index = rows.find_index { |x| x.all?(&:nil?) }
 
     raise 'must have a blank row separating metadata' unless

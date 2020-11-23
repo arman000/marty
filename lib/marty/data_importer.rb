@@ -1,3 +1,5 @@
+require 'csv'
+
 module Marty
   class DataImporter
     class Error < StandardError
@@ -32,13 +34,13 @@ module Marty
                        preprocess_function,
                       )
 
-      recs.each_with_object(Hash.new(0)) do |(op, _id), h|
+      recs.each_with_object(::Hash.new(0)) do |(op, _id), h|
         h[op] += 1
       end
     end
 
     # Given a Mcfly klass and CSV data, import data into the database
-    # and report on affected rows.  Result is an array of tuples.
+    # and report on affected rows. Result is an array of tuples.
     # Each tuple is associated with one data row and looks like [tag,
     # id].  Tag is one of :same, :update, :create and "id" is the id
     # of the affected row.
@@ -53,7 +55,7 @@ module Marty
                       )
 
       parsed = data.is_a?(Array) ? data :
-        CSV.new(data, headers: true, col_sep: col_sep)
+        ::CSV.new(data, headers: true, col_sep: col_sep)
 
       # run preprocessor
       parsed = klass.send(preprocess_function.to_sym, parsed) if

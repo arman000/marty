@@ -1,3 +1,5 @@
+require 'csv'
+
 describe 'Blame Report', slow: true do
   RES0 = [
     ['bud_category', 'note_rate', 'settlement_mm', 'settlement_yy', 'buy_up'],
@@ -73,7 +75,7 @@ describe 'Blame Report', slow: true do
       'sort_field'    => 'settlement_yy'
     )
 
-    parsed_csv = CSV.parse(ws)
+    parsed_csv = ::CSV.parse(ws)
     expect(parsed_csv).to eq RES0
 
     ws = engine.evaluate(
@@ -82,7 +84,7 @@ describe 'Blame Report', slow: true do
       'class_name' => 'Gemini::FannieBup',
     )
 
-    parsed_csv = CSV.parse(ws)
+    parsed_csv = ::CSV.parse(ws)
     expect(parsed_csv).to eq RES1
   end
 end

@@ -41,7 +41,7 @@ module Marty::Diagnostic
         'Netzke Core'             => Netzke::Core::VERSION,
         'Netzke Basepack'         => Netzke::Basepack::VERSION,
         'Ruby'                    => rbv,
-        'RubyGems'                => Gem::VERSION,
+        'RubyGems'                => ::Gem::VERSION,
         'Database Schema Version' => db_schema,
         'Postgres'                => Database.db_version,
         'Environment'             => Rails.env,
