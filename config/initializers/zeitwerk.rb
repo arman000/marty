@@ -14,10 +14,9 @@ Rails.autoloaders.each do |autoloader|
 end
 
 # ignore monkey/version as these break convention.
-marty = Gem::Specification.find_by_name('marty')
 ignore = [
-  "#{marty.gem_dir}/lib/marty/monkey.rb",
-  "#{marty.gem_dir}/lib/marty/version.rb"
+  Marty::Gem.dir.join('lib/marty/monkey.rb'),
+  Marty::Gem.dir.join('lib/marty/version.rb'),
 ]
 
 Rails.autoloaders.main.ignore(*ignore)

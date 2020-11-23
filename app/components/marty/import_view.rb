@@ -1,3 +1,5 @@
+require 'csv'
+
 class Marty::ImportView < Marty::Form
   include Marty::Extras::Layout
 
@@ -37,7 +39,7 @@ class Marty::ImportView < Marty::Form
   end
 
   def process_import_data
-    CSV.new(@import_data, headers: true, col_sep: "\t")
+    ::CSV.new(@import_data, headers: true, col_sep: "\t")
   end
 
   def post_import

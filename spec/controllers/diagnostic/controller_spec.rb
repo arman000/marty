@@ -75,7 +75,7 @@ module Marty::Diagnostic
                   'Ruby',
                   "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
                 ),
-                consistent('RubyGems', Gem::VERSION),
+                consistent('RubyGems', ::Gem::VERSION),
                 consistent('Database Schema Version', Database.db_schema),
                 consistent('Postgres', Database.db_version),
                 consistent('Environment', Rails.env),

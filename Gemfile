@@ -20,10 +20,6 @@ group :default do
 end
 
 group :development, :test do
-  group :cmit do
-    gem 'cm_shared', git: 'https://gitlab.pnmac.com/cm_tech/cm_shared.git'
-    # gem 'cm_shared', path: File.expand_path('../cm_shared', __dir__)
-  end
   gem 'benchmark-ips'
   gem 'capybara'
   gem 'connection_pool'
@@ -40,4 +36,8 @@ group :development, :test do
   gem 'vcr'
   gem 'webdrivers'
   gem 'webmock'
+  group :cmit do
+    gem 'cm_shared', git: 'https://gitlab.pnmac.com/cm_tech/cm_shared.git'
+    # gem 'cm_shared', path: File.expand_path('../cm_shared', __dir__)
+  end
 end

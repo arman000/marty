@@ -1,15 +1,22 @@
-$:.push File.expand_path('../lib', __FILE__)
+$LOAD_PATH.push File.expand_path('lib', __dir__) # rubocop:disable Style/SpecialGlobalVars
 
 require 'marty/version'
-require 'digest/md5'
-require 'base64'
-require 'zlib'
-require 'csv'
-require 'pathname'
 
-git_tracked_files = `git ls-files`.split($\)
-gem_ignored_files = `git ls-files -i -X .gemignore`.split($\)
-files = git_tracked_files - gem_ignored_files
+files = Dir[
+  'app/**/*',
+  'config/**/*',
+  'db/**/*',
+  'delorean/**/*',
+  'lib/**/*',
+  'spec/support/**/*',
+  'CHANGELOG.md',
+  'Gemfile',
+  'marty.gemspec',
+  'MIT-LICENSE',
+  'package.json',
+  'Rakefile',
+  'README.md',
+]
 
 Gem::Specification.new do |s|
   s.name        = 'marty'

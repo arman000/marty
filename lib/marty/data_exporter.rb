@@ -1,3 +1,5 @@
+require 'csv'
+
 class Marty::DataExporter
   # given an array of hashes, return set of all keys
   def self.hash_array_keys(hl)
@@ -60,13 +62,13 @@ class Marty::DataExporter
     # rethink this.  Probably should have separate functions for
     # to_csv for hash and arrays.
 
-    return CSV.generate(conf) do |csv|
+    return ::CSV.generate(conf) do |csv|
       obj.each do |x|
         csv << x.flatten(1).map { |v| v.nil? ? nil : v.to_s }
       end
     end if obj.is_a?(Hash)
 
-    CSV.generate(conf) do |csv|
+    ::CSV.generate(conf) do |csv|
       obj.each do |x|
         x = [x] unless x.respond_to? :map
         csv << x.map do |v|

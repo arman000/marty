@@ -53,3 +53,7 @@ Gemfile.lock
 
 # Ignore code coverage
 coverage/
+
+# YARDoc related
+.yardoc
+doc/

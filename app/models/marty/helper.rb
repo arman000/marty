@@ -1,3 +1,5 @@
+require 'csv'
+
 class Marty::Helper
   include Delorean::Model
 
@@ -43,9 +45,9 @@ class Marty::Helper
 
   delorean_fn :parse_csv_to_hash, sig: 3 do |txt, comma_sep, types|
     txt ||= ''
-    headers, *rows = CSV.parse(txt.strip,
-                               headers: true,
-                               col_sep: (comma_sep ? ',' : "\t")).to_a
+    headers, *rows = ::CSV.parse(txt.strip,
+                                 headers: true,
+                                 col_sep: (comma_sep ? ',' : "\t")).to_a
     rows.map do |row|
       headers.zip(row).each_with_object({}) do |(h, v), res|
         res[h] = v.blank? ? nil :

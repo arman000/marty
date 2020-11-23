@@ -1,3 +1,5 @@
+require 'csv'
+
 feature 'User List report', js: true do
   before(:each) do
     populate_test_users
@@ -57,7 +59,7 @@ feature 'User List report', js: true do
     end
 
     path = Rails.root.join('spec/tmp/downloads/User List.csv')
-    csv_content = CSV.parse File.read(path)
+    csv_content = ::CSV.parse File.read(path)
 
     expect(csv_content.size > 1).to be true
     expect(csv_content.first).to eq ['login', 'firstname', 'lastname', 'active', 'roles']

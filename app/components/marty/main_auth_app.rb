@@ -170,7 +170,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   def app_title
-    title = "#{app_moniker} #{::Marty::RailsApp.application_name_with_env}"
+    title = "#{app_moniker} #{::Marty::RailsApp.application_name(with_env: true)}"
     title += ' [TIME WARPED]' if warped
     title
   end
