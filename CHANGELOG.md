@@ -2,7 +2,7 @@
 =====================================================
 
 * Remove `INDEPENDENCE_ISSUES.md`; we aren't using this anymore
-* Add more functionality to `Marty::RailsApp` and refactor (auto `constantize`)
+* Add more functionality to `Marty::RailsApp`
 * Remove `gemini_deprecations.md`; we aren't using this anymore
 * Remove `script/rails`; obsolete, not used by Rails convention anymore
 * Remove `.gemignore` and explicitly specify which files we want in `Gem::Specification`.
