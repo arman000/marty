@@ -22,9 +22,6 @@ RSpec.configure do |config|
   config.include Marty::RSpec::Suite
   config.include Marty::RSpec::SharedConnection
   config.include Marty::RSpec::SharedConnectionDbHelpers
-  config.include Marty::RSpec::RequestRecording
-
-  Marty::RSpec::RequestRecording.enable_integration!
 
   config.before :each, :js do
     ActionCable.server.pubsub.shutdown
