@@ -1,3 +1,16 @@
+18.6.0 - 2020-12-03
+=====================================================
+
+* Remove `Marty::SqlServer` and related files, replaced with the sleeker
+  `Marty::SqlServers` and related files.
+  * Add `Marty::RSpec::RequestRecording::SqlServer` to record all database
+    interactions to external SQL Server databases.
+  * Remove `spec/support/vcr_sql_server.rb`.
+* `tiny_tds` and `activerecord-sqlserver-adapter` added as optional gems.
+* Enable `rspec-mocks`' `verify_partial_doubles`
+  * Remove `:trigger_failure` receive expectation in
+    `spec/jobs/delorean_background_job_spec.rb`; not necessary anymore.
+
 18.5.0 - 2020-11-19
 =====================================================
 
