@@ -38,6 +38,10 @@ RSpec.configure do |config|
   # errors
   config.expect_with(:rspec) { |c| c.syntax = [:should, :expect] }
 
+  config.mock_with :rspec do |mocks|
+    mocks.verify_partial_doubles = true
+  end
+
   config.run_all_when_everything_filtered = true
 
   # This allows you to limit a spec run to individual examples or groups

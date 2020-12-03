@@ -32,8 +32,6 @@ describe 'Delorean Background Jobs' do
 
   describe 'logs' do
     it 'logs success' do
-      allow(klass).to receive(:trigger_failure).and_return(nil)
-
       expect { run_job }.to change { Marty::BackgroundJob::Log.count }.by 1
       log = Marty::BackgroundJob::Log.find_by(job_class: klass.name)
       expect(log.error).to_not be_present

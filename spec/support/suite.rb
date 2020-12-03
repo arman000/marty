@@ -15,7 +15,6 @@ file_names = [
   'setup',
   'structure_compare',
   'users',
-  'vcr_sql_server'
 ]
 
 file_names.sort.each { |f| require (relative + '/' + f) }
@@ -32,7 +31,6 @@ module Marty
       include Marty::RSpec::PostRunLogger
       include Marty::RSpec::PerformanceHelper
       include Marty::RSpec::StructureCompare
-      include Marty::RSpec::VcrSqlServer
     end
   end
 end

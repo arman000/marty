@@ -11,11 +11,16 @@ group :default do
   gem 'netzke'
   gem 'pg'
   gem 'rails'
+
   group :cmit do
     gem 'delorean_lang', git: 'https://gitlab.pnmac.com/cm_tech/delorean.git'
     gem 'mcfly', git: 'https://gitlab.pnmac.com/cm_tech/mcfly.git'
     # gem 'delorean_lang', path: File.expand_path('../delorean', __dir__)
     # gem 'mcfly', path: File.expand_path('../mcfly', __dir__)
+  end
+  group :sqlserver, optional: true do
+    gem 'activerecord-sqlserver-adapter'
+    gem 'tiny_tds'
   end
 end
 
