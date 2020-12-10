@@ -9,7 +9,12 @@ module Marty
         # This module patches {Marty::SqlServers::Client} to account for reading
         # of the current {SqlServer::Cassette} if {SqlServer.recording?} is
         # turned on.
-        module ClientMocks
+        module ClientFakes
+          # We don't want any connections if we're not recording
+          def ensure_connection!
+            ::RSpec.configuration.recording? ? super : true
+          end
+
           private
 
           def instrument_query(method_name, sql, vars: {})
@@ -20,7 +25,8 @@ module Marty
             raise SqlServer::Errors::CassetteNotFoundError, example if cassette.nil?
 
             episode = cassette.database_interactions.shift
-            check_episode_consistency!(episode, method_name, sql, vars)
+            episode_check = example.metadata.dig(:sql_server, :episode_check)
+            check_episode_consistency!(episode, method_name, sql, vars) unless episode_check == false
 
             episode['result']
           end
@@ -30,7 +36,7 @@ module Marty
           #
           # @raise If not consistent
           def check_episode_consistency!(episode, method_name, sql, vars)
-            raise 'Episode is not a Hash' unless episode.is_a?(Hash)
+            raise 'Read SQL Server Episode is not a Hash' unless episode.is_a?(Hash)
 
             episode_database = episode['database']
             expected_database = {
@@ -44,10 +50,10 @@ module Marty
             expected_request = {
               'method_name' => method_name.to_s,
               'sql' => sql,
-              'variables' => vars
+              'variables' => vars.empty? ? nil : vars
             }.compact
             raise 'Query in episode does not match given query!' unless
-                  episode_request == expected_request
+                  episode_request == expected_request.deep_stringify_keys
           end
         end
       end
@@ -55,6 +61,6 @@ module Marty
   end
 end
 
-Marty::SqlServers::Client.class_eval do
-  prepend Marty::RSpec::RequestRecording::SqlServer::ClientMocks
-end
+Marty::SqlServers::Client.prepend(
+  Marty::RSpec::RequestRecording::SqlServer::ClientFakes
+)

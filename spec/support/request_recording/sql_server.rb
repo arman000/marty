@@ -3,7 +3,7 @@
 require 'marty/sql_servers/client'
 require_relative 'callbacks/sql_server'
 require_relative 'sql_server/cassette'
-require_relative 'sql_server/client_mocks'
+require_relative 'sql_server/client_fakes'
 require_relative 'sql_server/errors'
 
 module Marty
@@ -11,6 +11,12 @@ module Marty
     module RequestRecording
       # Handles recording requests sent through {Marty::SqlServers},
       # much like VCR does with HTTP.
+      #
+      # Users can pass settings through example metadata to control the module,
+      # specifically through the `sql_server` key.
+      # Passing +sql_server: { episode_check: false }+, for example, will
+      # skip checking the consistency of the +episode+ file (to see if the
+      # request being sent matches exactly the recorded request).
       module SqlServer
         CASSETTE_HOME = Rails.root.join('spec/cassettes/sql_server')
 

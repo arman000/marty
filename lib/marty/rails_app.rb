@@ -33,17 +33,16 @@ module Marty
       end
 
       def needs_migration?
-        return ActiveRecord::Migrator.needs_migration? unless
+        return ActiveRecord::Base.connection.migration_context.needs_migration? if
                rails_version_ge?(RAILS_VERSION_5)
 
-        ActiveRecord::Base.connection.migration_context.needs_migration?
+        ActiveRecord::Migrator.needs_migration?
       end
 
       def parameter_filter_class
-        return ActionDispatch::Http::ParameterFilter unless
-               rails_version_ge?(RAILS_VERSION_5)
+        return ActiveSupport::ParameterFilter if rails_version_ge?(RAILS_VERSION_6)
 
-        ActiveSupport::ParameterFilter
+        ActionDispatch::Http::ParameterFilter
       end
 
       private

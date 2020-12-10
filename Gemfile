@@ -7,7 +7,6 @@ gemspec
 
 group :default do
   gem 'daemons'
-  gem 'delayed_job_active_record'
   gem 'netzke'
   gem 'pg'
   gem 'rails'
@@ -18,6 +17,7 @@ group :default do
     # gem 'delorean_lang', path: File.expand_path('../delorean', __dir__)
     # gem 'mcfly', path: File.expand_path('../mcfly', __dir__)
   end
+
   group :sqlserver, optional: true do
     gem 'activerecord-sqlserver-adapter'
     gem 'tiny_tds'
