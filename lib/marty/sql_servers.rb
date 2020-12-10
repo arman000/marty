@@ -57,6 +57,8 @@ module Marty
   #   Marty::SqlServers::MySqlServerDb.exec_query('SELECT 1;')
   #   # OR
   #   Marty::SqlServers['my_sql_server_db'].exec_query('SELECT 1;')
+  #   # OR
+  #   Marty::SqlServers[:my_sql_server_db].exec_query('SELECT 1;')
   #
   # @example A sample +config/sql_servers.yml+ file
   #   ---

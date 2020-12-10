@@ -1,3 +1,14 @@
+18.6.1 - 2020-12-09
+=====================================================
+
+* Fix serious bug in `rails_app.rb` that returned the wrong version of
+  `parameter_filter_class`.
+* "Mock" `ensure_connection!` in tests
+* Fix `check_episode_consistency!` since we were previously not comparing keys
+  of the same type.
+* In `Marty::RSpec::RequestRecording::SqlServer`, rename `ClientMocks` to
+  `ClientFakes`.
+
 18.6.0 - 2020-12-03
 =====================================================
 
