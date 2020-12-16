@@ -21,7 +21,8 @@ module Marty
                                validation_function = nil,
                                col_sep             = "\t",
                                allow_dups          = false,
-                               preprocess_function = nil
+                               preprocess_function = nil,
+                               suppress_empty_data_error = false
                               )
 
       recs = do_import(klass,
@@ -32,6 +33,7 @@ module Marty
                        col_sep,
                        allow_dups,
                        preprocess_function,
+                       suppress_empty_data_error,
                       )
 
       recs.each_with_object(::Hash.new(0)) do |(op, _id), h|
@@ -51,7 +53,8 @@ module Marty
                        validation_function = nil,
                        col_sep             = "\t",
                        allow_dups          = false,
-                       preprocess_function = nil
+                       preprocess_function = nil,
+                       suppress_empty_data_error = false
                       )
 
       parsed = data.is_a?(Array) ? data :
@@ -104,10 +107,12 @@ module Marty
 
         remainder_ids = cleaner_ids - ids.keys
 
-        raise Error.
-          new('Missing import data. ' +
-              'Please provide header line and at least one data line.', [1]) if
-          ids.keys.compact.count == 0
+        unless suppress_empty_data_error
+          raise Error.
+            new('Missing import data. ' +
+                'Please provide header line and at least one data line.', [1]) if
+            ids.keys.compact.count == 0
+        end
 
         klass.delete(remainder_ids)
         res + remainder_ids.map { |id| [:clean, id] }
