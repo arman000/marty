@@ -1,7 +1,7 @@
 class Gemini::HeadVersion < ActiveRecord::Base
   self.table_name = 'head_versions'
 
-  has_mcfly
+  mcfly
 
   validates_presence_of \
   :version,

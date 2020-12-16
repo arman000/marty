@@ -107,7 +107,7 @@ class Marty::DataGrid < Marty::Base
     end
   end
 
-  has_mcfly
+  mcfly
 
   validates :name, :data, :metadata, presence: true
 
