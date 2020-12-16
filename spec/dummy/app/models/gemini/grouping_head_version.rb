@@ -1,7 +1,7 @@
 class Gemini::GroupingHeadVersion < ActiveRecord::Base
   self.table_name = 'grouping_head_versions'
 
-  mcfly
+  has_mcfly
 
   validates_presence_of \
   :grouping_id,

@@ -2,7 +2,7 @@ class Gemini::LoanProgram < ActiveRecord::Base
 
   self.table_name = 'gemini_loan_programs'
 
-  mcfly
+  has_mcfly
   mcfly_validates_uniqueness_of :name
 
   validates_presence_of :name, :amortization_type, :mortgage_type, :streamline_type

@@ -1,5 +1,5 @@
 class Marty::Tag < Marty::Base
-  mcfly append_only: true
+  has_mcfly append_only: true
 
   mcfly_validates_uniqueness_of :name
   validates :name, :comment, presence: true

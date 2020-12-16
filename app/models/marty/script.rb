@@ -1,5 +1,5 @@
 class Marty::Script < Marty::Base
-  mcfly
+  has_mcfly
 
   validates :name, :body, presence: true
   mcfly_validates_uniqueness_of :name

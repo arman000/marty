@@ -1,6 +1,6 @@
 class Marty::BaseRule < Marty::Base
   self.abstract_class = true
-  mcfly
+  has_mcfly
 
   def self.guard_info
     {}
