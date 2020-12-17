@@ -1,8 +1,8 @@
-return unless ActiveRecord::Base.connection.table_exists? 'marty_user_roles'
-return unless ActiveRecord::Base.connection.column_exists?(
-  'marty_user_roles',
-  'role',
-)
+# return unless ActiveRecord::Base.connection.table_exists? 'marty_user_roles'
+# return unless ActiveRecord::Base.connection.column_exists?(
+#   'marty_user_roles',
+#   'role',
+# )
 return unless Rails.env.development?
 
 # Grant developers access to manage roles
