@@ -8,7 +8,7 @@ begin
 rescue StandardError => e
   Marty::Logger.warn(
     'marty_user_roles warning:',
-    [e.message, *e.backtrace].join($RS),
+    [e.message, *e.backtrace].join($/),
   )
   return
 end
