@@ -3,6 +3,15 @@
 #   'marty_user_roles',
 #   'role',
 # )
+begin
+  Marty::UserRole.where(role: 'dev')
+rescue StandardError => e
+  Marty::Logger.warn(
+    'marty_user_roles warning:',
+    [e.message, *e.backtrace].join($RS),
+  )
+  return
+end
 return unless Rails.env.development?
 
 # Grant developers access to manage roles
