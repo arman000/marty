@@ -81,10 +81,12 @@ module Marty
         # original method expects it.
         prepared_vars = variables.is_a?(Hash) ? [variables] : variables
 
+        sanitized_vars = sanitize_xml_encoding(prepared_vars)
+
         sql = "EXEC #{proc_name}"
         run_callbacks :instrumentation do
-          instrument_query(:execute_procedure, sql, vars: prepared_vars) do
-            @pool.connection.execute_procedure(proc_name, *prepared_vars)
+          instrument_query(:execute_procedure, sql, vars: sanitized_vars) do
+            @pool.connection.execute_procedure(proc_name, *sanitized_vars)
           end
         end
       end
@@ -101,6 +103,30 @@ module Marty
       def ensure_connection!
         @pool.connection
         raise ActiveRecord::ConnectionNotEstablished unless @pool.connected?
+      end
+
+      # Strips encodings from any XML parameters submitted because they are not
+      # allowed by out ActiveRecord adapter
+      #
+      # @param prepared_vars [Array]
+      # @return [Array]
+      def sanitize_xml_encoding(prepared_vars)
+        [
+          prepared_vars.first.map.each_with_object({}) do | (key, value), h |
+            h[key] = value
+
+            # if valid XML and encoding is declared, remove instructions
+            # because SqlServer adapter only allows UTF-16
+            valid_xml_with_encoding = Nokogiri::XML(value).errors.none? &&
+                                      value.match?(/xml version/i) &&
+                                      value.match?(/encoding/i)
+
+            next unless valid_xml_with_encoding
+
+            h[key] = Nokogiri::XML.parse(value).to_xml(
+              save_with: Nokogiri::XML::Node::SaveOptions::NO_DECLARATION)
+          end
+        ]
       end
 
       private
