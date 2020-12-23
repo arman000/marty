@@ -1,3 +1,9 @@
+18.7.0 - 2020-12-21
+=====================================================
+*  Add a function `recreate_views` to Marty::Migration
+   that receives a list of views, a block, uses `pg_get_viewdef`
+   and recreates the views after the block was executed.
+
 18.6.2 - 2020-12-09
 =====================================================
 
