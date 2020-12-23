@@ -340,4 +340,17 @@ CREATE OR REPLACE FUNCTION #{fnname} (
 $$ LANGUAGE plv8;
 EOT
   end
+
+  def recreate_views(*views)
+    view_definitions = views.each_with_object({}) do |view_name, hash|
+      hash[view_name] = execute("SELECT pg_get_viewdef('#{view_name}') as definition;").first['definition']
+      execute("DROP VIEW #{view_name};")
+    end
+
+    yield
+  ensure
+    view_definitions.each do |view_name, definition|
+      execute("CREATE OR REPLACE VIEW #{view_name} AS #{definition}")
+    end
+  end
 end
