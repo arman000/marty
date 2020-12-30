@@ -170,7 +170,7 @@ that can make recordings of external calls which can be replayed during tests.
 
 To use this RequestRecording functionality you will need to do the following:
 
-- Include `VCR` and `webmock` in your gemfile
+- Include `gem 'vcr'` and `gem 'webmock'` in your gemfile
 - Require the desired files in your RSpec configuration
   - `Marty::Gem.require_file!('spec/support/request_recording')` for HTTP requests
   - `spec/support/request_recording/sql_server` for SqlServer requests
