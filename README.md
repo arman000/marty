@@ -168,7 +168,7 @@ bundle exec rspec
 To make it easier to run tests in CI pipelines, Marty comes with a functionality
 that can make recordings of external calls which can be replayed during tests.
 
-To use this RequestRecording functionality you will need to do the following:
+To use this `RequestRecording` functionality you will need to do the following:
 
 - Include `gem 'vcr'` and `gem 'webmock'` in your gemfile
 - Require the desired files in your RSpec configuration
