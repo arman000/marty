@@ -173,7 +173,7 @@ To use this `RequestRecording` functionality you will need to do the following:
 - Include `gem 'vcr'` and `gem 'webmock'` in your gemfile
 - Require the desired files in your RSpec configuration
   - `Marty::Gem.require_file!('spec/support/request_recording')` for HTTP requests
-  - `spec/support/request_recording/sql_server` for SqlServer requests
+  - `Marty::Gem.require_file!('spec/support/request_recording/sql_server')` for SQL Server requests
 - When running a test that connects to an external service, first run the test
   in an environment with connectivity and enable "Recording Mode" by setting
   the environment variable `MARTY_RSPEC_RECORD=true`
