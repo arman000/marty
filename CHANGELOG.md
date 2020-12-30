@@ -8,6 +8,7 @@
 =====================================================
 
 * Fix broken `development.rb` initializer. Use rake task instead.
+* Refactor diagnostic `Reporter` and controller to avoid constant resolution issues.
 
 18.6.1 - 2020-12-09
 =====================================================
