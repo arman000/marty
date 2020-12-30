@@ -64,6 +64,24 @@ config.active_job.queue_adapter = :delayed_job
 To have monit keep track of background jobs run a bash script to configure
 monit after deployment. An example script is provided in `.application-scripts`
 
+## Marty SqlServers
+
+Marty comes with support for using the ActiveRecord SQL Server adapter. To use
+this functionality you will need:
+
+- A `config/sql_servers.yml` file that specifies your endpoint configurations,
+similar to `config/database.yml`
+- Create an initializer that:
+  - requires the needed files with `require 'marty/sql_servers'`
+  - connects on startup with `Marty::SqlServers.generate_database_connections!`
+
+*note* The ActiveRecord SQL Server adapter will escape queries and stored
+procedure variables by default.
+
+*note* The ActiveRecord SQL Server adapter enforces that all XML is sent
+as UTF-16 Little Endian. You will want to remove the instructions on XML or
+ensure that they are UTF-16 LE.
+
 # Dummy Application & Testing
 
 Make sure that extjs is installed (or symbolically linked) in the
@@ -145,6 +163,22 @@ Then to run the tests:
 ```bash
 bundle exec rspec
 ```
+## Test Isolation Support
+
+To make it easier to run tests in CI pipelines, Marty comes with a functionality
+that can make recordings of external calls which can be replayed during tests.
+
+To use this `RequestRecording` functionality you will need to do the following:
+
+- Include `gem 'vcr'` and `gem 'webmock'` in your gemfile
+- Require the desired files in your RSpec configuration
+  - `Marty::Gem.require_file!('spec/support/request_recording')` for HTTP requests
+  - `Marty::Gem.require_file!('spec/support/request_recording/sql_server')` for SQL Server requests
+- When running a test that connects to an external service, first run the test
+  in an environment with connectivity and enable "Recording Mode" by setting
+  the environment variable `MARTY_RSPEC_RECORD=true`
+- Should you need to regenerate a test recording, the same environment variable
+  can be used to update test recordings.
 
 # History & Status
 
@@ -169,7 +203,7 @@ script with the following conditions:
   - form: A list of fields that will be mapped to any paramters in your node.
   - result: This is the value returned after running the report
   - optional
-    - roles: provide a list of roles that have access to execute the report. 
+    - roles: provide a list of roles that have access to execute the report.
     - format: provide the format for the report result. This will default to json.
 
 An exmaple node would be, which would belong in `example_report.dl`
