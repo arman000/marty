@@ -175,7 +175,7 @@ To use this RequestRecording functionality you will need to do the following:
   - `Marty::Gem.require_file!('spec/support/request_recording')` for HTTP requests
   - `spec/support/request_recording/sql_server` for SqlServer requests
 - When running a test that connects to an external service, first run the test
-  in an environment with connectivity and enable the "Recording Mode" by setting
+  in an environment with connectivity and enable "Recording Mode" by setting
   the environment variable `MARTY_RSPEC_RECORD=true`
 - Should you need to regenerate a test recording, the same environment variable
   can be used to update test recordings.
