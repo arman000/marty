@@ -66,7 +66,7 @@ monit after deployment. An example script is provided in `.application-scripts`
 
 ## Marty SqlServers
 
-Marty comes with support for using the ActiveRecord Sql Server adapter. To use
+Marty comes with support for using the ActiveRecord SQL Server adapter. To use
 this functionality you will need:
 
 - A `config/sql_servers.yml` file that specifies your endpoint configurations,
