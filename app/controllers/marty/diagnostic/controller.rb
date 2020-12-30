@@ -5,7 +5,7 @@ module Marty
 
       def self.inherited(klass)
         namespace = klass.name.deconstantize.split('::')[0] rescue ''
-        Diagnostic::Reporter.namespaces.unshift(namespace)
+        Marty::Diagnostic::Reporter.namespaces.unshift(namespace)
         super
       end
 
