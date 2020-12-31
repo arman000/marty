@@ -62,7 +62,7 @@ class Marty::PromiseJob < Struct.new(:promise,
     promise.set_result(res, locked_by)
     process_hook(res)
   end
-  add_method_tracer :perform, 'PromiseJob/perform'
+  add_method_tracer :perform, 'PromiseJob/performπ'
 
   def process_hook(res)
       return unless hook
