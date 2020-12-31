@@ -1,5 +1,5 @@
 require 'delorean_lang'
-require 'new_relic/agent/method_tracer'
+# require 'new_relic/agent/method_tracer'
 
 class Marty::PromiseJob < Struct.new(:promise,
                                      :title,
@@ -62,7 +62,7 @@ class Marty::PromiseJob < Struct.new(:promise,
     promise.set_result(res, locked_by)
     process_hook(res)
   end
-  add_method_tracer :perform, 'PromiseJob/performπ'
+  # add_method_tracer :perform, 'PromiseJob/perform'
 
   def process_hook(res)
       return unless hook
