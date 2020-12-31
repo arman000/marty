@@ -35,9 +35,7 @@ class Marty::PromiseJob < Struct.new(:promise,
       # in case the job writes to the the database
       Mcfly.whodunnit = promise.user
 
-      self.class.trace_execution_scoped(['Marty/promise_job/perform/engine']) do
-        engine = Marty::ScriptSet.new(tag).get_engine(sname)
-      end
+      engine = Marty::ScriptSet.new(tag).get_engine(sname)
 
       attrs_eval = engine.evaluate(node, attrs, params)
       res = attrs.zip(attrs_eval).each_with_object({}) do |(attr, val), h|
