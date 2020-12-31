@@ -1,4 +1,5 @@
 require 'delorean_lang'
+require 'new_relic/agent/method_tracer'
 
 class Marty::PromiseJob < Struct.new(:promise,
                                      :title,
@@ -34,7 +35,9 @@ class Marty::PromiseJob < Struct.new(:promise,
       # in case the job writes to the the database
       Mcfly.whodunnit = promise.user
 
-      engine = Marty::ScriptSet.new(tag).get_engine(sname)
+      self.class.trace_execution_scoped(['Marty/promise_job/perform/engine']) do
+        engine = Marty::ScriptSet.new(tag).get_engine(sname)
+      end
 
       attrs_eval = engine.evaluate(node, attrs, params)
       res = attrs.zip(attrs_eval).each_with_object({}) do |(attr, val), h|
@@ -59,6 +62,7 @@ class Marty::PromiseJob < Struct.new(:promise,
     promise.set_result(res, locked_by)
     process_hook(res)
   end
+  add_method_tracer :perform, 'PromiseJob/perform'
 
   def process_hook(res)
       return unless hook
