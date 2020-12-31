@@ -24,13 +24,14 @@ group :default do
   end
 end
 
-group :development, :test do
+group :development, :test, :uat do
   gem 'benchmark-ips'
   gem 'capybara'
   gem 'connection_pool'
   gem 'database_cleaner'
   gem 'fuubar', require: false
   gem 'mini_racer'
+  gem 'newrelic_rpm'
   gem 'pry'
   gem 'rails-controller-testing'
   gem 'rspec-instafail', require: false

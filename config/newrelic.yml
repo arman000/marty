@@ -1,0 +1,61 @@
+---
+common: &default_settings
+  # this name is overridden with NEWRELIC_APP_NAME env var in deploy repo
+  app_name: app-default
+
+  # To disable the agent regardless of other settings, uncomment the following:
+  # agent_enabled: false
+
+  # Logging level for log/newrelic_agent.log
+  log_level: info
+
+  # When true, the agent captures HTTP request parameters and attaches them to
+  # transaction traces, traced errors, and TransactionError events.
+  # When using the capture_params setting, the Ruby agent will not filter
+  # sensitive information. To filter sensitive information from request
+  # parameters, use the attributes.include setting instead.
+  capture_params: true
+
+  # The agent collects and reports all uncaught exceptions by default.
+  # These configuration options allow you to customize the error collection.
+  error_collector:
+    # Defines the maximum number of frames in an error backtrace.
+    # Backtraces over this amount are truncated at the beginning and end.
+    max_backtrace_frames: 100
+
+  # Audit log which logs communications with the New Relic collector.
+  # https://docs.newrelic.com/docs/using-new-relic/welcome-new-relic/get-started/glossary#
+  audit_log:
+    enabled: true
+
+  # Distributed tracing lets you see the path that a request takes through your
+  # distributed system. Enabling distributed tracing changes the behavior of
+  # some New Relic features, so carefully consult the transition guide
+  # before you enable this feature.
+  # https://docs.newrelic.com/docs/transition-guide-distributed-tracing
+  distributed_tracing:
+    enabled: true
+
+# Environment-specific settings are in this section.
+# RAILS_ENV or RACK_ENV (as appropriate) is used to determine the environment.
+# If your application has other named environments, configure them here.
+development:
+  <<: *default_settings
+
+  # NOTE: There is substantial overhead when running in developer mode.
+  # Do not use for production or load testing.
+  developer_mode: true
+
+uat:
+  <<: *default_settings
+  developer_mode: true
+
+qa:
+  <<: *default_settings
+
+production:
+  <<: *default_settings
+
+test:
+  <<: *default_settings
+  monitor_mode: false
