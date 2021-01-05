@@ -1,3 +1,7 @@
+18.7.1 - 2021-01-04
+=====================================================
+*  Remove `app/components/marty/import_view.rb` as the component isn't used and is broken.
+
 18.7.0 - 2020-12-21
 =====================================================
 *  Add a function `recreate_views` to Marty::Migration
