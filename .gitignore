@@ -1,5 +1,6 @@
 .bundle/
 /vendor/bundle
+/vendor/cache
 log/*.log
 pkg/
 
