@@ -10,16 +10,13 @@ services:
       - "3000:3000"
     environment:
       - "PORT=3000"
-      - "PATH=/bundle_box/bundle/bin:/usr/local/bundle/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      - "PATH=/bundle_box/bundle/bin:/usr/local/bundle/bin:$PATH"
       - "DEVELOPMENT_DATABASE_URL=postgres://postgres@postgres/marty_dev"
       - "TEST_DATABASE_URL=postgres://postgres@postgres/marty_test"
-      - "HEADLESS_WINDOW_SIZE=1920,1400"
       - "HEADLESS=true"
       - "PGTZ=America/Los_Angeles"
       - "BUNDLER_VERSION=2.1.4"
       - "MARTY_REDIS_URL=redis:6379/1"
-      - "POSTGRES_HOST=postgres"
-    # env_file: ".rbenv-vars"
     depends_on:
       - "postgres"
       - "redis"
@@ -36,6 +33,11 @@ services:
     image: "postgres:11"
     ports:
       - "3030:5432"
+    environment:
+      TZ: 'America/Los_Angeles'
+      PGTZ: 'America/Los_Angeles'
+      POSTGRES_HOST: postgres
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
     volumes:
       - postgresql-data:/var/lib/postgresql/data
 

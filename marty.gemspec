@@ -46,31 +46,32 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.4.2'
 
   # used for signing aws ec2 requests
-  s.add_dependency 'actioncable'
-  s.add_dependency 'aws-sigv4'
+  s.add_dependency 'aws-sigv4', '~> 1.2.2'
   # Only pinning this because there's no other way around it for Axlsx.
   # DO NOT unpin this.
   s.add_dependency 'axlsx', '3.0.0pre'
-  s.add_dependency 'coderay'
-  s.add_dependency 'daemons'
-  s.add_dependency 'delayed_cron_job'
-  s.add_dependency 'delayed_job', '< 4.1.9'
-  s.add_dependency 'delayed_job_active_record', '< 4.1.5'
+  s.add_dependency 'coderay', '~> 1.1.3'
+  s.add_dependency 'daemons', '~> 1.3.1'
+  s.add_dependency 'delayed_cron_job', '~> 0.7.4'
+  s.add_dependency 'delayed_job', '~> 4.1.9'
+  s.add_dependency 'delayed_job_active_record', '~> 4.1.5'
   s.add_dependency 'delorean_lang', '>= 2.6.0'
-  s.add_dependency 'json-schema'
-  s.add_dependency 'mcfly'
+  s.add_dependency 'json-schema', '~> 2.8.1'
+  s.add_dependency 'mcfly', '~> 1.0.0'
   # s.add_dependency 'mini_racer' # FIXME: add mini_racer as dependency once we fix the lambda layer size issue
-  s.add_dependency 'net-ldap'
-  s.add_dependency 'netzke'
-  s.add_dependency 'pg'
-  s.add_dependency 'rails'
-  s.add_dependency 'redis'
-  s.add_dependency 'rubyzip'
+  s.add_dependency 'net-ldap', '~> 0.17.0'
+  s.add_dependency 'netzke', '~> 6.5.0.0'
+  s.add_dependency 'pg', '~> 1.2.2'
+  s.add_dependency 'rails', '>= 5.0.0', '< 6.1'
+  s.add_dependency 'redis', '~> 4.2.5'
+
+  # Constrained to rubyzip 1 because axlsx hasn't been updated and
+  # is not maintained
+  s.add_dependency 'rubyzip', '>= 1.2.1'
   s.add_dependency 'simplecov' # FIXME: Move to cm_shared when it's ready
-  s.add_dependency 'state_machines'
-  s.add_dependency 'state_machines-activerecord'
-  s.add_dependency 'tiny_tds'
-  s.add_dependency 'zip-zip'
+  s.add_dependency 'state_machines', '~> 0.5.0'
+  s.add_dependency 'state_machines-activerecord', '~> 0.6.0'
+  s.add_dependency 'zip-zip', '~> 0.3'
 
   # Development-only Dependencies
   s.add_development_dependency 'pry-byebug'
