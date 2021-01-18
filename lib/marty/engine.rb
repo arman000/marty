@@ -2,22 +2,26 @@ module Marty
   class Engine < ::Rails::Engine
     isolate_namespace Marty
 
+    # Loads all keys from +env.yml+ to +ENV+.
     # @note This gets called before the application's `before_configuration`
     config.before_configuration do
       file_path = Rails.root.join('config/env.yml')
+      next unless File.exist?(file_path)
 
-      if File.exist?(file_path)
-        file = File.open(file_path)
-
+      File.open(file_path) do |file|
         # Safely loads the env.yml file with alises enabled
-        YAML.safe_load(file, [], [], true)[Rails.env].each do |key, value|
+        loaded_yaml = YAML.safe_load(file, aliases: true, filename: file.path)
+
+        loaded_yaml[Rails.env].each do |key, value|
           # If ENV key already exists, don't overwrite it
           ENV[key.to_s] = value.to_s unless ENV[key.to_s]
         end
-
-        file.close
       end
+    end
 
+    # Load all configuration from +credentials.enc.yml+ to +ENV+.
+    # Must have +master.key+ file in +config/+ for this to work properly.
+    config.before_configuration do
       Rails.application.credentials[Rails.env.to_sym]&.each do |key, value|
         ENV[key.to_s] = value.to_s if ENV[key.to_s].blank?
       end
