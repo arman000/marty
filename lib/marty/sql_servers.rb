@@ -7,7 +7,7 @@ rescue LoadError => e
   Rails.logger.info(<<~INFO.squish)
     activerecord-sqlserver-adapter gem not found; skipping initialization...
   INFO
-  return false
+  return
 end
 
 require 'marty/sql_servers/servers'

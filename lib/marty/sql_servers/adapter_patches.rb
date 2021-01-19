@@ -1,3 +1,19 @@
+# frozen_string_literal: true
+
+# FIXME: This is included here as well because +eager_loading+ +lib/+ in Marty
+# causes this to be loaded as well. We might want to figure out a better way
+# to not load optional files.
+#
+# Don't require this file unless the SQL Server adapter can be loaded
+begin
+  require 'activerecord-sqlserver-adapter'
+rescue LoadError => e
+  Rails.logger.info(<<~INFO.squish)
+    activerecord-sqlserver-adapter gem not found; skipping initialization...
+  INFO
+  return
+end
+
 module Marty
   module SqlServers
     # This module is responsible for several patches to the SQL Server adapter,
@@ -8,9 +24,7 @@ module Marty
 
       # Enables the monkey patches by +prepend+ing {AdapterPatches} to the {Adapter}
       def self.enable!
-        Adapter.class_eval do
-          prepend Marty::SqlServers::AdapterPatches
-        end
+        Adapter.prepend(Marty::SqlServers::AdapterPatches)
       end
 
       # Prepends +MS-SQL [#{db_name}]+ to all Transaction names which are used
