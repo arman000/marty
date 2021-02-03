@@ -62,6 +62,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'net-ldap', '~> 0.17.0'
   s.add_dependency 'netzke', '~> 6.5.0.0'
   s.add_dependency 'pg', '~> 1.2.2'
+  s.add_dependency 'psych', '~> 3.3.0'
   s.add_dependency 'rails', '>= 5.0.0', '< 6.1'
   s.add_dependency 'redis', '~> 4.2.5'
 
