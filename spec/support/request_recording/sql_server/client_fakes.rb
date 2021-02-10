@@ -43,8 +43,11 @@ module Marty
               'host' => @spec.config[:host],
               'database' => @spec.config[:database],
             }
-            raise 'Database in episode does not match current database!' unless
-                  episode_database == expected_database
+            emsg = <<~ROAR.squish
+              Database in episode `#{episode_database}` does not match
+              current database `#{expected_database}`!
+            ROAR
+            raise emsg unless episode_database == expected_database
 
             episode_request = episode['request']
             expected_request = {
