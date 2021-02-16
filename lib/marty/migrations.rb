@@ -121,9 +121,19 @@ module Marty::Migrations
                                    unique: true)
   end
 
-  def self.write_view(target_dir, target_view, klass, jsons, excludes, extras)
+  def self.write_view_2(
+    target_dir: 'db/views',
+    target_view:,
+    klass:,
+    jsons: {},
+    excludes: [],
+    extras: [],
+    aliases: {}
+    )
+    aliases_indifferent = aliases.with_indifferent_access
     colnames = klass.columns_hash.keys
     excludes += ['user_id', 'o_user_id']
+
     joins = ['join marty_users u on main.user_id = u.id',
              'left join marty_users ou on main.o_user_id = ou.id']
     columns = ['u.login AS user_name',
@@ -140,6 +150,8 @@ module Marty::Migrations
             columns.push "main.#{c} ->> '#{subc}' as \"#{c}_#{subc}\""
           end
         end
+      elsif aliases_indifferent.keys.include?(c)
+        columns.push "main.#{c} as #{aliases_indifferent[c]}"
       elsif !excludes.include?(c)
         assoc = klass.reflections.find { |(_n, h)| h.foreign_key == c }
         if assoc && assoc[1].klass.columns_hash['name']
@@ -178,6 +190,19 @@ from #{klass.table_name} main
 grant select on #{target_view} to public;
 EOSQL
     end
+  end
+
+  def self.write_view(target_dir, target_view, klass, jsons, excludes, extras)
+    ActiveSupport::Deprecation.warn(
+      "Use #write_view_2 for new development")
+    write_view_2(
+      target_dir: target_dir,
+      target_view: target_view,
+      klass: klass,
+      jsons: jsons,
+      excludes: excludes,
+      extras: extras
+    )
   end
 
   def self.lines_to_crlf(lines)
