@@ -49,6 +49,7 @@ class Marty::SimpleApp < Netzke::Base
     )
 
     c.include :simple_app
+    c.include "#{Marty.root}/app/components/marty/js/addons.js"
   end
 
   def configure(c)

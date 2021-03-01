@@ -14,6 +14,7 @@ class Marty::Grid < ::Netzke::Grid::Base
 
   client_class do |c|
     c.include :grid
+    c.include "#{Marty.root}/app/components/marty/js/addons.js"
   end
 
   ######################################################################
