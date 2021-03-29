@@ -2,7 +2,8 @@ module Marty
   module Secrets
     TERMS = [
       'credential',
-      'key',
+      'api_key',
+      'api-key',
       'password',
       'secret'
     ]
