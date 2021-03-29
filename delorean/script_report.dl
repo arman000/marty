@@ -1,3 +1,5 @@
+import Fields
+
 IdField:
     xtype        = ":numberfield"
     field_label  = "Id"
@@ -10,3 +12,108 @@ PrettyScript:
     form   = [IdField]
     result = Marty::Script.pretty_print(script_id)
     format = "html"
+
+TagField:
+    field_label = "Tag"
+    xtype       = ":combo"
+    name        = "tag_name_and_comment"
+    raw_store       =  [ "%s: %s" % [name, comment]
+                     for name, comment in Marty::Tag.where(
+                             "name != 'DEV'").order(
+                             "name DESC").pluck("name", "comment") ]
+    store = raw_store
+    value       = store[0]
+
+DownloadAll:
+    title =? 'Download All Scripts'
+    tag_name_and_comment =?
+    form = [TagField]
+    format = "zip"
+
+    tag_name =? tag_name_and_comment.split(':').first
+    tag = Marty::Tag.find_by({'name': tag_name})
+
+    scripts = Marty::Script.mcfly_pt(tag.attributes.created_dt)
+    fname_info = {
+        script.attributes.name:
+        Marty::Helper.script_to_filename(script.attributes.name)
+        for script in scripts
+        }
+
+    result = [{
+        'title': fname_info[script.attributes.name]['name'],
+        'path': fname_info[script.attributes.name]['path'],
+        'format': 'dl',
+        'result': script.attributes.body
+        } for script in scripts]
+
+Tag1: TagField
+    field_label = 'Tag 1'
+    name = 'tag_name_and_comment_1'
+    store = ['DEV:'] + raw_store
+
+Tag2: TagField
+    field_label = 'Tag 2'
+    name = 'tag_name_and_comment_2'
+    store = ['DEV:'] + raw_store
+
+DiffReport:
+    title = 'Diff Report'
+    format = 'html'
+    form = [Tag1, Tag2]
+
+    tag_name_and_comment_1 =?
+    tag_name_and_comment_2 =?
+    tag_name_1 =? tag_name_and_comment_1.split(':').first
+    tag_name_2 =? tag_name_and_comment_2.split(':').first
+
+    # either use the passed in value, or default such that:
+    # if one value is given the other will be defaulted to DEV
+    # if no values are given, one is DEV and the other is the first tag
+    raw_name_1 = tag_name_1 || 'DEV'
+    raw_name_2 = tag_name_2 ||
+        (if raw_name_1 != 'DEV' then 'DEV'
+         else Marty::Tag.where("name != 'DEV'").order(
+                 {'created_dt': 'DESC'}).first.attributes.name
+         )
+
+    # sort so the second tag is most recent
+    name_a = (if raw_name_1 == 'DEV' then [raw_name_2, raw_name_1]
+              else [raw_name_1, raw_name_2].sort)
+
+    use_name_1 = name_a.first
+    use_name_2 = name_a.last
+
+    tag_1 = Marty::Tag.find_by({'name': use_name_1}).attributes
+    tag_1_cd =  if use_name_1 == 'DEV' then 'infinity' else tag_1.created_dt
+    tag_1_scripts = [s.attributes for s in Marty::Script.mcfly_pt(tag_1_cd)]
+    tag_1_h = {scr.name: scr.body for scr in tag_1_scripts}
+
+    tag_2 = Marty::Tag.find_by({'name': use_name_2}).attributes
+    tag_2_cd =  if use_name_2 == 'DEV' then 'infinity' else tag_2.created_dt
+    tag_2_scripts = [s.attributes for s in  Marty::Script.mcfly_pt(tag_2_cd)]
+    tag_2_h = {scr.name: scr.body for scr in tag_2_scripts}
+
+    all_names = (tag_1_h.keys() + tag_2_h.keys()).to_set.to_a.sort
+
+    diffs = if use_name_1 == use_name_2 then ERR('same tag selected')
+        else
+        [[name,
+          (if tag_1_h[name] && tag_2_h[name]
+           then Marty::Helper.diff(tag_1_h[name], tag_2_h[name])
+           elsif tag_1_h[name] && !tag_2_h[name]
+           then "script %s in %s but not %s" % [name, tag_name_1, tag_name_2]
+           elsif !tag_1_h[name] && tag_2_h[name]
+           then "script %s in %s but not %s" % [name, tag_name_1, tag_name_2]
+           else "")]
+         for name in all_names
+        ]
+
+    stars = "********************************************"
+    result = "<pre>\n" +
+        ("%s compared to %s\n" % [tag_2.name, tag_1.name]) + [
+        if diff.strip.length > 0 then
+        ("%s\n\n%s\n\n" % [stars, name]) + Marty::Helper.ltgt(diff)
+        else ""
+        for name, diff in diffs
+        ].join('') + "</pre>"

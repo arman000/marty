@@ -1,7 +1,7 @@
 module Marty
   module RSpec
     module DownloadHelper
-      TIMEOUT = 10
+      TIMEOUT = 30
       PATH    = Rails.root.join('spec/tmp/downloads')
 
       ACCEPTED_EXTS = ['.xlsx', '.csv']

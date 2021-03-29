@@ -56,6 +56,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'delayed_job', '~> 4.1.9'
   s.add_dependency 'delayed_job_active_record', '~> 4.1.5'
   s.add_dependency 'delorean_lang', '>= 2.6.0'
+  s.add_dependency 'diffy', '>= 3.4.0'
   s.add_dependency 'json-schema', '~> 2.8.1'
   s.add_dependency 'mcfly', '~> 1.0.0'
   # s.add_dependency 'mini_racer' # FIXME: add mini_racer as dependency once we fix the lambda layer size issue

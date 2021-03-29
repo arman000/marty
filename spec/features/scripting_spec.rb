@@ -1,3 +1,4 @@
+require 'zip'
 feature 'under Applications menu, Scripting workflows', js: true, speed: :slow do
   before(:all) do
     self.use_transactional_tests = false
@@ -50,7 +51,7 @@ feature 'under Applications menu, Scripting workflows', js: true, speed: :slow d
 
       # create 3 additional tags and modify A5 in the process
       (1..3).each do |i|
-        body = Marty::Script.find_by(name: 'A5').body
+        body = Marty::Script.mcfly_pt('infinity').find_by(name: 'A5').body
 
         Marty::Script.
           load_script_bodies({
@@ -378,6 +379,96 @@ feature 'under Applications menu, Scripting workflows', js: true, speed: :slow d
 
     and_by 'delete did not work' do
        expect(find(:msg)).to have_content 'Can only delete in DEV tag'
+    end
+  end
+
+  describe 'diff and download' do
+    before(:each) do
+      load_scripts(nil, Time.zone.now)
+      body = Marty::Script.mcfly_pt('infinity').find_by(name: 'A2').body
+
+      Marty::Script.
+        load_script_bodies({
+                             'A2' => body + '# extra1'
+                           }, Time.zone.now + 1.minute)
+
+      Marty::Script.
+        load_a_script('A2', body + '# extra2', Time.zone.now + 2.minutes)
+    end
+
+    let(:script_grid) { netzke_find('script_grid') }
+    let(:tag_grid) { netzke_find('tag_grid') }
+
+    def dlget(*lines)
+      by 'select two tags' do
+        wait_for_ajax
+        tag_grid.select_row_range(*lines) if lines.present?
+      end
+      press('Diff')
+      wait_for_download
+      f = download
+      contents = File.read(f)
+      FileUtils.rm_f(downloads)
+      contents
+    end
+
+    it 'diff output' do
+      log_in_as('dev1')
+      go_to_scripting
+
+      contents = dlget(2, 3)
+      expect(contents).to include('+# extra1')
+      expect(contents).not_to include('extra2')
+
+      contents = dlget(1, 2)
+      expect(contents).to include('-# extra1')
+      expect(contents).to include('+# extra2')
+
+      go_to_scripting
+
+      contents = dlget
+      expect(contents).to include('-# extra1')
+      expect(contents).to include('+# extra2')
+    end
+
+    it 'zip download' do
+      log_in_as('dev1')
+      go_to_scripting
+
+      tag_grid.select_row(2)
+      press('Download All Tag')
+      wait_for_download
+      filename = download
+      data = {}
+      Zip::File.open(filename) do |zip_file|
+        zip_file.each do |f|
+          data[f.name] = f.get_input_stream.read
+        end
+      end
+      FileUtils.rm_f(downloads)
+      expkeys = ['test_namespace/nested_namespace/test.dl',
+                 'test_namespace/test.dl (1)',
+                 'base_code.dl',
+                 'styles.dl',
+                 'data_report.dl',
+                 'fields.dl',
+                 'table_report.dl',
+                 'script_report.dl',
+                 'jobs.dl',
+                 'delorean_fn.dl',
+                 'blame_report.dl',
+                 'enum_report.dl',
+                 'promises.dl',
+                 'data_grid_report.dl',
+                 'a1.dl',
+                 'a3.dl',
+                 'a4.dl',
+                 'a5.dl',
+                 'a2.dl'].sort
+      expect(data.keys.sort).to eq(expkeys)
+      a2data = data['a2.dl']
+      exp_a2data = "#2\n# extra1"
+      expect(a2data).to eq(exp_a2data)
     end
   end
 end

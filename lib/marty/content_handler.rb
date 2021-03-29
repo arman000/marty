@@ -31,7 +31,7 @@ module Marty::ContentHandler
         res = to_zip(data)
       when nil, 'json'
         res, format = data.to_json, 'json'
-      when 'html', 'xml', 'pdf'
+      when 'html', 'xml', 'pdf', 'dl'
         res = data.to_s
       else
         res, format = { error: "Unknown format: #{format}" }.to_json, 'json'
@@ -63,12 +63,14 @@ module Marty::ContentHandler
     filename
   end
 
-  def self.to_zip_stream(stream, path, data)
+  def self.to_zip_stream(stream, inpath, data)
     fset = Set.new
 
     data.each do |r|
-      title, format, result = r['title'], r['format'], r['result']
+      fields = %w[path title format result]
+      raw_path, title, format, result = r.values_at(*fields)
 
+      path = inpath + (raw_path || [])
       log_and_raise 'Result has no title' unless title
       log_and_raise 'Result has no result' unless result
 
