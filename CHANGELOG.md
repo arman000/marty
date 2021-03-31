@@ -1,3 +1,7 @@
+18.9 - 2021-03
+=====================================================
+* Store and display report execution history
+
 18.7.1 - 2021-01-04
 =====================================================
 *  Remove `app/components/marty/import_view.rb` as the component isn't used and is broken.

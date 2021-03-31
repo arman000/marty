@@ -60,14 +60,18 @@ class Marty::ReportForm < Marty::Form
     raise 'no selected report node' unless String === node
 
     begin
+      execution_log = Marty::ReportExecution.create!(report: node)
       engine.evaluate(node, 'result', d_params)
     rescue StandardError => e
       Marty::Util.logger.error "run_eval failed: #{e.backtrace}"
+      execution_log.update!(error: true)
 
       res = Delorean::Engine.grok_runtime_exception(e)
       res['backtrace'] =
         res['backtrace'].map { |m, line, fn| "#{m}:#{line} #{fn}" }.join('\n')
       res
+    ensure
+      execution_log.update!(completed_at: Time.zone.now)
     end
   end
 
@@ -79,9 +83,13 @@ class Marty::ReportForm < Marty::Form
     return client.netzke_notify 'Insufficient permissions to run report!' unless
       engine
 
+    execution_log = Marty::ReportExecution.create!(report: node)
+
+    params_with_hook = d_params + { 'p_hook' => execution_log }
+
     # start background promise to get report result
     engine.background_eval(node,
-                           d_params,
+                           params_with_hook,
                            ['result', 'title', 'format'],
                           )
 

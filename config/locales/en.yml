@@ -22,6 +22,9 @@ en:
   data_grid: Data Grids Admin
   data_grid_user: Data Grids
   data_grid_user_view: Data Grids
+  report_execution: Report History
+  report_execution_view: Report History
+
 
   data_import_view:
     import: Import
@@ -187,4 +190,4 @@ en:
     perm_view: Can View
     perm_edit_data: Can Edit Data
     perm_edit_all: Can Edit All
-    
+

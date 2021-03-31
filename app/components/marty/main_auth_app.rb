@@ -13,6 +13,7 @@ require_relative 'notifications/deliveries_view'
 require_relative 'postings/new_window'
 require_relative 'postings/window'
 require_relative 'promise_view'
+require_relative 'report_execution_view'
 require_relative 'reporting'
 require_relative 'scripting'
 require_relative 'users/user_view'
@@ -121,6 +122,7 @@ class Marty::MainAuthApp < Marty::AuthApp
         :data_grid_view,
         :data_grid_user_view,
         :reporting,
+        :report_execution_view,
         :scripting,
         :promise_view,
       ],
@@ -219,6 +221,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.text      = I18n.t('reports')
     a.handler   = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-file-alt glyph'
+    a.disabled  = !self.class.has_any_perm?
+  end
+
+  action :report_execution_view do |a|
+    a.text      = I18n.t('report_execution_view')
+    a.handler   = :netzke_load_component_by_action
+    a.icon_cls = 'fas fa-user-clock'
     a.disabled  = !self.class.has_any_perm?
   end
 
@@ -559,6 +568,10 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   component :promise_view do |c|
     c.klass = Marty::PromiseView
+  end
+
+  component :report_execution_view do |c|
+    c.klass = Marty::ReportExecutionView
   end
 
   component :reporting
