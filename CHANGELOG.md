@@ -1,3 +1,8 @@
+19.1.0 - 2020-04-23
+====================================================
+* add functionality to scripting page for DIFFing tags, downloading
+  all scripts for a given tag, and uploading a zip of scripts
+
 19.0.0 - 2021-04-20
 =====================================================
 * Allow only admins to view API auth keys.
@@ -389,4 +394,3 @@ future
 12.0.0 - 2020-04-02
 =================
 * Marty::PostingType converted to PgEnum. AR methods (find_by, all, etc...) will no longer work.
-

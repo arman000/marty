@@ -102,9 +102,9 @@ DiffReport:
           (if tag_1_h[name] && tag_2_h[name]
            then Marty::Helper.diff(tag_1_h[name], tag_2_h[name])
            elsif tag_1_h[name] && !tag_2_h[name]
-           then "script %s in %s but not %s" % [name, tag_name_1, tag_name_2]
+           then "script %s in %s but not %s\n\n" % [name, use_name_1, use_name_2]
            elsif !tag_1_h[name] && tag_2_h[name]
-           then "script %s in %s but not %s" % [name, tag_name_1, tag_name_2]
+           then "script %s in %s but not %s\n\n" % [name, use_name_2, use_name_1]
            else "")]
          for name in all_names
         ]

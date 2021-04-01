@@ -152,7 +152,6 @@ class Marty::ScriptGrid < Marty::Grid
 
             Marty::Script.load_a_script(script_full_final, script_body)
             status << "#{script_full_final} was loaded."
-
           rescue Delorean::ParseError => e
             Marty::Logger.error(name, {
                                   error: e.message,

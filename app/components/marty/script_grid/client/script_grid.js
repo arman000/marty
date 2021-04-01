@@ -3,32 +3,32 @@
     this.listeners = {
       drop: {
         element: "el",
-        fn: "drop",
+        fn: "drop"
       },
 
       dragstart: {
         element: "el",
-        fn: "addDropZone",
+        fn: "addDropZone"
       },
       dragenter: {
         element: "el",
-        fn: "addDropZone",
+        fn: "addDropZone"
       },
 
       dragover: {
         element: "el",
-        fn: "addDropZone",
+        fn: "addDropZone"
       },
 
       dragleave: {
         element: "el",
-        fn: "removeDropZone",
+        fn: "removeDropZone"
       },
 
       dragexit: {
         element: "el",
-        fn: "removeDropZone",
-      },
+        fn: "removeDropZone"
+      }
     };
 
     this.callParent();
@@ -71,28 +71,26 @@
   },
 
   uploadFiles(files) {
-      const me = this;
+    const me = this;
 
-      if (files.length != 1 || !files[0].name.toLowerCase().endsWith('.zip'))
-          return this.netzkeNotify("Please upload a single .zip file");
+    if (files.length != 1 || !files[0].name.toLowerCase().endsWith(".zip"))
+      return this.netzkeNotify("Please upload a single .zip file");
 
-      const file = files[0];
-      const reader = new FileReader();
-      
-      reader.onloadend = function (e) {
-          me.server.uploadZip(file.name, e.target.result)
-      }
-      reader.readAsDataURL(file);
+    const file = files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = function(e) {
+      me.server.uploadZip(file.name, e.target.result);
+    };
+    reader.readAsDataURL(file);
   },
 
   drop(e) {
-      e.stopEvent();
-      this.performDrop(Array.from(e.browserEvent.dataTransfer.files));
+    e.stopEvent();
+    this.performDrop(Array.from(e.browserEvent.dataTransfer.files));
   },
 
   performDrop(files) {
-    const me = this;
-
     this.uploadFiles(files);
     this.removeCls("drag-over");
   }
