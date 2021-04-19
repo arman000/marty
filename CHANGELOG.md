@@ -1,3 +1,8 @@
+NEXT
+=====================================================
+* Raise in an error in `Marty::SqlServers.[]` if no client instance is found
+  for the specific database.
+
 18.9 - 2021-03
 =====================================================
 * Store and display report execution history
