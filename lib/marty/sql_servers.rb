@@ -121,8 +121,15 @@ module Marty
     #
     # @param db_name [String] The name of the db (e.g., +my_sql_server_db+)
     # @return [Marty::SqlServers::Client] The {Client} instance for DB +db_name+
+    # @raise [NameError] if no such database client is found
     def self.[](db_name)
-      @clients[db_name]
+      found_client_instance = @clients[db_name]
+      raise NameError, <<~ERROR.squish unless found_client_instance
+        No Marty::SqlServers client instantiated with for the DB named "#{db_name}"
+        in the current environment.
+      ERROR
+
+      found_client_instance
     end
   end
 end
