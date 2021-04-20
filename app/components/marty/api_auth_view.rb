@@ -1,6 +1,6 @@
 class Marty::ApiAuthView < Marty::McflyGridPanel
   has_marty_permissions create: :admin,
-                        read: :any,
+                        read: :admin,
                         update: :admin,
                         delete: :admin
 
