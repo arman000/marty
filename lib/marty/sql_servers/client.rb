@@ -3,6 +3,9 @@ module Marty
     # {Client} provides the interface for all actual interactions with the
     # database from code.
     class Client
+      # The maximum amount of times a connection to the SQL Server will be
+      # re-established upon some query error.
+      MAX_RETRY_COUNT = 3
       ConnectionHandler = ::ActiveRecord::ConnectionAdapters::ConnectionHandler
       include ActiveSupport::Callbacks
 
@@ -100,7 +103,8 @@ module Marty
       # @return [void]
       def ensure_connection!
         @pool.connection
-        raise ActiveRecord::ConnectionNotEstablished unless @pool.connected?
+        raise ActiveRecord::ConnectionNotEstablished unless @pool.connected? ||
+                                                            @pool.active_connection?
       end
 
       private
@@ -108,6 +112,18 @@ module Marty
       define_callbacks :instrumentation
       set_callback :instrumentation, :before, :ensure_connection!
 
+      # Handles the main portion of sending a query to the SQL Server adapter,
+      # while taking care of instrumenting the query to specific subscribers
+      # that are interested.
+      #
+      # It uses whatever connection it can find for the thread, or checks out
+      # a new one. It also implements an a retry mechanism,
+      # in case a database connection dies and is not reaped.
+      # @see MAX_RETRY_COUNT
+      #
+      # @raise [StandardError] in case any failures happen with the process of
+      #   querying, re-connection, or any of the lifecycle methods of the
+      #   connection pool.
       # @return [void]
       def instrument_query(method_name, sql, vars: {})
         event_name = 'sql.sqlserver'
@@ -125,13 +141,31 @@ module Marty
         result = {}
 
         listeners_state = @instrumenter.start(event_name, request_data)
+        retry_count = 0
         begin
+          current_conn = @pool.connection
           result = if block_given?
                      yield
                    else
-                     @pool.connection.send(method_name, sql)
+                     current_conn.send(method_name, sql)
                    end
         rescue StandardError => e
+          # There can be situations where the connection to SQL Server dies,
+          # but is not reaped by ActiveRecord. In this case, we want to release
+          # the connection (which expires it) for the current Thread and retry
+          # the operation, checking out a new connection in the process that will
+          # hopefully work.
+          if !current_conn.active? && retry_count < MAX_RETRY_COUNT
+            Rails.logger.warn(<<~WARN.squish)
+              Dead SQL Server connection to host "#{@spec.config[:host]}".
+              Attempting to re-establish...
+            WARN
+
+            @pool.release_connection
+            retry_count += 1
+            retry
+          end
+
           result[:exception] = [e.class.name, e.message]
           result[:exception_object] = e
           raise e

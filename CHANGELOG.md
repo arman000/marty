@@ -1,7 +1,14 @@
-NEXT
+18.11.0 - 2021-04-20
 =====================================================
+* Add a retry mechanism to `Marty::SqlServers::Client`. Attempts to release the
+  connection on possible errors where the DB might not be reaping a dead connection,
+  and re-establish a new connection.
 * Raise in an error in `Marty::SqlServers.[]` if no client instance is found
   for the specific database.
+
+18.10.0 - 2021-04-20
+=====================================================
+* Add support for XML reports in `Marty::ContentHandler`.
 
 18.9 - 2021-03
 =====================================================
