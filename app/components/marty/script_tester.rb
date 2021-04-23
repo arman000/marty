@@ -1,6 +1,9 @@
 class Marty::ScriptTester < Marty::Form
   include Marty::Extras::Layout
 
+  has_marty_permissions \
+    submit: [:dev, :admin]
+
   def configure(c)
     super
 
@@ -87,10 +90,11 @@ class Marty::ScriptTester < Marty::Form
   end
 
   action :apply do |a|
+    roles = Mcfly.whodunnit.roles
     a.text     = I18n.t('script_tester.compute')
     a.tooltip  = I18n.t('script_tester.compute')
     a.icon_cls = 'fa fa-bug glyph'
-    a.disabled = false
+    a.disabled = !(roles.include?('admin') || roles.include?('dev'))
   end
 
   component :result do |c|

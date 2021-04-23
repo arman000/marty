@@ -1,3 +1,8 @@
+19.0.0 - 2021-04-20
+=====================================================
+* Allow only admins to view API auth keys.
+* Allow only devs and admins to run scripts in Scripting editor.
+
 18.11.0 - 2021-04-20
 =====================================================
 * Add a retry mechanism to `Marty::SqlServers::Client`. Attempts to release the
