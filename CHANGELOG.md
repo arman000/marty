@@ -2,6 +2,7 @@
 =====================================================
 * Allow only admins to view API auth keys.
 * Allow only devs and admins to run scripts in Scripting editor.
+* Patch 1: Fix icons for Report Execution History
 
 18.11.0 - 2021-04-20
 =====================================================
