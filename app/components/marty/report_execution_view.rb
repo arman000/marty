@@ -43,7 +43,7 @@ class Marty::ReportExecutionView < Marty::Grid
   action :cleanup do |a|
     a.text     = a.tooltip = 'Clear'
     a.disabled = false
-    a.icon_cls = 'fas fa-trash-alt'
+    a.icon_cls = 'fa fa-trash-alt'
     a.hidden   = !self.class.has_perm?(:admin)
   end
 

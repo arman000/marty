@@ -227,7 +227,7 @@ class Marty::MainAuthApp < Marty::AuthApp
   action :report_execution_view do |a|
     a.text      = I18n.t('report_execution_view')
     a.handler   = :netzke_load_component_by_action
-    a.icon_cls = 'fas fa-user-clock'
+    a.icon_cls = 'fa fa-user-clock'
     a.disabled  = !self.class.has_any_perm?
   end
 
