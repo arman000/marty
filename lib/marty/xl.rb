@@ -334,6 +334,12 @@ class Marty::Xl
     end
   end
 
+  def add_custom_style(style, types_map)
+    raise 'bad style' unless style.is_a?(Array)
+
+    style.map { |iden| types_map[iden] }
+  end
+
   def intern_range(ws, range)
     return range if range.is_a? String
     raise "bad range #{range}" unless range.is_a?(Array) && range.length == 4
@@ -377,10 +383,16 @@ class Marty::Xl
     count == 0 ? new_ops.sort : recalc_offsets(new_ops)
   end
 
+  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/CyclomaticComplexity
+  # rubocop:disable Metrics/PerceivedComplexity
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Lint/ShadowingOuterLocalVariable
   def apply_relative_worksheet_ops(ws, ops)
     non_pos = ops.select { |opl| opl[0] != 'pos' }
     ops_pos = ops.select { |opl| opl[0] == 'pos' }
     ops_brd = ops.select { |opl| opl[0] == 'border' }
+    types_map = {} # handle custom style formatting
 
     if (ops_pos.count > 0)
       # Wrap all non-pos options in a pos option with offset 0, 0:
@@ -397,6 +409,8 @@ class Marty::Xl
     ops.each do |opl|
       raise "bad op #{opl}" unless opl.length > 1
 
+      # TODO ['pos', ...], ['row', ] ??? Why is the format like this?
+      #          ['pos' => ...]
       case opl[0]
       when 'pos'
         op, offset, data = opl
@@ -438,7 +452,12 @@ class Marty::Xl
 
         options = self.class.symbolize_keys(options || {}, ':')
 
-        options[:style] = add_style(options[:style]) if options[:style]
+        if options[:style]
+          options[:style] = add_style(options[:style])
+        elsif options[:custom_style]
+          options[:style] = add_custom_style(options[:custom_style], types_map)
+          data = data.map { |str| Marty::DateUtil.convert_date_str(str) }
+        end
 
         ws.add_row data, options
 
@@ -506,6 +525,11 @@ class Marty::Xl
           image.start_at x1, y1
           image.end_at x2, y2 if x2.is_a?(Integer) && y2.is_a?(Integer)
         end
+      when 'custom_style'
+        # add types for custom style generation
+        types_map = opl[1].each_with_object({}) do |(type, format), h|
+          h[type] = package.workbook.styles.add_style(format_code: format)
+        end
       else
         raise "unknown op #{opl[0]}"
       end
@@ -513,6 +537,11 @@ class Marty::Xl
     worksheet_rows(ws, rows, styles, row_styles, format, borders, images) unless
       [ops_pos.count, ops_brd.count].all? { |a| a == 0 }
   end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/CyclomaticComplexity
+  # rubocop:enable Metrics/PerceivedComplexity
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Lint/ShadowingOuterLocalVariable
 
   # recursive symbolize_keys. FIXME: this belongs in a generic
   # library somewhere.
