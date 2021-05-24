@@ -38,10 +38,10 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
     parsed = Hash.from_xml(resp)
 
     # check AWS response for errors
-    error = parsed.dig('Response', 'Errors', 'Error')
+    error = parsed&.dig('Response', 'Errors', 'Error')
     raise Marty::Diagnostic::Aws::Error.new(action, error) if error
 
-    action_resp = parsed["#{action}Response"]
+    action_resp = parsed&.dig("#{action}Response")
     raise Marty::Diagnostic::Aws::Error.new(action, parsed) unless action_resp
 
     action_resp
@@ -55,7 +55,7 @@ class Marty::Diagnostic::Aws::Ec2Instance < Marty::Aws::Request
               'Filter.2.Value.1' => 'Name' }
 
     action_resp = ec2_request(action, params)
-    tag = action_resp.dig('tagSet', 'item', 'value')
+    tag = action_resp&.dig('tagSet', 'item', 'value')
     raise Marty::Diagnostic::Aws::Error.new(action, action_resp) unless tag
 
     tag
