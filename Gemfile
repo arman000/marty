@@ -25,7 +25,7 @@ group :default do
 end
 
 group :development, :test do
-  gem 'benchmark-ips'
+  gem 'benchmark-ips', '~> 2.8.0'
   gem 'capybara'
   gem 'connection_pool'
   gem 'database_cleaner'
