@@ -1,3 +1,5 @@
+require 'zip'
+
 class Marty::ScriptGrid < Marty::Grid
   has_marty_permissions \
     create: [:dev],
@@ -108,6 +110,77 @@ class Marty::ScriptGrid < Marty::Grid
     c.text      = I18n.t('script_grid.tag')
     c.flex      = 1
     c.getter    = lambda { |r| r.find_tag.try(:name) }
+  end
+
+  endpoint :upload_zip do |_zip_name, data64|
+    begin
+      next client.netzke_notify "#{file_name}: Permission Denied" unless
+        config[:permissions][:create]
+
+      rawdata64 = data64.sub(/data:.*;base64,/, '')
+      data = Base64.decode64(rawdata64)
+
+      status = []
+      Zip::ZipInputStream.open(StringIO.new(data)) do |io|
+        while (entry = io.get_next_entry)
+          script_full = entry.name.split('/')
+          script_name = script_full.pop
+
+          script_path = if script_full.first == 'delorean'
+                          script_full[1..-1]
+                        else
+                          script_full
+                        end
+          script_lhs = script_path.map(&:camelize).join('::')
+          next unless script_name.ends_with?('.dl')
+
+          script_name_final = script_name.sub(/.dl$/, '').camelize
+          script_full_final = if script_lhs.present?
+                                "#{script_lhs}::#{script_name_final}"
+                              else
+                                script_name_final
+                              end
+          script_body = entry.get_input_stream.read
+          body_lines = script_body.lines.each_with_index.map do |line, ind|
+            [ind, line.chomp]
+          end
+
+          begin
+            # check syntax
+            dev = Marty::Tag.find_by(name: 'DEV')
+            Marty::ScriptSet.new(dev).parse_check(script_full_final, script_body)
+
+            Marty::Script.load_a_script(script_full_final, script_body)
+            status << "#{script_full_final} was loaded."
+          rescue Delorean::ParseError => e
+            Marty::Logger.error(name, {
+                                  error: e.message,
+                                  line: e.line,
+                                  script: script_name_final,
+                                  body_lines: body_lines
+                                })
+            status <<
+              "#{script_full_final} parsing error: #{e.message} line: #{e.line}"
+          rescue StandardError => e
+            Marty::Logger.error(name, {
+                                  error: e.message,
+                                  script: script_name_final,
+                                  body_lines: body_lines,
+                                  stack: e.backtrace.select do |str|
+                                    str.include?('script_grid')
+                                  end
+                                })
+            status << "#{script_full_final} error: #{e.message}"
+          end
+        end
+      end
+
+      Marty::Logger.info(name, {
+                           status: status
+                         })
+      client.netzke_notify status.join("<br>\n")
+      client.reload
+    end
   end
 end
 

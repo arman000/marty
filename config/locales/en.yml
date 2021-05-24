@@ -50,6 +50,8 @@ en:
 
   tag_grid:
     new: New Tag
+    dl: Download All Tag
+    diff: Diff
 
   script_grid:
     title: Scripts

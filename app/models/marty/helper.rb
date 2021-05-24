@@ -1,4 +1,5 @@
 require 'csv'
+require 'diffy'
 
 class Marty::Helper
   include Delorean::Model
@@ -61,5 +62,22 @@ class Marty::Helper
     data, config = args
 
     Marty::DataExporter.to_csv(data, config)
+  end
+
+  delorean_fn :script_to_filename do |string|
+    parts = string.to_s.split('::').map(&:underscore)
+    name = parts.pop
+    {
+      'path' => parts,
+      'name' => name
+    }
+  end
+
+  delorean_fn :diff do |s1, s2|
+    Diffy::Diff.new(s1, s2, include_diff_info: true, diff: '-U10').to_s('text')
+  end
+
+  delorean_fn :ltgt do |string|
+    string.gsub('<', '&lt;').gsub('>', '&gt;')
   end
 end
