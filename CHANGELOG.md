@@ -1,7 +1,10 @@
-19.1.0 - 2020-04-23
-====================================================
-* add functionality to scripting page for DIFFing tags, downloading
-  all scripts for a given tag, and uploading a zip of scripts
+19.1.1 - 2021-05
+=====================================================
+* Safe navigate while parsing in Nodes diag
+
+19.1.0 - 2021-05
+=====================================================
+* Add styles to Marty::XL
 
 19.0.0 - 2021-04-20
 =====================================================
