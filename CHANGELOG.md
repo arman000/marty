@@ -1,3 +1,10 @@
+19.2.1 - 2021-05
+=====================================================
+* Add simple token authentication for HTTP API endoints by creating
+controllers that inherit from `Marty::Api::HttpController`.
+* Add ability to create API tokens for HTTP APIs from 
+the API Auth page.
+
 19.1.1 - 2021-05
 =====================================================
 * Safe navigate while parsing in Nodes diag

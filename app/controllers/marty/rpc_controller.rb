@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Marty::RpcController < ActionController::Base
   INTERNAL_SERVER_ERROR   = { error: 'internal server error' }
   PERMISSION_DENIED_ERROR = { error: 'Permission denied' }
