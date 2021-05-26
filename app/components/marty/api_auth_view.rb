@@ -1,13 +1,13 @@
 class Marty::ApiAuthView < Marty::McflyGridPanel
   has_marty_permissions create: :admin,
-                        read: :admin,
-                        update: :admin,
-                        delete: :admin
+    read: :admin,
+    update: :admin,
+    delete: :admin
 
   def configure(c)
     super
 
-    c.title   = I18n.t('api_auth', default: 'API Authorization')
+    c.title   = I18n.t('api_auth', default: 'RPC API Authorization')
     c.model   = 'Marty::ApiAuth'
     c.attributes = [:app_name, :api_key, :script_name]
     c.store_config.merge!(sorters: [{ property: :app_name, direction: 'ASC' }])

@@ -1,4 +1,5 @@
 require_relative 'api_auth_view'
+require_relative 'http_api_auth_view'
 require_relative 'api_config_view'
 require_relative 'api_log_view'
 require_relative 'background_job/delayed_jobs_grid'
@@ -72,6 +73,7 @@ class Marty::MainAuthApp < Marty::AuthApp
         disabled: !self.class.has_perm?(:admin),
         menu: [
           :api_auth_view,
+          :http_api_auth_view,
           :api_config_view,
           :api_log_view,
         ]
@@ -255,7 +257,14 @@ class Marty::MainAuthApp < Marty::AuthApp
   end
 
   action :api_auth_view do |a|
-    a.text      = 'API Auth Management'
+    a.text      = 'RPC API Auth Management'
+    a.handler   = :netzke_load_component_by_action
+    a.icon_cls = 'fa fa-key glyph'
+    a.disabled = !self.class.has_perm?(:admin)
+  end
+
+  action :http_api_auth_view do |a|
+    a.text      = 'HTTP API Auth Management'
     a.handler   = :netzke_load_component_by_action
     a.icon_cls = 'fa fa-key glyph'
     a.disabled = !self.class.has_perm?(:admin)
@@ -526,6 +535,10 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   ######################################################################
   component :api_auth_view do |c|
+    c.disabled = Marty::Util.warped?
+  end
+
+  component :http_api_auth_view do |c|
     c.disabled = Marty::Util.warped?
   end
 
