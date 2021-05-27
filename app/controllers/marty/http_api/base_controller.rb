@@ -19,7 +19,11 @@ module Marty
       end
 
       def auth_procedure(token, _options)
-        api = Marty::HttpApiAuth.find_by(token: token)
+        api = Marty::HttpApiAuth.find_by(
+          obsoleted_dt: 'infinity',
+          token: token
+        )
+
         check_authorizations(api.authorizations) if api
       end
 
