@@ -7,7 +7,9 @@ module Marty
     # You may restrict which path and method can be access for a particular token (token).
     # To limit which endpoints can be accessed, add a list of path and mathods to the
     # +authorizations+ in {Marty::HttpApiAuth}.
-    class BaseController < ApplicationController
+    class BaseController < ActionController::API
+      include ActionController::HttpAuthentication::Token::ControllerMethods
+
       before_action :authenticate
 
       private
