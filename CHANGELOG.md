@@ -1,3 +1,7 @@
+19.2.3 - 2021-05
+=====================================================
+* Fixed that `Marty::HttpApiAuth::BaseController` inherits from `ActionController::API`
+
 19.2.2 - 2021-05
 =====================================================
 * Fixed that http api auth uses McFly
