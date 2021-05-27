@@ -1,5 +1,4 @@
 class Marty::HttpApiAuth < Marty::Base
-  mcfly
 
   UNFETTERED_ACCESS_CHARS = [nil, '', '*']
 
