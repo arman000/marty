@@ -24,7 +24,7 @@ module Marty
         api = Marty::HttpApiAuth.find_by(
           obsoleted_dt: 'infinity',
           token: token
-          )
+        )
 
         check_authorizations(api.authorizations) if api
       end
