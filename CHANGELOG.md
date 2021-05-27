@@ -1,3 +1,7 @@
+19.2.2 - 2021-05
+=====================================================
+* Fixed that http api auth uses McFly
+
 19.2.1 - 2021-05
 =====================================================
 * Add simple token authentication for HTTP API endoints by creating
