@@ -34,8 +34,10 @@ module Marty
 
         # Recreate V8, load package and try again
         recreate_v8
+
         package = loader.package(pt: loader.closest_package_pt(pt: pt))
         load_package(package: package)
+
         v8.call('call', pt.to_s, hash)
       rescue MiniRacer::ScriptTerminatedError => e
         logger.log(
@@ -94,10 +96,12 @@ module Marty
       end
 
       def js_script(pt:, script:)
+        # Zeus returns a bundle within `var zeus_bundled_code = ...`.
+        # We can use that var in order to access the package.
         <<~JS
-          var pt = "#{pt}"
-          var loaded_script = #{script};
-          scripts[pt] = loaded_script;
+          var pt = "#{pt}";
+          #{script};
+          scripts[pt] = zeus_bundled_code;
         JS
       end
 

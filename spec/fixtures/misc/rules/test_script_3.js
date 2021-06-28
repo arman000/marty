@@ -1,4 +1,4 @@
-/******/ (function(modules) { // webpackBootstrap
+/******/ var zeus_bundled_code = (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
