@@ -1,3 +1,7 @@
+19.2.4 - 2021-06
+=====================================================
+* Fixed `SharedConnectionDbHelpers` so that tests would work with Rails >= 6.0.4
+
 19.2.3 - 2021-05
 =====================================================
 * Fixed that `Marty::HttpApiAuth::BaseController` inherits from `ActionController::API`
