@@ -12,6 +12,7 @@ module Marty; module RSpec; module SharedConnectionDbHelpers
   end
 
   def restore_clean_db(clean_file, remove_file = true)
+    use_transactional_tests_original = use_transactional_tests
     self.use_transactional_tests = false
 
     if db_host == 'localhost'
@@ -24,7 +25,7 @@ module Marty; module RSpec; module SharedConnectionDbHelpers
     ActionCable.server.pubsub.shutdown
     ActiveRecord::Base.clear_all_connections!
     ActiveRecord::Base.reset_shared_connection
-    self.use_transactional_tests = true
+    self.use_transactional_tests = use_transactional_tests_original
   end
 
   private
