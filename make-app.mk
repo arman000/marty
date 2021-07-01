@@ -51,3 +51,6 @@ db-start:
 
 db-stop:
 	docker-compose stop postgres redis
+
+start:
+	cd spec/dummy; rails s -p 3001

@@ -1,4 +1,4 @@
-/******/ (function(modules) { // webpackBootstrap
+/******/ var zeus_bundled_code = (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -95,10 +95,10 @@
 
 module.exports = {
   call: function call(data) {
-    var a = new Array(10000);
+    var a = new Array(100000);
 
-    Array.from(new Array(10000)).map(() => {
-      a = a.concat(new Array(10000))
+    Array.from(new Array(100000)).map(() => {
+      a = a.concat(new Array(100000))
     })
 
     return { result: 10, metadata: { message: 'Call was called' } };

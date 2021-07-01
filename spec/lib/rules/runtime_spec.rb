@@ -25,6 +25,10 @@ RSpec.describe Marty::Rules::Runtime do
     file_fixture('misc/rules/test_script_with_exception.js').read
   end
 
+  let(:zeus_script_1) do
+    file_fixture('misc/rules/zeus_script1.js').read
+  end
+
   def create_package(name: 'test-package', starts_at:, script:)
     Marty::Rules::Package.create!(
       name: name,
@@ -75,12 +79,48 @@ RSpec.describe Marty::Rules::Runtime do
     )
   end
 
+  let(:zeus_package1) do
+    create_package(
+      starts_at: 33.hours.ago,
+      script: zeus_script_1
+    )
+  end
+
   let!(:runtime1) do
     described_class.new(
       package_name: 'test-package',
-      memory_limit_mb: 1,
+      memory_limit_mb: 10,
       timeout_seconds: 2
     )
+  end
+
+  let(:zeus_package1_input1) do
+    {
+      'order' => {
+        'products' => [
+          { 'name' => 'Water', 'price' => 100.5, 'amount' => 1 },
+          { 'name' => 'Hot dog', 'price' => 10, 'amount' => 1 }
+        ],
+         'total_price' => 110.5
+      },
+     'users' => [
+       { 'age' => 25, 'state' => 'CA', 'lastname' => 'Doe', 'firstname' => 'John' },
+       { 'age' => 42, 'state' => 'NY', 'lastname' => 'Adams', 'firstname' => 'Arthur' }
+     ],
+     'total_price' => 110.5
+    }
+  end
+
+  let(:zeus_package1_output1) do
+    {
+      'all' => [
+        { 'total_price' => 222.2, '__metadata__' => { 'rule_name' => 'Rule1' } },
+        { 'total_price' => 223.2, '__metadata__' => { 'rule_name' => 'Rule2' } },
+        { 'total_price' => 224.2, '__metadata__' => { 'rule_name' => 'Rule3 With Guards' } }
+      ],
+       'state' => 'SC',
+       'total_price' => 222.2
+    }
   end
 
   describe 'historical Rules' do
@@ -178,7 +218,7 @@ RSpec.describe Marty::Rules::Runtime do
         #
         # Apparently, iterating over an array increases the chance of GC so
         # we can use it as a hack to get consistent behaviour.
-        script = "a = Array.from(new Array(10000)).map((e) => e + 1); #{script1}"
+        script = "a = Array.from(new Array(100000)).map((e) => e + 1); #{script1}"
 
         runtime1.historical_v8.load_package(
           package: {
@@ -248,6 +288,13 @@ RSpec.describe Marty::Rules::Runtime do
         MiniRacer::RuntimeError,
         /Test error/
       )
+    end
+
+    it 'runs zeus script 1' do
+      res = runtime1.call(pt: zeus_package1.starts_at + 1.second, hash: zeus_package1_input1)
+      expect(runtime1.historical_v8.packages).to include(zeus_package1.starts_at)
+
+      expect(res).to eq(zeus_package1_output1)
     end
   end
 end
