@@ -1,5 +1,5 @@
 module Marty
-  RSpec.describe ReportExecution, :focus do
+  RSpec.describe ReportExecution do
     before do
       Marty::Script.load_scripts
       expect(described_class.any?).to eq(false)

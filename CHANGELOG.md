@@ -1,3 +1,8 @@
+19.3.0 - 2021-06
+=====================================================
+* Allow pipe delimited string imports in `Marty::Importer` for :enum_array
+columns
+
 19.2.4 - 2021-06
 =====================================================
 * Fixed `SharedConnectionDbHelpers` so that tests would work with Rails >= 6.0.4
@@ -14,7 +19,7 @@
 =====================================================
 * Add simple token authentication for HTTP API endoints by creating
 controllers that inherit from `Marty::Api::HttpController`.
-* Add ability to create API tokens for HTTP APIs from 
+* Add ability to create API tokens for HTTP APIs from
 the API Auth page.
 
 19.1.1 - 2021-05
