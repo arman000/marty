@@ -114,7 +114,7 @@ class Marty::ScriptGrid < Marty::Grid
 
   endpoint :upload_zip do |_zip_name, data64|
     begin
-      next client.netzke_notify "#{file_name}: Permission Denied" unless
+      next client.netzke_notify 'Permission Denied' unless
         config[:permissions][:create]
 
       rawdata64 = data64.sub(/data:.*;base64,/, '')
