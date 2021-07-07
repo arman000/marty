@@ -70,8 +70,12 @@ class Marty::DataConversion
       end
     when :numrange, :int4range, :int8range
       v.to_s
-    when :float_array, :json, :jsonb, :enum_array, :string_array, :integer_array
+    when :float_array, :json, :jsonb, :integer_array, :string_array
       # v might be base64 or might be a readable string
+      JSON.parse Marty::DataExporter.decode_json(v) rescue JSON.parse(v)
+    when :enum_array
+      return v.split('|') if v.match?(/\|/)
+
       JSON.parse Marty::DataExporter.decode_json(v) rescue JSON.parse(v)
     else
       raise "unknown type #{type} for #{v.inspect}}"
