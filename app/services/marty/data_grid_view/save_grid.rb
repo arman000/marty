@@ -14,10 +14,7 @@ module Marty
         end
       end
 
-      def self.call(params)
-        rec_id = params['record_id']
-        dg = Marty::DataGrid.mcfly_pt('infinity').find_by(group_id: rec_id)
-        user_perm = Marty::DataGridView.get_edit_permission(dg.permissions)
+      def self.call(params, dg, user_perm)
         data = params['data']
 
         raise GridError.new('entered with view permissions', data, rec_id) if

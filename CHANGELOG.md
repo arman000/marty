@@ -1,3 +1,8 @@
+19.3.1 - 2021-07
+=====================================================
+fix data grid editing permissions.   (data_grid_viewers were able to
+edit grids on the data grid admin screen)
+
 19.3.0 - 2021-06
 =====================================================
 * Allow pipe delimited string imports in `Marty::Importer` for :enum_array
