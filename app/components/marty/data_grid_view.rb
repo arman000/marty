@@ -194,8 +194,12 @@ module Marty; class DataGridView < McflyGridPanel
     client.netzke_client_show_grid maxcount, res, 'Data Grid'
   end
 
-  def self.get_edit_permission(_permissions)
-    'edit_all'
+  def self.get_edit_permission(_permissions, config)
+    if config[:permissions][:update]
+      'edit_all'
+    else
+      'view'
+    end
   end
 
   endpoint :edit_grid do |params|
@@ -214,7 +218,7 @@ module Marty; class DataGridView < McflyGridPanel
     vdim = md.map { |m| m['dir'] == 'v' && m['attr'] }.select { |v| v }
     hdim_en = hdim.map { |d| I18n.t('attributes.' + d, default: d) }
     vdim_en = vdim.map { |d| I18n.t('attributes.' + d, default: d) }
-    perm = self.class.get_edit_permission(dg.permissions)
+    perm = self.class.get_edit_permission(dg.permissions, config)
     # should never happen
     return client.netzke_notify('No permission to edit/view grid.') unless perm
 
@@ -232,7 +236,11 @@ module Marty; class DataGridView < McflyGridPanel
   end
 
   endpoint :save_grid do |params|
-    SaveGrid.call(params)
+    rec_id = params['record_id']
+    dg = Marty::DataGrid.mcfly_pt('infinity').find_by(group_id: rec_id)
+    user_perm = self.class.get_edit_permission(dg.permissions, config)
+
+    SaveGrid.call(params, dg, user_perm)
   end
 
   def default_bbar

@@ -45,7 +45,7 @@ module Marty
       end
     end
 
-    def self.get_edit_permission(permissions)
+    def self.get_edit_permission(permissions, _config)
       cur_perms = current_user_roles.map(&:to_s)
       ['edit_all', 'edit_data', 'view'].detect do |p|
         permissions[p] - cur_perms != permissions[p]
