@@ -72,4 +72,20 @@ feature 'Posting workflows', js: true do
       expect(posting_type_combo.get_values).not_to include 'BASE'
     end
   end
+
+  it 'logs out if login was changed' do
+    log_in_as('dev1')
+
+    expect(page).to have_content('dev1 dev1')
+
+    visit '/'
+    expect(page).to have_content('dev1 dev1')
+
+    Marty::User.find_by(login: 'dev1').update!(firstname: 'dev1_updated', login: 'dev1_updated')
+    visit '/'
+
+    expect(page).to_not have_content('dev1 dev1')
+    expect(page).to_not have_content('dev1_updated')
+    expect(page).to have_content('Sign in')
+  end
 end
