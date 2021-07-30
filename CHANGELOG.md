@@ -1,3 +1,7 @@
+19.3.2 - 2021-07
+=====================================================
+Log user out if login was changed in order to make sure that user won't get logged in as someone else after backup restore or login change.
+
 19.3.1 - 2021-07
 =====================================================
 fix data grid editing permissions.   (data_grid_viewers were able to

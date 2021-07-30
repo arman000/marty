@@ -49,6 +49,7 @@ class Marty::ApplicationController < ActionController::Base
 
   def start_user_session(user)
     session[:user_id] = user.id
+    session[:user_login] = user.login
     session[:ctime] = Time.zone.now.utc.to_i
     session[:atime] = Time.zone.now.utc.to_i
 
@@ -66,8 +67,10 @@ class Marty::ApplicationController < ActionController::Base
   # Returns the current user or nil if no user is logged in
   def find_current_user
     user_id = session[:user_id]
+    login = session[:user_login]
+
     if user_id
-      user = Marty::User.active.find(user_id) rescue nil
+      user = Marty::User.active.find_by(id: user_id, login: login)
     else
       user = try_to_autologin
     end
