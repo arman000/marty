@@ -79,6 +79,14 @@ module Marty
       # @param example [RSpec::Core::Example] the example object passed in by RSpec.
       # @return [String] The name of the cassette
       def self.cassette_name(example)
+        # return the cassette_name specified on the example metadata
+        # example:
+        # it "some test", vcr: { cassette_name: 'my_cassette' } do
+        #   expect(...)
+        # end
+        cassette_name = example.metadata.dig(:vcr, :cassette_name)
+        return cassette_name if cassette_name.present?
+
         file_name = File.basename(example.metadata[:file_path], '.rb')
         full_description = example.metadata[:example_group][:full_description]
         description = example.metadata[:description]

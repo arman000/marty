@@ -1,3 +1,7 @@
+19.3.3 - 2021-08
+=====================================================
+* Add ability to specify the cassette name for recorded sql_server interactions
+
 19.3.2 - 2021-07
 =====================================================
 Log user out if login was changed in order to make sure that user won't get logged in as someone else after backup restore or login change.
