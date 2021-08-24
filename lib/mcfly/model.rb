@@ -74,6 +74,15 @@ module Mcfly::Model
       base_mcfly_lookup(name, options, &block)
     end
 
+    RANGE_CAST = {
+      'daterange' => 'date',
+      'int4range' => 'integer',
+      'int8range' => 'bigint',
+      'numrange' => 'numeric',
+      'tsrange' => 'timestamp',
+      'tstzrange' => 'timestamptz',
+    }
+
     def gen_mcfly_lookup(name, attrs, options = {})
       raise "bad options #{options.keys}" unless
       (options.keys - [:mode, :cache, :private, :to_hash]).empty?
@@ -88,8 +97,26 @@ module Mcfly::Model
 
       assoc = Set.new(reflect_on_all_associations.map(&:name))
 
+      rcm = if database_exists? && table_exists?
+              range_cols = columns.select { |c| c.sql_type =~ /range/ }
+              range_cols.each_with_object({}) do |col, hsh|
+                hsh[col.name.to_sym] = col.sql_type
+              end
+            else
+              # FIXME: This was only added because in Gemini we have factories
+              # that would fail during `db:drop db:create` which use lookups.
+              {}
+            end
+
       qstr = attrs.map do |k, v|
         k = "#{k}_id" if assoc.member?(k)
+
+        if rcm.key?(k)
+          cast_as = RANGE_CAST[rcm[k]]
+          next v ?
+              "(#{k} @> ?::#{cast_as} OR #{k} IS NULL)" :
+              "(#{k} @> ?::#{cast_as})"
+        end
 
         v ? "(#{k} = ? OR #{k} IS NULL)" : "(#{k} = ?)"
       end.join(' AND ')
@@ -196,6 +223,18 @@ module Mcfly::Model
 
         openstruct_if_necessary(q, options[:private])
       end
+    end
+
+    def database_exists?
+      ActiveRecord::Base.connection
+    rescue ActiveRecord::NoDatabaseError
+      false
+    else
+      true
+    end
+
+    def table_exists?
+      ActiveRecord::Base.connection.table_exists?(table_name)
     end
   end
 end

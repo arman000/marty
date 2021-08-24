@@ -1,3 +1,7 @@
+19.4.0 - 2021-08
+=====================================================
+* Add range support to mcfly lookups
+
 19.3.3 - 2021-08
 =====================================================
 * Add ability to specify the cassette name for recorded sql_server interactions
