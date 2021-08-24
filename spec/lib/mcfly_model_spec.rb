@@ -45,6 +45,10 @@ A:
     a_func = Gemini::FannieBup.a_func('infinity', e_id, bc_id)
     b_func = Gemini::FannieBup.b_func('infinity', e_id, bc_id, 12)
     c_func = Gemini::FannieBup.c_func('infinity', e_id, bc_id, 12)
+
+    range_nil = Gemini::FannieBup.lookup_range_nullable('infinity', entity, 120)
+    range_out = Gemini::FannieBup.lookup_range('infinity', entity, 120)
+    range_in = Gemini::FannieBup.lookup_range('infinity', entity, 119)
 EOF
 errscript = <<EOF
 Err:
@@ -117,6 +121,19 @@ describe 'McflyModel' do
                  'note_rate' => 2.875 }
   end
 
+  let(:expected_keys) do
+    Set[
+      'buy_up',
+      'buy_down',
+      'loan_amortization_period_count_range',
+      'int4range_col',
+      'int8range_col',
+      'tsrange_col',
+      'tstzrange_col',
+      'daterange_col',
+    ]
+  end
+
   it 'lookup mode default' do
     a1 = @engine.evaluate('A', 'lookup', params)
     a2 = @engine.evaluate('A', 'clookup', params)
@@ -125,7 +142,7 @@ describe 'McflyModel' do
     expect(a2.class).to eq(Hash)
 
     # check that keys are non mcfly non uniqueness
-    expect(a1.to_h.keys.to_set).to eq(Set['buy_up', 'buy_down'])
+    expect(a1.to_h.keys.to_set).to eq(expected_keys)
   end
 
   it 'lookup non generated' do
@@ -145,7 +162,7 @@ describe 'McflyModel' do
     expect(a1.to_a.count).to eq(2)
 
     # a1 lookup did not include extra attrs
-    expect(a1.first.attributes.keys.to_set).to eq(Set['id', 'buy_up', 'buy_down'])
+    expect(a1.first.attributes.keys.to_set).to eq(expected_keys + ['id'])
 
     # a1 is AR but still missing the FK entity_id so will raise
     expect { a1.first.entity }.to raise_error(/missing attribute: entity_id/)
@@ -153,12 +170,12 @@ describe 'McflyModel' do
     expect(b1.class).to eq(Hash)
 
     # make sure b1 has correct keys
-    expect(b1.to_h.keys.to_set).to eq(Set['buy_up', 'buy_down'])
+    expect(b1.to_h.keys.to_set).to eq(expected_keys)
 
     expect(c1.class).to eq(OpenStruct)
 
     # make sure c1 has correct keys
-    expect(c1.to_h.keys.to_set).to eq(Set[:buy_up, :buy_down])
+    expect(c1.to_h.keys.to_set).to eq(expected_keys.map(&:to_sym).to_set)
   end
 
   it 'lookup mode nil' do
@@ -168,6 +185,27 @@ describe 'McflyModel' do
     expect(a1).to eq(a2)
     expect(ActiveRecord::Relation === a1).to be_truthy
     expect(a1.to_a.count).to eq(4)
+  end
+
+  context 'lookup with ranges' do
+    let(:test_range) { '[0,120)' }
+    before(:each) do
+      Gemini::FannieBup.where(note_rate: 2.875).each do |bup|
+        bup.update!(loan_amortization_period_count_range: test_range)
+      end
+    end
+
+    it 'matches some when nil' do
+      res = @engine.evaluate('A', 'range_nil', params)
+      expect(res['loan_amortization_period_count_range']).to be_nil
+    end
+
+    it 'properly uses range param' do
+      res1 = @engine.evaluate('A', 'range_out', params)
+      res2 = @engine.evaluate('A', 'range_in', params)
+      expect(res1).to be_nil
+      expect(res2['loan_amortization_period_count_range']).to eq(test_range)
+    end
   end
 
   it 'raises exception when too many arguments passed' do

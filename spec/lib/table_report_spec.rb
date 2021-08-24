@@ -1,18 +1,25 @@
 require 'csv'
 
 describe 'Blame Report', slow: true do
+  EXTRA_HEADERS = [
+    'loan_amortization_period_count_range', 'int4range_col', 'int8range_col',
+    'tsrange_col', 'tstzrange_col', 'daterange_col'
+  ]
+  PADDING = [nil] * 6
+
   RES0 = [
-    ['bud_category', 'note_rate', 'settlement_mm', 'settlement_yy', 'buy_up'],
-    ['Govt Fixed 30', '2.25', '22', '2010', '12.123'],
-    ['Conv Fixed 30', '2.25', '12', '2012', '1.127']
+    ['bud_category', 'note_rate', 'settlement_mm', 'settlement_yy', 'buy_up'] +
+      EXTRA_HEADERS,
+    ['Govt Fixed 30', '2.25', '22', '2010', '12.123'] + PADDING,
+    ['Conv Fixed 30', '2.25', '12', '2012', '1.127'] + PADDING
   ].freeze
 
   RES1 = [
     ['entity', 'bud_category', 'note_rate', 'settlement_mm', 'settlement_yy',
-     'buy_up', 'buy_down'],
-    [nil, 'Govt Fixed 30', '2.25', '22', '2014', '2.123', '3.345'],
-    [nil, 'Govt Fixed 30', '2.25', '22', '2010', '12.123', '3.345'],
-    [nil, 'Conv Fixed 30', '2.25', '12', '2012', '1.126', '2.345']
+     'buy_up', 'buy_down'] + EXTRA_HEADERS,
+    [nil, 'Govt Fixed 30', '2.25', '22', '2014', '2.123', '3.345'] + PADDING,
+    [nil, 'Govt Fixed 30', '2.25', '22', '2010', '12.123', '3.345'] + PADDING,
+    [nil, 'Conv Fixed 30', '2.25', '12', '2012', '1.126', '2.345'] + PADDING
   ].freeze
 
   before do

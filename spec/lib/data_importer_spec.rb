@@ -98,8 +98,26 @@ Conv Fixed 30	$2.750	4.32900	7.09300	12	2012
 Conv Fixed 20	$2.875	4.24800	6.95900	12	2012
 EOF
 
+expected_report_header_len = 18
+
 describe DataImporter do
   # New .call tests
+
+  let(:expected_export_headers) do
+    ['entity',
+     'bud_category',
+     'note_rate',
+     'settlement_mm',
+     'settlement_yy',
+     'buy_up',
+     'buy_down',
+     'loan_amortization_period_count_range',
+     'int4range_col',
+     'int8range_col',
+     'tsrange_col',
+     'tstzrange_col',
+     'daterange_col']
+  end
 
   it 'should be able to import into classes with id as uniqueness' do
     pending('Fix data importer to handle at least group_id as mcfly_uniqueness')
@@ -420,8 +438,9 @@ describe DataImporter do
       'pt_name'    => p.name,
       'class_name' => 'Gemini::FannieBup',
     )
-    expect(res[0]).to eq(fannie_bup1_export[0])
-    expect(res[1..-1].sort).to eq(fannie_bup1_export[1..-1].sort)
+    expect(res[0]).to eq(expected_export_headers)
+    expect(res[1..-1].map { |e| e.first(7) }.sort).to eq(
+      fannie_bup1_export[1..-1].sort)
   end
 
   # Old .do_import_summary test
@@ -754,8 +773,9 @@ describe DataImporter do
       'pt_name'    => p.name,
       'class_name' => 'Gemini::FannieBup',
     )
-    expect(res[0]).to eq(fannie_bup1_export[0])
-    expect(res[1..-1].sort).to eq(fannie_bup1_export[1..-1].sort)
+    expect(res[0]).to eq(expected_export_headers)
+    expect(res[1..-1].map { |e| e.first(7) }.sort).to eq(
+      fannie_bup1_export[1..-1].sort)
   end
 end
 
@@ -784,7 +804,7 @@ describe 'Blame Report without yml translations - call' do
 
   context 'when exporting' do
     it 'exports the column_name' do
-      expect(@res[0][1][0][1].length).to eq(12)
+      expect(@res[0][1][0][1].length).to eq(expected_report_header_len)
       expect(@res[0][1][0][1][7]).to eq('note_rate')
     end
   end
@@ -815,7 +835,7 @@ describe 'Blame Report without yml translations' do
 
   context 'when exporting' do
     it 'exports the column_name' do
-      expect(@res[0][1][0][1].length).to eq(12)
+      expect(@res[0][1][0][1].length).to eq(expected_report_header_len)
       expect(@res[0][1][0][1][7]).to eq('note_rate')
     end
   end
@@ -843,7 +863,7 @@ describe 'Blame Report with yml translations' do
 
   context 'when exporting' do
     it 'exports the locale value for the column header' do
-      expect(@res[0][1][0][1].length).to eq(12)
+      expect(@res[0][1][0][1].length).to eq(expected_report_header_len)
       expect(@res[0][1][0][1][7]).to eq('Note Rate')
     end
   end
@@ -871,7 +891,7 @@ describe 'Blame Report with yml translations' do
 
   context 'when exporting' do
     it 'exports the locale value for the column header' do
-      expect(@res[0][1][0][1].length).to eq(12)
+      expect(@res[0][1][0][1].length).to eq(expected_report_header_len)
       expect(@res[0][1][0][1][7]).to eq('Note Rate')
     end
   end

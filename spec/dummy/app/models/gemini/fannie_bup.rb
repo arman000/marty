@@ -66,6 +66,16 @@ module Gemini
                        note_rate: false
                      }, cache: true, to_hash: false, mode: nil
 
+    gen_mcfly_lookup :lookup_range, {
+                      entity: true,
+                      loan_amortization_period_count_range: false
+                    }, to_hash: true
+
+    gen_mcfly_lookup :lookup_range_nullable, {
+                      entity: true,
+                      loan_amortization_period_count_range: true
+                    }, to_hash: true
+
     mcfly_lookup :a_func, sig: 3, to_hash: true do
       |pt, e_id, bc_id|
       where(entity_id: e_id, bud_category_id: bc_id).
