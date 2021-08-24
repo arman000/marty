@@ -71,4 +71,41 @@ class Marty::RpcCall
 
     response.body
   end
+
+  def self.json_call(host, port, path, body, ssl, http_opts = {}, get = false)
+    http = Net::HTTP.new(host, port)
+    http.use_ssl = ssl
+    http.read_timeout = http_opts[:read_timeout] if http_opts[:read_timeout]
+    http.open_timeout = http_opts[:open_timeout] if http_opts[:open_timeout]
+
+    request = get ? Net::HTTP::Get.new(path) : request = Net::HTTP::Post.new(path)
+    request.add_field('Content-Type', 'application/json')
+    request.body = body.to_json
+
+    base_log = {
+      host: host,
+      port: port,
+      path: path,
+      input: body,
+    }
+    begin
+      response = http.request(request)
+      json = JSON.parse(response.body)
+      if json.is_a?(Hash) && json['error'].present?
+        Marty::Logger.info('Marty::RpcCall#json_call',
+                           base_log.merge(output: json)
+                          )
+      end
+      json
+    rescue StandardError => e
+      Marty::Logger.error('Marty::RpcCall#json_call',
+                          base_log.merge(
+                            error: e.message,
+                            stack: e.backtrace.select { |s| s.include?('marty') },
+                            output: response
+                          ).compact
+                         )
+      raise "#{e.message} during JSON RPC call to #{host}:#{port}#{path}"
+    end
+  end
 end

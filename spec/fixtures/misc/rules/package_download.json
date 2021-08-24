@@ -1,0 +1,50 @@
+{
+  "name": "pptest",
+  "slug": "pptest",
+  "builds": [
+    {
+      "name": "build 1",
+      "starts_at": "2021-08-04T14:39:09.000-07:00",
+      "script": "# dummy script for pptest:build 1",
+      "metadata": {
+        "dummy_metadata": [
+          "pptest",
+          "build 1"
+        ]
+      }
+    },
+    {
+      "name": "build 2",
+      "starts_at": "2021-08-11T13:43:57.000-07:00",
+      "script": "# dummy script for pptest:build 2",
+      "metadata": {
+        "dummy_metadata": [
+          "pptest",
+          "build 2"
+        ]
+      }
+    },
+    {
+      "name": "build 3",
+      "starts_at": "2021-08-13T15:56:23.000-07:00",
+      "script": "# dummy script for pptest:build 3",
+      "metadata": {
+        "dummy_metadata": [
+          "pptest",
+          "build 3"
+        ]
+      }
+    },
+    {
+      "name": "build 4",
+      "starts_at": "2021-08-18T09:53:30.000-07:00",
+      "script": "# dummy script for pptest:build 4",
+      "metadata": {
+        "dummy_metadata": [
+          "pptest",
+          "build 4"
+        ]
+      }
+    }
+  ]
+}

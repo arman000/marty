@@ -14,13 +14,18 @@ module Marty
 
         return unless p
 
-        { 'starts_at' => p.starts_at, 'script' => p.script }
+        {
+          'starts_at' => p.starts_at,
+          'script' => p.script,
+          'metadata' => p.metadata
+        }
       end
 
       def closest_package_pt(pt:)
         Marty::Rules::Package.where(
           name: package_name
-        ).where("starts_at < date_trunc('second', ?::timestamp)", pt).maximum('starts_at')
+        ).where("starts_at < date_trunc('second', ?::timestamp)", pt).
+          maximum('starts_at')
       end
     end
   end

@@ -18,6 +18,7 @@ require_relative 'report_execution_view'
 require_relative 'reporting'
 require_relative 'scripting'
 require_relative 'users/user_view'
+require_relative 'rules_package_view'
 
 class Marty::MainAuthApp < Marty::AuthApp
   extend ::Marty::Permissions
@@ -422,6 +423,13 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !self.class.has_perm?(:admin)
   end
 
+  action :rules_package_view do |a|
+      a.text = a.tooltip = 'Rules Packages'
+      a.iconCls = 'fa glyph'
+      a.glyph = 0xf0b0
+      a.handler = :netzke_load_component_by_action
+  end
+
   ######################################################################
   # Background Jobs/Delayed Jobs
 
@@ -603,6 +611,10 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   component :user_view do |c|
     c.klass = ::Marty::Users::UserView
+  end
+
+  component :rules_package_view do |c|
+    c.klass = Marty::RulesPackageView
   end
 
   endpoint :reload_scripts do |_params|

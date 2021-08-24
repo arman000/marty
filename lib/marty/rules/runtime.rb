@@ -44,7 +44,7 @@ module Marty
         )
       end
 
-      def call(pt:, hash:)
+      def operate(pt:, args:)
         closest_pt = closest_package_pt(pt: pt)
 
         return package_not_found(pt: pt) unless closest_pt
@@ -63,29 +63,29 @@ module Marty
             logger: logger
           )
 
-          call_current(pt: pt, hash: hash)
-
+          yield(current_v8, pt, args)
         elsif current_v8.packages.include?(closest_pt)
-          call_current(pt: pt, hash: hash)
-
+          yield(current_v8, pt, args)
         elsif historical_v8.packages.include?(closest_pt)
-          call_historical(pt: pt, hash: hash)
-
+          yield(historical_v8, pt, args)
         else
           historical_v8.load_package(
             package: package(pt: closest_pt)
           )
-
-          call_historical(pt: pt, hash: hash)
+          yield(historical_v8, pt, args)
         end
       end
 
-      def call_current(pt:, hash:)
-        current_v8.call(pt: pt, hash: hash)
+      def call(pt:, hash:)
+        operate(pt: pt, args: hash) do |context, ipt, args|
+          context.call(pt: ipt, args: args)
+        end
       end
 
-      def call_historical(pt:, hash:)
-        historical_v8.call(pt: pt, hash: hash)
+      def metadata(pt:)
+        operate(pt: pt, args: nil) do |context, ipt|
+          context.call(pt: ipt, fn: 'metadata', args: ipt)
+        end
       end
 
       def closest_package_pt(pt:)
