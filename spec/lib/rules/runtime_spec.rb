@@ -29,32 +29,37 @@ RSpec.describe Marty::Rules::Runtime do
     file_fixture('misc/rules/zeus_script1.js').read
   end
 
-  def create_package(name: 'test-package', starts_at:, script:)
+  def create_package(name: 'test-package', starts_at:, script:, metadata: {})
     Marty::Rules::Package.create!(
       name: name,
+      build_name: "build #{starts_at}",
       starts_at: starts_at,
-      script: script
+      script: script,
+      metadata: metadata
     ).reload
   end
 
   let!(:package1) do
     create_package(
       starts_at: 3.hours.ago,
-      script: script1
+      script: script1,
+      metadata: { input_fields: %w[a b c] }
     )
   end
 
   let!(:package2) do
     create_package(
       starts_at: 2.hours.ago,
-      script: script2
+      script: script2,
+      metadata: { input_fields: %w[d e f] }
     )
   end
 
   let!(:package3) do
     create_package(
       starts_at: 1.hour.ago,
-      script: script3
+      script: script3,
+      metadata: { input_fields: %w[x y z] }
     )
   end
 
@@ -233,6 +238,27 @@ RSpec.describe Marty::Rules::Runtime do
       ).to be < runtime1.memory_limit_mb * 3_000_000
 
       expect(runtime1.historical_v8.packages.size).to be < 90
+    end
+
+    it 'can read package metadata' do
+      times = [
+        Time.zone.now,
+        Time.zone.now - 30.minutes,
+        Time.zone.now - 1.hour + 1.second,
+        2.hours.ago + 1.second,
+        3.hours.ago + 1.second
+      ]
+      aggregate_failures do
+        times.each do |time|
+          res = runtime1.metadata(pt: time)
+          exp = Marty::Rules::Package.where('starts_at <= ?', time).
+                  order(starts_at: :desc)&.first&.metadata
+          expect(res).to eq(exp)
+        end
+        errexp =
+          /Package test-package with starting date before .* was not found/
+        expect { runtime1.metadata(pt: 10.hours.ago) }.to raise_error(errexp)
+      end
     end
 
     it 'raises an error if memory limit is exceeded' do
