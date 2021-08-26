@@ -46,7 +46,7 @@ class Marty::Posting < Marty::Base
   # may allow deletion of postings.  i.e. a new one with same name
   # might be created.  Or, use regular validates_uniqueness_of instead
   # of mcfly_validates_uniqueness_of.
-  delorean_fn :lookup, sig: 1 do |name|
+  delorean_fn :lookup, cache: true do |name|
     p = select(get_struct_attrs).find_by(name: name)
     make_openstruct(p)
   end
