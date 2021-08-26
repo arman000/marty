@@ -3,6 +3,7 @@
 * 19.4.0 - Add range support to mcfly lookups
 * 19.4.1 - Put MARTY_RSPEC_RECORD cassette errors to console to make issues obvious.
 * 19.4.2 - Cache Marty::Posting.lookup(pt_name)
+* 19.4.3 - Remove `table_exists?` override in Mcfly::Model
 
 19.3.3 - 2021-08
 =====================================================

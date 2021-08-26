@@ -232,9 +232,5 @@ module Mcfly::Model
     else
       true
     end
-
-    def table_exists?
-      ActiveRecord::Base.connection.table_exists?(table_name)
-    end
   end
 end
