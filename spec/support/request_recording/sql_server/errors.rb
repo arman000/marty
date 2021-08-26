@@ -16,6 +16,7 @@ module Marty
                 You may create one by setting `ENV['#{flag_name}'] = true` and
                 re-running your example.
               ERROR
+              puts msg
               super(msg)
             end
           end
