@@ -4,6 +4,7 @@
 * 19.4.1 - Put MARTY_RSPEC_RECORD cassette errors to console to make issues obvious.
 * 19.4.2 - Cache Marty::Posting.lookup(pt_name)
 * 19.4.3 - Remove `table_exists?` override in Mcfly::Model
+* 19.4.4 - add ssl flag to Marty::Rules::Retrieve methods
 
 19.3.3 - 2021-08
 =====================================================

@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe Marty::Rules::Retrieve do
   def call(name)
     # only name arg matters since we are stubbed
-    described_class.download('host', 1234, 1234, name, Time.zone.now)
+    described_class.download('host', 1234, 1234, name, Time.zone.now, false)
   end
 
   it 'retrieves rules packages' do

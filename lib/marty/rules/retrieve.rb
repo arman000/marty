@@ -1,17 +1,17 @@
 module Marty
   module Rules
     class Retrieve
-      def self.package_list(host, port, api_key)
+      def self.package_list(host, port, api_key, ssl)
         path = "/packages?api_key=#{api_key}"
 
         Marty::RpcCall.json_call(
-          host, port, path, {}, false, {}, true)
+          host, port, path, {}, ssl, {}, true)
       end
 
-      def self.download(host, port, api_key, package_name, starts_at_raw)
+      def self.download(host, port, api_key, package_name, starts_at_raw, ssl)
         starts_at = Time.zone.parse(starts_at_raw.to_s).iso8601
         path = "/packages/#{package_name}?api_key=#{api_key}&starts_at=#{starts_at}"
-        resp = Marty::RpcCall.json_call(host, port, path, {}, false, {}, true)
+        resp = Marty::RpcCall.json_call(host, port, path, {}, ssl, {}, true)
         return if resp['builds'].blank?
 
         resp['builds'].each do |build|
