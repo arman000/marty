@@ -12,13 +12,13 @@
         <% break if success %>
       <% end %>
     </tr>
-    <%# create row headers and render node results %>
+    <%# create row headers and display node results %>
     <% data.values.map{|v| v.keys}.flatten.compact.uniq.each do |test| %>
       <tr>
         <th class="data" scope="row"><%= test %></th>
         <% data.values.each do |diagnostic| %>
-          <td class="overflow <%= render_info_css(diagnostic[test]) %>">
-            <%= render_info_description(diagnostic[test]) %>
+          <td class="overflow <%= display_info_css(diagnostic[test]) %>">
+            <%= display_info_description(diagnostic[test]) %>
           </td>
           <% break if success %>
         <% end %>

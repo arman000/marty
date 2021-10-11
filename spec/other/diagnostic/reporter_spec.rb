@@ -1,12 +1,17 @@
 require 'job_helper'
 
 describe Marty::Diagnostic::Reporter do
+  # used to stub request object
+  class DummyRequest
+    attr_accessor :params, :port
+  end
+
   def params(diagnostic = 'base', scope = nil)
     { op: diagnostic, scope: scope }
   end
 
   def git
-      message = Marty::Diagnostic::Git.tag
+      message = Marty::Diagnostic::Version.git_tag
   rescue StandardError
       message = error('Failed accessing git')
   end
@@ -50,35 +55,35 @@ describe Marty::Diagnostic::Reporter do
     inconsistent_b = Marty::Diagnostic::Base.create_info('B', true, false)
     inconsistent_c = Marty::Diagnostic::Base.create_info('C', true, false)
 
-    expected = if diagnostic == 'EnvironmentVariables'
-                {
-                  diagnostic => {
-                    'NodeA' => {
-                      'CONSTANTB' => inconsistent_b,
-                      'CONSTANTB2' => inconsistent_b,
-                    },
-                    'NodeB' => {
-                      'CONSTANTB' => inconsistent_c,
-                      'CONSTANTB2' => inconsistent_c,
-                    },
-                  }
-                }
-               else
-                {
-                  diagnostic => {
-                    'NodeA' => {
-                      'CONSTANTA' => original_a + { 'consistent' => true },
-                      'CONSTANTB' => inconsistent_b,
-                      'CONSTANTB2' => inconsistent_b,
-                    },
-                    'NodeB' => {
-                      'CONSTANTA' => original_a + { 'consistent' => true },
-                      'CONSTANTB' => inconsistent_c,
-                      'CONSTANTB2' => inconsistent_c,
-                    },
-                  }
-                }
-               end
+    if diagnostic == 'EnvironmentVariables'
+      expected = {
+        diagnostic => {
+          'NodeA' => {
+            'CONSTANTB' => inconsistent_b,
+            'CONSTANTB2' => inconsistent_b,
+          },
+          'NodeB' => {
+            'CONSTANTB' => inconsistent_c,
+            'CONSTANTB2' => inconsistent_c,
+          },
+        }
+      }
+    else
+      expected = {
+        diagnostic => {
+          'NodeA' => {
+            'CONSTANTA' => original_a + { 'consistent' => true },
+            'CONSTANTB' => inconsistent_b,
+            'CONSTANTB2' => inconsistent_b,
+          },
+          'NodeB' => {
+            'CONSTANTA' => original_a + { 'consistent' => true },
+            'CONSTANTB' => inconsistent_c,
+            'CONSTANTB2' => inconsistent_c,
+          },
+        }
+      }
+    end
     [test, expected]
   end
 
@@ -102,7 +107,16 @@ describe Marty::Diagnostic::Reporter do
   end
 
   describe 'display mechanism for version diagnostic' do
+    before(:all) do
+      described_class.diagnostics = [Marty::Diagnostic::Version]
+    end
+
+    before(:each) do
+      described_class.request = DummyRequest.new
+    end
+
     it 'masks consistent nodes for display (version)' do
+      described_class.request.params = params(scope = 'local')
       data = {
         'Version' => {
           'NodeA' => version_data,
@@ -141,14 +155,23 @@ describe Marty::Diagnostic::Reporter do
       </div>
       ERB
 
-      reporter = described_class.new
-      reporter.result = data
-      reporter.scope = 'local'
-      expect(minimize(reporter.display['html'])).to eq(minimize(expected))
+      test = Marty::Diagnostic::Reporter.displays(data)
+      expect(minimize(test)).to eq(minimize(expected))
     end
 
     it 'displays all nodes when there is an inconsistent node (version)' do
+     Marty:: Diagnostic::Reporter.request.params = params
      bad_ver = '0.0.0'
+
+     data = {
+       'Version' => {
+         'NodeA' => version_data(consistent = false),
+         'NodeB' => version_data + {
+           'Marty' => Marty::Diagnostic::Base.create_info(bad_ver, true, false)
+         },
+       }
+     }
+
      expected = <<-ERB
       <h3>Version</h3>
       <h3 class="error">Inconsistency Detected </h3>
@@ -183,22 +206,12 @@ describe Marty::Diagnostic::Reporter do
       </div>
      ERB
 
-     reporter = described_class.new
-     reporter.result = {
-       'Version' => {
-         'NodeA' => version_data(consistent = false),
-         'NodeB' => version_data + {
-           'Marty' => Marty::Diagnostic::Base.create_info(bad_ver, true, false)
-         },
-       }
-     }
-
-     reporter.scope = 'local'
-     result = reporter.display['html']
-     expect(minimize(result)).to eq(minimize(expected))
+     test = described_class.displays(data)
+     expect(minimize(test)).to eq(minimize(expected))
     end
 
     it 'can detect errors in diagnostic for display and api' do
+      described_class.request.params = params
       n = aggregate_data
       e = aggregate_data(status: false)
       c = aggregate_data(consistent: false)
@@ -213,6 +226,8 @@ describe Marty::Diagnostic::Reporter do
     end
 
     it 'can survive and display fatal errors' do
+      described_class.request.params = params
+
       a_err_a = Marty::Diagnostic::Fatal.message('A',
                                                  node: 'NodeA')
 
@@ -277,22 +292,20 @@ describe Marty::Diagnostic::Reporter do
       </div>
       ERB
 
-      reporter = described_class.new
-      reporter.scope = 'local'
-      reporter.result = data
-      expect(minimize(reporter.display['html'])).to eq(minimize(expected))
+      result = described_class.displays(data)
+      expect(minimize(result)).to eq(minimize(expected))
     end
   end
 
   describe 'aggregation consistency functionality' do
     it 'env diagnostic' do
-      result, expected = aggregate_consistency_data('EnvironmentVariables')
-      expect(described_class.consistency(result)).to eq(expected)
+      test, expected = aggregate_consistency_data('EnvironmentVariables')
+      expect(described_class.consistency(test)).to eq(expected)
     end
 
     it 'marks data as consistent/inconsistent' do
-      result, expected = aggregate_consistency_data
-      expect(described_class.consistency(result)).to eq(expected)
+      test, expected = aggregate_consistency_data
+      expect(described_class.consistency(test)).to eq(expected)
     end
   end
 end

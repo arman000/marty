@@ -1,7 +1,7 @@
 module Marty::Diagnostic; class Connections < Base
   self.aggregatable = false
   diagnostic_fn do
-    conns = Database.get_postgres_connections[Database.db_name].
+    conns = Node.get_postgres_connections[Database.db_name].
               sort_by do |h|
               [h['application_name'],
                h['pid'],

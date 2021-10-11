@@ -94,6 +94,11 @@ rspec-models:
     - .rspec-models
     - .marty-rspec-rails
 
+rspec-other:
+  extends:
+    - .rspec-other
+    - .marty-rspec-rails
+
 rspec-performance:
   extends:
     - .rspec-performance

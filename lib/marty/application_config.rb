@@ -1,5 +1,4 @@
 require 'marty/sql_servers/connection_config'
-require 'marty/diagnostic/git'
 
 module Marty
   class ApplicationConfig < ActiveSupport::OrderedOptions
@@ -21,9 +20,9 @@ module Marty
       self.ci_job_name = ENV['CI_JOB_NAME'] || nil
       self.data_grid_plpg_lookups = false
       self.default_posting_type = 'BASE'
-      self.diagnostic_app_version = ENV['MARTY_DIAGNOSTIC_APP_VERSION'] || Marty::Diagnostic::Git.tag
-      self.diagnostic_remote_timeout = ENV['MARTY_DIAGNOSTIC_REMOTE_TIMEOUT'] || 10
-      self.diagnostic_title = ENV['MARTY_DIAGNOSTIC_TITLE'] || Marty::RailsApp.application_name
+      self.delayed_ver = ENV['DELAYED_VER']
+      self.diag_timeout = ENV['DIAG_TIMEOUT'] || 10
+      self.diag_title = ENV['DIAG_TITLE'] || ::Marty::RailsApp.application_name
       self.enable_action_cable = true
       self.extjs_theme = 'classic'
       self.gitlab_ci = ENV['GITLAB_CI']

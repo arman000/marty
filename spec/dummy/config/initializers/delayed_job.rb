@@ -1,3 +1,5 @@
+ENV['DELAYED_VER'] = Marty::Diagnostic::Version.git_tag
+
 if Rails.env.test?
   # set a really small delay in test environment so that it doesn't
   # interfere as much with promise tests.

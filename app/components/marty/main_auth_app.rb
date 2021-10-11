@@ -6,7 +6,6 @@ require_relative 'background_job/delayed_jobs_grid'
 require_relative 'background_job/schedule_jobs_dashboard'
 require_relative 'background_job/schedule_jobs_logs'
 require_relative 'config_view'
-require_relative 'diagnostic/dashboard'
 require_relative 'data_grid_view'
 require_relative 'data_grid_user_view'
 require_relative 'import_type_view'
@@ -90,7 +89,6 @@ class Marty::MainAuthApp < Marty::AuthApp
         icon_cls: 'fa fa-window-restore glyph',
         disabled: !self.class.has_perm?(:admin),
         menu: [
-          :diagnostic_view,
           :show_env,
           :update_data_grids_to_strict_null_mode,
           :clear_cache,
@@ -378,14 +376,6 @@ class Marty::MainAuthApp < Marty::AuthApp
     a.disabled = !(self.class.has_perm?(:admin) || self.class.has_perm?(:dev))
   end
 
-  action :diagnostic_view do |a|
-    a.text = 'Diagnostics'
-    a.tooltip = 'Diagnostics'
-    a.handler = :netzke_load_component_by_action
-    a.icon_cls = 'fa fa-cog glyph'
-    a.disabled = !(self.class.has_perm?(:admin) || self.class.has_perm?(:dev))
-  end
-
   action :log_cleanup do |a|
     a.text     = 'Cleanup Log Table'
     a.tooltip  = 'Delete old log records'
@@ -578,10 +568,6 @@ class Marty::MainAuthApp < Marty::AuthApp
 
   component :log_view do |c|
     c.klass = Marty::LogView
-  end
-
-  component :diagnostic_view do |c|
-    c.klass = Marty::Diagnostic::Dashboard
   end
 
   component :new_posting_window do |c|
