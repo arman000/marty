@@ -37,13 +37,16 @@ describe Marty::Diagnostic::Base do
     test_a = {
       'ImportantA' => 'A',
       'ImportantB' => 'B',
-      'ImportantC' => 'C' }
+      'ImportantC' => 'C'
+    }
 
     test_b = {
       'ImportantA' => {
-        'description' => 'A', 'status' => true, 'consistent' => nil },
+        'description' => 'A', 'status' => true, 'consistent' => nil
+      },
       'ImportantB' => 'B',
-      'ImportantC' => 'C' }
+      'ImportantC' => 'C'
+    }
 
     expected = {
       'ImportantA' => {
@@ -72,7 +75,8 @@ describe Marty::Diagnostic::Base do
       'Base' => {
         'description' => 'E',
         'status' => false,
-        'consistent' => nil }
+        'consistent' => nil
+      }
     }
 
     expect(test).to eq(expected)

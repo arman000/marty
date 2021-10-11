@@ -1,61 +1,64 @@
-# used for testing controller inheritance
-module Test
-  module Diagnostic; end
-end
+RSpec.describe Marty::Diagnostic::Controller, type: :controller do
+  before(:each) { @routes = Marty::Engine.routes }
 
-module Marty::Diagnostic
-  RSpec.describe Controller, type: :controller do
-    before(:each) { @routes = Marty::Engine.routes }
+  delegate :my_ip, to: 'Marty::Diagnostic::Node'
+  delegate :db_schema, to: 'Marty::Diagnostic::Database'
+  delegate :db_version, to: 'Marty::Diagnostic::Database'
 
-    def my_ip
-      Node.my_ip
+  def git
+    tag = `cd #{Rails.root}; git describe --tags --always --abbrev=7;`.strip
+    git_datetime = `cd #{Rails.root}; git log -1 --format=%cd;`.strip
+
+    "#{tag} (#{git_datetime})"
+  rescue StandardError
+    'Failed accessing git'
+  end
+
+  def consistent(key, description)
+    {
+      key => {
+        'description' => description,
+        'status' => true,
+        'consistent' => true
+      }
+    }
+  end
+
+  describe 'GET #op' do
+    it 'returns http success' do
+      get :op, params: { format: :json, op: 'version' }
+      expect(response).to have_http_status(:success)
     end
 
-    def git
-      tag = `cd #{Rails.root}; git describe --tags --always --abbrev=7;`.strip
-      git_datetime = `cd #{Rails.root}; git log -1 --format=%cd;`.strip
+    it 'returns the current version JSON' do
+      get :op, params: { format: :json, op: 'version', data: 'true' }
 
-      "#{tag} (#{git_datetime})"
-    rescue StandardError
-      'Failed accessing git'
-    end
+      # generate version data and declare all values consistent
+      versions = Marty::Diagnostic::Version.
+        generate.
+        each_with_object({}) do |(n, v), h|
+        h[n] = v.each { |_t, r| r['consistent'] = true }
+      end
 
-    def consistent(key, description)
-      {
-        key => {
-          'description' => description,
-          'status' => true,
-          'consistent' => true
+      expected = {
+        'data' => {
+          'Version' => versions
         }
       }
+
+      expect(JSON.parse(response.body)).to eq(expected)
     end
 
-    describe 'GET #op' do
-      it 'returns http success' do
-        get :op, params: { format: :json, op: 'version' }
-        expect(response).to have_http_status(:success)
-      end
+    describe 'configurability' do
+      before(:each) do
+        report = Marty::Diagnostic::Report.create!(name: 'health')
+        Marty::Diagnostic::Configuration.
+          where(name: Marty::Diagnostic.diagnostics).
+          update(report: report)
 
-      it 'a request injects the request object into Diagnostic classes' do
-        get :op, params: { format: :json, op: 'version' }
-        expect(Reporter.request).not_to eq(nil)
-      end
-
-      it 'returns the current version JSON' do
-        get :op, params: { format: :json, op: 'version', data: 'true' }
-
-        # generate version data and declare all values consistent
-        versions = Version.generate.each_with_object({}) do |(n, v), h|
-          h[n] = v.each { |_t, r| r['consistent'] = true }
-        end
-
-        expected = {
-          'data' => {
-            'Version' => versions
-          }
-        }
-
-        expect(assigns('result')).to eq(expected)
+        Marty::Diagnostic::Configuration.
+          where(name: 'Marty::Diagnostic::DelayedJobVersion').
+          update(enabled: false)
       end
 
       it 'returns the expected cummulative diagnostic' do
@@ -67,7 +70,6 @@ module Marty::Diagnostic
                 consistent('Marty', Marty::VERSION),
                 consistent('Delorean', Delorean::VERSION),
                 consistent('Mcfly', Mcfly::VERSION),
-                consistent('CM Shared', CmShared::VERSION),
                 consistent('Rails', Rails.version),
                 consistent('Netzke Core', Netzke::Core::VERSION),
                 consistent('Netzke Basepack', Netzke::Basepack::VERSION),
@@ -76,8 +78,8 @@ module Marty::Diagnostic
                   "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})"
                 ),
                 consistent('RubyGems', ::Gem::VERSION),
-                consistent('Database Schema Version', Database.db_schema),
-                consistent('Postgres', Database.db_version),
+                consistent('Database Schema Version', db_schema),
+                consistent('Postgres', db_version),
                 consistent('Environment', Rails.env),
                 consistent('Root Git', git),
               ].reduce({}, :merge)
@@ -97,21 +99,75 @@ module Marty::Diagnostic
               data: 'true'
             }
 
-        diag_version_response = JSON.parse(response.body)
-        expect(JSON.parse(response.body)).to eq(expected)
+        diag_response = JSON.parse(response.body)
+        expect(diag_response).to eq(expected)
       end
-    end
 
-    describe 'Inheritance behavior' do
-      it 'appends namespace to reporter and resolves in order of inheritance' do
-        class Test::SomeController < Controller; end
-        expect(Reporter.namespaces).to include('Test')
+      it 'allows reports to define various diagnostics' do
+        get :op, params: {
+          format: :json,
+          op: 'health',
+          data: 'true'
+        }
 
-        class Test::Diagnostic::Version; end
-        expect(Reporter.resolve_diagnostic('Version').name).
-          to eq('Test::Diagnostic::Version')
+        diag_response = JSON.parse(response.body)
+        expect(diag_response['data'].keys.sort).to eq(
+          [
+            'Connections',
+            'DelayedJobWorkers',
+            'EnvironmentVariables',
+            'Nodes',
+            'ObjectSizes',
+            'ScheduledJobs',
+            'ServerTimeAndTz',
+            'Version'
+          ]
+        )
+      end
 
-        Reporter.namespaces.shift
+      it 'allows reports to define various diagnostics if enabled' do
+        Marty::Diagnostic::Configuration.
+        find_by(name: 'Marty::Diagnostic::Nodes').
+        update!(enabled: false)
+
+        get :op, params: {
+          format: :json,
+          op: 'health',
+          data: 'true'
+        }
+
+        diag_response = JSON.parse(response.body)
+        expect(diag_response['data'].keys.sort).to eq(
+          [
+            'Connections',
+            'DelayedJobWorkers',
+            'EnvironmentVariables',
+            'ObjectSizes',
+            'ScheduledJobs',
+            'ServerTimeAndTz',
+            'Version'
+          ]
+        )
+      end
+
+      it 'forces failure if diagnotsic exceeds configured timeout' do
+        Marty::Diagnostic::Configuration.
+        find_by(name: 'Marty::Diagnostic::Nodes').
+        update!(timeout: 1)
+
+        allow(Marty::Diagnostic::Nodes).to receive(:generate).and_wrap_original do
+          sleep(10)
+        end
+
+        get :op, params: {
+          format: :json,
+          op: 'nodes',
+          data: 'true'
+        }
+
+        diag_response = JSON.parse(response.body)
+        errors = diag_response.dig('errors', 'Fatal', my_ip.to_s)
+        expect(errors.dig('Nodes', 'description')).to eq('execution expired')
       end
     end
   end

@@ -1,0 +1,17 @@
+---
+.common: &common
+  adapter: "activerecord-sqlserver-adapter"
+  encoding: "<%= 'UTF-8' %>"
+  reconnect: true
+
+shared: &shared
+  override: "this will be overridden"
+  example:
+    <<: *common
+    host: "<%= 'my_host' %>"
+    database: "<%= 1 + 2 %>"
+    username: "<%= 2 + 3 %>"
+    password: "<%= 3 * 5 %>"
+
+test:
+  override: "I'm overriding"

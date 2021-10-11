@@ -1,13 +1,18 @@
-module Marty::Diagnostic; class Collection < Base
-  class_attribute :diagnostics
+module Marty
+  module Diagnostic
+    class Collection < Base
+      class_attribute :diagnostics
 
-  self.diagnostics = []
-  self.status_only = true
+      self.diagnostics = []
+      self.status_only = true
 
-  def self.generate
-    raise 'No diagnostics assigned to collection.' if diagnostics.empty?
+      class << self
+        def generate
+          raise 'No diagnostics assigned to collection.' if diagnostics.empty?
 
-    diagnostics.map(&:generate).reduce(:deep_merge)
+          diagnostics.map(&:generate).reduce(:deep_merge)
+        end
+      end
+    end
   end
-end
 end
