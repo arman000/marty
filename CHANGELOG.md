@@ -16,8 +16,8 @@ Log user out if login was changed in order to make sure that user won't get logg
 
 19.3.1 - 2021-07
 =====================================================
-fix data grid editing permissions.   (data_grid_viewers were able to
-edit grids on the data grid admin screen)
+* fix data grid editing permissions.   (data_grid_viewers were able to edit grids on the data grid admin screen)
+* add diagnostics dashboard and diagnostics enhancements
 
 19.3.0 - 2021-06
 =====================================================

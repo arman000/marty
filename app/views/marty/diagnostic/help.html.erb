@@ -6,16 +6,6 @@
 <div>
   <p>The diagnostic you requested does not exist.</p>
   <% diag_path = "#{request.path}?op=%s" %>
-  <% if Marty::Diagnostic::Reporter.reports.present? %>
-    <h4>Reports</h4>
-    <div class="wrapper">
-      <% Marty::Diagnostic::Reporter.reports.each do |report, diagnostics| %>
-          <a class="button" target="_blank" href="<%= diag_path % report %>">
-            <%= report.camelize %>
-          </a>
-      <% end %>
-    </div>
-  <% end %>
   <table>
   <th colspan="2">URL Parameters</th>
   <tr>
@@ -30,7 +20,7 @@
   <% klass_diagnostics = Marty::Diagnostic::Base.descendants.sort_by(&:name).map do |klass| 
         next unless klass.respond_to?(:description)
         klass
-      end.compact.group_by(&:parent) %>
+      end.compact.group_by(&:module_parent) %>
   <% klass_diagnostics.each do |parent, diagnostics| %>
     <div class="wrapper">
       <table>

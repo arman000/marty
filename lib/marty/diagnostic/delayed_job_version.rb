@@ -33,11 +33,8 @@ module Marty
         end
 
         def generate
-          raise 'DelayedJob cannot be called with local scope.' if
-            scope == 'local'
-
-          raise 'DELAYED_VER environment variable has not been initialized.' if
-            Rails.application.config.marty.delayed_ver.nil?
+          raise 'MARTY_DIAGNOSTIC_APP_VERSION environment variable has not been initialized.' if
+            Rails.application.config.marty.diagnostic_app_version.nil?
 
           total_workers = Marty::Diagnostic::Node.
             get_target_connections('delayed').count
@@ -56,7 +53,7 @@ module Marty
             hash[r[0]] << r[1]
           end.map do |node, result|
             versions = result.uniq
-            status = versions.count == 1 && versions[0] == Rails.application.config.marty.delayed_ver
+            status = versions.count == 1 && versions[0] == Rails.application.config.marty.diagnostic_app_version
 
             { node => { 'Version' => create_info(versions.join("\n"), status) } }
           end.reduce(:deep_merge)

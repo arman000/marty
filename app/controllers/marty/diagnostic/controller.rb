@@ -3,43 +3,38 @@ module Marty
     class Controller < ActionController::Base
       layout 'marty/diagnostic'
 
-      def self.inherited(klass)
-        namespace = klass.name.deconstantize.split('::')[0] rescue ''
-        Reporter.namespaces.unshift(namespace)
-        super
+      class << self
+        def inherited(klass)
+          namespace = klass.name.deconstantize.split('::')[0] rescue ''
+          Reporter.namespaces.unshift(namespace)
+          super
+        end
       end
 
       def op
-          @result = Reporter.run(request)
+        @reporter = Reporter.new(request.params, request.ssl?)
+        @reporter.run
+        @reporter.result
       rescue NameError
         render :help,
                formats: [:html],
                status: :bad_request
       else
         respond_to do |format|
-          format.html { @result = display_parameters }
+          format.html { @result = html }
           format.json { render json: process_result_for_api }
         end
       end
 
       def process_result_for_api
-        @result.delete('data') unless request.params['data'] == 'true'
-        @result.delete('errors') if @result['errors'] && @result['errors'].empty?
-        @result
+        response = @reporter.result
+        response.delete('data') unless @reporter.return_data?
+        response.delete('errors') unless @reporter.errors?
+        response
       end
 
-      def display_parameters
-        local  = params[:scope] == 'local'
-        data   = local ? @result : @result['data']
-        errors = local ? Reporter.errors(data) : @result['errors']
-        {
-          'display' => Reporter.displays(data),
-          'errors' => errors
-        }
-      end
-
-      def self.add_report(name, diagnostics)
-        Reporter.reports[name] = diagnostics
+      def html
+        @reporter.display
       end
     end
   end

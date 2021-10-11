@@ -54,3 +54,9 @@ Marty::Config['CLEANER_MAINTENANCE_WINDOW'] = {
 }
 
 Marty::Configs::UpdateFromYml.call
+
+Marty::Diagnostic.diagnostics.each do |name|
+  Marty::Diagnostic::Configuration.find_or_create_by!(
+    name: name
+  )
+end
