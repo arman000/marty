@@ -33,7 +33,7 @@ module Marty
           nodes = Node.get_nodes - [Node.my_ip]
           remote = nodes.sort.map do |n|
             Thread.new do
-              uri = Addressable::URI.new(host: n, port: request.port)
+              uri = Addressable::URI.new(host: n, port: ssl ? 443 : 80)
               uri.scheme = ssl ? 'https' : 'http'
               uri.path = '/marty/diag.json'
               uri.query_values = {

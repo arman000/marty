@@ -11,7 +11,7 @@ module Marty
       delegate :aggregatable, to: :diagnostic
 
       validates :name, inclusion: { in: Marty::Diagnostic.diagnostics }, uniqueness: true
-      validates :timeout, numericality: { greater_than: 0, less_than: 10 }
+      validates :timeout, numericality: { greater_than: 0, less_than_or_equal_to: 30 }
 
       before_validation -> { self.timeout = DEFAULT_TIMEOUT }, unless: :timeout?
 
